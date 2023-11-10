@@ -1,0 +1,54 @@
+import { create } from 'zustand'
+
+ const usePlaylistStore = create((set) => ({
+    queue: [],
+    archive: [],
+    clearQueue: () => set(state => {
+        state.queue = []
+    }),
+    clearArchive: () => set(state => {
+        state.archive = []
+    }),
+    addToQueue: (item) => set((state) => {
+        if(state.queue.includes(item)){
+            return {}
+        }
+        else{
+            return {queue: [...state.queue, item]}
+        }
+    }),
+    popFromQueue: (index) => set(state => {
+        console.log("in func")
+        if (state.queue.length > index) {
+            console.log(state.queue, "in func")
+            const q = [...state.queue]
+            const removed = q.splice(index, 1)
+            console.log(q, "in func after splice")
+            return {
+                queue: q,
+                archive: [...state.archive, removed[0]]
+            }
+        }
+        console.log("Cannot pop from empty queue")
+        return {}
+    }),
+    popFromArchive: (index) => set(state => {
+        if (state.archive.length > index+1) {
+            let i = index
+            if (index === -1) {
+                i = state.archive.length - 1 
+            }
+            const a = [...state.archive]
+            const removed = a.splice(i, 1)
+
+            return {
+                queue: [removed[0], ...state.queue],
+                archive: a
+            }
+        }
+        console.log("Cannot pop from empty archive")
+        return {}
+    }),
+}))
+
+export default usePlaylistStore
