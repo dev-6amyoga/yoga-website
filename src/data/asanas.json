@@ -1,0 +1,126 @@
+{
+    "1" : {
+        "transitionIn": {},
+        "asana": {
+            "name": "Ardhakati Chakrasana",
+            "desc": "",
+            "category": "Standing",
+            "imageID": "",
+            "videoID": "Nkdc3uIBV_I",
+            "withAudio" : true,
+            "audioLag" : 0,
+            "markers": {
+                "00:01": {
+                    "step": "Samastithi",
+                    "desc": "Feet together; hands on the side of your thighs;"
+                },
+                "00:05": {
+                    "step": "Step 1: Ekam",
+                    "desc": "Inhale, Raise the left arm sideways up stretch it to the sky"
+                },
+                "00:09": {
+                    "step": "Step 2: Dwi",
+                    "desc": "Exhale, Bend your body to the right side"
+                },
+                "00:37": {
+                    "step": "Step 3: Trini",
+                    "desc": "Inhale, Stand up stretch your left hand to the sky"
+                },
+                "00:41": {
+                    "step": "Step 4 : Chatvari",
+                    "desc": "Exhale, Bring the left hand sideways down keep it on the thigh "
+                },
+                "00:45": {
+                    "step": "Step 5 : Pancha",
+                    "desc": "Inhale, Raise the right arm sideways up stretch it to the sky"
+                },
+                "00:49": {
+                    "step": "Step 6 : Shashta",
+                    "desc": "Exhale, Bend your body to the left side"
+                },
+                "01:17": {
+                    "step": "Step 7 : Saptha",
+                    "desc": "Inhale, Stand up stretch your right hand to the sky"
+                },
+                "01:21": {
+                    "step": "Step 8 : Ashta",
+                    "desc": "Exhale, Bring the right hand sideways down keep it on the thigh "
+                },
+                "01:25": {
+                    "step": "Relax",
+                    "desc": "Feet apart and relax"
+                }
+            }
+        }
+    },
+    "2": {
+        "transitionIn": {},
+        "asana": {
+            "name": "Veerabadrasana Level 2",
+            "desc": "",
+            "category": "Standing",
+            "imageID": "",
+            "videoID": "0HYhrxozlhw",
+            "withAudio" : true,
+            "audioLag" : 0,
+            "markers": {
+                "00:00": {
+                    "step": "Samastithi",
+                    "desc": "Feet together; hands on the side of your thighs;"
+                },
+                "00:03": {
+                    "step": "Step 1: Ekam",
+                    "desc": "Inhale, Right leg out four feet catch your waist"
+                },
+                "00:07": {
+                    "step": "Step 2: Dwi",
+                    "desc": "Exhale, Turn your right foot out look over the right shoulder"
+                },
+                "00:11": {
+                    "step": "Step 3: Trini",
+                    "desc": "Inhale, Open the arms parallel to mat line of the legs"
+                },
+                "00:15": {
+                    "step": "Step 4 : Chatvari",
+                    "desc": "Exhale, Bend the right knee, stay there"
+                },
+                "00:44": {
+                    "step": "Step 5 : Pancha",
+                    "desc": "Inhale, Straighten the right knee"
+                },
+                "00:48": {
+                    "step": "Step 6 : Shashta",
+                    "desc": "Exhale, Turn the right foot in look forward"
+                },
+                "00:51": {
+                    "step": "Step 7 : Saptha",
+                    "desc": "Inhale, Turn your left foot out look at your left hand"
+                },
+                "00:55": {
+                    "step": "Step 8 : Ashta",
+                    "desc": "Exhale, Bend the left knee, stay there"
+                },
+                "01:23": {
+                    "step": "Step 9 : Nava",
+                    "desc": "Inhale, Straighten the left knee look at the left hand"
+                },
+                "01:27": {
+                    "step": "Step 10 : Dasha",
+                    "desc": "Exhale, Turn the left foot in look forward"
+                },
+                "01:31": {
+                    "step": "Step 11 : Ekadasha",
+                    "desc": "Inhale, Catch your waist bring the right leg in one foot"
+                },
+                "01:36": {
+                    "step": "Step 12 : Dwadasha",
+                    "desc": "Exhale, Walk to the left keep your hands down"
+                },
+                "01:39": {
+                    "step": "Relax",
+                    "desc": "Keep your feet apart hands loose"
+                }
+            }
+        }
+    }
+}

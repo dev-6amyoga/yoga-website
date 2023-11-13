@@ -1,0 +1,23 @@
+.firstpage{
+    background-color: #283044;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; */
+}
+.notGoogle{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.registerWrapper{
+    margin: 10%;
+}
+
+.loginWrapper{
+    margin:10%;
+}
+
+.googleWrapper{
+    margin-left:45%;
+}

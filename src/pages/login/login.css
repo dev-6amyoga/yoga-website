@@ -1,0 +1,10 @@
+.outer{
+    background-color: #EBF5EE;
+    width: 30vw;
+    height: 50vh;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
