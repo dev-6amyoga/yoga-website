@@ -58,7 +58,6 @@ export default function RegisterVideoForm() {
     updateNeeded = true;
     console.log("FROM POP UP ", updateNeeded);
     handleClosePopUp();
-    //update existing record with new data
   };
   const handleNo = () => {
     updateNeeded = false;
@@ -238,7 +237,7 @@ export default function RegisterVideoForm() {
         className="flex flex-col gap-1 border-2 max-w-3xl p-4 rounded-md mx-auto"
         onSubmit={handleSubmit}
       >
-        <Text h3>Register New Video</Text>
+        <Text h3>Register Video Form</Text>
         <Input width="100%" id="asana_name">
           Asana Name
         </Input>
