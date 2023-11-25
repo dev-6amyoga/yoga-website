@@ -1,0 +1,8 @@
+.video_form {
+    background-color: #283044;
+}
+
+.elements{
+    display: flex;
+    flex-direction: row;
+}

@@ -3,8 +3,8 @@ import PageWrapper from "../../../components/Common/PageWrapper";
 
 export default function RegisterVideo() {
   return (
-    <PageWrapper>
-      <RegisterVideoForm />
-    </PageWrapper>
+    // <PageWrapper>
+    <RegisterVideoForm />
+    // </PageWrapper>
   );
 }

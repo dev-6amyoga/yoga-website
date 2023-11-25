@@ -1,17 +1,19 @@
-import { GoogleOAuthProvider } from "@react-oauth/google";
-import Login_page from "./login_page";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Input, Text, Button, Radio, ButtonDropdown } from "@geist-ui/core";
+import { Input, Button } from "@geist-ui/core";
 import axios from "axios";
 import "./login.css";
+import useUserStore from "../../store/UserStore";
+import LoginGoogle from "./login_google";
 
-export default function Login() {
+export default function Login({ switchForm }) {
   const [loginStatus, setLoginStatus] = useState(null);
   const navigate = useNavigate();
   const [type, SetType] = useState("");
+  const setUser = useUserStore((state) => state.setUser);
+
   async function verify_login(username, password) {
     try {
       const baseURL = "http://localhost:4000";
@@ -21,9 +23,11 @@ export default function Login() {
         if (entry.username === username && entry.password === password) {
           userExists = true;
           SetType(entry.user_type);
+          setUser(entry);
           break;
         }
       }
+      console.log(loginStatus);
       setLoginStatus(userExists ? "Login successful" : "Invalid credentials");
     } catch (error) {
       console.error(error);
@@ -39,28 +43,39 @@ export default function Login() {
   };
 
   useEffect(() => {
+    console.log(loginStatus);
     if (loginStatus === "Login successful" && type === "student") {
-      navigate("/student");
+      const navigateTimeout = setTimeout(() => navigate("/student"), 0);
+      return () => clearTimeout(navigateTimeout);
     } else if (loginStatus === "Login successful" && type === "admin") {
-      navigate("/admin");
+      const navigateTimeout = setTimeout(() => navigate("/admin"), 0);
+      return () => clearTimeout(navigateTimeout);
     } else if (loginStatus === "Login successful" && type === "teacher") {
-      navigate("/teacher");
+      const navigateTimeout = setTimeout(() => navigate("/teacher"), 0);
+      return () => clearTimeout(navigateTimeout);
     }
-  }, [loginStatus, navigate]);
+  }, [loginStatus, type, navigate]);
 
   return (
-    <div className="outer">
-      <h3>Login</h3>
-      <div className="login_normal">
-        <form onSubmit={handleSubmit}>
+    <div className="bg-white p-4 rounded-lg max-w-xl mx-auto">
+      <h3 className="text-center text-2xl">Login</h3>
+      <hr />
+      <div className="flex flex-col gap-1 items-center w-full mt-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
           <Input width="100%" id="user_name">
             Username
           </Input>
-          <Input width="100%" id="pass_word">
+          <Input.Password width="100%" id="pass_word">
             Password
-          </Input>
+          </Input.Password>
           <Button htmlType="submit">Login</Button>
         </form>
+        <p onClick={() => switchForm((s) => !s)} className="hover:pointer">
+          Dont have an account?{" "}
+          <span className="text-blue-500">Click Here</span>
+        </p>
+        <p>{"( or )"}</p>
+        <LoginGoogle />
       </div>
     </div>
   );

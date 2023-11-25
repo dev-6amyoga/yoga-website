@@ -3,11 +3,14 @@ import axios from "axios";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import useUserStore from "../../store/UserStore";
 
 export default function Login_page() {
   const [loginStatus, setLoginStatus] = useState(null);
   const navigate = useNavigate();
   const [type, SetType] = useState("");
+  const setUser = useUserStore((state) => state.setUser);
+
   async function verify_login(email, name) {
     try {
       const baseURL = "http://localhost:4000";
@@ -17,6 +20,7 @@ export default function Login_page() {
         if (entry.user_name === name || entry.email_id === email) {
           userExists = true;
           SetType(entry.user_type);
+          setUser(entry);
           break;
         }
       }
@@ -26,6 +30,7 @@ export default function Login_page() {
       setLoginStatus("Failed to verify login");
     }
   }
+
   useEffect(() => {
     if (loginStatus === "Login successful" && type === "student") {
       navigate("/student");
@@ -35,8 +40,9 @@ export default function Login_page() {
       navigate("/teacher");
     }
   }, [loginStatus, navigate]);
+
   return (
-    <div>
+    <div className="w-full">
       <GoogleLogin
         onSuccess={async (credentialResponse) => {
           const jwt_token = credentialResponse.credential

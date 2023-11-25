@@ -1,25 +1,27 @@
-import { create } from 'zustand'
-import usePlaylistStore from './PlaylistStore'
-export const STATE_VIDEO_PLAY = "PLAY"
-export const STATE_VIDEO_PAUSED = "PAUSED"
-
+import { create } from "zustand";
+import usePlaylistStore from "./PlaylistStore";
+export const STATE_VIDEO_PLAY = "PLAY";
+export const STATE_VIDEO_PAUSED = "PAUSED";
 
 const useVideoStore = create((set) => ({
-    playlistState: false,
-    setPlaylistState: (ps) => set(state => {
-        return { playlistState: ps }
+  playlistState: false,
+  setPlaylistState: (ps) =>
+    set((state) => {
+      return { playlistState: ps };
     }),
-    currentVideoID: null,
-    setCurrentVideoID: (item) => set((state) => {
-        //console.log(state.currentVideoID, item)
-        // state.currentVideoID = item
-        // console.log(state.currentVideoID)
-        return {currentVideoID: item}
-    }),    
-    videoState: null,
-    setVideoState: (vs) => set(state => {
-        return { videoState: vs }
-    })
-}))
+  currentVideoID: null,
+  setCurrentVideoID: (item) =>
+    set((state) => {
+      //console.log(state.currentVideoID, item)
+      // state.currentVideoID = item
+      // console.log(state.currentVideoID)
+      return { currentVideoID: item };
+    }),
+  videoState: null,
+  setVideoState: (vs) =>
+    set((state) => {
+      return { videoState: vs };
+    }),
+}));
 
-export default useVideoStore
+export default useVideoStore;

@@ -1,9 +1,10 @@
 import React from "react";
+import App from "../../App";
 
 export default function Student_home() {
   return (
     <div>
-      <h1>THIS IS THE STUDENT LOGIN</h1>
+      <App />
     </div>
   );
 }

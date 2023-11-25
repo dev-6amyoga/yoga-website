@@ -1,0 +1,10 @@
+.allAsanas {
+    background-color: #283044;
+}
+
+.elements{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin:5%;
+}

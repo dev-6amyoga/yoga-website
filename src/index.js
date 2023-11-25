@@ -10,7 +10,8 @@ import Firstpage from "./pages/firstpage/firstpage";
 import Student_home from "./pages/student/student_home";
 import Admin_home from "./pages/admin/admin_home";
 import Teacher_home from "./pages/teacher/teacher_home";
-
+import AllAsanas from "./components/content-management/all_asanas";
+import RegisterPlaylist from "./pages/content-management/playlist/RegisterPlaylist";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 const router = createBrowserRouter([
   {
@@ -59,6 +60,24 @@ const router = createBrowserRouter([
     element: (
       <div>
         <RegisterVideo />
+      </div>
+    ),
+  },
+
+  {
+    path: "/content/playlist/create",
+    element: (
+      <div>
+        <RegisterPlaylist />
+      </div>
+    ),
+  },
+
+  {
+    path: "/admin/allAsanas",
+    element: (
+      <div>
+        <AllAsanas />
       </div>
     ),
   },

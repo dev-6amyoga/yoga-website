@@ -1,11 +1,28 @@
 import usePlaylistStore from "../../store/PlaylistStore";
 import data from "../../data/asanas.json";
-import useVideoStore from "../../store/VideoStore";
 import { useState } from "react";
-import { Drawer, Button } from "@geist-ui/core";
+import { Button } from "@geist-ui/core";
+
+function PlaylistItem({ asana, add }) {
+  return (
+    <div className="px-2 py-2 rounded-xl border border-zinc-800">
+      <div className="flex justify-between gap-8 items-center">
+        <p>{asana.name}</p>
+        <div className="flex gap-4 items-center scale-75">
+          {/* <p>0</p> */}
+          <Button auto type="outline" onClick={add}>
+            Add
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Playlist() {
   const allAsanas = [];
   const asanaMap = {};
+
   for (var key in data) {
     allAsanas.push(key);
     asanaMap[key] = data[key].asana;
@@ -14,92 +31,32 @@ function Playlist() {
   const queue = usePlaylistStore((state) => state.queue);
   const archive = usePlaylistStore((state) => state.archive);
   const addToQueue = usePlaylistStore((state) => state.addToQueue);
-  const [state, setState] = useState(false);
-  const [queueState, setQueueState] = useState(false);
 
   return (
-    <div className="border border-red-500">
-      <Button auto onClick={() => setState(true)} scale={1 / 2}>
-        Show Drawer
-      </Button>
-      <Drawer visible={state} onClose={() => setState(false)} placement="right">
-        <Drawer.Title>Drawer</Drawer.Title>
-        <Drawer.Subtitle>This is a drawer</Drawer.Subtitle>
-        <Drawer.Content>
-          <div className="flex flex-col gap-2">
-            {allAsanas.map((x) => (
-              <Button
-                key={asanaMap[x].name}
-                type={
-                  queue
-                    ? queue.includes(x)
-                      ? "success"
-                      : "secondary"
-                    : "secondary"
-                }
-                onClick={() => {
-                  addToQueue(x);
-                }}
-              >
-                {asanaMap[x].name}
-              </Button>
-            ))}
-          </div>
-        </Drawer.Content>
-      </Drawer>
-
-      <Button auto onClick={() => setQueueState(true)} scale={1 / 2}>
-        Show Queue
-      </Button>
-      <Drawer
-        visible={queueState}
-        onClose={() => setQueueState(false)}
-        placement="right"
-      >
-        <Drawer.Title>Drawer</Drawer.Title>
-        <Drawer.Subtitle>This is a drawer</Drawer.Subtitle>
-        <Drawer.Content>
-          <div className="flex flex-col gap-2">
-            {queue.map((queue_item) => {
-              return (
-                <button key={queue_item}>{asanaMap[queue_item].name}</button>
-              );
-            })}
-          </div>
-        </Drawer.Content>
-      </Drawer>
+    <div className="rounded-xl">
+      <h3>Playlists</h3>
+      <p className="pb-4 text-sm">
+        Choose from a variety of playlists to practice.
+      </p>
+      <div className="flex flex-row gap-2">
+        {allAsanas.map((x) => (
+          <PlaylistItem
+            key={asanaMap[x].name}
+            type={
+              queue
+                ? queue.includes(x)
+                  ? "success"
+                  : "secondary"
+                : "secondary"
+            }
+            add={() => {
+              addToQueue(x);
+            }}
+            asana={asanaMap[x]}
+          />
+        ))}
+      </div>
     </div>
-
-    //     <div className="">
-    //         {allAsanas.map((x) => (
-    //             <button
-    //             key={asanaMap[x].name}
-    //                 className="border border-green-500"
-    //                 onClick={() => {
-    //                     addToQueue(x);
-    //                 }}>
-    //                 {asanaMap[x].name}
-    //             </button>
-    //         ))}
-    //     </div>
-    //     {/* <div>{first ? asanaMap[first].name : ""}</div> */}
-    //     <div>
-    //         <p>Queue : </p>
-    //         <div>
-    //             {queue.map((queue_item) => {
-    //                 return <button key={queue_item}>{asanaMap[queue_item].name}</button>;
-    //             })}
-    //         </div>
-    //     </div>
-    //     <div>
-    //         <p>Archive : </p>
-    //         <div>
-    //             {archive?.map((archive_item) => {
-    //                 return <button key={archive_item}>{asanaMap[archive_item].name}</button>;
-    //             })}
-    //         </div>
-    //     </div>
-    // </div>
   );
 }
 
