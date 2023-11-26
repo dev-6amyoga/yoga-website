@@ -31,7 +31,7 @@
 
 /* Style for the "Yes" button */
 .b_yes {
-    background-color: #4CAF50;
+    background-color: #4caf50;
     color: white;
     width: 20%;
     margin: 2%;
@@ -39,7 +39,7 @@
 
 /* Style for the "No" button */
 
-.b_no{
+.b_no {
     background-color: #f44336;
     color: white;
     width: 20%;

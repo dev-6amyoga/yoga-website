@@ -1,24 +1,32 @@
-import React from "react";
-import Playlist from "./components/Sidebar/Playlist";
-import VideoPlayerWrapper from "./components/Video/VideoPlayerWrapper";
-import PageWrapper from "./components/Common/PageWrapper";
-import VideoQueue from "./components/Video/VideoQueue";
+import { Button } from '@geist-ui/core';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function App() {
-  return (
-    <PageWrapper>
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-7 gap-4 my-10">
-          <VideoPlayerWrapper />
-          <VideoQueue />
+    const navigate = useNavigate();
+    return (
+        <div>
+            <h1>This is temporary</h1>
+            <Button
+                onClick={() => {
+                    navigate('/admin');
+                }}>
+                Redirect to Admin Page
+            </Button>
+            <Button
+                onClick={() => {
+                    navigate('/student');
+                }}>
+                Redirect to Student Page
+            </Button>
+            <Button
+                onClick={() => {
+                    navigate('/teacher');
+                }}>
+                Redirect to Teacher Page
+            </Button>
         </div>
-        <hr />
-        <div className="my-10">
-          <Playlist />
-        </div>
-      </div>
-    </PageWrapper>
-  );
+    );
 }
 
 export default App;
