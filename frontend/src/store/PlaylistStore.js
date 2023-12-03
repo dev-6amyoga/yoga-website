@@ -4,12 +4,12 @@ const usePlaylistStore = create((set) => ({
   queue: [],
   archive: [],
   clearQueue: () =>
-    set((state) => {
-      state.queue = [];
+    set((_) => {
+      return { queue: [] };
     }),
   clearArchive: () =>
-    set((state) => {
-      state.archive = [];
+    set((_) => {
+      return { archive: [] };
     }),
   moveUpQueue: (index) =>
     set((state) => {
@@ -33,9 +33,9 @@ const usePlaylistStore = create((set) => ({
       console.log("Cannot move down");
       return {};
     }),
-  addToQueue: (item) =>
+  addToQueue: (items) =>
     set((state) => {
-      return { queue: [...state.queue, item] };
+      return { queue: [...state.queue, ...items] };
     }),
   popFromQueue: (index) =>
     set((state) => {

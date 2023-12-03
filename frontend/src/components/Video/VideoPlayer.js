@@ -2,7 +2,7 @@ import useVideoStore from "../../store/VideoStore";
 import YouTube from "react-youtube";
 import React, { useEffect, useState } from "react";
 import usePlaylistStore from "../../store/PlaylistStore";
-import asanas from "../../data/asanas.json";
+// import asanas from "../../data/asanas.json";
 
 import { STATE_VIDEO_PLAY, STATE_VIDEO_PAUSED } from "../../store/VideoStore";
 import { toHaveAccessibleDescription } from "@testing-library/jest-dom/matchers";

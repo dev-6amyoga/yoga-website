@@ -10,7 +10,7 @@ function QueueItem({ asana, idx, pop, moveUp, moveDown }) {
     <div className="flex flex-row gap-2 items-center">
       <p>{idx + 1}</p>
       <div className="grid grid-cols-4 gap-4 px-2 py-3 bg-yblue-900 text-white rounded-xl">
-        <p className="m-0 col-start-1 col-span-3">{asana}</p>
+        <p className="m-0 col-start-1 col-span-3">{asana.asana_name}</p>
         <div className="flex gap-2 col-start-4 col-span-1">
           <button className="w-6 h-6" onClick={() => moveUp(idx)}>
             <LuMoveUp className="w-full h-full" />
@@ -28,17 +28,11 @@ function QueueItem({ asana, idx, pop, moveUp, moveDown }) {
 }
 
 export default function VideoQueue() {
-  const allAsanas = [];
-  const asanaMap = {};
-  for (var key in data) {
-    allAsanas.push(key);
-    asanaMap[key] = data[key].asana;
-  }
-
   const queue = usePlaylistStore((state) => state.queue);
   const popFromQueue = usePlaylistStore((state) => state.popFromQueue);
   const moveUpQueue = usePlaylistStore((state) => state.moveUpQueue);
   const moveDownQueue = usePlaylistStore((state) => state.moveDownQueue);
+  console.log(queue, "in queue!");
 
   return (
     <div className="col-start-6 col-span-3 bg-yblue-50 rounded-xl">
@@ -52,7 +46,7 @@ export default function VideoQueue() {
               return (
                 <QueueItem
                   key={queue_item + idx}
-                  asana={asanaMap[queue_item].name}
+                  asana={queue_item}
                   pop={popFromQueue}
                   moveUp={moveUpQueue}
                   moveDown={moveDownQueue}

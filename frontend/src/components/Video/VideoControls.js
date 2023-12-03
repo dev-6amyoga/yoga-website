@@ -1,9 +1,10 @@
 import usePlaylistStore from "../../store/PlaylistStore";
 import useVideoStore from "../../store/VideoStore";
-import asanas from "../../data/asanas.json";
+// import asanas from "../../data/asanas.json";
 import { STATE_VIDEO_PLAY, STATE_VIDEO_PAUSED } from "../../store/VideoStore";
 import { useEffect } from "react";
 import { FaPlay, FaPause, FaStepForward, FaStepBackward } from "react-icons/fa";
+import parseYouTubeUrl from "../../utils/parseYouTubeUrl";
 
 export default function VideoControls() {
   const queue = usePlaylistStore((state) => state.queue);
@@ -18,9 +19,12 @@ export default function VideoControls() {
   let setVideoState = useVideoStore((state) => state.setVideoState);
 
   useEffect(() => {
-    // console.log("QUEU changed", queue)
     if (queue && queue.length > 0 && playlistState) {
-      setCurrentVideoID(asanas[queue[0]].asana.videoID);
+      setCurrentVideoID(
+        queue[0].asana_videoID.length === 11
+          ? queue[0].asana_videoID
+          : parseYouTubeUrl(queue[0].asana_videoID).videoId
+      );
     } else {
       setCurrentVideoID(null);
     }
@@ -36,7 +40,16 @@ export default function VideoControls() {
       // console.log("Starting to play the playlist")
       // console.log("Starting with video ID", asanas[queue[0]].asana.videoID)
       setPlaylistState(true);
-      setCurrentVideoID(asanas[queue[0]].asana.videoID);
+      console.log(
+        queue[0].asana_videoID,
+        parseYouTubeUrl(queue[0].asana_videoID)
+      );
+      setCurrentVideoID(
+        queue[0].asana_videoID.length === 11
+          ? queue[0].asana_videoID
+          : parseYouTubeUrl(queue[0].asana_videoID).videoId
+      );
+      // console.log("currentVideoID", currentVideoID);
     } else if (currentVideoID === null && queue.length === 0) {
       setPlaylistState(false);
       //console.log("empty queue??")

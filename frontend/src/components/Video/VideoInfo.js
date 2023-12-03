@@ -10,18 +10,18 @@ export default function VideoInfo() {
   const [markers, setMarker] = useState(null);
 
   useEffect(() => {
-    if (currentVideoId == null) {
-      setMarker(null);
+    if (currentVideoId) {
+      setMarker(queue[0].asana_markers);
     } else {
-      setMarker(asanas[queue[0]].asana.markers);
+      setMarker(null);
     }
   }, [currentVideoId]);
 
   return (
     <div className="">
-      {currentVideoId ? (
+      {currentVideoId && queue.length > 0 ? (
         <div className="flex flex-col gap-4">
-          <h3>{asanas[queue[0]].asana.name}</h3>
+          <h3>{queue[0].asana_name}</h3>
           <div className="border p-4 rounded-2xl">
             <h5 className="">Markers</h5>
             <div className="flex gap-1 flex-wrap mt-4">
@@ -43,7 +43,7 @@ export default function VideoInfo() {
           </div>
 
           <h5>Asana Description</h5>
-          <p>{asanas[queue[0]].asana.desc}</p>
+          <p>{queue[0].asana_desc}</p>
         </div>
       ) : (
         <>
