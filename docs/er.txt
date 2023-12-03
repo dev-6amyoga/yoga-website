@@ -1,0 +1,162 @@
+# Organizations --------------------------------
+
+# sql
+table Institute {
+    id integer
+    name varchar
+    address1 varchar
+    address2 varchar
+    email varchar
+    
+}
+
+# User -----------------------------------------
+
+# sql
+table User {
+    id integer
+    institute_id integer 
+
+    username varchar
+    name varchar
+    email varchar
+    password varchar
+    is_google_login bool
+
+    # roles -> STUDENT, TEACHER, INSTITUTE_OWNER, INSTITUTE_ADMIN, ROOT?
+    role varchar
+    
+    created timestamp
+    updated timestamp
+    last_login timestamp
+}
+
+# sql
+table Permission {
+    id integer
+    name varchar
+}
+
+# sql
+table Role_Permission {
+    role_name varchar
+    perm_id integer
+}
+
+# Plan -----------------------------------------
+
+# sql
+table User_Plan{
+  plan_id integer
+  id integer
+  plan_valid boolean
+  plan_validityperiod_total integer
+  plan_validityperiod_balance integer
+}
+
+# sql
+table Plan {
+  plan_id integer
+  plan_name string
+  basic_playlist_access boolean
+  playlist_creation boolean
+  playlist_creation_count integer
+  self_audio boolean  
+  number_of_teachers integer 
+  plan_validity integer
+}
+
+# Resources, Combo, Playlist ----------------------------------------
+
+# mongo
+table Asana {
+    id integer 
+}
+
+# mongo
+table Image {
+    id integer
+}
+
+# mongo
+table Audio {
+    id integer
+}
+
+# mongo
+table Text {
+    id integer
+}
+
+# mongo
+table Combination {
+    id integer
+    user_id integer
+    name varchar
+    desc varchar
+
+    items list # (asana)*(audio)*(image)*(text)* in order of combination
+
+    created timestamp
+    updated timestamp
+}
+
+# mongo
+table Playlist {
+    id integer
+    user_id integer
+    name varchar
+    desc varchar
+
+    items list # (asana)*(combination)* in order of playlist
+
+    created timestamp
+    updated timestamp
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------
+playlist = <playlist_id, playlist_name, item_combo_list>
+asana = <asana_id, asana_name, .....>
+combination = <combo_id, combo_name, .......>
+example : <P1, "beginner", [A1, C5, A4, A4, C2, C6, A5]>
+-------------------------------------------------------------
+4 types of resources : 
+video, audio, image, text <can be uploaded by 6am admin>
+-------------------------------------------------------------
+3 types of data types :  asana(has only video), 
+combination(can have multiple videos, audios and images), 
+playlist(can have multiple asanas and combinations within)
+-------------------------------------------------------------
+soo, admin can :
+1. insert new asana, upload audio, images, text
+2. create a new combination (using prev uploads)
+3. create playlist (can have asanas and combinations)
+-------------------------------------------------------------
+so if ur saying that u wanna combine asana and combination as one type, idm it but like
+i thought registering it would be difficult
+cuz normally when u register a new asana you just upload video give it a name and finish
+so when ur registering combination u can use registered asanas
+whereas if u combine itll be more logical computations to create individual asana and computations
+-------------------------------------------------------------
+
+
+asana -> video
+combination -> (asana)*(audio)*(image)*(text)*
+playlist -> (asana)*(combination)*
