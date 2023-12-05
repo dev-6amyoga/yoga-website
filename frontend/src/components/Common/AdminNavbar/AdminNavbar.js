@@ -95,6 +95,14 @@ export default function AdminNavbar() {
                   Register New Playlist
                 </Link>
               </ButtonDropdown.Item>
+              <ButtonDropdown.Item>
+                <Link
+                  to={"/admin/allPlaylists"}
+                  className="w-full text-zinc-800"
+                >
+                  View All Playlists
+                </Link>
+              </ButtonDropdown.Item>
             </ButtonDropdown>
 
             <Button className="w-full">
