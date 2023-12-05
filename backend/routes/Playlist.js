@@ -32,4 +32,33 @@ router.get("/content/playlists/getAllPlaylists", async (req, res) => {
   }
 });
 
+router.put(
+  "/content/playlists/updatePlaylist/:playlistId",
+  async (req, res) => {
+    const playlistId = req.params.playlistId;
+    const updatedData = req.body;
+    console.log("GOT : ", updatedData, playlistId);
+    try {
+      const existingPlaylist = await Playlist.findOne({
+        playlist_id: playlistId,
+      });
+      console.log(existingPlaylist);
+      if (!existingPlaylist) {
+        return res.status(404).json({ error: "Playlist not found" });
+      }
+      const mergedData = { ...existingPlaylist.toObject(), ...updatedData };
+      const updatedPlaylist = await Playlist.findOneAndUpdate(
+        { playlist_id: playlistId },
+        mergedData,
+        {
+          new: true,
+        }
+      );
+      res.json(updatedPlaylist);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to update Playlist" });
+    }
+  }
+);
 module.exports = router;
