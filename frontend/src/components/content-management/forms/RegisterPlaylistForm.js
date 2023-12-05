@@ -124,23 +124,23 @@ export default function RegisterPlaylistForm() {
       }
     });
     console.log(playlist_sequence);
-    // try {
-    //   const response = await fetch("http://localhost:4000/addPlaylist", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(playlist_sequence),
-    //   });
-    //   if (response.ok) {
-    //     toast("Playlist added successfully");
-    //     navigate("/admin/allPlaylists");
-    //   } else {
-    //     console.error("Failed to add playlist");
-    //   }
-    // } catch (error) {
-    //   console.error("Error during playlist addition:", error);
-    // }
+    try {
+      const response = await fetch("http://localhost:4000/addPlaylist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(playlist_sequence),
+      });
+      if (response.ok) {
+        toast("Playlist added successfully");
+        navigate("/admin/allPlaylists");
+      } else {
+        console.error("Failed to add playlist");
+      }
+    } catch (error) {
+      console.error("Error during playlist addition:", error);
+    }
   };
 
   const renderAction = (value, rowData, index) => {

@@ -12,6 +12,13 @@ import AdminNavbar from "../Common/AdminNavbar/AdminNavbar";
 import "./AllPlaylists.css";
 
 export default function AllPlaylists() {
+  const [delState, setDelState] = useState(false);
+  const [delPlaylistId, setDelPlaylistId] = useState(0);
+  const closeDelHandler = (event) => {
+    setDelState(false);
+    console.log("closed");
+  };
+
   const [playlist1, setPlaylist1] = useState([]);
   const [playlistAsanas, setPlaylistAsanas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,6 +30,7 @@ export default function AllPlaylists() {
     playlist_name: "",
     asana_ids: [],
   });
+
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setModalData({ ...modalData, [id]: value });
@@ -106,31 +114,39 @@ export default function AllPlaylists() {
     setModalData((prevData) => ({ ...prevData, asana_ids: updatedAsanaIds }));
   };
 
+  const deletePlaylist = async () => {
+    try {
+      const playlistId = delPlaylistId;
+      const response = await fetch(
+        `http://localhost:4000/content/playlist/deletePlaylist/${playlistId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.ok) {
+        console.log("Response from server:", response);
+        setPlaylist1((prev) =>
+          prev.filter((playlist) => playlist.playlist_id !== playlistId)
+        );
+        console.log("Playlist deleted successfully");
+      } else {
+        console.log("Error deleting playlist:", response.status);
+      }
+      setDelState(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const renderAction = (value, rowData, index) => {
     const handleDelete = async () => {
       try {
         const playlist_id = Number(rowData.playlist_id);
-        console.log("Deleting asana with ID:", playlist_id);
-        // const response = await fetch(
-        //   `http://localhost:4000/content/video/deleteAsana/${asanaId}`,
-        //   {
-        //     method: "DELETE",
-        //     headers: {
-        //       "Content-Type": "application/json",
-        //     },
-        //   }
-        // );
-
-        // if (response.ok) {
-        //   console.log("Response from server:", response);
-        //   setAsanas((prevAsanas) =>
-        //     prevAsanas.filter((asana) => asana.id !== asanaId)
-        //   );
-        //   console.log("Asana deleted successfully");
-        //   console.log("Updated asanas state:", asanas);
-        // } else {
-        //   console.log("Error deleting asana:", response.status);
-        // }
+        setDelPlaylistId(playlist_id);
+        setDelState(true);
       } catch (error) {
         console.error(error);
       }
@@ -256,6 +272,17 @@ export default function AllPlaylists() {
             Cancel
           </Modal.Action>
           <Modal.Action onClick={updateData}>Update</Modal.Action>
+        </Modal>
+
+        <Modal visible={delState} onClose={closeDelHandler}>
+          <Modal.Title>Delete Playlist</Modal.Title>
+          <Modal.Content>
+            <p>Do you really wish to delete this playlist?</p>
+          </Modal.Content>
+          <Modal.Action passive onClick={() => setDelState(false)}>
+            No
+          </Modal.Action>
+          <Modal.Action onClick={deletePlaylist}>Yes</Modal.Action>
         </Modal>
       </div>
     </div>
