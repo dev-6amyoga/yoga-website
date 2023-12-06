@@ -9,7 +9,11 @@ export default function LoginGoogle() {
     const navigate = useNavigate();
     const [type, SetType] = useState('');
     const setUser = useUserStore((state) => state.setUser);
-    const clientID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    const [clientID, setClientID] = useState('');
+
+    useEffect(() => {
+        setClientID(process.env.REACT_APP_GOOGLE_CLIENT_ID);
+    }, []);
 
     async function verify_login(email, name) {
         try {
@@ -54,8 +58,7 @@ export default function LoginGoogle() {
                         console.log(jwt_token);
                         const baseURL = 'http://localhost:4000';
                         const payload = await axios.post(`${baseURL}/verify`, {
-                            client_id:
-                                '749892759088-nn2uoltojfs74js4vhe4gps6lfoiuqet.apps.googleusercontent.com',
+                            client_id: clientID,
                             jwtToken: jwt_token,
                         });
                         const email_verified = payload.data.email_verified;
