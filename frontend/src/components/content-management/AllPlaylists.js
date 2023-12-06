@@ -16,7 +16,6 @@ export default function AllPlaylists() {
   const [delPlaylistId, setDelPlaylistId] = useState(0);
   const closeDelHandler = (event) => {
     setDelState(false);
-    console.log("closed");
   };
 
   const [playlist1, setPlaylist1] = useState([]);

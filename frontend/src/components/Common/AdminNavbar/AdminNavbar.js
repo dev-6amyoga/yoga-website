@@ -103,6 +103,22 @@ export default function AdminNavbar() {
                   View All Playlists
                 </Link>
               </ButtonDropdown.Item>
+              <ButtonDropdown.Item>
+                <Link
+                  to={"/content/language/create"}
+                  className="w-full text-zinc-800"
+                >
+                  Register New Language
+                </Link>
+              </ButtonDropdown.Item>
+              <ButtonDropdown.Item>
+                <Link
+                  to={"/admin/allLanguages"}
+                  className="w-full text-zinc-800"
+                >
+                  View All Languages
+                </Link>
+              </ButtonDropdown.Item>
             </ButtonDropdown>
 
             <Button className="w-full">
