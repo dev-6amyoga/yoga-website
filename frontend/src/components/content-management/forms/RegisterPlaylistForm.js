@@ -65,7 +65,10 @@ export default function RegisterPlaylistForm() {
   }, [asanas, sortOrder]);
 
   const addToPlaylist = (rowData) => {
-    const count = document.getElementById(`asana_count_${rowData.id}`).value;
+    var count = document.getElementById(`asana_count_${rowData.id}`).value;
+    if (count === "") {
+      count = 1;
+    }
     setPlaylistTemp((prevPlaylist) => [
       ...prevPlaylist,
       {
