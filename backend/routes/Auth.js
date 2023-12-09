@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 
 const auth = require('../oauth');
-const { HTTP_OK } = require('../utils/http_status_codes');
-
 const { User: UserSQL } = require('../models/sql/User');
 const brypt = require('bcrypt');
 const {
@@ -34,6 +32,7 @@ router.post('/auth/verify-google', async (req, res) => {
 });
 
 router.post('/auth/login', async (req, res) => {
+    // TODO : jwt token
     const { username, password } = req.body;
 
     if (!username || !password)
@@ -111,7 +110,7 @@ router.post('/auth/register', async (req, res) => {
         attributes: ['id', 'name', 'username', 'email'],
     });
 
-    console.log(user);
+    // console.log(user);
 
     if (user && user.username === username)
         return res
@@ -127,7 +126,7 @@ router.post('/auth/register', async (req, res) => {
     const salt = await brypt.genSalt(10);
     const hashedPassword = await brypt.hash(password, salt);
 
-    // transaction
+    // db transaction
     const t = await sequelize.transaction();
     try {
         // find insitite by name
@@ -170,7 +169,7 @@ router.post('/auth/register', async (req, res) => {
             { transaction: t }
         );
 
-        console.log('committing');
+        // console.log('committing');
         await timeout(t.commit(), 5000, new Error('timeout; try again'));
 
         res.status(HTTP_OK).json({ user: newUser });
@@ -184,6 +183,93 @@ router.post('/auth/register', async (req, res) => {
                 return res
                     .status(HTTP_BAD_REQUEST)
                     .json({ error: "Role doesn't exist" });
+            default:
+                return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+                    error: error.message,
+                });
+        }
+    }
+});
+
+router.post('/auth/register-google', async (req, res) => {
+    // used to register user whos logging in using google oauth
+    const { email, name, is_google_login, client_id, jwt_token } = req.body;
+
+    // validate inputs
+    if (
+        !email ||
+        !name ||
+        !jwt_token ||
+        !client_id ||
+        is_google_login === undefined ||
+        is_google_login === null
+    )
+        return res
+            .status(HTTP_BAD_REQUEST)
+            .json({ error: 'Missing required fields' });
+
+    const userInfo = await auth.verify(client_id, jwt_token);
+
+    if (!userInfo) {
+        return res
+            .status(HTTP_BAD_REQUEST)
+            .json({ error: 'Invalid Google OAuth token' });
+    }
+
+    if (userInfo.email !== email) {
+        return res.status(HTTP_BAD_REQUEST).json({
+            error: 'unmatched email',
+        });
+    }
+
+    if (!validate_email(email)) {
+        return res.status(HTTP_BAD_REQUEST).json({ error: 'Invalid email' });
+    }
+
+    if (!is_google_login) {
+        return res.status(HTTP_BAD_REQUEST).json({
+            error: 'user not registered using Google OAuth',
+        });
+    }
+
+    // check if user exists
+    const user = await UserSQL.findOne({
+        where: {
+            email: email,
+        },
+        attributes: ['id', 'name', 'username', 'email'],
+    });
+
+    // console.log(user);
+
+    if (user && user.email === email)
+        return res
+            .status(HTTP_BAD_REQUEST)
+            .json({ error: 'Email already exists' });
+
+    // db transaction
+    const t = await sequelize.transaction();
+
+    try {
+        // create user
+        const newUser = await UserSQL.create(
+            {
+                name,
+                email,
+                is_google_login,
+            },
+            { transaction: t }
+        );
+
+        // console.log('committing');
+        await timeout(t.commit(), 5000, new Error('timeout; try again'));
+
+        res.status(HTTP_OK).json({ user: newUser });
+    } catch (error) {
+        console.error(error);
+        await t.rollback();
+
+        switch (error.message) {
             default:
                 return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
                     error: error.message,
