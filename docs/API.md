@@ -23,12 +23,13 @@ Base URL : /auth
 
 #### Open
 
--   POST /register
+-   POST /register [I]
+-   POST /register-google [NI]
 
 #### Authenticated
 
--   POST /login
--   POST /verify-google
+-   POST /login [I]
+-   POST /verify-google [I]
 
 ---
 
@@ -38,12 +39,12 @@ Base URL : /institute
 
 #### Open
 
--   GET /info
+-   GET /info [NI]
 
 #### Authenticated
 
--   POST /register
--   POST /update
+-   POST /register [NI]
+-   POST /update [NI]
 
 ---
 
@@ -55,15 +56,15 @@ Base URL : /user
 
 #### Authenticated
 
--   POST /get-by-id
--   POST /get-by-username
--   POST /get-by-email
--   POST /get-all-by-instituteid
--   POST /get-all-by-planid
--   POST /update-profile
--   POST /change-password
--   POST /reset-password
--   DELETE /delete-by-id
+-   POST /get-by-id [NI]
+-   POST /get-by-username [NI]
+-   POST /get-by-email [NI]
+-   POST /get-all-by-instituteid [NI]
+-   POST /get-all-by-planid [NI]
+-   POST /update-profile [NI]
+-   POST /change-password [NI]
+-   POST /reset-password [NI]
+-   DELETE /delete-by-id [NI]
 
 ---
 

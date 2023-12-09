@@ -13,6 +13,7 @@ export default function LoginGoogle() {
 
     useEffect(() => {
         setClientID(process.env.REACT_APP_GOOGLE_CLIENT_ID);
+        // console.log(process.env.REACT_APP_GOOGLE_CLIENT_ID);
     }, []);
 
     async function verify_login(email, name) {
