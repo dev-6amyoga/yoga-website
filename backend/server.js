@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const cors = require('cors');
+const morgan = require('morgan');
 
 // sql models
 const { initializeSequelize } = require('./init.sequelize');
@@ -21,6 +22,7 @@ const { bulkCreateSampleData } = require('./sample_data');
 
 app.use(cors());
 app.use(express.json());
+app.use(morgan('dev'));
 
 const mongoURI = process.env.MONGO_SRV_URL;
 mongoose
@@ -38,10 +40,11 @@ initializeSequelize()
     });
 
 // bind routers
+
 app.use('/', asanaRouter);
-app.use('/', authRouter);
-app.use('/', userRouter);
 app.use('/', playlistRouter);
+app.use('/', userRouter);
+app.use('/', authRouter);
 
 const port = parseInt(process.env.SERVER_PORT);
 

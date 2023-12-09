@@ -8,9 +8,10 @@ var sequelize = new Sequelize('yoga', 'root', 'root', {
         mode:
             SQLite.OPEN_READWRITE | SQLite.OPEN_CREATE | SQLite.OPEN_FULLMUTEX,
     },
-    logging: false,
+    // logging: false,
 });
 
+// Initializes and syncs the db
 function initializeSequelize() {
     return sequelize.sync({ force: true });
 }
