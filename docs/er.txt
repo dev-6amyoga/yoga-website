@@ -7,7 +7,6 @@ table Institute {
     address1 varchar
     address2 varchar
     email varchar
-    
 }
 
 # User -----------------------------------------
@@ -64,6 +63,7 @@ table Plan {
   self_audio boolean  
   number_of_teachers integer 
   plan_validity integer
+  plan_user string
 }
 
 # Resources, Combo, Playlist ----------------------------------------
