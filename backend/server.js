@@ -43,7 +43,7 @@ initializeSequelize()
 
 app.use('/', asanaRouter);
 app.use('/', playlistRouter);
-app.use('/', userRouter);
+app.use('/user', userRouter);
 app.use('/', authRouter);
 
 const port = parseInt(process.env.SERVER_PORT);
