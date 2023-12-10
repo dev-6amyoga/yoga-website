@@ -30,12 +30,12 @@ export default function RegisterLanguageForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const language = document.querySelector("#language").value;
-    if (language == "") {
+    if (language === "") {
       console.log("Enter a language!");
       notify();
     } else {
       for (var lang in tableLanguages) {
-        if (lang.language == language) {
+        if (lang.language === language) {
           setFound(true);
           break;
         }

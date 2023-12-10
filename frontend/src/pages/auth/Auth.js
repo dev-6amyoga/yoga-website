@@ -7,7 +7,7 @@ export default function Auth() {
   const [regOpen, setRegOpen] = useState(true);
 
   return (
-    <div className="bg-[#283044] min-h-screen">
+    <div className="bg-[#f0efed] min-h-screen">
       <div className="h-20 bg-zinc-800 text-white">
         <h1 className="text-center">6AM Yoga</h1>
       </div>
