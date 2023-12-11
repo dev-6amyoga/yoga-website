@@ -18,6 +18,7 @@ const asanaRouter = require("./routes/Asana");
 const authRouter = require("./routes/Auth");
 const userRouter = require("./routes/User");
 const playlistRouter = require("./routes/Playlist");
+const planRouter = require("./routes/Plan");
 const { bulkCreateSampleData } = require("./sample_data");
 
 app.use(cors());
@@ -45,7 +46,7 @@ app.use("/", asanaRouter);
 app.use("/", playlistRouter);
 app.use("/user", userRouter);
 app.use("/", authRouter);
-
+app.use("/", planRouter);
 const port = parseInt(process.env.SERVER_PORT);
 
 app.listen(port, () => {

@@ -12,6 +12,7 @@ const {
 const { Institute } = require("../models/sql/Institute");
 const { Role } = require("../models/sql/Role");
 const { Op } = require("sequelize");
+const { Plan } = require("../models/sql/Plan");
 const { sequelize } = require("../init.sequelize");
 const { timeout } = require("../utils/promise_timeout");
 const { validate_email } = require("../utils/validate_email");
