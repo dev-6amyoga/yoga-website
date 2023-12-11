@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { Button, Input } from "@geist-ui/core";
 import LoginGoogle from "../../components/Auth/LoginGoogle";
-// import useUserStore from "../../store/UserStore";
+import useUserStore from "../../store/UserStore";
 import "./login.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -13,6 +12,8 @@ export default function Login({ switchForm }) {
   const notify = (x) => toast(x);
   const [loginStatus, setLogInStatus] = useState(false);
   const [userType, setUserType] = useState("");
+
+  const setUser = useUserStore((state) => state.setUser);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,6 +35,7 @@ export default function Login({ switchForm }) {
         notify("Logged in successfully");
         setLogInStatus(true);
         const userData = await response.json();
+        setUser(userData.user);
         setUserType(userData.user.role.name);
       } else {
         const errorData = await response.json();
