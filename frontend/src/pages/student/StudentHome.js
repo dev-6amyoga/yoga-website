@@ -1,6 +1,5 @@
 import React from "react";
-import { Note, Grid, Card, Button, Spacer } from "@geist-ui/core";
-import { User } from "@geist-ui/icons";
+import { Note } from "@geist-ui/core";
 import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
 import PageWrapper from "../../components/Common/PageWrapper";
 import Playlist from "../../components/Sidebar/Playlist";

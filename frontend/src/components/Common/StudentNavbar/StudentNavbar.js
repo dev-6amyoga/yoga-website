@@ -2,6 +2,8 @@ import { Grid, Card, Button, Spacer } from "@geist-ui/core";
 import { User } from "@geist-ui/icons";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../../../store/UserStore";
+import StudentPlan from "../../../pages/student/StudentPlan";
+
 export default function StudentNavbar() {
   const navigate = useNavigate();
   let user = useUserStore((state) => state.user);
@@ -11,9 +13,12 @@ export default function StudentNavbar() {
       <Grid xs={24}>
         <Card shadow width="100%" type="dark">
           <Grid.Container>
-            <Button>Purchase a plan</Button>
+            <Button onClick={() => navigate("/student/purchase-a-plan")}>
+              Purchase a plan
+            </Button>
+
             <Spacer w={3} />
-            <Button>Free Videos</Button>
+            <Button onClick={() => navigate("/student")}>Free Videos</Button>
             <Spacer w={3} />
             <Button>About Us</Button>
             <Spacer w={3} />
