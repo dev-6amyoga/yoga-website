@@ -24,11 +24,11 @@ Base URL : /auth
 #### Open
 
 -   POST /register [I]
--   POST /register-google [NI]
+-   POST /register-google [I]
 
 #### Authenticated
 
--   POST /login [I]
+-   POST /login [NI]
 -   POST /verify-google [I]
 
 ---
@@ -56,9 +56,10 @@ Base URL : /user
 
 #### Authenticated
 
--   POST /get-by-id [NI]
--   POST /get-by-username [NI]
--   POST /get-by-email [NI]
+-   POST /get-by-id [I]
+-   POST /get-by-username [I]
+-   POST /get-by-email [I]
+-   POST /get-by-phone [I]
 -   POST /get-all-by-instituteid [NI]
 -   POST /get-all-by-planid [NI]
 -   POST /update-profile [NI]
@@ -100,12 +101,12 @@ Base URL : /plan
 
 #### Open
 
--   GET /get-all
+-   GET /get-all [NI]
 
 #### Authenticated
 
--   POST /create-plan
--   POST /update-plan
+-   POST /create-plan [NI]
+-   POST /update-plan [NI]
 
 ---
 
@@ -119,7 +120,7 @@ None
 
 #### Authenticated
 
--   POST /update
+-   POST /update [NI]
 
 ---
 
