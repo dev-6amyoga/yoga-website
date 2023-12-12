@@ -35,6 +35,7 @@ export default function Login({ switchForm }) {
         notify("Logged in successfully");
         setLogInStatus(true);
         const userData = await response.json();
+        console.log(userData.user);
         setUser(userData.user);
         setUserType(userData.user.role.name);
       } else {
