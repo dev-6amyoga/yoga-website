@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Asana = require('../models/Asana');
-const Language = require('../models/Language');
+const Asana = require('../models/mongo/Asana');
+const Language = require('../models/mongo/Language');
 
 router.post('/content/video/addAsana', async (req, res) => {
     try {

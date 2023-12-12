@@ -5,7 +5,7 @@ const { options } = require('./defaultOptions');
 const Institute = sequelize.define(
     'institute',
     {
-        id: {
+        institute_id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,

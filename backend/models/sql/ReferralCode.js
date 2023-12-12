@@ -1,17 +1,17 @@
 const { sequelize } = require('../../init.sequelize');
 const { DataTypes } = require('sequelize');
 const { options } = require('./defaultOptions');
-const { Role } = require('./Role');
+const { User } = require('./User');
 
-const Permission = sequelize.define(
-    'permission',
+const ReferralCode = sequelize.define(
+    'referral_code',
     {
-        permission_id: {
+        referral_code_id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
         },
-        name: {
+        code: {
             type: DataTypes.STRING,
             allowNull: false,
         },
@@ -19,10 +19,6 @@ const Permission = sequelize.define(
     { ...options }
 );
 
-Permission.belongsToMany(Role, {
-    through: 'role_permission',
-    sourceKey: 'permission_id',
-    targetKey: 'role_id',
-});
+ReferralCode.belongsTo(User, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 
-module.exports = { Permission };
+module.exports = { ReferralCode };
