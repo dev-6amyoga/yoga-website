@@ -1,8 +1,8 @@
 const { sequelize } = require('../../init.sequelize');
 const { DataTypes } = require('sequelize');
 const { options } = require('./defaultOptions');
-const { Role } = require('./Role');
-const { User } = require('./User');
+// const { Role } = require('./Role');
+// const { User } = require('./User');
 
 const Plan = sequelize.define(
     'plan',
