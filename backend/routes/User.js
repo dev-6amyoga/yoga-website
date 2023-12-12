@@ -11,6 +11,7 @@ const { Institute } = require('../models/sql/Institute');
 const { Role } = require('../models/sql/Role');
 const { sequelize } = require('../init.sequelize');
 const bcrypyt = require('bcrypt');
+const { UserPlan } = require('../models/sql/UserPlan');
 
 // router.post('/addUser', async (req, res) => {
 //     try {
@@ -58,7 +59,7 @@ router.post('/get-by-id', async (req, res) => {
                 .json({ error: 'User does not exist' });
         }
 
-        const plan = await Plan.findOne({
+        const plan = await UserPlan.findOne({
             include: [{ model: User, where: { user_id: user_id } }],
         });
 
@@ -81,7 +82,10 @@ router.post('/get-by-username', async (req, res) => {
     }
 
     try {
-        const user = await User.findByPk(user_id, {
+        const user = await User.findOne({
+            where: {
+                username: username,
+            },
             include: [
                 { model: Institute, attributes: ['name'] },
                 { model: Role, attributes: ['name'] },
@@ -94,7 +98,7 @@ router.post('/get-by-username', async (req, res) => {
                 .json({ error: 'User does not exist' });
         }
 
-        const plan = await Plan.findOne({
+        const plan = await UserPlan.findOne({
             include: [{ model: User, where: { user_id: user.user_id } }],
         });
 
@@ -118,7 +122,7 @@ router.post('/get-by-email', async (req, res) => {
 
     try {
         const user = await User.findOne({
-            where: { phone: phone },
+            where: { email: email },
             include: [
                 { model: Institute, attributes: ['name'] },
                 { model: Role, attributes: ['name'] },
@@ -131,7 +135,7 @@ router.post('/get-by-email', async (req, res) => {
                 .json({ error: 'User does not exist' });
         }
 
-        const plan = await Plan.findOne({
+        const plan = await UserPlan.findOne({
             include: [{ model: User, where: { user_id: user.user_id } }],
         });
 
@@ -168,7 +172,7 @@ router.post('/get-by-phone', async (req, res) => {
                 .json({ error: 'User does not exist' });
         }
 
-        const plan = await Plan.findOne({
+        const plan = await UserPlan.findOne({
             include: [{ model: User, where: { user_id: user.user_id } }],
         });
 
@@ -241,7 +245,7 @@ router.post('/get-by-planid', async (req, res) => {
 router.post('/update-profile', async (req, res) => {
     const { user_id, name, email, phone } = req.body;
 
-    if (!user_id) {
+    if (!user_id || !name || !email || !phone) {
         return res
             .status(HTTP_BAD_REQUEST)
             .json({ error: 'Missing required fields' });
@@ -255,7 +259,7 @@ router.post('/update-profile', async (req, res) => {
             }
         );
 
-        if (n.affectedCount !== 1) {
+        if (n.length > 0 && n[0] !== 1) {
             return res
                 .status(HTTP_BAD_REQUEST)
                 .json({ error: 'User does not exist' });
@@ -274,9 +278,13 @@ router.post('/update-profile', async (req, res) => {
                 .json({ error: 'User does not exist' });
         }
 
+        const plan = await UserPlan.findOne({
+            include: [{ model: User, where: { user_id: user.user_id } }],
+        });
+
         return res
             .status(HTTP_OK)
-            .json({ message: 'updated successfully', user });
+            .json({ message: 'updated successfully', user, plan });
     } catch (error) {
         console.error(error);
         return res
@@ -311,7 +319,7 @@ router.post('/update-password', async (req, res) => {
             }
         );
 
-        if (n.affectedCount !== 1) {
+        if (n.length > 0 && n[0] !== 1) {
             return res
                 .status(HTTP_BAD_REQUEST)
                 .json({ error: 'User does not exist' });
