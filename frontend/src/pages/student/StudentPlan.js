@@ -25,6 +25,7 @@ function StudentPlan() {
   const renderAction = (value, rowData, index) => {
     const subscribePlan = async () => {
       console.log("subscribed!");
+      console.log(rowData);
     };
     return (
       <Grid.Container gap={0.1}>
@@ -51,13 +52,12 @@ function StudentPlan() {
       {/* <div>Plans for : {user.name}!</div> */}
       <div className="flex flex-col items-center justify-center py-20">
         <Table width={100} data={allPlans} className="bg-white ">
-          <Table.Column prop="id" label="Plan ID" />
+          <Table.Column prop="plan_id" label="Plan ID" />
           <Table.Column prop="name" label="Plan Name" />
           <Table.Column
             prop="has_playlist_creation"
             label="Make Custom Playlists"
             render={(data) => {
-              console.log(data);
               return data ? "Yes" : "No";
             }}
           />
@@ -65,7 +65,6 @@ function StudentPlan() {
             prop="playlist_creation_limit"
             label="Number of Custom Playlists"
             render={(data) => {
-              console.log(data);
               return data ? data : "0";
             }}
           />
