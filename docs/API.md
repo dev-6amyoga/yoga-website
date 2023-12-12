@@ -60,12 +60,11 @@ Base URL : /user
 -   POST /get-by-username [I]
 -   POST /get-by-email [I]
 -   POST /get-by-phone [I]
--   POST /get-all-by-instituteid [NI]
--   POST /get-all-by-planid [NI]
--   POST /update-profile [NI]
--   POST /change-password [NI]
--   POST /reset-password [NI]
--   DELETE /delete-by-id [NI]
+-   POST /get-all-by-instituteid [I]
+-   POST /get-all-by-planid [I]
+-   POST /update-profile [I]
+-   POST /update-password [I]
+-   DELETE /delete-by-id [I]
 
 ---
 

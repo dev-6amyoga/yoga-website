@@ -1,28 +1,30 @@
-# Organizations --------------------------------
+// Organizations --------------------------------
 
-# sql
 table Institute {
-    id integer
+    institute_id integer
     name varchar
     address1 varchar
     address2 varchar
     email varchar
+
+    created timestamp
+    updated timestamp
 }
 
-# User -----------------------------------------
+// User -----------------------------------------
 
-# sql
 table User {
-    id integer
+    user_id integer
     institute_id integer 
 
     username varchar
     name varchar
     email varchar
+    phone varchar
     password varchar
     is_google_login bool
 
-    # roles -> STUDENT, TEACHER, INSTITUTE_OWNER, INSTITUTE_ADMIN, ROOT?
+    // roles -> STUDENT, TEACHER, INSTITUTE_OWNER, INSTITUTE_ADMIN, ROOT?
     role varchar
     
     created timestamp
@@ -30,30 +32,77 @@ table User {
     last_login timestamp
 }
 
-# sql
 table Permission {
-    id integer
+    permission_id integer
     name varchar
 }
 
-# sql
 table Role_Permission {
     role_name varchar
     perm_id integer
 }
 
-# Plan -----------------------------------------
+table ReferralCode {
+  ref_code_id integer
+  code string
+  user_id integer
 
-# sql
-table User_Plan{
-  plan_id integer
-  id integer
-  plan_valid boolean
-  plan_validityperiod_total integer
-  plan_validityperiod_balance integer
+  created timestamp
+  updated timestamp
 }
 
-# sql
+table ReferralCodeUsage {
+  ref_code_id integer
+  usage_user_id integer
+}
+
+// Plan -----------------------------------------
+
+table User_Plan{
+  user_plan_id integer
+  user_id integer
+  plan_id integer
+
+  purchase_date timestamp
+  validity_from timestamp
+  validity_to timestamp
+  
+  cancellation_date date
+  auto_renewal boolean
+  discount_coupon_id integer
+  referral_code_id integer
+}
+
+table Transaction {
+  transaction_id integer
+  user_id integer
+
+  payment_for string
+  payment_mode string
+  payment_unique_id string
+  payment_status string
+  payment_date timestamp
+
+  transaction_response_code string
+  transaction_response_message string
+}
+
+table DiscountCoupon {
+  discount_coupon_id integer
+
+  coupon_name string
+  creation_date timestamp
+  validity_from timestamp
+  validity_to timestamp
+
+  linked_user_id integer // can be null for all users
+}
+
+table DiscountCouponApplicablePlans {
+  discount_coupon_id integer
+  plan_id integer
+}
+
 table Plan {
   plan_id integer
   plan_name string
@@ -66,63 +115,105 @@ table Plan {
   plan_user string
 }
 
-# Resources, Combo, Playlist ----------------------------------------
+table Currency {
+  currency_id integer
+  short_tag string
+}
 
-# mongo
+table PlanPricing {
+  plan_pricing_id integer
+  plan_id integer
+  denomination integer
+  currency_id integer
+}
+
+// MONGO : Resources, Combo, Playlist ----------------------------------------
+
+// TODO
 table Asana {
-    id integer 
+  asana_id objectid
+
+  is_free boolean
+  video_url string
+  
+  status string // public/private
 }
 
-# mongo
+// TODO
+table Markers {
+  asana_id objectid
+
+  markers list // list of time_tag, step, desc
+  description string
+}
+
+// TODO
 table Image {
-    id integer
+    image_id objectid
 }
 
-# mongo
+// TODO
 table Audio {
-    id integer
+    audio_id objectid
 }
 
-# mongo
+// TODO
 table Text {
-    id integer
+    text_id objectid
 }
 
-# mongo
 table Combination {
-    id integer
+    combination_id objectid
     user_id integer
+    // institute?
     name varchar
     desc varchar
 
-    items list # (asana)*(audio)*(image)*(text)* in order of combination
+    items list // (asana)*(audio)*(image)*(text)* in order of combination
 
     created timestamp
     updated timestamp
 }
 
-# mongo
 table Playlist {
-    id integer
+    playlist_id objectid
     user_id integer
     name varchar
     desc varchar
 
-    items list # (asana)*(combination)* in order of playlist
+    items list // (asana)*(combination)* in order of playlist
 
     created timestamp
     updated timestamp
 }
 
+Ref: "User"."institute_id" < "Institute"."institute_id"
 
+Ref: "User_Plan"."plan_id" < "Plan"."plan_id"
 
+Ref: "User_Plan"."user_id" < "User"."user_id"
 
+Ref: "Transaction"."user_id" < "User"."user_id"
 
+Ref: "DiscountCouponApplicablePlans"."plan_id" < "Plan"."plan_id"
 
+Ref: "Markers"."asana_id" < "Asana"."asana_id"
 
+Ref: "Role_Permission"."perm_id" < "Permission"."permission_id"
 
+Ref: "ReferralCode"."user_id" < "User"."user_id"
 
+Ref: "ReferralCodeUsage"."usage_user_id" < "User"."user_id"
 
+Ref: "ReferralCodeUsage"."ref_code_id" < "ReferralCode"."ref_code_id"
+
+Ref: "DiscountCoupon"."linked_user_id" < "User"."user_id"
+
+Ref: "DiscountCouponApplicablePlans"."discount_coupon_id" < "DiscountCoupon"."discount_coupon_id"
+
+Ref: "PlanPricing"."currency_id" < "Currency"."currency_id"
+
+Ref: "PlanPricing"."plan_id" < "Plan"."plan_id"
 
 
 
