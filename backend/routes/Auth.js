@@ -135,7 +135,7 @@ router.post("/auth/register", async (req, res) => {
       institute = await Institute.findOne(
         {
           where: { name: institute_name },
-          attributes: ["id"],
+          attributes: ["institute_id"],
         },
         { transaction: t }
       );
@@ -147,7 +147,7 @@ router.post("/auth/register", async (req, res) => {
     const role = await Role.findOne(
       {
         where: { name: role_name },
-        attributes: ["id"],
+        attributes: ["role_id"],
       },
       { transaction: t }
     );
@@ -161,8 +161,8 @@ router.post("/auth/register", async (req, res) => {
         password: hashedPassword,
         name,
         email,
-        institute_id: institute ? institute.id : null,
-        role_id: role.id,
+        institute_id: institute ? institute.institute_id : null,
+        role_id: role.role_id,
         is_google_login,
       },
       { transaction: t }
