@@ -57,7 +57,7 @@ router.post("/get-by-id", async (req, res) => {
     }
 
     const plan = await Plan.findOne({
-      include: [{ model: User, where: { id: id } }],
+      include: [{ model: User, where: { user_id: id } }],
     });
 
     return res.status(HTTP_OK).json({ user, plan });
@@ -93,7 +93,7 @@ router.post("/get-by-username", async (req, res) => {
     }
 
     const plan = await Plan.findOne({
-      include: [{ model: User, where: { id: id } }],
+      include: [{ model: User, where: { user_id: id } }],
     });
 
     return res.status(HTTP_OK).json({ user, plan });
@@ -129,7 +129,7 @@ router.post("/get-by-email", async (req, res) => {
     }
 
     const plan = await Plan.findOne({
-      include: [{ model: User, where: { id: id } }],
+      include: [{ model: User, where: { user_id: id } }],
     });
 
     return res.status(HTTP_OK).json({ user, plan });

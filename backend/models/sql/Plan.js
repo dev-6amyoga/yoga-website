@@ -6,7 +6,7 @@ const { User } = require("./User");
 const Plan = sequelize.define(
   "plan",
   {
-    id: {
+    plan_id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,

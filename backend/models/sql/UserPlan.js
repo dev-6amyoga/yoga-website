@@ -10,6 +10,7 @@ const UserPlan = sequelize.define(
     user_plan_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
+      autoIncrement: true,
     },
     plan_purchase_date: {
       type: DataTypes.DATE,
