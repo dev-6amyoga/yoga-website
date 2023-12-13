@@ -196,7 +196,7 @@ router.post('/get-by-instituteid', async (req, res) => {
 
     try {
         const users = await sequelize.query(
-            `SELECT u.* from user u JOIN institute i on u.institute_id = i.user_id where i.user_id = ${institute_id};`,
+            `SELECT u.* from user u JOIN institute i on u.institute_id = i.institute_id where i.institute_id = ${institute_id};`,
             {
                 model: User,
                 mapToModel: true,
@@ -225,8 +225,8 @@ router.post('/get-by-planid', async (req, res) => {
         const users = await sequelize.query(
             `SELECT u.* from user u
             JOIN user_plan up on up.user_id = u.user_id
-            JOIN plan p on up.plan_id = p.user_id
-            where p.user_id = ${plan_id};`,
+            JOIN plan p on up.plan_id = p.plan_id
+            where p.plan_id = ${plan_id};`,
             {
                 model: User,
                 mapToModel: true,
