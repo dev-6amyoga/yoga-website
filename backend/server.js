@@ -30,13 +30,6 @@ const userRouter = require('./routes/User');
 const playlistRouter = require('./routes/Playlist');
 const planRouter = require('./routes/Plan');
 const userPlanRouter = require('./routes/UserPlan');
-
-const asanaRouter = require('./routes/Asana');
-const authRouter = require('./routes/Auth');
-const userRouter = require('./routes/User');
-const playlistRouter = require('./routes/Playlist');
-const planRouter = require('./routes/Plan');
-const userPlanRouter = require('./routes/UserPlan');
 const currencyRouter = require('./routes/Currency');
 
 const { bulkCreateSampleData } = require('./sample_data');
