@@ -22,6 +22,7 @@ router.post('/get-by-userid', async (req, res) => {
         const referral_code = await ReferralCode.findOne({
             where: { user_id },
         });
+
         return res.status(HTTP_OK).json({ referral_code });
     } catch (error) {
         console.error('Error fetching referral code:', error);
@@ -31,35 +32,46 @@ router.post('/get-by-userid', async (req, res) => {
     }
 });
 
-// router.post('/generate-for-userid', async (req, res) => {
-//     const { user_id } = req.body;
+router.post('/generate-for-userid', async (req, res) => {
+    const { user_id } = req.body;
 
-//     if (!user_id)
-//         return res
-//             .status(HTTP_BAD_REQUEST)
-//             .json({ error: 'Missing required fields' });
+    if (!user_id)
+        return res
+            .status(HTTP_BAD_REQUEST)
+            .json({ error: 'Missing required fields' });
 
-//     const t = await sequelize.transaction();
-//     try {
-//         const [newC, created] = await ReferralCode.findOrCreate({
-//             where: { user_id },
-//             transaction: t,
-//         });
+    const t = await sequelize.transaction();
+    try {
+        let created = false;
+        let newCode = null;
+        let n = 5;
 
-//         if (!created) {
-//             await t.rollback();
-//             return res
-//                 .status(HTTP_BAD_REQUEST)
-//                 .json({ error: 'Referral code already exists' });
-//         }
+        while (!created && newCode === null && n > 0) {
+            [newCode, created] = await ReferralCode.findOrCreate({
+                where: { user_id },
+                defaults: { code: Math.random().toString(36).slice() },
+                transaction: t,
+            });
 
-//         await t.commit();
-//         return res.status(HTTP_OK).json({ referral_code: newC });
-//     } catch (error) {
-//         console.error('Error creating new referral code:', error);
-//         await t.rollback();
-//         return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-//             error: 'Error creating new referral code',
-//         });
-//     }
-// });
+            --n;
+        }
+
+        if (!created) {
+            await t.rollback();
+            return res
+                .status(HTTP_BAD_REQUEST)
+                .json({ error: 'Referral code already exists' });
+        }
+
+        await t.commit();
+        return res.status(HTTP_OK).json({ referral_code: newCode });
+    } catch (error) {
+        console.error('Error creating new referral code:', error);
+        await t.rollback();
+        return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+            error: 'Error creating new referral code',
+        });
+    }
+});
+
+module.exports = router;
