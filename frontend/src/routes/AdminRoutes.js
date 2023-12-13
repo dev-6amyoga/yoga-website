@@ -5,7 +5,7 @@ import AdminHome from "../pages/admin/AdminHome";
 import AllPlaylists from "../components/content-management/AllPlaylists";
 import AllLanguages from "../components/content-management/AllLanguages";
 import RegisterLanguageForm from "../components/content-management/forms/RegisterLanguage";
-
+import RegisterNewPlan from "../pages/admin/Plans/RegisterNewPlan";
 export const AdminRoutes = [
   {
     path: "/admin",
@@ -38,5 +38,9 @@ export const AdminRoutes = [
   {
     path: "/admin/allLanguages",
     element: <AllLanguages />,
+  },
+  {
+    path: "/plan/registerNewPlan",
+    element: <RegisterNewPlan />,
   },
 ];

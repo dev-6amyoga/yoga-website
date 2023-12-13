@@ -32,8 +32,6 @@ export default function VideoQueue() {
   const popFromQueue = usePlaylistStore((state) => state.popFromQueue);
   const moveUpQueue = usePlaylistStore((state) => state.moveUpQueue);
   const moveDownQueue = usePlaylistStore((state) => state.moveDownQueue);
-  console.log(queue, "in queue!");
-
   return (
     <div className="col-start-6 col-span-3 bg-yblue-50 rounded-xl">
       <h3 className="text-center pt-2">Queue</h3>

@@ -129,14 +129,23 @@ export default function AdminNavbar() {
                 Account Management
               </Link>
             </Button>
-            <Button className="w-full">
-              <Link
-                to={"/content/video/create"}
-                className="w-full text-zinc-800"
-              >
-                Plan Management
-              </Link>
-            </Button>
+            <ButtonDropdown className="w-full">
+              <ButtonDropdown.Item main>Plan Management</ButtonDropdown.Item>
+              <ButtonDropdown.Item>
+                <Link
+                  to={"/plan/registerNewPlan"}
+                  className="w-full text-zinc-800"
+                >
+                  Register New Plan
+                </Link>
+              </ButtonDropdown.Item>
+              <ButtonDropdown.Item>
+                <Link to={"/plan/viewAllPlans"} className="w-full text-zinc-800">
+                  View All Plans
+                </Link>
+              </ButtonDropdown.Item>             
+           
+            </ButtonDropdown>
             <Button className="w-full">
               <Link
                 to={"/content/video/create"}

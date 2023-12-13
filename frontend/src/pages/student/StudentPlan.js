@@ -38,7 +38,7 @@ function StudentPlan() {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "http://localhost:4000/get-all-student-plans"
+          "http://localhost:4000/plan/get-all-student-plans"
         );
         const data = await response.json();
         setAllPlans(data["plans"]);
@@ -66,13 +66,16 @@ function StudentPlan() {
     };
     console.log(userPlanData);
     try {
-      const response = await fetch("http://localhost:4000/register-user-plan", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userPlanData),
-      });
+      const response = await fetch(
+        "http://localhost:4000/user-plan/register-user-plan",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userPlanData),
+        }
+      );
       if (response.ok) {
         notify("New User-Plan added successfully");
         setTimeout(() => {

@@ -6,9 +6,35 @@ import Playlist from "../../components/Sidebar/Playlist";
 import VideoPlayerWrapper from "../../components/Video/VideoPlayerWrapper";
 import VideoQueue from "../../components/Video/VideoQueue";
 import useUserStore from "../../store/UserStore";
+import { useState, useEffect } from "react";
 
 function StudentHome() {
   let user = useUserStore((state) => state.user);
+  const [userPlan, setUserPlan] = useState({});
+  const [planId, setPlanId] = useState(0);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/user-plan/get-user-plan-by-id",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_id: user.user_id }),
+          }
+        );
+        const data = await response.json();
+        setUserPlan(data["userPlan"]);
+        setPlanId(data["userPlan"]["plan_id"]);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <div className="flex-col justify-center">
       <StudentNavbar />
@@ -17,9 +43,11 @@ function StudentHome() {
       <br />
       {/* Add a check here to display the note only if the user is not a paid member */}
       <div className="px-20">
-        <Note type="error" label="Note" filled width={100}>
-          Please purchase a subscription to unlock all features!.
-        </Note>
+        {planId === 0 && (
+          <Note type="error" label="Note" filled width={100}>
+            Please purchase a subscription to unlock all features!.
+          </Note>
+        )}
       </div>
       <br />
       <div className="max-w-7xl mx-auto">

@@ -27,10 +27,9 @@ function Playlist() {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "http://localhost:4000/content/playlists/getAllPlaylists"
+          "http://localhost:4000/playlist/content/playlists/getAllPlaylists"
         );
         const data = await response.json();
-        console.log(data);
         setPlaylists(data);
         setLoading(false);
       } catch (error) {

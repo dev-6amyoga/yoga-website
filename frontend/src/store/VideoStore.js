@@ -12,9 +12,6 @@ const useVideoStore = create((set) => ({
   currentVideoID: null,
   setCurrentVideoID: (item) =>
     set((state) => {
-      //console.log(state.currentVideoID, item)
-      // state.currentVideoID = item
-      // console.log(state.currentVideoID)
       return { currentVideoID: item };
     }),
   videoState: null,
