@@ -57,7 +57,7 @@ function StudentPlan() {
       purchase_date: formattedDate,
       validity_from: formattedDate,
       validity_to: calculateEndDate(selectedValidity),
-      cancellation_date: "",
+      cancellation_date: null,
       auto_renewal_enabled: false,
       user_id: user.user_id,
       plan_id: cardData.plan_id,

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
-import { Button, Input, Card, Text, Select,Checkbox } from "@geist-ui/core";
+import { Button, Input, Card, Text, Select, Checkbox } from "@geist-ui/core";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -21,19 +21,19 @@ export default function RegisterNewPlan() {
     const instituteplaylist_count = document.querySelector(
       "#institute_playlist_count"
     ).value;
-    const institute_playlist_creation = isChecked?1:0;
+    const institute_playlist_creation = isChecked ? 1 : 0;
     const teacher_count = document.querySelector("#teacher_count").value;
     const new_plan = {
-      name:plan_name,
-      has_basic_playlist:playlist_6am,
-      playlist_creation_limit:instituteplaylist_count,
-      number_of_teachers:teacher_count,
-      has_self_audio_upload:selfVoiceStatus,
-      has_playlist_creation:institute_playlist_creation,
-      plan_user_type:userType,
-      plan_validity:0
+      name: plan_name,
+      has_basic_playlist: playlist_6am,
+      playlist_creation_limit: instituteplaylist_count,
+      number_of_teachers: teacher_count,
+      has_self_audio_upload: selfVoiceStatus,
+      has_playlist_creation: institute_playlist_creation,
+      plan_user_type: userType,
+      plan_validity: 0,
     };
-    
+
     try {
       const response = await fetch("http://localhost:4000/plan/register", {
         method: "POST",
@@ -54,7 +54,6 @@ export default function RegisterNewPlan() {
     } catch (error) {
       console.log(error);
     }
-
   };
   const [selfVoiceStatus, setSelfVoiceStatus] = useState(true);
   const handler = (value) => {
@@ -82,12 +81,12 @@ export default function RegisterNewPlan() {
           <Input width="100%" id="plan_name"></Input>
           <br />
           <Checkbox
-      id="institute_playlist_creation"
-      checked={isChecked}
-      onChange={handleCheckboxChange}
-    >
-      Allow Playlist Creation
-    </Checkbox>
+            id="institute_playlist_creation"
+            checked={isChecked}
+            onChange={handleCheckboxChange}
+          >
+            Allow Playlist Creation
+          </Checkbox>
           <Text h5>Institute Playlist Count:</Text>
           <Input width="100%" id="institute_playlist_count"></Input>
           <br />
@@ -109,8 +108,8 @@ export default function RegisterNewPlan() {
         </form>
       </div>
       <div>
-          <ToastContainer />
-        </div>
+        <ToastContainer />
+      </div>
     </div>
   );
 }
