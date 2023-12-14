@@ -117,7 +117,7 @@ export default function AllPlaylists() {
     try {
       const playlistId = delPlaylistId;
       const response = await fetch(
-        `http://localhost:4000/content/playlist/deletePlaylist/${playlistId}`,
+        `http://localhost:4000/content/playlists/deletePlaylist/${playlistId}`,
         {
           method: "DELETE",
           headers: {
