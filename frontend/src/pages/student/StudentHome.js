@@ -1,7 +1,7 @@
 import React from "react";
 import { Note } from "@geist-ui/core";
 import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
-import PageWrapper from "../../components/Common/PageWrapper";
+// import PageWrapper from "../../components/Common/PageWrapper";
 import Playlist from "../../components/Sidebar/Playlist";
 import VideoPlayerWrapper from "../../components/Video/VideoPlayerWrapper";
 import VideoQueue from "../../components/Video/VideoQueue";
@@ -33,22 +33,13 @@ function StudentHome() {
       }
     };
     fetchData();
-  }, []);
+  }, [user.user_id]);
 
   return (
     <div className="flex-col justify-center">
       <StudentNavbar />
       {/* <div>Welcome {user.name}!</div> */}
       <br />
-      <br />
-      {/* Add a check here to display the note only if the user is not a paid member */}
-      <div className="px-20">
-        {planId === 0 && (
-          <Note type="error" label="Note" filled width={100}>
-            Please purchase a subscription to unlock all features!.
-          </Note>
-        )}
-      </div>
       <br />
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-7 gap-4 my-10">

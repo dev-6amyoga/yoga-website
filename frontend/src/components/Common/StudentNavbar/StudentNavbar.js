@@ -45,7 +45,6 @@ export default function StudentNavbar() {
             );
             const data1 = await response1.json();
             if (data1["plan"]) {
-              console.log(data1["plan"]["has_playlist_creation"]);
               setTailorMade(data1["plan"]["has_playlist_creation"]);
             } else {
               setTailorMade(false);
@@ -54,7 +53,6 @@ export default function StudentNavbar() {
             console.log(error);
           }
         } else {
-          console.log(data["error"]);
           setDisabled(true);
         }
       } catch (error) {
@@ -63,7 +61,7 @@ export default function StudentNavbar() {
       }
     };
     fetchData();
-  }, []);
+  }, [user.user_id]);
 
   return (
     <Grid.Container gap={2} justify="center">
@@ -86,7 +84,7 @@ export default function StudentNavbar() {
             </Button>
             <Spacer w={1} />
             <Button
-              onClick={() => navigate("/student/playlist-view")}
+              onClick={() => navigate("/student/register-new-playlist")}
               disabled={!tailorMade}
             >
               Make your own Playlist
