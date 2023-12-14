@@ -72,7 +72,7 @@ export default function Login({ switchForm }) {
 
   useEffect(() => {
     if (loginStatus === true && userType === "STUDENT") {
-      if (planId == 0) {
+      if (planId === 0) {
         const navigateTimeout = setTimeout(
           () => navigate("/student/free-videos"),
           1500

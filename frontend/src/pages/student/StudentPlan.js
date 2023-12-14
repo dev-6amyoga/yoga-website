@@ -23,13 +23,14 @@ function StudentPlan() {
   const [showCard, setShowCard] = useState(false);
   const [cardData, setCardData] = useState({});
   const today = new Date();
-  const formattedDate = today.toLocaleDateString();
+  const formattedDate = today.toISOString().split("T")[0];
+
   const [selectedValidity, setSelectedValidity] = useState(30);
 
   const calculateEndDate = (validityDays) => {
-    const endDate = new Date();
-    endDate.setDate(today.getDate() + validityDays);
-    return endDate.toLocaleDateString("en-GB");
+    const endDate = new Date(today);
+    endDate.setUTCDate(today.getUTCDate() + validityDays);
+    return endDate.toISOString().split("T")[0];
   };
   const handleValidityChange = (validity) => {
     setSelectedValidity(validity);
