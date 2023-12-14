@@ -56,8 +56,8 @@ initializeSequelize()
 
 // bind routers
 
-app.use("/asana", asanaRouter);
-app.use("/playlist", playlistRouter);
+app.use("/content", asanaRouter);
+app.use("/content", playlistRouter);
 app.use("/user", userRouter);
 app.use("/auth", authRouter);
 app.use("/plan", planRouter);
