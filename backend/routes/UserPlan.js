@@ -42,6 +42,7 @@ router.post("/get-user-plan-by-id", async (req, res) => {
       ],
     });
     if (!userPlan) {
+      console.log("no!", userPlan);
       return res
         .status(HTTP_BAD_REQUEST)
         .json({ error: "User Plan does not exist" });

@@ -65,7 +65,7 @@ router.get("/get-all-student-plans", async (req, res) => {
   }
 });
 
-router.post("/plan/register", async (req, res) => {
+router.post("/register", async (req, res) => {
   const {
     name,
     has_basic_playlist,
@@ -86,11 +86,12 @@ router.post("/plan/register", async (req, res) => {
     where: {
       [Op.and]: [
         { name: name },
-        { has_basic_playlist: has_basic_playlist },
-        { has_playlist_creation: has_playlist_creation },
+        { has_basic_playlist: has_basic_playlist ? true : false },
+        { has_playlist_creation: has_playlist_creation ? true : false },
+        // { has_playlist_creation: has_playlist_creation },
         { playlist_creation_limit: playlist_creation_limit },
         { number_of_teachers: number_of_teachers },
-        { has_self_audio_upload: has_self_audio_upload },
+        { has_self_audio_upload: has_self_audio_upload ? true : false },
         { plan_user_type: plan_user_type },
         { plan_validity: plan_validity },
       ],

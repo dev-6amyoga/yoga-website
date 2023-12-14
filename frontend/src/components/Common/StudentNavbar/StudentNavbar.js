@@ -1,6 +1,7 @@
 import { Grid, Card, Button, Spacer } from "@geist-ui/core";
 import { User } from "@geist-ui/icons";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import useUserStore from "../../../store/UserStore";
 import StudentPlan from "../../../pages/student/StudentPlan";
 
@@ -8,6 +9,38 @@ export default function StudentNavbar() {
   const navigate = useNavigate();
   let user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
+  const [userPlan, setUserPlan] = useState({});
+  const [planId, setPlanId] = useState(0);
+  const [disabled, setDisabled] = useState(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/user-plan/get-user-plan-by-id",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_id: user.user_id }),
+          }
+        );
+        const data = await response.json();
+        if (data["userPlan"]) {
+          setUserPlan(data["userPlan"]);
+          setPlanId(data["userPlan"]["plan_id"]);
+          console.log(data["userPlan"]["plan_id"]);
+        } else {
+          console.log(data["error"]);
+          setDisabled(true);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <Grid.Container gap={2} justify="center">
       <Grid xs={24}>
@@ -16,18 +49,27 @@ export default function StudentNavbar() {
             <Button onClick={() => navigate("/student/purchase-a-plan")}>
               Purchase a plan
             </Button>
+            <Spacer w={1} />
+            <Button onClick={() => navigate("/student/free-videos")}>
+              Free Videos
+            </Button>
+            <Spacer w={1} />
+            <Button
+              onClick={() => navigate("/student/playlist-view")}
+              disabled={disabled}
+            >
+              6AM Yoga Playlists
+            </Button>
 
-            <Spacer w={3} />
-            <Button onClick={() => navigate("/student")}>Free Videos</Button>
-            <Spacer w={3} />
+            <Spacer w={1} />
             <Button>About Us</Button>
-            <Spacer w={3} />
+            <Spacer w={1} />
             <Button>Contact Us</Button>
-            <Spacer w={40} />
+            <Spacer w={30} />
             <Button icon={<User />} type="success" ghost>
               {user.name.split(" ")[0]}
             </Button>
-            <Spacer w={3} />
+            <Spacer w={1} />
             <Button
               type="error"
               onClick={() => {
