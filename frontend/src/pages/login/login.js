@@ -12,6 +12,8 @@ export default function Login({ switchForm }) {
   const notify = (x) => toast(x);
   const [loginStatus, setLogInStatus] = useState(false);
   const [userType, setUserType] = useState("");
+  const [userPlan, setUserPlan] = useState({});
+  const [planId, setPlanId] = useState(0);
 
   const setUser = useUserStore((state) => state.setUser);
 
@@ -36,6 +38,28 @@ export default function Login({ switchForm }) {
         setLogInStatus(true);
         const userData = await response.json();
         setUser(userData.user);
+        try {
+          const response = await fetch(
+            "http://localhost:4000/user-plan/get-user-plan-by-id",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ user_id: userData.user.user_id }),
+            }
+          );
+          const data = await response.json();
+          if (data["userPlan"]) {
+            setUserPlan(data["userPlan"]);
+            setPlanId(data["userPlan"]["plan_id"]);
+          } else {
+            setPlanId(0);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+        //check if user has a plan and set some var as true or false
         setUserType(userData.user.role.name);
       } else {
         const errorData = await response.json();
@@ -48,8 +72,17 @@ export default function Login({ switchForm }) {
 
   useEffect(() => {
     if (loginStatus === true && userType === "STUDENT") {
-      const navigateTimeout = setTimeout(() => navigate("/student"), 1500);
-      return () => clearTimeout(navigateTimeout);
+      if (planId == 0) {
+        const navigateTimeout = setTimeout(
+          () => navigate("/student/free-videos"),
+          1500
+        );
+      } else {
+        const navigateTimeout = setTimeout(
+          () => navigate("/student/playlist-view"),
+          1500
+        );
+      }
     } else if (loginStatus === true && userType === "ROOT") {
       const navigateTimeout = setTimeout(() => navigate("/admin"), 1500);
       return () => clearTimeout(navigateTimeout);
