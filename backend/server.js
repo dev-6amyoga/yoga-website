@@ -32,7 +32,8 @@ const planRouter = require("./routes/Plan");
 const userPlanRouter = require("./routes/UserPlan");
 const currencyRouter = require("./routes/Currency");
 const referralCodeRouter = require("./routes/ReferralCode");
-
+const userPlaylistRouter = require("./routes/PlaylistUser");
+const UserPlaylistCountRouter = require("./routes/UserPlaylistCount");
 const { bulkCreateSampleData } = require("./sample_data");
 
 app.use(cors());
@@ -64,6 +65,8 @@ app.use("/plan", planRouter);
 app.use("/user-plan", userPlanRouter);
 app.use("/currency", currencyRouter);
 app.use("/referral", referralCodeRouter);
+app.use("/user-playlists", userPlaylistRouter);
+app.use("/user-playlist-count", UserPlaylistCountRouter);
 
 const port = parseInt(process.env.SERVER_PORT);
 

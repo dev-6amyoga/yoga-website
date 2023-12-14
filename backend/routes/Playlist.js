@@ -11,7 +11,6 @@ router.post("/playlists/addPlaylist", async (req, res) => {
       { sort: { playlist_id: -1 } }
     );
     const newPlaylistId = maxIdPlaylist ? maxIdPlaylist.playlist_id + 1 : 1;
-    console.log(newPlaylistId, maxIdPlaylist);
     requestData.playlist_id = newPlaylistId;
     const newPlaylist = new Playlist(requestData);
     const savedPlaylist = await newPlaylist.save();
@@ -24,7 +23,6 @@ router.post("/playlists/addPlaylist", async (req, res) => {
 router.get("/playlists/getAllPlaylists", async (req, res) => {
   try {
     const playlists = await Playlist.find();
-    console.log(playlists);
     res.json(playlists);
   } catch (error) {
     console.error(error);
@@ -35,12 +33,10 @@ router.get("/playlists/getAllPlaylists", async (req, res) => {
 router.put("/playlists/updatePlaylist/:playlistId", async (req, res) => {
   const playlistId = req.params.playlistId;
   const updatedData = req.body;
-  console.log("GOT : ", updatedData, playlistId);
   try {
     const existingPlaylist = await Playlist.findOne({
       playlist_id: playlistId,
     });
-    console.log(existingPlaylist);
     if (!existingPlaylist) {
       return res.status(404).json({ error: "Playlist not found" });
     }
@@ -64,7 +60,6 @@ router.put("/playlists/updatePlaylist/:playlistId", async (req, res) => {
 
 router.delete("/playlists/deletePlaylist/:playlistId", async (req, res) => {
   const playlistId = req.params.playlistId;
-  console.log(playlistId);
   try {
     const deletedPlaylist = await Playlist.findOneAndDelete({
       playlist_id: playlistId,

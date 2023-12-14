@@ -117,8 +117,6 @@ router.post("/register", async (req, res) => {
       },
       { transaction: t }
     );
-
-    // console.log('committing');
     await timeout(t.commit(), 5000, new Error("timeout; try again"));
 
     res.status(HTTP_OK).json({ plan: newPlan });

@@ -56,7 +56,6 @@ router.delete("/video/deleteAsana/:asanaId", async (req, res) => {
 router.get("/video/getAllAsanas", async (req, res) => {
   try {
     const asanas = await Asana.find();
-    console.log(asanas);
     res.json(asanas);
   } catch (error) {
     console.error(error);
@@ -67,7 +66,6 @@ router.get("/video/getAllAsanas", async (req, res) => {
 router.get("/language/getAllLanguages", async (req, res) => {
   try {
     const languages = await Language.find();
-    console.log(languages);
     res.json(languages);
   } catch (error) {
     console.error(error);
@@ -84,7 +82,6 @@ router.post("/language/addLanguage", async (req, res) => {
       { sort: { language_id: -1 } }
     );
     const newLangID = maxLangID ? maxLangID.language_id + 1 : 1;
-    console.log(newLangID, maxLangID);
     requestData.language_id = newLangID;
     const newLanguage = new Language(requestData);
     const savedLanguage = await newLanguage.save();
