@@ -1,23 +1,23 @@
-.firstpage{
+.firstpage {
     background-color: white;
-    height: 100vh;
+    /* height: 100vh; */
     display: flex;
     flex-direction: column;
     /* align-items: center; */
 }
-.notGoogle{
+.notGoogle {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
-.registerWrapper{
+.registerWrapper {
     margin: 10%;
 }
 
-.loginWrapper{
-    margin:10%;
+.loginWrapper {
+    margin: 10%;
 }
 
-.googleWrapper{
-    margin-left:45%;
+.googleWrapper {
+    margin-left: 45%;
 }

@@ -1,7 +1,7 @@
-.outer{
-    background-color: #EBF5EE;
+.outer {
+    background-color: #ebf5ee;
     width: 30vw;
-    height: 50vh;
+    /* height: 50vh; */
     font-family: 'Courier New', Courier, monospace;
     font-weight: bold;
     display: flex;

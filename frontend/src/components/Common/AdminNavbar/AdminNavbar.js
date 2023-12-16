@@ -152,13 +152,6 @@ export default function AdminNavbar() {
                             <Link
                                 to={'/content/video/create'}
                                 className='w-full text-zinc-800'>
-                                Settings
-                            </Link>
-                        </Button>
-                        <Button className='w-full'>
-                            <Link
-                                to={'/content/video/create'}
-                                className='w-full text-zinc-800'>
                                 Forms
                             </Link>
                         </Button>
@@ -181,6 +174,13 @@ export default function AdminNavbar() {
                                 to={'/content/video/create'}
                                 className='w-full text-zinc-800'>
                                 Reports
+                            </Link>
+                        </Button>
+                        <Button className='w-full'>
+                            <Link
+                                to={'/admin/settings'}
+                                className='w-full text-zinc-800'>
+                                Settings
                             </Link>
                         </Button>
                     </div>
