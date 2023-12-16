@@ -24,6 +24,14 @@ const Institute = sequelize.define(
         },
         email: {
             type: DataTypes.STRING,
+            allowNull: false,
+        },
+        phone: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        billing_address: {
+            type: DataTypes.STRING,
             allowNull: true,
         },
     },

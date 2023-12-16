@@ -11,6 +11,8 @@ const institutes = [
         address1: '#192, 1st Main, 2nd Cross, 5th Phase',
         address2: 'JP Nagar, Bangalore',
         email: 'institute1@gmail.com',
+        phone: '1234567890',
+        billing_address: 'JP Nagar, Bangalore',
     },
     {
         id: 2,
@@ -18,6 +20,8 @@ const institutes = [
         address1: '#3838, 1st Main, 2nd Cross, 5th Phase',
         address2: 'Sarjapur, Bangalore',
         email: 'institute2@gmail.com',
+        phone: '1234567890',
+        billing_address: 'Sarjapur, Bangalore',
     },
 ];
 
