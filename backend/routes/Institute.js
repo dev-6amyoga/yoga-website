@@ -17,6 +17,8 @@ router.post('/register', async (req, res) => {
     const { name, address1, address2, email, phone, billing_address } =
         req.body;
 
+    // console.log({ body: req.body });
+
     if (!name || !email || !phone)
         return res
             .status(HTTP_BAD_REQUEST)
