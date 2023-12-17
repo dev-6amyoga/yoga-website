@@ -11,27 +11,23 @@ import {
 import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
 import useUserStore from "../../store/UserStore";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function RegisterNewPlaylistStudent() {
-  const navigate = useNavigate();
   const notify = (x) => toast(x);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
-
   let user = useUserStore((state) => state.user);
   const user_id = user?.user_id;
   const [planId, setPlanId] = useState(0);
   const [planDetails, setPlanDetails] = useState({});
-  const [userPlaylist, setUserPlaylist] = useState({});
   const [asanas, setAsanas] = useState([]);
   const [playlist_temp, setPlaylistTemp] = useState([]);
   const [modalState, setModalState] = useState(false);
   const [currentCount, setCurrentCount] = useState(0);
   const [maxCount, setMaxCount] = useState(0);
   const [maxStudId, setMaxStudId] = useState(0);
-  const [idForUpdate, setIdForUpdate] = useState("");
   const [modalData, setModalData] = useState({
     rowData: {
       asana_name: "",
@@ -39,6 +35,55 @@ export default function RegisterNewPlaylistStudent() {
     count: "",
     index: 0,
   });
+  ////////////////////////////////////////////////////////
+
+  const [userPlaylist, setUserPlaylist] = useState({});
+  const [incremented, setIncremented] = useState(false);
+
+  const incrementPlaylistField = (field) => {
+    setUserPlaylist((prevPlaylist) => ({
+      ...prevPlaylist,
+      [field]: prevPlaylist[field] + 1,
+    }));
+    setIncremented(true);
+  };
+
+  const [prevUserPlaylist, setPrevUserPlaylist] = useState(() => userPlaylist);
+
+  useEffect(() => {
+    async function fetchCount() {
+      if (typeof window !== "undefined") {
+        if (userPlaylist !== prevUserPlaylist) {
+          if (incremented) {
+            try {
+              const response = await fetch(
+                `http://localhost:4000/user-playlist-count/updateUserPlaylistCount/${user_id}`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(userPlaylist),
+                }
+              );
+              if (response.ok) {
+                setCurrentCount((prevCount) => prevCount + 1);
+              } else {
+                notify("Error updating asana:", response.status);
+              }
+            } catch (error) {
+              console.error(error);
+            }
+            setIncremented(false);
+          }
+          setPrevUserPlaylist(userPlaylist);
+        }
+      }
+    }
+    fetchCount();
+  }, [userPlaylist, incremented, user_id]);
+
+  ////////////////////////////////////////////////////////
 
   const findRecordByKeyValue = (array, key, value) => {
     return array.find((item) => item[key] === value);
@@ -73,7 +118,7 @@ export default function RegisterNewPlaylistStudent() {
           setMaxStudId(0);
         }
       } catch (error) {
-        console.log(error);
+        notify(error);
       }
     };
     fetchData();
@@ -127,6 +172,7 @@ export default function RegisterNewPlaylistStudent() {
                       "user_id",
                       user_id
                     );
+                    setUserPlaylist(record);
                     setCurrentCount(record.current_count);
                     setMaxCount(record.maximum_count);
                   } else {
@@ -153,7 +199,7 @@ export default function RegisterNewPlaylistStudent() {
                         }
                       );
                       if (response.ok) {
-                        console.log("Count added successfully");
+                        notify("Count added successfully");
                       } else {
                         console.error("Failed to add count");
                       }
@@ -162,15 +208,15 @@ export default function RegisterNewPlaylistStudent() {
                     }
                   }
                 } catch (error) {
-                  console.log(error);
+                  notify(error);
                 }
               }
             } catch (error) {
-              console.log(error);
+              notify(error);
             }
           }
         } catch (error) {
-          console.log(error);
+          notify(error);
         }
       }
     };
@@ -186,7 +232,7 @@ export default function RegisterNewPlaylistStudent() {
         const data = await response.json();
         setAsanas(data);
       } catch (error) {
-        console.log(error);
+        notify(error);
       }
     };
     fetchData();
@@ -266,7 +312,7 @@ export default function RegisterNewPlaylistStudent() {
         },
       ]);
     } else {
-      toast("Invalid count entered. Please enter a valid number.");
+      notify("Invalid count entered. Please enter a valid number.");
     }
   };
 
@@ -284,7 +330,6 @@ export default function RegisterNewPlaylistStudent() {
         playlist_sequence["asana_ids"].push(Number(asana_id_playlist));
       }
     });
-    // console.log(playlist_sequence, currentCount, maxCount, maxStudId);
     const newId = "S_" + String(user_id) + "_" + String(maxStudId + 1);
     const newRecord = {
       playlist_id: newId,
@@ -293,11 +338,10 @@ export default function RegisterNewPlaylistStudent() {
       playlist_name: playlist_sequence["playlist_name"],
       asana_ids: playlist_sequence["asana_ids"],
     };
-    console.log(newRecord);
     if (currentCount === maxCount) {
-      console.log("LIMIT REACHED!!");
+      notify("LIMIT REACHED!!");
     } else {
-      console.log("CAN ADD");
+      incrementPlaylistField("current_count");
       try {
         const response = await fetch(
           "http://localhost:4000/user-playlists/addUserPlaylist",
@@ -311,9 +355,7 @@ export default function RegisterNewPlaylistStudent() {
         );
         if (response.ok) {
           setMaxStudId((prevMaxStudId) => prevMaxStudId + 1);
-          //post req to update prev count in userPlaylistCount by +1
-
-          toast("Playlist added successfully");
+          notify("Playlist added successfully");
         } else {
           console.error("Failed to add playlist");
         }
