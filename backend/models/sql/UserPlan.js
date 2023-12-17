@@ -17,7 +17,7 @@ const UserPlan = sequelize.define(
       allowNull: false,
     },
     validity_from: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     validity_to: {
