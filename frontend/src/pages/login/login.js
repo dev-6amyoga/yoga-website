@@ -1,123 +1,145 @@
 import { Button, Input } from '@geist-ui/core';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useShallow } from 'zustand/react/shallow';
 import LoginGoogle from '../../components/Auth/LoginGoogle';
 import useUserStore from '../../store/UserStore';
+import { Fetch } from '../../utils/Fetch';
+import getFormData from '../../utils/getFormData';
 import './login.css';
 
 export default function Login({ switchForm }) {
     const navigate = useNavigate();
     const notify = (x) => toast(x);
-    const [loginStatus, setLogInStatus] = useState(false);
-    const [userType, setUserType] = useState('');
-    const [userPlan, setUserPlan] = useState({});
-    const [planId, setPlanId] = useState(0);
+    // const [loginStatus, setLogInStatus] = useState(false);
 
-    const setUser = useUserStore((state) => state.setUser);
+    const [user, userType, userPlan] = useUserStore(
+        useShallow((state) => [state.user, state.userType, state.userPlan])
+    );
+
+    const [setUser, setInstitutes, setUserType, setUserPlan] = useUserStore(
+        useShallow((state) => [
+            state.setUser,
+            state.setInstitutes,
+            state.setUserType,
+            state.setUserPlan,
+        ])
+    );
+
+    useEffect(() => {
+        if (user) {
+            fetchUserPlan()
+                .then(() => {})
+                .catch(() => {})
+                .finally(() => {
+                    // console.log('finally?');
+                    fetchUserInstitutes()
+                        .then(() => {})
+                        .catch(() => {})
+                        .finally(() => {
+                            notify('Logged in successfully');
+                            navigateToDashboard();
+                        });
+                });
+        }
+    }, [user]);
+
+    const fetchUserPlan = useCallback(async () => {
+        console.log('Fetching user plan for : ', user?.user_id, ' ...');
+        try {
+            const response = await Fetch({
+                url: 'http://localhost:4000/user-plan/get-user-plan-by-id',
+                method: 'POST',
+                data: {
+                    user_id: user?.user_id,
+                },
+            });
+
+            if (response.data['userPlan']) {
+                setUserPlan(response.data['userPlan']);
+            } else {
+                setUserPlan(null);
+            }
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }, [user, setUserPlan]);
+
+    const fetchUserInstitutes = useCallback(async () => {
+        // console.log('Fetching user institute for : ', user?.user_id, ' ...');
+        try {
+            const response = await Fetch({
+                url: 'http://localhost:4000/institute/get-all-by-userid',
+                method: 'POST',
+                data: {
+                    user_id: user?.user_id,
+                },
+            });
+
+            if (response.data['institutes']) {
+                setInstitutes(response.data['institutes']);
+            } else {
+                setInstitutes([]);
+            }
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }, [user, setInstitutes]);
+
+    const navigateToDashboard = useCallback(() => {
+        const type = userType || user?.role?.name;
+
+        switch (type) {
+            case 'ROOT':
+                navigate('/admin');
+                break;
+            case 'TEACHER':
+                navigate('/teacher');
+                break;
+            case 'INSTITUTE_OWNER':
+                navigate('/institute');
+                break;
+            case 'STUDENT':
+                if (userPlan.plan_id === 0) {
+                    navigate('/student/free-videos');
+                } else {
+                    navigate('/student/playlist-view');
+                }
+                break;
+            default:
+                navigate('/');
+                break;
+        }
+    }, [user, userType, userPlan, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const username = document.querySelector('#user_name').value;
-        const password = document.querySelector('#pass_word').value;
-        const existingUser = {
-            username: username,
-            password: password,
-        };
+        const formData = getFormData(e);
         try {
-            const response = await fetch('http://localhost:4000/auth/login', {
+            const response = await Fetch({
+                url: 'http://localhost:4000/auth/login',
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(existingUser),
+                data: formData,
             });
-            if (response.ok) {
-                notify('Logged in successfully');
-                setLogInStatus(true);
-                const userData = await response.json();
-                setUser(userData.user);
-                try {
-                    const response = await fetch(
-                        'http://localhost:4000/user-plan/get-user-plan-by-id',
-                        {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                user_id: userData.user.user_id,
-                            }),
-                        }
-                    );
-                    const data = await response.json();
-                    if (data['userPlan']) {
-                        setUserPlan(data['userPlan']);
-                        setPlanId(data['userPlan']['plan_id']);
-                    } else {
-                        setPlanId(0);
-                    }
-                } catch (error) {
-                    console.log(error);
-                }
-                //check if user has a plan and set some var as true or false
-                setUserType(userData.user.role.name);
 
-                switch (userData.user.role.name) {
-                    case 'ROOT':
-                        navigate('/admin');
-                        break;
-                    case 'TEACHER':
-                        navigate('/teacher');
-                        break;
-                    case 'INSTITUTE_OWNER':
-                        navigate('/institute');
-                        break;
-                    case 'STUDENT':
-                        // if (planId === 0) {
-                        //     navigate('/student/free-videos');
-                        // } else {
-                        //     navigate('/student/playlist-view');
-                        // }
-                        break;
-                    default:
-                        navigate('/');
-                        break;
-                }
+            if (response && response.status === 200) {
+                const userData = response.data;
+
+                // console.log(userData.user);
+                setUser(userData.user);
+                setUserType(userData.user.role.name);
             } else {
-                const errorData = await response.json();
+                const errorData = response.data;
                 notify(errorData.error);
             }
         } catch (error) {
             console.log(error);
         }
     };
-
-    useEffect(() => {
-        if (loginStatus === true && userType === 'STUDENT') {
-            if (planId === 0) {
-                const navigateTimeout = setTimeout(
-                    () => navigate('/student/free-videos'),
-                    1500
-                );
-            } else {
-                const navigateTimeout = setTimeout(
-                    () => navigate('/student/playlist-view'),
-                    1500
-                );
-            }
-        } else if (loginStatus === true && userType === 'ROOT') {
-            const navigateTimeout = setTimeout(() => navigate('/admin'), 1500);
-            return () => clearTimeout(navigateTimeout);
-        } else if (loginStatus === true && userType === 'TEACHER') {
-            const navigateTimeout = setTimeout(
-                () => navigate('/teacher'),
-                1500
-            );
-            return () => clearTimeout(navigateTimeout);
-        }
-    }, [loginStatus, userType, navigate]);
 
     return (
         <div className='bg-white p-4 rounded-lg max-w-xl mx-auto'>
@@ -127,10 +149,10 @@ export default function Login({ switchForm }) {
                 <form
                     onSubmit={handleSubmit}
                     className='flex flex-col gap-4 w-full'>
-                    <Input width='100%' id='user_name'>
+                    <Input width='100%' name='username'>
                         Username
                     </Input>
-                    <Input.Password width='100%' id='pass_word'>
+                    <Input.Password width='100%' name='password'>
                         Password
                     </Input.Password>
                     <Button htmlType='submit'>Login</Button>

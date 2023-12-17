@@ -1,6 +1,6 @@
-import { Button, ButtonDropdown, Drawer } from '@geist-ui/core';
+import { Button, ButtonDropdown, Drawer, Select } from '@geist-ui/core';
 import { Menu } from '@geist-ui/icons';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useUserStore from '../../../store/UserStore';
 
@@ -9,6 +9,21 @@ export default function InstituteNavbar() {
     const [open, setOpen] = useState(false);
     let user = useUserStore((state) => state.user);
     const setUser = useUserStore((state) => state.setUser);
+    let institutes = useUserStore((state) => state.institutes);
+    // let setInstitutes = useUserStore((state) => state.setInstitutes);
+    let currentInstituteId = useUserStore((state) => state.currentInstituteId);
+    let setCurrentInstituteId = useUserStore(
+        (state) => state.setCurrentInstituteId
+    );
+
+    const handleInstituteSelection = (value) => {
+        setCurrentInstituteId(parseInt(value));
+    };
+
+    useEffect(() => {}, [user]);
+    // useEffect(() => {
+    //     console.log(institutes);
+    // }, [institutes]);
 
     return (
         <div>
@@ -29,10 +44,27 @@ export default function InstituteNavbar() {
                 <Drawer.Title>6AM Yoga</Drawer.Title>
                 <Drawer.Subtitle>Institute Dashboard</Drawer.Subtitle>
                 <Drawer.Content>
+                    <div className='py-4'>
+                        <Select
+                            width='100%'
+                            value={String(currentInstituteId)}
+                            placeholder='Select An Institute'
+                            onChange={handleInstituteSelection}>
+                            {institutes?.map((institute) => {
+                                return (
+                                    <Select.Option
+                                        key={institute.institute_id}
+                                        value={String(institute.institute_id)}>
+                                        {institute.name}
+                                    </Select.Option>
+                                );
+                            })}
+                        </Select>
+                    </div>
                     <div className='flex flex-col gap-4 w-full'>
                         <Button className='w-full'>
                             <Link
-                                to={'/admin'}
+                                to={'/institute'}
                                 className='w-full text-zinc-800'>
                                 Dashboard
                             </Link>
@@ -40,7 +72,7 @@ export default function InstituteNavbar() {
 
                         <Button className='w-full'>
                             <Link
-                                to={'/content/video/create'}
+                                to={'/institute'}
                                 className='w-full text-zinc-800'>
                                 Member Management
                             </Link>
@@ -53,7 +85,7 @@ export default function InstituteNavbar() {
 
                         <Button className='w-full'>
                             <Link
-                                to={'/content/video/create'}
+                                to={'/institute'}
                                 className='w-full text-zinc-800'>
                                 Reports
                             </Link>

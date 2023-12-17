@@ -22,7 +22,7 @@
         "url": "^0.11.3",
         "url-pattern": "^1.0.3",
         "web-vitals": "^2.1.4",
-        "zustand": "^4.4.1"
+        "zustand": "^4.4.7"
     },
     "devDependencies": {
         "autoprefixer": "10.4.15",

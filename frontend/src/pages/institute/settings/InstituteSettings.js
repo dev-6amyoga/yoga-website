@@ -1,5 +1,8 @@
 import { Tabs } from '@geist-ui/core';
 import InstitutePageWrapper from '../../../components/Common/InstitutePageWrapper';
+import BillingSettings from '../../../components/Institute/InstituteSettings/BillingSettings';
+import ContactInfoSettings from '../../../components/Institute/InstituteSettings/ContactInfoSettings';
+import GeneralSettings from '../../../components/Institute/InstituteSettings/GeneralSettings';
 
 export default function InstituteSettings() {
     return (
@@ -7,13 +10,13 @@ export default function InstituteSettings() {
             <div className='max-w-5xl mx-auto'>
                 <Tabs initialValue='general' className=''>
                     <Tabs.Item label='General' value='general'>
-                        <h2>General</h2>
+                        <GeneralSettings />
                     </Tabs.Item>
                     <Tabs.Item label='Contact Information' value='contact'>
-                        <h2>Contact Information</h2>
+                        <ContactInfoSettings />
                     </Tabs.Item>
                     <Tabs.Item label='Billing' value='billing'>
-                        <h2>Billing</h2>
+                        <BillingSettings />
                     </Tabs.Item>
                 </Tabs>
             </div>

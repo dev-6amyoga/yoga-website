@@ -1,96 +1,102 @@
 import { Button, Input } from '@geist-ui/core';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import useUserStore from '../../../store/UserStore';
 import { Fetch } from '../../../utils/Fetch';
 import getFormData from '../../../utils/getFormData';
 
-export default function GeneralSettings() {
-    let user = useUserStore((state) => state.user);
-    let setUser = useUserStore((state) => state.setUser);
+export default function ContactInfoSettings() {
+    const institutes = useUserStore((state) => state.institutes);
+    const currentInstituteId = useUserStore(
+        (state) => state.currentInstituteId
+    );
+    const updateInstitute = useUserStore((state) => state.updateInstitute);
 
-    // useEffect(() => {}, [user]);
+    const [currentInstitute, setCurrentInstitute] = useState(null);
+
+    useEffect(() => {
+        if (currentInstituteId) {
+            setCurrentInstitute(
+                institutes?.find(
+                    (institute) => institute.institute_id === currentInstituteId
+                )
+            );
+        }
+    }, [currentInstituteId, institutes]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = getFormData(e);
 
-        if (formData?.name === undefined || formData?.name === '') {
-            formData.name = user?.name;
-        }
-
         if (formData?.email === undefined || formData?.email === '') {
-            formData.email = user?.email;
+            formData.email = currentInstitute?.email;
         }
 
         if (formData?.phone === undefined || formData?.phone === '') {
-            formData.phone = user?.phone || null;
+            formData.phone = currentInstitute?.phone;
         }
 
-        // console.log(formData, user);
+        // console.log({
+        //     ...currentInstitute,
+        //     ...formData,
+        // });
 
         Fetch({
-            url: 'http://localhost:4000/user/update-profile',
+            url: 'http://localhost:4000/institute/update',
             method: 'POST',
             data: {
+                ...currentInstitute,
                 ...formData,
-                user_id: user?.user_id,
             },
         })
             .then((res) => {
                 if (res && res.status === 200) {
                     Fetch({
-                        url: 'http://localhost:4000/user/get-by-id',
+                        url: 'http://localhost:4000/institute/get-by-instituteid',
                         method: 'POST',
                         data: {
-                            user_id: user?.user_id,
+                            institute_id: currentInstitute?.institute_id,
                         },
                     }).then((res) => {
                         if (res && res.status === 200) {
-                            toast('Profile updated successfully', {
+                            toast('Institute updated successfully', {
                                 type: 'success',
                             });
-                            // console.log(res.data.user);
-                            setUser(res.data.user);
+                            // console.log({ res: res.data });
+                            updateInstitute(res.data);
                         } else {
-                            toast('Error updating profile; retry', {
+                            toast('Error updating institute; retry', {
                                 type: 'error',
                             });
                         }
                     });
                 } else {
-                    toast('Error updating profile; retry', { type: 'error' });
+                    toast('Error updating institute; retry', { type: 'error' });
                 }
             })
             .catch((err) => {
                 console.log(err);
-                toast('Error updating profile', { type: 'error' });
+                toast('Error updating institute', { type: 'error' });
             });
     };
 
     return (
         <div>
-            <h2>General Settings</h2>
+            <h2>Contact Information Settings</h2>
             <form className='flex flex-col gap-2 my-8' onSubmit={handleSubmit}>
                 <Input
                     width='100%'
-                    defaultValue={user?.name}
-                    placeholder={user?.name}
-                    name='name'>
-                    Name
-                </Input>
-                <Input
-                    width='100%'
-                    defaultValue={user?.email}
-                    placeholder={user?.email}
+                    defaultValue={currentInstitute?.email}
+                    placeholder={currentInstitute?.email}
                     name='email'>
                     Email
                 </Input>
                 <Input
                     width='100%'
-                    defaultValue={user?.phone}
-                    placeholder={user?.phone}
+                    defaultValue={currentInstitute?.phone}
+                    placeholder={currentInstitute?.phone}
                     name='phone'>
-                    Phone
+                    Phone No.
                 </Input>
                 <div className='flex flex-row gap-2 w-full'>
                     <Button
