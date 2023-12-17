@@ -31,27 +31,6 @@ export default function AdminNavbar() {
                 <Drawer.Subtitle>Admin Dashboard</Drawer.Subtitle>
                 <Drawer.Content>
                     <div className='flex flex-col gap-4 w-full'>
-                        {user ? (
-                            <>
-                                <h2 className='text-sm text-center'>
-                                    Logged in as {user?.name}
-                                </h2>
-                                <Button
-                                    type='error'
-                                    onClick={() => {
-                                        setUser(null);
-                                        navigate('/auth');
-                                    }}>
-                                    Logout
-                                </Button>
-                            </>
-                        ) : (
-                            <Link to={'/auth'} className='w-full'>
-                                <Button type='primary' width='100%'>
-                                    Login
-                                </Button>
-                            </Link>
-                        )}
                         <Button className='w-full'>
                             <Link
                                 to={'/admin'}
@@ -152,13 +131,6 @@ export default function AdminNavbar() {
                             <Link
                                 to={'/content/video/create'}
                                 className='w-full text-zinc-800'>
-                                Forms
-                            </Link>
-                        </Button>
-                        <Button className='w-full'>
-                            <Link
-                                to={'/content/video/create'}
-                                className='w-full text-zinc-800'>
                                 Wallets
                             </Link>
                         </Button>
@@ -176,13 +148,43 @@ export default function AdminNavbar() {
                                 Reports
                             </Link>
                         </Button>
+                        <hr />
+                        <Button className='w-full'>
+                            <Link
+                                to={'/admin/institute/settings'}
+                                className='w-full text-zinc-800'>
+                                Institute Settings
+                            </Link>
+                        </Button>
                         <Button className='w-full'>
                             <Link
                                 to={'/admin/settings'}
                                 className='w-full text-zinc-800'>
-                                Settings
+                                User Settings
                             </Link>
                         </Button>
+                        <hr />
+                        {user ? (
+                            <>
+                                <h2 className='text-sm text-center'>
+                                    Logged in as {user?.name}
+                                </h2>
+                                <Button
+                                    type='error'
+                                    onClick={() => {
+                                        setUser(null);
+                                        navigate('/auth');
+                                    }}>
+                                    Logout
+                                </Button>
+                            </>
+                        ) : (
+                            <Link to={'/auth'} className='w-full'>
+                                <Button type='primary' width='100%'>
+                                    Login
+                                </Button>
+                            </Link>
+                        )}
                     </div>
                 </Drawer.Content>
             </Drawer>

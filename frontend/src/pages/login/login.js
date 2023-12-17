@@ -72,7 +72,7 @@ export default function Login({ switchForm }) {
                         navigate('/teacher');
                         break;
                     case 'INSTITUTE_OWNER':
-                        navigate('/admin');
+                        navigate('/institute');
                         break;
                     case 'STUDENT':
                         // if (planId === 0) {

@@ -9,6 +9,7 @@ import reportWebVitals from './reportWebVitals';
 import { AdminRoutes } from './routes/AdminRoutes';
 import { AuthRoutes } from './routes/AuthRoutes';
 import { GeneralRoutes } from './routes/GeneralRoutes';
+import { InstituteRoutes } from './routes/InstituteRoutes';
 import { StudentRoutes } from './routes/StudentRoutes';
 import { TeacherRoutes } from './routes/TeacherRoutes';
 
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
     ...GeneralRoutes,
     ...AuthRoutes,
     ...AdminRoutes,
+    ...InstituteRoutes,
     ...StudentRoutes,
     ...TeacherRoutes,
 ]);
