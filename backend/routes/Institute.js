@@ -10,6 +10,7 @@ const { Institute } = require('../models/sql/Institute');
 const { validate_email } = require('../utils/validate_email');
 const { sequelize } = require('../init.sequelize');
 const { Op } = require('sequelize');
+const { UserInstitute } = require('../models/sql/UserInstitute');
 
 const router = express.Router();
 
@@ -395,6 +396,79 @@ router.delete('/delete-by-id', async (req, res) => {
     } catch (error) {
         await t.rollback();
 
+        console.error(error);
+        return res
+            .status(HTTP_INTERNAL_SERVER_ERROR)
+            .json({ error: 'Internal server error' });
+    }
+});
+
+// For owners of institutes
+router.post('/get-all-by-userid', async (req, res) => {
+    const { user_id } = req.body;
+    if (!user_id) {
+        return res
+            .status(HTTP_BAD_REQUEST)
+            .json({ error: 'Missing required fields' });
+    }
+
+    const t = await sequelize.transaction();
+    try {
+        const ui = await UserInstitute.findAll(
+            {
+                where: { user_id },
+                include: [
+                    {
+                        model: Institute,
+                    },
+                ],
+            },
+            { transaction: t }
+        );
+
+        await t.commit();
+        return res
+            .status(HTTP_OK)
+            .json({ institutes: ui.map((i) => i.institute) });
+    } catch (error) {
+        await t.rollback();
+        console.error(error);
+        return res
+            .status(HTTP_INTERNAL_SERVER_ERROR)
+            .json({ error: 'Internal server error' });
+    }
+});
+
+// For users
+router.post('/get-by-userid', async (req, res) => {
+    const { user_id } = req.body;
+    if (!user_id) {
+        return res
+            .status(HTTP_BAD_REQUEST)
+            .json({ error: 'Missing required fields' });
+    }
+
+    const t = await sequelize.transaction();
+    try {
+        const ui = await UserInstitute.findOne(
+            {
+                where: { user_id },
+                include: [
+                    {
+                        model: Institute,
+                        attributes: ['institute_id', 'name', 'email', 'phone'],
+                    },
+                ],
+            },
+            { transaction: t }
+        );
+
+        await t.commit();
+        return res
+            .status(HTTP_OK)
+            .json({ institute: ui.institute ? ui.institute : null });
+    } catch (error) {
+        await t.rollback();
         console.error(error);
         return res
             .status(HTTP_INTERNAL_SERVER_ERROR)

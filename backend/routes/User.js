@@ -24,10 +24,7 @@ router.post('/get-by-id', async (req, res) => {
 
     try {
         const user = await User.findByPk(user_id, {
-            include: [
-                { model: Institute, attributes: ['name'] },
-                { model: Role, attributes: ['name'] },
-            ],
+            include: [{ model: Role, attributes: ['name'] }],
         });
 
         if (!user) {
@@ -63,10 +60,7 @@ router.post('/get-by-username', async (req, res) => {
             where: {
                 username: username,
             },
-            include: [
-                { model: Institute, attributes: ['name'] },
-                { model: Role, attributes: ['name'] },
-            ],
+            include: [{ model: Role, attributes: ['name'] }],
         });
 
         if (!user) {
@@ -100,10 +94,7 @@ router.post('/get-by-email', async (req, res) => {
     try {
         const user = await User.findOne({
             where: { email: email },
-            include: [
-                { model: Institute, attributes: ['name'] },
-                { model: Role, attributes: ['name'] },
-            ],
+            include: [{ model: Role, attributes: ['name'] }],
         });
 
         if (!user) {
@@ -137,10 +128,7 @@ router.post('/get-by-phone', async (req, res) => {
     try {
         const user = await User.findOne({
             where: { phone: phone },
-            include: [
-                { model: Institute, attributes: ['name'] },
-                { model: Role, attributes: ['name'] },
-            ],
+            include: [{ model: Role, attributes: ['name'] }],
         });
 
         if (!user) {
@@ -222,7 +210,7 @@ router.post('/get-by-planid', async (req, res) => {
 router.post('/update-profile', async (req, res) => {
     const { user_id, name, email, phone } = req.body;
 
-    if (!user_id || !name || !email || !phone) {
+    if (!user_id) {
         return res
             .status(HTTP_BAD_REQUEST)
             .json({ error: 'Missing required fields' });
@@ -243,10 +231,7 @@ router.post('/update-profile', async (req, res) => {
         }
 
         const user = await User.findByPk(user_id, {
-            include: [
-                { model: Institute, attributes: ['name'] },
-                { model: Role, attributes: ['name'] },
-            ],
+            include: [{ model: Role, attributes: ['name'] }],
         });
 
         if (!user) {

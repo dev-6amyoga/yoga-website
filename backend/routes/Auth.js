@@ -16,6 +16,7 @@ const { Plan } = require('../models/sql/Plan');
 const { sequelize } = require('../init.sequelize');
 const { timeout } = require('../utils/promise_timeout');
 const { validate_email } = require('../utils/validate_email');
+const { UserInstitute } = require('../models/sql/UserInstitute');
 
 router.post('/verify-google', async (req, res) => {
     const { client_id, jwtToken } = req.body;
@@ -41,10 +42,7 @@ router.post('/login', async (req, res) => {
     const user = await UserSQL.findOne({
         where: { username: username },
         attributes: ['user_id', 'name', 'username', 'email', 'password'],
-        include: [
-            { model: Institute, attributes: ['name'] },
-            { model: Role, attributes: ['name'] },
-        ],
+        include: [{ model: Role, attributes: ['name'] }],
     });
 
     if (!user)
@@ -74,6 +72,9 @@ router.post('/register', async (req, res) => {
         is_google_login,
     } = req.body;
     // validate inputs
+
+    // console.log(req.body);
+
     if (
         !username ||
         !password ||
@@ -110,6 +111,7 @@ router.post('/register', async (req, res) => {
         },
         attributes: ['user_id', 'name', 'username', 'email'],
     });
+
     if (user && user.username === username)
         return res
             .status(HTTP_BAD_REQUEST)
@@ -129,10 +131,11 @@ router.post('/register', async (req, res) => {
     try {
         // find insitite by name
         let institute = null;
-
+        console.log({ institute_name });
         if (
-            institute_name !== '' ||
-            institute_name !== null ||
+            institute_name.length > 0 &&
+            institute_name !== '' &&
+            institute_name !== null &&
             institute_name !== undefined
         ) {
             institute = await Institute.findOne(
@@ -143,7 +146,9 @@ router.post('/register', async (req, res) => {
                 { transaction: t }
             );
 
-            if (!institute) throw new Error("Institute doesn't exist");
+            console.log({ institute });
+
+            if (institute === null) throw new Error("Institute doesn't exist");
         }
 
         // find role by name
@@ -164,12 +169,24 @@ router.post('/register', async (req, res) => {
                 password: hashedPassword,
                 name,
                 email,
-                institute_id: institute ? institute.institute_id : null,
                 role_id: role.role_id,
                 is_google_login,
             },
             { transaction: t }
         );
+
+        // console.log(newUser.toJSON());
+
+        // create user_institute
+
+        const user_institute = await UserInstitute.create(
+            {
+                user_id: newUser.user_id,
+                institute_id: institute ? institute.institute_id : null,
+            },
+            { transaction: t }
+        );
+
         await timeout(t.commit(), 5000, new Error('timeout; try again'));
 
         res.status(HTTP_OK).json({ user: newUser });
@@ -182,7 +199,7 @@ router.post('/register', async (req, res) => {
             case "Role doesn't exist":
                 return res
                     .status(HTTP_BAD_REQUEST)
-                    .json({ error: "Role doesn't exist" });
+                    .json({ error: error.message });
             default:
                 return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
                     error: error.message,

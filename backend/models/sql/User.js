@@ -11,6 +11,7 @@ const User = sequelize.define(
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
+            autoIncrementIdentity: true,
         },
         username: {
             type: DataTypes.STRING,
@@ -44,7 +45,7 @@ const User = sequelize.define(
     { ...options }
 );
 
-User.belongsTo(Institute, { foreignKey: 'institute_id', onDelete: 'CASCADE' });
+// User.belongsTo(Institute, { foreignKey: 'institute_id', onDelete: 'CASCADE' });
 User.belongsTo(Role, { foreignKey: 'role_id' });
 
 module.exports = { User };
