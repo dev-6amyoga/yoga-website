@@ -148,7 +148,8 @@ export default function Register({ switchForm }) {
     const user = {
       name: formData?.name,
       username: formData?.username,
-      email: formData?.user_email,
+      email_id: formData?.user_email,
+      phone_no: formData?.phone,
       password: formData?.password,
       confirm_password: formData?.confirm_password,
       role_name: "INSTITUTE_OWNER",

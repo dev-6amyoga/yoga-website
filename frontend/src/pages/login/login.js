@@ -103,7 +103,7 @@ export default function Login({ switchForm }) {
         break;
       case "STUDENT":
         console.log(userPlan);
-        if (userPlan === null) {
+        if (userPlan === null || userPlan.plan_id === 0) {
           navigate("/student/free-videos");
         } else {
           navigate("/student/playlist-view");
