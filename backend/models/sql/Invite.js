@@ -1,6 +1,7 @@
 const { sequelize } = require('../../init.sequelize');
 const { DataTypes } = require('sequelize');
 const { options } = require('./defaultOptions');
+const { User } = require('./User');
 
 const Invite = sequelize.define(
     'invite',
@@ -34,5 +35,7 @@ const Invite = sequelize.define(
     },
     { ...options }
 );
+
+Invite.hasOne(User, { foreignKey: 'user_id' }, { onDelete: 'cascade' });
 
 module.exports = { Invite };
