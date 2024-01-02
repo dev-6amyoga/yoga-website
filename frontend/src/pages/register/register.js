@@ -3,9 +3,9 @@ import { Tabs } from '@geist-ui/core';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import InstituteRegisterForm from '../../components/Auth/InstituteRegisterForm';
-import LoginGoogle from '../../components/Auth/LoginGoogle';
-import StudentRegisterForm from '../../components/Auth/StudentRegisterForm';
+import InstituteRegisterForm from '../../components/auth/InstituteRegisterForm';
+import LoginGoogle from '../../components/auth/LoginGoogle';
+import StudentRegisterForm from '../../components/auth/StudentRegisterForm';
 import { Fetch } from '../../utils/Fetch';
 import {
     validateEmail,

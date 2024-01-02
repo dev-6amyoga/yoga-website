@@ -115,7 +115,13 @@ export default function StudentNavbar() {
                         <Button>About Us</Button>
                         <Button>Contact Us</Button>
                         <hr />
-                        <Button icon={<User />} type='success' ghost>
+                        <Button
+                            icon={<User />}
+                            type='success'
+                            ghost
+                            onClick={() => {
+                                navigate('/student/profile');
+                            }}>
                             {user.name.split(' ')[0]}
                         </Button>
                         <Button
