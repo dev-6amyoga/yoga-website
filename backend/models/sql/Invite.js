@@ -36,6 +36,10 @@ const Invite = sequelize.define(
     { ...options }
 );
 
-Invite.hasOne(User, { foreignKey: 'user_id' }, { onDelete: 'cascade' });
+Invite.belongsTo(
+    User,
+    { foreignKey: 'inviter_user_id' },
+    { onDelete: 'cascade' }
+);
 
 module.exports = { Invite };
