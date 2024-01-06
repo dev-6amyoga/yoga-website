@@ -486,4 +486,81 @@ router.post('/update-userdetails', async (req, res) => {
     }
 });
 
+router.post('/retract', async (req, res) => {
+    const { invite_id, invite_token } = req.body;
+
+    if (!invite_token || !invite_id) {
+        return res.status(HTTP_BAD_REQUEST).json({
+            message: 'Missing required fields',
+        });
+    }
+
+    const t = await sequelize.transaction();
+
+    try {
+        const invite = await Invite.findOne({
+            where: { invite_id, token: invite_token },
+            transaction: t,
+        });
+
+        if (!invite) {
+            await t.rollback();
+            return res.status(HTTP_BAD_REQUEST).json({
+                message: 'Invalid invite id',
+            });
+        }
+
+        const n = await Invite.update(
+            { is_retracted: true },
+            {
+                where: { invite_id },
+                transaction: t,
+            }
+        );
+
+        if (n.length > 0 && n[0] !== 1) {
+            await t.rollback();
+            return res.status(HTTP_BAD_REQUEST).json({
+                message: 'Invalid invite id',
+            });
+        }
+
+        await t.commit();
+        return res.status(HTTP_OK).json({
+            message: 'Retracted successfully',
+        });
+    } catch (err) {
+        await t.rollback();
+        console.log(err);
+        return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+            message: 'Internal server error',
+        });
+    }
+});
+
+router.post('/get-all-by-inviterid', async (req, res) => {
+    const { inviter_user_id } = req.body;
+
+    if (!inviter_user_id) {
+        return res.status(HTTP_BAD_REQUEST).json({
+            message: 'Missing required fields',
+        });
+    }
+
+    try {
+        const invites = await Invite.findAll({
+            where: { inviter_user_id },
+        });
+
+        return res.status(HTTP_OK).json({
+            invites,
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+            message: 'Internal server error',
+        });
+    }
+});
+
 module.exports = router;
