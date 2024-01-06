@@ -202,6 +202,43 @@ export default function AddNewTeacher() {
         );
     };
 
+    const renderInviteStatus = (value, row, index) => {
+        return (
+            <>
+                {row.is_retracted ? (
+                    <Tag type='error'>Retracted</Tag>
+                ) : row.is_filled ? (
+                    <Tag type='success'>Registered</Tag>
+                ) : row.is_accepted ? (
+                    <Tag type='success'>Accepted</Tag>
+                ) : (
+                    <Tag type='warning'>Pending</Tag>
+                )}
+            </>
+        );
+    };
+
+    const renderExpiryStatus = (value, row, index) => {
+        const diff = (new Date(row.expiry_date).getTime() - Date.now()) / 1000;
+        return (
+            <>
+                <p>
+                    <span>
+                        {diff > 86400
+                            ? (diff / 86400).toFixed(2) + ' Days'
+                            : diff > 0
+                            ? (diff / 3600).toFixed(2) + ' Hours'
+                            : 'Expired'}
+                    </span>
+                    <br />
+                    <span className='text-sm text-zinc-400'>
+                        {new Date(row.expiry_date).toDateString()}
+                    </span>
+                </p>
+            </>
+        );
+    };
+
     return (
         <InstitutePageWrapper heading='Teacher Invite Management'>
             <div className='card-base'>
@@ -256,55 +293,12 @@ export default function AddNewTeacher() {
                     <Table.Column
                         prop='status'
                         label='Status'
-                        render={(value, row, index) => {
-                            return (
-                                <>
-                                    {row.is_retracted ? (
-                                        <Tag type='error'>Retracted</Tag>
-                                    ) : row.is_filled ? (
-                                        <Tag type='success'>Registered</Tag>
-                                    ) : row.is_accepted ? (
-                                        <Tag type='success'>Accepted</Tag>
-                                    ) : (
-                                        <Tag type='warning'>Pending</Tag>
-                                    )}
-                                </>
-                            );
-                        }}
+                        render={renderInviteStatus}
                     />
-                    <Table.Column
-                        label='Expiry'
-                        render={(value, row, index) => {
-                            const diff =
-                                (new Date(row.expiry_date).getTime() -
-                                    Date.now()) /
-                                1000;
-                            return (
-                                <>
-                                    <p>
-                                        <span>
-                                            {diff > 86400
-                                                ? (diff / 86400).toFixed(2) +
-                                                  ' Days'
-                                                : diff > 0
-                                                ? (diff / 3600).toFixed(2) +
-                                                  ' Hours'
-                                                : 'Expired'}
-                                        </span>
-                                        <br />
-                                        <span className='text-sm text-zinc-400'>
-                                            {new Date(
-                                                row.expiry_date
-                                            ).toDateString()}
-                                        </span>
-                                    </p>
-                                </>
-                            );
-                        }}
-                    />
+                    <Table.Column label='Expiry' render={renderExpiryStatus} />
                     <Table.Column
                         label='Actions'
-                        render={(value, row, index) => {
+                        render={(_, row, index) => {
                             return <InviteActions row={row} key={index} />;
                         }}
                     />
