@@ -1,7 +1,8 @@
 import usePlaylistStore from "../../store/PlaylistStore";
 import data from "../../data/asanas.json";
 import { useState, useEffect } from "react";
-import { Button } from "@geist-ui/core";
+import { Button, Divider } from "@geist-ui/core";
+import useUserStore from "../../store/UserStore";
 
 function PlaylistItem({ playlist, add }) {
   return (
@@ -21,17 +22,30 @@ function PlaylistItem({ playlist, add }) {
 
 function Playlist() {
   const [playlists, setPlaylists] = useState([]);
+  const [userPlaylists, setUserPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
+  let user = useUserStore((state) => state.user);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log(user.user_id);
         const response = await fetch(
           "http://localhost:4000/content/playlists/getAllPlaylists"
         );
         const data = await response.json();
+        console.log(data);
         setPlaylists(data);
         setLoading(false);
+        try {
+          const response1 = await fetch(
+            `http://localhost:4000/user-playlists/getAllUserPlaylists/${user.user_id}`
+          );
+          const data1 = await response1.json();
+          setUserPlaylists(data1);
+        } catch (error) {
+          console.log(error);
+        }
       } catch (error) {
         setLoading(false);
         console.log(error);
@@ -54,10 +68,8 @@ function Playlist() {
   };
 
   const handleAddToQueue = (asana_ids) => {
-    // get all asana details from asana_ids
     getAllAsanas(asana_ids)
       .then((asanas) => {
-        // clearQueue();
         addToQueue(asanas);
       })
       .catch((err) => console.log(err));
@@ -70,7 +82,26 @@ function Playlist() {
 
   return (
     <div className="rounded-xl">
-      <h3>Playlists</h3>
+      <h4>My Playlists</h4>
+      <p className="pb-4 text-sm">Choose from your playlists to practice.</p>
+      <div className="flex flex-row gap-2">
+        {userPlaylists.map((playlist) => (
+          <PlaylistItem
+            key={playlist.playlist_name}
+            type={
+              queue
+                ? queue.includes(playlist)
+                  ? "success"
+                  : "secondary"
+                : "secondary"
+            }
+            add={() => handleAddToQueue(playlist.asana_ids)}
+            playlist={playlist}
+          />
+        ))}
+      </div>
+      <Divider />
+      <h4>6AM Yoga Playlists</h4>
       <p className="pb-4 text-sm">
         Choose from a variety of playlists to practice.
       </p>

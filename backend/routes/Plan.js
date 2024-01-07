@@ -129,4 +129,94 @@ router.post("/register", async (req, res) => {
   }
 });
 
+router.put("/update-plan/:plan_id", async (req, res) => {
+  const { plan_id } = req.params;
+  const {
+    name,
+    has_basic_playlist,
+    playlist_creation_limit,
+    number_of_teachers,
+    has_self_audio_upload,
+    has_playlist_creation,
+    plan_user_type,
+    plan_validity,
+  } = req.body;
+
+  // Validate inputs
+  if (!plan_id || !name || !plan_user_type) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Missing required fields" });
+  }
+
+  const existingPlan = await Plan.findOne({
+    where: {
+      plan_id: plan_id,
+    },
+  });
+
+  if (!existingPlan) {
+    return res.status(HTTP_BAD_REQUEST).json({ error: "Plan does not exist" });
+  }
+
+  // Update plan properties
+  existingPlan.name = name;
+  existingPlan.has_basic_playlist = has_basic_playlist;
+  existingPlan.playlist_creation_limit = playlist_creation_limit;
+  existingPlan.number_of_teachers = number_of_teachers;
+  existingPlan.has_self_audio_upload = has_self_audio_upload;
+  existingPlan.has_playlist_creation = has_playlist_creation;
+  existingPlan.plan_user_type = plan_user_type;
+  existingPlan.plan_validity = plan_validity;
+
+  // Save the changes to the database
+  const t = await sequelize.transaction();
+  try {
+    await existingPlan.save({ transaction: t });
+    await timeout(t.commit(), 5000, new Error("timeout; try again"));
+
+    res.status(HTTP_OK).json({ plan: existingPlan });
+  } catch (error) {
+    console.error(error);
+    await t.rollback();
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: error.message,
+    });
+  }
+});
+
+router.delete("/deletePlan/:plan_id", async (req, res) => {
+  const { plan_id } = req.params;
+
+  if (!plan_id) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Missing required fields" });
+  }
+
+  const existingPlan = await Plan.findOne({
+    where: {
+      plan_id: plan_id,
+    },
+  });
+
+  if (!existingPlan) {
+    return res.status(HTTP_BAD_REQUEST).json({ error: "Plan does not exist" });
+  }
+
+  // Delete the plan from the database
+  const t = await sequelize.transaction();
+  try {
+    await existingPlan.destroy({ transaction: t });
+    await timeout(t.commit(), 5000, new Error("timeout; try again"));
+
+    res.status(HTTP_OK).json({ message: "Plan deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    await t.rollback();
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: error.message,
+    });
+  }
+});
 module.exports = router;

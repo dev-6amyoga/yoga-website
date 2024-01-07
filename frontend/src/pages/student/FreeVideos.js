@@ -6,6 +6,7 @@ import { Note } from "@geist-ui/core";
 // import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // import { useNavigate } from "react-router-dom";
+import VideoPlayerWrapper from "../../components/Video/VideoPlayerWrapper";
 
 export default function FreeVideos() {
   const [planId, setPlanId] = useState(0);
@@ -41,8 +42,6 @@ export default function FreeVideos() {
       <div>
         <StudentNavbar />
       </div>
-      <br />
-      <br />
       <div className="px-20">
         {planId === 0 && (
           <Note type="error" label="Note" filled width={100}>
@@ -50,13 +49,13 @@ export default function FreeVideos() {
           </Note>
         )}
       </div>
-      {/* <div>Plans for : {user.name}!</div> */}
-      <div className="flex flex-col items-center justify-center py-20">
-        Free Videos!
+      <div className="flex-col justify-center">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-7 gap-4 my-10">
+            <VideoPlayerWrapper />
+          </div>
+        </div>
       </div>
-      {/* <div>
-        <ToastContainer />
-      </div> */}
     </div>
   );
 }

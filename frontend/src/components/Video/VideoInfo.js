@@ -46,9 +46,7 @@ export default function VideoInfo() {
           <p>{queue[0].asana_desc}</p>
         </div>
       ) : (
-        <>
-          <h3>Pick a playlist to play </h3>
-        </>
+        <></>
       )}
     </div>
   );

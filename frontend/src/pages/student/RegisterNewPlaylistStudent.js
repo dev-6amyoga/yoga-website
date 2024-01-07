@@ -67,6 +67,7 @@ export default function RegisterNewPlaylistStudent() {
                 }
               );
               if (response.ok) {
+                console.log(currentCount);
                 setCurrentCount((prevCount) => prevCount + 1);
               } else {
                 notify("Error updating asana:", response.status);
@@ -163,6 +164,7 @@ export default function RegisterNewPlaylistStudent() {
                     "http://localhost:4000/user-playlist-count/getAllUserPlaylistCounts"
                   );
                   const data3 = await response3.json();
+                  console.log(data3);
                   const isUserPresent = data3.some(
                     (record) => record.user_id === user_id
                   );

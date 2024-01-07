@@ -2,10 +2,13 @@ const express = require("express");
 const router = express.Router();
 const PlaylistUser = require("../models/mongo/PlaylistUser");
 
-router.get("/getAllUserPlaylists", async (req, res) => {
+router.get("/getAllUserPlaylists/:user_id", async (req, res) => {
   try {
-    const userPlaylists = await PlaylistUser.find();
-    console.log("HI", userPlaylists);
+    const user_id = Number(req.params["user_id"]);
+    const userPlaylists = await PlaylistUser.find({
+      playlist_user_id: user_id,
+    });
+    // PlaylistUser.findOne({});
     res.json(userPlaylists);
   } catch (error) {
     console.error(error);

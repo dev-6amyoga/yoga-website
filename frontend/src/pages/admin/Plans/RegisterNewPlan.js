@@ -87,6 +87,7 @@ export default function RegisterNewPlan() {
           >
             Allow Playlist Creation
           </Checkbox>
+
           <Text h5>Institute Playlist Count:</Text>
           <Input width="100%" id="institute_playlist_count"></Input>
           <br />
