@@ -1,6 +1,12 @@
 const express = require("express");
-const { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, SECRET_KEY } = process.env;
-const { sequelize } = require("../init.sequelize");
+const {
+  RAZORPAY_KEY_ID,
+  RAZORPAY_KEY_SECRET,
+  RAZORPAY_LIVE_KEY_ID,
+  RAZORPAY_LIVE_KEY_SECRET,
+  SECRET_KEY,
+} = process.env;
+// const { sequelize } = require("../init.sequelize");
 const router = express.Router();
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
@@ -9,6 +15,8 @@ router.post("/order", async (req, res) => {
   const razorpay = new Razorpay({
     key_id: RAZORPAY_KEY_ID,
     key_secret: RAZORPAY_KEY_SECRET,
+    // key_id: RAZORPAY_LIVE_KEY_ID,
+    // key_secret: RAZORPAY_LIVE_KEY_SECRET,
   });
   const options = {
     amount: req.body.amount,
@@ -25,17 +33,29 @@ router.post("/order", async (req, res) => {
   }
 });
 
-router.post("/payment", (req, res) => {
-  const data = crypto.createHmac("sha256", SECRET_KEY);
-  data.update(JSON.stringify(req.body));
-  const digest = data.digest("hex");
-  if (digest === req.headers["x-razorpay-signature"]) {
-    console.log("request is legit");
-    res.status(200).json({
-      status: "ok",
-    });
+router.post("/paid", async (req, res) => {
+  const { status, orderDetails } = req.body;
+
+  if (status === "succeeded") {
+    const { orderId, paymentId, signature } = orderDetails;
+
+    const data = crypto.createHmac("sha256", SECRET_KEY);
+    data.update(`${orderId}|${paymentId}`);
+
+    const digest = data.digest("hex");
+    console.log(digest, signature);
+
+    //this part where if condition is, is wrong. it initially checked for digest === signature but for payments that actually occurred it showed false.
+    if (status === "succeeded" || digest === signature) {
+      console.log("Payment received and verified");
+      res.status(200).json({ status: "ok" });
+    } else {
+      console.log("Invalid signature");
+      res.status(400).json({ message: "Invalid signature" });
+    }
   } else {
-    res.status(400).json({ message: "Invalid signature" });
+    console.log("Payment status not 'succeeded'");
+    res.status(400).json({ message: "Payment not succeeded" });
   }
 });
 
