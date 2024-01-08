@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
-
+import RenderRazorpay from "./RenderRazorpay";
 import {
   Table,
   Grid,
@@ -72,7 +72,7 @@ function StudentPlan() {
     //   referral_code: referral_code,
     // };
     const userPlanData = {
-      amount: 1000,
+      amount: 100,
       currency: "INR",
     };
     try {
@@ -86,12 +86,14 @@ function StudentPlan() {
       if (response.ok) {
         const responseJson = await response.json();
         const razorpayOrder = responseJson.order;
-        setOrderDetails({
-          orderId: razorpayOrder["id"],
-          currency: razorpayOrder["currency"],
-          amount: razorpayOrder["amount"],
-        });
-        console.log(orderDetails);
+        if (razorpayOrder && razorpayOrder["id"]) {
+          setOrderDetails({
+            orderId: razorpayOrder["id"],
+            currency: razorpayOrder["currency"],
+            amount: razorpayOrder["amount"],
+          });
+          setDisplayRazorpay(true);
+        }
         notify("New User-Plan added successfully");
         setTimeout(() => {
           navigate("/student");
@@ -265,6 +267,15 @@ function StudentPlan() {
       <div>
         <ToastContainer />
       </div>
+      {displayRazorpay && (
+        <RenderRazorpay
+          amount={orderDetails.amount}
+          currency={orderDetails.currency}
+          orderId={orderDetails.orderId}
+          keyId={process.env.REACT_APP_RAZORPAY_KEY_ID}
+          keySecret={process.env.REACT_APP_RAZORPAY_KEY_SECRET}
+        />
+      )}
     </div>
   );
 }
