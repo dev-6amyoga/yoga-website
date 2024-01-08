@@ -6,6 +6,7 @@ import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
 import useUserStore from "../../store/UserStore";
 import getFormData from "../../utils/getFormData";
 import ChangePassword from "../../components/student/UserSettings/ChangePassword";
+
 export default function StudentProfile() {
   const user = useUserStore((state) => state.user);
   const navigate = useNavigate();

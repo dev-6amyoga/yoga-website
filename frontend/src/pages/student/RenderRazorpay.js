@@ -18,9 +18,18 @@ const loadScript = (src) =>
     document.body.appendChild(script);
   });
 
-const RenderRazorpay = ({ orderId, keyId, keySecret, currency, amount }) => {
+const RenderRazorpay = ({
+  orderId,
+  keyId,
+  keySecret,
+  currency,
+  amount,
+  setDisplayRazorpay,
+}) => {
+  // console.log(orderId, keyId, keySecret, currency, amount);
   const paymentId = useRef(null);
   const paymentMethod = useRef(null);
+
   const displayRazorpay = async (options) => {
     const res = await loadScript(
       "https://checkout.razorpay.com/v1/checkout.js"
@@ -40,12 +49,14 @@ const RenderRazorpay = ({ orderId, keyId, keySecret, currency, amount }) => {
   };
 
   const handlePayment = async (status, orderDetails = {}) => {
+    // console.log(status, orderDetails);
     const userPlanData = {
       status: status,
       orderDetails: orderDetails,
     };
+    console.log(userPlanData);
     try {
-      const response = await fetch("http://localhost:4000/payment/payment", {
+      const response = await fetch("http://localhost:4000/payment/paid", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -66,17 +77,41 @@ const RenderRazorpay = ({ orderId, keyId, keySecret, currency, amount }) => {
     key: keyId,
     amount,
     currency,
-    name: "6AM Yoga",
-    order_id: orderId, // order id from props
+    name: "6AM Yoga!!!",
+    order_id: orderId,
+    config: {
+      display: {
+        blocks: {
+          banks: {
+            name: "All payment methods",
+            instruments: [
+              {
+                method: "upi",
+              },
+              {
+                method: "card",
+              },
+              {
+                method: "wallet",
+              },
+              {
+                method: "netbanking",
+              },
+            ],
+          },
+        },
+        sequence: ["block.banks"],
+        preferences: {
+          show_default_blocks: false,
+        },
+      },
+    },
     handler: (response) => {
-      console.log("succeeded");
-      console.log(response);
       paymentId.current = response.razorpay_payment_id;
       const succeeded =
         crypto
           .HmacSHA256(`${orderId}|${response.razorpay_payment_id}`, keySecret)
           .toString() === response.razorpay_signature;
-
       if (succeeded) {
         handlePayment("succeeded", {
           orderId,
@@ -124,6 +159,7 @@ const RenderRazorpay = ({ orderId, keyId, keySecret, currency, amount }) => {
       color: "",
     },
   };
+
   useEffect(() => {
     console.log("in razorpay");
     displayRazorpay(options);

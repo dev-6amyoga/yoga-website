@@ -28,6 +28,7 @@ function StudentPlan() {
     currency: null,
     amount: null,
   });
+
   const today = new Date();
   const formattedDate = today.toISOString().split("T")[0];
 
@@ -95,6 +96,7 @@ function StudentPlan() {
           setDisplayRazorpay(true);
         }
         notify("New User-Plan added successfully");
+        // setDisplayRazorpay(false);
         setTimeout(() => {
           navigate("/student");
         }, 2000);
@@ -272,8 +274,11 @@ function StudentPlan() {
           amount={orderDetails.amount}
           currency={orderDetails.currency}
           orderId={orderDetails.orderId}
+          // keyId={process.env.REACT_APP_RAZORPAY_LIVE_KEY_ID}
+          // keySecret={process.env.REACT_APP_RAZORPAY_LIVE_KEY_SECRET}
           keyId={process.env.REACT_APP_RAZORPAY_KEY_ID}
           keySecret={process.env.REACT_APP_RAZORPAY_KEY_SECRET}
+          setDisplayRazorpay={setDisplayRazorpay}
         />
       )}
     </div>
