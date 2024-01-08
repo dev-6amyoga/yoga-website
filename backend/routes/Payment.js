@@ -25,7 +25,7 @@ router.post("/order", async (req, res) => {
   }
 });
 
-router.post("/paymentCapture", (req, res) => {
+router.post("/payment", (req, res) => {
   const data = crypto.createHmac("sha256", SECRET_KEY);
   data.update(JSON.stringify(req.body));
   const digest = data.digest("hex");
