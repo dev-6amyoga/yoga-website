@@ -1,8 +1,8 @@
-import axios from 'axios';
+import axios from "axios";
 
 export const Fetch = ({
     url = null,
-    method = 'GET',
+    method = "GET",
     token = null,
     data = null,
     params = {},
@@ -11,19 +11,18 @@ export const Fetch = ({
     let h = { ...headers };
 
     if (token) {
-        h['Authorization'] = `Bearer ${token}`;
+        h["Authorization"] = `Bearer ${token}`;
     }
 
     if (data) {
-        h['Content-Type'] = 'application/json';
+        h["Content-Type"] = "application/json";
     }
 
-    switch (method) {
-        case 'GET':
-            return axios.get(url, { params: params, headers: h });
-        default:
-            return axios.post(url, data, {
-                headers: h,
-            });
-    }
+    return axios.request({
+        method: method,
+        headers: h,
+        url: url,
+        data: data,
+        params: params,
+    });
 };
