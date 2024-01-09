@@ -1,10 +1,10 @@
-const { sequelize } = require('../../init.sequelize');
-const { DataTypes } = require('sequelize');
-const { options } = require('./defaultOptions');
-const { User } = require('./User');
+const { sequelize } = require("../../init.sequelize");
+const { DataTypes } = require("sequelize");
+const { options } = require("./defaultOptions");
+const { User } = require("./User");
 
 const Transaction = sequelize.define(
-    'transaction',
+    "transaction",
     {
         transaction_id: {
             type: DataTypes.INTEGER,
@@ -31,11 +31,15 @@ const Transaction = sequelize.define(
             type: DataTypes.DATE,
             allowNull: false,
         },
-        transaction_response_code: {
+        transaction_order_id: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        transaction_response_message: {
+        transaction_payment_id: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        transaction_signature: {
             type: DataTypes.STRING,
             allowNull: false,
         },
@@ -43,6 +47,6 @@ const Transaction = sequelize.define(
     { ...options }
 );
 
-Transaction.belongsTo(User, { foreignKey: 'user_id', onDelete: 'CASCADE' });
+Transaction.belongsTo(User, { foreignKey: "user_id", onDelete: "CASCADE" });
 
 module.exports = { Transaction };
