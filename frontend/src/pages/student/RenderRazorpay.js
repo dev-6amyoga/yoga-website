@@ -65,6 +65,7 @@ const RenderRazorpay = ({
       });
       if (response.ok) {
         console.log("yay");
+        // setDisplayRazorpay(false);
       } else {
         console.log("error");
       }

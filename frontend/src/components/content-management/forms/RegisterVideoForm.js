@@ -9,8 +9,31 @@ export default function RegisterVideoForm() {
   const navigate = useNavigate();
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [asana_category, setAsanaCategory] = useState("");
+  const [asana_type, setAsanaType] = useState("");
+  const [asana_difficulty, setAsanaDifficulty] = useState("");
+  const [counter, setCounter] = useState("");
+  const [muted, setMuted] = useState("");
+  const [message_difficulty, setMessage_difficulty] = useState("");
+
+  const mutedHandler = (val) => {
+    setMuted(val);
+  };
+  const counterHandler = (val) => {
+    setCounter(val);
+  };
+
+  const handleMessage_difficultyChange = (x) => {
+    setMessage_difficulty(x);
+  };
+
   const handler4 = (val) => {
     setAsanaCategory(val);
+  };
+  const handler_type = (val) => {
+    setAsanaType(val);
+  };
+  const handler_difficulty = (val) => {
+    setAsanaDifficulty(val);
   };
   const [message1] = useState(
     "Do you want to proceed with the following updates?"
@@ -38,6 +61,11 @@ export default function RegisterVideoForm() {
   const [message7, setMessage7] = useState("");
   const handleMessage7Change = (x) => {
     setMessage7(x);
+  };
+
+  const [message_type, setMessage_type] = useState("");
+  const handleMessage_typeChange = (x) => {
+    setMessage_type(x);
   };
 
   const [message_lang, setMessage_lang] = useState("");
@@ -75,12 +103,12 @@ export default function RegisterVideoForm() {
 
   const handleYesLanguage = async () => {
     updateNeededLanguage = true;
-    console.log("FROM POP UP ", updateNeededLanguage);
     handleClosePopUp1();
     const asanaName = document.querySelector("#asana_name").value;
     const description = document.querySelector("#asana_description").value;
     const category = document.querySelector("#asana_category").value;
     const language = selectedLanguage;
+    const asana_type = document.querySelector("#asana_type").value;
     const videoURL = document.querySelector("#asana_url").value;
     const newAsana = {
       asana_name: asanaName,
@@ -90,6 +118,7 @@ export default function RegisterVideoForm() {
       asana_videoID: videoURL,
       asana_withAudio: withAudio,
       asana_audioLag: 0,
+      asana_type: asana_type,
       asana_imageID: "",
     };
     try {
@@ -115,7 +144,6 @@ export default function RegisterVideoForm() {
   };
   const handleNoLanguage = () => {
     updateNeededLanguage = false;
-    console.log("FROM POP UP ", updateNeededLanguage);
     handleClosePopUp1();
     handleOpenPopUp();
   };
@@ -137,7 +165,6 @@ export default function RegisterVideoForm() {
   }, []);
 
   const [tableLanguages, setTableLanguages] = useState([]);
-  //http://localhost:4000/content/language/getAllLanguages
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -160,18 +187,30 @@ export default function RegisterVideoForm() {
     asanaName,
     description,
     category,
+    asana_type,
+    asana_difficulty,
     language,
     videoURL
   ) => {
     let { uniqueCount, totalCount } = { uniqueCount: 0, totalCount: 0 };
-    let { updateDesc, updateCat, updateLink, updateAudio, updateLanguage } = {
+    let {
+      updateDesc,
+      updateCat,
+      updateLink,
+      updateAudio,
+      updateLanguage,
+      updateType,
+      updateDifficulty,
+    } = {
       updateDesc: false,
       updateCat: false,
       updateLink: false,
       updateAudio: false,
       updateLanguage: false,
+      updateType: false,
+      updateDifficulty: false,
     };
-
+    console.log(asana_type, muted, counter);
     for (var sub_asana in data) {
       totalCount = totalCount + 1;
       if (data[sub_asana]["asana_name"] === asanaName) {
@@ -180,7 +219,11 @@ export default function RegisterVideoForm() {
           data[sub_asana]["asana_category"] === category &&
           data[sub_asana]["language"] === language &&
           data[sub_asana]["asana_videoID"] === videoURL &&
-          data[sub_asana]["asana_withAudio"] === withAudio
+          data[sub_asana]["asana_withAudio"] === withAudio &&
+          data[sub_asana]["asana_type"] === asana_type &&
+          data[sub_asana]["asana_difficulty"] === asana_difficulty &&
+          data[sub_asana]["muted"] === muted &&
+          data[sub_asana]["counter"] === counter
         ) {
         } else {
           if (data[sub_asana]["asana_desc"] !== description) {
@@ -197,6 +240,12 @@ export default function RegisterVideoForm() {
           }
           if (data[sub_asana]["language"] !== language) {
             updateLanguage = true;
+          }
+          if (data[sub_asana]["asana_type"] !== asana_type) {
+            updateType = true;
+          }
+          if (data[sub_asana]["asana_difficulty"] !== asana_difficulty) {
+            updateDifficulty = true;
           }
         }
       } else {
@@ -215,6 +264,10 @@ export default function RegisterVideoForm() {
         asana_withAudio: withAudio,
         asana_audioLag: 0,
         asana_imageID: "",
+        asana_type: asana_type,
+        asana_difficulty: asana_difficulty,
+        muted: muted,
+        counter: counter,
       };
       try {
         const response = await fetch(
@@ -254,6 +307,14 @@ export default function RegisterVideoForm() {
             category
         );
       }
+      if (updateDifficulty === true) {
+        handleMessage_difficultyChange(
+          "Difficulty from : " +
+            data[sub_asana]["asana_difficulty"] +
+            " to : " +
+            asana_difficulty
+        );
+      }
       if (updateLink === true) {
         handleMessage5Change(
           "Asana URL from : " +
@@ -278,6 +339,14 @@ export default function RegisterVideoForm() {
             language
         );
       }
+      if (updateType === true) {
+        handleMessage_typeChange(
+          "Change Type from : " +
+            data[sub_asana]["asana_type"] +
+            " to : " +
+            asana_type
+        );
+      }
       if (updateLanguage) {
         handleMessage_langChange(
           "Do you wish to insert a new entry in the table for the same asana with a different language?"
@@ -296,15 +365,17 @@ export default function RegisterVideoForm() {
     const category = document.querySelector("#asana_category").value;
     const language = document.querySelector("#asana_language").value;
     const videoURL = document.querySelector("#asana_url").value;
+    const asana_type = document.querySelector("#asana_type").value;
     if (
       asanaName === "" ||
       description === "" ||
       category === "" ||
       videoURL === "" ||
       withAudio === "" ||
-      language === ""
+      language === "" ||
+      asana_type === ""
     ) {
-      alert("something is empty");
+      alert("A field is empty");
     } else {
       console.log("marker");
     }
@@ -317,7 +388,15 @@ export default function RegisterVideoForm() {
     const category = asana_category;
     const language = selectedLanguage;
     const videoURL = document.querySelector("#asana_url").value;
-    presentAlready(asanaName, description, category, language, videoURL);
+    presentAlready(
+      asanaName,
+      description,
+      category,
+      asana_type,
+      asana_difficulty,
+      language,
+      videoURL
+    );
   };
   const handler = (val) => {
     setSelectedLanguage(val);
@@ -351,6 +430,30 @@ export default function RegisterVideoForm() {
             <Select.Option value="Prone">Prone</Select.Option>
             <Select.Option value="Special">Special</Select.Option>
           </Select>
+
+          <Text h6>Type</Text>
+          <Select
+            value={asana_type}
+            placeholder="Single"
+            onChange={handler_type}
+            id="asana_type"
+          >
+            <Select.Option value="Single">Single</Select.Option>
+            <Select.Option value="Combination">Combination</Select.Option>
+          </Select>
+
+          <Text h6>Asana Difficulty</Text>
+          <Select
+            value={asana_difficulty}
+            placeholder="Beginner"
+            onChange={handler_difficulty}
+            id="asana_difficulty"
+          >
+            <Select.Option value="Beginner">Beginner</Select.Option>
+            <Select.Option value="Intermediate">Intermediate</Select.Option>
+            <Select.Option value="Advanced">Advanced</Select.Option>
+          </Select>
+
           <Input width="100%" id="asana_url">
             Video URL
           </Input>
@@ -383,6 +486,19 @@ export default function RegisterVideoForm() {
             <Radio value="true">Yes</Radio>
             <Radio value="false">No</Radio>
           </Radio.Group>
+
+          <Text>Muted?</Text>
+          <Radio.Group id="muted" value={muted} onChange={mutedHandler}>
+            <Radio value="true">Yes</Radio>
+            <Radio value="false">No</Radio>
+          </Radio.Group>
+
+          <Text>Counter?</Text>
+          <Radio.Group id="counter" value={counter} onChange={counterHandler}>
+            <Radio value="true">Yes</Radio>
+            <Radio value="false">No</Radio>
+          </Radio.Group>
+
           <Button onClick={markerNavigate}>Add Markers</Button>
           <Button htmlType="submit">Submit</Button>
           <PopUpDialog
@@ -397,6 +513,7 @@ export default function RegisterVideoForm() {
             message5={message5}
             message6={message6}
             message7={message7}
+            message8={message_type}
           />
           <PopUpDialog
             isOpen={isPopUp1Open}

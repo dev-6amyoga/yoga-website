@@ -23,16 +23,24 @@ export default function AllAsanas() {
     asana_videoID: "",
     language: "",
     asana_category: "",
+    asana_type: "",
+    asana_difficulty: "",
   });
 
   const [category_modal, setCategoryModal] = useState("");
   const [language_modal, setLanguageModal] = useState("");
+  const [type_modal, setTypeModal] = useState("");
   const handler1 = (val) => {
     setModalData({ ...modalData, asana_category: val });
   };
-
   const handler2 = (val) => {
     setModalData({ ...modalData, language: val });
+  };
+  const handler3 = (val) => {
+    setModalData({ ...modalData, asana_type: val });
+  };
+  const handler4 = (val) => {
+    setModalData({ ...modalData, asana_difficulty: val });
   };
 
   const handleInputChange = (e) => {
@@ -126,7 +134,6 @@ export default function AllAsanas() {
       }
     };
     const handleUpdate = async () => {
-      console.log("IN UPDATE!");
       setModalData(rowData);
       setModalState(true);
     };
@@ -172,8 +179,12 @@ export default function AllAsanas() {
             <Table.Column prop="asana_desc" label="Description" />
             <Table.Column prop="asana_category" label="Category" />
             <Table.Column prop="language" label="Language" />
+            <Table.Column prop="asana_type" label="Type" />
+            <Table.Column prop="asana_difficulty" label="Difficulty" />
             <Table.Column prop="asana_videoID" label="Video URL" />
             <Table.Column prop="asana_withAudio" label="With Audio?" />
+            <Table.Column prop="muted" label="  Muted?" />
+            <Table.Column prop="counter" label="Counter?" />
             <Table.Column
               prop="operation"
               label="ACTIONS"
@@ -223,6 +234,28 @@ export default function AllAsanas() {
                 <Select.Option value="Hindi">Hindi</Select.Option>
                 <Select.Option value="Malayalam">Malayalam</Select.Option>
               </Select>
+
+              <Text h6>Video Type</Text>
+              <Select
+                onChange={handler3}
+                id="asana_type"
+                value={modalData.asana_type}
+              >
+                <Select.Option value="Single">Single</Select.Option>
+                <Select.Option value="Combination">Combination</Select.Option>
+              </Select>
+
+              <Text h6>Asana Difficulty</Text>
+              <Select
+                onChange={handler4}
+                id="asana_difficulty"
+                value={modalData.asana_difficulty}
+              >
+                <Select.Option value="Beginner">Beginner</Select.Option>
+                <Select.Option value="Intermediate">Intermediate</Select.Option>
+                <Select.Option value="Advanced">Advanced</Select.Option>
+              </Select>
+
               <Text h6>Category</Text>
               <Select
                 onChange={handler1}
