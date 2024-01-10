@@ -9,7 +9,11 @@ const asanaSchema = new mongoose.Schema({
   asana_videoID: String,
   asana_withAudio: String,
   asana_audioLag: Number,
+  asana_type: String,
+  asana_difficulty: String,
   language: String,
+  muted: String,
+  counter: String,
 });
 
 const Asana = mongoose.model("Asana", asanaSchema, "asanas");

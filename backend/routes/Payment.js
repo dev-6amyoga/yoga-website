@@ -59,6 +59,12 @@ router.post("/paid", async (req, res) => {
   }
 });
 
+router.get("/pepe", async (req, res) => {
+  res.json({
+    message: "hello! from /payment/pepe",
+  });
+});
+
 router.post("/refund", async (req, res) => {
   try {
     const options = {
