@@ -10,7 +10,9 @@ import getFormData from "../../../utils/getFormData";
 
 export default function AddNewTeacher() {
   const user = useUserStore((state) => state.user);
+  console.log(user);
   const [invites, setInvites] = useState([]);
+  const [instituteID, setInstituteID] = useState(0);
   const [addLoading, setAddLoading] = useState(false);
   const [refreshLoading, setRefreshLoading] = useState(false);
 
@@ -35,6 +37,31 @@ export default function AddNewTeacher() {
         setRefreshLoading(false);
       });
   }, [user.user_id]);
+
+  const getInstituteID = useCallback(async () => {
+    setRefreshLoading(true);
+    Fetch({
+      url: "http://localhost:4000/user-institute/get-institute-by-user-id",
+      method: "POST",
+      data: {
+        user_id: user.user_id,
+      },
+    })
+      .then((res) => {
+        setInstituteID(res.data.user_institute.institute_id);
+        setRefreshLoading(false);
+      })
+      .catch((err) => {
+        toast(`Error : ${err?.response?.data?.message}`, {
+          type: "error",
+        });
+        setRefreshLoading(false);
+      });
+  }, [user.user_id]);
+
+  useEffect(() => {
+    getInstituteID();
+  }, [getInstituteID]);
 
   useEffect(() => {
     getInvites();
@@ -72,8 +99,6 @@ export default function AddNewTeacher() {
 
     formData.invite_type = "TEACHER";
     formData.user_id = user.user_id;
-
-    // console.log(formData);
 
     Fetch({
       url: "http://localhost:4000/invite/create",

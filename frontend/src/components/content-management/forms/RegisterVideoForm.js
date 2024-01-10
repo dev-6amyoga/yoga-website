@@ -356,7 +356,7 @@ export default function RegisterVideoForm() {
         handleOpenPopUp();
       }
     }
-    navigate("/admin");
+    navigate("/admin/allAsanas");
   };
 
   const markerNavigate = () => {
