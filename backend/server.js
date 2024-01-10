@@ -45,6 +45,7 @@ const userPlaylistRouter = require("./routes/PlaylistUser");
 const UserPlaylistCountRouter = require("./routes/UserPlaylistCount");
 const inviteRouter = require("./routes/Invite");
 const paymentRouter = require("./routes/Payment");
+const userInstituteRouter = require("./routes/UserInstitute");
 
 // DEV : sample data creation
 const { bulkCreateSampleData } = require("./sample_data");
@@ -90,6 +91,7 @@ app.use("/user-playlist-count", UserPlaylistCountRouter);
 app.use("/institute", instituteRouter);
 app.use("/invite", inviteRouter);
 app.use("/payment", paymentRouter);
+app.use("/user-institute", userInstituteRouter);
 
 const port = parseInt(process.env.SERVER_PORT);
 

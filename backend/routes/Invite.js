@@ -29,7 +29,6 @@ router.post("/get-by-id", async (req, res) => {
       message: "Missing required fields",
     });
   }
-
   try {
     const invite = await Invite.findOne({
       where: { invite_id },
@@ -151,6 +150,7 @@ router.post("/create", async (req, res) => {
       },
       transaction: t,
     });
+
     if (!created) {
       await t.rollback();
       return res.status(HTTP_BAD_REQUEST).json({
@@ -207,13 +207,11 @@ router.post("/create", async (req, res) => {
 
 router.post("/accept", async (req, res) => {
   const { invite_token, confirm_email } = req.body;
-
   if (!invite_token || !confirm_email) {
     return res.status(HTTP_BAD_REQUEST).json({
       message: "Missing required fields",
     });
   }
-
   const t = await sequelize.transaction();
   try {
     // get invite
@@ -227,7 +225,6 @@ router.post("/accept", async (req, res) => {
         message: "Invite not found",
       });
     }
-
     // check if email matches
     if (invite.email !== confirm_email) {
       await t.rollback();
@@ -235,7 +232,6 @@ router.post("/accept", async (req, res) => {
         message: "Invalid email",
       });
     }
-
     // check expiry
     if (invite.expiry_date < new Date()) {
       await t.rollback();
@@ -243,14 +239,12 @@ router.post("/accept", async (req, res) => {
         message: "Invite expired",
       });
     }
-
     if (invite.is_accepted === true && invite.is_filled === true) {
       await t.rollback();
       return res.status(HTTP_BAD_REQUEST).json({
         message: "Invite already accepted",
       });
     }
-
     // accept
     const n = await Invite.update(
       {
@@ -262,6 +256,33 @@ router.post("/accept", async (req, res) => {
         },
         transaction: t,
       }
+    );
+    const user1 = await User.findOne({
+      where: {
+        email: invite.email,
+      },
+    });
+    const userinstitute1 = await UserInstitute.findOne({
+      where: {
+        user_id: invite.inviter_user_id,
+      },
+    });
+
+    if (!user1 || !userinstitute1) {
+      await t.rollback();
+      return res.status(HTTP_BAD_REQUEST).json({
+        message: "User/Institute not found",
+      });
+    }
+    const user_id = user1.user_id;
+    const institute_id = userinstitute1.institute_id;
+
+    const newUserInstitute = await UserInstitute.create(
+      {
+        user_id: user_id,
+        institute_id: institute_id,
+      },
+      { transaction: t }
     );
 
     await t.commit();
@@ -369,8 +390,6 @@ router.post("/resend", async (req, res) => {
         message: "Invalid invite_id",
       });
     }
-
-    // resend mail
   } catch (err) {
     console.log(err);
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
@@ -480,81 +499,81 @@ router.post("/update-userdetails", async (req, res) => {
   }
 });
 
-router.post('/retract', async (req, res) => {
-    const { invite_id, invite_token } = req.body;
+router.post("/retract", async (req, res) => {
+  const { invite_id, invite_token } = req.body;
 
-    if (!invite_token || !invite_id) {
-        return res.status(HTTP_BAD_REQUEST).json({
-            message: 'Missing required fields',
-        });
+  if (!invite_token || !invite_id) {
+    return res.status(HTTP_BAD_REQUEST).json({
+      message: "Missing required fields",
+    });
+  }
+
+  const t = await sequelize.transaction();
+
+  try {
+    const invite = await Invite.findOne({
+      where: { invite_id, token: invite_token },
+      transaction: t,
+    });
+
+    if (!invite) {
+      await t.rollback();
+      return res.status(HTTP_BAD_REQUEST).json({
+        message: "Invalid invite id",
+      });
     }
 
-    const t = await sequelize.transaction();
+    const n = await Invite.update(
+      { is_retracted: true },
+      {
+        where: { invite_id },
+        transaction: t,
+      }
+    );
 
-    try {
-        const invite = await Invite.findOne({
-            where: { invite_id, token: invite_token },
-            transaction: t,
-        });
-
-        if (!invite) {
-            await t.rollback();
-            return res.status(HTTP_BAD_REQUEST).json({
-                message: 'Invalid invite id',
-            });
-        }
-
-        const n = await Invite.update(
-            { is_retracted: true },
-            {
-                where: { invite_id },
-                transaction: t,
-            }
-        );
-
-        if (n.length > 0 && n[0] !== 1) {
-            await t.rollback();
-            return res.status(HTTP_BAD_REQUEST).json({
-                message: 'Invalid invite id',
-            });
-        }
-
-        await t.commit();
-        return res.status(HTTP_OK).json({
-            message: 'Retracted successfully',
-        });
-    } catch (err) {
-        await t.rollback();
-        console.log(err);
-        return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            message: 'Internal server error',
-        });
+    if (n.length > 0 && n[0] !== 1) {
+      await t.rollback();
+      return res.status(HTTP_BAD_REQUEST).json({
+        message: "Invalid invite id",
+      });
     }
+
+    await t.commit();
+    return res.status(HTTP_OK).json({
+      message: "Retracted successfully",
+    });
+  } catch (err) {
+    await t.rollback();
+    console.log(err);
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
+  }
 });
 
-router.post('/get-all-by-inviterid', async (req, res) => {
-    const { inviter_user_id } = req.body;
+router.post("/get-all-by-inviterid", async (req, res) => {
+  const { inviter_user_id } = req.body;
 
-    if (!inviter_user_id) {
-        return res.status(HTTP_BAD_REQUEST).json({
-            message: 'Missing required fields',
-        });
-    }
+  if (!inviter_user_id) {
+    return res.status(HTTP_BAD_REQUEST).json({
+      message: "Missing required fields",
+    });
+  }
 
-    try {
-        const invites = await Invite.findAll({
-            where: { inviter_user_id },
-        });
+  try {
+    const invites = await Invite.findAll({
+      where: { inviter_user_id },
+    });
 
-        return res.status(HTTP_OK).json({
-            invites,
-        });
-    } catch (err) {
-        console.log(err);
-        return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            message: 'Internal server error',
-        });
-    }
+    return res.status(HTTP_OK).json({
+      invites,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
+  }
 });
 
 module.exports = router;
