@@ -60,10 +60,10 @@ export default function RegisterLanguageForm() {
           );
 
           if (response.ok) {
-            console.log("New Asana added successfully");
+            console.log("New Language added successfully");
             navigate("/admin/allLanguages");
           } else {
-            console.error("Failed to add new Asana");
+            console.error("Failed to add new Language");
           }
         } catch (error) {
           console.error("Error while making the request:", error);

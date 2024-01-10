@@ -1,19 +1,10 @@
-import React from "react";
-import Navbar_Admin from "../../components/Common/AdminNavbar/AdminNavbar";
-import "./AdminHome.css";
-import { useEffect, useState } from "react";
-import {
-  Button,
-  Grid,
-  Input,
-  Modal,
-  Select,
-  Table,
-  Text,
-  Checkbox,
-} from "@geist-ui/core";
+import { Button, Grid, Input, Modal, Table } from "@geist-ui/core";
+import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Navbar_Admin from "../../components/Common/AdminNavbar/AdminNavbar";
+import { Fetch } from "../../utils/Fetch";
+import "./AdminHome.css";
 
 export default function AdminHome() {
   // const navigate = useNavigate();
@@ -42,31 +33,32 @@ export default function AdminHome() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:4000/institute/get-all-institutes",
-          { headers: { "Cache-Control": "no-store" } }
-        );
-        console.log(response);
-        const data = await response.json();
-        setInstitutes(data["institutes"]);
+        const response = await Fetch({
+          url: "http://localhost:4000/institute/get-all-institutes",
+          method: "GET",
+        });
+        const data = response.data;
+        console.log("Fetched Data:", data);
+        const fetchedInstitutes = data;
+        console.log("Fetched Institutes:", fetchedInstitutes);
+        setInstitutes(fetchedInstitutes);
         setupdated(false);
+        const sortedData = [...fetchedInstitutes].sort((a, b) => {
+          if (sortOrder === "asc") {
+            return a.institute_id - b.institute_id;
+          } else {
+            return b.institute_id - a.institute_id;
+          }
+        });
+        console.log("Sorted Institutes:", sortedData);
+        setSortedInstitutes(sortedData);
       } catch (error) {
-        console.log(error);
+        console.error("Fetch Error:", error);
       }
     };
-    fetchData();
-  }, [updated]);
 
-  useEffect(() => {
-    const sortedData = [...institutes].sort((a, b) => {
-      if (sortOrder === "asc") {
-        return a.institute_id - b.institute_id;
-      } else {
-        return b.institute_id - a.institute_id;
-      }
-    });
-    setSortedInstitutes(sortedData);
-  }, [institutes, sortOrder, updated]);
+    fetchData();
+  }, [updated, sortOrder]);
 
   const renderAction = (value, rowData, index) => {
     const handleDelete = async () => {
@@ -120,17 +112,12 @@ export default function AdminHome() {
   const deleteInstitute = async () => {
     try {
       const institute_id = DelinstituteId; // Assuming you have the institute ID to delete
-      const response = await fetch(
-        `http://localhost:4000/institute/delete-by-id/${institute_id}`, // Adjust the endpoint
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await Fetch({
+        url: `http://localhost:4000/institute/delete-by-id/${institute_id}`, // Adjust the endpoint
+        method: "DELETE",
+      });
 
-      if (response.ok) {
+      if (response.status === 200) {
         console.log("Response from server:", response);
         setInstitutes((prev) =>
           prev.filter((institute) => institute.institute_id !== institute_id)
@@ -149,17 +136,12 @@ export default function AdminHome() {
     try {
       const institute_id = Number(modalData.institute_id);
       console.log(modalData);
-      const response = await fetch(
-        `http://localhost:4000/institute/update/${institute_id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(modalData),
-        }
-      );
-      if (response.ok) {
+      const response = await Fetch({
+        url: `http://localhost:4000/institute/update/${institute_id}`,
+        method: "POST",
+        data: modalData,
+      });
+      if (response.status === 200) {
         notify("Institute updated successfully");
         setupdated(true);
         setModalState(false);

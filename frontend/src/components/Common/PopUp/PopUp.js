@@ -13,6 +13,7 @@ function PopUpDialog({
   message5,
   message6,
   message7,
+  message8,
 }) {
   if (!isOpen) return null;
   return (
@@ -25,6 +26,7 @@ function PopUpDialog({
         <p>{message5}</p>
         <p>{message6}</p>
         <p>{message7}</p>
+        <p>{message8}</p>
         <p id="updatesInPopUp"></p>
         <button className="b_yes" onClick={onYes}>
           Yes
