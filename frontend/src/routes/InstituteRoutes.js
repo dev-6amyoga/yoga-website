@@ -3,6 +3,8 @@ import InstituteHome from "../pages/institute";
 import AddNewTeacher from "../pages/institute/settings/AddNewTeacher";
 import InstituteSettings from "../pages/institute/settings/InstituteSettings";
 import UserSettings from "../pages/institute/settings/UserSettings";
+import MemberManagement from "../pages/institute/settings/MemberManagement";
+import PurchaseAPlan from "../pages/institute/settings/PurchaseAPlan";
 export const InstituteRoutes = [
   {
     path: "/institute",
@@ -22,6 +24,10 @@ export const InstituteRoutes = [
   },
   {
     path: "institute/member-management",
-    element: <AddNewTeacher />,
+    element: <MemberManagement />,
+  },
+  {
+    path: "institute/purchase-a-plan",
+    element: <PurchaseAPlan />,
   },
 ];

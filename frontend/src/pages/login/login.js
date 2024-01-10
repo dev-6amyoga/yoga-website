@@ -39,7 +39,6 @@ export default function Login({ switchForm }) {
         .then(() => {})
         .catch(() => {})
         .finally(() => {
-          // console.log('finally?');
           fetchUserInstitutes()
             .then(() => {})
             .catch(() => {})
@@ -52,7 +51,6 @@ export default function Login({ switchForm }) {
   }, [user]);
 
   const fetchUserPlan = useCallback(async () => {
-    console.log("Fetching user plan for : ", user?.user_id, " ...");
     try {
       const response = await Fetch({
         url: "http://localhost:4000/user-plan/get-user-plan-by-id",
@@ -65,7 +63,6 @@ export default function Login({ switchForm }) {
       if (response.data["userPlan"]) {
         setUserPlan(response.data["userPlan"]);
       } else {
-        console.log("in here!");
         setUserPlan(null);
       }
     } catch (error) {
@@ -75,7 +72,6 @@ export default function Login({ switchForm }) {
   }, [user, setUserPlan]);
 
   const fetchUserInstitutes = useCallback(async () => {
-    // console.log('Fetching user institute for : ', user?.user_id, ' ...');
     try {
       const response = await Fetch({
         url: "http://localhost:4000/institute/get-all-by-userid",
@@ -86,7 +82,6 @@ export default function Login({ switchForm }) {
       });
 
       if (response.data["institutes"]) {
-        console.log(response.data["institutes"]);
         setInstitutes(response.data["institutes"]);
         if (
           response.data["institutes"] != null &&
@@ -117,7 +112,6 @@ export default function Login({ switchForm }) {
         navigate("/institute");
         break;
       case "STUDENT":
-        console.log(userPlan);
         if (userPlan === null || userPlan.plan_id === 0) {
           navigate("/student/free-videos");
         } else {
@@ -142,8 +136,6 @@ export default function Login({ switchForm }) {
 
       if (response && response.status === 200) {
         const userData = response.data;
-
-        // console.log(userData.user);
         setUser(userData.user);
         setUserType(userData.user.role.name);
       } else {

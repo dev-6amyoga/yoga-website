@@ -10,7 +10,6 @@ import getFormData from "../../../utils/getFormData";
 
 export default function AddNewTeacher() {
   const user = useUserStore((state) => state.user);
-  console.log(user);
   const [invites, setInvites] = useState([]);
   const [instituteID, setInstituteID] = useState(0);
   const [addLoading, setAddLoading] = useState(false);
