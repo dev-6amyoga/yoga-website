@@ -25,11 +25,13 @@ const loadScript = (src) => {
 
 const RenderRazorpay = ({
     userId,
-    orderId,
     keyId,
     keySecret,
+    orderId,
     currency,
     amount,
+    payment_for,
+    redirectUrl,
     displayRazorpay,
     setDisplayRazorpay,
 }) => {
@@ -65,38 +67,41 @@ const RenderRazorpay = ({
 
     const handlePaymentBackendCallback = useCallback(
         async (status, orderDetails = {}) => {
-            // console.log(status, orderDetails);
-            const userPlanData = {
-                user_id: userId,
-                status: status,
-                order_details: orderDetails,
-            };
-            // console.log(userPlanData);
-
             try {
+                // user_id, status, payment_for, payment_method, amount, signature, order_id, payment_id,
                 const response = await Fetch({
-                    url: "http://localhost:4000/payment/paid",
+                    url: "http://localhost:4000/payment/commit",
                     method: "POST",
-                    data: JSON.stringify(userPlanData),
+                    data: {
+                        user_id: userId,
+                        status,
+                        payment_for: payment_for,
+                        payment_method: paymentMethod.current,
+                        amount,
+                        signature: orderDetails.signature,
+                        order_id: orderDetails.orderId,
+                        payment_id: orderDetails.paymentId,
+                    },
                 });
                 if (response.status === 200) {
-                    // console.log("yay");
                     setDisplayRazorpay(false);
                     let type = status === "succeeded" ? "success" : "error";
 
                     toast(status, { type });
 
                     if (status === "succeeded") {
-                        navigate("/student");
+                        navigate(redirectUrl);
                     }
                 } else {
-                    // console.log("error");
+                    setDisplayRazorpay(false);
+                    toast("Something went wrong, try again", { type: "error" });
                 }
             } catch (error) {
-                // console.log(error);
+                setDisplayRazorpay(false);
+                toast("Something went wrong, try again", { type: "error" });
             }
         },
-        [setDisplayRazorpay, navigate, userId]
+        [setDisplayRazorpay, navigate, userId, amount, payment_for, redirectUrl]
     );
 
     const handlePayment = useCallback(

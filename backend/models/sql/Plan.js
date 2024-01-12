@@ -1,11 +1,11 @@
-const { sequelize } = require('../../init.sequelize');
-const { DataTypes } = require('sequelize');
-const { options } = require('./defaultOptions');
+const { sequelize } = require("../../init.sequelize");
+const { DataTypes } = require("sequelize");
+const { options } = require("./defaultOptions");
 // const { Role } = require('./Role');
 // const { User } = require('./User');
 
 const Plan = sequelize.define(
-    'plan',
+    "plan",
     {
         plan_id: {
             type: DataTypes.INTEGER,
@@ -15,6 +15,10 @@ const Plan = sequelize.define(
         name: {
             type: DataTypes.STRING,
             allowNull: false,
+        },
+        description: {
+            type: DataTypes.TEXT,
+            allowNull: true,
         },
         has_basic_playlist: {
             type: DataTypes.BOOLEAN,

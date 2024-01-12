@@ -12,6 +12,11 @@ const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const { sequelize } = require("../init.sequelize");
 const { Transaction } = require("../models/sql/Transaction");
+const {
+    HTTP_BAD_REQUEST,
+    HTTP_INTERNAL_SERVER_ERROR,
+    HTTP_OK,
+} = require("../utils/http_status_codes");
 
 router.post("/order", async (req, res) => {
     const razorpay = new Razorpay({
@@ -28,14 +33,14 @@ router.post("/order", async (req, res) => {
     };
     try {
         const response = await razorpay.orders.create(options);
-        res.status(200).json({ order: response });
+        res.status(HTTP_OK).json({ order: response });
     } catch (err) {
         console.error("Razorpay Error:", err.error);
-        res.status(400).json({ error: err.error });
+        res.status(HTTP_BAD_REQUEST).json({ error: err.error });
     }
 });
 
-router.post("/paid", async (req, res) => {
+router.post("/commit", async (req, res) => {
     const {
         user_id,
         status,
@@ -57,7 +62,9 @@ router.post("/paid", async (req, res) => {
         !order_id ||
         !payment_id
     ) {
-        res.status(400).json({ message: "Missing required fields" });
+        res.status(HTTP_BAD_REQUEST).json({
+            message: "Missing required fields",
+        });
     }
 
     // TODO: fix this; not same as frontend hash for some reason
@@ -86,11 +93,13 @@ router.post("/paid", async (req, res) => {
         );
 
         await t.commit();
-        res.status(200).json({ status: "successfully saved transaction" });
+        res.status(HTTP_OK).json({ status: "successfully saved transaction" });
     } catch (err) {
         console.log(err);
         await t.rollback();
-        res.status(400).json({ message: "Unable to create transaction" });
+        res.status(HTTP_BAD_REQUEST).json({
+            message: "Unable to create transaction",
+        });
     }
 });
 
@@ -101,8 +110,8 @@ router.post("/refund", async (req, res) => {
             amount: req.body.amount,
         };
         // const razorpayResponse = await Razorpay.refund(options);
-        res.status(200).json("Successfully refunded");
-    } catch (error) {
+        res.status(HTTP_OK).json("Successfully refunded");
+    } catch (err) {
         console.log(error);
         res.status(400).json({ message: "Unable to issue a refund" });
     }
