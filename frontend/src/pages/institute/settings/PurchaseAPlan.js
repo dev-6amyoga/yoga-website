@@ -6,6 +6,7 @@ import {
   Input,
   Divider,
   Card,
+  Note,
   ButtonGroup,
 } from "@geist-ui/core";
 import InstitutePageWrapper from "../../../components/Common/InstitutePageWrapper";
@@ -18,7 +19,10 @@ import { toast } from "react-toastify";
 
 export default function PurchaseAPlan() {
   const [refreshLoading, setRefreshLoading] = useState(false);
+  const notify = (x) => toast(x);
+  const [teachers, setTeachers] = useState([]);
   const [allPlans, setAllPlans] = useState([]);
+  const [planId, setPlanId] = useState(0);
   const [showCard, setShowCard] = useState(false);
   const [cardData, setCardData] = useState({});
   const [user, institutes, currentInstituteId] = useUserStore(
@@ -30,9 +34,7 @@ export default function PurchaseAPlan() {
   );
   const today = new Date();
   const formattedDate = today.toISOString().split("T")[0];
-
   const [selectedValidity, setSelectedValidity] = useState(30);
-
   const calculateEndDate = (validityDays) => {
     const endDate = new Date(today);
     endDate.setUTCDate(today.getUTCDate() + validityDays);
@@ -41,6 +43,33 @@ export default function PurchaseAPlan() {
   const handleValidityChange = (validity) => {
     setSelectedValidity(validity);
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/user-plan/get-user-plan-by-id",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_id: user.user_id }),
+          }
+        );
+        const data = await response.json();
+        if (data["userPlan"]) {
+          console.log(data["userPlan"]["plan_id"]);
+          setPlanId(data["userPlan"]["plan_id"]);
+        } else {
+          notify("You don't have a plan yet! Purchase one to continue");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, [user.user_id]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,28 +107,150 @@ export default function PurchaseAPlan() {
     );
   };
 
+  const getTeachers = useCallback(async () => {
+    setRefreshLoading(true);
+    setTeachers([]);
+    try {
+      const res = await Fetch({
+        url: "http://localhost:4000/institute/teacher/get-all-by-instituteid",
+        method: "POST",
+        data: {
+          institute_id: currentInstituteId,
+        },
+      });
+      setTeachers(() => res?.data?.teachers?.map((t) => t.user));
+      setRefreshLoading(false);
+    } catch (err) {
+      toast(`Error : ${err?.response?.data?.message}`, {
+        type: "error",
+      });
+      setRefreshLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    getTeachers();
+  }, [getTeachers]);
+
+  async function registerUserPlan(userPlanData) {
+    try {
+      const response = await fetch(
+        "http://localhost:4000/user-plan/register-user-plan",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userPlanData),
+        }
+      );
+      if (response.ok) {
+        notify("New User-Plan added successfully");
+      } else {
+        const errorData = await response.json();
+        notify(errorData.error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const discount_code = document.querySelector("#discount_code").value;
-    const referral_code = document.querySelector("#referral_code").value;
-    const userPlanData = {
-      purchase_date: formattedDate,
-      validity_from: formattedDate,
-      validity_to: calculateEndDate(selectedValidity),
-      cancellation_date: null,
-      auto_renewal_enabled: false,
-      user_id: user.user_id,
-      plan_id: cardData.plan_id,
-      discount_code: discount_code,
-      referral_code: referral_code,
-    };
-    console.log(userPlanData);
+    if (planId != 0) {
+      notify("You have an active plan! You can't purchase a new plan.");
+    } else {
+      const discount_code = document.querySelector("#discount_code").value;
+      const referral_code = document.querySelector("#referral_code").value;
+      const userPlanData_admin = {
+        purchase_date: formattedDate,
+        validity_from: formattedDate,
+        validity_to: calculateEndDate(selectedValidity),
+        cancellation_date: null,
+        auto_renewal_enabled: false,
+        user_id: user.user_id,
+        plan_id: cardData.plan_id,
+        discount_code: discount_code,
+        referral_code: referral_code,
+      };
+      registerUserPlan(userPlanData_admin);
+      if (teachers.length > cardData.number_of_teachers) {
+        notify(
+          "Please purchase a higher plan. You have more teachers than the selected plan permits."
+        );
+      } else {
+        if (teachers.length < cardData.number_of_teachers) {
+          notify(
+            "You have lesser teachers than the selected plan permits. You can add more teachers in the future."
+          );
+        }
+        if (teachers.length === cardData.number_of_teachers) {
+          notify(
+            "You have the exact number of teachers as mentioned in the selected plan permits. You can add more teachers in the future by purchasing a higher plan."
+          );
+        }
+        for (var t1 = 0; t1 < teachers.length; t1++) {
+          const userPlanData_teacher = {
+            purchase_date: formattedDate,
+            validity_from: formattedDate,
+            validity_to: calculateEndDate(selectedValidity),
+            cancellation_date: null,
+            auto_renewal_enabled: false,
+            user_id: teachers[t1].user_id,
+            plan_id: cardData.plan_id,
+            discount_code: discount_code,
+            referral_code: referral_code,
+          };
+          registerUserPlan(userPlanData_teacher);
+        }
+      }
+    }
+
+    //set the plan for institute owner and all teachers in the institute (as permitted)
+
+    // try {
+    //   const response = await fetch(
+    //     "http://localhost:4000/user-plan/register-user-plan",
+    //     {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify(userPlanData),
+    //     }
+    //   );
+    //   if (response.ok) {
+    //     notify("New User-Plan added successfully");
+    //     setTimeout(() => {
+    //       navigate("/student");
+    //     }, 2000);
+    //   } else {
+    //     const errorData = await response.json();
+    //     notify(errorData.error);
+    //   }
+    // } catch (error) {
+    //   console.log(error);
+    // }
   };
 
   return (
     <InstitutePageWrapper heading="Purchase A Plan">
       <div className="max-w-5xl mx-auto">
         <h4></h4>
+        <div>
+          {planId === 0 && (
+            <Note type="error" label="Note" filled width={70}>
+              Please purchase a subscription to unlock all features!.
+            </Note>
+          )}
+        </div>
+        <div>
+          {planId != 0 && (
+            <Note type="warning" label="Note" filled width={70}>
+              You have an already active plan!
+            </Note>
+          )}
+        </div>
         <div className="flex flex-col items-center justify-center py-20">
           <Table width={100} data={allPlans} className="bg-white ">
             {/* <Table.Column prop="plan_id" label="Plan ID" /> */}
@@ -149,7 +300,6 @@ export default function PurchaseAPlan() {
             />
           </Table>
         </div>
-        {/* <div> */}
         <Divider />
         {showCard && (
           <Card>
@@ -157,6 +307,7 @@ export default function PurchaseAPlan() {
             <Divider />
             <h5>Features:</h5>
             <br />
+            <h6>. One Admin Account</h6>
             <h6>
               {cardData.has_basic_playlist
                 ? ". Use all yoga playlists curated by 6AM Yoga"

@@ -4,15 +4,12 @@ import useUserStore from "../../store/UserStore";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Fetch } from "../../utils/Fetch";
+import TeacherNavbar from "../../components/Common/TeacherNavbar/TeacherNavbar";
 export default function TeacherHome() {
   let user = useUserStore((state) => state.user);
   const [instituteID, setInstituteID] = useState(0);
   const [institute, setInstitute] = useState({});
-  //   const [addLoading, setAddLoading] = useState(false);
   const [refreshLoading, setRefreshLoading] = useState(false);
-  function sayHello() {
-    console.log("Hello to you!");
-  }
   const getInstituteID = useCallback(async () => {
     setRefreshLoading(true);
     Fetch({
@@ -55,10 +52,11 @@ export default function TeacherHome() {
 
   return (
     <div>
+      <div>
+        <TeacherNavbar />
+      </div>
       <h1>WELCOME {user.name}</h1>
-      <h4>WELCOME TO {instituteID}</h4>
-      <h4>{institute?.name}</h4>
-      <Button onClick={sayHello}>Click me to say hello</Button>
+      <h4>WELCOME TO {institute?.name}</h4>
     </div>
   );
 }

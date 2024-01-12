@@ -143,7 +143,7 @@ export default function Login({ switchForm }) {
         notify(errorData.error);
       }
     } catch (error) {
-      console.log(error);
+      notify(error.response.data.error);
     }
   };
 
