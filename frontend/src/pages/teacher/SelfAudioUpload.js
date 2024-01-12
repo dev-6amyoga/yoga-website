@@ -83,7 +83,7 @@ export default function SelfAudioUpload() {
           // downloadFileExtension="mp3"
           showVisualizer={true}
         />
-        <button onClick={recorderControls.stopRecording}>Stop recording</button>
+        <button onClick={recorderControls.stopRecording}></button>
       </div>
     </div>
   );
