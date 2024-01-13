@@ -9,13 +9,9 @@ export default function Otp() {
   const [number, setNumber] = useState("");
   const [verified, setVerified] = useState(false);
   const [enter, setEnter] = useState(false);
-
+  const [confirmObj, setConfirmObj] = useState("");
   const recaptchaVerifier = useRef(null);
-
-  // useEffect(() => {}, [verified]);
-
   function setUpReCaptcha() {
-    // first setup recaptcha verifier
     const rv = new RecaptchaVerifier(auth, "recaptcha-container", {
       callback: () => {
         console.log("recaptcha resolved..");
@@ -31,9 +27,7 @@ export default function Otp() {
 
   useEffect(() => {
     setUpReCaptcha();
-
     return () => {
-      // destroy instance when exiting
       if (recaptchaVerifier.current) {
         recaptchaVerifier.current.clear();
       }
@@ -60,10 +54,29 @@ export default function Otp() {
         toast("OTP Sent!");
         console.log({ confirmationResult });
         setEnter(true);
+        setConfirmObj(confirmationResult);
       })
       .catch((error) => {
         console.log(error);
       });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const otp_entered = document.querySelector("#otp").value;
+    console.log(otp_entered);
+    try {
+      await confirmObj
+        .confirm(otp_entered)
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -87,12 +100,12 @@ export default function Otp() {
       {/* verify otp */}
       {enter && (
         <div>
-          <Input
-            value={otp}
-            onChange={setOtp}
-            placeholder="Enter OTP here"
-          ></Input>
-          <Button>Verify OTP</Button>
+          <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
+            <Input width="100%" id="otp" placeholder="Enter OTP here">
+              Name
+            </Input>
+            <Button htmlType="submit">Verify OTP</Button>
+          </form>
         </div>
       )}
     </div>
