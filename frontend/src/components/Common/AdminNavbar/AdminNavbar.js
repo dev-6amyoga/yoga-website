@@ -38,15 +38,6 @@ export default function AdminNavbar() {
                 to={"/content/video/create"}
                 className="w-full text-zinc-800"
               >
-                Modify Asanas
-              </Link>
-            </Button>
-
-            <Button className="w-full">
-              <Link
-                to={"/content/video/create"}
-                className="w-full text-zinc-800"
-              >
                 Member Management
               </Link>
             </Button>
@@ -132,6 +123,14 @@ export default function AdminNavbar() {
                 className="w-full text-zinc-800"
               >
                 Wallets
+              </Link>
+            </Button>
+            <Button className="w-full">
+              <Link
+                to={"/admin/discount-management"}
+                className="w-full text-zinc-800"
+              >
+                Discount Management
               </Link>
             </Button>
             <Button className="w-full">
