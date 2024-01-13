@@ -92,6 +92,8 @@ app.use("/user-playlist-count", UserPlaylistCountRouter);
 app.use("/institute", instituteRouter);
 app.use("/invite", inviteRouter);
 app.use("/payment", paymentRouter);
+app.use("/user-institute", userInstituteRouter);
+app.use("/discount-coupon", discountCouponRouter);
 
 const port = parseInt(process.env.SERVER_PORT);
 
