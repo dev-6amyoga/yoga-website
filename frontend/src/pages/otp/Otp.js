@@ -1,11 +1,13 @@
 import PhoneInput from "react-phone-number-input";
 import { Button, Input } from "@geist-ui/core";
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { auth } from "../../utils/firebase";
 export default function Otp() {
   const [otp, setOtp] = useState("");
+  const navigate = useNavigate();
   const [number, setNumber] = useState("");
   const [verified, setVerified] = useState(false);
   const [enter, setEnter] = useState(false);
@@ -64,12 +66,12 @@ export default function Otp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const otp_entered = document.querySelector("#otp").value;
-    console.log(otp_entered);
     try {
       await confirmObj
         .confirm(otp_entered)
         .then((res) => {
           console.log(res);
+          navigate("/auth");
         })
         .catch((err) => {
           console.log(err);
