@@ -8,6 +8,7 @@ export default function Otp() {
   const [otp, setOtp] = useState("");
   const [number, setNumber] = useState("");
   const [verified, setVerified] = useState(false);
+  const [enter, setEnter] = useState(false);
 
   const recaptchaVerifier = useRef(null);
 
@@ -24,7 +25,6 @@ export default function Otp() {
         setVerified(false);
       },
     });
-
     recaptchaVerifier.current = rv;
     recaptchaVerifier.current.render();
   }
@@ -44,8 +44,6 @@ export default function Otp() {
     if (number === "" || number === undefined) {
       return;
     }
-    console.log(number);
-
     if (!verified) {
       try {
         await recaptchaVerifier.current.verify();
@@ -59,7 +57,9 @@ export default function Otp() {
     console.log("SENDING OTP TO : ", number);
     signInWithPhoneNumber(auth, number, recaptchaVerifier.current)
       .then((confirmationResult) => {
+        toast("OTP Sent!");
         console.log({ confirmationResult });
+        setEnter(true);
       })
       .catch((error) => {
         console.log(error);
@@ -85,9 +85,16 @@ export default function Otp() {
       </div>
       <br />
       {/* verify otp */}
-      <div>
-        <Input placeholder="Enter OTP here"></Input>
-      </div>
+      {enter && (
+        <div>
+          <Input
+            value={otp}
+            onChange={setOtp}
+            placeholder="Enter OTP here"
+          ></Input>
+          <Button>Verify OTP</Button>
+        </div>
+      )}
     </div>
   );
 }
