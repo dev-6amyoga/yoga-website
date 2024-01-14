@@ -3,7 +3,14 @@ import useVideoStore from "../../store/VideoStore";
 // import asanas from "../../data/asanas.json";
 import { STATE_VIDEO_PLAY, STATE_VIDEO_PAUSED } from "../../store/VideoStore";
 import { useEffect } from "react";
-import { FaPlay, FaPause, FaStepForward, FaStepBackward } from "react-icons/fa";
+import {
+  FaPlay,
+  FaPause,
+  FaStepForward,
+  FaStepBackward,
+  FaForward,
+  FaBackward,
+} from "react-icons/fa";
 import parseYouTubeUrl from "../../utils/parseYouTubeUrl";
 
 export default function VideoControls() {
@@ -20,11 +27,8 @@ export default function VideoControls() {
 
   useEffect(() => {
     if (queue && queue.length > 0 && playlistState) {
-      setCurrentVideoID(
-        queue[0].asana_videoID.length === 11
-          ? queue[0].asana_videoID
-          : parseYouTubeUrl(queue[0].asana_videoID).videoId
-      );
+      setCurrentVideoID(null);
+      setCurrentVideoID(queue[0].asana_videoID);
     } else {
       setCurrentVideoID(null);
     }
@@ -32,13 +36,10 @@ export default function VideoControls() {
 
   const handlePlay = () => {
     /*
-        -- if currentVideo is null then play (video starts)
-        -- else if video is running, pause. if video not running(paused), play
-        */
-
+      -- if currentVideo is null then play (video starts)
+      -- else if video is running, pause. if video not running(paused), play
+    */
     if (currentVideoID === null && queue.length > 0) {
-      // console.log("Starting to play the playlist")
-      // console.log("Starting with video ID", asanas[queue[0]].asana.videoID)
       setPlaylistState(true);
       console.log(
         queue[0].asana_videoID,
@@ -49,31 +50,29 @@ export default function VideoControls() {
           ? queue[0].asana_videoID
           : parseYouTubeUrl(queue[0].asana_videoID).videoId
       );
-      // console.log("currentVideoID", currentVideoID);
     } else if (currentVideoID === null && queue.length === 0) {
       setPlaylistState(false);
-      //console.log("empty queue??")
     } else {
-      //console.log("in queue somewhere")
     }
     setVideoState(STATE_VIDEO_PLAY);
-    // console.log("Handle Play")
   };
 
   const handlePause = () => {
     /*
-        -- if playing pause it
-        */
+      -- if playing pause it
+    */
 
     setVideoState(STATE_VIDEO_PAUSED);
-    //console.log("Handle Pause")
   };
 
   const handleNextVideo = () => {
     // remove from queue add to archive
-    // console.log("first was : ", queue)
     popFromQueue(0);
   };
+
+  const handleSeekFoward = () => {};
+
+  const handleSeekBackward = () => {};
 
   return (
     <div>
@@ -85,6 +84,10 @@ export default function VideoControls() {
           }}
         >
           <FaStepBackward className="w-full h-full" />
+        </button>
+
+        <button>
+          <FaBackward />
         </button>
 
         <button
@@ -104,6 +107,9 @@ export default function VideoControls() {
           )}
         </button>
 
+        <button>
+          <FaForward />
+        </button>
         <button className="w-6 h-6" onClick={handleNextVideo}>
           <FaStepForward className="w-full h-full" />
         </button>

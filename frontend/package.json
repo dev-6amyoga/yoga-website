@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
+        "@cloudflare/stream-react": "^1.9.1",
         "@geist-ui/core": "^2.3.8",
         "@geist-ui/icons": "^1.0.2",
         "@react-oauth/google": "^0.11.1",

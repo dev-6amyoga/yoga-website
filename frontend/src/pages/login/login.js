@@ -8,14 +8,18 @@ import LoginGoogle from "../../components/Auth/LoginGoogle";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
 import getFormData from "../../utils/getFormData";
+import { useState } from "react";
 import "./login.css";
-
+import PhoneInput from "react-phone-number-input";
+import Otp from "../otp/Otp";
 export default function Login({ switchForm }) {
   const navigate = useNavigate();
   const notify = (x) => toast(x);
+  const [number, setNumber] = useState("");
   const [user, userType, userPlan] = useUserStore(
     useShallow((state) => [state.user, state.userType, state.userPlan])
   );
+  const [visible, setVisible] = useState(true);
 
   const [
     setUser,
@@ -147,32 +151,46 @@ export default function Login({ switchForm }) {
     }
   };
 
+  const forgotPassword = () => {
+    setVisible(false);
+  };
+
   return (
     <div className="bg-white p-4 rounded-lg max-w-xl mx-auto">
       <h3 className="text-center text-2xl">Login</h3>
       <hr />
-      <div className="flex flex-col gap-1 items-center w-full mt-4">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
-          <Input width="100%" name="username">
-            Username
-          </Input>
-          <Input.Password width="100%" name="password">
-            Password
-          </Input.Password>
-          <Button htmlType="submit">Login</Button>
-        </form>
-        <p onClick={() => switchForm((s) => !s)} className="hover:pointer">
-          Dont have an account?{" "}
-          <span className="text-blue-500">Click Here</span>
-        </p>
-        <p>{"( or )"}</p>
-        <div>
-          <ToastContainer />
+      {visible && (
+        <div className="flex flex-col gap-1 items-center w-full mt-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
+            <Input width="100%" name="username">
+              Username
+            </Input>
+            <Input.Password width="100%" name="password">
+              Password
+            </Input.Password>
+            <Button onClick={forgotPassword}>Forgot Password?</Button>
+            <Button type="warning" htmlType="submit">
+              Login
+            </Button>
+          </form>
+          <p onClick={() => switchForm((s) => !s)} className="hover:pointer">
+            Dont have an account?{" "}
+            <span className="text-blue-500">Click Here</span>
+          </p>
+          <p>{"( or )"}</p>
+          <div>
+            <ToastContainer />
+          </div>
+          <div>
+            <LoginGoogle />
+          </div>
         </div>
+      )}
+      {!visible && (
         <div>
-          <LoginGoogle />
+          <Otp />
         </div>
-      </div>
+      )}
     </div>
   );
 }

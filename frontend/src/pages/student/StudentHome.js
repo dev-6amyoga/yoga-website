@@ -7,6 +7,7 @@ import VideoPlayerWrapper from "../../components/Video/VideoPlayerWrapper";
 import VideoQueue from "../../components/Video/VideoQueue";
 import useUserStore from "../../store/UserStore";
 import { useState, useEffect } from "react";
+import { Stream } from "@cloudflare/stream-react";
 
 function StudentHome() {
   let user = useUserStore((state) => state.user);

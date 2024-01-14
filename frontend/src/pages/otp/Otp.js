@@ -36,6 +36,20 @@ export default function Otp() {
     };
   }, []);
 
+  /*
+  MESSAGE : 
+    ive to go out ill come back and do it 
+    I will finish it today dw
+    pls push it off
+
+    Im sorry today I tried my best to work during my travel and I did a bunch but ya ill finish when I come
+
+    Video is coming in student free videos, controls for play pause are working
+
+    Need to fix : next/previous video && seek 15seconds forward backward
+    these are pretty chill so ill do them whne i come
+  */
+
   const sendOTP = async () => {
     if (number === "" || number === undefined) {
       return;
@@ -49,8 +63,6 @@ export default function Otp() {
         return;
       }
     }
-
-    console.log("SENDING OTP TO : ", number);
     signInWithPhoneNumber(auth, number, recaptchaVerifier.current)
       .then((confirmationResult) => {
         toast("OTP Sent!");
@@ -63,15 +75,13 @@ export default function Otp() {
       });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const verifyOtp = async () => {
     const otp_entered = document.querySelector("#otp").value;
     try {
       await confirmObj
         .confirm(otp_entered)
         .then((res) => {
-          console.log(res);
-          navigate("/auth");
+          console.log("THIS IS RES : ", res);
         })
         .catch((err) => {
           console.log(err);
@@ -102,11 +112,11 @@ export default function Otp() {
       {/* verify otp */}
       {enter && (
         <div>
-          <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
+          <form className="flex flex-col gap-4 w-full">
             <Input width="100%" id="otp" placeholder="Enter OTP here">
               Name
             </Input>
-            <Button htmlType="submit">Verify OTP</Button>
+            <Button onClick={verifyOtp}>Verify OTP</Button>
           </form>
         </div>
       )}

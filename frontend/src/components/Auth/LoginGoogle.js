@@ -56,7 +56,7 @@ export default function LoginGoogle() {
               : null;
             console.log(jwt_token);
             const baseURL = "http://localhost:4000";
-            const payload = await axios.post(`${baseURL}/verify`, {
+            const payload = await axios.post(`${baseURL}/auth/verify-google`, {
               client_id: clientID,
               jwtToken: jwt_token,
             });

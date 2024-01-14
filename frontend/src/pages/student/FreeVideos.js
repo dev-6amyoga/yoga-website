@@ -6,10 +6,12 @@ import { Note } from "@geist-ui/core";
 // import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // import { useNavigate } from "react-router-dom";
+import YouTube from "react-youtube";
 import VideoPlayerWrapper from "../../components/Video/VideoPlayerWrapper";
 
 export default function FreeVideos() {
   const [planId, setPlanId] = useState(0);
+  const currentVideoId = "";
   let user = useUserStore((state) => state.user);
   useEffect(() => {
     const fetchData = async () => {
@@ -49,12 +51,8 @@ export default function FreeVideos() {
           </Note>
         )}
       </div>
-      <div className="flex-col justify-center">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-7 gap-4 my-10">
-            <VideoPlayerWrapper />
-          </div>
-        </div>
+      <div className="max-w-5xl mx-auto mt-10">
+        <VideoPlayerWrapper />
       </div>
     </div>
   );
