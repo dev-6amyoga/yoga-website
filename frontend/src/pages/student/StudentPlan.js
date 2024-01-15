@@ -6,14 +6,7 @@ import {
   Grid,
   Input,
   Table,
-  Button,
-  ButtonGroup,
-  Card,
-  Divider,
-  Grid,
-  Input,
   Select,
-  Table,
 } from "@geist-ui/core";
 import React, { useCallback, useEffect, useState } from "react";
 // import { useNavigate } from "react-router-dom";
@@ -40,22 +33,8 @@ function StudentPlan() {
   const formattedDate = today.toISOString().split("T")[0];
 
   const [selectedValidity, setSelectedValidity] = useState(30);
-  const notify = (x) => toast(x);
-  let user = useUserStore((state) => state.user);
-  const [allPlans, setAllPlans] = useState([]);
-  const [showCard, setShowCard] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState({});
-  const [displayRazorpay, setDisplayRazorpay] = useState(false);
-  const [orderDetails, setOrderDetails] = useState({
-    orderId: null,
-    currency: null,
-    amount: null,
-  });
-  const [selectedValidity, setSelectedValidity] = useState(30);
   const [selectedCurrency, setSelectedCurrency] = useState(1);
   const [allCurrencies, setAllCurrencies] = useState([]);
-
-  const formattedDate = new Date().toDateString();
 
   const calculateEndDate = (validityDays) => {
     const endDate = new Date(today);
@@ -65,15 +44,6 @@ function StudentPlan() {
   const handleValidityChange = (validity) => {
     setSelectedValidity(validity);
   };
-  const calculateEndDate = (validityDays) => {
-    const endDate = new Date();
-    endDate.setUTCDate(endDate.getUTCDate() + validityDays);
-    return endDate;
-  };
-
-  const handleValidityChange = (validity) => {
-    setSelectedValidity(validity);
-  };
 
   const fetchPlans = useCallback(async () => {
     try {
@@ -82,19 +52,6 @@ function StudentPlan() {
       );
       const data = await response.json();
       setAllPlans(data?.plans);
-    } catch (error) {
-      notify("Error fetching plans", { type: "error" });
-      console.log(error);
-    }
-  }, []);
-  const fetchPlans = useCallback(async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:4000/plan/get-all-student-plans"
-      );
-      const data = await response.json();
-      setAllPlans(data?.plans);
-      console.log("Fetching plans");
     } catch (error) {
       notify("Error fetching plans", { type: "error" });
       console.log(error);
@@ -121,20 +78,20 @@ function StudentPlan() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const discount_code = document.querySelector("#discount_code").value;
-    const referral_code = document.querySelector("#referral_code").value;
-    // const userPlanData = {
-    //   purchase_date: formattedDate,
-    //   validity_from: formattedDate,
-    //   validity_to: calculateEndDate(selectedValidity),
-    //   cancellation_date: null,
-    //   auto_renewal_enabled: false,
-    //   user_id: user.user_id,
-    //   plan_id: cardData.plan_id,
-    //   discount_code: discount_code,
-    //   referral_code: referral_code,
-    // };
+    const discount_coupon_id = document.querySelector(
+      "#discount_coupon_id"
+    ).value;
+    const referral_code_id = document.querySelector("#referral_code_id").value;
     const userPlanData = {
+      purchase_date: formattedDate,
+      validity_from: formattedDate,
+      validity_to: calculateEndDate(selectedValidity),
+      cancellation_date: null,
+      auto_renewal_enabled: false,
+      user_id: user.user_id,
+      plan_id: cardData.plan_id,
+      discount_coupon_id: discount_coupon_id,
+      referral_code_id: referral_code_id,
       amount: 100,
       currency: "INR",
     };
@@ -147,7 +104,6 @@ function StudentPlan() {
       if (response.status === 200) {
         const responseJson = response.data;
         const razorpayOrder = responseJson.order;
-
         if (razorpayOrder && razorpayOrder["id"]) {
           setOrderDetails({
             orderId: razorpayOrder["id"],
@@ -180,7 +136,7 @@ function StudentPlan() {
             font="12px"
             onClick={subscribePlan}
           >
-            Subscribe
+            Purchase
           </Button>
         </Grid>
       </Grid.Container>
@@ -188,21 +144,27 @@ function StudentPlan() {
   };
 
   const registerUserPlan = () => {
-    /*
-        purchase_date,
-        validity_from,
-        validity_to,
-        cancellation_date,
-        auto_renewal_enabled,
-        discount_coupon_id,
-        referral_code_id,
-        user_id,
-        plan_id,
-        */
+    const discount_coupon_id = document.querySelector(
+      "#discount_coupon_id"
+    ).value;
+    const referral_code_id = document.querySelector("#referral_code_id").value;
+    const userPlanData = {
+      purchase_date: formattedDate,
+      validity_from: formattedDate,
+      validity_to: calculateEndDate(selectedValidity),
+      cancellation_date: null,
+      auto_renewal_enabled: false,
+      user_id: user.user_id,
+      plan_id: cardData.plan_id,
+      discount_coupon_id: 0,
+      referral_code_id: 0,
+      amount: 100,
+      currency: "INR",
+    };
     Fetch({
-      url: "http://localhost:4000/user-plan/register-user-plan",
+      url: "http://localhost:4000/user-plan/register",
       method: "POST",
-      data: {},
+      data: { userPlanData },
     }).then((res) => {
       if (res.status === 200) {
         notify("Plan subscribed successfully", { type: "success" });
@@ -234,7 +196,7 @@ function StudentPlan() {
           />
           <Table.Column
             prop="operation"
-            label="Subscribe"
+            label="Purchase"
             width={150}
             render={renderAction}
           />
@@ -309,10 +271,10 @@ function StudentPlan() {
               <p> Plan Start Date : {formattedDate}</p>
               <p> Plan End Date: {calculateEndDate(selectedValidity)}</p>
               <Divider />
-              <Input width="100%" id="discount_code">
-                Discount Code
+              <Input width="100%" id="discount_coupon_id">
+                Discount Coupon
               </Input>
-              <Input width="100%" id="referral_code">
+              <Input width="100%" id="referral_code_id">
                 Referral Code
               </Input>
               <Button htmlType="submit">Purchase</Button>
