@@ -66,7 +66,7 @@ router.post("/register", async (req, res) => {
     referral_code_id,
     user_id,
     plan_id,
-  } = req.body;
+  } = req.body.userPlanData;
 
   if (!user_id || !plan_id || !validity_from || !validity_to || !purchase_date)
     return res
