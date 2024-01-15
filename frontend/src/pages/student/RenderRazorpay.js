@@ -52,8 +52,6 @@ const RenderRazorpay = ({
 
         gateway.current = rzp;
 
-        // console.log(gateway.current);
-
         gateway.current.on("payment.submit", (response) => {
             paymentMethod.current = response.method;
         });

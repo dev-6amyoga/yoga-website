@@ -10,50 +10,50 @@ import YouTube from "react-youtube";
 import VideoPlayerWrapper from "../../components/Video/VideoPlayerWrapper";
 
 export default function FreeVideos() {
-  const [planId, setPlanId] = useState(0);
-  const currentVideoId = "";
-  let user = useUserStore((state) => state.user);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:4000/user-plan/get-user-plan-by-id",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ user_id: user.user_id }),
-          }
-        );
-        const data = await response.json();
-        if (data["userPlan"]) {
-          setPlanId(data["userPlan"]["plan_id"]);
-        } else {
-          console.log(data["error"]);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
-  }, [user.user_id]);
+    const [planId, setPlanId] = useState(0);
+    const currentVideo = "";
+    let user = useUserStore((state) => state.user);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(
+                    "http://localhost:4000/user-plan/get-user-plan-by-id",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ user_id: user.user_id }),
+                    }
+                );
+                const data = await response.json();
+                if (data["userPlan"]) {
+                    setPlanId(data["userPlan"]["plan_id"]);
+                } else {
+                    console.log(data["error"]);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        fetchData();
+    }, [user.user_id]);
 
-  return (
-    <div>
-      <div>
-        <StudentNavbar />
-      </div>
-      <div className="px-20">
-        {planId === 0 && (
-          <Note type="error" label="Note" filled width={100}>
-            Please purchase a subscription to unlock all features!.
-          </Note>
-        )}
-      </div>
-      <div className="max-w-5xl mx-auto mt-10">
-        <VideoPlayerWrapper />
-      </div>
-    </div>
-  );
+    return (
+        <div>
+            <div>
+                <StudentNavbar />
+            </div>
+            <div className="px-20">
+                {planId === 0 && (
+                    <Note type="error" label="Note" filled width={100}>
+                        Please purchase a subscription to unlock all features!.
+                    </Note>
+                )}
+            </div>
+            <div className="max-w-5xl mx-auto mt-10">
+                <VideoPlayerWrapper />
+            </div>
+        </div>
+    );
 }

@@ -1,14 +1,18 @@
-const { sequelize } = require('../../init.sequelize');
-const { DataTypes } = require('sequelize');
-const { options } = require('./defaultOptions');
+const { sequelize } = require("../../init.sequelize");
+const { DataTypes } = require("sequelize");
+const { options } = require("./defaultOptions");
 
 const Currency = sequelize.define(
-    'currency',
+    "currency",
     {
         currency_id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
+        },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false,
         },
         short_tag: {
             type: DataTypes.STRING,

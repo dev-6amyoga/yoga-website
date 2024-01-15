@@ -5,6 +5,7 @@ import {
     Divider,
     Grid,
     Input,
+    Select,
     Table,
 } from "@geist-ui/core";
 import React, { useCallback, useEffect, useState } from "react";
@@ -20,24 +21,25 @@ function StudentPlan() {
     let user = useUserStore((state) => state.user);
     const [allPlans, setAllPlans] = useState([]);
     const [showCard, setShowCard] = useState(false);
-    const [cardData, setCardData] = useState({});
+    const [selectedPlan, setSelectedPlan] = useState({});
     const [displayRazorpay, setDisplayRazorpay] = useState(false);
     const [orderDetails, setOrderDetails] = useState({
         orderId: null,
         currency: null,
         amount: null,
     });
-
-    const today = new Date();
-    const formattedDate = today.toISOString().split("T")[0];
-
     const [selectedValidity, setSelectedValidity] = useState(30);
+    const [selectedCurrency, setSelectedCurrency] = useState(1);
+    const [allCurrencies, setAllCurrencies] = useState([]);
+
+    const formattedDate = new Date().toDateString();
 
     const calculateEndDate = (validityDays) => {
-        const endDate = new Date(today);
-        endDate.setUTCDate(today.getUTCDate() + validityDays);
-        return endDate.toISOString().split("T")[0];
+        const endDate = new Date();
+        endDate.setUTCDate(endDate.getUTCDate() + validityDays);
+        return endDate;
     };
+
     const handleValidityChange = (validity) => {
         setSelectedValidity(validity);
     };
@@ -49,6 +51,21 @@ function StudentPlan() {
             );
             const data = await response.json();
             setAllPlans(data?.plans);
+            console.log("Fetching plans");
+        } catch (error) {
+            notify("Error fetching plans", { type: "error" });
+            console.log(error);
+        }
+    }, []);
+
+    const fetchCurrencies = useCallback(async () => {
+        try {
+            const response = await Fetch({
+                url: "http://localhost:4000/currency/get-all",
+            });
+
+            setAllCurrencies(response?.data?.currencies);
+            console.log("Fetching currencies");
         } catch (error) {
             notify("Error fetching plans", { type: "error" });
             console.log(error);
@@ -57,27 +74,17 @@ function StudentPlan() {
 
     useEffect(() => {
         fetchPlans();
-    }, [fetchPlans]);
+        fetchCurrencies();
+    }, [fetchPlans, fetchCurrencies]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const discount_code = document.querySelector("#discount_code").value;
-        const referral_code = document.querySelector("#referral_code").value;
-        // const userPlanData = {
-        //   purchase_date: formattedDate,
-        //   validity_from: formattedDate,
-        //   validity_to: calculateEndDate(selectedValidity),
-        //   cancellation_date: null,
-        //   auto_renewal_enabled: false,
-        //   user_id: user.user_id,
-        //   plan_id: cardData.plan_id,
-        //   discount_code: discount_code,
-        //   referral_code: referral_code,
-        // };
+
         const userPlanData = {
             amount: 100,
             currency: "INR",
         };
+
         try {
             const response = await Fetch({
                 url: "http://localhost:4000/payment/order",
@@ -108,7 +115,7 @@ function StudentPlan() {
     const renderAction = (value, rowData, index) => {
         const subscribePlan = async () => {
             setShowCard(true);
-            setCardData(rowData);
+            setSelectedPlan(rowData);
         };
         return (
             <Grid.Container gap={0.1}>
@@ -119,7 +126,7 @@ function StudentPlan() {
                         scale={1 / 3}
                         font="12px"
                         onClick={subscribePlan}>
-                        Subscribe
+                        Purchase
                     </Button>
                 </Grid>
             </Grid.Container>
@@ -138,10 +145,17 @@ function StudentPlan() {
         user_id,
         plan_id,
         */
+
         Fetch({
-            url: "http://localhost:4000/user-plan/register-user-plan",
+            url: "http://localhost:4000/user-plan/register",
             method: "POST",
-            data: {},
+            data: {
+                user_id: user?.user_id,
+                plan_id: selectedPlan?.plan_id,
+                purchase_date: new Date(),
+                validity_from: new Date(),
+                validity_to: calculateEndDate,
+            },
         }).then((res) => {
             if (res.status === 200) {
                 notify("Plan subscribed successfully", { type: "success" });
@@ -153,9 +167,29 @@ function StudentPlan() {
 
     return (
         <StudentPageWrapper heading="Plans">
-            <div className="flex flex-col items-center justify-center py-20">
-                <Table width={100} data={allPlans} className="bg-white ">
-                    <Table.Column prop="plan_id" label="Plan ID" />
+            <Select
+                placeholder="Choose currency"
+                onChange={(val) => {
+                    setSelectedCurrency(val);
+                }}>
+                {allCurrencies?.map((c) => {
+                    return (
+                        <Select.Option value={String(c.currency_id)}>
+                            {c.name} | {c.short_tag}
+                        </Select.Option>
+                    );
+                })}
+            </Select>
+            {/* <Button
+                onClick={() => {
+                    fetchPlans();
+                    fetchCurrencies();
+                }}>
+                Refresh
+            </Button> */}
+            <div className="flex flex-col items-center justify-center my-20 max-w-7xl">
+                <Table data={allPlans} className="bg-white ">
+                    {/* <Table.Column prop="plan_id" label="Plan ID" /> */}
                     <Table.Column prop="name" label="Plan Name" />
                     <Table.Column
                         prop="has_playlist_creation"
@@ -171,9 +205,10 @@ function StudentPlan() {
                             return data ? data : "0";
                         }}
                     />
+
                     <Table.Column
                         prop="operation"
-                        label="Subscribe"
+                        label="Purchase"
                         width={150}
                         render={renderAction}
                     />
@@ -181,25 +216,36 @@ function StudentPlan() {
                 <Divider />
                 {showCard && (
                     <Card>
-                        <h4>{cardData.name}</h4>
+                        <h4>{selectedPlan.name}</h4>
                         <Divider />
-                        <h5>Features:</h5>
-                        <br />
-                        <h6>
-                            {cardData.has_basic_playlist
-                                ? ". Use all yoga playlists curated by 6AM Yoga"
-                                : ""}{" "}
-                        </h6>
-                        <h6>
-                            {cardData.has_playlist_creation &&
-                            cardData.playlist_creation_limit
-                                ? cardData.playlist_creation_limit === 1000000
-                                    ? ". Create UNLIMITED yoga playlists of your own, using our asana videos"
-                                    : ". Create " +
-                                      cardData.playlist_creation_limit +
-                                      " yoga playlists of your own, using our asana videos"
-                                : ""}{" "}
-                        </h6>
+                        <div className="mb-10">
+                            <h4>Features:</h4>
+                            <ul>
+                                <li>
+                                    {selectedPlan.has_basic_playlist
+                                        ? "Use all yoga playlists curated by 6AM Yoga"
+                                        : ""}
+                                </li>
+                                {selectedPlan.has_playlist_creation &&
+                                selectedPlan.playlist_creation_limit ? (
+                                    selectedPlan.playlist_creation_limit ===
+                                    1000000 ? (
+                                        <li>
+                                            Create UNLIMITED yoga playlists of
+                                            your own, using our asana videos
+                                        </li>
+                                    ) : (
+                                        <li>
+                                            {"Create " +
+                                                selectedPlan.playlist_creation_limit +
+                                                " yoga playlists of your own, using our asana videos"}
+                                        </li>
+                                    )
+                                ) : (
+                                    ""
+                                )}
+                            </ul>
+                        </div>
                         <Divider />
                         <form
                             onSubmit={handleSubmit}
@@ -251,9 +297,10 @@ function StudentPlan() {
                             <Divider />
                             <p> Plan Start Date : {formattedDate}</p>
                             <p>
-                                {" "}
-                                Plan End Date:{" "}
-                                {calculateEndDate(selectedValidity)}
+                                Plan End Date:
+                                {calculateEndDate(
+                                    selectedValidity
+                                ).toDateString()}
                             </p>
                             <Divider />
                             <Input width="100%" id="discount_code">

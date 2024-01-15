@@ -9,10 +9,35 @@ const {
     HTTP_INTERNAL_SERVER_ERROR,
 } = require("../utils/http_status_codes");
 const { Plan } = require("../models/sql/Plan");
+const { PlanPricing } = require("../models/sql/PlanPricing");
+const { Currency } = require("../models/sql/Currency");
 
 router.get("/get-all", async (req, res) => {
     try {
-        const plans = await Plan.findAll();
+        let plans = await Plan.findAll({});
+
+        const plan_pricing = await PlanPricing.findAll({
+            where: {
+                plan_id: {
+                    [Op.in]: plans.map((p) => p.toJSON().plan_id),
+                },
+            },
+            attributes: [
+                "plan_pricing_id",
+                "denomination",
+                "currency_id",
+                "plan_id",
+            ],
+            include: [{ model: Currency, attributes: ["name", "short_tag"] }],
+        });
+
+        plans = plans.map((p) => {
+            return {
+                ...p.toJSON(),
+                pricing: plan_pricing.filter((pp) => pp.plan_id === p.plan_id),
+            };
+        });
+
         res.status(HTTP_OK).json({ plans });
     } catch (error) {
         console.error("Error fetching plans:", error);
@@ -30,11 +55,30 @@ router.post("/get-plan-by-id", async (req, res) => {
             .json({ error: "Missing required fields" });
     }
     try {
-        const plan = await Plan.findOne({
+        let plan = await Plan.findOne({
             where: {
                 plan_id: plan_id,
             },
         });
+
+        const plan_pricing = await PlanPricing.findAll({
+            where: {
+                plan_id: plan.plan_id,
+            },
+            attributes: [
+                "plan_pricing_id",
+                "denomination",
+                "currency_id",
+                "plan_id",
+            ],
+            include: [{ model: Currency, attributes: ["name", "short_tag"] }],
+        });
+
+        plan = {
+            ...plan.toJSON(),
+            pricing: plan_pricing,
+        };
+
         if (!plan) {
             return res
                 .status(HTTP_BAD_REQUEST)
@@ -51,11 +95,34 @@ router.post("/get-plan-by-id", async (req, res) => {
 
 router.get("/get-all-student-plans", async (req, res) => {
     try {
-        const plans = await Plan.findAll({
+        let plans = await Plan.findAll({
             where: {
                 plan_user_type: "student",
             },
         });
+
+        const plan_pricing = await PlanPricing.findAll({
+            where: {
+                plan_id: {
+                    [Op.in]: plans.map((p) => p.toJSON().plan_id),
+                },
+            },
+            attributes: [
+                "plan_pricing_id",
+                "denomination",
+                "currency_id",
+                "plan_id",
+            ],
+            include: [{ model: Currency, attributes: ["name", "short_tag"] }],
+        });
+
+        plans = plans.map((p) => {
+            return {
+                ...p.toJSON(),
+                pricing: plan_pricing.filter((pp) => pp.plan_id === p.plan_id),
+            };
+        });
+
         return res.status(HTTP_OK).json({ plans });
     } catch (error) {
         console.error("Error fetching plans:", error);
@@ -67,10 +134,32 @@ router.get("/get-all-student-plans", async (req, res) => {
 
 router.get("/get-all-institute-plans", async (req, res) => {
     try {
-        const plans = await Plan.findAll({
+        let plans = await Plan.findAll({
             where: {
                 plan_user_type: "institute",
             },
+        });
+
+        const plan_pricing = await PlanPricing.findAll({
+            where: {
+                plan_id: {
+                    [Op.in]: plans.map((p) => p.toJSON().plan_id),
+                },
+            },
+            attributes: [
+                "plan_pricing_id",
+                "denomination",
+                "currency_id",
+                "plan_id",
+            ],
+            include: [{ model: Currency, attributes: ["name", "short_tag"] }],
+        });
+
+        plans = plans.map((p) => {
+            return {
+                ...p.toJSON(),
+                pricing: plan_pricing.filter((pp) => pp.plan_id === p.plan_id),
+            };
         });
         return res.status(HTTP_OK).json({ plans });
     } catch (error) {
@@ -241,4 +330,11 @@ router.delete("/deletePlan/:plan_id", async (req, res) => {
         });
     }
 });
+
+router.post("/add-pricing", async (req, res) => {});
+
+router.post("/update-pricing", async (req, res) => {});
+
+router.post("/remove-pricing", async (req, res) => {});
+
 module.exports = router;

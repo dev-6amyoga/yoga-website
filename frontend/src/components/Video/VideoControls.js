@@ -1,119 +1,130 @@
-import usePlaylistStore from "../../store/PlaylistStore";
-import useVideoStore from "../../store/VideoStore";
+import usePlaylistStore from "../../store/PlaylistStore"
+import useVideoStore, { STATE_VIDEO_LOADING } from "../../store/VideoStore"
 // import asanas from "../../data/asanas.json";
-import { STATE_VIDEO_PLAY, STATE_VIDEO_PAUSED } from "../../store/VideoStore";
-import { useEffect } from "react";
-import {
-  FaPlay,
-  FaPause,
-  FaStepForward,
-  FaStepBackward,
-  FaForward,
-  FaBackward,
-} from "react-icons/fa";
-import parseYouTubeUrl from "../../utils/parseYouTubeUrl";
+import { Loading } from "@geist-ui/core"
+import { useEffect } from "react"
+import
+    {
+        FaBackward,
+        FaForward,
+        FaPause,
+        FaPlay,
+        FaStepBackward,
+        FaStepForward,
+    } from "react-icons/fa"
+import { toast } from "react-toastify"
+import { STATE_VIDEO_PAUSED, STATE_VIDEO_PLAY } from "../../store/VideoStore"
 
 export default function VideoControls() {
-  const queue = usePlaylistStore((state) => state.queue);
-  let popFromQueue = usePlaylistStore((state) => state.popFromQueue);
-  let popFromArchive = usePlaylistStore((state) => state.popFromArchive);
+    const queue = usePlaylistStore((state) => state.queue);
+    let popFromQueue = usePlaylistStore((state) => state.popFromQueue);
+    let popFromArchive = usePlaylistStore((state) => state.popFromArchive);
 
-  let playlistState = useVideoStore((state) => state.playlistState);
-  let setPlaylistState = useVideoStore((state) => state.setPlaylistState);
-  let currentVideoID = useVideoStore((state) => state.currentVideoID);
-  let setCurrentVideoID = useVideoStore((state) => state.setCurrentVideoID);
-  let videoState = useVideoStore((state) => state.videoState);
-  let setVideoState = useVideoStore((state) => state.setVideoState);
+    let playlistState = useVideoStore((state) => state.playlistState);
+    let setPlaylistState = useVideoStore((state) => state.setPlaylistState);
 
-  useEffect(() => {
-    if (queue && queue.length > 0 && playlistState) {
-      setCurrentVideoID(null);
-      setCurrentVideoID(queue[0].asana_videoID);
-    } else {
-      setCurrentVideoID(null);
-    }
-  }, [queue]);
+    let currentVideo = useVideoStore((state) => state.currentVideo);
+    let setCurrentVideo = useVideoStore((state) => state.setCurrentVideo);
 
-  const handlePlay = () => {
-    /*
-      -- if currentVideo is null then play (video starts)
-      -- else if video is running, pause. if video not running(paused), play
-    */
-    if (currentVideoID === null && queue.length > 0) {
-      setPlaylistState(true);
-      console.log(
-        queue[0].asana_videoID,
-        parseYouTubeUrl(queue[0].asana_videoID)
-      );
-      setCurrentVideoID(
-        queue[0].asana_videoID.length === 11
-          ? queue[0].asana_videoID
-          : parseYouTubeUrl(queue[0].asana_videoID).videoId
-      );
-    } else if (currentVideoID === null && queue.length === 0) {
-      setPlaylistState(false);
-    } else {
-    }
-    setVideoState(STATE_VIDEO_PLAY);
-  };
+    let videoState = useVideoStore((state) => state.videoState);
+    let setVideoState = useVideoStore((state) => state.setVideoState);
 
-  const handlePause = () => {
-    /*
-      -- if playing pause it
-    */
+    let addToSeekQueue = useVideoStore((state) => state.addToSeekQueue);
 
-    setVideoState(STATE_VIDEO_PAUSED);
-  };
+    useEffect(() => {
+        if (queue && queue.length > 0 && playlistState) {
+            console.log("setCurrentVideo : Setting current video");
+            setCurrentVideo(queue[0]);
+        } else {
+            console.log("setCurrentVideo : No videos in queue");
+            setCurrentVideo(null);
+            setVideoState(STATE_VIDEO_PAUSED);
+        }
+    }, [queue, playlistState, setCurrentVideo, setVideoState]);
 
-  const handleNextVideo = () => {
-    // remove from queue add to archive
-    popFromQueue(0);
-  };
+    const handlePlay = () => {
+        /*
+          -- if currentVideo is null then play (video starts)
+          -- else if video is running, pause. if video not running(paused), play
+        */
+        if (currentVideo === null && queue.length > 0) {
+            setPlaylistState(true);
+            setCurrentVideo(queue[0]);
+        } else if (currentVideo === null && queue.length === 0) {
+            setPlaylistState(false);
+            toast("Please add videos to queue!", { type: "warning" });
+            return;
+        } else {
+        }
+        setVideoState(STATE_VIDEO_PLAY);
+    };
 
-  const handleSeekFoward = () => {};
+    const handlePause = () => {
+        /*
+        -- if playing pause it
+      */
+        setVideoState(STATE_VIDEO_PAUSED);
+    };
 
-  const handleSeekBackward = () => {};
+    const handleNextVideo = () => {
+        // remove from queue add to archive
+        popFromQueue(0);
+    };
 
-  return (
-    <div>
-      <div className="bg-yblue-900 flex gap-8 items-center justify-center text-white rounded-xl my-4 p-2">
-        <button
-          className="w-6 h-6"
-          onClick={() => {
-            popFromArchive(-1);
-          }}
-        >
-          <FaStepBackward className="w-full h-full" />
-        </button>
+    const handleSeekFoward = () => {
+        console.log("adding +5 seek")
+        addToSeekQueue(5)
+    };
 
-        <button>
-          <FaBackward />
-        </button>
+    const handleSeekBackward = () => {
+        console.log("adding -5 seek")
+        addToSeekQueue(-5)
+    };
 
-        <button
-          className="w-6 h-6"
-          onClick={() => {
-            if (videoState === STATE_VIDEO_PLAY) {
-              handlePause();
-            } else {
-              handlePlay();
-            }
-          }}
-        >
-          {videoState === STATE_VIDEO_PLAY ? (
-            <FaPause className="w-full h-full" />
-          ) : (
-            <FaPlay className="w-full h-full" />
-          )}
-        </button>
+    return (
+        <div>
+            <div className="bg-yblue-900 flex gap-8 items-center justify-center text-white rounded-xl my-4 p-2">
+                <button
+                    className="w-6 h-6"
+                    onClick={() => {
+                        popFromArchive(-1);
+                    }}>
+                    <FaStepBackward className="w-full h-full" />
+                </button>
 
-        <button>
-          <FaForward />
-        </button>
-        <button className="w-6 h-6" onClick={handleNextVideo}>
-          <FaStepForward className="w-full h-full" />
-        </button>
-      </div>
-    </div>
-  );
+                <button onClick={handleSeekBackward}>
+                    <FaBackward />
+                </button>
+
+                <button
+                    className={`w-6 h-6 ${
+                        videoState === STATE_VIDEO_LOADING ? "opacity-30" : ""
+                    }`}
+                    onClick={() => {
+                        if (videoState === STATE_VIDEO_PLAY) {
+                            handlePause();
+                        } else if (videoState === STATE_VIDEO_PAUSED) {
+                            handlePlay();
+                        }
+                    }}
+                    disabled={videoState === STATE_VIDEO_LOADING}>
+                    {videoState === STATE_VIDEO_PLAY ? (
+                        <FaPause className="w-full h-full" />
+                    ) : videoState === STATE_VIDEO_PAUSED ? (
+                        <FaPlay className="w-full h-full" />
+                    ) : (
+                        <Loading color="#fff"/>
+                    )}
+                </button>
+
+                <button onClick={handleSeekFoward}>
+                    <FaForward />
+                </button>
+                
+                <button className="w-6 h-6" onClick={handleNextVideo}>
+                    <FaStepForward className="w-full h-full" />
+                </button>
+            </div>
+        </div>
+    );
 }
