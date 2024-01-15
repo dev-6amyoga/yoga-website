@@ -22,6 +22,7 @@ export default function PurchaseAPlan() {
   const notify = (x) => toast(x);
   const [teachers, setTeachers] = useState([]);
   const [allPlans, setAllPlans] = useState([]);
+  const [modifiedPlans, setModifiedPlans] = useState([]);
   const [planId, setPlanId] = useState(0);
   const [showCard, setShowCard] = useState(false);
   const [cardData, setCardData] = useState({});
@@ -40,9 +41,34 @@ export default function PurchaseAPlan() {
     endDate.setUTCDate(today.getUTCDate() + validityDays);
     return endDate.toISOString().split("T")[0];
   };
+
   const handleValidityChange = (validity) => {
     setSelectedValidity(validity);
   };
+
+  useEffect(() => {
+    for (var x = 0; x < allPlans.length; x++) {
+      // console.log(allPlans[x].name);
+      var newPlan = {
+        plan_name: allPlans[x].name,
+        has_basic_playlist: allPlans[x].has_basic_playlist,
+        has_playlist_creation: allPlans[x].has_playlist_creation,
+        playlist_creation_limit: [allPlans[x].playlist_creation_limit],
+        has_self_audio_upload: allPlans[x].has_self_audio_upload,
+        number_of_teachers: [allPlans[x].number_of_teachers],
+      };
+      console.log(newPlan);
+      if (modifiedPlans.length === 0) {
+        setModifiedPlans((prevPlans) => [...prevPlans, newPlan]);
+      } else {
+        for (var y = 0; y < modifiedPlans.length; y++) {
+          console.log("hi");
+        }
+      }
+
+      // setModifiedPlans((prevPlans) => [...prevPlans, newPlan]);
+    }
+  }, [allPlans]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -100,7 +126,7 @@ export default function PurchaseAPlan() {
             font="12px"
             onClick={subscribePlan}
           >
-            Subscribe
+            Purchase
           </Button>
         </Grid>
       </Grid.Container>
@@ -205,32 +231,6 @@ export default function PurchaseAPlan() {
         }
       }
     }
-
-    //set the plan for institute owner and all teachers in the institute (as permitted)
-
-    // try {
-    //   const response = await fetch(
-    //     "http://localhost:4000/user-plan/register-user-plan",
-    //     {
-    //       method: "POST",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: JSON.stringify(userPlanData),
-    //     }
-    //   );
-    //   if (response.ok) {
-    //     notify("New User-Plan added successfully");
-    //     setTimeout(() => {
-    //       navigate("/student");
-    //     }, 2000);
-    //   } else {
-    //     const errorData = await response.json();
-    //     notify(errorData.error);
-    //   }
-    // } catch (error) {
-    //   console.log(error);
-    // }
   };
 
   return (
@@ -294,7 +294,7 @@ export default function PurchaseAPlan() {
             />
             <Table.Column
               prop="operation"
-              label="Subscribe"
+              label="Purchase"
               width={150}
               render={renderAction}
             />

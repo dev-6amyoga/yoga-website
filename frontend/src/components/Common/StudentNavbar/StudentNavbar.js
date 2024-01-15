@@ -1,9 +1,10 @@
 import { Button, Drawer } from "@geist-ui/core";
-import { Menu, User } from "@geist-ui/icons";
+import { Menu, PlusSquare, User } from "@geist-ui/icons";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../../../store/UserStore";
 // import StudentPlan from "../../../pages/student/StudentPlan";
+import { Divider } from "@geist-ui/core";
 
 export default function StudentNavbar() {
   const [open, setOpen] = useState(false);
@@ -15,7 +16,7 @@ export default function StudentNavbar() {
   const [disabled, setDisabled] = useState(false);
   const [tailorMade, setTailorMade] = useState(false);
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchPlanData = async () => {
       try {
         const response = await fetch(
           "http://localhost:4000/user-plan/get-user-plan-by-id",
@@ -28,30 +29,14 @@ export default function StudentNavbar() {
           }
         );
         const data = await response.json();
+        // console.log({ data });
         if (data["userPlan"]) {
           setUserPlan(data["userPlan"]);
           setPlanId(data["userPlan"]["plan_id"]);
-          try {
-            const response1 = await fetch(
-              "http://localhost:4000/plan/get-plan-by-id",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  plan_id: data["userPlan"]["plan_id"],
-                }),
-              }
-            );
-            const data1 = await response1.json();
-            if (data1["plan"]) {
-              setTailorMade(data1["plan"]["has_playlist_creation"]);
-            } else {
-              setTailorMade(false);
-            }
-          } catch (error) {
-            console.log(error);
+          if (data?.userPlan?.plan?.has_playlist_creation) {
+            setTailorMade(true);
+          } else {
+            setTailorMade(false);
           }
         } else {
           setDisabled(true);
@@ -61,9 +46,8 @@ export default function StudentNavbar() {
         console.log(error);
       }
     };
-    fetchData();
+    fetchPlanData();
   }, [user.user_id]);
-
   return (
     <>
       <div className="w-full px-4 py-1 flex bg-zinc-800 text-white items-center gap-4">
@@ -83,6 +67,10 @@ export default function StudentNavbar() {
         <Drawer.Subtitle>Student Dashboard</Drawer.Subtitle>
         <hr />
         <Drawer.Content>
+          <h5 className="rounded-lg bg-zinc-800 text-white p-2">
+            {userPlan ? "Plan : " + userPlan?.plan?.name : ""}
+          </h5>
+          <Divider />
           <div className="flex flex-col gap-4">
             <Button onClick={() => navigate("/student/purchase-a-plan")}>
               Purchase a plan
