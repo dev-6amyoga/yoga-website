@@ -18,24 +18,23 @@ import { TestingRoutes } from "./routes/TestingRoutes";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 const router = createBrowserRouter([
-    ...GeneralRoutes,
-    ...AuthRoutes,
-    ...AdminRoutes,
-    ...InstituteRoutes,
-    ...StudentRoutes,
-    ...TeacherRoutes,
-    ...TestingRoutes,
+  ...GeneralRoutes,
+  ...AuthRoutes,
+  ...AdminRoutes,
+  ...InstituteRoutes,
+  ...StudentRoutes,
+  ...TeacherRoutes,
+  ...TestingRoutes,
 ]);
 
+// TODO : do we put back React.StrictMode
 root.render(
-    <React.StrictMode>
-        <GeistProvider>
-            <CssBaseline />
-            {/* <App /> */}
-            <RouterProvider router={router} />
-            <ToastContainer />
-        </GeistProvider>
-    </React.StrictMode>
+  <GeistProvider>
+    <CssBaseline />
+    {/* <App /> */}
+    <RouterProvider router={router} />
+    <ToastContainer />
+  </GeistProvider>
 );
 
 reportWebVitals();
