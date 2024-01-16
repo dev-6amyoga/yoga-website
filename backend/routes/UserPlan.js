@@ -38,7 +38,17 @@ router.post("/get-user-plan-by-id", async (req, res) => {
       },
       include: [
         { model: User, attributes: ["name"] },
-        { model: Plan, attributes: ["name"] },
+        {
+          model: Plan,
+          attributes: [
+            "name",
+            "has_basic_playlist",
+            "has_playlist_creation",
+            "playlist_creation_limit",
+            "has_self_audio_upload",
+            "number_of_teachers",
+          ],
+        },
       ],
     });
     if (!userPlan) {
@@ -66,7 +76,8 @@ router.post("/register", async (req, res) => {
     referral_code_id,
     user_id,
     plan_id,
-  } = req.body.userPlanData;
+  } = req.body;
+  console.log("registering!!");
 
   if (!user_id || !plan_id || !validity_from || !validity_to || !purchase_date)
     return res

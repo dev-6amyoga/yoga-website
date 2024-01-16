@@ -10,7 +10,7 @@ const asanaSchema = new mongoose.Schema({
   asana_withAudio: String,
   asana_audioLag: Number,
   asana_type: String,
-  asana_difficulty: String,
+  asana_difficulty: [String],
   language: String,
   muted: String,
   counter: String,
