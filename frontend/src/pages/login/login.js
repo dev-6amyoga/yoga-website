@@ -14,6 +14,7 @@ export default function Login({ switchForm }) {
   const navigate = useNavigate();
   const notify = (x) => toast(x);
   const [number, setNumber] = useState("");
+  const [userPasswordReset, setUserPasswordReset] = useState({});
   const [forgotPassword1, setForgotPassword1] = useState(false);
   const [user, userType, userPlan] = useUserStore(
     useShallow((state) => [state.user, state.userType, state.userPlan])
@@ -36,6 +37,33 @@ export default function Login({ switchForm }) {
       state.setCurrentInstituteId,
     ])
   );
+
+  useEffect(() => {
+    if (number.length > 0) {
+      const fetchData = async () => {
+        try {
+          const response = await fetch(
+            "http://localhost:4000/user/get-by-phone",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ phone: number }),
+            }
+          );
+          const data = await response.json();
+          if (data["user"]) {
+            setUserPasswordReset(data["user"]);
+          }
+          console.log(data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      fetchData();
+    }
+  }, [number]);
 
   useEffect(() => {
     if (user) {
@@ -63,7 +91,6 @@ export default function Login({ switchForm }) {
           user_id: user?.user_id,
         },
       });
-
       if (response.data["userPlan"]) {
         setUserPlan(response.data["userPlan"]);
       } else {
@@ -75,8 +102,9 @@ export default function Login({ switchForm }) {
     }
   }, [user, setUserPlan]);
 
-  const func1 = () => {
-    console.log("hellooo!!");
+  const func1 = (number) => {
+    setNumber(number);
+    console.log("in login.js", number);
     setForgotPassword1(true);
     setVisible(false);
     setForgotp(false);
@@ -139,11 +167,23 @@ export default function Login({ switchForm }) {
     const confirm_password = document.querySelector(
       "#new_confirm_password"
     ).value;
-    console.log(password, confirm_password);
-    if (password != confirm_password) {
-      toast("The two passwords don't match!");
-    } else {
-      toast("Updated successfully!");
+    try {
+      const response = await Fetch({
+        url: "http://localhost:4000/user/reset-password",
+        method: "POST",
+        data: {
+          user_id: userPasswordReset?.user_id,
+          new_password: password,
+          confirm_new_password: confirm_password,
+        },
+      });
+      console.log(response);
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+      toast(response.data.message);
+    } catch (err) {
+      toast(err);
     }
   };
 
@@ -156,7 +196,6 @@ export default function Login({ switchForm }) {
         method: "POST",
         data: formData,
       });
-
       if (response && response.status === 200) {
         const userData = response.data;
         setUser(userData.user);
