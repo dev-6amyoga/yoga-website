@@ -180,7 +180,7 @@ export default function Register({ switchForm }) {
       phone: formData?.phone,
     };
 
-    console.log(user, institute);
+    // console.log(user, institute);
 
     Fetch({
       url: "http://localhost:4000/institute/register",
