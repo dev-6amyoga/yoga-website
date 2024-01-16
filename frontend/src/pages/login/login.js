@@ -14,8 +14,9 @@ export default function Login({ switchForm }) {
   const navigate = useNavigate();
   const notify = (x) => toast(x);
   const [number, setNumber] = useState("");
-  const [userPasswordReset, setUserPasswordReset] = useState({});
+  const [userNow, setUserNow] = useState({});
   const [forgotPassword1, setForgotPassword1] = useState(false);
+  const [phoneSignIn, setPhoneSignIn] = useState(false);
   const [user, userType, userPlan] = useUserStore(
     useShallow((state) => [state.user, state.userType, state.userPlan])
   );
@@ -54,7 +55,7 @@ export default function Login({ switchForm }) {
           );
           const data = await response.json();
           if (data["user"]) {
-            setUserPasswordReset(data["user"]);
+            setUserNow(data["user"]);
           }
           console.log(data);
         } catch (error) {
@@ -82,6 +83,10 @@ export default function Login({ switchForm }) {
     }
   }, [user]);
 
+  const phoneSignInFunction = () => {
+    setVisible(false);
+    setPhoneSignIn(true);
+  };
   const fetchUserPlan = useCallback(async () => {
     try {
       const response = await Fetch({
@@ -102,12 +107,22 @@ export default function Login({ switchForm }) {
     }
   }, [user, setUserPlan]);
 
+  const signWithPhone = () => {
+    setPhoneSignIn(false);
+    setUser(userNow.user);
+    setUserType(userNow.user.role.name);
+  };
+
   const func1 = (number) => {
     setNumber(number);
-    console.log("in login.js", number);
-    setForgotPassword1(true);
     setVisible(false);
-    setForgotp(false);
+    if (phoneSignIn) {
+      console.log("phone sign in !!!!");
+      signWithPhone();
+    } else {
+      setForgotPassword1(true);
+      setForgotp(false);
+    }
   };
   const fetchUserInstitutes = useCallback(async () => {
     try {
@@ -138,7 +153,6 @@ export default function Login({ switchForm }) {
 
   const navigateToDashboard = useCallback(() => {
     const type = userType || user?.role?.name;
-
     switch (type) {
       case "ROOT":
         navigate("/admin");
@@ -172,7 +186,7 @@ export default function Login({ switchForm }) {
         url: "http://localhost:4000/user/reset-password",
         method: "POST",
         data: {
-          user_id: userPasswordReset?.user_id,
+          user_id: userNow?.user_id,
           new_password: password,
           confirm_new_password: confirm_password,
         },
@@ -238,7 +252,9 @@ export default function Login({ switchForm }) {
           <div className="flex flex-row	">
             <LoginGoogle />
             &nbsp; &nbsp;
-            <Button width="50%">Login with Phone Number</Button>
+            <Button width="50%" onClick={phoneSignInFunction}>
+              Login with Phone Number
+            </Button>
           </div>
           <br />
           <h5 onClick={() => switchForm((s) => !s)} className="hover:pointer">
@@ -250,7 +266,7 @@ export default function Login({ switchForm }) {
           </div>
         </div>
       )}
-      {forgotp && (
+      {(forgotp || phoneSignIn) && (
         <div>
           <Otp onSuccessCallback={func1} />
         </div>
