@@ -90,7 +90,6 @@ export default function AllAsanas() {
         }
       );
       if (response.ok) {
-        console.log("Asana updated successfully");
         setAsanas((prevAsanas) =>
           prevAsanas.map((asana) => (asana.id === asanaId ? modalData : asana))
         );
@@ -107,8 +106,6 @@ export default function AllAsanas() {
     const handleDelete = async () => {
       try {
         const asanaId = Number(rowData.id);
-        console.log("Deleting asana with ID:", asanaId);
-
         const response = await fetch(
           `http://localhost:4000/content/video/deleteAsana/${asanaId}`,
           {
@@ -120,12 +117,9 @@ export default function AllAsanas() {
         );
 
         if (response.ok) {
-          console.log("Response from server:", response);
           setAsanas((prevAsanas) =>
             prevAsanas.filter((asana) => asana.id !== asanaId)
           );
-          console.log("Asana deleted successfully");
-          console.log("Updated asanas state:", asanas);
         } else {
           console.log("Error deleting asana:", response.status);
         }

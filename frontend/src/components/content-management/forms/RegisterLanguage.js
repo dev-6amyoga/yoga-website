@@ -31,7 +31,6 @@ export default function RegisterLanguageForm() {
     e.preventDefault();
     const language = document.querySelector("#language").value;
     if (language === "") {
-      console.log("Enter a language!");
       notify();
     } else {
       for (var lang in tableLanguages) {

@@ -80,7 +80,6 @@ export default function AllPlaylists() {
   const updateData = async () => {
     try {
       const playlistId = Number(modalData.playlist_id);
-      console.log(modalData);
       const response = await fetch(
         `http://localhost:4000/content/playlists/updatePlaylist/${playlistId}`,
         {
@@ -92,7 +91,6 @@ export default function AllPlaylists() {
         }
       );
       if (response.ok) {
-        console.log("Playlist updated successfully");
         setPlaylist1((prev) =>
           prev.map((p1) => (p1.playlist_id === playlistId ? modalData : p1))
         );
@@ -126,11 +124,9 @@ export default function AllPlaylists() {
         }
       );
       if (response.ok) {
-        console.log("Response from server:", response);
         setPlaylist1((prev) =>
           prev.filter((playlist) => playlist.playlist_id !== playlistId)
         );
-        console.log("Playlist deleted successfully");
       } else {
         console.log("Error deleting playlist:", response.status);
       }
@@ -152,7 +148,6 @@ export default function AllPlaylists() {
     };
 
     const handleUpdate = async () => {
-      console.log("IN UPDATE!");
       setModalData(rowData);
       setModalState(true);
     };

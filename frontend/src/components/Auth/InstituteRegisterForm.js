@@ -32,7 +32,6 @@ export default function InstituteRegisterForm({
             ?.map((c) => ({ label: c.name, value: c.name }))
         );
       } else {
-        console.log("countries search init");
         setCountriesSearch(() =>
           countries?.map((country) => ({
             label: country.name,
@@ -55,7 +54,6 @@ export default function InstituteRegisterForm({
             ?.map((s) => ({ label: s.name, value: s.name }))
         );
       } else {
-        console.log("states search init");
         setStatesSearch(() =>
           states?.map((s) => ({
             label: s.name,
@@ -110,7 +108,6 @@ export default function InstituteRegisterForm({
       method: "GET",
     })
       .then((res) => {
-        console.log("got states");
         setStates(res.data.states || []);
       })
       .catch((err) => {});
@@ -137,9 +134,6 @@ export default function InstituteRegisterForm({
   const validateAndSubmit = useCallback(
     (e) => {
       e.preventDefault();
-
-      console.log(selectedCountry, selectedState, selectedCity);
-
       if (selectedState && !states.find((s) => s.name === selectedState)) {
         toast("Please select a valid state", {
           type: "error",
@@ -181,7 +175,6 @@ export default function InstituteRegisterForm({
     if (selectedCountry && countries.find((c) => c.name === selectedCountry)) {
       setSelectedState("");
       setSelectedCity("");
-      console.log("cleared state and city");
       getStates(selectedCountry);
     }
   }, [selectedCountry, getStates]);
@@ -189,7 +182,6 @@ export default function InstituteRegisterForm({
   useEffect(() => {
     if (selectedState) {
       setSelectedCity("");
-      console.log("cleared city");
       getCities(selectedState);
     }
   }, [selectedState, getCities]);

@@ -7,6 +7,7 @@ import {
   Input,
   Table,
   Select,
+  Note,
 } from "@geist-ui/core";
 import React, { useCallback, useEffect, useState } from "react";
 // import { useNavigate } from "react-router-dom";
@@ -35,6 +36,7 @@ function StudentPlan() {
   const [selectedValidity, setSelectedValidity] = useState(30);
   const [selectedCurrency, setSelectedCurrency] = useState(1);
   const [allCurrencies, setAllCurrencies] = useState([]);
+  const [planId, setPlanId] = useState(0);
 
   const calculateEndDate = (validityDays) => {
     const endDate = new Date(today);
@@ -45,12 +47,41 @@ function StudentPlan() {
     setSelectedValidity(validity);
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/user-plan/get-user-plan-by-id",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_id: user.user_id }),
+          }
+        );
+        const data = await response.json();
+        if (data["userPlan"]) {
+          console.log(data["userPlan"]);
+          console.log(data["userPlan"]["plan_id"]);
+          setPlanId(data["userPlan"]["plan_id"]);
+        } else {
+          notify("You don't have a plan yet! Purchase one to continue");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, [user.user_id]);
+
   const fetchPlans = useCallback(async () => {
     try {
       const response = await fetch(
-        "http://localhost:4000/plan/get-all-student-plans"
+        "http://localhost:4000/plan/get-all-student-plan"
       );
       const data = await response.json();
+      console.log("DATA IS : ", data);
       setAllPlans(data?.plans);
     } catch (error) {
       notify("Error fetching plans", { type: "error" });
@@ -78,6 +109,10 @@ function StudentPlan() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (planId != 0) {
+      notify("You have an active plan! You can't purchase a new plan.");
+      return;
+    }
     const discount_coupon_id = document.querySelector(
       "#discount_coupon_id"
     ).value;
@@ -92,7 +127,7 @@ function StudentPlan() {
       plan_id: cardData.plan_id,
       discount_coupon_id: discount_coupon_id,
       referral_code_id: referral_code_id,
-      amount: 100,
+      amount: cardData.pricing[0].denomination * 118,
       currency: "INR",
     };
     try {
@@ -176,6 +211,20 @@ function StudentPlan() {
 
   return (
     <StudentPageWrapper heading="Plans">
+      <div>
+        {planId === 0 && (
+          <Note type="error" label="Note" filled width={70}>
+            Please purchase a subscription to unlock all features!.
+          </Note>
+        )}
+      </div>
+      <div>
+        {planId != 0 && (
+          <Note type="warning" label="Note" filled width={70}>
+            You have an already active plan!
+          </Note>
+        )}
+      </div>
       <div className="flex flex-col items-center justify-center py-20">
         <Table width={100} data={allPlans} className="bg-white ">
           <Table.Column prop="plan_id" label="Plan ID" />
@@ -195,6 +244,18 @@ function StudentPlan() {
             }}
           />
           <Table.Column
+            prop="pricing"
+            label="Price"
+            render={(data) => {
+              return data
+                ? data[0].currency.short_tag +
+                    " " +
+                    data[0].denomination +
+                    " + 18% GST"
+                : 0;
+            }}
+          />
+          <Table.Column
             prop="operation"
             label="Purchase"
             width={150}
@@ -204,7 +265,7 @@ function StudentPlan() {
         <Divider />
         {showCard && (
           <Card>
-            <h4>{cardData.name}</h4>
+            <h3>{cardData.name}</h3>
             <Divider />
             <h5>Features:</h5>
             <br />
@@ -228,6 +289,14 @@ function StudentPlan() {
               onSubmit={handleSubmit}
               className="flex flex-col gap-4 w-full"
             >
+              <h5>
+                Price :{" "}
+                {cardData.pricing[0].currency.short_tag +
+                  " " +
+                  cardData.pricing[0].denomination}{" "}
+                + 18% GST
+              </h5>
+              <Divider />
               <h5>Validity : </h5>
               {/* later fetch from db */}
               <ButtonGroup type="warning" ghost>
@@ -267,15 +336,20 @@ function StudentPlan() {
                   365 days
                 </Button>
               </ButtonGroup>
-              <Divider />
-              <p> Plan Start Date : {formattedDate}</p>
-              <p> Plan End Date: {calculateEndDate(selectedValidity)}</p>
+              <p>
+                {" "}
+                <h5>Plan Start Date :</h5> {formattedDate}
+              </p>
+              <p>
+                {" "}
+                <h5>Plan End Date:</h5> {calculateEndDate(selectedValidity)}
+              </p>
               <Divider />
               <Input width="100%" id="discount_coupon_id">
-                Discount Coupon
+                <h5>Discount Coupon</h5>
               </Input>
               <Input width="100%" id="referral_code_id">
-                Referral Code
+                <h5>Referral Code</h5>
               </Input>
               <Button htmlType="submit">Purchase</Button>
             </form>

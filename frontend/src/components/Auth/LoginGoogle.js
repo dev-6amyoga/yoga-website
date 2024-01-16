@@ -13,7 +13,6 @@ export default function LoginGoogle() {
 
   useEffect(() => {
     setClientID(process.env.REACT_APP_GOOGLE_CLIENT_ID);
-    // console.log(process.env.REACT_APP_GOOGLE_CLIENT_ID);
   }, []);
 
   async function verify_login(email, name) {
@@ -54,7 +53,6 @@ export default function LoginGoogle() {
             const jwt_token = credentialResponse.credential
               ? credentialResponse.credential
               : null;
-            console.log(jwt_token);
             const baseURL = "http://localhost:4000";
             const payload = await axios.post(`${baseURL}/auth/verify-google`, {
               client_id: clientID,
@@ -66,7 +64,6 @@ export default function LoginGoogle() {
               const name = payload.data.name;
               verify_login(email, name);
             } else {
-              console.log("no");
             }
           }}
           onError={() => {

@@ -14,7 +14,7 @@ export default function StudentNavbar() {
   const [userPlan, setUserPlan] = useState({});
   const [planId, setPlanId] = useState(0);
   const [disabled, setDisabled] = useState(false);
-  const [tailorMade, setTailorMade] = useState(false);
+  const [disabledTailorMade, setDisabledTailorMade] = useState(false);
   useEffect(() => {
     const fetchPlanData = async () => {
       try {
@@ -29,20 +29,19 @@ export default function StudentNavbar() {
           }
         );
         const data = await response.json();
-        // console.log({ data });
         if (data["userPlan"]) {
           setUserPlan(data["userPlan"]);
           setPlanId(data["userPlan"]["plan_id"]);
           if (data?.userPlan?.plan?.has_playlist_creation) {
-            setTailorMade(true);
+            setDisabledTailorMade(false);
           } else {
-            setTailorMade(false);
+            setDisabledTailorMade(true);
           }
         } else {
           setDisabled(true);
         }
       } catch (error) {
-        setTailorMade(false);
+        setDisabledTailorMade(false);
         console.log(error);
       }
     };
@@ -82,17 +81,20 @@ export default function StudentNavbar() {
               onClick={() => navigate("/student/playlist-view")}
               disabled={disabled}
             >
-              6AM Yoga Playlists
+              Playlist Player
             </Button>
             <Button
               onClick={() => navigate("/student/register-new-playlist")}
-              disabled={!tailorMade}
+              disabled={disabledTailorMade}
             >
               Make your own Playlist
             </Button>
 
             <Button>About Us</Button>
             <Button>Contact Us</Button>
+            <Button onClick={() => navigate("/student/transactions")}>
+              Transaction History
+            </Button>
             <hr />
             <Button
               onClick={() => navigate("/student/my-profile")}

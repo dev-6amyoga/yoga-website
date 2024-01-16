@@ -10,7 +10,7 @@ export default function RegisterVideoForm() {
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [asana_category, setAsanaCategory] = useState("");
   const [asana_type, setAsanaType] = useState("");
-  const [asana_difficulty, setAsanaDifficulty] = useState("");
+  const [asana_difficulty, setAsanaDifficulty] = useState(null);
   const [counter, setCounter] = useState("");
   const [muted, setMuted] = useState("");
   const [message_difficulty, setMessage_difficulty] = useState("");
@@ -31,9 +31,6 @@ export default function RegisterVideoForm() {
   };
   const handler_type = (val) => {
     setAsanaType(val);
-  };
-  const handler_difficulty = (val) => {
-    setAsanaDifficulty(val);
   };
   const [message1] = useState(
     "Do you want to proceed with the following updates?"
@@ -210,7 +207,7 @@ export default function RegisterVideoForm() {
       updateType: false,
       updateDifficulty: false,
     };
-    console.log(asana_type, muted, counter);
+    console.log(asana_type, muted, counter, asana_difficulty);
     for (var sub_asana in data) {
       totalCount = totalCount + 1;
       if (data[sub_asana]["asana_name"] === asanaName) {
@@ -381,6 +378,10 @@ export default function RegisterVideoForm() {
     }
   };
 
+  const handleDifficulty = (val) => {
+    setAsanaDifficulty(val);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const asanaName = document.querySelector("#asana_name").value;
@@ -388,6 +389,7 @@ export default function RegisterVideoForm() {
     const category = asana_category;
     const language = selectedLanguage;
     const videoURL = document.querySelector("#asana_url").value;
+    console.log(asana_difficulty);
     presentAlready(
       asanaName,
       description,
@@ -444,14 +446,19 @@ export default function RegisterVideoForm() {
 
           <Text h6>Asana Difficulty</Text>
           <Select
-            value={asana_difficulty}
-            placeholder="Beginner"
-            onChange={handler_difficulty}
-            id="asana_difficulty"
+            multiple
+            placeholder="Choose Difficulty"
+            onChange={handleDifficulty}
           >
-            <Select.Option value="Beginner">Beginner</Select.Option>
-            <Select.Option value="Intermediate">Intermediate</Select.Option>
-            <Select.Option value="Advanced">Advanced</Select.Option>
+            <Select.Option key="Beginner" value="Beginner">
+              Beginner
+            </Select.Option>
+            <Select.Option key="Intermediate" value="Intermediate">
+              Intermediate
+            </Select.Option>
+            <Select.Option key="Advanced" value="Advanced">
+              Advanced
+            </Select.Option>
           </Select>
 
           <Input width="100%" id="asana_url">

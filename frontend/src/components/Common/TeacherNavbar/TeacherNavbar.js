@@ -92,7 +92,7 @@ export default function TeacherNavbar() {
               disabled={disabled}
               onClick={() => navigate("/teacher/playlist")}
             >
-              6AM Yoga Playlists
+              Playlist Player
             </Button>
             <Button disabled={!tailorMade}>Make your own Playlist</Button>
 

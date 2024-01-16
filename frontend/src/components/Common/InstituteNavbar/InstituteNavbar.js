@@ -20,9 +20,6 @@ export default function InstituteNavbar() {
   };
 
   useEffect(() => {}, [user]);
-  // useEffect(() => {
-  //     console.log(institutes);
-  // }, [institutes]);
 
   return (
     <div>
@@ -73,7 +70,6 @@ export default function InstituteNavbar() {
                 Purchase A Plan
               </Link>
             </Button>
-
             <Button className="w-full">
               <Link
                 to={"/institute/member-management"}
@@ -115,6 +111,15 @@ export default function InstituteNavbar() {
                 User Settings
               </Link>
             </Button>
+            <Button className="w-full">
+              <Link
+                to={"/institute/view-transactions"}
+                className="w-full text-zinc-800"
+              >
+                View Transactions
+              </Link>
+            </Button>
+
             <hr />
             {user ? (
               <>

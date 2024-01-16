@@ -5,6 +5,7 @@ import StudentMain from "../pages/student/StudentMain";
 import StudentPlan from "../pages/student/StudentPlan";
 import StudentProfile from "../pages/student/StudentProfile";
 import StudentSettings from "../pages/student/StudentSettings";
+import StudentTransactionHistory from "../pages/student/StudentTransactionHistory";
 export const StudentRoutes = [
   {
     path: "/student/playlist-view",
@@ -34,5 +35,9 @@ export const StudentRoutes = [
   {
     path: "/student/settings",
     element: <StudentSettings />,
+  },
+  {
+    path: "/student/transactions",
+    element: <StudentTransactionHistory />,
   },
 ];

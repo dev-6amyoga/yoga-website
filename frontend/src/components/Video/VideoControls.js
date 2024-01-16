@@ -1,7 +1,7 @@
 import usePlaylistStore from "../../store/PlaylistStore";
 import useVideoStore, { STATE_VIDEO_LOADING } from "../../store/VideoStore";
 // import asanas from "../../data/asanas.json";
-import { Loading } from "@geist-ui/core";
+import { Loading, Tooltip } from "@geist-ui/core";
 import { useEffect } from "react";
 import {
   FaBackward,
@@ -83,18 +83,21 @@ export default function VideoControls() {
   return (
     <div>
       <div className="bg-yblue-900 flex gap-8 items-center justify-center text-white rounded-xl my-4 p-2">
-        <button
-          className="w-6 h-6"
-          onClick={() => {
-            popFromArchive(-1);
-          }}
-        >
-          <FaStepBackward className="w-full h-full" />
-        </button>
-
-        <button onClick={handleSeekBackward}>
-          <FaBackward />
-        </button>
+        <Tooltip text={"Previous Video"} type="dark">
+          <button
+            className="w-6 h-6"
+            onClick={() => {
+              popFromArchive(-1);
+            }}
+          >
+            <FaStepBackward className="w-full h-full" />
+          </button>
+        </Tooltip>
+        <Tooltip text={"Rewind"} type="dark">
+          <button onClick={handleSeekBackward}>
+            <FaBackward />
+          </button>
+        </Tooltip>
 
         <button
           className={`w-6 h-6 ${
@@ -117,14 +120,16 @@ export default function VideoControls() {
             <Loading color="#fff" />
           )}
         </button>
-
-        <button onClick={handleSeekFoward}>
-          <FaForward />
-        </button>
-
-        <button className="w-6 h-6" onClick={handleNextVideo}>
-          <FaStepForward className="w-full h-full" />
-        </button>
+        <Tooltip text={"Fast Forward"} type="dark">
+          <button onClick={handleSeekFoward}>
+            <FaForward />
+          </button>
+        </Tooltip>
+        <Tooltip text={"Next Video"} type="dark">
+          <button className="w-6 h-6" onClick={handleNextVideo}>
+            <FaStepForward className="w-full h-full" />
+          </button>
+        </Tooltip>
       </div>
     </div>
   );

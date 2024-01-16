@@ -28,8 +28,6 @@ export default function AllLanguages() {
   const deleteLanguage = async () => {
     try {
       const languageId = delLanguageId;
-      console.log(languageId, "TO BE DELETED");
-
       const response = await fetch(
         `http://localhost:4000/content/video/deleteLanguage/${languageId}`,
         {
@@ -40,11 +38,9 @@ export default function AllLanguages() {
         }
       );
       if (response.ok) {
-        console.log("Response from server:", response);
         setLanguages((prev) =>
           prev.filter((lang) => lang.language_id !== languageId)
         );
-        console.log("Language deleted successfully");
       } else {
         console.log("Error deleting Language:", response.status);
       }

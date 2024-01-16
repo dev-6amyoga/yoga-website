@@ -14,10 +14,16 @@ import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import { useCallback, useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-
+import RenderRazorpay from "../../student/RenderRazorpay";
 import { toast } from "react-toastify";
 
 export default function PurchaseAPlan() {
+  const [displayRazorpay, setDisplayRazorpay] = useState(false);
+  const [orderDetails, setOrderDetails] = useState({
+    orderId: null,
+    currency: null,
+    amount: null,
+  });
   const [refreshLoading, setRefreshLoading] = useState(false);
   const notify = (x) => toast(x);
   const [teachers, setTeachers] = useState([]);
@@ -48,7 +54,6 @@ export default function PurchaseAPlan() {
 
   useEffect(() => {
     for (var x = 0; x < allPlans.length; x++) {
-      // console.log(allPlans[x].name);
       var newPlan = {
         plan_name: allPlans[x].name,
         has_basic_playlist: allPlans[x].has_basic_playlist,
@@ -57,16 +62,10 @@ export default function PurchaseAPlan() {
         has_self_audio_upload: allPlans[x].has_self_audio_upload,
         number_of_teachers: [allPlans[x].number_of_teachers],
       };
-      console.log(newPlan);
       if (modifiedPlans.length === 0) {
         setModifiedPlans((prevPlans) => [...prevPlans, newPlan]);
       } else {
-        for (var y = 0; y < modifiedPlans.length; y++) {
-          console.log("hi");
-        }
       }
-
-      // setModifiedPlans((prevPlans) => [...prevPlans, newPlan]);
     }
   }, [allPlans]);
 
@@ -85,6 +84,7 @@ export default function PurchaseAPlan() {
         );
         const data = await response.json();
         if (data["userPlan"]) {
+          console.log(data["userPlan"]);
           console.log(data["userPlan"]["plan_id"]);
           setPlanId(data["userPlan"]["plan_id"]);
         } else {
@@ -158,20 +158,70 @@ export default function PurchaseAPlan() {
     getTeachers();
   }, [getTeachers]);
 
-  async function registerUserPlan(userPlanData) {
+  async function registerUserPlan() {
+    console.log("in reg user plan");
+    const discount_coupon_id = document.querySelector(
+      "#discount_coupon_id"
+    ).value;
+    const referral_code_id = document.querySelector("#referral_code_id").value;
+    const userPlanData = {
+      purchase_date: formattedDate,
+      validity_from: formattedDate,
+      validity_to: calculateEndDate(selectedValidity),
+      cancellation_date: null,
+      auto_renewal_enabled: false,
+      user_id: user.user_id,
+      plan_id: cardData.plan_id,
+      discount_coupon_id: 0,
+      referral_code_id: 0,
+      amount: 100,
+      currency: "INR",
+    };
+    console.log(userPlanData);
     try {
-      const response = await fetch(
-        "http://localhost:4000/user-plan/register-user-plan",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userPlanData),
-        }
-      );
+      const response = await fetch("http://localhost:4000/user-plan/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userPlanData),
+      });
       if (response.ok) {
-        notify("New User-Plan added successfully");
+        for (var t1 = 0; t1 < teachers.length; t1++) {
+          const userPlanData = {
+            purchase_date: formattedDate,
+            validity_from: formattedDate,
+            validity_to: calculateEndDate(selectedValidity),
+            cancellation_date: null,
+            auto_renewal_enabled: false,
+            user_id: teachers[t1].user_id,
+            plan_id: cardData.plan_id,
+            discount_coupon_id: 0,
+            referral_code_id: 0,
+            amount: 100,
+            currency: "INR",
+          };
+          console.log(userPlanData);
+          try {
+            const response = await fetch(
+              "http://localhost:4000/user-plan/register",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(userPlanData),
+              }
+            );
+            if (response.ok) {
+              notify("New User-Plan added successfully");
+            } else {
+              notify("An error occured!");
+            }
+          } catch (err) {
+            notify(err);
+          }
+        }
       } else {
         const errorData = await response.json();
         notify(errorData.error);
@@ -186,8 +236,11 @@ export default function PurchaseAPlan() {
     if (planId != 0) {
       notify("You have an active plan! You can't purchase a new plan.");
     } else {
-      const discount_code = document.querySelector("#discount_code").value;
-      const referral_code = document.querySelector("#referral_code").value;
+      const discount_coupon_id = document.querySelector(
+        "#discount_coupon_id"
+      ).value;
+      const referral_code_id =
+        document.querySelector("#referral_code_id").value;
       const userPlanData_admin = {
         purchase_date: formattedDate,
         validity_from: formattedDate,
@@ -196,10 +249,11 @@ export default function PurchaseAPlan() {
         auto_renewal_enabled: false,
         user_id: user.user_id,
         plan_id: cardData.plan_id,
-        discount_code: discount_code,
-        referral_code: referral_code,
+        discount_coupon_id: discount_coupon_id,
+        referral_code_id: referral_code_id,
+        amount: 100,
+        currency: "INR",
       };
-      registerUserPlan(userPlanData_admin);
       if (teachers.length > cardData.number_of_teachers) {
         notify(
           "Please purchase a higher plan. You have more teachers than the selected plan permits."
@@ -215,20 +269,48 @@ export default function PurchaseAPlan() {
             "You have the exact number of teachers as mentioned in the selected plan permits. You can add more teachers in the future by purchasing a higher plan."
           );
         }
-        for (var t1 = 0; t1 < teachers.length; t1++) {
-          const userPlanData_teacher = {
-            purchase_date: formattedDate,
-            validity_from: formattedDate,
-            validity_to: calculateEndDate(selectedValidity),
-            cancellation_date: null,
-            auto_renewal_enabled: false,
-            user_id: teachers[t1].user_id,
-            plan_id: cardData.plan_id,
-            discount_code: discount_code,
-            referral_code: referral_code,
-          };
-          registerUserPlan(userPlanData_teacher);
+
+        try {
+          const response = await Fetch({
+            url: "http://localhost:4000/payment/order",
+            method: "POST",
+            data: userPlanData_admin,
+          });
+          if (response.status === 200) {
+            const responseJson = response.data;
+            const razorpayOrder = responseJson.order;
+            if (razorpayOrder && razorpayOrder["id"]) {
+              setOrderDetails({
+                orderId: razorpayOrder["id"],
+                currency: razorpayOrder["currency"],
+                amount: razorpayOrder["amount"],
+              });
+              setDisplayRazorpay(true);
+            }
+          } else {
+            const errorData = await response.json();
+            notify(errorData.error);
+          }
+        } catch (error) {
+          console.log(error);
         }
+
+        // for (var t1 = 0; t1 < teachers.length; t1++) {
+        //   const userPlanData_teacher = {
+        //     purchase_date: formattedDate,
+        //     validity_from: formattedDate,
+        //     validity_to: calculateEndDate(selectedValidity),
+        //     cancellation_date: null,
+        //     auto_renewal_enabled: false,
+        //     user_id: teachers[t1].user_id,
+        //     plan_id: cardData.plan_id,
+        //     discount_coupon_id: discount_coupon_id,
+        //     referral_code_id: referral_code_id,
+        //     amount: 100,
+        //     currency: "INR",
+        //   };
+        //   // registerUserPlan(userPlanData_teacher);
+        // }
       }
     }
   };
@@ -385,16 +467,29 @@ export default function PurchaseAPlan() {
               <p> Plan Start Date : {formattedDate}</p>
               <p> Plan End Date: {calculateEndDate(selectedValidity)}</p>
               <Divider />
-              <Input width="100%" id="discount_code">
+              <Input width="100%" id="discount_coupon_id">
                 Discount Code
               </Input>
-              <Input width="100%" id="referral_code">
+              <Input width="100%" id="referral_code_id">
                 Referral Code
               </Input>
               <Button htmlType="submit">Purchase</Button>
             </form>
           </Card>
         )}
+        <RenderRazorpay
+          userId={user?.user_id}
+          keyId={process.env.REACT_APP_RAZORPAY_KEY_ID}
+          keySecret={process.env.REACT_APP_RAZORPAY_KEY_SECRET}
+          orderId={orderDetails.orderId}
+          currency={orderDetails.currency}
+          amount={orderDetails.amount}
+          payment_for={"user_plan"}
+          redirectUrl={"/student"}
+          onSuccessCallback={registerUserPlan}
+          displayRazorpay={displayRazorpay}
+          setDisplayRazorpay={setDisplayRazorpay}
+        />
       </div>
       {/* </div> */}
     </InstitutePageWrapper>

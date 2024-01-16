@@ -33,14 +33,12 @@ export default function AdminNavbar() {
                 Dashboard
               </Link>
             </Button>
-            <Button className="w-full">
-              <Link
-                to={"/content/video/create"}
-                className="w-full text-zinc-800"
-              >
-                Member Management
-              </Link>
-            </Button>
+            <ButtonDropdown className="w-full">
+              <ButtonDropdown.Item main>Member Management</ButtonDropdown.Item>
+              <ButtonDropdown.Item>Institutes</ButtonDropdown.Item>
+              <ButtonDropdown.Item>Students</ButtonDropdown.Item>
+              <ButtonDropdown.Item>Teachers</ButtonDropdown.Item>
+            </ButtonDropdown>
             <ButtonDropdown className="w-full">
               <ButtonDropdown.Item main>Content Management</ButtonDropdown.Item>
               <ButtonDropdown.Item>
@@ -89,15 +87,6 @@ export default function AdminNavbar() {
                 </Link>
               </ButtonDropdown.Item>
             </ButtonDropdown>
-
-            <Button className="w-full">
-              <Link
-                to={"/content/video/create"}
-                className="w-full text-zinc-800"
-              >
-                Account Management
-              </Link>
-            </Button>
             <ButtonDropdown className="w-full">
               <ButtonDropdown.Item main>Plan Management</ButtonDropdown.Item>
               <ButtonDropdown.Item>
@@ -119,50 +108,15 @@ export default function AdminNavbar() {
             </ButtonDropdown>
             <Button className="w-full">
               <Link
-                to={"/content/video/create"}
-                className="w-full text-zinc-800"
-              >
-                Wallets
-              </Link>
-            </Button>
-            <Button className="w-full">
-              <Link
                 to={"/admin/discount-management"}
                 className="w-full text-zinc-800"
               >
                 Discount Management
               </Link>
             </Button>
-            <Button className="w-full">
-              <Link
-                to={"/content/video/create"}
-                className="w-full text-zinc-800"
-              >
-                Free Videos
-              </Link>
-            </Button>
-            <Button className="w-full">
-              <Link
-                to={"/content/video/create"}
-                className="w-full text-zinc-800"
-              >
-                Reports
-              </Link>
-            </Button>
+            <Button className="w-full">Free Videos</Button>
+            <Button className="w-full">Reports</Button>
             <hr />
-            <Button className="w-full">
-              <Link
-                to={"/admin/institute/settings"}
-                className="w-full text-zinc-800"
-              >
-                Institute Settings
-              </Link>
-            </Button>
-            <Button className="w-full">
-              <Link to={"/admin/settings"} className="w-full text-zinc-800">
-                User Settings
-              </Link>
-            </Button>
             <hr />
             {user ? (
               <>

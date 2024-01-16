@@ -5,6 +5,7 @@ import InstituteSettings from "../pages/institute/settings/InstituteSettings";
 import UserSettings from "../pages/institute/settings/UserSettings";
 import MemberManagement from "../pages/institute/settings/MemberManagement";
 import PurchaseAPlan from "../pages/institute/settings/PurchaseAPlan";
+import TransactionHistoryInstitute from "../pages/institute/settings/TransactionHistoryInstitute";
 export const InstituteRoutes = [
   {
     path: "/institute",
@@ -29,5 +30,9 @@ export const InstituteRoutes = [
   {
     path: "institute/purchase-a-plan",
     element: <PurchaseAPlan />,
+  },
+  {
+    path: "institute/view-transactions",
+    element: <TransactionHistoryInstitute />,
   },
 ];
