@@ -410,4 +410,38 @@ router.post("/reset-password", async (req, res) => {
       .json({ error: "Failed to update user" });
   }
 });
+
+router.post("/get-by-email-and-name", async (req, res) => {
+  const { email, name } = req.body;
+
+  if (!email || !name) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Missing required fields" });
+  }
+
+  try {
+    const user = await User.findOne({
+      where: { email: email, name: name },
+      include: [{ model: Role, attributes: ["name"] }],
+    });
+
+    if (!user) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ error: "User does not exist" });
+    }
+
+    const plan = await UserPlan.findOne({
+      include: [{ model: User, where: { user_id: user.user_id } }],
+    });
+
+    return res.status(HTTP_OK).json({ user, plan });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to fetch user" });
+  }
+});
 module.exports = router;
