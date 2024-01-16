@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from "zustand"
 
 const useUserStore = create((set) => ({
   user: null,
@@ -14,8 +14,11 @@ const useUserStore = create((set) => ({
   userPlan: null,
   setUserPlan: (userPlan) => set(() => ({ userPlan: userPlan })),
 
-  token: null,
-  setToken: (token) => set(() => ({ token: token })),
+  accessToken: null,
+  setAccessToken: (accessToken) => set(() => ({ accessToken: accessToken })),
+
+  refreshToken: null,
+  setRefreshToken: (refreshToken) => set(() => ({ refreshToken: refreshToken })),
 
   currentInstituteId: null,
   setCurrentInstituteId: (id) => set(() => ({ currentInstituteId: id })),

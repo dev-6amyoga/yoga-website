@@ -1,4 +1,5 @@
-import axios from "axios";
+import axios from "axios"
+import useUserStore from "../store/UserStore"
 
 export const Fetch = ({
     url = null,
@@ -11,7 +12,7 @@ export const Fetch = ({
     let h = { ...headers };
 
     if (token) {
-        h["Authorization"] = `Bearer ${token}`;
+        h["Authorization"] = `Bearer ${token || useUserStore.getState().accessToken}`;
     }
 
     if (data) {
