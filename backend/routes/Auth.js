@@ -104,9 +104,13 @@ router.post("/register", async (req, res) => {
   // check if user exists
   const user = await UserSQL.findOne({
     where: {
-      [Op.or]: [{ username: username }, { email: email_id }],
+      [Op.or]: [
+        { username: username },
+        { email: email_id },
+        { phone: phone_no },
+      ],
     },
-    attributes: ["user_id", "name", "username", "email"],
+    attributes: ["user_id", "name", "username", "email", "phone"],
   });
 
   if (user && user.username === username)
@@ -116,6 +120,11 @@ router.post("/register", async (req, res) => {
 
   if (user && user.email === email_id)
     return res.status(HTTP_BAD_REQUEST).json({ error: "Email already exists" });
+
+  if (user && user.phone === phone_no)
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Phone No. already exists" });
 
   // hash password
   const salt = await brypt.genSalt(10);

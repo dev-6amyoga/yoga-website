@@ -359,4 +359,55 @@ router.get("/get-all-teachers", async (req, res) => {
   }
 });
 
+router.post("/reset-password", async (req, res) => {
+  const { user_id, new_password, confirm_new_password } = req.body;
+  console.log(req.body);
+  if (!user_id || !new_password || !confirm_new_password) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Missing required fields" });
+  }
+  if (new_password !== confirm_new_password) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Passwords do not match" });
+  }
+  console.log("hi");
+  try {
+    const user = await User.findByPk(user_id);
+
+    if (!user) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ error: "User does not exist" });
+    }
+    console.log(new_password, user.password);
+    const samePasswords = await bcrypyt.compare(new_password, user.password);
+    if (samePasswords) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ error: "Password not allowed; try again" });
+    }
+
+    const hashedPassword = await bcrypyt.hash(new_password, 10);
+    const n = await User.update(
+      { password: hashedPassword },
+      {
+        where: { user_id: user_id },
+      }
+    );
+
+    if (n.length > 0 && n[0] !== 1) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ error: "User does not exist" });
+    }
+    return res.status(HTTP_OK).json({ message: "Updated successfully" });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to update user" });
+  }
+});
 module.exports = router;
