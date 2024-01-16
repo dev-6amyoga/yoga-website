@@ -27,7 +27,7 @@ const { Currency } = require("./models/sql/Currency");
 const { Transaction } = require("./models/sql/Transaction");
 const { DiscountCoupon } = require("./models/sql/DiscountCoupon");
 const {
-    DiscountCouponApplicablePlan,
+  DiscountCouponApplicablePlan,
 } = require("./models/sql/DiscountCouponApplicablePlan");
 const { Invite } = require("./models/sql/Invite");
 
@@ -47,6 +47,7 @@ const inviteRouter = require("./routes/Invite");
 const paymentRouter = require("./routes/Payment");
 const userInstituteRouter = require("./routes/UserInstitute");
 const discountCouponRouter = require("./routes/DiscountCoupon");
+const transactionRouter = require("./routes/Transaction");
 
 // DEV : sample data creation
 const { bulkCreateSampleData } = require("./sample_data");
@@ -59,24 +60,24 @@ app.use(morgan("dev"));
 // initialize databases
 const mongoURI = process.env.MONGO_SRV_URL;
 mongoose
-    .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log("Connected to MongoDB Atlas"))
-    .catch((err) => console.log(err));
+  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("Connected to MongoDB Atlas"))
+  .catch((err) => console.log(err));
 
 initializeSequelize()
-    .then(() => {
-        console.log("Sequelize initialized");
-        bulkCreateSampleData()
-            .then(() => {
-                console.log("Sample data created!");
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    })
-    .catch((err) => {
-        console.log(err);
-    });
+  .then(() => {
+    console.log("Sequelize initialized");
+    // bulkCreateSampleData()
+    //     .then(() => {
+    //         console.log("Sample data created!");
+    //     })
+    //     .catch((err) => {
+    //         console.log(err);
+    //     });
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 // bind routers
 app.use("/content", asanaRouter);
@@ -94,9 +95,10 @@ app.use("/invite", inviteRouter);
 app.use("/payment", paymentRouter);
 app.use("/user-institute", userInstituteRouter);
 app.use("/discount-coupon", discountCouponRouter);
+app.use("/transaction", transactionRouter);
 
 const port = parseInt(process.env.SERVER_PORT);
 
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 });
