@@ -5,11 +5,16 @@ import { Link, useNavigate } from "react-router-dom";
 import useUserStore from "../../../store/UserStore";
 import { useCookies } from "react-cookie";
 import "./AdminNavbar.css";
+import { navigateToDashboard } from "../../../utils/navigateToDashboard";
+import { useEffect } from "react";
 
 export default function AdminNavbar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+
   let user = useUserStore((state) => state.user);
+  let currentRole = useUserStore((state) => state.currentRole);
+  let userPlan = useUserStore((state) => state.userPlan);
 
   const resetUserState = useUserStore((state) => state.resetUserState);
   const [cookies, setCookie, removeCookie] = useCookies([
@@ -23,6 +28,12 @@ export default function AdminNavbar() {
     resetUserState();
     navigate("/auth");
   };
+
+  useEffect(() => {
+    if (currentRole) {
+      navigateToDashboard(currentRole, userPlan, navigate);
+    }
+  }, [currentRole]);
 
   return (
     <div>

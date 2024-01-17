@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { create } from "zustand";
 
 const useUserStore = create((set) => ({
   user: null,
@@ -18,15 +17,9 @@ const useUserStore = create((set) => ({
   refreshToken: null,
   setRefreshToken: (refreshToken) =>
     set(() => ({ refreshToken: refreshToken })),
-  refreshToken: null,
-  setRefreshToken: (refreshToken) =>
-    set(() => ({ refreshToken: refreshToken })),
 
   currentInstituteId: null,
   setCurrentInstituteId: (id) => set(() => ({ currentInstituteId: id })),
-  refreshToken: null,
-  setRefreshToken: (refreshToken) =>
-    set(() => ({ refreshToken: refreshToken })),
 
   institutes: [],
   setInstitutes: (institutes) => set(() => ({ institutes: institutes })),
@@ -55,18 +48,6 @@ const useUserStore = create((set) => ({
         return r;
       });
       return { roles };
-    }),
-  institutes: [],
-  setInstitutes: (institutes) => set(() => ({ institutes: institutes })),
-  updateInstitute: (institute) =>
-    set((state) => {
-      const institutes = state.institutes.map((i) => {
-        if (i.institute_id === institute.institute_id) {
-          return institute;
-        }
-        return i;
-      });
-      return { institutes };
     }),
 
   resetUserState: () =>

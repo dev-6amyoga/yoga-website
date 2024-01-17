@@ -33,11 +33,10 @@ import React, { useEffect } from "react";
 
 export const withAuth = (props) => {
   return <div></div>;
-}
+};
 
- const user = useUserStore(state => state.user)
+//  const user = useUserStore(state => state.user)
 
- useEffect(() => {}, [user])
+//  useEffect(() => {}, [user])
 
-  user ? <>{}</>
- 
+//   user ? <>{}</>

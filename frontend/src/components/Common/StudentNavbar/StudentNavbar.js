@@ -6,13 +6,17 @@ import useUserStore from "../../../store/UserStore";
 // import StudentPlan from "../../../pages/student/StudentPlan";
 import { useCookies } from "react-cookie";
 import { Divider } from "@geist-ui/core";
+import { navigateToDashboard } from "../../../utils/navigateToDashboard";
 
 export default function StudentNavbar() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   let user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
-  const [userPlan, setUserPlan] = useState({});
+  let currentRole = useUserStore((state) => state.currentRole);
+  let userPlan = useUserStore((state) => state.userPlan);
+  let setUserPlan = useUserStore((state) => state.setUserPlan);
+
   const [planId, setPlanId] = useState(0);
   const [disabled, setDisabled] = useState(false);
   const [disabledTailorMade, setDisabledTailorMade] = useState(false);
@@ -30,6 +34,12 @@ export default function StudentNavbar() {
     resetUserState();
     navigate("/auth");
   };
+
+  useEffect(() => {
+    if (currentRole) {
+      navigateToDashboard(currentRole, userPlan, navigate);
+    }
+  }, [currentRole]);
 
   useEffect(() => {
     const fetchPlanData = async () => {

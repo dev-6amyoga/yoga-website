@@ -19,6 +19,7 @@ function VerifyEmailCard({
   inviteToken,
   setConfirmEmail,
   handleAccept,
+  onSuccessCallback,
   handleReject,
   instituteName,
   expiryDiffSeconds,
@@ -45,7 +46,7 @@ function VerifyEmailCard({
         className="mb-4"
         onChange={(e) => setConfirmEmail(e.target.value)}
       /> */}
-      <Otp />
+      <Otp onSuccessCallback={onSuccessCallback} />
       <div className="flex gap-2">
         <Button type="success" onClick={handleAccept}>
           Accept
@@ -99,6 +100,7 @@ function UpdateDetailsCard({
 }
 
 export default function InvitePage() {
+  const [number, setNumber] = useState("");
   const [token, setToken] = useState(null);
   const [invite, setInvite] = useState(null);
   const [accepted, setAccepted] = useState(false);
@@ -153,6 +155,12 @@ export default function InvitePage() {
     e.preventDefault();
     console.log("DONE DONE!");
     setVerified(true);
+
+    // have phone number now
+    // if phone number matches that in invite, proceed, else return.
+    // if receiver id field is not null, retrieve user details, and login.
+    // if it is null, move to username password screen.
+
     // Fetch({
     //   url: "http://localhost:4000/invite/accept",
     //   method: "POST",
