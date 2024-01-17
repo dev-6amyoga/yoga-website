@@ -39,7 +39,7 @@ export default function StudentProfile() {
       <div className="flex flex-col items-center justify-center py-20">
         <div>
           <Card type="secondary" shadow hoverable>
-            <Text h2>Hello {user.name}</Text>
+            <Text h2>Hello {user?.name}</Text>
             <br />
             <Text h6>This is your profile page.</Text>
           </Card>
@@ -49,7 +49,7 @@ export default function StudentProfile() {
               <Input
                 width="100%"
                 name="name_profile"
-                placeholder={user.name}
+                placeholder={user?.name}
                 disabled={!isEditing}
                 // onChange={handleInputChange}
               >
@@ -58,7 +58,7 @@ export default function StudentProfile() {
               <Input
                 width="100%"
                 name="username_profile"
-                placeholder={user.username}
+                placeholder={user?.username}
                 disabled={!isEditing}
                 // onChange={handleInputChange}
               >
@@ -67,7 +67,7 @@ export default function StudentProfile() {
               <Input
                 width="100%"
                 name="email_profile"
-                placeholder={user.email}
+                placeholder={user?.email}
                 disabled={!isEditing}
                 // onChange={handleInputChange}
               >
@@ -76,7 +76,7 @@ export default function StudentProfile() {
               <Input
                 width="100%"
                 name="phone_profile"
-                placeholder={user.phone}
+                placeholder={user?.phone}
                 disabled={!isEditing}
                 // onChange={handleInputChange}
               >

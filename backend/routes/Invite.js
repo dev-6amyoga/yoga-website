@@ -110,9 +110,15 @@ router.post("/get-by-token", async (req, res) => {
   }
 });
 
+// if (!created) {
+//   await t.rollback();
+//   return res.status(HTTP_BAD_REQUEST).json({
+//     message: "Teacher already exists with the given email",
+//   });
+// }
+
 router.post("/create", async (req, res) => {
   const { user_id, name, email, phone, invite_type } = req.body;
-
   if (!user_id || !email || !invite_type || !name || !phone) {
     return res.status(HTTP_BAD_REQUEST).json({
       message: "Missing required fields",
@@ -129,73 +135,114 @@ router.post("/create", async (req, res) => {
       },
       { transaction: t }
     );
-
     if (!role) {
       await t.rollback();
       return res.status(HTTP_BAD_REQUEST).json({
         message: "Role not found",
       });
     }
-
-    // create a teacher
-    const [teacher, created] = await User.findOrCreate({
-      where: { email },
-      defaults: {
-        username: email,
+    const teacher1 = await User.findOne({
+      where: {
         name: name ? name : null,
         email: email,
         phone: phone ? phone : null,
-        is_google_login: false,
-        role_id: role.role_id,
+      },
+      defaults: {
+        name: name ? name : null,
+        email: email,
+        phone: phone ? phone : null,
       },
       transaction: t,
     });
-
-    if (!created) {
-      await t.rollback();
-      return res.status(HTTP_BAD_REQUEST).json({
-        message: "Teacher already exists with the given email",
-      });
-    }
     const token = tokenUtils.enc_token(email, phone, email);
     console.log("TOKEN : ", token);
-
-    mailTransporter.sendMail(
-      {
-        from: "dev.6amyoga@gmail.com",
-        to: email,
-        subject: "6AM Yoga | Teacher Invite",
-        text: `Welcome to 6AM Yoga! Please click on the link to accept the invite: http://localhost:3000/teacher/invite?token=${token}`,
-      },
-      async (err, info) => {
-        if (err) {
-          await t.rollback();
-          console.error(err);
-          res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            message: "Internal server error; try again",
-          });
-        } else {
-          await Invite.create(
-            {
-              token,
-              email,
-              invite_type,
-              expiry_date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
-              inviter_user_id: user_id,
-            },
-            { transaction: t }
-          );
-
-          await t.commit();
-
-          res.status(HTTP_OK).json({
-            message: "Invite sent",
-            token: token,
-          });
+    if (teacher1) {
+      mailTransporter.sendMail(
+        {
+          from: "dev.6amyoga@gmail.com",
+          to: email,
+          subject: "6AM Yoga | Teacher Invite",
+          text: `Welcome to 6AM Yoga! Please click on the link to accept the invite: http://localhost:3000/teacher/invite?token=${token}`,
+        },
+        async (err, info) => {
+          if (err) {
+            await t.rollback();
+            console.error(err);
+            res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+              message: "Internal server error; try again",
+            });
+          } else {
+            await Invite.create(
+              {
+                token,
+                email,
+                phone,
+                invite_type,
+                user_exists: true,
+                expiry_date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+                inviter_user_id: user_id,
+                receiver_user_id: teacher1.user_id,
+              },
+              { transaction: t }
+            );
+            //add entry in user-institute-plan-role?
+            await t.commit();
+            res.status(HTTP_OK).json({
+              message: "Invite sent",
+              token: token,
+            });
+          }
         }
-      }
-    );
+      );
+    } else {
+      const [teacher, created] = await User.findOrCreate({
+        where: { email },
+        defaults: {
+          username: email,
+          name: name ? name : null,
+          email: email,
+          phone: phone ? phone : null,
+          is_google_login: false,
+          role_id: role.role_id,
+        },
+        transaction: t1,
+      });
+      mailTransporter.sendMail(
+        {
+          from: "dev.6amyoga@gmail.com",
+          to: email,
+          subject: "6AM Yoga | Teacher Invite",
+          text: `Welcome to 6AM Yoga! Please click on the link to accept the invite: http://localhost:3000/teacher/invite?token=${token}`,
+        },
+        async (err, info) => {
+          if (err) {
+            await t1.rollback();
+            console.error(err);
+            res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+              message: "Internal server error; try again",
+            });
+          } else {
+            await Invite.create(
+              {
+                token,
+                email,
+                invite_type,
+                expiry_date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+                inviter_user_id: user_id,
+              },
+              { transaction: t1 }
+            );
 
+            await t1.commit();
+
+            res.status(HTTP_OK).json({
+              message: "Invite sent",
+              token: token,
+            });
+          }
+        }
+      );
+    }
     return res;
   } catch (err) {
     console.log(err);
@@ -206,8 +253,8 @@ router.post("/create", async (req, res) => {
 });
 
 router.post("/accept", async (req, res) => {
-  const { invite_token, confirm_email } = req.body;
-  if (!invite_token || !confirm_email) {
+  const { invite_token, confirm_phone } = req.body;
+  if (!invite_token || !confirm_phone) {
     return res.status(HTTP_BAD_REQUEST).json({
       message: "Missing required fields",
     });

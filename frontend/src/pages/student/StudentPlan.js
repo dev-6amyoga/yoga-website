@@ -57,7 +57,7 @@ function StudentPlan() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ user_id: user.user_id }),
+            body: JSON.stringify({ user_id: user?.user_id }),
           }
         );
         const data = await response.json();
@@ -72,8 +72,10 @@ function StudentPlan() {
         console.log(error);
       }
     };
-    fetchData();
-  }, [user.user_id]);
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
 
   const fetchPlans = useCallback(async () => {
     try {
@@ -123,7 +125,7 @@ function StudentPlan() {
       validity_to: calculateEndDate(selectedValidity),
       cancellation_date: null,
       auto_renewal_enabled: false,
-      user_id: user.user_id,
+      user_id: user?.user_id,
       plan_id: cardData.plan_id,
       discount_coupon_id: discount_coupon_id,
       referral_code_id: referral_code_id,
@@ -178,7 +180,7 @@ function StudentPlan() {
     );
   };
 
-  const registerUserPlan = () => {
+  const registerUserPlan = async () => {
     const discount_coupon_id = document.querySelector(
       "#discount_coupon_id"
     ).value;
@@ -189,24 +191,31 @@ function StudentPlan() {
       validity_to: calculateEndDate(selectedValidity),
       cancellation_date: null,
       auto_renewal_enabled: false,
-      user_id: user.user_id,
+      user_id: user?.user_id,
       plan_id: cardData.plan_id,
       discount_coupon_id: 0,
       referral_code_id: 0,
       amount: 100,
       currency: "INR",
     };
-    Fetch({
-      url: "http://localhost:4000/user-plan/register",
-      method: "POST",
-      data: { userPlanData },
-    }).then((res) => {
-      if (res.status === 200) {
+    try {
+      const response = await fetch("http://localhost:4000/user-plan/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userPlanData),
+      });
+      if (response.ok) {
         notify("Plan subscribed successfully", { type: "success" });
       } else {
-        notify("Error subscribing plan", { type: "error" });
+        const errorData = await response.json();
+        notify(errorData.error);
       }
-    });
+    } catch (error) {
+      console.log(error);
+      notify("Error subscribing plan", { type: "error" });
+    }
   };
 
   return (

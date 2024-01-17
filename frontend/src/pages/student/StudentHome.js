@@ -33,8 +33,10 @@ function StudentHome() {
         console.log(error);
       }
     };
-    fetchData();
-  }, [user.user_id]);
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
 
   return (
     <div className="flex-col justify-center">

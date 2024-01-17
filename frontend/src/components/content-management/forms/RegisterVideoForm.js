@@ -252,7 +252,8 @@ export default function RegisterVideoForm() {
 
     if (uniqueCount === totalCount) {
       const newAsana = {
-        id: data.reduce((max, user) => (user.id > max ? user.id : max), 0) + 1,
+        id:
+          data.reduce((max, user) => (user?.id > max ? user?.id : max), 0) + 1,
         asana_name: asanaName,
         asana_desc: description,
         asana_category: category,

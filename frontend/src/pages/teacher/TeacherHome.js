@@ -11,36 +11,38 @@ export default function TeacherHome() {
   const [institute, setInstitute] = useState({});
   const [refreshLoading, setRefreshLoading] = useState(false);
   const getInstituteID = useCallback(async () => {
-    setRefreshLoading(true);
-    Fetch({
-      url: "http://localhost:4000/user-institute/get-institute-by-user-id",
-      method: "POST",
-      data: {
-        user_id: user.user_id,
-      },
-    })
-      .then((res) => {
-        setInstituteID(res.data.user_institute.institute_id);
-        Fetch({
-          url: "http://localhost:4000/institute/get-by-instituteid",
-          method: "POST",
-          data: {
-            institute_id: res.data.user_institute.institute_id,
-          },
-        })
-          .then((res1) => {
-            setInstitute(res1.data);
-          })
-          .catch((err) => {});
-        setRefreshLoading(false);
+    if (user) {
+      setRefreshLoading(true);
+      Fetch({
+        url: "http://localhost:4000/user-institute/get-institute-by-user-id",
+        method: "POST",
+        data: {
+          user_id: user?.user_id,
+        },
       })
-      .catch((err) => {
-        toast(`Error : ${err?.response?.data?.message}`, {
-          type: "error",
+        .then((res) => {
+          setInstituteID(res.data.user_institute.institute_id);
+          Fetch({
+            url: "http://localhost:4000/institute/get-by-instituteid",
+            method: "POST",
+            data: {
+              institute_id: res.data.user_institute.institute_id,
+            },
+          })
+            .then((res1) => {
+              setInstitute(res1.data);
+            })
+            .catch((err) => {});
+          setRefreshLoading(false);
+        })
+        .catch((err) => {
+          toast(`Error : ${err?.response?.data?.message}`, {
+            type: "error",
+          });
+          setRefreshLoading(false);
         });
-        setRefreshLoading(false);
-      });
-  }, [user.user_id]);
+    }
+  }, [user]);
 
   useEffect(() => {
     getInstituteID();
@@ -55,7 +57,7 @@ export default function TeacherHome() {
       <div>
         <TeacherNavbar />
       </div>
-      <h1>WELCOME {user.name}</h1>
+      <h1>WELCOME {user?.name}</h1>
       <h4>WELCOME TO {institute?.name}</h4>
     </div>
   );
