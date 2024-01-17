@@ -4,19 +4,24 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../../../store/UserStore";
 import { useCookies } from "react-cookie";
+import { navigateToDashboard } from "../../../utils/navigateToDashboard";
 
 export default function TeacherNavbar() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   let user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
-  const [userPlan, setUserPlan] = useState({});
+  const currentRole = useUserStore((state) => state.currentRole);
+  const userPlan = useUserStore((state) => state.userPlan);
+  const setUserPlan = useUserStore((state) => state.setUserPlan);
+
   const [planId, setPlanId] = useState(0);
   const [disabled, setDisabled] = useState(false);
   const [tailorMade, setTailorMade] = useState(false);
   const [selfAudio, setSelfAudio] = useState(false);
 
   const resetUserState = useUserStore((state) => state.resetUserState);
+
   const [cookies, setCookie, removeCookie] = useCookies([
     "6amyoga_access_token",
     "6amyoga_refresh_token",
@@ -30,56 +35,13 @@ export default function TeacherNavbar() {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:4000/user-plan/get-user-plan-by-id",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ user_id: user?.user_id }),
-          }
-        );
-        const data = await response.json();
-        if (data["userPlan"]) {
-          setUserPlan(data["userPlan"]);
-          setPlanId(data["userPlan"]["plan_id"]);
-          try {
-            const response1 = await fetch(
-              "http://localhost:4000/plan/get-plan-by-id",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  plan_id: data["userPlan"]["plan_id"],
-                }),
-              }
-            );
-            const data1 = await response1.json();
-            if (data1["plan"]) {
-              setTailorMade(data1["plan"]["has_playlist_creation"]);
-              setSelfAudio(data1["plan"]["has_self_audio_upload"]);
-            } else {
-              setTailorMade(false);
-            }
-          } catch (error) {
-            console.log(error);
-          }
-        } else {
-          setDisabled(true);
-        }
-      } catch (error) {
-        setTailorMade(false);
-        console.log(error);
-      }
-    };
-    if (user) {
-      fetchData();
+    if (currentRole) {
+      navigateToDashboard(currentRole, userPlan, navigate);
     }
+  }, [currentRole]);
+
+  useEffect(() => {
+    // TODO : update state based on plan
   }, [user]);
 
   return (

@@ -11,17 +11,21 @@ import { Fetch } from "../../utils/Fetch";
 import getFormData from "../../utils/getFormData";
 import Otp from "../otp/Otp";
 import "./login.css";
+import { navigateToDashboard } from "../../utils/navigateToDashboard";
 
 export default function Login({ switchForm }) {
   const navigate = useNavigate();
   const notify = (x) => toast(x);
   const [number, setNumber] = useState("");
   const [userNow, setUserNow] = useState({});
-  const [forgotPassword, setForgotPassword] = useState(false);
+  const [forgotPassword, setForgotPassword1] = useState(false);
   const [phoneSignIn, setPhoneSignIn] = useState(false);
+  const [phoneSignInVisible, setPhoneSignInVisible] = useState(false);
+
   // const [user, userType, userPlan] = useUserStore(
   //   useShallow((state) => [state.user, state.userType, state.userPlan])
   // );
+
   const [visible, setVisible] = useState(true);
   const [forgotp, setForgotp] = useState(false);
   const [cookies, setCookie, removeCookie] = useCookies([
@@ -32,42 +36,42 @@ export default function Login({ switchForm }) {
   const [
     user,
     setUser,
-    userType,
     userPlan,
     setUserPlan,
-    accessToken,
     setAccessToken,
-    refreshToken,
     setRefreshToken,
-    currentInstituteId,
     setCurrentInstituteId,
-    institutes,
     setInstitutes,
     currentRole,
     setCurrentRole,
-    roles,
     setRoles,
   ] = useUserStore(
     useShallow((state) => [
       state.user,
       state.setUser,
-      state.userType,
       state.userPlan,
       state.setUserPlan,
-      state.accessToken,
       state.setAccessToken,
-      state.refreshToken,
       state.setRefreshToken,
-      state.currentInstituteId,
       state.setCurrentInstituteId,
-      state.institutes,
       state.setInstitutes,
       state.currentRole,
       state.setCurrentRole,
-      state.roles,
       state.setRoles,
     ])
   );
+
+  const func1 = (number) => {
+    setNumber(number);
+    setVisible(false);
+    if (phoneSignIn) {
+      console.log("phone sign in !!!!");
+      signWithPhone();
+    } else {
+      setForgotPassword1(true);
+      setForgotp(false);
+    }
+  };
 
   useEffect(() => {
     if (number.length > 0) {
@@ -89,7 +93,6 @@ export default function Login({ switchForm }) {
             setUserNow(data["user"]);
             if (phoneSignIn) {
               setUser(data["user"]);
-              setUserType(data["user"]["role"]["name"]);
             }
           }
           console.log(data);
@@ -101,121 +104,46 @@ export default function Login({ switchForm }) {
     }
   }, [number]);
 
-  useEffect(() => {
-    if (user) {
-      console.log(user);
-      fetchUserPlan()
-        .then(() => {})
-        .catch(() => {})
-        .finally(() => {
-          fetchUserInstitutes()
-            .then(() => {})
-            .catch(() => {})
-            .finally(() => {
-              notify("Logged in successfully");
-              navigateToDashboard();
-            });
-        });
-    }
-  }, [user]);
-
   const phoneSignInFunction = () => {
     setVisible(false);
     setPhoneSignIn(true);
   };
 
-  const fetchUserPlan = useCallback(async () => {
-    try {
-      const response = await Fetch({
-        url: "http://localhost:4000/user-plan/get-user-plan-by-id",
-        method: "POST",
-        data: {
-          user_id: user?.user_id,
-        },
-      });
-      if (response.data["userPlan"]) {
-        setUserPlan(response.data["userPlan"]);
-      } else {
-        setUserPlan(null);
-      }
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  }, [user, setUserPlan]);
-
   const signWithPhone = () => {
     setPhoneSignIn(false);
     setUser(userNow.user);
-    setUserType(userNow.user.role.name);
+    // setUserType(userNow.user.role.name);
   };
-  const func1 = (number) => {
-    setNumber(number);
-    setVisible(false);
-    if (phoneSignIn) {
-      console.log("phone sign in !!!!");
-      signWithPhone();
-    } else {
-      setForgotPassword(true);
-      setForgotp(false);
-    }
-  };
-  const fetchUserInstitutes = useCallback(async () => {
+
+  const updateNewPassword = async () => {
+    const password = document.querySelector("#new_password").value;
+    const confirm_password = document.querySelector(
+      "#new_confirm_password"
+    ).value;
     try {
       const response = await Fetch({
-        url: "http://localhost:4000/institute/get-all-by-userid",
+        url: "http://localhost:4000/user/reset-password",
         method: "POST",
         data: {
-          user_id: user?.user_id,
+          user_id: userNow?.user_id,
+          new_password: password,
+          confirm_new_password: confirm_password,
         },
       });
-
-      if (response.data["institutes"]) {
-        setInstitutes(response.data["institutes"]);
-        if (
-          response.data["institutes"] != null &&
-          response.data["institutes"].length > 0
-        ) {
-          setCurrentInstituteId(response.data["institutes"][0].institute_id);
-        }
-      } else {
-        setInstitutes([]);
-      }
-    } catch (error) {
-      console.log(error);
-      throw error;
+      console.log(response);
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+      toast(response.data.message);
+    } catch (err) {
+      toast(err);
     }
-  }, [user, setInstitutes, setCurrentInstituteId]);
-
-  const navigateToDashboard = useCallback(() => {
-    const type = userType || user?.role?.name;
-
-    switch (type) {
-      case "ROOT":
-        navigate("/admin");
-        break;
-      case "TEACHER":
-        navigate("/teacher");
-        break;
-      case "INSTITUTE_OWNER":
-        navigate("/institute");
-        break;
-      case "STUDENT":
-        if (userPlan === null || userPlan.plan_id === 0) {
-          navigate("/student/free-videos");
-        } else {
-          navigate("/student/playlist-view");
-        }
-        break;
-      default:
-        navigate("/");
-        break;
-    }
-  }, [user, userType, userPlan, navigate]);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = getFormData(e);
+
     try {
       const response = await Fetch({
         url: "http://localhost:4000/auth/login",
@@ -225,10 +153,38 @@ export default function Login({ switchForm }) {
 
       if (response && response.status === 200) {
         const userData = response.data;
+        // console.log(userData);
         setUser(userData.user);
-        setUserType(userData.user.role.name);
+        // setUserType(userData.user.role.name);
         setAccessToken(userData?.accessToken);
         setRefreshToken(userData?.refreshToken);
+
+        setRoles(userData?.user?.roles);
+
+        const currRole = Object.keys(userData?.user?.roles)[0];
+        // use first role as current role
+        setCurrentRole(currRole);
+
+        const currPlan = userData?.user?.roles[currRole][0]?.plan;
+        setUserPlan(currPlan);
+
+        console.log(userData?.user?.roles[currRole]);
+        const ins = userData?.user?.roles[currRole].map((r) => r?.institute);
+
+        setInstitutes(ins);
+
+        setCurrentInstituteId(ins[0]?.institute_id);
+
+        // console.log({
+        //   user: userData?.user,
+        //   roles: userData?.user?.roles,
+        //   accessToken: userData?.accessToken,
+        //   refreshToken: userData?.refreshToken,
+        //   currentRole: currRole,
+        //   userPlan: currPlan,
+        //   institutes: ins,
+        //   currentInstituteId: ins[0]?.institute_id,
+        // });
 
         // set token cookies
         setCookie("6amyoga_access_token", userData?.accessToken);
@@ -239,12 +195,13 @@ export default function Login({ switchForm }) {
         const errorData = response.data;
         removeCookie("6amyoga_access_token");
         removeCookie("6amyoga_refresh_token");
-        notify(errorData.error);
+        notify(errorData?.error);
       }
     } catch (error) {
       removeCookie("6amyoga_access_token");
       removeCookie("6amyoga_refresh_token");
-      notify(error.response.data.error);
+      // console.log(error);
+      notify(error?.response?.data?.message);
     }
   };
 
@@ -254,21 +211,10 @@ export default function Login({ switchForm }) {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchUserPlan()
-        .then(() => {})
-        .catch(() => {})
-        .finally(() => {
-          fetchUserInstitutes()
-            .then(() => {})
-            .catch(() => {})
-            .finally(() => {
-              notify("Logged in successfully");
-              navigateToDashboard();
-            });
-        });
+    if (user && currentRole) {
+      navigateToDashboard(currentRole, userPlan, navigate);
     }
-  }, [user, fetchUserPlan, fetchUserInstitutes, navigateToDashboard]);
+  }, [user, currentRole]);
 
   return (
     <div className="bg-white p-4 rounded-lg max-w-xl mx-auto">

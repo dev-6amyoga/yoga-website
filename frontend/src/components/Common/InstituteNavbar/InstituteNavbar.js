@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useUserStore from "../../../store/UserStore";
 import { useCookies } from "react-cookie";
+import { navigateToDashboard } from "../../../utils/navigateToDashboard";
 
 export default function InstituteNavbar() {
   const navigate = useNavigate();
@@ -11,7 +12,9 @@ export default function InstituteNavbar() {
   let user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   let institutes = useUserStore((state) => state.institutes);
-  // let setInstitutes = useUserStore((state) => state.setInstitutes);
+  let currentRole = useUserStore((state) => state.currentRole);
+  let userPlan = useUserStore((state) => state.userPlan);
+
   let currentInstituteId = useUserStore((state) => state.currentInstituteId);
   let setCurrentInstituteId = useUserStore(
     (state) => state.setCurrentInstituteId
@@ -35,6 +38,12 @@ export default function InstituteNavbar() {
   };
 
   useEffect(() => {}, [user]);
+
+  useEffect(() => {
+    if (currentRole) {
+      navigateToDashboard(currentRole, userPlan, navigate);
+    }
+  }, [currentRole]);
 
   return (
     <div>
