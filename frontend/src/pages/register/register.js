@@ -112,6 +112,10 @@ export default function Register({ switchForm }) {
       return;
     }
 
+    if (!formData.phone.startsWith("+91")) {
+      formData.phone = "+91" + formData.phone;
+    }
+
     [is_phone_valid, phone_error] = validatePhone(formData?.contact_phone);
 
     if (!is_phone_valid) {
@@ -119,6 +123,9 @@ export default function Register({ switchForm }) {
       return;
     }
 
+    if (!formData.contact_phone.startsWith("+91")) {
+      formData.contact_phone = "+91" + formData.contact_phone;
+    }
     let [is_email_valid, email_error] = validateEmail(formData?.user_email);
 
     if (!is_email_valid) {

@@ -3,6 +3,7 @@ import { Menu, User } from "@geist-ui/icons";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../../../store/UserStore";
+import { useCookies } from "react-cookie";
 
 export default function TeacherNavbar() {
   const [open, setOpen] = useState(false);
@@ -15,6 +16,19 @@ export default function TeacherNavbar() {
   const [tailorMade, setTailorMade] = useState(false);
   const [selfAudio, setSelfAudio] = useState(false);
 
+  const resetUserState = useUserStore((state) => state.resetUserState);
+  const [cookies, setCookie, removeCookie] = useCookies([
+    "6amyoga_access_token",
+    "6amyoga_refresh_token",
+  ]);
+
+  const handleLogout = () => {
+    removeCookie("6amyoga_access_token", { domain: "localhost", path: "/" });
+    removeCookie("6amyoga_refresh_token", { domain: "localhost", path: "/" });
+    resetUserState();
+    navigate("/auth");
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -25,7 +39,7 @@ export default function TeacherNavbar() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ user_id: user.user_id }),
+            body: JSON.stringify({ user_id: user?.user_id }),
           }
         );
         const data = await response.json();
@@ -63,8 +77,10 @@ export default function TeacherNavbar() {
         console.log(error);
       }
     };
-    fetchData();
-  }, [user.user_id]);
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
 
   return (
     <>
@@ -106,15 +122,9 @@ export default function TeacherNavbar() {
             <Button>Contact Us</Button>
             <hr />
             <Button icon={<User />} type="success" ghost>
-              {user.name.split(" ")[0]}
+              {user?.name.split(" ")[0]}
             </Button>
-            <Button
-              type="error"
-              onClick={() => {
-                setUser(null);
-                navigate("/auth");
-              }}
-            >
+            <Button type="error" onClick={handleLogout}>
               Logout
             </Button>
           </div>

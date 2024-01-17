@@ -3,6 +3,8 @@ import { Menu } from "@geist-ui/icons";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useUserStore from "../../../store/UserStore";
+import { useCookies } from "react-cookie";
+
 export default function InstituteNavbar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -17,6 +19,19 @@ export default function InstituteNavbar() {
 
   const handleInstituteSelection = (value) => {
     setCurrentInstituteId(parseInt(value));
+  };
+
+  const resetUserState = useUserStore((state) => state.resetUserState);
+  const [cookies, setCookie, removeCookie] = useCookies([
+    "6amyoga_access_token",
+    "6amyoga_refresh_token",
+  ]);
+
+  const handleLogout = () => {
+    removeCookie("6amyoga_access_token", { domain: "localhost", path: "/" });
+    removeCookie("6amyoga_refresh_token", { domain: "localhost", path: "/" });
+    resetUserState();
+    navigate("/auth");
   };
 
   useEffect(() => {}, [user]);
@@ -126,13 +141,7 @@ export default function InstituteNavbar() {
                 <h2 className="text-sm text-center">
                   Logged in as {user?.name}
                 </h2>
-                <Button
-                  type="error"
-                  onClick={() => {
-                    setUser(null);
-                    navigate("/auth");
-                  }}
-                >
+                <Button type="error" onClick={handleLogout}>
                   Logout
                 </Button>
               </>

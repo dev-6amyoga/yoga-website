@@ -37,7 +37,7 @@ function Playlist() {
         setLoading(false);
         try {
           const response1 = await fetch(
-            `http://localhost:4000/user-playlists/getAllUserPlaylists/${user.user_id}`
+            `http://localhost:4000/user-playlists/getAllUserPlaylists/${user?.user_id}`
           );
           const data1 = await response1.json();
           setUserPlaylists(data1);

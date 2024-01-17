@@ -17,7 +17,7 @@ export default function TransactionHistoryInstitute() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ user_id: user.user_id }),
+            body: JSON.stringify({ user_id: user?.user_id }),
           }
         );
         const data = await response.json();
@@ -27,8 +27,10 @@ export default function TransactionHistoryInstitute() {
         console.log(error);
       }
     };
-    fetchData();
-  }, [user.user_id]);
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
 
   const renderAction = (value, rowData, index) => {
     return (

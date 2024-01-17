@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
+import Otp from "../../otp/Otp";
 
 function Card({ title, description }) {
   return (
@@ -37,13 +38,14 @@ function VerifyEmailCard({
         </div>
       </div>
 
-      <Input
+      {/* <Input
         name="confirm_email"
         placeholder="Enter Email to verify"
         w="100%"
         className="mb-4"
         onChange={(e) => setConfirmEmail(e.target.value)}
-      />
+      /> */}
+      <Otp />
       <div className="flex gap-2">
         <Button type="success" onClick={handleAccept}>
           Accept
@@ -149,26 +151,27 @@ export default function InvitePage() {
 
   const handleAccept = (e) => {
     e.preventDefault();
-
-    Fetch({
-      url: "http://localhost:4000/invite/accept",
-      method: "POST",
-      data: {
-        invite_token: token,
-        confirm_email: confirmEmail,
-      },
-    })
-      .then((res) => {
-        console.log(res);
-        if (res.status === 200) {
-          setVerified(true);
-          toast("Email Verified", { type: "success" });
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        toast(err?.response?.data?.message, { type: "error" });
-      });
+    console.log("DONE DONE!");
+    setVerified(true);
+    // Fetch({
+    //   url: "http://localhost:4000/invite/accept",
+    //   method: "POST",
+    //   data: {
+    //     invite_token: token,
+    //     confirm_email: confirmEmail,
+    //   },
+    // })
+    //   .then((res) => {
+    //     console.log(res);
+    //     if (res.status === 200) {
+    //       setVerified(true);
+    //       toast("Email Verified", { type: "success" });
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //     toast(err?.response?.data?.message, { type: "error" });
+    //   });
   };
 
   const handleReject = (e) => {

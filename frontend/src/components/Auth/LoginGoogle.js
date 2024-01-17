@@ -18,16 +18,24 @@ export default function LoginGoogle() {
   async function verify_login(email, name) {
     try {
       const baseURL = "http://localhost:4000";
-      const response = await axios.get(`${baseURL}/allUsers`);
-      var userExists = false;
-      for (const entry of response.data) {
-        if (entry.user_name === name || entry.email_id === email) {
-          userExists = true;
-          SetType(entry.user_type);
-          setUser(entry);
-          break;
-        }
+      const response = await axios.post(`${baseURL}/user//get-by-email`, {
+        email: email,
+      });
+      console.log(response);
+      if (response.status === 200) {
+        userExists = true;
       }
+      var userExists = false;
+      setUser(response.data.user);
+      SetType(response.data.user_type);
+      // for (const entry of response.data) {
+      //   if (entry.user_name === name || entry.email_id === email) {
+      //     userExists = true;
+      //     SetType(entry.user_type);
+      //     setUser(entry);
+      //     break;
+      //   }
+      // }
       setLoginStatus(userExists ? "Login successful" : "Invalid credentials");
     } catch (error) {
       console.error(error);
@@ -62,6 +70,7 @@ export default function LoginGoogle() {
             if (email_verified) {
               const email = payload.data.email;
               const name = payload.data.name;
+              console.log(email, name);
               verify_login(email, name);
             } else {
             }

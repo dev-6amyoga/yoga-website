@@ -74,7 +74,7 @@ export default function LoginPhone({ onSuccessCallback }) {
       .then((result) => {
         console.log({ result });
         toast("Verified!", { type: "success" });
-        onSuccessCallback();
+        onSuccessCallback(number);
       })
       .catch((err) => {
         toast(err, { type: "error" });

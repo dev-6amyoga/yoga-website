@@ -3,13 +3,26 @@ import { Menu } from "@geist-ui/icons";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useUserStore from "../../../store/UserStore";
+import { useCookies } from "react-cookie";
 import "./AdminNavbar.css";
 
 export default function AdminNavbar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   let user = useUserStore((state) => state.user);
-  const setUser = useUserStore((state) => state.setUser);
+
+  const resetUserState = useUserStore((state) => state.resetUserState);
+  const [cookies, setCookie, removeCookie] = useCookies([
+    "6amyoga_access_token",
+    "6amyoga_refresh_token",
+  ]);
+
+  const handleLogout = () => {
+    removeCookie("6amyoga_access_token", { domain: "localhost", path: "/" });
+    removeCookie("6amyoga_refresh_token", { domain: "localhost", path: "/" });
+    resetUserState();
+    navigate("/auth");
+  };
 
   return (
     <div>
@@ -123,13 +136,7 @@ export default function AdminNavbar() {
                 <h2 className="text-sm text-center">
                   Logged in as {user?.name}
                 </h2>
-                <Button
-                  type="error"
-                  onClick={() => {
-                    setUser(null);
-                    navigate("/auth");
-                  }}
-                >
+                <Button type="error" onClick={handleLogout}>
                   Logout
                 </Button>
               </>

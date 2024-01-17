@@ -16,47 +16,51 @@ export default function AddNewTeacher() {
   const [refreshLoading, setRefreshLoading] = useState(false);
 
   const getInvites = useCallback(async () => {
-    setRefreshLoading(true);
-    Fetch({
-      url: "http://localhost:4000/invite/get-all-by-inviterid",
-      method: "POST",
-      data: {
-        inviter_user_id: user.user_id,
-      },
-    })
-      .then((res) => {
-        setInvites(res.data.invites);
-        toast("Invites fetched successfully", { type: "success" });
-        setRefreshLoading(false);
+    if (user) {
+      setRefreshLoading(true);
+      Fetch({
+        url: "http://localhost:4000/invite/get-all-by-inviterid",
+        method: "POST",
+        data: {
+          inviter_user_id: user?.user_id,
+        },
       })
-      .catch((err) => {
-        toast(`Error : ${err?.response?.data?.message}`, {
-          type: "error",
+        .then((res) => {
+          setInvites(res.data.invites);
+          toast("Invites fetched successfully", { type: "success" });
+          setRefreshLoading(false);
+        })
+        .catch((err) => {
+          toast(`Error : ${err?.response?.data?.message}`, {
+            type: "error",
+          });
+          setRefreshLoading(false);
         });
-        setRefreshLoading(false);
-      });
-  }, [user.user_id]);
+    }
+  }, [user]);
 
   const getInstituteID = useCallback(async () => {
-    setRefreshLoading(true);
-    Fetch({
-      url: "http://localhost:4000/user-institute/get-institute-by-user-id",
-      method: "POST",
-      data: {
-        user_id: user.user_id,
-      },
-    })
-      .then((res) => {
-        setInstituteID(res.data.user_institute.institute_id);
-        setRefreshLoading(false);
+    if (user) {
+      setRefreshLoading(true);
+      Fetch({
+        url: "http://localhost:4000/user-institute/get-institute-by-user-id",
+        method: "POST",
+        data: {
+          user_id: user?.user_id,
+        },
       })
-      .catch((err) => {
-        toast(`Error : ${err?.response?.data?.message}`, {
-          type: "error",
+        .then((res) => {
+          setInstituteID(res.data.user_institute.institute_id);
+          setRefreshLoading(false);
+        })
+        .catch((err) => {
+          toast(`Error : ${err?.response?.data?.message}`, {
+            type: "error",
+          });
+          setRefreshLoading(false);
         });
-        setRefreshLoading(false);
-      });
-  }, [user.user_id]);
+    }
+  }, [user]);
 
   useEffect(() => {
     getInstituteID();
@@ -96,9 +100,12 @@ export default function AddNewTeacher() {
       return;
     }
 
-    formData.invite_type = "TEACHER";
-    formData.user_id = user.user_id;
+    if (!formData.phone.startsWith("+91")) {
+      formData.phone = "+91" + formData.phone;
+    }
 
+    formData.invite_type = "TEACHER";
+    formData.user_id = user?.user_id;
     Fetch({
       url: "http://localhost:4000/invite/create",
       method: "POST",
