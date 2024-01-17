@@ -13,7 +13,9 @@ const { sequelize } = require("../init.sequelize");
 const bcrypyt = require("bcrypt");
 const { UserPlan } = require("../models/sql/UserPlan");
 const { verifyToken, TOKEN_TYPE_ACCESS } = require("../utils/jwt");
-const { UserRole } = require("../models/sql/UserRole");
+const {
+  UserInstitutePlanRole,
+} = require("../models/sql/UserInstitutePlanRole");
 const { GetUserInfo, GetUser } = require("../services/User.service");
 
 router.post("/get-by-id", async (req, res) => {

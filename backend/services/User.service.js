@@ -3,142 +3,113 @@ const { Plan } = require("../models/sql/Plan");
 const { Institute } = require("../models/sql/Institute");
 const { Role } = require("../models/sql/Role");
 const { UserPlan } = require("../models/sql/UserPlan");
-const { UserRole } = require("../models/sql/UserRole");
+const {
+  UserInstitutePlanRole,
+} = require("../models/sql/UserInstitutePlanRole");
 const { UserInstitute } = require("../models/sql/UserInstitute");
 
 const GetUser = async (filter, attributes) => {
-	// returns user
+  // returns user
 
-	let user = null,
-		error = null;
+  let user = null,
+    error = null;
 
-	try {
-		let q = {
-			where: filter,
-		};
+  try {
+    let q = {
+      where: filter,
+    };
 
-		if (attributes) {
-			q.attributes = attributes;
-		}
+    if (attributes) {
+      q.attributes = attributes;
+    }
 
-		user = await User.findOne(q);
+    user = await User.findOne(q);
 
-		if (!user) {
-			error = "User does not exist";
-			return [null, error];
-		}
+    if (!user) {
+      console.log("here1");
+      error = "User does not exist";
+      return [null, error];
+    }
 
-		return [user, error];
-	} catch (err) {
-		return [null, err];
-	}
+    return [user, error];
+  } catch (err) {
+    return [null, err];
+  }
 };
 
 const GetUserInfo = async (filter, attributes = null) => {
-	// returns user with roles
-	/*
+  // returns user with roles
+  /*
  Returns
- {
-  user_id, name, username, email, phone,
-  roles: [
-   {user_id, role_id, role: {name}}
-  ],
-		plan: {
-			user_id, 
-			plan_id, 
-			plan: {
-				plan_id, 
-				name, 
-				description, 
-				has_basic_playlist, 
-				has_playlist_creation,
-			 playlist_creation_limit,
-				has_self_audio_upload,
-   	number_of_teachers,
-    plan_validity,
-    plan_user_type,
-			}
-		},
-		institutes: [
-			 {user_id, institute_id, institute: {name}}
-		]
- }
+		{
+				user_id: 1,
+				username: "",
+				name: "",
+				email: "",
+				phone: "",
+
+				roles: {
+					"INSTITUTE_OWNER": [
+						{
+							user_institute_plan_role_id,
+							institute: {
+									insitute_id,
+									name
+							}, 
+							plan: {
+								plan_id,
+								name,
+								etc
+							},
+						}
+					]
+				}
+		}
  */
-	let user = null,
-		error = null;
-	try {
-		[user, errorUser] = await GetUser(filter, attributes);
+  let user = null,
+    error = null;
+  try {
+    [user, errorUser] = await GetUser(filter, attributes);
 
-		if (!user || errorUser) {
-			error = "User does not exist";
-			return [null, error];
-		}
+    if (!user || errorUser) {
+      error = "User does not exist";
+      return [null, error];
+    }
 
-		// get all roles
-		const roles = await UserRole.findAll({
-			where: {
-				user_id: user.user_id,
-			},
-			order: [["role_id", "ASC"]],
-			attributes: ["user_id", "role_id"],
-			include: [
-				{
-					model: Role,
-					attributes: ["name"],
-				},
-			],
-		});
+    let userInstitutePlanRoles = await UserInstitutePlanRole.findAll({
+      where: {
+        user_id: user.user_id,
+      },
+      include: [
+        { model: Institute, attributes: ["institute_id", "name"] },
+        { model: Plan },
+        { model: Role, attributes: ["role_id", "name"] },
+      ],
+    });
 
-		if (!roles) {
-			error = "Role does not exist";
-			return [null, error];
-		}
+    let roles = {};
 
-		// get plan
-		const user_plan = await UserPlan.findOne({
-			where: {
-				user_id: user.user_id,
-			},
-			attributes: ["user_id", "plan_id"],
-			include: [
-				{
-					model: Plan,
-				},
-			],
-		});
+    userInstitutePlanRoles.forEach((uipr) => {
+      // const {role, institute, plan} = uipr;
+      if (!roles[uipr.role.name]) {
+        roles[uipr.role.name] = [];
+      }
 
-		// get institutes
-		const institutes = await UserInstitute.findAll({
-			where: {
-				user_id: user.user_id,
-			},
-			attributes: ["user_id", "institute_id"],
-			include: [
-				{
-					model: Institute,
-					attributes: ["name"],
-					required: true,
-				},
-			],
-		});
+      roles[uipr.role.name].push(uipr);
+    });
 
-		let userInfo = {
-			...user.toJSON(),
-			roles: roles.map((r) => r.toJSON()),
-			plan: user_plan ? user_plan.toJSON()?.plan : null,
-			institutes:
-				institutes && institutes.length > 0
-					? institutes.map((i) => i.toJSON())
-					: null,
-		};
+    let userInfo = {
+      ...user.toJSON(),
+      roles,
+    };
 
-		return [userInfo, error];
-	} catch (err) {
-		return [null, err];
-	}
+    return [userInfo, error];
+  } catch (err) {
+    return [null, err];
+  }
 };
 
 module.exports = {
-	GetUser,
-	GetUserInfo,
+  GetUser,
+  GetUserInfo,
 };
