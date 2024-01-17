@@ -19,9 +19,7 @@ export default function Login({ switchForm }) {
 	const [userNow, setUserNow] = useState({});
 	const [forgotPassword, setForgotPassword] = useState(false);
 	const [phoneSignIn, setPhoneSignIn] = useState(false);
-	const [user, userType, userPlan] = useUserStore(
-		useShallow((state) => [state.user, state.userType, state.userPlan])
-	);
+
 	const [visible, setVisible] = useState(true);
 	const [forgotp, setForgotp] = useState(false);
 	const [cookies, setCookie, removeCookie] = useCookies([
@@ -30,22 +28,40 @@ export default function Login({ switchForm }) {
 	]);
 
 	const [
+		user,
 		setUser,
-		setAccessToken,
-		setRefreshToken,
-		setInstitutes,
-		setUserType,
+		userPlan,
 		setUserPlan,
+		accessToken,
+		setAccessToken,
+		refreshToken,
+		setRefreshToken,
+		currentInstituteId,
 		setCurrentInstituteId,
+		institutes,
+		setInstitutes,
+		currentRole,
+		setCurrentRole,
+		roles,
+		setRoles,
 	] = useUserStore(
 		useShallow((state) => [
+			state.user,
 			state.setUser,
-			state.setAccessToken,
-			state.setRefreshToken,
-			state.setInstitutes,
-			state.setUserType,
+			state.userPlan,
 			state.setUserPlan,
+			state.accessToken,
+			state.setAccessToken,
+			state.refreshToken,
+			state.setRefreshToken,
+			state.currentInstituteId,
 			state.setCurrentInstituteId,
+			state.institutes,
+			state.setInstitutes,
+			state.currentRole,
+			state.setCurrentRole,
+			state.roles,
+			state.setRoles,
 		])
 	);
 
@@ -81,30 +97,30 @@ export default function Login({ switchForm }) {
 		setPhoneSignIn(true);
 	};
 
-	const fetchUserPlan = useCallback(async () => {
-		try {
-			const response = await Fetch({
-				url: "http://localhost:4000/user-plan/get-user-plan-by-id",
-				method: "POST",
-				data: {
-					user_id: user?.user_id,
-				},
-			});
-			if (response.data["userPlan"]) {
-				setUserPlan(response.data["userPlan"]);
-			} else {
-				setUserPlan(null);
-			}
-		} catch (error) {
-			console.log(error);
-			throw error;
-		}
-	}, [user, setUserPlan]);
+	// const fetchUserPlan = useCallback(async () => {
+	// 	try {
+	// 		const response = await Fetch({
+	// 			url: "http://localhost:4000/user-plan/get-user-plan-by-id",
+	// 			method: "POST",
+	// 			data: {
+	// 				user_id: user?.user_id,
+	// 			},
+	// 		});
+	// 		if (response.data["userPlan"]) {
+	// 			setUserPlan(response.data["userPlan"]);
+	// 		} else {
+	// 			setUserPlan(null);
+	// 		}
+	// 	} catch (error) {
+	// 		console.log(error);
+	// 		throw error;
+	// 	}
+	// }, [user, setUserPlan]);
 
 	const signWithPhone = () => {
 		setPhoneSignIn(false);
 		setUser(userNow.user);
-		setUserType(userNow.user.role.name);
+		// setUserType(userNow.user.role.name);
 	};
 	const func1 = (number) => {
 		setNumber(number);
@@ -117,34 +133,34 @@ export default function Login({ switchForm }) {
 			setForgotp(false);
 		}
 	};
-	const fetchUserInstitutes = useCallback(async () => {
-		try {
-			const response = await Fetch({
-				url: "http://localhost:4000/institute/get-all-by-userid",
-				method: "POST",
-				data: {
-					user_id: user?.user_id,
-				},
-			});
+	// const fetchUserInstitutes = useCallback(async () => {
+	// 	try {
+	// 		const response = await Fetch({
+	// 			url: "http://localhost:4000/institute/get-all-by-userid",
+	// 			method: "POST",
+	// 			data: {
+	// 				user_id: user?.user_id,
+	// 			},
+	// 		});
 
-			if (response.data["institutes"]) {
-				setInstitutes(response.data["institutes"]);
-				if (
-					response.data["institutes"] != null &&
-					response.data["institutes"].length > 0
-				) {
-					setCurrentInstituteId(
-						response.data["institutes"][0].institute_id
-					);
-				}
-			} else {
-				setInstitutes([]);
-			}
-		} catch (error) {
-			console.log(error);
-			throw error;
-		}
-	}, [user, setInstitutes, setCurrentInstituteId]);
+	// 		if (response.data["institutes"]) {
+	// 			setInstitutes(response.data["institutes"]);
+	// 			if (
+	// 				response.data["institutes"] != null &&
+	// 				response.data["institutes"].length > 0
+	// 			) {
+	// 				setCurrentInstituteId(
+	// 					response.data["institutes"][0].institute_id
+	// 				);
+	// 			}
+	// 		} else {
+	// 			setInstitutes([]);
+	// 		}
+	// 	} catch (error) {
+	// 		console.log(error);
+	// 		throw error;
+	// 	}
+	// }, [user, setInstitutes, setCurrentInstituteId]);
 
 	const navigateToDashboard = useCallback(() => {
 		const type = userType || user?.role?.name;
@@ -208,17 +224,25 @@ export default function Login({ switchForm }) {
 			});
 
 			if (response && response.status === 200) {
-				const userData = response.data;
-				setUser(userData.user);
-				setUserType(userData.user.role.name);
-				setAccessToken(userData?.accessToken);
-				setRefreshToken(userData?.refreshToken);
+				const { user, accessToken, refreshToken } = response.data;
+				const { institutes, plan, roles, ...userData } = user;
+
+				// user
+				setUser(userData);
+
+				// roles
+
+				// institutes
+
+				// access tokens
+				setAccessToken(accessToken);
+				setRefreshToken(refreshToken);
 
 				// set token cookies
-				setCookie("6amyoga_access_token", userData?.accessToken);
-				setCookie("6amyoga_refresh_token", userData?.refreshToken);
+				setCookie("6amyoga_access_token", accessToken);
+				setCookie("6amyoga_refresh_token", refreshToken);
 
-				// console.log(userData);
+				navigateToDashboard();
 			} else {
 				const errorData = response.data;
 				removeCookie("6amyoga_access_token");
@@ -237,22 +261,22 @@ export default function Login({ switchForm }) {
 		setForgotp(true);
 	};
 
-	useEffect(() => {
-		if (user) {
-			fetchUserPlan()
-				.then(() => {})
-				.catch(() => {})
-				.finally(() => {
-					fetchUserInstitutes()
-						.then(() => {})
-						.catch(() => {})
-						.finally(() => {
-							notify("Logged in successfully");
-							navigateToDashboard();
-						});
-				});
-		}
-	}, [user, fetchUserPlan, fetchUserInstitutes, navigateToDashboard]);
+	// useEffect(() => {
+	// 	if (user) {
+	// 		fetchUserPlan()
+	// 			.then(() => {})
+	// 			.catch(() => {})
+	// 			.finally(() => {
+	// 				fetchUserInstitutes()
+	// 					.then(() => {})
+	// 					.catch(() => {})
+	// 					.finally(() => {
+	// 						notify("Logged in successfully");
+
+	// 					});
+	// 			});
+	// 	}
+	// }, [user, fetchUserPlan, fetchUserInstitutes, navigateToDashboard]);
 
 	return (
 		<div className="bg-white p-4 rounded-lg max-w-xl mx-auto">
