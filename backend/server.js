@@ -68,12 +68,12 @@ initializeSequelize()
   .then(() => {
     console.log("Sequelize initialized");
     // bulkCreateSampleData()
-    // 	.then(() => {
-    // 		console.log("Sample data created!");
-    // 	})
-    // 	.catch((err) => {
-    // 		console.log(err);
-    // 	});
+    //   .then(() => {
+    //     console.log("Sample data created!");
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
   })
   .catch((err) => {
     console.log(err);
