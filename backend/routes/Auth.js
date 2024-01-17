@@ -25,6 +25,7 @@ const {
 	TOKEN_TYPE_REFRESH,
 	TOKEN_TYPE_ACCESS,
 } = require("../utils/jwt");
+const { GetUserInfo } = require("../services/User.service");
 
 router.post("/verify-google", async (req, res) => {
 	const { client_id, jwtToken } = req.body;
@@ -84,13 +85,9 @@ router.post("/login", async (req, res) => {
 			.json({ message: "Missing required fields" });
 
 	// check if user exists
-	const user = await UserSQL.findOne({
-		where: { username: username },
-		attributes: ["user_id", "name", "username", "email", "password"],
-		include: [{ model: Role, attributes: ["name"] }],
-	});
+	let [user, errorUser] = await GetUserInfo({ username });
 
-	if (!user)
+	if (!user || errorUser)
 		return res
 			.status(HTTP_BAD_REQUEST)
 			.json({ error: "User does not exist" });
@@ -101,8 +98,10 @@ router.post("/login", async (req, res) => {
 	if (!validPassword)
 		return res.status(HTTP_BAD_REQUEST).json({ error: "Invalid password" });
 
-	const accessToken = generateAccessToken(user.toJSON());
-	const refreshToken = generateRefreshToken(user.toJSON());
+	delete user.password;
+
+	const accessToken = generateAccessToken(user);
+	const refreshToken = generateRefreshToken(user);
 
 	return res.status(HTTP_OK).json({ user, accessToken, refreshToken });
 });
