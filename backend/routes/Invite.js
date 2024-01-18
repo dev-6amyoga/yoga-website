@@ -321,7 +321,6 @@ router.post("/accept", async (req, res) => {
         user_id: invite.inviter_user_id,
       },
     });
-    console.log(userinstitute1);
 
     if (!user1 || !userinstitute1) {
       await t.rollback();
@@ -332,10 +331,12 @@ router.post("/accept", async (req, res) => {
     const user_id = user1.user_id;
     const institute_id = userinstitute1.institute_id;
 
-    const newUserInstitute = await UserInstitute.create(
+    const newUserInstitute = await UserInstitutePlanRole.create(
       {
         user_id: user_id,
         institute_id: institute_id,
+        role_id: 4,
+        plan_id: userinstitute1.plan_id,
       },
       { transaction: t }
     );
