@@ -16,6 +16,9 @@ const tokenUtils = require("../utils/invite_token");
 const { mailTransporter } = require("../init.nodemailer");
 const { Institute } = require("../models/sql/Institute");
 const { UserInstitute } = require("../models/sql/UserInstitute");
+const {
+  UserInstitutePlanRole,
+} = require("../models/sql/UserInstitutePlanRole");
 // const { Op } = require('sequelize');
 const bcrypyt = require("bcrypt");
 
@@ -185,7 +188,6 @@ router.post("/create", async (req, res) => {
               },
               { transaction: t }
             );
-            //add entry in user-institute-plan-role?
             await t.commit();
             res.status(HTTP_OK).json({
               message: "Invite sent",
@@ -205,8 +207,10 @@ router.post("/create", async (req, res) => {
           is_google_login: false,
           role_id: role.role_id,
         },
-        transaction: t1,
+        transaction: t,
       });
+      console.log(teacher);
+      console.log(created);
       mailTransporter.sendMail(
         {
           from: "dev.6amyoga@gmail.com",
@@ -216,7 +220,7 @@ router.post("/create", async (req, res) => {
         },
         async (err, info) => {
           if (err) {
-            await t1.rollback();
+            await t.rollback();
             console.error(err);
             res.status(HTTP_INTERNAL_SERVER_ERROR).json({
               message: "Internal server error; try again",
@@ -226,14 +230,15 @@ router.post("/create", async (req, res) => {
               {
                 token,
                 email,
+                phone,
                 invite_type,
+                user_exists: true,
                 expiry_date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
                 inviter_user_id: user_id,
               },
-              { transaction: t1 }
+              { transaction: t }
             );
-
-            await t1.commit();
+            await t.commit();
 
             res.status(HTTP_OK).json({
               message: "Invite sent",
@@ -272,11 +277,12 @@ router.post("/accept", async (req, res) => {
         message: "Invite not found",
       });
     }
-    // check if email matches
-    if (invite.email !== confirm_email) {
+    // check if phone matches
+    console.log(invite.phone, confirm_phone);
+    if (invite.phone !== confirm_phone) {
       await t.rollback();
       return res.status(HTTP_BAD_REQUEST).json({
-        message: "Invalid email",
+        message: "Invalid phone number",
       });
     }
     // check expiry
@@ -306,14 +312,16 @@ router.post("/accept", async (req, res) => {
     );
     const user1 = await User.findOne({
       where: {
-        email: invite.email,
+        phone: invite.phone,
       },
     });
-    const userinstitute1 = await UserInstitute.findOne({
+    console.log(user1);
+    const userinstitute1 = await UserInstitutePlanRole.findOne({
       where: {
         user_id: invite.inviter_user_id,
       },
     });
+    console.log(userinstitute1);
 
     if (!user1 || !userinstitute1) {
       await t.rollback();
