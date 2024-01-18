@@ -15,7 +15,7 @@ const { Role } = require("../models/sql/Role");
 const tokenUtils = require("../utils/invite_token");
 const { mailTransporter } = require("../init.nodemailer");
 const { Institute } = require("../models/sql/Institute");
-const { UserInstitute } = require("../models/sql/UserInstitute");
+
 const {
   UserInstitutePlanRole,
 } = require("../models/sql/UserInstitutePlanRole");
@@ -43,8 +43,9 @@ router.post("/get-by-id", async (req, res) => {
       });
     }
 
-    const user_institute = await UserInstitute.findOne({
+    const user_institute = await UserInstitutePlanRole.findOne({
       where: { user_id: invite.inviter_user_id },
+      attributes: ["institute_id"],
       include: [
         {
           model: Institute,
@@ -88,8 +89,9 @@ router.post("/get-by-token", async (req, res) => {
       });
     }
 
-    const user_institute = await UserInstitute.findOne({
+    const user_institute = await UserInstitutePlanRole.findOne({
       where: { user_id: invite.inviter_user_id },
+      attributes: ["institute_id"],
       include: [
         {
           model: Institute,

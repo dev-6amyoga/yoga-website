@@ -62,7 +62,7 @@ router.post("/commit", async (req, res) => {
         !order_id ||
         !payment_id
     ) {
-        res.status(HTTP_BAD_REQUEST).json({
+        return res.status(HTTP_BAD_REQUEST).json({
             message: "Missing required fields",
         });
     }
@@ -93,11 +93,11 @@ router.post("/commit", async (req, res) => {
         );
 
         await t.commit();
-        res.status(HTTP_OK).json({ status: "successfully saved transaction" });
+        return res.status(HTTP_OK).json({ status: "successfully saved transaction" });
     } catch (err) {
         console.log(err);
         await t.rollback();
-        res.status(HTTP_BAD_REQUEST).json({
+        return res.status(HTTP_BAD_REQUEST).json({
             message: "Unable to create transaction",
         });
     }

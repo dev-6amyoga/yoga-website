@@ -6,7 +6,6 @@ const { UserPlan } = require("../models/sql/UserPlan");
 const {
   UserInstitutePlanRole,
 } = require("../models/sql/UserInstitutePlanRole");
-const { UserInstitute } = require("../models/sql/UserInstitute");
 
 const GetUser = async (filter, attributes) => {
   // returns user
