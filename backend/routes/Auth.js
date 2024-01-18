@@ -26,6 +26,7 @@ const {
 	TOKEN_TYPE_ACCESS,
 } = require("../utils/jwt");
 const { GetUserInfo } = require("../services/User.service");
+const { UserInstitutePlanRole } = require( "../models/sql/UserInstitutePlanRole" )
 
 router.post("/verify-google", async (req, res) => {
 	const { client_id, jwtToken } = req.body;
@@ -227,7 +228,7 @@ router.post("/register", async (req, res) => {
 				{ transaction: t }
 			);
 
-			console.log({ institute });
+			// console.log({ institute });
 
 			if (institute === null) throw new Error("Institute doesn't exist");
 		}
@@ -251,7 +252,6 @@ router.post("/register", async (req, res) => {
 				name,
 				email: email_id,
 				phone: phone_no,
-				role_id: role.role_id,
 				is_google_login,
 			},
 			{ transaction: t }
@@ -261,17 +261,19 @@ router.post("/register", async (req, res) => {
 
 		// create user_institute
 
-		const user_institute = await UserInstitute.create(
+		const user_institute_plan_role = await UserInstitutePlanRole.create(
 			{
 				user_id: newUser.user_id,
 				institute_id: institute ? institute.institute_id : null,
+				role_id: role.role_id,
+				plan_id: null,
 			},
 			{ transaction: t }
 		);
 
 		await timeout(t.commit(), 5000, new Error("timeout; try again"));
 
-		res.status(HTTP_OK).json({ user: newUser });
+		return res.status(HTTP_OK).json({ user: newUser });
 	} catch (error) {
 		console.error(error);
 		await t.rollback();
@@ -292,13 +294,13 @@ router.post("/register", async (req, res) => {
 
 router.post("/register-google", async (req, res) => {
 	// used to register user whos logging in using google oauth
-	const { email, name, is_google_login, client_id, jwt_token } = req.body;
+	const { email, name, is_google_login, client_id } = req.body;
+	// const {access_token} = req.headers.authorization?.split(" ") ?? null
 
 	// validate inputs
 	if (
 		!email ||
 		!name ||
-		!jwt_token ||
 		!client_id ||
 		is_google_login === undefined ||
 		is_google_login === null
@@ -356,6 +358,15 @@ router.post("/register-google", async (req, res) => {
 			},
 			{ transaction: t }
 		);
+
+			const user_institute_plan_role	= await UserInstitutePlanRole.create({
+				user_id: newUser.user_id,
+				institute_id: null,
+				role_id: null,
+				plan_id: null,
+			}, { transaction: t
+			})
+
 		await timeout(t.commit(), 5000, new Error("timeout; try again"));
 
 		res.status(HTTP_OK).json({ user: newUser });
