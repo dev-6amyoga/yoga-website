@@ -10,9 +10,9 @@ const { Institute } = require("../models/sql/Institute");
 const { validate_email } = require("../utils/validate_email");
 const { sequelize } = require("../init.sequelize");
 const { Op } = require("sequelize");
-const { UserInstitute } = require("../models/sql/UserInstitute");
 const { User } = require("../models/sql/User");
 const { Role } = require("../models/sql/Role");
+const { UserInstitutePlanRole } = require( "../models/sql/UserInstitutePlanRole" )
 
 const router = express.Router();
 
@@ -432,9 +432,10 @@ router.post("/get-all-by-userid", async (req, res) => {
 
   const t = await sequelize.transaction();
   try {
-    const ui = await UserInstitute.findAll(
+    const ui = await UserInstitutePlanRole.findAll(
       {
         where: { user_id },
+        attributes: ["user_id", "institute_id"],
         include: [
           {
             model: Institute,
@@ -443,7 +444,7 @@ router.post("/get-all-by-userid", async (req, res) => {
       },
       { transaction: t }
     );
-    console.log(ui[0]);
+    // console.log(ui[0]);
 
     await t.commit();
     return res.status(HTTP_OK).json({ institutes: ui.map((i) => i.institute) });
@@ -467,9 +468,10 @@ router.post("/get-by-userid", async (req, res) => {
 
   const t = await sequelize.transaction();
   try {
-    const ui = await UserInstitute.findOne(
+    const ui = await UserInstitutePlanRole.findOne(
       {
         where: { user_id },
+        attributes: ["user_id", "institute_id"],
         include: [
           {
             model: Institute,
@@ -503,9 +505,9 @@ router.post("/teacher/get-all-by-instituteid", async (req, res) => {
 
   const t = await sequelize.transaction();
   try {
-    const ui = await UserInstitute.findAll({
+    const ui = await UserInstitutePlanRole.findAll({
       where: { institute_id },
-      attributes: [],
+      attributes: ["user_id", "institute_id", "role_id"],
       include: [
         {
           model: Institute,
@@ -515,13 +517,12 @@ router.post("/teacher/get-all-by-instituteid", async (req, res) => {
         {
           model: User,
           attributes: ["user_id", "username", "name", "email", "phone"],
-          include: [
-            {
-              model: Role,
-              where: { name: "TEACHER" },
-              required: true,
-            },
-          ],
+          required: true,
+        },
+        {
+          model: Role,
+          attributes: ["name"],
+          where: { name: "TEACHER" },
           required: true,
         },
       ],

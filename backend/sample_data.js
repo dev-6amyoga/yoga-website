@@ -4,7 +4,6 @@ const { Permission } = require("./models/sql/Permission");
 const { Plan } = require("./models/sql/Plan");
 const { Role } = require("./models/sql/Role");
 const { User } = require("./models/sql/User");
-const { UserInstitute } = require("./models/sql/UserInstitute");
 const { PlanPricing } = require("./models/sql/PlanPricing");
 const { Currency } = require("./models/sql/Currency");
 const { UserInstitutePlanRole } = require("./models/sql/UserInstitutePlanRole");
@@ -135,17 +134,17 @@ const user_institute_plan_role = [
   { user_id: 9, role_id: 5, plan_id: null, institute_id: null },
 ];
 
-const user_institute = [
-  { user_id: 1, institute_id: null },
-  { user_id: 2, institute_id: 1 },
-  { user_id: 3, institute_id: 1 },
-  { user_id: 4, institute_id: 1 },
-  { user_id: 5, institute_id: 2 },
-  { user_id: 6, institute_id: 2 },
-  { user_id: 7, institute_id: 2 },
-  { user_id: 8, institute_id: 1 },
-  { user_id: 9, institute_id: 2 },
-];
+// const user_institute = [
+//   { user_id: 1, institute_id: null },
+//   { user_id: 2, institute_id: 1 },
+//   { user_id: 3, institute_id: 1 },
+//   { user_id: 4, institute_id: 1 },
+//   { user_id: 5, institute_id: 2 },
+//   { user_id: 6, institute_id: 2 },
+//   { user_id: 7, institute_id: 2 },
+//   { user_id: 8, institute_id: 1 },
+//   { user_id: 9, institute_id: 2 },
+// ];
 
 const permissions = [];
 
@@ -616,17 +615,17 @@ const bulkCreateSampleData = async () => {
   }
 
   // USER_INSTITUTE
-  try {
-    const rui = await UserInstitute.bulkCreate(user_institute, {
-      transaction: t,
-    });
-    console.log(
-      `UserInstitute sample data inserted : ${user_institute.length}/${rui.length}`
-    );
-  } catch (err) {
-    await t.rollback();
-    throw err;
-  }
+  // try {
+  //   const rui = await UserInstitute.bulkCreate(user_institute, {
+  //     transaction: t,
+  //   });
+  //   console.log(
+  //     `UserInstitute sample data inserted : ${user_institute.length}/${rui.length}`
+  //   );
+  // } catch (err) {
+  //   await t.rollback();
+  //   throw err;
+  // }
 
   // USER_ROLE
   try {

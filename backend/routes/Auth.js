@@ -17,7 +17,7 @@ const { Plan } = require("../models/sql/Plan");
 const { sequelize } = require("../init.sequelize");
 const { timeout } = require("../utils/promise_timeout");
 const { validate_email } = require("../utils/validate_email");
-const { UserInstitute } = require("../models/sql/UserInstitute");
+
 const {
 	generateAccessToken,
 	generateRefreshToken,
