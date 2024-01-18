@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import useUserStore from "../../../store/UserStore";
 import { useCookies } from "react-cookie";
 import { navigateToDashboard } from "../../../utils/navigateToDashboard";
+import RoleShifter from "../RoleShifter";
 
 export default function InstituteNavbar() {
   const navigate = useNavigate();
@@ -12,8 +13,6 @@ export default function InstituteNavbar() {
   let user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   let institutes = useUserStore((state) => state.institutes);
-  let currentRole = useUserStore((state) => state.currentRole);
-  let userPlan = useUserStore((state) => state.userPlan);
 
   let currentInstituteId = useUserStore((state) => state.currentInstituteId);
   let setCurrentInstituteId = useUserStore(
@@ -39,12 +38,6 @@ export default function InstituteNavbar() {
 
   useEffect(() => {}, [user]);
 
-  useEffect(() => {
-    if (currentRole) {
-      navigateToDashboard(currentRole, userPlan, navigate);
-    }
-  }, [currentRole]);
-
   return (
     <div>
       <div className="w-full px-4 py-1 flex bg-zinc-800 text-white items-center gap-4">
@@ -62,6 +55,7 @@ export default function InstituteNavbar() {
         <Drawer.Subtitle>Institute Dashboard</Drawer.Subtitle>
         <Drawer.Content>
           <div className="py-4">
+            <RoleShifter />
             <Select
               width="100%"
               value={String(currentInstituteId)}
@@ -111,6 +105,14 @@ export default function InstituteNavbar() {
                 className="w-full text-zinc-800"
               >
                 Add New Teacher
+              </Link>
+            </Button>
+            <Button>
+              <Link
+                to={"/institute/make-playlist"}
+                className="w-full text-zinc-800"
+              >
+                Make New Playlist
               </Link>
             </Button>
             <Button className="w-full">

@@ -7,13 +7,13 @@ import useUserStore from "../../../store/UserStore";
 import { useCookies } from "react-cookie";
 import { Divider } from "@geist-ui/core";
 import { navigateToDashboard } from "../../../utils/navigateToDashboard";
+import RoleShifter from "../RoleShifter";
 
 export default function StudentNavbar() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   let user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
-  let currentRole = useUserStore((state) => state.currentRole);
   let userPlan = useUserStore((state) => state.userPlan);
   let setUserPlan = useUserStore((state) => state.setUserPlan);
 
@@ -34,12 +34,6 @@ export default function StudentNavbar() {
     resetUserState();
     navigate("/auth");
   };
-
-  useEffect(() => {
-    if (currentRole) {
-      navigateToDashboard(currentRole, userPlan, navigate);
-    }
-  }, [currentRole]);
 
   useEffect(() => {
     const fetchPlanData = async () => {
@@ -72,9 +66,9 @@ export default function StudentNavbar() {
         console.log(error);
       }
     };
-    if (user) {
-      fetchPlanData();
-    }
+    // if (user) {
+    //   fetchPlanData();
+    // }
   }, [user]);
 
   return (
@@ -96,6 +90,7 @@ export default function StudentNavbar() {
         <Drawer.Subtitle>Student Dashboard</Drawer.Subtitle>
         <hr />
         <Drawer.Content>
+          <RoleShifter />
           <h5 className="rounded-lg bg-zinc-800 text-white p-2">
             {userPlan ? "Plan : " + userPlan?.plan?.name : ""}
           </h5>

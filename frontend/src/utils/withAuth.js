@@ -21,7 +21,6 @@ import React, { useEffect } from "react";
 // }
 
 // https://blog.logrocket.com/understanding-react-higher-order-components/
-// thjis is basically same as this?!?2?1@?1@
 
 // const withEnhancement = (BaseComponent) => {
 //   // HOC logic using hooks

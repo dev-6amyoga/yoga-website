@@ -153,7 +153,7 @@ export default function Login({ switchForm }) {
 
       if (response && response.status === 200) {
         const userData = response.data;
-        // console.log(userData);
+        console.log(userData);
         setUser(userData.user);
         // setUserType(userData.user.role.name);
         setAccessToken(userData?.accessToken);
@@ -163,7 +163,6 @@ export default function Login({ switchForm }) {
 
         const currRole = Object.keys(userData?.user?.roles)[0];
         // use first role as current role
-        setCurrentRole(currRole);
 
         const currPlan = userData?.user?.roles[currRole][0]?.plan;
         setUserPlan(currPlan);
@@ -191,6 +190,9 @@ export default function Login({ switchForm }) {
         setCookie("6amyoga_refresh_token", userData?.refreshToken);
 
         // console.log(userData);
+
+        // change role in the end cuz it triggers navigation
+        setCurrentRole(currRole);
       } else {
         const errorData = response.data;
         removeCookie("6amyoga_access_token");

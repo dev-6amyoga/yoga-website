@@ -7,16 +7,23 @@ import { useCookies } from "react-cookie";
 import "./AdminNavbar.css";
 import { navigateToDashboard } from "../../../utils/navigateToDashboard";
 import { useEffect } from "react";
+import { useShallow } from "zustand/react/shallow";
+import { Select } from "@geist-ui/core";
+import RoleShifter from "../RoleShifter";
 
 export default function AdminNavbar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
-  let user = useUserStore((state) => state.user);
-  let currentRole = useUserStore((state) => state.currentRole);
-  let userPlan = useUserStore((state) => state.userPlan);
+  const [user, currentRole, userPlan, resetUserState] = useUserStore(
+    useShallow((state) => [
+      state.user,
+      state.currentRole,
+      state.userPlan,
+      state.resetUserState,
+    ])
+  );
 
-  const resetUserState = useUserStore((state) => state.resetUserState);
   const [cookies, setCookie, removeCookie] = useCookies([
     "6amyoga_access_token",
     "6amyoga_refresh_token",
@@ -28,12 +35,6 @@ export default function AdminNavbar() {
     resetUserState();
     navigate("/auth");
   };
-
-  useEffect(() => {
-    if (currentRole) {
-      navigateToDashboard(currentRole, userPlan, navigate);
-    }
-  }, [currentRole]);
 
   return (
     <div>
@@ -52,6 +53,7 @@ export default function AdminNavbar() {
         <Drawer.Subtitle>Admin Dashboard</Drawer.Subtitle>
         <Drawer.Content>
           <div className="flex flex-col gap-4 w-full">
+            <RoleShifter />
             <Button className="w-full">
               <Link to={"/admin"} className="w-full text-zinc-800">
                 Dashboard
