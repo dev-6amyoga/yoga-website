@@ -1,6 +1,7 @@
 export const navigateToDashboard = (currentRole, userPlan, navigate) => {
   const type = currentRole;
-
+  console.log("Navigating to dashboard", type);
+  // return;
   switch (type) {
     case "ROOT":
       navigate("/admin");

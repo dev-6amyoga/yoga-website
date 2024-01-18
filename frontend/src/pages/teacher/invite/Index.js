@@ -46,6 +46,7 @@ function VerifyEmailCard({
         className="mb-4"
         onChange={(e) => setConfirmEmail(e.target.value)}
       /> */}
+
       <Otp onSuccessCallback={onSuccessCallback} />
       <div className="flex gap-2">
         <Button type="success" onClick={handleAccept}>
@@ -151,35 +152,37 @@ export default function InvitePage() {
     }
   }, [token]);
 
+  function func1(number) {
+    setNumber(number);
+  }
+
   const handleAccept = (e) => {
     e.preventDefault();
-    console.log("DONE DONE!");
-    setVerified(true);
-
-    // have phone number now
+    console.log(number);
+    console.log(token);
     // if phone number matches that in invite, proceed, else return.
     // if receiver id field is not null, retrieve user details, and login.
     // if it is null, move to username password screen.
 
-    // Fetch({
-    //   url: "http://localhost:4000/invite/accept",
-    //   method: "POST",
-    //   data: {
-    //     invite_token: token,
-    //     confirm_email: confirmEmail,
-    //   },
-    // })
-    //   .then((res) => {
-    //     console.log(res);
-    //     if (res.status === 200) {
-    //       setVerified(true);
-    //       toast("Email Verified", { type: "success" });
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //     toast(err?.response?.data?.message, { type: "error" });
-    //   });
+    Fetch({
+      url: "http://localhost:4000/invite/accept",
+      method: "POST",
+      data: {
+        invite_token: token,
+        confirm_phone: number,
+      },
+    })
+      .then((res) => {
+        console.log(res);
+        if (res.status === 200) {
+          // setVerified(true);
+          toast("Email Verified", { type: "success" });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        toast(err?.response?.data?.message, { type: "error" });
+      });
   };
 
   const handleReject = (e) => {
@@ -251,6 +254,7 @@ export default function InvitePage() {
           setConfirmEmail={setConfirmEmail}
           handleAccept={handleAccept}
           handleReject={handleReject}
+          onSuccessCallback={func1}
           instituteName={invite?.institute_name}
           expiryDiffSeconds={
             (new Date(invite?.expiry_date).getTime() - Date.now()) / 1000

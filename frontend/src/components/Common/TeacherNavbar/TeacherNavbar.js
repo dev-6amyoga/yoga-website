@@ -5,15 +5,13 @@ import { useNavigate } from "react-router-dom";
 import useUserStore from "../../../store/UserStore";
 import { useCookies } from "react-cookie";
 import { navigateToDashboard } from "../../../utils/navigateToDashboard";
+import RoleShifter from "../RoleShifter";
 
 export default function TeacherNavbar() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   let user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
-  const currentRole = useUserStore((state) => state.currentRole);
-  const userPlan = useUserStore((state) => state.userPlan);
-  const setUserPlan = useUserStore((state) => state.setUserPlan);
 
   const [planId, setPlanId] = useState(0);
   const [disabled, setDisabled] = useState(false);
@@ -33,12 +31,6 @@ export default function TeacherNavbar() {
     resetUserState();
     navigate("/auth");
   };
-
-  useEffect(() => {
-    if (currentRole) {
-      navigateToDashboard(currentRole, userPlan, navigate);
-    }
-  }, [currentRole]);
 
   useEffect(() => {
     // TODO : update state based on plan
@@ -64,6 +56,7 @@ export default function TeacherNavbar() {
         <hr />
         <Drawer.Content>
           <div className="flex flex-col gap-4">
+            <RoleShifter />
             <Button onClick={() => navigate("/teacher")}>Dashboard</Button>
             <Button>Free Videos</Button>
             <Button
