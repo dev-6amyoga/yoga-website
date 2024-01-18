@@ -160,10 +160,6 @@ export default function InvitePage() {
     e.preventDefault();
     console.log(number);
     console.log(token);
-    // if phone number matches that in invite, proceed, else return.
-    // if receiver id field is not null, retrieve user details, and login.
-    // if it is null, move to username password screen.
-
     Fetch({
       url: "http://localhost:4000/invite/accept",
       method: "POST",
@@ -175,7 +171,7 @@ export default function InvitePage() {
       .then((res) => {
         console.log(res);
         if (res.status === 200) {
-          // setVerified(true);
+          setVerified(true);
           toast("Email Verified", { type: "success" });
         }
       })
