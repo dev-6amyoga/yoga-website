@@ -32,6 +32,7 @@ const {
 
 router.post("/verify-google", async (req, res) => {
 	const { client_id, jwtToken } = req.body;
+	console.log(client_id, jwtToken);
 	try {
 		const userInfo = await auth.verify(client_id, jwtToken);
 		return res.status(HTTP_OK).json(userInfo);
@@ -302,12 +303,12 @@ router.post("/register", async (req, res) => {
 
 router.post("/register-google", async (req, res) => {
 	// used to register user whos logging in using google oauth
-	const { email, name, is_google_login, client_id } = req.body;
+	const { email_id, name, is_google_login, client_id, jwt_token } = req.body;
 	// const {access_token} = req.headers.authorization?.split(" ") ?? null
 
 	// validate inputs
 	if (
-		!email ||
+		!email_id ||
 		!name ||
 		!client_id ||
 		is_google_login === undefined ||
@@ -325,13 +326,13 @@ router.post("/register-google", async (req, res) => {
 			.json({ error: "Invalid Google OAuth token" });
 	}
 
-	if (userInfo.email !== email) {
+	if (userInfo.email !== email_id) {
 		return res.status(HTTP_BAD_REQUEST).json({
 			error: "unmatched email",
 		});
 	}
 
-	if (!validate_email(email)) {
+	if (!validate_email(email_id)) {
 		return res.status(HTTP_BAD_REQUEST).json({ error: "Invalid email" });
 	}
 
@@ -344,11 +345,11 @@ router.post("/register-google", async (req, res) => {
 	// check if user exists
 	const user = await UserSQL.findOne({
 		where: {
-			email: email,
+			email: email_id,
 		},
 		attributes: ["user_id", "name", "username", "email"],
 	});
-	if (user && user.email === email)
+	if (user && user.email === email_id)
 		return res
 			.status(HTTP_BAD_REQUEST)
 			.json({ error: "Email already exists" });
@@ -361,7 +362,7 @@ router.post("/register-google", async (req, res) => {
 		const newUser = await UserSQL.create(
 			{
 				name,
-				email,
+				email: email_id,
 				is_google_login,
 			},
 			{ transaction: t }
