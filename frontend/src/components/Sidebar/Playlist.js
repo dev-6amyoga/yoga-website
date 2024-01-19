@@ -20,6 +20,12 @@ function PlaylistItem({ playlist, add }) {
 }
 
 function Playlist() {
+  const [isInstitute, setIsInstitute] = useState(false);
+  const [isTeacher, setIsTeacher] = useState(false);
+  const [isPersonal, setIsPersonal] = useState(true);
+  const [institutePlaylists, setInstitutePlaylists] = useState([]);
+  const [teacherPlaylists, setTeacherPlaylists] = useState([]);
+  const [madeForTeacher, setMadeForTeacher] = useState([]);
   const [playlists, setPlaylists] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +36,8 @@ function Playlist() {
       state.currentInstituteId,
     ])
   );
+  const user_id = user?.user_id;
+
   const [currentInstitute, setCurrentInstitute] = useState(null);
   useState(() => {
     if (currentInstituteId) {
@@ -40,8 +48,133 @@ function Playlist() {
       );
     }
   }, [currentInstituteId, institutes]);
-  const user_id = user?.user_id;
-  console.log(user_id, currentInstituteId);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/institute-playlist/get-playlists",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ institute_id: currentInstituteId }),
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setInstitutePlaylists(data);
+        } else {
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    if (isInstitute && currentInstituteId) {
+      fetchData();
+    }
+  }, [isInstitute, currentInstituteId]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log(currentInstituteId);
+      try {
+        const response = await fetch(
+          "http://localhost:4000/teacher-playlist/get-playlists",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_id: user?.user_id,
+              institute_id: currentInstituteId,
+            }),
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setTeacherPlaylists(data);
+          try {
+            const response = await fetch(
+              "http://localhost:4000/institute-playlist/get-playlists",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  institute_id: currentInstituteId,
+                }),
+              }
+            );
+            if (response.ok) {
+              const data = await response.json();
+              const filteredMadeForTeacher = data.filter((item) => {
+                const applicableTeachers = Array.isArray(
+                  item.applicable_teachers
+                )
+                  ? item.applicable_teachers
+                  : [];
+                const userId = user && user.user_id;
+                return userId && applicableTeachers.includes(Number(userId));
+              });
+              if (madeForTeacher.length > 0) {
+                setMadeForTeacher([]);
+              }
+              setMadeForTeacher((prev) => [...prev, ...filteredMadeForTeacher]);
+            }
+          } catch (err) {
+            console.log(err);
+          }
+        } else {
+          console.log("No playlists made!");
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    if (isTeacher && currentInstituteId && user) {
+      fetchData();
+    }
+  }, [isTeacher, currentInstituteId, user]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/user-institute/get-role-by-user-institute-id",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_id: user?.user_id,
+              institute_id: currentInstituteId,
+            }),
+          }
+        );
+        const data = await response.json();
+        if (data?.user_institute?.length === 1) {
+          if (data.user_institute[0].role.name === "TEACHER") {
+            setIsTeacher(true);
+            setIsPersonal(false);
+          } else if (data.user_institute[0].role.name === "INSTITUTE_OWNER") {
+            setIsInstitute(true);
+            setIsPersonal(false);
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (currentInstituteId && user) {
+      fetchData();
+    }
+  }, [currentInstituteId, user]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -49,45 +182,8 @@ function Playlist() {
           "http://localhost:4000/content/playlists/getAllPlaylists"
         );
         const data = await response.json();
-        console.log(data);
         setPlaylists(data);
         setLoading(false);
-        if (currentInstituteId != 1) {
-          const newRecord = {
-            user_id: user_id,
-            institute_id: currentInstituteId,
-          };
-          try {
-            const response = await fetch(
-              "http://localhost:4000/teacher-playlist/get-playlists",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(newRecord),
-              }
-            );
-            if (response.ok) {
-              const data = await response.json();
-              setUserPlaylists(data);
-            } else {
-              console.error("Failed to add playlist");
-            }
-          } catch (error) {
-            console.error("Error during playlist addition:", error);
-          }
-        } else {
-          try {
-            const response1 = await fetch(
-              `http://localhost:4000/user-playlists/getAllUserPlaylists/${user?.user_id}`
-            );
-            const data1 = await response1.json();
-            setUserPlaylists(data1);
-          } catch (error) {
-            console.log(error);
-          }
-        }
       } catch (error) {
         setLoading(false);
         console.log(error);
@@ -117,6 +213,10 @@ function Playlist() {
       .catch((err) => console.log(err));
   };
 
+  const showDetails = () => {
+    console.log("hi");
+  };
+
   const queue = usePlaylistStore((state) => state.queue);
   const archive = usePlaylistStore((state) => state.archive);
   const addToQueue = usePlaylistStore((state) => state.addToQueue);
@@ -124,24 +224,106 @@ function Playlist() {
 
   return (
     <div className="rounded-xl">
-      <h4>My Playlists</h4>
-      <p className="pb-4 text-sm">Choose from your playlists to practice.</p>
-      <div className="flex flex-row gap-2">
-        {userPlaylists.map((playlist) => (
-          <PlaylistItem
-            key={playlist.playlist_name}
-            type={
-              queue
-                ? queue.includes(playlist)
-                  ? "success"
-                  : "secondary"
-                : "secondary"
-            }
-            add={() => handleAddToQueue(playlist.asana_ids)}
-            playlist={playlist}
-          />
-        ))}
-      </div>
+      {isInstitute && (
+        <div>
+          <h4>Institutes Playlists</h4>
+          <p className="pb-4 text-sm">
+            Choose from institutes' playlists to practice.
+          </p>
+          <div className="flex flex-row gap-2">
+            {institutePlaylists.map((playlist) => (
+              <PlaylistItem
+                key={playlist.playlist_name}
+                type={
+                  queue
+                    ? queue.includes(playlist)
+                      ? "success"
+                      : "secondary"
+                    : "secondary"
+                }
+                add={() => handleAddToQueue(playlist.asana_ids)}
+                playlist={playlist}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {isTeacher && (
+        <div>
+          <h4>Teacher's Playlists</h4>
+          <p className="pb-4 text-sm">
+            Choose from your playlists to practice.
+          </p>
+          <div className="flex flex-row gap-2">
+            {teacherPlaylists.map((playlist) => (
+              <PlaylistItem
+                key={playlist.playlist_name}
+                type={
+                  queue
+                    ? queue.includes(playlist)
+                      ? "success"
+                      : "secondary"
+                    : "secondary"
+                }
+                add={() => handleAddToQueue(playlist.asana_ids)}
+                playlist={playlist}
+              />
+            ))}
+
+            <br />
+          </div>
+        </div>
+      )}
+      <Divider />
+      {isTeacher && (
+        <div>
+          <h4>Made for you : </h4>
+          <div className="flex flex-row gap-2">
+            {madeForTeacher.map((playlist) => (
+              <PlaylistItem
+                key={playlist.playlist_name}
+                type={
+                  queue
+                    ? queue.includes(playlist)
+                      ? "success"
+                      : "secondary"
+                    : "secondary"
+                }
+                add={() => handleAddToQueue(playlist?.asana_ids)}
+                playlist={playlist}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+      <Divider />
+
+      {isPersonal && (
+        <div>
+          <h4>My Playlists</h4>
+          <p className="pb-4 text-sm">
+            Choose from your playlists to practice.
+          </p>
+          <div className="flex flex-row gap-2">
+            {userPlaylists.map((playlist) => (
+              <PlaylistItem
+                key={playlist.playlist_name}
+                type={
+                  queue
+                    ? queue.includes(playlist)
+                      ? "success"
+                      : "secondary"
+                    : "secondary"
+                }
+                add={() => handleAddToQueue(playlist.asana_ids)}
+                playlist={playlist}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       <Divider />
       <h4>6AM Yoga Playlists</h4>
       <p className="pb-4 text-sm">

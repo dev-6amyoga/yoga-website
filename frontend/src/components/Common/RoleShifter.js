@@ -50,7 +50,7 @@ function RoleShifter() {
 
   return (
     <div className="bg-slate-700 rounded-lg z-100 p-4">
-      <p className="text-white text-center">Temporary Role Changer</p>
+      <p className="text-white text-center"> Role Changer</p>
       <Select onChange={handleRoleChange} value={currentRole}>
         {Object.keys(roles).map((role) => {
           return (

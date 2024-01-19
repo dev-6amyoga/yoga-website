@@ -7,6 +7,7 @@ import MemberManagement from "../pages/institute/settings/MemberManagement";
 import PurchaseAPlan from "../pages/institute/settings/PurchaseAPlan";
 import TransactionHistoryInstitute from "../pages/institute/settings/TransactionHistoryInstitute";
 import MakeNewPlaylist from "../pages/institute/settings/MakeNewPlaylist";
+import InstitutePlaylistPage from "../pages/institute/settings/InstitutePlaylistPage";
 export const InstituteRoutes = [
   {
     path: "/institute",
@@ -39,5 +40,9 @@ export const InstituteRoutes = [
   {
     path: "institute/make-playlist",
     element: <MakeNewPlaylist />,
+  },
+  {
+    path: "institute/playlist-page",
+    element: <InstitutePlaylistPage />,
   },
 ];

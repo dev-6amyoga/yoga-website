@@ -1,5 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { useShallow } from "zustand/react/shallow";
 import useUserStore from "../../../store/UserStore";
@@ -23,6 +24,7 @@ export default function MakeNewPlaylist() {
       state.currentInstituteId,
     ])
   );
+  const navigate = useNavigate();
   const [teachers, setTeachers] = useState([]);
   const [selectedTeachers, setSelectedTeachers] = useState([]);
   const [currentInstitute, setCurrentInstitute] = useState(null);
@@ -50,6 +52,7 @@ export default function MakeNewPlaylist() {
 
   useState(() => {
     if (currentInstituteId) {
+      console.log(currentInstitute);
       setCurrentInstitute(
         institutes?.find(
           (institute) => institute.institute_id === currentInstituteId
@@ -121,26 +124,27 @@ export default function MakeNewPlaylist() {
     // } else {
     //   incrementPlaylistField("current_count");
     console.log(newRecord);
-    // try {
-    //   const response = await fetch(
-    //     "http://localhost:4000/teacher-playlist/add-playlist",
-    //     {
-    //       method: "POST",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: JSON.stringify(newRecord),
-    //     }
-    //   );
-    //   if (response.ok) {
-    //     // setMaxStudId((prevMaxStudId) => prevMaxStudId + 1);
-    //     toast("Playlist added successfully");
-    //   } else {
-    //     console.error("Failed to add playlist");
-    //   }
-    // } catch (error) {
-    //   console.error("Error during playlist addition:", error);
-    // }
+    try {
+      const response = await fetch(
+        "http://localhost:4000/institute-playlist/add-playlist",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newRecord),
+        }
+      );
+      if (response.ok) {
+        // setMaxStudId((prevMaxStudId) => prevMaxStudId + 1);
+        toast("Playlist added successfully");
+        navigate("/institute/playlist-page");
+      } else {
+        console.error("Failed to add playlist");
+      }
+    } catch (error) {
+      console.error("Error during playlist addition:", error);
+    }
     // }
   };
 
