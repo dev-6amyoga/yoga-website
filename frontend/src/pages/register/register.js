@@ -108,6 +108,7 @@ function PickRegistationMode({
 function GeneralInformationForm({
 	generalInfo,
 	setGeneralInfo,
+	googleInfo,
 	setBlockStep,
 	setLoading,
 }) {
@@ -135,19 +136,21 @@ function GeneralInformationForm({
 		}
 
 		// validate passwords
-		if (formData?.password !== formData?.confirm_password) {
-			toast("Passwords do not match");
-			return;
-		}
+		if (!googleInfo) {
+			if (formData?.password !== formData?.confirm_password) {
+				toast("Passwords do not match");
+				return;
+			}
 
-		const [is_password_valid, pass_error] = validatePassword(
-			formData?.password
-		);
+			const [is_password_valid, pass_error] = validatePassword(
+				formData?.password
+			);
 
-		if (!is_password_valid) {
-			toast(pass_error.message, { type: "warning" });
-			setPasswordError(pass_error);
-			return;
+			if (!is_password_valid) {
+				toast(pass_error.message, { type: "warning" });
+				setPasswordError(pass_error);
+				return;
+			}
 		}
 
 		setPasswordError(null);
@@ -213,56 +216,65 @@ function GeneralInformationForm({
 				required>
 				Email ID
 			</Input>
-			{username && usernameError ? (
-				<p className="text-sm border border-red-500 p-2 rounded-lg">
-					Error : Username exists
-				</p>
-			) : (
+
+			{googleInfo && googleInfo?.verified ? (
 				<></>
-			)}
-			<Input
-				width="100%"
-				name="username"
-				placeholder="johnDoe123"
-				initialValue={generalInfo?.username}
-				onChange={(e) => setUsername(e.target.value)}
-				onFocus={handleUsernameCheck}
-				onMouseLeave={handleUsernameCheck}
-				onKeyUp={handleUsernameCheck}
-				required>
-				Username
-			</Input>
-			<p
-				className={`text-sm border p-2 rounded-lg text-zinc-500 ${
-					passwordError ? "border-red-500" : ""
-				}`}>
-				Password must be minimum 8 letters and contain atleast 1 number,
-				1 alphabet, 1 special character [!@#$%^&*,?]
-			</p>
-			<Input.Password
-				width="100%"
-				name="password"
-				initialValue={generalInfo?.password}
-				onChange={(e) => setPassword(e.target.value)}
-				title="Password must be minimum 8 letters and contain atleast 1 number, 1 alphabet, 1 special character."
-				required>
-				Password
-			</Input.Password>
-			<Input.Password
-				width="100%"
-				name="confirm_password"
-				initialValue={generalInfo?.confirm_password}
-				onChange={(e) => setConfirmPassword(e.target.value)}
-				title="Password must be minimum 8 letters and contain atleast 1 number, 1 alphabet, 1 special character."
-				required>
-				Confirm Password
-			</Input.Password>
-			{password && confirmPassword && password !== confirmPassword ? (
-				<p className="text-sm border border-red-500 p-2 rounded-lg">
-					Passwords dont match!
-				</p>
 			) : (
-				<></>
+				<>
+					{username && usernameError ? (
+						<p className="text-sm border border-red-500 p-2 rounded-lg">
+							Error : Username exists
+						</p>
+					) : (
+						<></>
+					)}
+					<Input
+						width="100%"
+						name="username"
+						placeholder="johnDoe123"
+						initialValue={generalInfo?.username}
+						onChange={(e) => setUsername(e.target.value)}
+						onFocus={handleUsernameCheck}
+						onMouseLeave={handleUsernameCheck}
+						onKeyUp={handleUsernameCheck}
+						required>
+						Username
+					</Input>
+					<p
+						className={`text-sm border p-2 rounded-lg text-zinc-500 ${
+							passwordError ? "border-red-500" : ""
+						}`}>
+						Password must be minimum 8 letters and contain atleast 1
+						number, 1 alphabet, 1 special character [!@#$%^&*,?]
+					</p>
+					<Input.Password
+						width="100%"
+						name="password"
+						initialValue={generalInfo?.password}
+						onChange={(e) => setPassword(e.target.value)}
+						title="Password must be minimum 8 letters and contain atleast 1 number, 1 alphabet, 1 special character."
+						required>
+						Password
+					</Input.Password>
+					<Input.Password
+						width="100%"
+						name="confirm_password"
+						initialValue={generalInfo?.confirm_password}
+						onChange={(e) => setConfirmPassword(e.target.value)}
+						title="Password must be minimum 8 letters and contain atleast 1 number, 1 alphabet, 1 special character."
+						required>
+						Confirm Password
+					</Input.Password>
+					{password &&
+					confirmPassword &&
+					password !== confirmPassword ? (
+						<p className="text-sm border border-red-500 p-2 rounded-lg">
+							Passwords dont match!
+						</p>
+					) : (
+						<></>
+					)}
+				</>
 			)}
 			<Button htmlType="submit" type="success">
 				Save Changes
@@ -699,17 +711,20 @@ export default function Register({ switchForm }) {
 		console.log(newUser);
 
 		try {
-			const response = await fetch(
-				"http://localhost:4000/auth/register",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(newUser),
-				}
-			);
-			if (response.ok) {
+			let url = "http://localhost:4000/auth/register";
+			if (googleInfo && googleInfo?.verified) {
+				url += "-google";
+				newUser.client_id = clientID;
+				newUser.jwt_token = googleInfo?.jwt_token;
+			}
+
+			const response = await Fetch({
+				url: url,
+				method: "POST",
+				data: newUser,
+			});
+
+			if (response.status === 200) {
 				toast("New User added successfully! Kindly login.", {
 					type: "success",
 				});
@@ -718,8 +733,8 @@ export default function Register({ switchForm }) {
 					window.location.reload();
 				}, 2000);
 			} else {
-				const errorData = await response.json();
-				toast(errorData.error, { type: "error" });
+				const errorData = response.data;
+				toast(errorData?.message, { type: "error" });
 			}
 		} catch (error) {
 			console.log(error);
@@ -776,8 +791,12 @@ export default function Register({ switchForm }) {
 						type: "success",
 					});
 					user.institute_name = institute.name;
+					let url = "http://localhost:4000/auth/register";
+					if (googleInfo && googleInfo?.verified) {
+						url += "-google";
+					}
 					Fetch({
-						url: "http://localhost:4000/auth/register",
+						url: url,
 						method: "POST",
 						data: user,
 					})
@@ -854,6 +873,7 @@ export default function Register({ switchForm }) {
 						setGeneralInfo={setGeneralInfo}
 						setBlockStep={setBlockStep}
 						setLoading={setLoading}
+						googleInfo={googleInfo}
 					/>
 				);
 			case 3:
@@ -912,6 +932,7 @@ export default function Register({ switchForm }) {
 				return <></>;
 		}
 	}, [
+		googleInfo,
 		step,
 		role,
 		regMode,
