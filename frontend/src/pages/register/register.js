@@ -11,7 +11,7 @@ import getFormData from "../../utils/getFormData";
 import "./register.css";
 
 import { AutoComplete } from "@geist-ui/core";
-import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { useCallback, useEffect } from "react";
 import Otp from "../otp/Otp";
 
@@ -23,68 +23,75 @@ function PickRegistationMode({
 	setLoading,
 	clientID,
 }) {
-	const googleLogin = useGoogleLogin({
-		onSuccess: async (credentialResponse) => {
-			setLoading(true);
-			const jwt_token = credentialResponse.credential
-				? credentialResponse.credential
-				: null;
-
-			const baseURL = "http://localhost:4000";
-			const payload = await Fetch({
-				url: `${baseURL}/auth/verify-google`,
-				data: {
-					client_id: clientID,
-					jwtToken: jwt_token,
-				},
-			});
-
-			const email_verified = payload.data.email_verified;
-
-			if (email_verified) {
-				const email = payload.data.email;
-				const name = payload.data.name;
-				console.log(email, name);
-				setGoogleInfo({
-					jwt_token,
-					verified: true,
-					email_id: email,
-					name,
-				});
-				setGeneralInfo({
-					email_id: email,
-					name: name,
-				});
-			} else {
-				setGoogleInfo({
-					verified: false,
-				});
-			}
-		},
-		onError: () => {
-			toast("Login Failed", { type: "warning" });
-		},
-		onNonOAuthError: (err) => {
-			toast("Google login failed! Try again", { type: "warning" });
-		},
-	});
-
 	return (
 		<form className="flex flex-col gap-4 w-full" onSubmit={() => {}}>
 			<h4 className="text-center">Select Mode Of Registration</h4>
 
 			<div className="flex gap-4 items-center justify-center">
-				<div
-					className={`flex items-center gap-2 flex-col p-8 border rounded-lg ${
-						regMode === "GOOGLE" ? "border-blue-500" : ""
-					}`}
-					onClick={() => {
-						setRegMode("GOOGLE");
-						googleLogin();
+				<GoogleLogin
+					size="large"
+					containerProps={{}}
+					onSuccess={async (credentialResponse) => {
+						setLoading(true);
+						console.log(credentialResponse);
+						const jwt_token = credentialResponse.credential
+							? credentialResponse.credential
+							: null;
+
+						const baseURL = "http://localhost:4000";
+						const payload = await Fetch({
+							url: `${baseURL}/auth/verify-google`,
+							method: "POST",
+							data: {
+								client_id: clientID,
+								jwtToken: jwt_token,
+							},
+						});
+
+						const email_verified = payload.data.email_verified;
+
+						if (email_verified) {
+							const email = payload.data.email;
+							const name = payload.data.name;
+							console.log(email, name);
+							setGoogleInfo({
+								jwt_token,
+								verified: true,
+								email_id: email,
+								name,
+							});
+							setGeneralInfo({
+								email_id: email,
+								name: name,
+							});
+							setLoading(false);
+						} else {
+							setGoogleInfo({
+								verified: false,
+							});
+							setLoading(false);
+						}
+						setLoading(false);
+					}}
+					onError={() => {
+						toast("Login Failed", { type: "warning" });
+					}}
+					onNonOAuthError={(err) => {
+						toast("Google login failed! Try again", {
+							type: "warning",
+						});
 					}}>
-					<SiGoogle className="w-6 h-6" />
-					Google
-				</div>
+					<div
+						className={`flex items-center gap-2 flex-col p-8 border rounded-lg ${
+							regMode === "GOOGLE" ? "border-blue-500" : ""
+						}`}
+						onClick={() => {
+							setRegMode("GOOGLE");
+						}}>
+						<SiGoogle className="w-6 h-6" />
+						Google
+					</div>
+				</GoogleLogin>
 				<div
 					className={`flex items-center gap-2 flex-col p-8 border rounded-lg ${
 						regMode === "NORMAL" ? "border-blue-500" : ""
@@ -322,7 +329,7 @@ function RoleSelectorForm({ role, setRole }) {
 }
 
 function InstituteDetailsForm({
-	handleSubmit,
+	setInstituteInfo,
 	billingAddressSame,
 	setBillingAddressSame,
 }) {
@@ -489,10 +496,17 @@ function InstituteDetailsForm({
 				return;
 			}
 
-			handleSubmit(e);
+			const formData = getFormData(e);
+
+			setInstituteInfo({
+				...formData,
+				country: selectedCountry,
+				state: selectedState,
+				city: selectedCity,
+			});
 		},
 		[
-			handleSubmit,
+			setInstituteInfo,
 			cities,
 			selectedCity,
 			selectedState,
@@ -629,6 +643,9 @@ function InstituteDetailsForm({
 					required>
 					Contact Phone Number
 				</Input>
+				<Input width="100%" name="gstin" placeholder="" required>
+					GST Number
+				</Input>
 			</div>
 			<Button htmlType="submit" type="success">
 				Save Changes
@@ -660,6 +677,7 @@ export default function Register({ switchForm }) {
 
 	useEffect(() => {
 		setClientID(process.env.REACT_APP_GOOGLE_CLIENT_ID);
+		console.log(process.env.REACT_APP_GOOGLE_CLIENT_ID);
 	}, []);
 
 	useEffect(() => {
@@ -725,7 +743,7 @@ export default function Register({ switchForm }) {
 			name: generalInfo?.name,
 			username: generalInfo?.username,
 			email_id: generalInfo?.email_id,
-			phone_no: generalInfo?.phone,
+			phone_no: phoneInfo?.phone_no,
 			password: generalInfo?.password,
 			confirm_password: generalInfo?.confirm_password,
 			role_name: "INSTITUTE_OWNER",
@@ -741,7 +759,8 @@ export default function Register({ switchForm }) {
 				? addressCombination
 				: instituteInfo?.billing_address,
 			email: instituteInfo?.contact_email,
-			phone: instituteInfo?.phone,
+			phone: instituteInfo?.contact_phone,
+			gstin: instituteInfo?.gstin,
 		};
 
 		console.log(user, institute);
@@ -767,6 +786,9 @@ export default function Register({ switchForm }) {
 								toast("User added successfully", {
 									type: "success",
 								});
+								setTimeout(() => {
+									window.location.reload();
+								}, 2000);
 							} else {
 								toast("Error registering user", {
 									type: "error",
@@ -816,16 +838,14 @@ export default function Register({ switchForm }) {
 		switch (step) {
 			case 1:
 				return (
-					<GoogleOAuthProvider clientId={clientID}>
-						<PickRegistationMode
-							regMode={regMode}
-							setRegMode={setRegMode}
-							setGoogleInfo={setGoogleInfo}
-							setGeneralInfo={setGeneralInfo}
-							setLoading={setLoading}
-							clientID={clientID}
-						/>
-					</GoogleOAuthProvider>
+					<PickRegistationMode
+						regMode={regMode}
+						setRegMode={setRegMode}
+						setGoogleInfo={setGoogleInfo}
+						setGeneralInfo={setGeneralInfo}
+						setLoading={setLoading}
+						clientID={clientID}
+					/>
 				);
 			case 2:
 				return (
@@ -848,7 +868,7 @@ export default function Register({ switchForm }) {
 					/>
 				) : (
 					<InstituteDetailsForm
-						handleSubmit={() => {}}
+						setInstituteInfo={setInstituteInfo}
 						billingAddressSame={billingAddressSame}
 						setBillingAddressSame={setBillingAddressSame}
 					/>
@@ -902,61 +922,63 @@ export default function Register({ switchForm }) {
 	]);
 
 	return (
-		<div className="bg-white p-4 rounded-lg max-w-xl mx-auto">
-			<h3 className="text-center text-2xl">Register</h3>
-			<br />
-			<Progress
-				type="success"
-				value={step}
-				max={role === "STUDENT" ? maxSteps : maxSteps + 1}
-			/>
-			<Spacer y={4} />
-			{RenderStep}
-			<div className="flex flex-row justify-between my-10">
-				{(role === "STUDENT" && step < maxSteps) ||
-				(role === "INSTITUTE_OWNER" && step < maxSteps + 1) ? (
-					<Button
-						onClick={handleNextStep}
-						loading={loading}
-						width={step === 1 ? "100%" : null}
-						iconRight={<ArrowRight />}
-						disabled={loading || blockStep}>
-						Next
-					</Button>
-				) : (
-					<Button
-						onClick={() => {
-							if (role === "STUDENT") {
-								handleStudentRegistration();
-							} else {
-								handleInstituteRegistration();
-							}
-						}}>
-						Register
-					</Button>
-				)}
+		<GoogleOAuthProvider clientId={clientID}>
+			<div className="bg-white p-4 rounded-lg max-w-xl mx-auto">
+				<h3 className="text-center text-2xl">Register</h3>
+				<br />
+				<Progress
+					type="success"
+					value={step}
+					max={role === "STUDENT" ? maxSteps : maxSteps + 1}
+				/>
+				<Spacer y={4} />
+				{RenderStep}
+				<div className="flex flex-row justify-between my-10">
+					{(role === "STUDENT" && step < maxSteps) ||
+					(role === "INSTITUTE_OWNER" && step < maxSteps + 1) ? (
+						<Button
+							onClick={handleNextStep}
+							loading={loading}
+							width={step === 1 ? "100%" : null}
+							iconRight={<ArrowRight />}
+							disabled={loading || blockStep}>
+							Next
+						</Button>
+					) : (
+						<Button
+							onClick={() => {
+								if (role === "STUDENT") {
+									handleStudentRegistration();
+								} else {
+									handleInstituteRegistration();
+								}
+							}}>
+							Register
+						</Button>
+					)}
 
-				{step > minSteps && (
-					<Button
-						onClick={handlePrevStep}
-						loading={loading}
-						icon={<ArrowLeft />}
-						disabled={loading}>
-						Back
-					</Button>
-				)}
+					{step > minSteps && (
+						<Button
+							onClick={handlePrevStep}
+							loading={loading}
+							icon={<ArrowLeft />}
+							disabled={loading}>
+							Back
+						</Button>
+					)}
+				</div>
+
+				<hr />
+
+				<div className="flex flex-col gap-1 items-center w-full mt-4">
+					<h5
+						onClick={() => switchForm((s) => !s)}
+						className="hover:pointer">
+						Already have an account?{" "}
+						<span className="text-blue-500">Click Here</span>
+					</h5>
+				</div>
 			</div>
-
-			<hr />
-
-			<div className="flex flex-col gap-1 items-center w-full mt-4">
-				<h5
-					onClick={() => switchForm((s) => !s)}
-					className="hover:pointer">
-					Already have an account?{" "}
-					<span className="text-blue-500">Click Here</span>
-				</h5>
-			</div>
-		</div>
+		</GoogleOAuthProvider>
 	);
 }
