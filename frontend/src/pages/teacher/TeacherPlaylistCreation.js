@@ -2,7 +2,9 @@ import React from "react";
 import TeacherNavbar from "../../components/Common/TeacherNavbar/TeacherNavbar";
 import useUserStore from "../../store/UserStore";
 import { useState, useEffect } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { ToastContainer, toast } from "react-toastify";
+import TeacherPageWrapper from "../../components/Common/TeacherPageWrapper";
 import {
   Card,
   Table,
@@ -13,7 +15,23 @@ import {
   Modal,
 } from "@geist-ui/core";
 export default function TeacherPlaylistCreation() {
-  let user = useUserStore((state) => state.user);
+  const [user, institutes, currentInstituteId] = useUserStore(
+    useShallow((state) => [
+      state.user,
+      state.institutes,
+      state.currentInstituteId,
+    ])
+  );
+  const [currentInstitute, setCurrentInstitute] = useState(null);
+  useState(() => {
+    if (currentInstituteId) {
+      setCurrentInstitute(
+        institutes?.find(
+          (institute) => institute.institute_id === currentInstituteId
+        )
+      );
+    }
+  }, [currentInstituteId, institutes]);
   const user_id = user?.user_id;
   const [playlist_temp, setPlaylistTemp] = useState([]);
   const [asanas, setAsanas] = useState([]);
@@ -22,6 +40,12 @@ export default function TeacherPlaylistCreation() {
   const [userPlaylist, setUserPlaylist] = useState({});
   const [incremented, setIncremented] = useState(false);
   const [modalState, setModalState] = useState(false);
+  useEffect(() => {
+    console.log(user);
+    console.log(user.roles);
+    console.log(currentInstituteId);
+    console.log(currentInstitute);
+  }, [user]);
   const incrementPlaylistField = (field) => {
     setUserPlaylist((prevPlaylist) => ({
       ...prevPlaylist,
@@ -163,47 +187,42 @@ export default function TeacherPlaylistCreation() {
     });
     // const newId = "S_" + String(user_id) + "_" + String(maxStudId + 1);
     const newRecord = {
-      playlist_id: 1,
-      playlist_user_id: user_id,
-      user_type: user?.role.name,
+      user_id: user_id,
+      institute_id: currentInstituteId,
       playlist_name: playlist_sequence["playlist_name"],
-      student_name: playlist_sequence["student_name"],
       asana_ids: playlist_sequence["asana_ids"],
+      student_name: playlist_sequence["student_name"],
     };
-    console.log(currentCount, maxCount);
     if (currentCount === maxCount) {
       toast("LIMIT REACHED!!");
     } else {
       incrementPlaylistField("current_count");
       console.log(newRecord);
-      // try {
-      //   const response = await fetch(
-      //     "http://localhost:4000/user-playlists/addUserPlaylist",
-      //     {
-      //       method: "POST",
-      //       headers: {
-      //         "Content-Type": "application/json",
-      //       },
-      //       body: JSON.stringify(newRecord),
-      //     }
-      //   );
-      //   if (response.ok) {
-      //     setMaxStudId((prevMaxStudId) => prevMaxStudId + 1);
-      //     toast("Playlist added successfully");
-      //   } else {
-      //     console.error("Failed to add playlist");
-      //   }
-      // } catch (error) {
-      //   console.error("Error during playlist addition:", error);
-      // }
+      try {
+        const response = await fetch(
+          "http://localhost:4000/teacher-playlist/add-playlist",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newRecord),
+          }
+        );
+        if (response.ok) {
+          // setMaxStudId((prevMaxStudId) => prevMaxStudId + 1);
+          toast("Playlist added successfully");
+        } else {
+          console.error("Failed to add playlist");
+        }
+      } catch (error) {
+        console.error("Error during playlist addition:", error);
+      }
     }
   };
 
   return (
-    <div>
-      <div>
-        <TeacherNavbar />
-      </div>
+    <TeacherPageWrapper heading="Make Playlist">
       <div>
         <Card>
           <Table width={60} data={asanas} className="bg-white ">
@@ -291,6 +310,6 @@ export default function TeacherPlaylistCreation() {
           <Modal.Action onClick={updateData}>Update</Modal.Action>
         </Modal>
       </div>
-    </div>
+    </TeacherPageWrapper>
   );
 }

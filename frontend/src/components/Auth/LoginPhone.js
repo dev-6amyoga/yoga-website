@@ -53,7 +53,6 @@ export default function LoginPhone({ onSuccessCallback }) {
       await recaptchaVerifier.current.verify();
       setVerified(true);
       console.log("SENDING OTP TO : ", number);
-      // hii
       signInWithPhoneNumber(auth, number, recaptchaVerifier.current)
         .then((confResult) => {
           console.log({ confirmationResult: confResult });

@@ -26,6 +26,7 @@ router.get("/get-all-user-plans", async (req, res) => {
 
 router.post("/get-user-plan-by-id", async (req, res) => {
   const { user_id } = req.body;
+  console.log(user_id);
   if (!user_id) {
     return res
       .status(HTTP_BAD_REQUEST)

@@ -6,6 +6,7 @@ import useUserStore from "../../../store/UserStore";
 import { useCookies } from "react-cookie";
 import { navigateToDashboard } from "../../../utils/navigateToDashboard";
 import RoleShifter from "../RoleShifter";
+import { toast } from "react-toastify";
 
 export default function TeacherNavbar() {
   const [open, setOpen] = useState(false);
@@ -14,9 +15,9 @@ export default function TeacherNavbar() {
   const setUser = useUserStore((state) => state.setUser);
 
   const [planId, setPlanId] = useState(0);
-  const [disabled, setDisabled] = useState(false);
-  const [tailorMade, setTailorMade] = useState(false);
-  const [selfAudio, setSelfAudio] = useState(false);
+  const [playDisabled, setPlayDisabled] = useState(true);
+  const [tailorMadeDisabled, setTailorMadeDisabled] = useState(true);
+  const [selfAudioDisabled, setSelfAudioDisabled] = useState(true);
 
   const resetUserState = useUserStore((state) => state.resetUserState);
 
@@ -33,7 +34,28 @@ export default function TeacherNavbar() {
   };
 
   useEffect(() => {
-    // TODO : update state based on plan
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/user-plan/get-user-plan-by-id",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_id: user?.user_id }),
+          }
+        );
+        const data = await response.json();
+        setPlayDisabled(!data?.userPlan?.plan.has_basic_playlist);
+        setTailorMadeDisabled(!data?.userPlan?.plan.has_playlist_creation);
+        setSelfAudioDisabled(!data?.userPlan?.plan.has_self_audio_upload);
+        const retrievedPlanId = data?.userPlan?.plan_id;
+      } catch (err) {
+        toast(err);
+      }
+    };
+    fetchData();
   }, [user]);
 
   return (
@@ -60,15 +82,19 @@ export default function TeacherNavbar() {
             <Button onClick={() => navigate("/teacher")}>Dashboard</Button>
             <Button>Free Videos</Button>
             <Button
-              disabled={disabled}
+              disabled={playDisabled}
               onClick={() => navigate("/teacher/playlist")}
             >
               Playlist Player
             </Button>
-            <Button disabled={!tailorMade}>Make your own Playlist</Button>
-
             <Button
-              disabled={!selfAudio}
+              disabled={tailorMadeDisabled}
+              onClick={() => navigate("/teacher/make-playlist")}
+            >
+              Make your own Playlist
+            </Button>
+            <Button
+              disabled={selfAudioDisabled}
               onClick={() => navigate("/teacher/self-audio-upload")}
             >
               Self Audio Upload
