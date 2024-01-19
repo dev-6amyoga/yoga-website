@@ -346,6 +346,7 @@ router.post("/accept", async (req, res) => {
     await t.commit();
     return res.status(HTTP_OK).json({
       message: "Successfully accepted",
+      receiver_id: invite.receiver_user_id,
     });
   } catch (err) {
     await t.rollback();
