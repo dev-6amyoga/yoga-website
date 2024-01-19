@@ -7,8 +7,10 @@ const {
   HTTP_SERVICE_UNAVAILABLE,
 } = require("../utils/http_status_codes");
 
-const { UserInstitutePlanRole } = require( "../models/sql/UserInstitutePlanRole" )
-const { Institute } = require( "../models/sql/Institute" )
+const {
+  UserInstitutePlanRole,
+} = require("../models/sql/UserInstitutePlanRole");
+const { Institute } = require("../models/sql/Institute");
 const router = express.Router();
 
 router.post("/get-institute-by-user-id", async (req, res) => {
@@ -19,8 +21,7 @@ router.post("/get-institute-by-user-id", async (req, res) => {
       .json({ error: "Missing required fields" });
   }
   try {
-    
-    const user_institute = await UserInstitutePlanRole.findOne({
+    const user_institute = await UserInstitutePlanRole.findAll({
       where: {
         user_id: user_id,
       },
@@ -28,8 +29,8 @@ router.post("/get-institute-by-user-id", async (req, res) => {
       include: [
         {
           model: Institute,
-        }
-      ]
+        },
+      ],
     });
 
     if (!user_institute) {
