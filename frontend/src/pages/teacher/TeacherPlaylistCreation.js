@@ -22,6 +22,7 @@ export default function TeacherPlaylistCreation() {
       state.currentInstituteId,
     ])
   );
+  const [teachers, setTeachers] = useState([]);
   const [currentInstitute, setCurrentInstitute] = useState(null);
   useState(() => {
     if (currentInstituteId) {

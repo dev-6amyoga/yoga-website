@@ -15,6 +15,7 @@ export default function StudentNavbar() {
   let user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   let userPlan = useUserStore((state) => state.userPlan);
+
   let setUserPlan = useUserStore((state) => state.setUserPlan);
 
   const [planId, setPlanId] = useState(0);
@@ -49,7 +50,6 @@ export default function StudentNavbar() {
           }
         );
         const data = await response.json();
-        // console.log({ data });
         if (data["userPlan"]) {
           setUserPlan(data["userPlan"]);
           setPlanId(data["userPlan"]["plan_id"]);

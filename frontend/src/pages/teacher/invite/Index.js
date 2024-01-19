@@ -106,6 +106,7 @@ export default function InvitePage() {
   const [invite, setInvite] = useState(null);
   const [accepted, setAccepted] = useState(false);
   const [verified, setVerified] = useState(false);
+  const [userNoExists, setUserNoExists] = useState(true);
   const [expired, setExpired] = useState(false);
   const [used, setUsed] = useState(false);
   const [confirmEmail, setConfirmEmail] = useState("");
@@ -169,8 +170,12 @@ export default function InvitePage() {
       },
     })
       .then((res) => {
-        console.log(res);
         if (res.status === 200) {
+          if (res?.data?.receiver_id) {
+            console.log("user exists!");
+            toast("Please Login again!");
+            navigate("/auth");
+          }
           setVerified(true);
           toast("Email Verified", { type: "success" });
         }
