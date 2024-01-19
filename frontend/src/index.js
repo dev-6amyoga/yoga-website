@@ -72,11 +72,14 @@ function LoginIndex() {
   useEffect(() => {
     // check for user tokens and log them in
     if (!user) {
-      // console.log(cookies["6amyoga_access_token"]);
-      // console.log(cookies["6amyoga_refresh_token"]);
+      // console.log({
+      //   access_token: cookies["6amyoga_access_token"]);
+      // console.log();
 
       const access_token = cookies["6amyoga_access_token"];
       const refresh_token = cookies["6amyoga_refresh_token"];
+
+      console.log({ access_token, refresh_token });
 
       if (access_token && refresh_token) {
         // validate tokens
@@ -105,11 +108,11 @@ function LoginIndex() {
                 .then((res) => {
                   if (res.status === 200) {
                     const userData = res.data;
-                    // console.log(userData);
+                    console.log(userData);
                     setUser(userData.user);
                     // setUserType(userData.user.role.name);
-                    setAccessToken(userData?.accessToken);
-                    setRefreshToken(userData?.refreshToken);
+                    setAccessToken(access_token);
+                    setRefreshToken(refresh_token);
 
                     setRoles(userData?.user?.roles);
 
@@ -141,8 +144,8 @@ function LoginIndex() {
                     // });
 
                     // set token cookies
-                    setCookie("6amyoga_access_token", userData?.accessToken);
-                    setCookie("6amyoga_refresh_token", userData?.refreshToken);
+                    setCookie("6amyoga_access_token", access_token);
+                    setCookie("6amyoga_refresh_token", refresh_token);
                   }
                 })
                 .catch((err) => {

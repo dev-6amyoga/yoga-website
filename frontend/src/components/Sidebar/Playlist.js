@@ -1,5 +1,6 @@
 import { Button, Divider } from "@geist-ui/core";
 import { useEffect, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import usePlaylistStore from "../../store/PlaylistStore";
 import useUserStore from "../../store/UserStore";
 
@@ -22,12 +23,28 @@ function Playlist() {
   const [playlists, setPlaylists] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
-  let user = useUserStore((state) => state.user);
-
+  const [user, institutes, currentInstituteId] = useUserStore(
+    useShallow((state) => [
+      state.user,
+      state.institutes,
+      state.currentInstituteId,
+    ])
+  );
+  const [currentInstitute, setCurrentInstitute] = useState(null);
+  useState(() => {
+    if (currentInstituteId) {
+      setCurrentInstitute(
+        institutes?.find(
+          (institute) => institute.institute_id === currentInstituteId
+        )
+      );
+    }
+  }, [currentInstituteId, institutes]);
+  const user_id = user?.user_id;
+  console.log(user_id, currentInstituteId);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // console.log(user.user_id);
         const response = await fetch(
           "http://localhost:4000/content/playlists/getAllPlaylists"
         );
@@ -35,14 +52,41 @@ function Playlist() {
         console.log(data);
         setPlaylists(data);
         setLoading(false);
-        try {
-          const response1 = await fetch(
-            `http://localhost:4000/user-playlists/getAllUserPlaylists/${user?.user_id}`
-          );
-          const data1 = await response1.json();
-          setUserPlaylists(data1);
-        } catch (error) {
-          console.log(error);
+        if (currentInstituteId != 1) {
+          const newRecord = {
+            user_id: user_id,
+            institute_id: currentInstituteId,
+          };
+          try {
+            const response = await fetch(
+              "http://localhost:4000/teacher-playlist/get-playlists",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newRecord),
+              }
+            );
+            if (response.ok) {
+              const data = await response.json();
+              setUserPlaylists(data);
+            } else {
+              console.error("Failed to add playlist");
+            }
+          } catch (error) {
+            console.error("Error during playlist addition:", error);
+          }
+        } else {
+          try {
+            const response1 = await fetch(
+              `http://localhost:4000/user-playlists/getAllUserPlaylists/${user?.user_id}`
+            );
+            const data1 = await response1.json();
+            setUserPlaylists(data1);
+          } catch (error) {
+            console.log(error);
+          }
         }
       } catch (error) {
         setLoading(false);
@@ -50,7 +94,7 @@ function Playlist() {
       }
     };
     fetchData();
-  }, []);
+  }, [user_id, currentInstituteId]);
 
   const getAllAsanas = async (asana_ids) => {
     try {
