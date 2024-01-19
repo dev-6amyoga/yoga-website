@@ -1,0 +1,55 @@
+import React from "react";
+import { useEffect, useState } from "react";
+import InstituteNavbar from "../../../components/Common/InstituteNavbar/InstituteNavbar";
+import Playlist from "../../../components/Sidebar/Playlist";
+import VideoPlayerWrapper from "../../../components/Video/VideoPlayerWrapper";
+import VideoQueue from "../../../components/Video/VideoQueue";
+import useUserStore from "../../../store/UserStore";
+function InstitutePlaylistPage() {
+  let user = useUserStore((state) => state.user);
+  const [userPlan, setUserPlan] = useState({});
+  const [planId, setPlanId] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/user-plan/get-user-plan-by-id",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_id: user?.user_id }),
+          }
+        );
+        const data = await response.json();
+        setUserPlan(data["userPlan"]);
+        setPlanId(data["userPlan"]["plan_id"]);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    // fetchData();
+  }, [user?.user_id]);
+
+  return (
+    <div className="flex-col justify-center">
+      <InstituteNavbar />
+      <br />
+      <br />
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-7 gap-4 my-10">
+          <VideoPlayerWrapper />
+          <VideoQueue />
+        </div>
+        <hr />
+        <div className="my-10">
+          <Playlist />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default InstitutePlaylistPage;

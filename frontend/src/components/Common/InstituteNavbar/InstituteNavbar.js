@@ -96,9 +96,6 @@ export default function InstituteNavbar() {
                 Member Management
               </Link>
             </Button>
-            <ButtonDropdown className="w-full">
-              <ButtonDropdown.Item main>Content Management</ButtonDropdown.Item>
-            </ButtonDropdown>
             <Button className="w-full">
               <Link
                 to={"/institute/add-new-teacher"}
@@ -106,6 +103,13 @@ export default function InstituteNavbar() {
               >
                 Add New Teacher
               </Link>
+            </Button>
+            <Button
+              onClick={() => {
+                navigate("/institute/playlist-page");
+              }}
+            >
+              Playlist Page
             </Button>
             <Button>
               <Link

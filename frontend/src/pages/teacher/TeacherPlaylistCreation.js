@@ -2,6 +2,7 @@ import React from "react";
 import TeacherNavbar from "../../components/Common/TeacherNavbar/TeacherNavbar";
 import useUserStore from "../../store/UserStore";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useShallow } from "zustand/react/shallow";
 import { ToastContainer, toast } from "react-toastify";
 import TeacherPageWrapper from "../../components/Common/TeacherPageWrapper";
@@ -15,6 +16,7 @@ import {
   Modal,
 } from "@geist-ui/core";
 export default function TeacherPlaylistCreation() {
+  const navigate = useNavigate();
   const [user, institutes, currentInstituteId] = useUserStore(
     useShallow((state) => [
       state.user,
@@ -213,6 +215,7 @@ export default function TeacherPlaylistCreation() {
         if (response.ok) {
           // setMaxStudId((prevMaxStudId) => prevMaxStudId + 1);
           toast("Playlist added successfully");
+          navigate("/teacher/playlist");
         } else {
           console.error("Failed to add playlist");
         }
