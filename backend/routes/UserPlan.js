@@ -11,6 +11,7 @@ const { User } = require("../models/sql/User");
 const { Op } = require("sequelize");
 const { sequelize } = require("../init.sequelize");
 const { timeout } = require("../utils/promise_timeout");
+const { UserInstitutePlanRole } = require( "../models/sql/UserInstitutePlanRole" )
 
 router.get("/get-all-user-plans", async (req, res) => {
   try {
@@ -153,8 +154,14 @@ router.post("/register", async (req, res) => {
       },
       { transaction: t }
     );
+
+    const x = await UserInstitutePlanRole.update({
+      user_id: user_id,
+      plan_id: plan_id,
+    })
+
     await timeout(t.commit(), 5000, new Error("timeout; try again"));
-    res.status(HTTP_OK).json({ userPlan: newUserPlan });
+    return res.status(HTTP_OK).json({ userPlan: newUserPlan });
   } catch (error) {
     console.error(error);
     await t.rollback();

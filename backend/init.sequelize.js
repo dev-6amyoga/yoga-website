@@ -17,6 +17,7 @@ var sequelize = new Sequelize(DB_DATABASE, DB_USERNAME, DB_PASSWORD, {
   host: DB_HOST,
   port: DB_PORT,
   dialectOptions: {},
+  benchmark: true
 });
 
 // Initializes and syncs the db
