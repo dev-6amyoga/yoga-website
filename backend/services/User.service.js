@@ -2,10 +2,11 @@ const { User } = require("../models/sql/User");
 const { Plan } = require("../models/sql/Plan");
 const { Institute } = require("../models/sql/Institute");
 const { Role } = require("../models/sql/Role");
-const { UserPlan } = require("../models/sql/UserPlan");
+
 const {
   UserInstitutePlanRole,
 } = require("../models/sql/UserInstitutePlanRole");
+const { UserPlan } = require( "../models/sql/UserPlan" )
 
 const GetUser = async (filter, attributes) => {
   // returns user
@@ -81,10 +82,17 @@ const GetUserInfo = async (filter, attributes = null) => {
       },
       include: [
         { model: Institute, attributes: ["institute_id", "name"] },
-        { model: Plan },
+        { model: UserPlan, attributes: ["user_plan_id", "plan_id"], include: [Plan] },
         { model: Role, attributes: ["role_id", "name"] },
       ],
     });
+
+				userInstitutePlanRoles = userInstitutePlanRoles.map(uipr => {
+					return {
+						...uipr.toJSON(),
+						plan: uipr.user_plan ? uipr.user_plan.plan : null
+					}
+				})
 
     let roles = {};
 

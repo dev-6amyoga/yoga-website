@@ -5,6 +5,7 @@ const { User } = require("./User");
 const { Role } = require("./Role");
 const { Institute } = require("./Institute");
 const { Plan } = require("./Plan");
+const { UserPlan } = require( "./UserPlan" )
 
 const UserInstitutePlanRole = sequelize.define(
   "user_institute_plan_role",
@@ -30,8 +31,8 @@ UserInstitutePlanRole.belongsTo(Institute, {
   foreignKey: "institute_id",
   onDelete: "SET NULL",
 });
-UserInstitutePlanRole.belongsTo(Plan, {
-  foreignKey: "plan_id",
+UserInstitutePlanRole.belongsTo(UserPlan, {
+  foreignKey: "user_plan_id",
   onDelete: "SET NULL",
 });
 
