@@ -27,6 +27,9 @@ export default function ApplicablePlansForm({
     fetchPlans();
   }, []);
 
+  useEffect(() => {
+    console.log(plans);
+  }, [plans]);
   const handleSelectPlan = (val) => {
     setSelectedPlans(val);
   };
