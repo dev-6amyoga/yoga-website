@@ -50,6 +50,7 @@ const discountCouponRouter = require("./routes/DiscountCoupon");
 const transactionRouter = require("./routes/Transaction");
 const teacherPlaylistRouter = require("./routes/TeacherPlaylist");
 const userInstitutePlanRoleRouter = require("./routes/UserInstitutePlanRole");
+const institutePlaylistRouter = require("./routes/InstitutePlaylist");
 // DEV : sample data creation
 const { bulkCreateSampleData } = require("./sample_data");
 
@@ -92,6 +93,7 @@ app.use("/referral", referralCodeRouter);
 app.use("/user-playlists", userPlaylistRouter);
 app.use("/user-playlist-count", UserPlaylistCountRouter);
 app.use("/institute", instituteRouter);
+app.use("/institute-playlist", institutePlaylistRouter);
 app.use("/invite", inviteRouter);
 app.use("/payment", paymentRouter);
 app.use("/user-institute", userInstituteRouter);

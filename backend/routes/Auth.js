@@ -248,7 +248,16 @@ router.post("/register", async (req, res) => {
 
     if (!role) throw new Error("Role doesn't exist");
 
-    // create user
+    const user = await UserSQL.findOne({
+      where: {
+        email: email_id,
+      },
+      attributes: ["email"],
+    });
+
+    if (user) {
+    }
+
     const newUser = await UserSQL.create(
       {
         username,
@@ -264,6 +273,13 @@ router.post("/register", async (req, res) => {
     // console.log(newUser.toJSON());
 
     // create user_institute
+
+    // const user = await UserInstitutePlanRole.findOne({
+    //   where: {
+    //     user_id: email,
+    //   },
+    //   attributes: ["user_id", "name", "username", "email"],
+    // });
 
     const user_institute_plan_role = await UserInstitutePlanRole.create(
       {
