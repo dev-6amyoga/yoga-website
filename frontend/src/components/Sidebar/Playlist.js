@@ -1,10 +1,10 @@
-import { Button, Divider } from "@geist-ui/core";
+import { Button, Divider, Tooltip, Modal } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import usePlaylistStore from "../../store/PlaylistStore";
 import useUserStore from "../../store/UserStore";
 
-function PlaylistItem({ playlist, add }) {
+function PlaylistItem({ playlist, add, deets }) {
   return (
     <div className="px-2 py-2 rounded-xl border border-zinc-800">
       <div className="flex justify-between gap-8 items-center">
@@ -13,6 +13,9 @@ function PlaylistItem({ playlist, add }) {
           <Button auto type="outline" onClick={add}>
             Add
           </Button>
+          <Button auto type="outline" onClick={deets}>
+            Details
+          </Button>
         </div>
       </div>
     </div>
@@ -20,6 +23,54 @@ function PlaylistItem({ playlist, add }) {
 }
 
 function Playlist() {
+  const [modalState, setModalState] = useState(false);
+  const [modalData, setModalData] = useState({
+    playlist_id: 0,
+    playlist_name: "",
+    applicable_teachers: [],
+    user_id: 0,
+    institute_id: 0,
+    asana_ids: [],
+    asana_details: [],
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let updatedModalData = { ...modalData };
+      if (!Array.isArray(updatedModalData.asana_details)) {
+        updatedModalData.asana_details = [];
+      }
+      for (var i = 0; i < modalData.asana_ids.length; i++) {
+        try {
+          const response = await fetch(
+            "http://localhost:4000/content/get-asana-by-id",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ asana_id: modalData.asana_ids[i] }),
+            }
+          );
+          if (response.ok) {
+            const data = await response.json();
+            updatedModalData.asana_details.push(data);
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      setModalData((prevModalData) => ({
+        ...prevModalData,
+        asana_details: updatedModalData.asana_details,
+      }));
+    };
+
+    if (modalData.asana_ids.length > 0) {
+      fetchData();
+    }
+  }, [modalData.asana_ids]);
+
   const [isInstitute, setIsInstitute] = useState(false);
   const [isTeacher, setIsTeacher] = useState(false);
   const [isPersonal, setIsPersonal] = useState(true);
@@ -213,8 +264,9 @@ function Playlist() {
       .catch((err) => console.log(err));
   };
 
-  const showDetails = () => {
-    console.log("hi");
+  const showDetails = (x) => {
+    setModalData(x);
+    setModalState(true);
   };
 
   const queue = usePlaylistStore((state) => state.queue);
@@ -224,6 +276,13 @@ function Playlist() {
 
   return (
     <div className="rounded-xl">
+      <Modal visible={modalState} onClose={() => setModalState(false)}>
+        <Modal.Title>Playlist Details</Modal.Title>
+        <Modal.Subtitle>{modalData.playlist_name}</Modal.Subtitle>
+        <Modal.Action passive onClick={() => setModalState(false)}>
+          Close
+        </Modal.Action>
+      </Modal>
       {isInstitute && (
         <div>
           <h4>Institutes Playlists</h4>
@@ -242,6 +301,7 @@ function Playlist() {
                     : "secondary"
                 }
                 add={() => handleAddToQueue(playlist.asana_ids)}
+                deets={() => showDetails(playlist)}
                 playlist={playlist}
               />
             ))}
@@ -257,18 +317,21 @@ function Playlist() {
           </p>
           <div className="flex flex-row gap-2">
             {teacherPlaylists.map((playlist) => (
-              <PlaylistItem
-                key={playlist.playlist_name}
-                type={
-                  queue
-                    ? queue.includes(playlist)
-                      ? "success"
+              <Tooltip text={"Made for " + playlist.student_name} type="dark">
+                <PlaylistItem
+                  key={playlist.playlist_name}
+                  type={
+                    queue
+                      ? queue.includes(playlist)
+                        ? "success"
+                        : "secondary"
                       : "secondary"
-                    : "secondary"
-                }
-                add={() => handleAddToQueue(playlist.asana_ids)}
-                playlist={playlist}
-              />
+                  }
+                  add={() => handleAddToQueue(playlist.asana_ids)}
+                  deets={showDetails}
+                  playlist={playlist}
+                />
+              </Tooltip>
             ))}
 
             <br />
@@ -291,6 +354,7 @@ function Playlist() {
                     : "secondary"
                 }
                 add={() => handleAddToQueue(playlist?.asana_ids)}
+                deets={showDetails}
                 playlist={playlist}
               />
             ))}
@@ -317,6 +381,7 @@ function Playlist() {
                     : "secondary"
                 }
                 add={() => handleAddToQueue(playlist.asana_ids)}
+                deets={showDetails}
                 playlist={playlist}
               />
             ))}
@@ -341,6 +406,7 @@ function Playlist() {
                 : "secondary"
             }
             add={() => handleAddToQueue(playlist.asana_ids)}
+            deets={showDetails}
             playlist={playlist}
           />
         ))}
