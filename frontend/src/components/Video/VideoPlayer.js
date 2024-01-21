@@ -108,7 +108,7 @@ function VideoPlayer() {
 				// console.log(player?.current?.currentTime);
 				setCurrentTime(player?.current?.currentTime);
 			}
-		}, 500);
+		}, 250);
 
 		return () => {
 			clearInterval(int);
@@ -170,6 +170,10 @@ function VideoPlayer() {
 										duration={duration}
 										draggableHandle={draggableHandle}
 										toTimeString={toTimeString}
+										handleSetPause={handleSetPause}
+										handleSetPlay={handleSetPlay}
+										moveToTimestamp={moveToTimestamp}
+										playbarVisible={playbarVisible}
 									/>
 								</div>
 								{videoState === STATE_VIDEO_LOADING ? (
