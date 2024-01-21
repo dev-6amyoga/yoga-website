@@ -1,6 +1,3 @@
-import useUserStore from "../store/UserStore";
-import React, { useEffect } from "react";
-
 // export default function withAuth(Component) {
 //   return function AuthenticatedPage(props) {
 //     let user = useUserStore((state) => state.user);
@@ -30,8 +27,8 @@ import React, { useEffect } from "react";
 //   };
 // };
 
-export const withAuth = (props) => {
-  return <div></div>;
+export const withAuth = (Component) => {
+	return <div>{Component}</div>;
 };
 
 //  const user = useUserStore(state => state.user)
