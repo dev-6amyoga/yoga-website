@@ -1,155 +1,72 @@
-import { Button, Input, Radio, Select, Text } from "@geist-ui/core";
+import { Checkbox, Button, Divider, Input, Select, Text } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import AdminNavbar from "../../Common/AdminNavbar/AdminNavbar";
-import PopUpDialog from "../../Common/PopUp/PopUp";
+import getFormData from "../../../utils/getFormData";
 import "./RegisterVideoForm.css";
 
 export default function RegisterVideoForm() {
   const navigate = useNavigate();
+  const [data, setData] = useState([]);
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [asana_category, setAsanaCategory] = useState("");
   const [asana_type, setAsanaType] = useState("");
   const [asana_difficulty, setAsanaDifficulty] = useState(null);
-  const [counter, setCounter] = useState("");
-  const [muted, setMuted] = useState("");
-  const [message_difficulty, setMessage_difficulty] = useState("");
+  const [counter, setCounter] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [withAudio, setWithAudio] = useState(true);
+  const [tableLanguages, setTableLanguages] = useState([]);
 
-  const mutedHandler = (val) => {
-    setMuted(val);
+  const hello = (value) => {
+    console.log("VALUE IS ", value);
+    if (value.length === 0) {
+      setWithAudio(false);
+      setMuted(false);
+      setCounter(false);
+    }
+    if (value.length !== 0) {
+      if (value.includes("with_audio")) {
+        setWithAudio(true);
+      }
+      if (value.includes("muted")) {
+        setMuted(true);
+      }
+      if (value.includes("with_timer")) {
+        setCounter(true);
+      }
+    }
   };
-  const counterHandler = (val) => {
-    setCounter(val);
+  const handleDifficulty = (val) => {
+    setAsanaDifficulty(val);
   };
 
-  const handleMessage_difficultyChange = (x) => {
-    setMessage_difficulty(x);
+  const [personStart, setPersonStart] = useState(null);
+  const [personEnd, setPersonEnd] = useState(null);
+  const [matStart, setMatStart] = useState(null);
+  const [matEnd, setMatEnd] = useState(null);
+  const handlePersonStart = (val) => {
+    setPersonStart(val);
   };
-
+  const handlePersonEnd = (val) => {
+    setPersonEnd(val);
+  };
+  const handleMatStart = (val) => {
+    setMatStart(val);
+  };
+  const handleMatEnd = (val) => {
+    setMatEnd(val);
+  };
+  const handleLanguageChange = (val) => {
+    setSelectedLanguage(val);
+  };
   const handler4 = (val) => {
     setAsanaCategory(val);
   };
   const handler_type = (val) => {
     setAsanaType(val);
   };
-  const [message1] = useState(
-    "Do you want to proceed with the following updates?"
-  );
-  const [message2, setMessage2] = useState("");
-  const handleMessage2Change = (x) => {
-    setMessage2(x);
-  };
-  const [message3, setMessage3] = useState("");
-  const handleMessage3Change = (x) => {
-    setMessage3(x);
-  };
-  const [message4, setMessage4] = useState("");
-  const handleMessage4Change = (x) => {
-    setMessage4(x);
-  };
-  const [message5, setMessage5] = useState("");
-  const handleMessage5Change = (x) => {
-    setMessage5(x);
-  };
-  const [message6, setMessage6] = useState("");
-  const handleMessage6Change = (x) => {
-    setMessage6(x);
-  };
-  const [message7, setMessage7] = useState("");
-  const handleMessage7Change = (x) => {
-    setMessage7(x);
-  };
 
-  const [message_type, setMessage_type] = useState("");
-  const handleMessage_typeChange = (x) => {
-    setMessage_type(x);
-  };
-
-  const [message_lang, setMessage_lang] = useState("");
-  const handleMessage_langChange = (x) => {
-    setMessage_lang(x);
-  };
-  let updateNeeded = false;
-  let updateNeededLanguage = false;
-  const [isPopUpOpen, setIsPopUpOpen] = useState(false);
-  const handleOpenPopUp = () => {
-    setIsPopUpOpen(true);
-  };
-  const handleClosePopUp = () => {
-    setIsPopUpOpen(false);
-  };
-
-  const [isPopUp1Open, setIsPopUp1Open] = useState(false);
-  const handleOpenPopUp1 = () => {
-    setIsPopUp1Open(true);
-  };
-  const handleClosePopUp1 = () => {
-    setIsPopUp1Open(false);
-  };
-
-  const handleYes = () => {
-    updateNeeded = true;
-    console.log("FROM POP UP ", updateNeeded);
-    handleClosePopUp();
-  };
-  const handleNo = () => {
-    updateNeeded = false;
-    console.log("FROM POP UP ", updateNeeded);
-    handleClosePopUp();
-  };
-
-  const handleYesLanguage = async () => {
-    updateNeededLanguage = true;
-    handleClosePopUp1();
-    const asanaName = document.querySelector("#asana_name").value;
-    const description = document.querySelector("#asana_description").value;
-    const category = document.querySelector("#asana_category").value;
-    const language = selectedLanguage;
-    const asana_type = document.querySelector("#asana_type").value;
-    const videoURL = document.querySelector("#asana_url").value;
-    const newAsana = {
-      asana_name: asanaName,
-      asana_desc: description,
-      asana_category: category,
-      language: language,
-      asana_videoID: videoURL,
-      asana_withAudio: withAudio,
-      asana_audioLag: 0,
-      asana_type: asana_type,
-      asana_imageID: "",
-    };
-    try {
-      const response = await fetch(
-        "http://localhost:4000/content/video/addAsana",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newAsana),
-        }
-      );
-
-      if (response.ok) {
-        console.log("New Asana added successfully");
-      } else {
-        console.error("Failed to add new Asana");
-      }
-    } catch (error) {
-      console.error("Error while making the request:", error);
-    }
-  };
-  const handleNoLanguage = () => {
-    updateNeededLanguage = false;
-    handleClosePopUp1();
-    handleOpenPopUp();
-  };
-  const [withAudio, setWithAudio] = useState(true);
-  const withAudioHandler = (val) => {
-    setWithAudio(val);
-  };
-
-  const [data, setData] = useState([]);
   useEffect(() => {
     fetch("http://localhost:4000/content/video/getAllAsanas")
       .then((response) => response.json())
@@ -160,8 +77,6 @@ export default function RegisterVideoForm() {
         console.error(error);
       });
   }, []);
-
-  const [tableLanguages, setTableLanguages] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -176,235 +91,94 @@ export default function RegisterVideoForm() {
     };
     fetchData();
   }, []);
-  const handleLanguageChange = (value) => {
-    setSelectedLanguage(value);
-  };
 
-  const presentAlready = async (
-    asanaName,
-    description,
-    category,
-    asana_type,
-    asana_difficulty,
-    language,
-    videoURL
-  ) => {
-    let { uniqueCount, totalCount } = { uniqueCount: 0, totalCount: 0 };
-    let {
-      updateDesc,
-      updateCat,
-      updateLink,
-      updateAudio,
-      updateLanguage,
-      updateType,
-      updateDifficulty,
-    } = {
-      updateDesc: false,
-      updateCat: false,
-      updateLink: false,
-      updateAudio: false,
-      updateLanguage: false,
-      updateType: false,
-      updateDifficulty: false,
-    };
-    console.log(asana_type, muted, counter, asana_difficulty);
-    for (var sub_asana in data) {
-      totalCount = totalCount + 1;
-      if (data[sub_asana]["asana_name"] === asanaName) {
-        if (
-          data[sub_asana]["asana_desc"] === description &&
-          data[sub_asana]["asana_category"] === category &&
-          data[sub_asana]["language"] === language &&
-          data[sub_asana]["asana_videoID"] === videoURL &&
-          data[sub_asana]["asana_withAudio"] === withAudio &&
-          data[sub_asana]["asana_type"] === asana_type &&
-          data[sub_asana]["asana_difficulty"] === asana_difficulty &&
-          data[sub_asana]["muted"] === muted &&
-          data[sub_asana]["counter"] === counter
-        ) {
-        } else {
-          if (data[sub_asana]["asana_desc"] !== description) {
-            updateDesc = true;
-          }
-          if (data[sub_asana]["asana_category"] !== category) {
-            updateCat = true;
-          }
-          if (data[sub_asana]["asana_videoID"] !== videoURL) {
-            updateLink = true;
-          }
-          if (data[sub_asana]["asana_withAudio"] !== withAudio) {
-            updateAudio = true;
-          }
-          if (data[sub_asana]["language"] !== language) {
-            updateLanguage = true;
-          }
-          if (data[sub_asana]["asana_type"] !== asana_type) {
-            updateType = true;
-          }
-          if (data[sub_asana]["asana_difficulty"] !== asana_difficulty) {
-            updateDifficulty = true;
-          }
-        }
-      } else {
-        uniqueCount = uniqueCount + 1;
-      }
-    }
+  // const markerNavigate = () => {};
 
-    if (uniqueCount === totalCount) {
-      const newAsana = {
-        id:
-          data.reduce((max, user) => (user?.id > max ? user?.id : max), 0) + 1,
-        asana_name: asanaName,
-        asana_desc: description,
-        asana_category: category,
-        language: language,
-        asana_videoID: videoURL,
-        asana_withAudio: withAudio,
-        asana_audioLag: 0,
-        asana_imageID: "",
-        asana_type: asana_type,
-        asana_difficulty: asana_difficulty,
-        muted: muted,
-        counter: counter,
-      };
-      try {
-        const response = await fetch(
-          "http://localhost:4000/content/video/addAsana",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newAsana),
-          }
-        );
-
-        if (response.ok) {
-          console.log("New Asana added successfully");
-        } else {
-          console.error("Failed to add new Asana");
-        }
-      } catch (error) {
-        console.error("Error while making the request:", error);
-      }
-    } else {
-      handleMessage2Change(asanaName);
-      if (updateDesc === true) {
-        handleMessage3Change(
-          "Description from :" +
-            data[sub_asana]["asana_desc"] +
-            " to : " +
-            description
-        );
-      }
-      if (updateCat === true) {
-        handleMessage4Change(
-          "Asana Category from : " +
-            data[sub_asana]["asana_category"] +
-            " to : " +
-            category
-        );
-      }
-      if (updateDifficulty === true) {
-        handleMessage_difficultyChange(
-          "Difficulty from : " +
-            data[sub_asana]["asana_difficulty"] +
-            " to : " +
-            asana_difficulty
-        );
-      }
-      if (updateLink === true) {
-        handleMessage5Change(
-          "Asana URL from : " +
-            data[sub_asana]["asana_videoID"] +
-            " to : " +
-            videoURL
-        );
-      }
-      if (updateAudio === true) {
-        handleMessage6Change(
-          "Change Audio Presence from : " +
-            data[sub_asana]["asana_withAudio"] +
-            " to : " +
-            withAudio
-        );
-      }
-      if (updateLanguage === true) {
-        handleMessage7Change(
-          "Change Language from : " +
-            data[sub_asana]["language"] +
-            " to : " +
-            language
-        );
-      }
-      if (updateType === true) {
-        handleMessage_typeChange(
-          "Change Type from : " +
-            data[sub_asana]["asana_type"] +
-            " to : " +
-            asana_type
-        );
-      }
-      if (updateLanguage) {
-        handleMessage_langChange(
-          "Do you wish to insert a new entry in the table for the same asana with a different language?"
-        );
-        handleOpenPopUp1();
-      } else {
-        handleOpenPopUp();
-      }
-    }
-    navigate("/admin/allAsanas");
-  };
-
-  const markerNavigate = () => {
-    const asanaName = document.query4Selector("#asana_name").value;
-    const description = document.querySelector("#asana_description").value;
-    const category = document.querySelector("#asana_category").value;
-    const language = document.querySelector("#asana_language").value;
-    const videoURL = document.querySelector("#asana_url").value;
-    const asana_type = document.querySelector("#asana_type").value;
-    if (
-      asanaName === "" ||
-      description === "" ||
-      category === "" ||
-      videoURL === "" ||
-      withAudio === "" ||
-      language === "" ||
-      asana_type === ""
-    ) {
-      alert("A field is empty");
-    } else {
-      console.log("marker");
-    }
-  };
-
-  const handleDifficulty = (val) => {
-    setAsanaDifficulty(val);
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const asanaName = document.querySelector("#asana_name").value;
-    const description = document.querySelector("#asana_description").value;
-    const category = asana_category;
+    const asana_category1 = asana_category;
     const language = selectedLanguage;
-    const videoURL = document.querySelector("#asana_url").value;
-    console.log(asana_difficulty);
-    presentAlready(
-      asanaName,
-      description,
-      category,
-      asana_type,
-      asana_difficulty,
-      language,
-      videoURL
-    );
+    const formData = getFormData(e);
+    const additionalData = {
+      asana_category: asana_category1,
+      language: language,
+      asana_type: asana_type,
+      asana_difficulty: asana_difficulty,
+      counter: counter,
+      muted: muted,
+      asana_withAudio: withAudio,
+      person_starting_position: personStart,
+      person_ending_position: personEnd,
+      mat_starting_position: matStart,
+      mat_ending_position: matEnd,
+    };
+    const combinedData = {
+      ...formData,
+      ...additionalData,
+    };
+    console.log(combinedData);
+    console.log(data);
+    console.log(withAudio, muted, counter);
+    if (
+      combinedData.asana_name === "" ||
+      combinedData.asana_type === "" ||
+      combinedData.asana_videoID === "" ||
+      combinedData.asana_category === "" ||
+      combinedData.asana_difficulty === "" ||
+      combinedData.person_starting_position === null ||
+      combinedData.person_ending_position === null ||
+      combinedData.mat_starting_position === null ||
+      combinedData.mat_ending_position === null
+    ) {
+      // c3b045a15ec9a79d383d49c3c9acb278
+      if (combinedData.person_starting_position === null) {
+        console.log("nulnullnull");
+      } else {
+        console.log(combinedData.person_starting_position);
+      }
+      toast("Missing required fields!");
+    } else if (withAudio === false && muted === false && counter === false) {
+      toast("One or more of the audio options must be selected!");
+    } else {
+      let toastShown = false;
+      for (var i = 0; i !== data.length; i++) {
+        if (data[i].asana_name === combinedData.asana_name) {
+          if (data[i].language === combinedData.language) {
+            toast("Asana already exists with the same language!");
+            toastShown = true;
+          } else if (data[i].asana_videoID === combinedData.asana_videoID) {
+            toast("Asana already exists with the same Video ID !");
+            toastShown = true;
+          }
+        }
+      }
+      if (toastShown) {
+        console.log("wait");
+      } else {
+        console.log("insert!!");
+        try {
+          const response = await fetch(
+            "http://localhost:4000/content/video/addAsana",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(combinedData),
+            }
+          );
+          if (response.ok) {
+            toast("New Asana added successfully");
+            navigate("/admin/allAsanas");
+          } else {
+            console.log("Failed to add new Asana");
+          }
+        } catch (error) {
+          console.log("Error while making the request:", error);
+        }
+      }
+    }
   };
-  const handler = (val) => {
-    setSelectedLanguage(val);
-  };
-
   return (
     <div className="video_form min-h-screen">
       <AdminNavbar />
@@ -414,17 +188,17 @@ export default function RegisterVideoForm() {
           onSubmit={handleSubmit}
         >
           <Text h3>Register New Video</Text>
-          <Input width="100%" id="asana_name">
+          <Input width="100%" name="asana_name">
             Asana Name
           </Input>
-          <Input width="100%" id="asana_description">
+          <Input width="100%" name="asana_desc">
             Description
           </Input>
           <Text h6>Category</Text>
           <Select
-            placeholder="Category"
+            placeholder="Choose Category"
             onChange={handler4}
-            id="asana_category"
+            name="asana_category"
           >
             <Select.Option value="Standing">Standing</Select.Option>
             <Select.Option value="Sitting">Sitting</Select.Option>
@@ -433,13 +207,12 @@ export default function RegisterVideoForm() {
             <Select.Option value="Prone">Prone</Select.Option>
             <Select.Option value="Special">Special</Select.Option>
           </Select>
-
           <Text h6>Type</Text>
           <Select
             value={asana_type}
-            placeholder="Single"
+            placeholder="Choose Asana Type"
             onChange={handler_type}
-            id="asana_type"
+            name="asana_type"
           >
             <Select.Option value="Single">Single</Select.Option>
             <Select.Option value="Combination">Combination</Select.Option>
@@ -450,6 +223,7 @@ export default function RegisterVideoForm() {
             multiple
             placeholder="Choose Difficulty"
             onChange={handleDifficulty}
+            name="asana_difficulty"
           >
             <Select.Option key="Beginner" value="Beginner">
               Beginner
@@ -461,18 +235,16 @@ export default function RegisterVideoForm() {
               Advanced
             </Select.Option>
           </Select>
-
-          <Input width="100%" id="asana_url">
-            Video URL
+          <Input width="100%" id="asana_videoID" name="asana_videoID">
+            Cloudflare Video ID
           </Input>
-
           <Text>Language</Text>
-
           <Select
             placeholder="Choose Language"
             value={selectedLanguage}
             onChange={handleLanguageChange}
             id="asana_language"
+            name="asana_language"
           >
             {tableLanguages &&
               tableLanguages.map((language) => (
@@ -484,52 +256,101 @@ export default function RegisterVideoForm() {
                 </Select.Option>
               ))}
           </Select>
-
-          <Text>With Audio?</Text>
-          <Radio.Group
-            id="withAudio"
-            value={withAudio}
-            onChange={withAudioHandler}
+          <br />
+          <Text h5>Audio Settings </Text>
+          <Checkbox.Group
+            value={["with_audio"]}
+            onChange={hello}
+            name="audio_settings"
           >
-            <Radio value="true">Yes</Radio>
-            <Radio value="false">No</Radio>
-          </Radio.Group>
+            <Checkbox value="with_audio">With Audio?</Checkbox>
+            <Checkbox value="muted">Muted?</Checkbox>
+            <Checkbox value="with_timer">With Timer?</Checkbox>
+          </Checkbox.Group>
+          <Divider />
 
-          <Text>Muted?</Text>
-          <Radio.Group id="muted" value={muted} onChange={mutedHandler}>
-            <Radio value="true">Yes</Radio>
-            <Radio value="false">No</Radio>
-          </Radio.Group>
+          <Text h5>Person Starting Position</Text>
+          <Select
+            placeholder="Choose Person Starting Position"
+            onChange={handlePersonStart}
+          >
+            <Select.Option key="Front" value="Front">
+              Front
+            </Select.Option>
+            <Select.Option key="Left" value="Left">
+              Left
+            </Select.Option>
+            <Select.Option key="Right" value="Right">
+              Right
+            </Select.Option>
+            <Select.Option key="Back" value="Back">
+              Back
+            </Select.Option>
+            <Select.Option key="Diagonal" value="Diagonal">
+              Diagonal
+            </Select.Option>
+          </Select>
+          <br />
 
-          <Text>Counter?</Text>
-          <Radio.Group id="counter" value={counter} onChange={counterHandler}>
-            <Radio value="true">Yes</Radio>
-            <Radio value="false">No</Radio>
-          </Radio.Group>
+          <Text h5>Person Ending Position</Text>
+          <Select
+            placeholder="Choose Person Starting Position"
+            onChange={handlePersonEnd}
+          >
+            <Select.Option key="Front" value="Front">
+              Front
+            </Select.Option>
+            <Select.Option key="Left" value="Left">
+              Left
+            </Select.Option>
+            <Select.Option key="Right" value="Right">
+              Right
+            </Select.Option>
+            <Select.Option key="Back" value="Back">
+              Back
+            </Select.Option>
+            <Select.Option key="Diagonal" value="Diagonal">
+              Diagonal
+            </Select.Option>
+          </Select>
+          <br />
 
-          <Button onClick={markerNavigate}>Add Markers</Button>
+          <Text h5>Mat Starting Position</Text>
+          <Select
+            placeholder="Choose Mat Starting Position"
+            onChange={handleMatStart}
+          >
+            <Select.Option key="Front" value="Front">
+              Front
+            </Select.Option>
+            <Select.Option key="Side" value="Side">
+              Side
+            </Select.Option>
+            <Select.Option key="Diagonal" value="Diagonal">
+              Diagonal
+            </Select.Option>
+          </Select>
+          <br />
+
+          <Text h5>Mat Ending Position</Text>
+          <Select
+            placeholder="Choose Mat Starting Position"
+            onChange={handleMatEnd}
+          >
+            <Select.Option key="Front" value="Front">
+              Front
+            </Select.Option>
+            <Select.Option key="Side" value="Side">
+              Side
+            </Select.Option>
+            <Select.Option key="Diagonal" value="Diagonal">
+              Diagonal
+            </Select.Option>
+          </Select>
+          <br />
+
+          {/* <Button onClick={markerNavigate}>Add Markers</Button> */}
           <Button htmlType="submit">Submit</Button>
-          <PopUpDialog
-            isOpen={isPopUpOpen}
-            onClose={handleClosePopUp}
-            onYes={handleYes}
-            onNo={handleNo}
-            message1={message1}
-            message2={message2}
-            message3={message3}
-            message4={message4}
-            message5={message5}
-            message6={message6}
-            message7={message7}
-            message8={message_type}
-          />
-          <PopUpDialog
-            isOpen={isPopUp1Open}
-            onClose={handleClosePopUp1}
-            onYes={handleYesLanguage}
-            onNo={handleNoLanguage}
-            message1={message_lang}
-          />
         </form>
       </div>
     </div>
