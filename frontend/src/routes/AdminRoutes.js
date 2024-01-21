@@ -5,53 +5,59 @@ import RegisterLanguageForm from "../components/content-management/forms/Registe
 import RegisterPlaylistForm from "../components/content-management/forms/RegisterPlaylistForm";
 import RegisterVideoForm from "../components/content-management/forms/RegisterVideoForm";
 import AdminHome from "../pages/admin/AdminHome";
+import RegisterTransitionVideoForm from "../components/content-management/forms/RegisterTransitionVideoForm";
 import RegisterNewPlan from "../pages/admin/Plans/RegisterNewPlan";
 // import Settings from '../pages/admin/settings/settings';
 import ViewAllPlans from "../pages/admin/Plans/ViewAllPlans";
 import DiscountManagement from "../pages/admin/discount-management";
 export const AdminRoutes = [
-    {
-        path: "/admin",
-        element: <AdminHome />,
-    },
-    {
-        path: "/content/video/create",
-        element: <RegisterVideoForm />,
-    },
-    {
-        path: "/content/playlist/create",
-        element: <RegisterPlaylistForm />,
-    },
-    {
-        path: "/content/language/create",
-        element: <RegisterLanguageForm />,
-    },
-    {
-        path: "/content/video/create/addmarkers",
-        element: <RegisterVideoForm />,
-    },
-    {
-        path: "/admin/allAsanas",
-        element: <AllAsanas />,
-    },
-    {
-        path: "/admin/allPlaylists",
-        element: <AllPlaylists />,
-    },
-    {
-        path: "/admin/allLanguages",
-        element: <AllLanguages />,
-    },
-    {
-        path: "/plan/registerNewPlan",
-        element: <RegisterNewPlan />,
-    },
-    {
-        path: "/plan/viewAllPlans",
-        element: <ViewAllPlans />,
-    },
-    {
-        path: "/admin/discount-management",
-        element: <DiscountManagement />,
-    },
+  {
+    path: "/admin",
+    element: <AdminHome />,
+  },
+  {
+    path: "/content/video/create",
+    element: <RegisterVideoForm />,
+  },
+  {
+    path: "/content/playlist/create",
+    element: <RegisterPlaylistForm />,
+  },
+  {
+    path: "/content/language/create",
+    element: <RegisterLanguageForm />,
+  },
+  {
+    path: "/content/video/transition/create",
+    element: <RegisterTransitionVideoForm />,
+  },
+
+  {
+    path: "/content/video/create/addmarkers",
+    element: <RegisterVideoForm />,
+  },
+  {
+    path: "/admin/allAsanas",
+    element: <AllAsanas />,
+  },
+  {
+    path: "/admin/allPlaylists",
+    element: <AllPlaylists />,
+  },
+  {
+    path: "/admin/allLanguages",
+    element: <AllLanguages />,
+  },
+  {
+    path: "/plan/registerNewPlan",
+    element: <RegisterNewPlan />,
+  },
+  {
+    path: "/plan/viewAllPlans",
+    element: <ViewAllPlans />,
+  },
+  {
+    path: "/admin/discount-management",
+    element: <DiscountManagement />,
+  },
 ];

@@ -82,6 +82,15 @@ export default function AdminNavbar() {
               </ButtonDropdown.Item>
               <ButtonDropdown.Item>
                 <Link
+                  to={"/content/video/transition/create"}
+                  className="w-full text-zinc-800"
+                >
+                  Register Transition Video
+                </Link>
+              </ButtonDropdown.Item>
+
+              <ButtonDropdown.Item>
+                <Link
                   to={"/content/playlist/create"}
                   className="w-full text-zinc-800"
                 >
