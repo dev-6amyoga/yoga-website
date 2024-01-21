@@ -1,6 +1,6 @@
 import { Button, Input } from "@geist-ui/core";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import PhoneInput from "react-phone-number-input";
 import { toast } from "react-toastify";
 import { auth } from "../../utils/firebase";
@@ -18,8 +18,10 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 	const [confirmationResult, setConfirmationResult] = useState(null);
 	const recaptchaVerifier = useRef(null);
 
-	function setUpReCaptcha() {
-		const rv = new RecaptchaVerifier(auth, "recaptcha-container", {
+	const [nonce] = useState(crypto.randomUUID());
+
+	const setUpReCaptcha = useCallback(() => {
+		const rv = new RecaptchaVerifier(auth, `recaptcha-container-${nonce}`, {
 			//   size: "invisible",
 			callback: () => {
 				console.log("recaptcha resolved..");
@@ -32,7 +34,7 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 		});
 		recaptchaVerifier.current = rv;
 		recaptchaVerifier.current.render();
-	}
+	}, [nonce]);
 
 	useEffect(() => {
 		if (setLoading) setLoading(true);
@@ -47,7 +49,7 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 				recaptchaVerifier.current.clear();
 			}
 		};
-	}, [setLoading]);
+	}, [setLoading, nonce, setUpReCaptcha]);
 
 	useEffect(() => {
 		let t;
@@ -66,10 +68,10 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 
 	useEffect(() => {
 		// reset timer
-		if (timer === 30) {
+		if (timer === resendCounter * 30) {
 			setStartResendTimer(false);
 		}
-	}, [timer]);
+	}, [timer, resendCounter]);
 
 	const sendOTP = async () => {
 		if (number === "" || number === undefined) {
@@ -106,32 +108,32 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 
 	const verifyOtp = async () => {
 		// console.log("otp", otp);
-		// if (otp === "" || otp === undefined) {
-		// 	toast("OTP is required", { type: "error" });
-		// 	return;
-		// }
+		if (otp === "" || otp === undefined) {
+			toast("OTP is required", { type: "error" });
+			return;
+		}
 		if (setLoading) setLoading(true);
-		// try {
-		// 	confirmationResult
-		// 		.confirm(otp)
-		// 		.then((result) => {
-		// 			// console.log({ result });
-		toast("Verified!", { type: "success" });
+		try {
+			confirmationResult
+				.confirm(otp)
+				.then((result) => {
+					// console.log({ result });
+					toast("Verified!", { type: "success" });
 
-		// 			// stop timer
-		// 			setStartResendTimer(false);
-		// 			setTimer(30);
+					// stop timer
+					setStartResendTimer(false);
+					setTimer(30);
 
-		onSuccessCallback(number);
-		// 		})
-		// 		.catch((err) => {
-		// 			toast(err, { type: "error" });
-		// 		});
-		// 	if (setLoading) setLoading(false);
-		// } catch (err) {
-		// 	toast("Error verifying OTP", { type: "error" });
-		if (setLoading) setLoading(false);
-		// }
+					onSuccessCallback(number);
+				})
+				.catch((err) => {
+					toast(err, { type: "error" });
+				});
+			if (setLoading) setLoading(false);
+		} catch (err) {
+			toast("Error verifying OTP", { type: "error" });
+			if (setLoading) setLoading(false);
+		}
 	};
 
 	return (
@@ -143,7 +145,7 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 				placeholder="Enter Phone Number"
 				className="w-full border rounded-lg py-2"></PhoneInput>
 			{/* <ReCAPTCHA sitekey={process.env?.REACT_APP_} /> */}
-			<div id="recaptcha-container"></div>
+			<div id={`recaptcha-container-${nonce}`}></div>
 			<div className="flex flex-row justify-between w-full">
 				<Button>Cancel</Button>
 				<Button
@@ -153,7 +155,7 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 						? "Send OTP"
 						: timer === 30
 						? "Resend OTP"
-						: `Resend in ${30 - timer} seconds`}
+						: `Resend in ${resendCounter * 30 - timer} seconds`}
 				</Button>
 			</div>
 			<br />
