@@ -108,7 +108,7 @@ function VideoPlayer() {
 				// console.log(player?.current?.currentTime);
 				setCurrentTime(player?.current?.currentTime);
 			}
-		}, 250);
+		}, 500);
 
 		return () => {
 			clearInterval(int);
@@ -147,53 +147,30 @@ function VideoPlayer() {
 							</div>
 						) : (
 							<div className="relative w-full h-full">
-								<div>
-									<Stream
-										autoplay
-										streamRef={player}
-										allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-										src={playerVideoId}
-										startTime={0}
-										onEnded={handleEnd}
-										onLoadStart={() => handleLoading(true)}
-										onCanPlay={() => handleLoading(false)}
-										onSeeking={() => handleLoading(true)}
-										onSeeked={() => handleLoading(false)}
-										onError={handlePlaybackError}
-										onLoadedMetaData={(e) => {
-											console.log(
-												player.current.duration
-											);
-											setDuration(
-												player.current.duration
-											);
-										}}
-									/>
-								</div>
-								<div
-									className="absolute bottom-0 h-40 w-full"
-									onMouseOver={() => {
-										if (!playbarVisible)
-											setPlaybarVisible(true);
+								<Stream
+									autoplay
+									streamRef={player}
+									allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+									src={playerVideoId}
+									startTime={0}
+									onEnded={handleEnd}
+									onLoadStart={() => handleLoading(true)}
+									onCanPlay={() => handleLoading(false)}
+									onSeeking={() => handleLoading(true)}
+									onSeeked={() => handleLoading(false)}
+									onError={handlePlaybackError}
+									onLoadedMetaData={(e) => {
+										console.log(player.current.duration);
+										setDuration(player.current.duration);
 									}}
-									onMouseOut={() =>
-										setTimeout(() => {
-											if (playbarVisible)
-												setPlaybarVisible(false);
-										}, 1000)
-									}>
-									<div className="absolute bottom-6 w-[calc(100%-2rem)] left-4">
-										<VideoPlaybar
-											currentTime={currentTime}
-											duration={duration}
-											draggableHandle={draggableHandle}
-											toTimeString={toTimeString}
-											moveToTimestamp={moveToTimestamp}
-											handleSetPlay={handleSetPlay}
-											handleSetPause={handleSetPause}
-											playbarVisible={playbarVisible}
-										/>
-									</div>
+								/>
+								<div className="absolute bottom-6 w-[calc(100%-2rem)] left-4">
+									<VideoPlaybar
+										currentTime={currentTime}
+										duration={duration}
+										draggableHandle={draggableHandle}
+										toTimeString={toTimeString}
+									/>
 								</div>
 								{videoState === STATE_VIDEO_LOADING ? (
 									<div className="absolute w-full h-full bg-zinc-800 bg-opacity-40 top-0 left-0 right-0 bottom-0">

@@ -34,6 +34,36 @@ export default function AllPlaylists() {
     const { id, value } = e.target;
     setModalData({ ...modalData, [id]: value });
   };
+
+  useEffect(() => {
+    const fetchData = async (playlistId) => {
+      try {
+        const response = await fetch(
+          `http://localhost:4000/content/playlists/deletePlaylist/${playlistId}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (response.ok) {
+          setPlaylist1((prev) =>
+            prev.filter((playlist) => playlist.playlist_id !== playlistId)
+          );
+        } else {
+          console.log("Error deleting playlist:", response.status);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    for (var i = 0; i != playlist1.length; i++) {
+      if (playlist1[i].asana_ids.length === 0) {
+        fetchData(playlist1[i].playlist_id);
+      }
+    }
+  }, [playlist1]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -96,7 +126,7 @@ export default function AllPlaylists() {
         );
         setModalState(false);
       } else {
-        console.log("Error updating asana:", response.status);
+        console.log("Error updating playlist:", response.status);
       }
     } catch (error) {
       console.error(error);
