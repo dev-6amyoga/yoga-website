@@ -3,130 +3,141 @@ const router = express.Router();
 const Asana = require("../models/mongo/Asana");
 const Language = require("../models/mongo/Language");
 const {
-    HTTP_OK,
-    HTTP_NOT_FOUND,
-    HTTP_INTERNAL_SERVER_ERROR,
+  HTTP_OK,
+  HTTP_NOT_FOUND,
+  HTTP_INTERNAL_SERVER_ERROR,
 } = require("../utils/http_status_codes");
 
 router.post("/video/addAsana", async (req, res) => {
-    try {
-        const requestData = req.body;
-        const newAsana = new Asana(requestData);
-        const savedAsana = await newAsana.save();
-        res.status(201).json(savedAsana);
-    } catch (error) {
-        console.error("Error saving new Asana:", error);
-        res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            error: "Failed to save new Asana",
-        });
-    }
+  try {
+    const requestData = req.body;
+    const newAsana = new Asana(requestData);
+    const savedAsana = await newAsana.save();
+    res.status(201).json(savedAsana);
+  } catch (error) {
+    console.error("Error saving new Asana:", error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to save new Asana",
+    });
+  }
 });
 
 router.put("/video/updateAsana/:asanaId", async (req, res) => {
-    const asanaId = req.params.asanaId;
-    const updatedData = req.body;
-    try {
-        const existingAsana = await Asana.findOne({ id: asanaId });
-        if (!existingAsana) {
-            return res
-                .status(HTTP_NOT_FOUND)
-                .json({ error: "Asana not found" });
-        }
-        const mergedData = { ...existingAsana.toObject(), ...updatedData };
-        const updatedAsana = await Asana.findOneAndUpdate(
-            { id: asanaId },
-            mergedData,
-            {
-                new: true,
-            }
-        );
-        res.json(updatedAsana);
-    } catch (error) {
-        console.error(error);
-        res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            error: "Failed to update Asana",
-        });
+  const asanaId = req.params.asanaId;
+  const updatedData = req.body;
+  try {
+    const existingAsana = await Asana.findOne({ id: asanaId });
+    if (!existingAsana) {
+      return res.status(HTTP_NOT_FOUND).json({ error: "Asana not found" });
     }
+    const mergedData = { ...existingAsana.toObject(), ...updatedData };
+    const updatedAsana = await Asana.findOneAndUpdate(
+      { id: asanaId },
+      mergedData,
+      {
+        new: true,
+      }
+    );
+    res.json(updatedAsana);
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to update Asana",
+    });
+  }
 });
 
 router.delete("/video/deleteAsana/:asanaId", async (req, res) => {
-    const asanaId = req.params.asanaId;
-    try {
-        const deletedAsana = await Asana.findOneAndDelete({ id: asanaId });
-        if (deletedAsana) {
-            res.status(HTTP_OK).json({ message: "Asana deleted successfully" });
-        } else {
-            res.status(HTTP_NOT_FOUND).json({ message: "Asana not found" });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            error: "Failed to delete asana",
-        });
+  const asanaId = req.params.asanaId;
+  try {
+    const deletedAsana = await Asana.findOneAndDelete({ id: asanaId });
+    if (deletedAsana) {
+      res.status(HTTP_OK).json({ message: "Asana deleted successfully" });
+    } else {
+      res.status(HTTP_NOT_FOUND).json({ message: "Asana not found" });
     }
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to delete asana",
+    });
+  }
 });
 
 router.get("/video/getAllAsanas", async (req, res) => {
-    try {
-        const asanas = await Asana.find();
-        res.json(asanas);
-    } catch (error) {
-        console.error(error);
-        res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            error: "Failed to fetch videos",
-        });
-    }
+  try {
+    const asanas = await Asana.find();
+    res.json(asanas);
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to fetch videos",
+    });
+  }
+});
+
+router.post("/get-asana-by-id", async (req, res) => {
+  const asana_id = req.body.asana_id;
+  try {
+    const asanas = await Asana.findOne({ id: asana_id });
+    res.json(asanas);
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to fetch video details",
+    });
+  }
 });
 
 router.get("/language/getAllLanguages", async (req, res) => {
-    try {
-        const languages = await Language.find();
-        res.json(languages);
-    } catch (error) {
-        console.error(error);
-        res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            error: "Failed to fetch languages",
-        });
-    }
+  try {
+    const languages = await Language.find();
+    res.json(languages);
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to fetch languages",
+    });
+  }
 });
 
 router.post("/language/addLanguage", async (req, res) => {
-    try {
-        const requestData = req.body;
-        const maxLangID = await Language.findOne(
-            {},
-            {},
-            { sort: { language_id: -1 } }
-        );
-        const newLangID = maxLangID ? maxLangID.language_id + 1 : 1;
-        requestData.language_id = newLangID;
-        const newLanguage = new Language(requestData);
-        const savedLanguage = await newLanguage.save();
-        res.status(201).json(savedLanguage);
-    } catch (err) {
-        console.error("Error saving new Language:", error);
-        res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            error: "Failed to save new Language",
-        });
-    }
+  try {
+    const requestData = req.body;
+    const maxLangID = await Language.findOne(
+      {},
+      {},
+      { sort: { language_id: -1 } }
+    );
+    const newLangID = maxLangID ? maxLangID.language_id + 1 : 1;
+    requestData.language_id = newLangID;
+    const newLanguage = new Language(requestData);
+    const savedLanguage = await newLanguage.save();
+    res.status(201).json(savedLanguage);
+  } catch (err) {
+    console.error("Error saving new Language:", error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to save new Language",
+    });
+  }
 });
 
 router.delete("/video/deleteLanguage/:languageId", async (req, res) => {
-    const languageId = req.params.languageId;
-    try {
-        const deletedLanguage = await Language.findOneAndDelete({
-            language_id: languageId,
-        });
-        if (deletedLanguage) {
-            res.status(HTTP).json({ message: "Language deleted successfully" });
-        } else {
-            res.status(HTTP_NOT_FOUND).json({ message: "Language not found" });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            error: "Failed to delete Language",
-        });
+  const languageId = req.params.languageId;
+  try {
+    const deletedLanguage = await Language.findOneAndDelete({
+      language_id: languageId,
+    });
+    if (deletedLanguage) {
+      res.status(HTTP).json({ message: "Language deleted successfully" });
+    } else {
+      res.status(HTTP_NOT_FOUND).json({ message: "Language not found" });
     }
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to delete Language",
+    });
+  }
 });
 module.exports = router;
