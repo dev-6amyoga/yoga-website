@@ -1,26 +1,57 @@
 import { useEffect, useRef, useState } from "react";
-import Draggable from "react-draggable";
+import { DraggableCore } from "react-draggable";
 
 export default function VideoPlaybar({
+	playbarVisible,
 	currentTime,
 	duration,
 	draggableHandle,
 	toTimeString,
+	moveToTimestamp,
+	handleSetPlay,
+	handleSetPause,
 }) {
 	const [mouseDown, setMouseDown] = useState(false);
 	const barRef = useRef(null);
-	const [barWidth, setBarWidth] = useState(0);
+	const [barBound, setBarBound] = useState({
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0,
+		width: 0,
+		height: 0,
+	});
 	const [currentBoopPosition, setCurrentBoopPosition] = useState(0);
 
 	useEffect(() => {
 		if (barRef.current) {
-			console.log(barRef.current.getBoundingClientRect());
-			setBarWidth(barRef.current.getBoundingClientRect().width);
+			const bounds = barRef.current.getBoundingClientRect();
+			console.log(bounds);
+			setBarBound({
+				top: bounds.top,
+				bottom: bounds.bottom,
+				left: bounds.left,
+				right: bounds.right,
+				width: bounds.width,
+				height: bounds.height,
+			});
 		}
 	}, [barRef]);
 
+	useEffect(() => {
+		setCurrentBoopPosition(barBound.width * (currentTime / duration));
+	}, [currentTime, barBound, duration]);
+
 	return (
-		<div className="w-full h-1 bg-white relative">
+		<div
+			className={`w-full h-1 bg-white relative transition-opacity duration-300 ease-in-out ${
+				playbarVisible ? "opacity-100" : "opacity-0 hover:opacity-100"
+			}`}
+			onClick={(e) => {
+				moveToTimestamp(
+					(duration * (e.clientX - barBound.left)) / barBound.width
+				);
+			}}>
 			<div
 				className="bg-blue-500 h-full relative transition-all ease-linear"
 				style={{
@@ -28,27 +59,37 @@ export default function VideoPlaybar({
 				}}
 				ref={barRef}></div>
 
-			<Draggable
+			<DraggableCore
 				axis="x"
+				// bounds={{
+				// 	left: 0,
+				// 	right: barBound.right - barBound.left,
+				// 	top: barBound.top,
+				// 	bottom: barBound.bottom,
+				// }}
 				bounds="parent"
+				// position={[currentBoopPosition, 0]}
 				handle=".timeboop"
 				defaultClassName="timeboop"
 				onStart={(e, data) => {
-					console.log("START-------------------------------------");
-					console.log(data);
+					// console.log("START-------------------------------------");
+					// console.log(e.clientX);
+					setMouseDown(true);
+					handleSetPause();
 				}}
 				onStop={(e, data) => {
-					console.log("STOP-------------------------------------");
-					console.log(data);
+					// console.log("STOP-------------------------------------");
+					moveToTimestamp(
+						(duration * (e.clientX - barBound.left)) /
+							barBound.width
+					);
 					setMouseDown(false);
 				}}
 				onDrag={(e, data) => {
 					// console.log("DRAGG : ", data);
 					// if (!mouseDown) setMouseDown(true);
-					setCurrentBoopPosition(data.x);
-				}}
-				onMouseDown={() => {
-					setMouseDown(true);
+					// console.log(e.clientX - barBound.left);
+					setCurrentBoopPosition((p) => e.clientX - barBound.left);
 				}}
 				// grid={[duration, 10]}
 				scale={1}
@@ -60,16 +101,25 @@ export default function VideoPlaybar({
 						mouseDown
 							? "xw-4 xh-4 x-top-[calc(50%+0.25rem)] w-2 h-2 -top-1/2"
 							: "w-2 h-2 -top-1/2 delay-75 transition-all"
-					} bg-blue-500 border border-black rounded-full absolute `}
+					} bg-blue-500 border border-black rounded-full absolute`}
 					ref={draggableHandle}
 					style={{
-						left: `${(currentTime / duration) * 100}%`,
+						left: `${
+							(currentBoopPosition / barBound.width) * 100
+						}%`,
 					}}>
-					<div className="text-white absolute rounded-lg px-4 text-xs -left-[calc(50%+1rem)] -top-[calc(50%+1.5rem)] border border-white">
-						{currentBoopPosition}
-					</div>
+					{mouseDown ? (
+						<div className="text-white absolute rounded-lg px-4 text-xs -left-[calc(50%+1rem)] -top-[calc(50%+1.5rem)] border border-white">
+							{toTimeString(
+								(duration * currentBoopPosition) /
+									barBound.width
+							)}
+						</div>
+					) : (
+						<></>
+					)}
 				</div>
-			</Draggable>
+			</DraggableCore>
 
 			<p className=" text-white text-xs absolute right-0 -top-4">
 				{toTimeString(currentTime.toFixed(0))}/
