@@ -14,6 +14,10 @@ const asanaSchema = new mongoose.Schema({
   language: String,
   muted: String,
   counter: String,
+  person_starting_position: String,
+  person_ending_position: String,
+  mat_starting_position: String,
+  mat_ending_position: String,
 });
 
 const Asana = mongoose.model("Asana", asanaSchema, "asanas");
