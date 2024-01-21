@@ -32,10 +32,8 @@ export default function VideoControls() {
 
   useEffect(() => {
     if (queue && queue.length > 0 && playlistState) {
-      console.log("setCurrentVideo : Setting current video");
       setCurrentVideo(queue[0]);
     } else {
-      console.log("setCurrentVideo : No videos in queue");
       setCurrentVideo(null);
       setVideoState(STATE_VIDEO_PAUSED);
     }
@@ -71,12 +69,10 @@ export default function VideoControls() {
   };
 
   const handleSeekFoward = () => {
-    console.log("adding +5 seek");
     addToSeekQueue(5);
   };
 
   const handleSeekBackward = () => {
-    console.log("adding -5 seek");
     addToSeekQueue(-5);
   };
 

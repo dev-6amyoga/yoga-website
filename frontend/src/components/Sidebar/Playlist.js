@@ -24,6 +24,10 @@ function PlaylistItem({ playlist, add, deets }) {
 
 function Playlist() {
   const [modalState, setModalState] = useState(false);
+  const [asana_details, setAsanaDetails] = useState([]);
+  const appendToAsanaDetails = (newItem) => {
+    setAsanaDetails((prevAsanaDetails) => [...prevAsanaDetails, newItem]);
+  };
   const [modalData, setModalData] = useState({
     playlist_id: 0,
     playlist_name: "",
@@ -31,15 +35,12 @@ function Playlist() {
     user_id: 0,
     institute_id: 0,
     asana_ids: [],
-    asana_details: [],
   });
 
   useEffect(() => {
     const fetchData = async () => {
-      let updatedModalData = { ...modalData };
-      if (!Array.isArray(updatedModalData.asana_details)) {
-        updatedModalData.asana_details = [];
-      }
+      // let updatedModalData = { ...modalData };
+      // updatedModalData.asana_details = [];
       for (var i = 0; i < modalData.asana_ids.length; i++) {
         try {
           const response = await fetch(
@@ -54,16 +55,12 @@ function Playlist() {
           );
           if (response.ok) {
             const data = await response.json();
-            updatedModalData.asana_details.push(data);
+            appendToAsanaDetails(data);
           }
         } catch (err) {
           console.log(err);
         }
       }
-      setModalData((prevModalData) => ({
-        ...prevModalData,
-        asana_details: updatedModalData.asana_details,
-      }));
     };
 
     if (modalData.asana_ids.length > 0) {
@@ -129,7 +126,6 @@ function Playlist() {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log(currentInstituteId);
       try {
         const response = await fetch(
           "http://localhost:4000/teacher-playlist/get-playlists",
@@ -268,6 +264,9 @@ function Playlist() {
     setModalData(x);
     setModalState(true);
   };
+  const closeModal = () => {
+    setModalState(false);
+  };
 
   const queue = usePlaylistStore((state) => state.queue);
   const archive = usePlaylistStore((state) => state.archive);
@@ -276,13 +275,20 @@ function Playlist() {
 
   return (
     <div className="rounded-xl">
-      <Modal visible={modalState} onClose={() => setModalState(false)}>
+      <Modal visible={modalState} onClose={closeModal}>
         <Modal.Title>Playlist Details</Modal.Title>
         <Modal.Subtitle>{modalData.playlist_name}</Modal.Subtitle>
-        <Modal.Action passive onClick={() => setModalState(false)}>
+        {asana_details?.map((asanaDetail) => (
+          <div>
+            <p>{asanaDetail.asana_name}</p>
+          </div>
+        ))}
+
+        <Modal.Action passive onClick={closeModal}>
           Close
         </Modal.Action>
       </Modal>
+
       {isInstitute && (
         <div>
           <h4>Institutes Playlists</h4>
@@ -328,7 +334,7 @@ function Playlist() {
                       : "secondary"
                   }
                   add={() => handleAddToQueue(playlist.asana_ids)}
-                  deets={showDetails}
+                  deets={() => showDetails(playlist)}
                   playlist={playlist}
                 />
               </Tooltip>
@@ -354,7 +360,7 @@ function Playlist() {
                     : "secondary"
                 }
                 add={() => handleAddToQueue(playlist?.asana_ids)}
-                deets={showDetails}
+                deets={() => showDetails(playlist)}
                 playlist={playlist}
               />
             ))}
@@ -381,7 +387,7 @@ function Playlist() {
                     : "secondary"
                 }
                 add={() => handleAddToQueue(playlist.asana_ids)}
-                deets={showDetails}
+                deets={() => showDetails(playlist)}
                 playlist={playlist}
               />
             ))}
@@ -406,7 +412,7 @@ function Playlist() {
                 : "secondary"
             }
             add={() => handleAddToQueue(playlist.asana_ids)}
-            deets={showDetails}
+            deets={() => showDetails(playlist)}
             playlist={playlist}
           />
         ))}
