@@ -2,12 +2,15 @@ import { AutoComplete, Button, Input } from "@geist-ui/core";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
+import { validateEmail } from "../../../utils/formValidation";
 import getFormData from "../../../utils/getFormData";
 
 export default function InstituteDetailsForm({
 	setInstituteInfo,
 	billingAddressSame,
 	setBillingAddressSame,
+	setBlockStep,
+	setLoading,
 }) {
 	// TODO : Error with clearing the state and city when country/state is changed
 	const [countries, setCountries] = useState([]);
@@ -21,6 +24,16 @@ export default function InstituteDetailsForm({
 	const [cities, setCities] = useState([]);
 	const [citiesSearch, setCitiesSearch] = useState([]); // {label: 'Bengaluru', value: 'Bengaluru'}
 	const [selectedCity, setSelectedCity] = useState("");
+
+	const [infoSaved, setInfoSaved] = useState(false);
+
+	useEffect(() => {
+		setBlockStep(!infoSaved);
+	}, [infoSaved, setBlockStep]);
+
+	useEffect(() => {
+		setInfoSaved(false);
+	}, []);
 
 	const handleCountrySearch = useCallback(
 		(value) => {
@@ -174,12 +187,28 @@ export default function InstituteDetailsForm({
 
 			const formData = getFormData(e);
 
-			setInstituteInfo({
+			const [is_email_valid, email_error] = validateEmail(
+				formData?.contact_email
+			);
+
+			if (!is_email_valid) {
+				toast(email_error.message, { type: "warning" });
+				return;
+			}
+
+			const inst = {
 				...formData,
 				country: selectedCountry,
 				state: selectedState,
 				city: selectedCity,
-			});
+			};
+
+			setInstituteInfo(inst);
+
+			setInfoSaved(true);
+
+			toast("Progress saved!", { type: "success" });
+			// console.log(inst);
 		},
 		[
 			setInstituteInfo,
@@ -188,6 +217,7 @@ export default function InstituteDetailsForm({
 			selectedState,
 			states,
 			selectedCountry,
+			setInfoSaved,
 		]
 	);
 
@@ -280,6 +310,7 @@ export default function InstituteDetailsForm({
 						value={selectedCity}
 						disabled={states.length === 0 || cities.length === 0}
 						onSearch={handleCitySearch}
+						onChange={(val) => setSelectedCity(val)}
 						clearable
 						required></AutoComplete>
 				</div>
@@ -311,13 +342,6 @@ export default function InstituteDetailsForm({
 				</div>
 				<Input width="100%" name="contact_email" required>
 					Contact Email
-				</Input>
-				<Input
-					width="100%"
-					name="contact_phone"
-					placeholder="9999999999"
-					required>
-					Contact Phone Number
 				</Input>
 				<Input width="100%" name="gstin" placeholder="" required>
 					GST Number

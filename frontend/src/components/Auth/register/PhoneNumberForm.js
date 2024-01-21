@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import Otp from "../../../pages/otp/Otp";
 
 export default function PhoneNumberForm({
+	heading,
 	phoneInfo,
 	setPhoneInfo,
 	setBlockStep,
@@ -22,8 +23,7 @@ export default function PhoneNumberForm({
 
 	return (
 		<div className="flex flex-col items-center w-full">
-			<h4 className="text-center">Phone Number Verification</h4>
-			<p className="text-center text-zinc-500">Your personal number</p>
+			<p className="text-center text-zinc-500">{heading}</p>
 			<Otp
 				setLoading={setLoading}
 				onSuccessCallback={handlePhoneChange}

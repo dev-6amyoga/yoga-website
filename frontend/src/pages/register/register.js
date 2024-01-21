@@ -1,4 +1,4 @@
-import { Button, Progress, Spacer } from "@geist-ui/core";
+import { Button, Checkbox, Divider, Progress, Spacer } from "@geist-ui/core";
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight } from "react-feather";
 import { toast } from "react-toastify";
@@ -19,6 +19,8 @@ export default function Register({ switchForm }) {
 
 	const [step, setStep] = useState(1);
 	const [blockStep, setBlockStep] = useState(false);
+	const [blockPhoneStep, setBlockPhoneStep] = useState(false);
+	const [blockBusinessPhoneStep, setBlockBusinessPhoneStep] = useState(false);
 
 	const [role, setRole] = useState("STUDENT"); // STUDENT | INSTITUTE_OWNER
 	const [regMode, setRegMode] = useState("NORMAL"); // NORMAL | GOOGLE
@@ -29,6 +31,9 @@ export default function Register({ switchForm }) {
 	const [generalInfo, setGeneralInfo] = useState({});
 
 	const [phoneInfo, setPhoneInfo] = useState({});
+	const [personalBusinessPhoneInfoSame, setPersonalBusinessPhoneInfoSame] =
+		useState(true);
+	const [businessPhoneInfo, setBusinessPhoneInfo] = useState({});
 
 	const [instituteInfo, setInstituteInfo] = useState({});
 
@@ -38,6 +43,19 @@ export default function Register({ switchForm }) {
 		setClientID(process.env.REACT_APP_GOOGLE_CLIENT_ID);
 		console.log(process.env.REACT_APP_GOOGLE_CLIENT_ID);
 	}, []);
+
+	useEffect(() => {
+		if (role === "STUDENT") {
+			setBlockStep(blockPhoneStep);
+		} else if (role === "INSTITUTE_OWNER") {
+			setBlockStep(blockPhoneStep && blockBusinessPhoneStep);
+		}
+	}, [
+		personalBusinessPhoneInfoSame,
+		blockPhoneStep,
+		blockBusinessPhoneStep,
+		role,
+	]);
 
 	useEffect(() => {
 		console.log(blockStep);
@@ -230,7 +248,7 @@ export default function Register({ switchForm }) {
 					<PhoneNumberForm
 						phoneValue={phoneInfo}
 						setPhoneInfo={setPhoneInfo}
-						setBlockStep={setBlockStep}
+						setBlockStep={setBlockPhoneStep}
 						setLoading={setLoading}
 					/>
 				) : (
@@ -238,6 +256,8 @@ export default function Register({ switchForm }) {
 						setInstituteInfo={setInstituteInfo}
 						billingAddressSame={billingAddressSame}
 						setBillingAddressSame={setBillingAddressSame}
+						setBlockStep={setBlockStep}
+						setLoading={setLoading}
 					/>
 				);
 			case 5:
@@ -253,12 +273,47 @@ export default function Register({ switchForm }) {
 						</p>
 					</div>
 				) : (
-					<PhoneNumberForm
-						phoneValue={phoneInfo}
-						setPhoneInfo={setPhoneInfo}
-						setBlockStep={setBlockStep}
-						setLoading={setLoading}
-					/>
+					<>
+						<h4 className="text-center">
+							Phone Number Verification
+						</h4>
+						<div
+							className={`max-w-md border-2 flex items-center justify-center p-4 rounded-lg my-4 mx-auto ${
+								personalBusinessPhoneInfoSame
+									? "border-blue-500"
+									: ""
+							}`}>
+							<Checkbox
+								initialChecked={personalBusinessPhoneInfoSame}
+								onChange={() =>
+									setPersonalBusinessPhoneInfoSame((p) => !p)
+								}
+								scale={1}>
+								Use same phone number for Personal information
+								and Business contact information.
+							</Checkbox>
+						</div>
+						<Divider />
+						<PhoneNumberForm
+							heading="Personal Phone Number"
+							phoneValue={phoneInfo}
+							setPhoneInfo={setPhoneInfo}
+							setBlockStep={setBlockPhoneStep}
+							setLoading={setLoading}
+						/>
+						{!personalBusinessPhoneInfoSame && (
+							<>
+								<Divider />
+								<PhoneNumberForm
+									heading="Business Phone Number"
+									phoneValue={businessPhoneInfo}
+									setPhoneInfo={setBusinessPhoneInfo}
+									setBlockStep={setBlockBusinessPhoneStep}
+									setLoading={setLoading}
+								/>
+							</>
+						)}
+					</>
 				);
 			case 6:
 				return role === "INSTITUTE_OWNER" && step === 6 ? (
@@ -279,6 +334,8 @@ export default function Register({ switchForm }) {
 				return <></>;
 		}
 	}, [
+		personalBusinessPhoneInfoSame,
+		businessPhoneInfo,
 		googleInfo,
 		step,
 		role,
@@ -309,7 +366,7 @@ export default function Register({ switchForm }) {
 							loading={loading}
 							width={step === 1 ? "100%" : null}
 							iconRight={<ArrowRight />}
-							disabled={loading || blockStep}>
+							disabled={loading}>
 							Next
 						</Button>
 					) : (
