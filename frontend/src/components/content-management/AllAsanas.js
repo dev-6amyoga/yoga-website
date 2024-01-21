@@ -10,13 +10,17 @@ import {
 import { useEffect, useState } from "react";
 import AdminNavbar from "../Common/AdminNavbar/AdminNavbar";
 import "./AllAsanas.css";
+import { toast } from "react-toastify";
 
 export default function AllAsanas() {
   const [asanas, setAsanas] = useState([]);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [delAsanaId, setDelAsanaId] = useState(0);
   const [loading, setLoading] = useState(true);
   const [sortedAsanas, setSortedAsanas] = useState([]);
   const [sortOrder, setSortOrder] = useState("asc");
   const [modalState, setModalState] = useState(false);
+  const [allPlaylists, setAllPlaylists] = useState([]);
   const [modalData, setModalData] = useState({
     asana_name: "",
     asana_desc: "",
@@ -26,6 +30,23 @@ export default function AllAsanas() {
     asana_type: "",
     asana_difficulty: "",
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/content/playlists/getAllPlaylists"
+        );
+        const data = await response.json();
+        setAllPlaylists(data);
+      } catch (error) {
+        toast(error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // http://localhost:4000/content/playlists/getAllPlaylists
 
   const [category_modal, setCategoryModal] = useState("");
   const [language_modal, setLanguageModal] = useState("");
@@ -59,7 +80,7 @@ export default function AllAsanas() {
         setLoading(false);
       } catch (error) {
         setLoading(false);
-        console.log(error);
+        toast("Error fetching asanas");
       }
     };
     fetchData();
@@ -95,7 +116,64 @@ export default function AllAsanas() {
         );
         setModalState(false);
       } else {
-        console.log("Error updating asana:", response.status);
+        toast("Error updating asana:", response.status);
+      }
+    } catch (error) {
+      toast(error);
+    }
+  };
+
+  const closeDelHandler = (event) => {
+    setDeleteModal(false);
+  };
+
+  const deleteAsana = async () => {
+    const asanaId = delAsanaId;
+    for (var i = 0; i < allPlaylists.length; i++) {
+      if (allPlaylists[i].asana_ids.includes(asanaId)) {
+        console.log("Update this playlist!");
+        allPlaylists[i].asana_ids = allPlaylists[i].asana_ids.filter(
+          (id) => id !== asanaId
+        );
+        try {
+          const response = await fetch(
+            `http://localhost:4000/content/playlists/updatePlaylist/${allPlaylists[i].playlist_id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(allPlaylists[i]),
+            }
+          );
+          if (response.ok) {
+            console.log(response);
+          } else {
+            console.log("Error updating asana:", response.status);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    }
+    try {
+      const response = await fetch(
+        `http://localhost:4000/content/video/deleteAsana/${asanaId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.ok) {
+        toast("Deleted Successfully!");
+        setDeleteModal(false);
+        setAsanas((prevAsanas) =>
+          prevAsanas.filter((asana) => asana.id !== asanaId)
+        );
+      } else {
+        console.log("Error deleting asana:", response.status);
       }
     } catch (error) {
       console.error(error);
@@ -104,28 +182,8 @@ export default function AllAsanas() {
 
   const renderAction = (value, rowData, index) => {
     const handleDelete = async () => {
-      try {
-        const asanaId = Number(rowData.id);
-        const response = await fetch(
-          `http://localhost:4000/content/video/deleteAsana/${asanaId}`,
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (response.ok) {
-          setAsanas((prevAsanas) =>
-            prevAsanas.filter((asana) => asana.id !== asanaId)
-          );
-        } else {
-          console.log("Error deleting asana:", response.status);
-        }
-      } catch (error) {
-        console.error(error);
-      }
+      setDeleteModal(true);
+      setDelAsanaId(Number(rowData.id));
     };
     const handleUpdate = async () => {
       setModalData(rowData);
@@ -269,6 +327,17 @@ export default function AllAsanas() {
             Cancel
           </Modal.Action>
           <Modal.Action onClick={updateData}>Update</Modal.Action>
+        </Modal>
+
+        <Modal visible={deleteModal} onClose={closeDelHandler}>
+          <Modal.Title>Delete Asana</Modal.Title>
+          <Modal.Content>
+            <p>Do you really wish to delete this asana?</p>
+          </Modal.Content>
+          <Modal.Action passive onClick={() => setDeleteModal(false)}>
+            No
+          </Modal.Action>
+          <Modal.Action onClick={deleteAsana}>Yes</Modal.Action>
         </Modal>
       </div>
     </div>

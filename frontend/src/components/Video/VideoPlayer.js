@@ -62,13 +62,6 @@ function VideoPlayer() {
       if (videoState === STATE_VIDEO_PAUSED) {
         player.current.pause();
       } else {
-        /*
-                Attempts to play the video. Returns a promise that will resolve 
-                if playback begins successfully, and rejects if it fails. 
-                The most common reason for this to fail is browser policies 
-                which prevent unmuted playback that is not initiated by the user.
-                */
-
         player.current
           .play()
           .then((res) => {})
@@ -95,7 +88,6 @@ function VideoPlayer() {
   useEffect(() => {
     const int = setInterval(() => {
       if (player?.current?.currentTime) {
-        // console.log(player?.current?.currentTime);
         setCurrentTime(player?.current?.currentTime);
       }
     }, 500);
@@ -124,6 +116,7 @@ function VideoPlayer() {
                   autoplay
                   streamRef={player}
                   allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                  allowfullscreen="true"
                   src={playerVideoId}
                   startTime={0}
                   onEnded={handleEnd}
