@@ -44,9 +44,7 @@ export default function VideoPlaybar({
 
 	return (
 		<div
-			className={`w-full h-1 bg-white relative transition-opacity duration-300 ease-in-out ${
-				playbarVisible ? "opacity-100" : "opacity-0 hover:opacity-100"
-			}`}
+			className={`w-full h-1 bg-white relative`}
 			onClick={(e) => {
 				moveToTimestamp(
 					(duration * (e.clientX - barBound.left)) / barBound.width

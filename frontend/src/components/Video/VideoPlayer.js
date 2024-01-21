@@ -31,7 +31,7 @@ function VideoPlayer() {
 	const [duration, setDuration] = useState(0);
 	const [currentTime, setCurrentTime] = useState(0);
 
-	const [playbarVisible, setPlaybarVisible] = useState(false);
+	// const [playbarVisible, setPlaybarVisible] = useState(false);
 
 	const draggableHandle = useRef(null);
 
@@ -164,17 +164,18 @@ function VideoPlayer() {
 										setDuration(player.current.duration);
 									}}
 								/>
-								<div className="absolute bottom-6 w-[calc(100%-2rem)] left-4">
-									<VideoPlaybar
-										currentTime={currentTime}
-										duration={duration}
-										draggableHandle={draggableHandle}
-										toTimeString={toTimeString}
-										handleSetPause={handleSetPause}
-										handleSetPlay={handleSetPlay}
-										moveToTimestamp={moveToTimestamp}
-										playbarVisible={playbarVisible}
-									/>
+								<div className="absolute bottom-0 h-40 w-full hover:opacity-100 opacity-0 transition-opacity duration-300 ease-in-out">
+									<div className="absolute bottom-6 w-[calc(100%-2rem)] left-4">
+										<VideoPlaybar
+											currentTime={currentTime}
+											duration={duration}
+											draggableHandle={draggableHandle}
+											toTimeString={toTimeString}
+											handleSetPause={handleSetPause}
+											handleSetPlay={handleSetPlay}
+											moveToTimestamp={moveToTimestamp}
+										/>
+									</div>
 								</div>
 								{videoState === STATE_VIDEO_LOADING ? (
 									<div className="absolute w-full h-full bg-zinc-800 bg-opacity-40 top-0 left-0 right-0 bottom-0">
