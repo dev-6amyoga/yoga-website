@@ -7,7 +7,10 @@ import RegisterVideoForm from "../components/content-management/forms/RegisterVi
 import AdminHome from "../pages/admin/AdminHome";
 import RegisterTransitionVideoForm from "../components/content-management/forms/RegisterTransitionVideoForm";
 import RegisterNewPlan from "../pages/admin/Plans/RegisterNewPlan";
+import AllTransitions from "../components/content-management/AllTransitions";
+import AllAsanaCategories from "../components/content-management/AllAsanaCategories";
 // import Settings from '../pages/admin/settings/settings';
+import RegisterNewCategoryForm from "../components/content-management/forms/RegisterNewCategoryForm";
 import ViewAllPlans from "../pages/admin/Plans/ViewAllPlans";
 import DiscountManagement from "../pages/admin/discount-management";
 export const AdminRoutes = [
@@ -28,10 +31,22 @@ export const AdminRoutes = [
     element: <RegisterLanguageForm />,
   },
   {
+    path: "/content/asana-category/create",
+    element: <RegisterNewCategoryForm />,
+  },
+  {
+    path: "/content/asana-category/all",
+    element: <AllAsanaCategories />,
+  },
+
+  {
     path: "/content/video/transition/create",
     element: <RegisterTransitionVideoForm />,
   },
-
+  {
+    path: "/content/transition/all",
+    element: <AllTransitions />,
+  },
   {
     path: "/content/video/create/addmarkers",
     element: <RegisterVideoForm />,

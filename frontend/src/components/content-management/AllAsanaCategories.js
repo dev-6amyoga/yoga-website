@@ -2,29 +2,57 @@ import { Button, Grid, Modal, Table } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import AdminNavbar from "../Common/AdminNavbar/AdminNavbar";
 import "./AllPlaylists.css";
+import { toast } from "react-toastify";
 import Papa from "papaparse";
 
-export default function AllLanguages() {
+export default function AllAsanaCategories() {
   const [delState, setDelState] = useState(false);
-  const [delLanguageId, setDelLanguageId] = useState(0);
+  const [delId, setDelId] = useState(0);
   const closeDelHandler = (event) => {
     setDelState(false);
   };
-  const [languages, setLanguages] = useState([]);
+
+  const [categories, setCategories] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "http://localhost:4000/content/language/getAllLanguages"
+          "http://localhost:4000/content/asana/getAllAsanaCategories"
         );
         const data = await response.json();
-        setLanguages(data);
+        setCategories(data);
       } catch (error) {
-        console.log(error);
+        toast(error);
       }
     };
     fetchData();
   }, []);
+
+  const deleteCategory = async () => {
+    try {
+      const del_id = delId;
+      const response = await fetch(
+        `http://localhost:4000/content/asana/deleteAsanaCategory/${del_id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.ok) {
+        toast("Category deleted successfully!");
+        setCategories((prev) =>
+          prev.filter((cat) => cat.asana_category_id !== del_id)
+        );
+      } else {
+        toast("Error deleting category:", response.status);
+      }
+      setDelState(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const handleDownload = (data1) => {
     const csv = Papa.unparse(data1);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -39,36 +67,11 @@ export default function AllLanguages() {
       document.body.removeChild(link);
     }
   };
-  const deleteLanguage = async () => {
-    try {
-      const languageId = delLanguageId;
-      const response = await fetch(
-        `http://localhost:4000/content/video/deleteLanguage/${languageId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (response.ok) {
-        setLanguages((prev) =>
-          prev.filter((lang) => lang.language_id !== languageId)
-        );
-      } else {
-        console.log("Error deleting Language:", response.status);
-      }
-      setDelState(false);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const renderAction = (value, rowData, index) => {
     const handleDelete = async () => {
       try {
-        const language_id = Number(rowData.language_id);
-        setDelLanguageId(language_id);
+        const asana_category_id = Number(rowData.asana_category_id);
+        setDelId(asana_category_id);
         setDelState(true);
       } catch (error) {
         console.error(error);
@@ -98,16 +101,15 @@ export default function AllLanguages() {
       <div className="elements">
         <Button
           onClick={() => {
-            handleDownload(languages);
+            handleDownload(categories);
           }}
         >
           Download CSV
         </Button>
         <br />
-
-        <Table width={100} data={languages} className="bg-white ">
-          <Table.Column prop="language_id" label="Language ID" />
-          <Table.Column prop="language" label="Language" />
+        <Table width={100} data={categories} className="bg-white ">
+          <Table.Column prop="asana_category_id" label="ID" />
+          <Table.Column prop="asana_category" label="Asana Category" />
           <Table.Column
             prop="operation"
             label="ACTIONS"
@@ -118,14 +120,14 @@ export default function AllLanguages() {
       </div>
       <div>
         <Modal visible={delState} onClose={closeDelHandler}>
-          <Modal.Title>Delete Language</Modal.Title>
+          <Modal.Title>Delete Asana Category</Modal.Title>
           <Modal.Content>
-            <p>Do you really wish to delete this language?</p>
+            <p>Do you really wish to delete this asana category?</p>
           </Modal.Content>
           <Modal.Action passive onClick={() => setDelState(false)}>
             No
           </Modal.Action>
-          <Modal.Action onClick={deleteLanguage}>Yes</Modal.Action>
+          <Modal.Action onClick={deleteCategory}>Yes</Modal.Action>
         </Modal>
       </div>
     </div>

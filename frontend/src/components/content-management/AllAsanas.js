@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import AdminNavbar from "../Common/AdminNavbar/AdminNavbar";
 import "./AllAsanas.css";
 import { toast } from "react-toastify";
+import Papa from "papaparse";
 
 export default function AllAsanas() {
   const [asanas, setAsanas] = useState([]);
@@ -20,6 +21,8 @@ export default function AllAsanas() {
   const [sortedAsanas, setSortedAsanas] = useState([]);
   const [sortOrder, setSortOrder] = useState("asc");
   const [modalState, setModalState] = useState(false);
+  const [tableLanguages, setTableLanguages] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [allPlaylists, setAllPlaylists] = useState([]);
   const [modalData, setModalData] = useState({
     asana_name: "",
@@ -31,6 +34,20 @@ export default function AllAsanas() {
     asana_difficulty: "",
   });
 
+  const handleDownload = (data1) => {
+    const csv = Papa.unparse(data1);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "data.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -45,9 +62,6 @@ export default function AllAsanas() {
     };
     fetchData();
   }, []);
-
-  // http://localhost:4000/content/playlists/getAllPlaylists
-
   const [category_modal, setCategoryModal] = useState("");
   const [language_modal, setLanguageModal] = useState("");
   const [type_modal, setTypeModal] = useState("");
@@ -97,6 +111,35 @@ export default function AllAsanas() {
     setSortedAsanas(sortedData);
   }, [asanas, sortOrder]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/content/language/getAllLanguages"
+        );
+        const data = await response.json();
+        setTableLanguages(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/content/asana/getAllAsanaCategories"
+        );
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, []);
   const updateData = async () => {
     try {
       const asanaId = Number(modalData.id);
@@ -222,6 +265,14 @@ export default function AllAsanas() {
     <div className="allAsanas min-h-screen">
       <AdminNavbar />
       <div className="elements">
+        <Button
+          onClick={() => {
+            handleDownload(asanas);
+          }}
+        >
+          Download CSV
+        </Button>
+        <br />
         {loading ? (
           <Text>Loading</Text>
         ) : (
@@ -232,7 +283,39 @@ export default function AllAsanas() {
             <Table.Column prop="asana_category" label="Category" />
             <Table.Column prop="language" label="Language" />
             <Table.Column prop="asana_type" label="Type" />
-            <Table.Column prop="asana_difficulty" label="Difficulty" />
+            {/* <Table.Column prop="asana_difficulty" label="Difficulty" /> */}
+            <Table.Column
+              prop="asana_difficulty"
+              label="Difficulty"
+              render={(data) => {
+                if (data.includes("Beginner")) {
+                  if (data.includes("Intermediate")) {
+                    if (data.includes("Advanced")) {
+                      return "Beg, Int, Adv";
+                    } else {
+                      return "Beg, Int";
+                    }
+                  } else if (data.includes("Advanced")) {
+                    return "Beg, Adv";
+                  } else {
+                    return "Beg";
+                  }
+                } else if (data.includes("Intermediate")) {
+                  if (data.includes("Advanced")) {
+                    return "Int, Adv";
+                  } else {
+                    return "Int";
+                  }
+                } else {
+                  if (data.includes("Adnvanced")) {
+                    return "Adv";
+                  } else {
+                    return "";
+                  }
+                }
+              }}
+            />
+
             <Table.Column prop="asana_videoID" label="Video URL" />
             <Table.Column prop="asana_withAudio" label="With Audio?" />
             <Table.Column prop="muted" label="  Muted?" />
@@ -282,9 +365,15 @@ export default function AllAsanas() {
                 id="language"
                 value={modalData.language}
               >
-                <Select.Option value="English">English</Select.Option>
-                <Select.Option value="Hindi">Hindi</Select.Option>
-                <Select.Option value="Malayalam">Malayalam</Select.Option>
+                {tableLanguages &&
+                  tableLanguages.map((language) => (
+                    <Select.Option
+                      key={language.language_id}
+                      value={language.language}
+                    >
+                      {language.language}
+                    </Select.Option>
+                  ))}
               </Select>
 
               <Text h6>Video Type</Text>
@@ -314,12 +403,15 @@ export default function AllAsanas() {
                 id="asana_category"
                 value={modalData.asana_category}
               >
-                <Select.Option value="Standing">Standing</Select.Option>
-                <Select.Option value="Sitting">Sitting</Select.Option>
-                <Select.Option value="Supine">Supine</Select.Option>
-                <Select.Option value="Inversion">Inversion</Select.Option>
-                <Select.Option value="Prone">Prone</Select.Option>
-                <Select.Option value="Special">Special</Select.Option>
+                {categories &&
+                  categories.map((x) => (
+                    <Select.Option
+                      key={x.asana_category_id}
+                      value={x.asana_category}
+                    >
+                      {x.asana_category}
+                    </Select.Option>
+                  ))}
               </Select>
             </form>
           </Modal.Content>

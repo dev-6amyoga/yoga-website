@@ -17,7 +17,7 @@ export default function RegisterVideoForm() {
   const [muted, setMuted] = useState(false);
   const [withAudio, setWithAudio] = useState(true);
   const [tableLanguages, setTableLanguages] = useState([]);
-
+  const [categories, setCategories] = useState([]);
   const hello = (value) => {
     console.log("VALUE IS ", value);
     if (value.length === 0) {
@@ -85,6 +85,21 @@ export default function RegisterVideoForm() {
         );
         const data = await response.json();
         setTableLanguages(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/content/asana/getAllAsanaCategories"
+        );
+        const data = await response.json();
+        setCategories(data);
       } catch (error) {
         console.log(error);
       }
@@ -200,12 +215,15 @@ export default function RegisterVideoForm() {
             onChange={handler4}
             name="asana_category"
           >
-            <Select.Option value="Standing">Standing</Select.Option>
-            <Select.Option value="Sitting">Sitting</Select.Option>
-            <Select.Option value="Supine">Supine</Select.Option>
-            <Select.Option value="Inversion">Inversion</Select.Option>
-            <Select.Option value="Prone">Prone</Select.Option>
-            <Select.Option value="Special">Special</Select.Option>
+            {categories &&
+              categories.map((x) => (
+                <Select.Option
+                  key={x.asana_category_id}
+                  value={x.asana_category}
+                >
+                  {x.asana_category}
+                </Select.Option>
+              ))}
           </Select>
           <Text h6>Type</Text>
           <Select

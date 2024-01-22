@@ -14,19 +14,11 @@ import "react-toastify/dist/ReactToastify.css";
 import AdminNavbar from "../../Common/AdminNavbar/AdminNavbar";
 
 export default function RegisterPlaylistForm() {
-  const [currentDateTime, setCurrentDateTime] = useState(new Date());
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCurrentDateTime(new Date());
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
-
   const navigate = useNavigate();
   const [asanas, setAsanas] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [transitions, setTransitions] = useState([]);
   const [sortedAsanas, setSortedAsanas] = useState([]);
-  const [sortOrder, setSortOrder] = useState("asc");
+  const sortOrder = "asc";
   const [playlist_temp, setPlaylistTemp] = useState([]);
   const [modalState, setModalState] = useState(false);
   const [modalData, setModalData] = useState({
@@ -44,15 +36,12 @@ export default function RegisterPlaylistForm() {
         );
         const data = await response.json();
         setAsanas(data);
-        setLoading(false);
       } catch (error) {
-        setLoading(false);
-        console.log(error);
+        toast(error);
       }
     };
     fetchData();
   }, []);
-
   useEffect(() => {
     const sortedData = [...asanas].sort((a, b) => {
       if (sortOrder === "asc") {
@@ -63,11 +52,85 @@ export default function RegisterPlaylistForm() {
     });
     setSortedAsanas(sortedData);
   }, [asanas, sortOrder]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/content/video/getAllTransitions"
+        );
+        const data = await response.json();
+        setTransitions(data);
+      } catch (error) {
+        toast(error);
+      }
+    };
+    fetchData();
+  }, []);
 
   const addToPlaylist = (rowData) => {
     var count = document.getElementById(`asana_count_${rowData.id}`).value;
     if (count === "") {
       count = 1;
+    }
+    if (playlist_temp.length !== 0) {
+      let startVideo = playlist_temp[playlist_temp.length - 1].rowData;
+      let endVideo = rowData;
+      console.log(
+        "PERSON STARTING POSITION FROM :",
+        startVideo.person_starting_position,
+        " TO : ",
+        endVideo.person_starting_position
+      );
+      //find the transition from transitions array
+      // with same category, person_ending_position and person_starting_position
+      if (startVideo.asana_category_end === endVideo.asana_category_start) {
+        if (
+          startVideo.person_ending_position === "Left" &&
+          endVideo.person_starting_position === "Front"
+        ) {
+          const matchingTransition = transitions.find((transition) => {
+            return (
+              transition.asana_category === startVideo.asana_category_end &&
+              transition.person_starting_position ===
+                startVideo.person_ending_position &&
+              transition.person_ending_position ===
+                endVideo.person_starting_position
+            );
+          });
+          console.log(matchingTransition);
+          setPlaylistTemp((prevPlaylist) => [
+            ...prevPlaylist,
+            {
+              rowData: matchingTransition,
+              count: 1,
+            },
+          ]);
+          // add left to front
+        } else if (
+          startVideo.person_ending_position === "Front" &&
+          endVideo.person_starting_position === "Left"
+        ) {
+          //add front to left
+          const matchingTransition = transitions.find((transition) => {
+            return (
+              transition.asana_category === startVideo.asana_category_end &&
+              transition.person_starting_position ===
+                startVideo.person_ending_position &&
+              transition.person_ending_position ===
+                endVideo.person_starting_position
+            );
+          });
+          console.log(matchingTransition);
+          setPlaylistTemp((prevPlaylist) => [
+            ...prevPlaylist,
+            {
+              rowData: matchingTransition,
+              count: 1,
+            },
+          ]);
+        }
+      }
+      console.log(transitions);
     }
     setPlaylistTemp((prevPlaylist) => [
       ...prevPlaylist,
@@ -117,13 +180,12 @@ export default function RegisterPlaylistForm() {
     const playlist_sequence = {};
     playlist_sequence["playlist_name"] = playlist_name;
     playlist_sequence["asana_ids"] = [];
-    const creation_date_and_time = currentDateTime;
-    console.log(creation_date_and_time);
     playlist_temp.map((item) => {
-      const asana_id_playlist = item["rowData"]["id"];
+      const asana_id_playlist =
+        item["rowData"]["id"] || item["rowData"]["transition_id"];
       const asana_count = Number(item["count"]);
       for (let i = 0; i < asana_count; i++) {
-        playlist_sequence["asana_ids"].push(Number(asana_id_playlist));
+        playlist_sequence["asana_ids"].push(asana_id_playlist);
       }
     });
     console.log(playlist_sequence);
