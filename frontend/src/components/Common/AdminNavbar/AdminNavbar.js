@@ -88,7 +88,14 @@ export default function AdminNavbar() {
                   Register Transition Video
                 </Link>
               </ButtonDropdown.Item>
-
+              <ButtonDropdown.Item>
+                <Link
+                  to={"/content/transition/all"}
+                  className="w-full text-zinc-800"
+                >
+                  View Transition Videos
+                </Link>
+              </ButtonDropdown.Item>
               <ButtonDropdown.Item>
                 <Link
                   to={"/content/playlist/create"}
@@ -110,7 +117,7 @@ export default function AdminNavbar() {
                   to={"/content/language/create"}
                   className="w-full text-zinc-800"
                 >
-                  Register New Language
+                  Register Language
                 </Link>
               </ButtonDropdown.Item>
               <ButtonDropdown.Item>
@@ -119,6 +126,22 @@ export default function AdminNavbar() {
                   className="w-full text-zinc-800"
                 >
                   View All Languages
+                </Link>
+              </ButtonDropdown.Item>
+              <ButtonDropdown.Item>
+                <Link
+                  to={"/content/asana-category/create"}
+                  className="w-full text-zinc-800"
+                >
+                  Register Asana Category
+                </Link>
+              </ButtonDropdown.Item>
+              <ButtonDropdown.Item>
+                <Link
+                  to={"/content/asana-category/all"}
+                  className="w-full text-zinc-800"
+                >
+                  View All Asana Categories
                 </Link>
               </ButtonDropdown.Item>
             </ButtonDropdown>

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import usePlaylistStore from "../../store/PlaylistStore";
 import useUserStore from "../../store/UserStore";
+import { toast } from "react-toastify";
 
 function PlaylistItem({ playlist, add, deets }) {
   return (
@@ -36,11 +37,69 @@ function Playlist() {
     institute_id: 0,
     asana_ids: [],
   });
+  const [isInstitute, setIsInstitute] = useState(false);
+  const [isTeacher, setIsTeacher] = useState(false);
+  const [isPersonal, setIsPersonal] = useState(true);
+  const [institutePlaylists, setInstitutePlaylists] = useState([]);
+  const [teacherPlaylists, setTeacherPlaylists] = useState([]);
+  const [madeForTeacher, setMadeForTeacher] = useState([]);
+  const [playlists, setPlaylists] = useState([]);
+  const [userPlaylists, setUserPlaylists] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [user, institutes, currentInstituteId] = useUserStore(
+    useShallow((state) => [
+      state.user,
+      state.institutes,
+      state.currentInstituteId,
+    ])
+  );
+  const user_id = user?.user_id;
+  const [currentInstitute, setCurrentInstitute] = useState(null);
+  const [allAsanas, setAllAsanas] = useState([]);
+  const [allTransitions, setAllTransitions] = useState([]);
+
+  useState(() => {
+    if (currentInstituteId) {
+      setCurrentInstitute(
+        institutes?.find(
+          (institute) => institute.institute_id === currentInstituteId
+        )
+      );
+    }
+  }, [currentInstituteId, institutes]);
 
   useEffect(() => {
     const fetchData = async () => {
-      // let updatedModalData = { ...modalData };
-      // updatedModalData.asana_details = [];
+      try {
+        const response = await fetch(
+          "http://localhost:4000/content/video/getAllAsanas"
+        );
+        const data = await response.json();
+        setAllAsanas(data);
+      } catch (error) {
+        toast("Error fetching asanas");
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/content/video/getAllTransitions"
+        );
+        const data = await response.json();
+        setAllTransitions(data);
+      } catch (error) {
+        toast(error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
       for (var i = 0; i < modalData.asana_ids.length; i++) {
         try {
           const response = await fetch(
@@ -62,40 +121,10 @@ function Playlist() {
         }
       }
     };
-
     if (modalData.asana_ids.length > 0) {
       fetchData();
     }
   }, [modalData.asana_ids]);
-
-  const [isInstitute, setIsInstitute] = useState(false);
-  const [isTeacher, setIsTeacher] = useState(false);
-  const [isPersonal, setIsPersonal] = useState(true);
-  const [institutePlaylists, setInstitutePlaylists] = useState([]);
-  const [teacherPlaylists, setTeacherPlaylists] = useState([]);
-  const [madeForTeacher, setMadeForTeacher] = useState([]);
-  const [playlists, setPlaylists] = useState([]);
-  const [userPlaylists, setUserPlaylists] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [user, institutes, currentInstituteId] = useUserStore(
-    useShallow((state) => [
-      state.user,
-      state.institutes,
-      state.currentInstituteId,
-    ])
-  );
-  const user_id = user?.user_id;
-
-  const [currentInstitute, setCurrentInstitute] = useState(null);
-  useState(() => {
-    if (currentInstituteId) {
-      setCurrentInstitute(
-        institutes?.find(
-          (institute) => institute.institute_id === currentInstituteId
-        )
-      );
-    }
-  }, [currentInstituteId, institutes]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -240,21 +269,30 @@ function Playlist() {
   }, [user_id, currentInstituteId]);
 
   const getAllAsanas = async (asana_ids) => {
-    try {
-      const response = await fetch(
-        "http://localhost:4000/content/video/getAllAsanas"
-      );
-      const data = await response.json();
-      return data.filter((asana) => asana_ids.includes(asana.id));
-    } catch (error) {
-      setLoading(false);
-      console.log(error);
+    if (asana_ids.length === 0) {
+      console.log("Empty asana_ids array");
+      return [];
     }
+    const allAsanasData = asana_ids.map((asana_id) => {
+      if (Number(asana_id)) {
+        console.log("NUMBER ID");
+        const asanaObject = allAsanas.find((asana) => asana.id === asana_id);
+        return asanaObject || null;
+      } else {
+        console.log("STRING ID");
+        const transitionObject = allTransitions.find(
+          (transition) => transition.transition_id === asana_id
+        );
+        return transitionObject || null;
+      }
+    });
+    return allAsanasData;
   };
 
   const handleAddToQueue = (asana_ids) => {
     getAllAsanas(asana_ids)
       .then((asanas) => {
+        console.log("ASANAS ARE : ", asanas);
         addToQueue(asanas);
       })
       .catch((err) => console.log(err));
@@ -283,7 +321,6 @@ function Playlist() {
             <p>{asanaDetail.asana_name}</p>
           </div>
         ))}
-
         <Modal.Action passive onClick={closeModal}>
           Close
         </Modal.Action>

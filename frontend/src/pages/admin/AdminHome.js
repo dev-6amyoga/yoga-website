@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Navbar_Admin from "../../components/Common/AdminNavbar/AdminNavbar";
 import { Fetch } from "../../utils/Fetch";
 import "./AdminHome.css";
+import Papa from "papaparse";
 
 export default function AdminHome() {
   // const navigate = useNavigate();
@@ -132,6 +133,20 @@ export default function AdminHome() {
       console.log(error);
     }
   };
+  const handleDownload = (data1) => {
+    const csv = Papa.unparse(data1);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "data.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
   const updateData = async () => {
     try {
       const institute_id = Number(modalData.institute_id);
@@ -162,6 +177,14 @@ export default function AdminHome() {
         <ToastContainer />
       </div>
       <div className="elements">
+        <Button
+          onClick={() => {
+            handleDownload(sortedInstitutes);
+          }}
+        >
+          Download CSV
+        </Button>
+        <br />
         <Table width={50} data={sortedInstitutes} className="bg-white ">
           <Table.Column prop="institute_id" label="Institute ID" />
           <Table.Column prop="name" label="Institute Name" />
