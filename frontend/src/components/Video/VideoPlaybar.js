@@ -1,5 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DraggableCore } from "react-draggable";
+import useVideoStore, {
+	STATE_VIDEO_ERROR,
+	STATE_VIDEO_LOADING,
+} from "../../store/VideoStore";
+import VideoControls from "./VideoControls";
 
 export default function VideoPlaybar({
 	playbarVisible,
@@ -10,6 +15,7 @@ export default function VideoPlaybar({
 	moveToTimestamp,
 	handleSetPlay,
 	handleSetPause,
+	handleFullScreen,
 }) {
 	const [mouseDown, setMouseDown] = useState(false);
 	const barRef = useRef(null);
@@ -22,8 +28,9 @@ export default function VideoPlaybar({
 		height: 0,
 	});
 	const [currentBoopPosition, setCurrentBoopPosition] = useState(0);
+	const videoState = useVideoStore((state) => state.videoState);
 
-	useEffect(() => {
+	const handleSetBarBounds = () => {
 		if (barRef.current) {
 			const bounds = barRef.current.getBoundingClientRect();
 			console.log(bounds);
@@ -36,93 +43,126 @@ export default function VideoPlaybar({
 				height: bounds.height,
 			});
 		}
+	};
+
+	useEffect(() => {
+		handleSetBarBounds();
 	}, [barRef]);
 
 	useEffect(() => {
 		setCurrentBoopPosition(barBound.width * (currentTime / duration));
 	}, [currentTime, barBound, duration]);
 
+	useEffect(() => {
+		handleSetBarBounds();
+	}, [handleFullScreen?.active]);
+
+	const seekOnClick = useCallback(
+		(e) => {
+			console.log(
+				(duration * (e.clientX - barBound.left)) / barBound.width,
+				e.clientX,
+				barBound
+			);
+			moveToTimestamp(
+				(duration * (e.clientX - barBound.left)) / barBound.width
+			);
+		},
+		[duration, barBound, moveToTimestamp]
+	);
+
+	const handleDragOnStart = useCallback(
+		(e, data) => {
+			setMouseDown(true);
+			handleSetPause();
+		},
+		[handleSetPause]
+	);
+
+	const handleDragOnStop = useCallback(
+		(e, data) => {
+			// console.log("STOP-------------------------------------");
+			seekOnClick(e);
+			setMouseDown(false);
+		},
+		[seekOnClick]
+	);
+
+	const handleOnDrag = useCallback(
+		(e, data) => {
+			console.log(
+				e.clientX - barBound.left,
+				barBound.width,
+				(duration * (e.clientX - barBound.left)) / barBound.width
+			);
+			setCurrentBoopPosition((p) => e.clientX - barBound.left);
+		},
+		[duration, barBound]
+	);
+
 	return (
-		<div
-			className={`w-full h-1 bg-white relative`}
-			onClick={(e) => {
-				moveToTimestamp(
-					(duration * (e.clientX - barBound.left)) / barBound.width
-				);
-			}}>
+		<>
 			<div
-				className="bg-blue-500 h-full relative transition-all ease-linear"
-				style={{
-					width: `${(currentTime / duration) * 100}%`,
-				}}
-				ref={barRef}></div>
-
-			<DraggableCore
-				axis="x"
-				// bounds={{
-				// 	left: 0,
-				// 	right: barBound.right - barBound.left,
-				// 	top: barBound.top,
-				// 	bottom: barBound.bottom,
-				// }}
-				bounds="parent"
-				// position={[currentBoopPosition, 0]}
-				handle=".timeboop"
-				defaultClassName="timeboop"
-				onStart={(e, data) => {
-					// console.log("START-------------------------------------");
-					// console.log(e.clientX);
-					setMouseDown(true);
-					handleSetPause();
-				}}
-				onStop={(e, data) => {
-					// console.log("STOP-------------------------------------");
-					moveToTimestamp(
-						(duration * (e.clientX - barBound.left)) /
-							barBound.width
-					);
-					setMouseDown(false);
-				}}
-				onDrag={(e, data) => {
-					// console.log("DRAGG : ", data);
-					// if (!mouseDown) setMouseDown(true);
-					// console.log(e.clientX - barBound.left);
-					setCurrentBoopPosition((p) => e.clientX - barBound.left);
-				}}
-				// grid={[duration, 10]}
-				scale={1}
-				nodeRef={draggableHandle}
-				// defaultPosition={}
-			>
+				className={`w-full h-[0.35rem] bg-white relative`}
+				onClick={seekOnClick}
+				ref={barRef}>
 				<div
-					className={`timeboop ${
-						mouseDown
-							? "xw-4 xh-4 x-top-[calc(50%+0.25rem)] w-2 h-2 -top-1/2"
-							: "w-2 h-2 -top-1/2 delay-75 transition-all"
-					} bg-blue-500 border border-black rounded-full absolute`}
-					ref={draggableHandle}
+					className={`bg-blue-500 h-full relative transition-all ease-linear ${
+						videoState === STATE_VIDEO_ERROR ||
+						videoState === STATE_VIDEO_LOADING
+							? "opacity-0"
+							: "opacity-100"
+					}`}
 					style={{
-						left: `${
-							(currentBoopPosition / barBound.width) * 100
-						}%`,
-					}}>
-					{mouseDown ? (
-						<div className="text-white absolute rounded-lg px-4 text-xs -left-[calc(50%+1rem)] -top-[calc(50%+1.5rem)] border border-white">
-							{toTimeString(
-								(duration * currentBoopPosition) /
-									barBound.width
-							)}
-						</div>
-					) : (
-						<></>
-					)}
-				</div>
-			</DraggableCore>
+						width: `${(currentTime / duration) * 100}%`,
+					}}></div>
 
-			<p className=" text-white text-xs absolute right-0 -top-4">
-				{toTimeString(currentTime.toFixed(0))}/
-				{toTimeString(duration.toFixed(0))}
-			</p>
-		</div>
+				<DraggableCore
+					axis="x"
+					bounds="parent"
+					handle=".timeboop"
+					defaultClassName="timeboop"
+					onStart={handleDragOnStart}
+					onStop={handleDragOnStop}
+					onDrag={handleOnDrag}
+					scale={1}
+					nodeRef={draggableHandle}>
+					<div
+						className={`timeboop ${
+							videoState === STATE_VIDEO_ERROR ||
+							videoState === STATE_VIDEO_LOADING
+								? "opacity-0"
+								: "opacity-100"
+						} ${
+							mouseDown
+								? "w-3 h-3 -top-[calc(50%+0.1rem)]"
+								: "w-3 h-3 -top-[calc(50%+0.1rem)] delay-75 transition-all"
+						} bg-blue-500 border border-white rounded-full absolute`}
+						ref={draggableHandle}
+						style={{
+							left: `${
+								(currentBoopPosition / barBound.width) * 100
+							}%`,
+						}}>
+						{mouseDown ? (
+							<div className="text-white absolute rounded-lg px-4 text-xs -left-[calc(50%+1rem)] -top-[calc(50%+1.5rem)] border border-white">
+								{toTimeString(
+									(duration * currentBoopPosition) /
+										barBound.width
+								)}
+							</div>
+						) : (
+							<></>
+						)}
+					</div>
+				</DraggableCore>
+
+				<p className=" text-white text-xs absolute right-0 -top-5 border rounded-full px-1">
+					{toTimeString(currentTime.toFixed(0))}/
+					{toTimeString(duration.toFixed(0))}
+				</p>
+			</div>
+			<VideoControls handleFullScreen={handleFullScreen} />
+		</>
 	);
 }
