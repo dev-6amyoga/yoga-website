@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
 import InstitutePageWrapper from "../../components/Common/InstitutePageWrapper";
 import useUserStore from "../../store/UserStore";
-
+import { toast } from "react-toastify";
+import { Fetch } from "../../utils/Fetch";
 export default function InstituteHome() {
   const [user, institutes, currentInstituteId] = useUserStore(
     useShallow((state) => [
@@ -11,7 +12,58 @@ export default function InstituteHome() {
       state.currentInstituteId,
     ])
   );
+  const [instituteData, setInstituteData] = useState({});
   const [currentInstitute, setCurrentInstitute] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/user-plan/get-user-plan-by-id",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_id: user?.user_id }),
+          }
+        );
+        const data = await response.json();
+        console.log(data?.userPlan?.plan?.number_of_teachers);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    // console.log(user);
+    const fetchData = async (id) => {
+      Fetch({
+        url: "http://localhost:4000/institute/get-by-instituteid",
+        method: "POST",
+        data: {
+          institute_id: id,
+        },
+      }).then((res) => {
+        if (res && res.status === 200) {
+          console.log(res.data);
+          setInstituteData(res.data);
+          // updateInstitute(res.data);
+        } else {
+          toast("Error fetching institute; retry", {
+            type: "error",
+          });
+        }
+      });
+    };
+    if (currentInstitute.institute_id != null) {
+      fetchData(currentInstitute.institute_id);
+    }
+  }, [currentInstitute]);
 
   useState(() => {
     if (currentInstituteId) {
@@ -38,18 +90,18 @@ export default function InstituteHome() {
           {currentInstitute?.name}
         </p>
         <p>
-          <strong>Institute Email: </strong> {currentInstitute?.email}
+          <strong>Institute Email: </strong> {instituteData?.email}
         </p>
         <p>
-          <strong>Institute Phone: </strong> {currentInstitute?.phone}
+          <strong>Institute Phone: </strong> {instituteData?.phone}
         </p>
         <p>
           <strong>Institute Address: </strong>
-          {currentInstitute?.address1 + " " + currentInstitute?.address2}
+          {instituteData?.address1 + " " + instituteData?.address2}
         </p>
         <p>
           <strong>Institute Billing Address: </strong>
-          {currentInstitute?.billing_address}
+          {instituteData?.billing_address}
         </p>
       </div>
     </InstitutePageWrapper>

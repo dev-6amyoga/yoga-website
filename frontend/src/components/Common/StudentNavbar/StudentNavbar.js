@@ -15,9 +15,7 @@ export default function StudentNavbar() {
   let user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   let userPlan = useUserStore((state) => state.userPlan);
-
   let setUserPlan = useUserStore((state) => state.setUserPlan);
-
   const [planId, setPlanId] = useState(0);
   const [disabled, setDisabled] = useState(false);
   const [disabledTailorMade, setDisabledTailorMade] = useState(false);
@@ -50,7 +48,7 @@ export default function StudentNavbar() {
           }
         );
         const data = await response.json();
-        if (data["userPlan"]) {
+        if (data["userPlan"].length != 0) {
           setUserPlan(data["userPlan"]);
           setPlanId(data["userPlan"]["plan_id"]);
           if (data?.userPlan?.plan?.has_playlist_creation) {
@@ -60,15 +58,17 @@ export default function StudentNavbar() {
           }
         } else {
           setDisabled(true);
+          setDisabledTailorMade(true);
         }
       } catch (error) {
-        setDisabledTailorMade(false);
+        setDisabled(true);
+        setDisabledTailorMade(true);
         console.log(error);
       }
     };
-    // if (user) {
-    //   fetchPlanData();
-    // }
+    if (user) {
+      fetchPlanData();
+    }
   }, [user]);
 
   return (
@@ -92,7 +92,7 @@ export default function StudentNavbar() {
         <Drawer.Content>
           <RoleShifter />
           <h5 className="rounded-lg bg-zinc-800 text-white p-2">
-            {userPlan ? "Plan : " + userPlan?.plan?.name : ""}
+            {userPlan ? "Plan : " + userPlan?.plan?.name : "No active plan"}
           </h5>
           <Divider />
           <div className="flex flex-col gap-4">
@@ -114,7 +114,6 @@ export default function StudentNavbar() {
             >
               Make your own Playlist
             </Button>
-
             <Button>About Us</Button>
             <Button>Contact Us</Button>
             <Button onClick={() => navigate("/student/transactions")}>

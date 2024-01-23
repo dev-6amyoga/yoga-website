@@ -6,8 +6,8 @@ import {
   Grid,
   Input,
   Table,
-  Select,
   Note,
+  Spacer,
 } from "@geist-ui/core";
 import React, { useCallback, useEffect, useState } from "react";
 // import { useNavigate } from "react-router-dom";
@@ -29,24 +29,27 @@ function StudentPlan() {
     currency: null,
     amount: null,
   });
-
   const today = new Date();
   const formattedDate = today.toISOString().split("T")[0];
-
+  const [myPlans, setMyPlans] = useState([]);
+  // const [countryInfo, setCountryInfo] = useState(null);
   const [selectedValidity, setSelectedValidity] = useState(30);
-  const [selectedCurrency, setSelectedCurrency] = useState(1);
-  const [allCurrencies, setAllCurrencies] = useState([]);
+  // const [selectedCurrency, setSelectedCurrency] = useState(1);
+  // const [allCurrencies, setAllCurrencies] = useState([]);
   const [planId, setPlanId] = useState(0);
-
+  const [toBeRegistered, setToBeRegistered] = useState({});
   const calculateEndDate = (validityDays) => {
     const endDate = new Date(today);
     endDate.setUTCDate(today.getUTCDate() + validityDays);
     return endDate.toISOString().split("T")[0];
   };
+  const calculateEndDate1 = (startDate, validityDays) => {
+    startDate.setUTCDate(startDate.getUTCDate() + validityDays);
+    return startDate.toISOString().split("T")[0];
+  };
   const handleValidityChange = (validity) => {
     setSelectedValidity(validity);
   };
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -61,10 +64,77 @@ function StudentPlan() {
           }
         );
         const data = await response.json();
-        if (data["userPlan"]) {
-          console.log(data["userPlan"]);
-          console.log(data["userPlan"]["plan_id"]);
-          setPlanId(data["userPlan"]["plan_id"]);
+        if (data["userPlan"].length != 0) {
+          setMyPlans(data["userPlan"]);
+          for (var i = 0; i !== data["userPlan"].length; i++) {
+            if (data["userPlan"][i].validity_to < formattedDate) {
+              if (data["userPlan"][i].current_status !== "EXPIRED") {
+                const {
+                  user_plan_id,
+                  purchase_date,
+                  validity_from,
+                  validity_to,
+                  cancellation_date,
+                  auto_renewal_enabled,
+                  discount_coupon_id,
+                  referral_code_id,
+                  user_id,
+                  plan_id,
+                } = data["userPlan"][i];
+                const updatedUserPlanData = {
+                  user_plan_id,
+                  purchase_date,
+                  validity_from,
+                  validity_to,
+                  cancellation_date,
+                  auto_renewal_enabled,
+                  discount_coupon_id,
+                  referral_code_id,
+                  user_id,
+                  plan_id,
+                  current_status: "EXPIRED",
+                };
+                try {
+                  const response = await fetch(
+                    "http://localhost:4000/user-plan/update-user-plan",
+                    {
+                      method: "PUT",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify(updatedUserPlanData),
+                    }
+                  );
+                  if (!response.ok) {
+                    const errorMessage = await response.json();
+                    throw new Error(errorMessage.error);
+                  }
+                  const result = await response.json();
+                } catch (error) {
+                  toast(error.message || "Error updating user plan");
+                }
+              }
+            }
+          }
+          if (data["userPlan"].length > 1) {
+            let found = 0;
+            for (var i = 0; i !== data["userPlan"].length; i++) {
+              if (data["userPlan"][i].current_status === "ACTIVE") {
+                setPlanId(data["userPlan"][0]["plan_id"]);
+                found = 1;
+                break;
+              }
+            }
+            if (found === 0) {
+              notify("You don't have a plan yet! Purchase one to continue");
+            }
+          } else {
+            if (data["userPlan"][0].current_status === "ACTIVE") {
+              setPlanId(data["userPlan"][0]["plan_id"]);
+            } else {
+              notify("You don't have a plan yet! Purchase one to continue");
+            }
+          }
         } else {
           notify("You don't have a plan yet! Purchase one to continue");
         }
@@ -77,28 +147,27 @@ function StudentPlan() {
     }
   }, [user]);
 
+  // const fetchCurrencies = useCallback(async () => {
+  //   try {
+  //     const response = await Fetch({
+  //       url: "http://localhost:4000/currency/get-all",
+  //     });
+
+  //     setAllCurrencies(response?.data?.currencies);
+  //     console.log("Fetching currencies");
+  //   } catch (error) {
+  //     notify("Error fetching plans", { type: "error" });
+  //     console.log(error);
+  //   }
+  // }, []);
+
   const fetchPlans = useCallback(async () => {
     try {
       const response = await fetch(
         "http://localhost:4000/plan/get-all-student-plan"
       );
       const data = await response.json();
-      console.log("DATA IS : ", data);
       setAllPlans(data?.plans);
-    } catch (error) {
-      notify("Error fetching plans", { type: "error" });
-      console.log(error);
-    }
-  }, []);
-
-  const fetchCurrencies = useCallback(async () => {
-    try {
-      const response = await Fetch({
-        url: "http://localhost:4000/currency/get-all",
-      });
-
-      setAllCurrencies(response?.data?.currencies);
-      console.log("Fetching currencies");
     } catch (error) {
       notify("Error fetching plans", { type: "error" });
       console.log(error);
@@ -111,50 +180,152 @@ function StudentPlan() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (planId != 0) {
-      notify("You have an active plan! You can't purchase a new plan.");
-      return;
-    }
-    const discount_coupon_id = document.querySelector(
-      "#discount_coupon_id"
-    ).value;
-    const referral_code_id = document.querySelector("#referral_code_id").value;
-    const userPlanData = {
-      purchase_date: formattedDate,
-      validity_from: formattedDate,
-      validity_to: calculateEndDate(selectedValidity),
-      cancellation_date: null,
-      auto_renewal_enabled: false,
-      user_id: user?.user_id,
-      plan_id: cardData.plan_id,
-      discount_coupon_id: discount_coupon_id,
-      referral_code_id: referral_code_id,
-      amount: cardData.pricing[0].denomination * 118,
-      currency: "INR",
-    };
-    try {
-      const response = await Fetch({
-        url: "http://localhost:4000/payment/order",
-        method: "POST",
-        data: userPlanData,
-      });
-      if (response.status === 200) {
-        const responseJson = response.data;
-        const razorpayOrder = responseJson.order;
-        if (razorpayOrder && razorpayOrder["id"]) {
-          setOrderDetails({
-            orderId: razorpayOrder["id"],
-            currency: razorpayOrder["currency"],
-            amount: razorpayOrder["amount"],
-          });
-          setDisplayRazorpay(true);
+    if (planId !== 0) {
+      console.log(planId);
+      let staged = [];
+      let expired = [];
+      let active = [];
+      for (var i = 0; i !== myPlans.length; i++) {
+        if (myPlans[i].current_status === "EXPIRED") {
+          expired.push(myPlans[i]);
+        } else if (myPlans[i].current_status === "ACTIVE") {
+          active.push(myPlans[i]);
+        } else if (myPlans[i].current_status === "STAGED") {
+          staged.push(myPlans[i]);
         }
-      } else {
-        const errorData = await response.json();
-        notify(errorData.error);
       }
-    } catch (error) {
-      console.log(error);
+      if (active.length > 1) {
+        toast("Error");
+      } else {
+        notify(
+          "You have an active plan! If you purchase a new plan, it will be staged."
+        );
+        let userPlanData = {};
+        if (staged.length === 0) {
+          console.log(active[0].validity_to);
+          const originalDate = new Date(active[0].validity_to);
+          originalDate.setDate(originalDate.getDate() + 1);
+          const validityFromDate = originalDate.toISOString();
+          const validityTo = new Date(validityFromDate);
+          validityTo.setDate(validityTo.getDate() + selectedValidity);
+          const validityToDate = validityTo.toISOString();
+          console.log(validityFromDate, validityToDate);
+          userPlanData = {
+            purchase_date: formattedDate,
+            validity_from: validityFromDate,
+            validity_to: validityToDate,
+            cancellation_date: null,
+            auto_renewal_enabled: false,
+            user_id: user?.user_id,
+            plan_id: cardData.plan_id,
+            discount_coupon_id: 0,
+            referral_code_id: 0,
+            amount: cardData.pricing[0].denomination * 118,
+            currency: "INR",
+            current_status: "STAGED",
+          };
+          setToBeRegistered(userPlanData);
+          console.log(userPlanData);
+        } else {
+          const dates = staged.map((obj) => new Date(obj.validity_to));
+          const indexOfHighestDate = dates.indexOf(
+            new Date(Math.max(...dates))
+          );
+          const highestDateObject = staged[indexOfHighestDate];
+          const originalDate = new Date(highestDateObject.validity_to);
+          originalDate.setDate(originalDate.getDate() + 1);
+          const validityFromDate = originalDate.toISOString();
+          const validityTo = new Date(validityFromDate);
+          validityTo.setDate(validityTo.getDate() + selectedValidity);
+          const validityToDate = validityTo.toISOString();
+          console.log(validityFromDate, validityToDate);
+          userPlanData = {
+            purchase_date: formattedDate,
+            validity_from: validityFromDate,
+            validity_to: validityToDate,
+            cancellation_date: null,
+            auto_renewal_enabled: false,
+            user_id: user?.user_id,
+            plan_id: cardData.plan_id,
+            discount_coupon_id: 0,
+            referral_code_id: 0,
+            amount: cardData.pricing[0].denomination * 118,
+            currency: "INR",
+            current_status: "STAGED",
+          };
+          setToBeRegistered(userPlanData);
+          console.log(userPlanData);
+        }
+        try {
+          const response = await Fetch({
+            url: "http://localhost:4000/payment/order",
+            method: "POST",
+            data: userPlanData,
+          });
+          if (response.status === 200) {
+            const responseJson = response.data;
+            const razorpayOrder = responseJson.order;
+            if (razorpayOrder && razorpayOrder["id"]) {
+              setOrderDetails({
+                orderId: razorpayOrder["id"],
+                currency: razorpayOrder["currency"],
+                amount: razorpayOrder["amount"],
+              });
+              setDisplayRazorpay(true);
+            }
+          } else {
+            const errorData = await response.json();
+            notify(errorData.error);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    } else {
+      const discount_coupon_id = document.querySelector(
+        "#discount_coupon_id"
+      ).value;
+      const referral_code_id =
+        document.querySelector("#referral_code_id").value;
+      const userPlanData = {
+        purchase_date: formattedDate,
+        validity_from: formattedDate,
+        validity_to: calculateEndDate(selectedValidity),
+        cancellation_date: null,
+        auto_renewal_enabled: false,
+        user_id: user?.user_id,
+        plan_id: cardData.plan_id,
+        discount_coupon_id: discount_coupon_id,
+        referral_code_id: referral_code_id,
+        amount: cardData.pricing[0].denomination * 118,
+        currency: "INR",
+        current_status: "ACTIVE",
+      };
+      setToBeRegistered(userPlanData);
+      try {
+        const response = await Fetch({
+          url: "http://localhost:4000/payment/order",
+          method: "POST",
+          data: userPlanData,
+        });
+        if (response.status === 200) {
+          const responseJson = response.data;
+          const razorpayOrder = responseJson.order;
+          if (razorpayOrder && razorpayOrder["id"]) {
+            setOrderDetails({
+              orderId: razorpayOrder["id"],
+              currency: razorpayOrder["currency"],
+              amount: razorpayOrder["amount"],
+            });
+            setDisplayRazorpay(true);
+          }
+        } else {
+          const errorData = await response.json();
+          notify(errorData.error);
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -181,30 +352,30 @@ function StudentPlan() {
   };
 
   const registerUserPlan = async () => {
-    const discount_coupon_id = document.querySelector(
-      "#discount_coupon_id"
-    ).value;
-    const referral_code_id = document.querySelector("#referral_code_id").value;
-    const userPlanData = {
-      purchase_date: formattedDate,
-      validity_from: formattedDate,
-      validity_to: calculateEndDate(selectedValidity),
-      cancellation_date: null,
-      auto_renewal_enabled: false,
-      user_id: user?.user_id,
-      plan_id: cardData.plan_id,
-      discount_coupon_id: 0,
-      referral_code_id: 0,
-      amount: 100,
-      currency: "INR",
-    };
+    // const discount_coupon_id = document.querySelector(
+    //   "#discount_coupon_id"
+    // ).value;
+    // const referral_code_id = document.querySelector("#referral_code_id").value;
+    // const userPlanData = {
+    //   purchase_date: formattedDate,
+    //   validity_from: formattedDate,
+    //   validity_to: calculateEndDate(selectedValidity),
+    //   cancellation_date: null,
+    //   auto_renewal_enabled: false,
+    //   user_id: user?.user_id,
+    //   plan_id: cardData.plan_id,
+    //   discount_coupon_id: 0,
+    //   referral_code_id: 0,
+    //   amount: 100,
+    //   currency: "INR",
+    // };
     try {
       const response = await fetch("http://localhost:4000/user-plan/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(userPlanData),
+        body: JSON.stringify(toBeRegistered),
       });
       if (response.ok) {
         notify("Plan subscribed successfully", { type: "success" });
@@ -227,13 +398,29 @@ function StudentPlan() {
           </Note>
         )}
       </div>
+
       <div>
-        {planId != 0 && (
+        {planId !== 0 && (
           <Note type="warning" label="Note" filled width={70}>
             You have an already active plan!
           </Note>
         )}
       </div>
+
+      <Spacer h={3} />
+
+      <Note label={false} type="success">
+        <h4>Plan History</h4>
+        {myPlans &&
+          myPlans.map((x) => (
+            <Note label={false} type="secondary" key={x.id}>
+              {x.current_status} : {x.plan.name} , VALID FROM :
+              {x.validity_from.split("T")[0]}, VALID TO :{" "}
+              {x.validity_to.split("T")[0]}
+            </Note>
+          ))}
+      </Note>
+
       <div className="flex flex-col items-center justify-center py-20">
         <Table width={100} data={allPlans} className="bg-white ">
           <Table.Column prop="plan_id" label="Plan ID" />

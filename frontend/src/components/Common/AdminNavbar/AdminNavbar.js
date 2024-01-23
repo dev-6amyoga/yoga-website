@@ -61,9 +61,27 @@ export default function AdminNavbar() {
             </Button>
             <ButtonDropdown className="w-full">
               <ButtonDropdown.Item main>Member Management</ButtonDropdown.Item>
-              <ButtonDropdown.Item>Institutes</ButtonDropdown.Item>
-              <ButtonDropdown.Item>Students</ButtonDropdown.Item>
-              <ButtonDropdown.Item>Teachers</ButtonDropdown.Item>
+              <ButtonDropdown.Item
+                onClick={() => {
+                  navigate("/admin/members/institutes");
+                }}
+              >
+                Institutes
+              </ButtonDropdown.Item>
+              <ButtonDropdown.Item
+                onClick={() => {
+                  navigate("/admin/members/students");
+                }}
+              >
+                Students
+              </ButtonDropdown.Item>
+              <ButtonDropdown.Item
+                onClick={() => {
+                  navigate("/admin/members/teachers");
+                }}
+              >
+                Teachers
+              </ButtonDropdown.Item>
             </ButtonDropdown>
             <ButtonDropdown className="w-full">
               <ButtonDropdown.Item main>Content Management</ButtonDropdown.Item>
