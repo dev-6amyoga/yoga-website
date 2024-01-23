@@ -1,5 +1,9 @@
 const express = require("express");
+const requestIp = require("request-ip");
+
 const app = express();
+app.use(requestIp.mw());
+
 const mongoose = require("mongoose");
 const cors = require("cors");
 const morgan = require("morgan");

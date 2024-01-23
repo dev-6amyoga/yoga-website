@@ -13,6 +13,9 @@ import AllAsanaCategories from "../components/content-management/AllAsanaCategor
 import RegisterNewCategoryForm from "../components/content-management/forms/RegisterNewCategoryForm";
 import ViewAllPlans from "../pages/admin/Plans/ViewAllPlans";
 import DiscountManagement from "../pages/admin/discount-management";
+import Institutes from "../pages/admin/member-management/Institutes";
+import Teachers from "../pages/admin/member-management/Teachers";
+import Students from "../pages/admin/member-management/Students";
 export const AdminRoutes = [
   {
     path: "/admin",
@@ -37,6 +40,18 @@ export const AdminRoutes = [
   {
     path: "/content/asana-category/all",
     element: <AllAsanaCategories />,
+  },
+  {
+    path: "/admin/members/institutes",
+    element: <Institutes />,
+  },
+  {
+    path: "/admin/members/teachers",
+    element: <Teachers />,
+  },
+  {
+    path: "/admin/members/students",
+    element: <Students />,
   },
 
   {

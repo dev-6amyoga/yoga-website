@@ -11,7 +11,9 @@ const { User } = require("../models/sql/User");
 const { Op } = require("sequelize");
 const { sequelize } = require("../init.sequelize");
 const { timeout } = require("../utils/promise_timeout");
-const { UserInstitutePlanRole } = require( "../models/sql/UserInstitutePlanRole" )
+const {
+  UserInstitutePlanRole,
+} = require("../models/sql/UserInstitutePlanRole");
 
 router.get("/get-all-user-plans", async (req, res) => {
   try {
@@ -27,14 +29,13 @@ router.get("/get-all-user-plans", async (req, res) => {
 
 router.post("/get-user-plan-by-id", async (req, res) => {
   const { user_id } = req.body;
-  console.log(user_id);
   if (!user_id) {
     return res
       .status(HTTP_BAD_REQUEST)
       .json({ error: "Missing required fields" });
   }
   try {
-    const userPlan = await UserPlan.findOne({
+    const userPlan = await UserPlan.findAll({
       where: {
         user_id: user_id,
       },
@@ -53,7 +54,6 @@ router.post("/get-user-plan-by-id", async (req, res) => {
         },
       ],
     });
-
     return res.status(HTTP_OK).json({ userPlan: userPlan ? userPlan : null });
   } catch (error) {
     console.error(error);
@@ -75,10 +75,18 @@ router.post("/register", async (req, res) => {
     referral_code_id,
     user_id,
     plan_id,
+    current_status,
   } = req.body;
   console.log("registering!!");
 
-  if (!user_id || !plan_id || !validity_from || !validity_to || !purchase_date)
+  if (
+    !user_id ||
+    !plan_id ||
+    !validity_from ||
+    !validity_to ||
+    !purchase_date ||
+    !current_status
+  )
     return res
       .status(HTTP_BAD_REQUEST)
       .json({ error: "Missing required fields" });
@@ -151,14 +159,22 @@ router.post("/register", async (req, res) => {
         referral_code_id: referral_code_id,
         user_id: user_id,
         plan_id: plan_id,
+        current_status: current_status,
       },
       { transaction: t }
     );
 
-    const x = await UserInstitutePlanRole.update({
-      user_id: user_id,
-      plan_id: plan_id,
-    })
+    // const x = await UserInstitutePlanRole.update(
+    //   {
+    //     user_id: user_id,
+    //     plan_id: plan_id,
+    //   },
+    //   {
+    //     where: {
+    //       user_id: user_id,
+    //     },
+    //   }
+    // );
 
     await timeout(t.commit(), 5000, new Error("timeout; try again"));
     return res.status(HTTP_OK).json({ userPlan: newUserPlan });
@@ -171,6 +187,110 @@ router.post("/register", async (req, res) => {
         return res
           .status(HTTP_BAD_REQUEST)
           .json({ error: "Missing required fields" });
+    }
+  }
+});
+
+router.put("/update-user-plan", async (req, res) => {
+  console.log("IN UPDATE");
+  console.log(req.body);
+  const {
+    user_plan_id,
+    purchase_date,
+    validity_from,
+    validity_to,
+    cancellation_date,
+    auto_renewal_enabled,
+    discount_coupon_id,
+    referral_code_id,
+    user_id,
+    plan_id,
+    current_status,
+  } = req.body;
+  if (
+    !user_plan_id ||
+    !user_id ||
+    !plan_id ||
+    !validity_from ||
+    !validity_to ||
+    !purchase_date ||
+    !current_status
+  )
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Missing required fields" });
+  const existingUserPlan = await UserPlan.findByPk(user_plan_id);
+  if (!existingUserPlan)
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "UserPlan does not exist." });
+  const t = await sequelize.transaction();
+  try {
+    let plan = null;
+    if (plan_id !== "") {
+      plan = await Plan.findOne(
+        {
+          where: { plan_id: plan_id },
+          attributes: ["plan_id"],
+        },
+        { transaction: t }
+      );
+      if (!plan) throw new Error("Plan doesn't exist");
+    }
+    const user = await User.findOne(
+      {
+        where: { user_id: user_id },
+        attributes: ["user_id"],
+      },
+      { transaction: t }
+    );
+    if (!user) throw new Error("User doesn't exist");
+    const updatedUserPlan = await existingUserPlan.update(
+      {
+        purchase_date: purchase_date,
+        validity_from: validity_from,
+        validity_to: validity_to,
+        cancellation_date: cancellation_date,
+        auto_renewal_enabled: auto_renewal_enabled,
+        discount_coupon_id: discount_coupon_id,
+        referral_code_id: referral_code_id,
+        user_id: user_id,
+        plan_id: plan_id,
+        current_status: current_status,
+      },
+      {
+        where: {
+          user_plan_id: user_plan_id,
+        },
+      },
+
+      { transaction: t }
+    );
+    const x = await UserInstitutePlanRole.update(
+      {
+        user_plan_id: user_plan_id,
+      },
+      {
+        where: {
+          user_id: user_id,
+        },
+      }
+    );
+    await timeout(t.commit(), 5000, new Error("timeout; try again"));
+    return res.status(HTTP_OK).json({ userPlan: updatedUserPlan });
+  } catch (error) {
+    console.error(error);
+    await t.rollback();
+    switch (error.message) {
+      case "Plan doesn't exist":
+      case "User doesn't exist":
+        return res
+          .status(HTTP_BAD_REQUEST)
+          .json({ error: "Missing required fields" });
+      default:
+        return res
+          .status(HTTP_INTERNAL_SERVER_ERROR)
+          .json({ error: "Failed to update user plan" });
     }
   }
 });
