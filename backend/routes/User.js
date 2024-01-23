@@ -385,6 +385,46 @@ router.get("/get-all-teachers", async (req, res) => {
   }
 });
 
+router.get("/get-all-institutes", async (req, res) => {
+  try {
+    const users = await UserInstitutePlanRole.findAll({
+      where: { role_id: 2 },
+      include: [{ model: User }],
+    });
+    if (!users) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ error: "Institutes dont exist" });
+    }
+    return res.status(HTTP_OK).json({ users });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to fetch Institutes" });
+  }
+});
+
+router.get("/get-all-students", async (req, res) => {
+  try {
+    const users = await UserInstitutePlanRole.findAll({
+      where: { role_id: 5 },
+      include: [{ model: User }],
+    });
+    if (!users) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ error: "Students dont exist" });
+    }
+    return res.status(HTTP_OK).json({ users });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to fetch Students" });
+  }
+});
+
 router.post("/reset-password", async (req, res) => {
   const { user_id, new_password, confirm_new_password } = req.body;
   console.log(req.body);

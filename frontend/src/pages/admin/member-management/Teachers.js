@@ -11,24 +11,26 @@ export default function Teachers() {
   };
   useEffect(() => {
     setUsers([]);
-    for (var i = 0; i != teachers.length; i++) {
-      console.log(teachers[i].user_id);
-      Fetch({
-        url: "http://localhost:4000/user/get-by-id",
-        method: "POST",
-        data: {
-          user_id: teachers[i].user_id,
-        },
-      }).then((res) => {
-        if (res && res.status === 200) {
-          console.log(res.data.user);
-          appendToUsers(res.data.user);
-        } else {
-          toast("Error updating profile; retry", {
-            type: "error",
-          });
-        }
-      });
+    if (teachers.length > 0) {
+      for (var i = 0; i != teachers.length; i++) {
+        console.log(teachers[i].user_id);
+        Fetch({
+          url: "http://localhost:4000/user/get-by-id",
+          method: "POST",
+          data: {
+            user_id: teachers[i].user_id,
+          },
+        }).then((res) => {
+          if (res && res.status === 200) {
+            console.log(res.data.user);
+            appendToUsers(res.data.user);
+          } else {
+            toast("Error updating profile; retry", {
+              type: "error",
+            });
+          }
+        });
+      }
     }
   }, [teachers]);
 
@@ -40,7 +42,7 @@ export default function Teachers() {
           method: "GET",
         });
         const data = response.data;
-        console.log(data);
+        console.log("THIS IS DATA : ", data);
         setTeachers(data.users);
       } catch (err) {
         console.log(err);
