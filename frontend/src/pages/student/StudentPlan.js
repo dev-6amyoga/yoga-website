@@ -203,7 +203,9 @@ function StudentPlan() {
         let userPlanData = {};
         if (staged.length === 0) {
           console.log(active[0].validity_to);
-          const originalDate = new Date(active[0].validity_to);
+          const originalDate = new Date(
+            active[0].validity_to ?? active[0].validity_to
+          );
           originalDate.setDate(originalDate.getDate() + 1);
           const validityFromDate = originalDate.toISOString();
           const validityTo = new Date(validityFromDate);
@@ -227,6 +229,7 @@ function StudentPlan() {
           setToBeRegistered(userPlanData);
           console.log(userPlanData);
         } else {
+          console.log(staged);
           const dates = staged.map((obj) => new Date(obj.validity_to));
           const indexOfHighestDate = dates.indexOf(
             new Date(Math.max(...dates))
