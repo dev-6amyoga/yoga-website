@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DraggableCore } from "react-draggable";
 import useVideoStore, {
 	STATE_VIDEO_ERROR,
@@ -100,6 +100,10 @@ export default function VideoPlaybar({
 		[duration, barBound]
 	);
 
+	const draggedDuration = useMemo(() => {
+		return (duration * currentBoopPosition) / barBound.width;
+	}, [barBound, currentBoopPosition, duration]);
+
 	return (
 		<>
 			<div
@@ -145,11 +149,13 @@ export default function VideoPlaybar({
 							}%`,
 						}}>
 						{mouseDown ? (
-							<div className="text-white absolute rounded-lg px-4 text-xs -left-[calc(50%+1rem)] -top-[calc(50%+1.5rem)] border border-white">
-								{toTimeString(
-									(duration * currentBoopPosition) /
-										barBound.width
-								)}
+							<div
+								className={`text-white absolute rounded-lg px-4 text-xs transition-all ${
+									duration - draggedDuration < 5
+										? "-left-[calc(50%+3.5rem)]"
+										: "-left-[calc(50%+1rem)]"
+								} -top-[calc(50%+1.5rem)] border border-white`}>
+								{toTimeString(draggedDuration)}
 							</div>
 						) : (
 							<></>
@@ -157,7 +163,8 @@ export default function VideoPlaybar({
 					</div>
 				</DraggableCore>
 
-				<p className=" text-white text-xs absolute right-0 -top-5 border rounded-full px-1">
+				<p
+					className={`text-white text-xs absolute right-0 -top-5 border rounded-full px-1`}>
 					{toTimeString(currentTime.toFixed(0))}/
 					{toTimeString(duration.toFixed(0))}
 				</p>

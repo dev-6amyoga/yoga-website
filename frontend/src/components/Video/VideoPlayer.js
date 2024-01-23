@@ -11,6 +11,7 @@ import { Stream } from "@cloudflare/stream-react";
 import { Button, Loading } from "@geist-ui/core";
 import { useState } from "react";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
+import { FaPause, FaPlay } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { STATE_VIDEO_PAUSED } from "../../store/VideoStore";
 import VideoPlaybar from "./VideoPlaybar";
@@ -36,10 +37,24 @@ function VideoPlayer() {
 	const [duration, setDuration] = useState(0);
 	const [currentTime, setCurrentTime] = useState(0);
 
-	// const [playbarVisible, setPlaybarVisible] = useState(false);
+	const [videoStateVisible, setVideoStateVisible] = useState(false);
 
 	const draggableHandle = useRef(null);
 
+	// when theres a pause or play, the state is shown for 300ms
+	useEffect(() => {
+		setVideoStateVisible(true);
+
+		let t = setTimeout(() => {
+			setVideoStateVisible(false);
+		}, 300);
+
+		return () => {
+			clearTimeout(t);
+		};
+	}, [videoState]);
+
+	// set player video id
 	useEffect(() => {
 		console.log(currentVideo, "IS THE CURRENT VIDEO");
 		if (currentVideo) {
@@ -55,6 +70,7 @@ function VideoPlayer() {
 		}
 	}, [currentVideo]);
 
+	// pop from seek queue and update the time
 	useEffect(() => {
 		if (seekQueue.length > 0) {
 			const seekTime = seekQueue[0];
@@ -66,6 +82,7 @@ function VideoPlayer() {
 		}
 	}, [seekQueue, popFromSeekQueue]);
 
+	// change play/pause based on video state
 	useEffect(() => {
 		if (player.current != null) {
 			if (videoState === STATE_VIDEO_PAUSED) {
@@ -141,20 +158,20 @@ function VideoPlayer() {
 		}
 	};
 
-	// const handleAlternatePlayPause = () => {
-	// 	console.log("CLICKED ON VIDEO PLAYER");
-	// 	if (videoState === STATE_VIDEO_PLAY) {
-	// 		setVideoState(STATE_VIDEO_PAUSED);
-	// 	} else if (videoState === STATE_VIDEO_PAUSED) {
-	// 		setVideoState(STATE_VIDEO_PLAY);
-	// 	}
-	// };
+	const handleAlternatePlayPause = () => {
+		console.log("CLICKED ON VIDEO PLAYER");
+		if (videoState === STATE_VIDEO_PLAY) {
+			setVideoState(STATE_VIDEO_PAUSED);
+		} else if (videoState === STATE_VIDEO_PAUSED) {
+			setVideoState(STATE_VIDEO_PLAY);
+		}
+	};
 
 	const handleFullScreen = useFullScreenHandle();
 
 	return (
 		<FullScreen handle={handleFullScreen}>
-			<div>
+			<div className="hover:cursor-pointer">
 				<div className="bg-yblue-100 grid place-items-center aspect-video rounded-xl overflow-hidden">
 					{playerVideoId ? (
 						<>
@@ -185,7 +202,7 @@ function VideoPlayer() {
 											);
 										}}
 									/>
-									<div className="absolute bottom-0 h-40 w-full hover:opacity-100 opacity-0 transition-opacity duration-300 ease-in-out">
+									<div className="absolute bottom-0 h-40 w-full hover:opacity-100 opacity-0 transition-opacity duration-300 ease-in-out z-20">
 										<div className="absolute bottom-0 w-full bg-black bg-opacity-60">
 											<VideoPlaybar
 												currentTime={currentTime}
@@ -205,13 +222,34 @@ function VideoPlayer() {
 											/>
 										</div>
 									</div>
-									{videoState === STATE_VIDEO_LOADING ? (
-										<div className="absolute w-full h-full bg-zinc-800 bg-opacity-40 top-0 left-0 right-0 bottom-0">
+									<div
+										className={`absolute w-full h-full top-0 left-0 right-0 bottom-0 bg-zinc-800 z-10 transition-all ${
+											videoState ===
+												STATE_VIDEO_LOADING ||
+											videoStateVisible
+												? "bg-opacity-40"
+												: "bg-opacity-0"
+										}`}
+										onClick={() => {
+											handleAlternatePlayPause();
+										}}>
+										{videoState === STATE_VIDEO_LOADING ? (
 											<Loading color="#fff" />
-										</div>
-									) : (
-										<></>
-									)}
+										) : videoStateVisible ? (
+											<div className="w-full h-full flex items-center justify-center">
+												<div className="w-8 h-8 text-white">
+													{videoState ===
+													STATE_VIDEO_PLAY ? (
+														<FaPlay className="w-full h-full" />
+													) : (
+														<FaPause className="w-full h-full" />
+													)}
+												</div>
+											</div>
+										) : (
+											<></>
+										)}
+									</div>
 								</div>
 							)}
 						</>
