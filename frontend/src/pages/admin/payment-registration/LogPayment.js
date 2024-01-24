@@ -1,36 +1,103 @@
 import { toast } from "react-toastify";
 import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
 import { Fetch } from "../../../utils/Fetch";
-import { Table, Button, Grid, Modal, Select, Input } from "@geist-ui/core";
+import {
+  Table,
+  Button,
+  Grid,
+  Modal,
+  Select,
+  Input,
+  Text,
+  ButtonGroup,
+} from "@geist-ui/core";
 import { useEffect, useState } from "react";
+import { useCallback } from "react";
 import getFormData from "../../../utils/getFormData";
 import CustomInput from "../../../components/Common/CustomInput";
 import { UserCheck, UserPlus, ArrowRight } from "@geist-ui/icons";
 import Students from "../member-management/Students";
 export default function LogPayment() {
   const [userStatus, setUserStatus] = useState("EXISTING");
+  const [user_id, setUserId] = useState(0);
+  const [plan_id, setPlanId] = useState(0);
+  const [validityFromDate, setValidityFromDate] = useState("");
+  const [validityToDate, setValidityToDate] = useState(null);
+  const [userPlans, setUserPlans] = useState([]);
   const [students, setStudents] = useState([]);
-  const [planAddition, setPlanAddition] = useState(true);
-  const [studentModalState, setStudentModalState] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState("");
+  const [studentPlans, setStudentPlans] = useState([]);
+  const [institutePlans, setInstitutePlans] = useState([]);
+  const [planConfirmed, setPlanConfirmed] = useState(false);
+  const [planAddition, setPlanAddition] = useState(false);
   const [modalData, setModalData] = useState({});
   const [paymentFor, setPaymentFor] = useState("");
-  const handleSetPaymentFor = (val) => {
-    setPaymentFor(val);
-  };
   const [studentData, setStudentData] = useState([]);
-  const appendToUsers = (newUserData) => {
-    setStudentData((prevUsers) => [...prevUsers, newUserData]);
-  };
   const [userType, setUserType] = useState("");
   const [nextClicked, setNextClicked] = useState(false);
   const [showUserSelection, setShowUserSelection] = useState(false);
-  useEffect(() => {}, []);
-  useEffect(() => {}, []);
+
+  const calculateEndDate = (startDate, validityDays) => {
+    console.log(startDate, validityDays);
+    const endDate = new Date(startDate);
+    endDate.setUTCDate(endDate.getUTCDate() + validityDays);
+    console.log(endDate.toISOString().split("T")[0]);
+    setValidityToDate(endDate.toISOString().split("T")[0]);
+  };
+  useEffect(() => {
+    // Log the updated validityToDate whenever it changes
+    console.log("Validity To:", validityToDate);
+  }, [validityToDate]);
+  const handleSetPaymentFor = (val) => {
+    setPaymentFor(val);
+  };
+  const formDate = (timestampString) => {
+    const d = new Date(timestampString);
+
+    return `${d.getUTCFullYear()}-${
+      d.getUTCMonth() >= 9 ? d.getUTCMonth() + 1 : "0" + (d.getUTCMonth() + 1)
+    }-${d.getUTCDate().toString().padStart(2, "0")}T${d
+      .getUTCHours()
+      .toString()
+      .padStart(2, "0")}:${d.getUTCMinutes().toString().padStart(2, "0")}:${d
+      .getUTCSeconds()
+      .toString()
+      .padStart(2, "0")}`;
+  };
+  const appendToUsers = (newUserData) => {
+    setStudentData((prevUsers) => [...prevUsers, newUserData]);
+  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/user-plan/get-user-plan-by-id",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_id: user_id }),
+          }
+        );
+        const data = await response.json();
+        if (data["userPlan"]) {
+          setUserPlans(data["userPlan"]);
+        } else {
+          toast("You don't have a plan yet! Purchase one to continue");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (user_id !== 0) {
+      fetchData();
+    }
+  }, [user_id]);
   useEffect(() => {
     setStudentData([]);
     if (students.length > 0) {
-      for (var i = 0; i != students.length; i++) {
-        console.log(students[i].user_id);
+      for (var i = 0; i !== students.length; i++) {
         Fetch({
           url: "http://localhost:4000/user/get-by-id",
           method: "POST",
@@ -39,7 +106,6 @@ export default function LogPayment() {
           },
         }).then((res) => {
           if (res && res.status === 200) {
-            console.log(res.data);
             appendToUsers(res.data.user);
           } else {
             toast("Error updating profile; retry", {
@@ -66,18 +132,43 @@ export default function LogPayment() {
     };
     fetchData();
   }, []);
-  const next = () => {
-    console.log("Next clicked!");
-  };
-
+  const fetchPlans = useCallback(async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:4000/plan/get-all-student-plan"
+      );
+      const data = await response.json();
+      setStudentPlans(data?.plans);
+    } catch (error) {
+      toast("Error fetching plans", { type: "error" });
+      console.log(error);
+    }
+  }, []);
+  useEffect(() => {
+    fetchPlans();
+  }, [fetchPlans]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/plan/get-all-institute-plans"
+        );
+        const data = await response.json();
+        setInstitutePlans(data["plans"]);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, []);
   const renderAction = (value, rowData, index) => {
     const handleLog = async () => {
       try {
-        const user_id = rowData.user_id;
-        console.log(user_id);
-        setStudentModalState(true);
+        setUserId(rowData.user_id);
+        // setStudentModalState(true);
+        // setPlanConfirmed(true);
+        setPlanAddition(true);
         setModalData(rowData);
-        console.log(rowData);
       } catch (error) {
         console.error(error);
       }
@@ -99,23 +190,112 @@ export default function LogPayment() {
       </Grid.Container>
     );
   };
+  useEffect(() => {
+    const fetchData = async () => {
+      setValidityFromDate(getEndDate(userPlans));
+    };
+    if (userPlans) {
+      fetchData();
+    }
+  }, [userPlans]);
+  const getEndDate = (userPlan) => {
+    var updatedValidityString = "";
+    if (userPlan.length === 0) {
+      setCurrentStatus("ACTIVE");
+      var today = new Date();
+      updatedValidityString = today.toISOString();
+      console.log("New plan starts from date:", updatedValidityString);
+    } else if (userPlan.length === 1) {
+      setCurrentStatus("STAGED");
+      var validityDate = new Date(userPlan[0].validity_to);
+      validityDate.setDate(validityDate.getDate() + 1);
+      updatedValidityString = validityDate.toISOString();
+      console.log("New plan validity from date:", updatedValidityString);
+    } else {
+      var highestValidityDate = null;
+      setCurrentStatus("STAGED");
+      for (var i = 0; i !== userPlan.length; i++) {
+        var validityDate = new Date(userPlan[i].validity_to);
+        if (
+          highestValidityDate === null ||
+          validityDate > highestValidityDate
+        ) {
+          highestValidityDate = validityDate;
+        }
+      }
+      if (highestValidityDate !== null) {
+        highestValidityDate.setDate(highestValidityDate.getDate() + 1);
+        updatedValidityString = highestValidityDate.toISOString();
+        console.log("New plan validity from date:", updatedValidityString);
+      } else {
+        console.log("No valid validity_to dates found.");
+      }
+    }
+    return updatedValidityString;
+  };
+  const renderAction1 = (value, rowData, index) => {
+    const handleAdd = async () => {
+      setPlanConfirmed(true);
+      setPlanId(rowData.plan_id);
+      // const user_id1 = user_id;
+      // console.log("Allot ", plan_id, "to ", user_id1);
+      // console.log(userPlans);
+    };
+
+    return (
+      <Grid.Container gap={0.1}>
+        <Grid>
+          <Button
+            type="error"
+            auto
+            scale={1 / 3}
+            font="12px"
+            onClick={handleAdd}
+          >
+            Assign
+          </Button>
+        </Grid>
+      </Grid.Container>
+    );
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = getFormData(e);
+    const formDataCopy = { ...formData };
+    delete formData.validity_from;
+    delete formDataCopy.amount;
+    delete formDataCopy.payment_date;
+    delete formDataCopy.payment_method;
     formData.amount = formData.amount * 100;
-    const additionalData = {
+    const additionalData1 = {
+      payment_for: "New Plan Manual",
       payment_status: "succeeded",
       transaction_order_id: "MANUAL",
       transaction_payment_id: "MANUAL",
       transaction_signature: "MANUAL",
+      user_id: user_id,
     };
-    const combinedData = {
+    const additionalData2 = {
+      purchase_date: formData.payment_date,
+      validity_to: validityToDate,
+      is_active: true,
+      discount_coupon_id: 0,
+      referral_code_id: 0,
+      user_id: user_id,
+      plan_id: plan_id,
+      current_status: currentStatus,
+    };
+    // current_status;
+    const transactionData = {
       ...formData,
-      ...additionalData,
-      payment_for: paymentFor,
-      user_id: modalData.user_id,
+      ...additionalData1,
     };
-    console.log(combinedData);
+    const userPlanData = {
+      ...formDataCopy,
+      ...additionalData2,
+    };
+    console.log(transactionData);
+    console.log(userPlanData);
     try {
       const response = await fetch(
         "http://localhost:4000/transaction/add-transaction",
@@ -124,15 +304,34 @@ export default function LogPayment() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(combinedData),
+          body: JSON.stringify(transactionData),
         }
       );
       if (response.ok) {
         toast("Succesfully logged!");
-        if (paymentFor === "New Plan") {
-          setPlanAddition(true);
+        try {
+          const response = await fetch(
+            "http://localhost:4000/user-plan/register",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(userPlanData),
+            }
+          );
+          if (response.ok) {
+            toast("Plan subscribed successfully", { type: "success" });
+            setPlanAddition(false);
+            setPlanConfirmed(false);
+          } else {
+            const errorData = await response.json();
+            toast(errorData.error);
+          }
+        } catch (error) {
+          console.log(error);
+          toast("Error subscribing plan", { type: "error" });
         }
-        setStudentModalState(false);
       } else {
         console.error("Failed to make the POST request");
       }
@@ -212,7 +411,6 @@ export default function LogPayment() {
                         toast("Choose a user type!");
                       } else {
                         setNextClicked(true);
-                        next();
                       }
                     }}
                     iconRight={<ArrowRight />}
@@ -260,31 +458,102 @@ export default function LogPayment() {
               )}
             </div>
             <Modal
-              visible={studentModalState}
-              onClose={() => setStudentModalState(false)}
+              width="42rem"
+              visible={planAddition}
+              onClose={() => setPlanAddition(false)}
             >
-              <Modal.Title>Log Payment</Modal.Title>
+              <Modal.Title>Assign a plan</Modal.Title>
+              <br />
+              <br />
+              {userType === "STUDENT" && (
+                <div>
+                  <Table width={40} data={studentPlans} className="bg-white ">
+                    <Table.Column prop="name" label="Plan Name" />
+                    <Table.Column
+                      prop="has_playlist_creation"
+                      label="Make Custom Playlists"
+                      render={(data) => {
+                        return data ? "Yes" : "No";
+                      }}
+                    />
+                    <Table.Column
+                      prop="playlist_creation_limit"
+                      label="Number of Custom Playlists"
+                      render={(data) => {
+                        return data ? data : "0";
+                      }}
+                    />
+                    <Table.Column
+                      prop="operation"
+                      label="Purchase"
+                      width={150}
+                      render={renderAction1}
+                    />
+                  </Table>
+                </div>
+              )}
+              {userType === "INSTITUTE_OWNER" && (
+                <Modal.Content>Institute Plans</Modal.Content>
+              )}
+              <Modal.Action passive onClick={() => setPlanAddition(false)}>
+                Cancel
+              </Modal.Action>
+            </Modal>
+            <Modal
+              width="38rem"
+              visible={planConfirmed}
+              onClose={() => {
+                setPlanConfirmed(false);
+              }}
+            >
+              <Modal.Title>Plan Details</Modal.Title>
               <Modal.Content>
                 <form
                   className="flex-1 flex items-center gap-2 flex-col px-4 py-2"
                   onSubmit={handleSubmit}
                 >
-                  <h5>Payment made by : {modalData.name}</h5>
-                  <br />
+                  <h6>Validity From</h6>
+                  <CustomInput
+                    name="validity_from"
+                    type="datetime-local"
+                    initialValue={formDate(validityFromDate)}
+                  ></CustomInput>
+                  <ButtonGroup type="warning" ghost>
+                    <Button
+                      value={30}
+                      onClick={() => calculateEndDate(validityFromDate, 30)}
+                    >
+                      30 days
+                    </Button>
+                    <Button
+                      value={60}
+                      onClick={() => calculateEndDate(validityFromDate, 60)}
+                    >
+                      60 days
+                    </Button>
+                    <Button
+                      value={90}
+                      onClick={() => calculateEndDate(validityFromDate, 90)}
+                    >
+                      90 days
+                    </Button>
+                    <Button
+                      value={30}
+                      onClick={() => calculateEndDate(validityFromDate, 180)}
+                    >
+                      180 days
+                    </Button>
+                    <Button
+                      value={30}
+                      onClick={() => calculateEndDate(validityFromDate, 365)}
+                    >
+                      365 days
+                    </Button>
+                  </ButtonGroup>
+                  <h6>Validity To</h6>
+                  <Text>{validityToDate}</Text>
                   <h6>Payment Method</h6>
                   <Input width="100%" name="payment_method"></Input>
-                  <h6>Payment For</h6>
-                  <Select
-                    placeholder="Choose Payment Reason"
-                    onChange={handleSetPaymentFor}
-                  >
-                    <Select.Option key="New Plan" value="New Plan">
-                      New Plan
-                    </Select.Option>
-                    <Select.Option key="Miscellanous" value="Miscellanous">
-                      Miscellanous
-                    </Select.Option>
-                  </Select>
                   <h6>Amount Paid (in INR)</h6>
                   <Input width="100%" name="amount"></Input>
                   <h6>Payment Date</h6>
@@ -293,13 +562,16 @@ export default function LogPayment() {
                     type="datetime-local"
                   ></CustomInput>
                   <br />
+
+                  <br />
                   <Button htmlType="submit">Register</Button>
                 </form>
               </Modal.Content>
-              <Modal.Action passive onClick={() => setStudentModalState(false)}>
+              <Modal.Action passive onClick={() => setPlanConfirmed(false)}>
                 Cancel
               </Modal.Action>
             </Modal>
+            <br />
           </div>
         </div>
       </div>
