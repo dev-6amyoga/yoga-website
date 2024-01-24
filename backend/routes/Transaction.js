@@ -31,3 +31,53 @@ router.post("/get-transaction-by-user-id", async (req, res) => {
       .json({ error: "Failed to fetch transactions!" });
   }
 });
+
+router.post("/add-transaction", async (req, res) => {
+  const {
+    payment_for,
+    payment_method,
+    amount,
+    payment_status,
+    payment_date,
+    transaction_order_id,
+    transaction_payment_id,
+    transaction_signature,
+    user_id,
+  } = req.body;
+  if (
+    !payment_for ||
+    !payment_method ||
+    !amount ||
+    !payment_status ||
+    !payment_date ||
+    !transaction_order_id ||
+    !transaction_payment_id ||
+    !transaction_signature ||
+    !user_id
+  ) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Missing required fields" });
+  }
+
+  try {
+    const newTransaction = await Transaction.create({
+      payment_for,
+      payment_method,
+      amount,
+      payment_status,
+      payment_date,
+      transaction_order_id,
+      transaction_payment_id,
+      transaction_signature,
+      user_id,
+    });
+
+    return res.status(HTTP_OK).json({ newTransaction });
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to add a new transaction" });
+  }
+});
