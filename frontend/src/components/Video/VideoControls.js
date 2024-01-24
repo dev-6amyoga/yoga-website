@@ -79,7 +79,7 @@ export default function VideoControls({ handleFullScreen }) {
 
 	return (
 		<div>
-			<div className="flex gap-8 items-center justify-center text-white rounded-xl my-2 p-1">
+			<div className="flex gap-8 items-center justify-center text-white rounded-xl my-1 p-1">
 				<Tooltip text={"Previous Video"} scale={0.5} type="dark">
 					<button
 						className="w-5 h-5"

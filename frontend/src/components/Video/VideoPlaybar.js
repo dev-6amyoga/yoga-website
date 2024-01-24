@@ -107,11 +107,11 @@ export default function VideoPlaybar({
 	return (
 		<>
 			<div
-				className={`w-full h-[0.35rem] bg-white relative`}
+				className={`w-full h-[0.5rem] bg-white relative`}
 				onClick={seekOnClick}
 				ref={barRef}>
 				<div
-					className={`bg-blue-500 h-full relative transition-all ease-linear ${
+					className={`bg-amber-600 h-full relative transition-all ease-linear ${
 						videoState === STATE_VIDEO_ERROR ||
 						videoState === STATE_VIDEO_LOADING
 							? "opacity-0"
@@ -137,15 +137,18 @@ export default function VideoPlaybar({
 							videoState === STATE_VIDEO_LOADING
 								? "opacity-0"
 								: "opacity-100"
+						} w-3 h-3  ${
+							mouseDown ? "" : "delay-75 transition-all"
 						} ${
-							mouseDown
-								? "w-3 h-3 -top-[calc(50%+0.1rem)]"
-								: "w-3 h-3 -top-[calc(50%+0.1rem)] delay-75 transition-all"
-						} bg-blue-500 border border-white rounded-full absolute`}
+							handleFullScreen.active
+								? "-top-[calc(50%-0.1rem)]"
+								: "-top-[calc(50%)]"
+						} bg-amber-600 border border-white rounded-full absolute`}
 						ref={draggableHandle}
 						style={{
 							left: `${
-								(currentBoopPosition / barBound.width) * 100
+								((currentBoopPosition - 2) / barBound.width) *
+								100
 							}%`,
 						}}>
 						{mouseDown ? (
