@@ -1,6 +1,6 @@
 import { Briefcase, UserCheck } from "@geist-ui/icons";
 
-export default function RoleSelectorForm({ role, setRole }) {
+export default function RoleSelectorForm({ role, setRole, handleNextStep }) {
 	return (
 		<form className="flex flex-col gap-4 w-full" onSubmit={() => {}}>
 			<h4 className="text-center">Select Role</h4>
@@ -10,7 +10,10 @@ export default function RoleSelectorForm({ role, setRole }) {
 					className={`flex items-center gap-2 flex-col p-8 border rounded-lg ${
 						role === "STUDENT" ? "border-blue-500" : ""
 					}`}
-					onClick={() => setRole("STUDENT")}>
+					onClick={() => {
+						setRole("STUDENT");
+						handleNextStep();
+					}}>
 					<UserCheck />
 					Student
 				</div>
@@ -18,7 +21,10 @@ export default function RoleSelectorForm({ role, setRole }) {
 					className={`flex items-center gap-2 flex-col p-8 border rounded-lg ${
 						role === "INSTITUTE_OWNER" ? "border-blue-500" : ""
 					}`}
-					onClick={() => setRole("INSTITUTE_OWNER")}>
+					onClick={() => {
+						setRole("INSTITUTE_OWNER");
+						handleNextStep();
+					}}>
 					<Briefcase />
 					Institute
 				</div>

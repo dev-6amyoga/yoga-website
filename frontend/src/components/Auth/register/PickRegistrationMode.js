@@ -11,6 +11,7 @@ export default function PickRegistationMode({
 	setGeneralInfo,
 	setLoading,
 	clientID,
+	handleNextStep,
 }) {
 	return (
 		<form className="flex flex-col gap-4 w-full" onSubmit={() => {}}>
@@ -61,6 +62,7 @@ export default function PickRegistationMode({
 									name: name,
 								});
 								setLoading(false);
+								handleNextStep();
 							} else {
 								setGoogleInfo({
 									verified: false,
@@ -83,7 +85,11 @@ export default function PickRegistationMode({
 					className={`flex-1 flex items-center gap-2 flex-col px-4 py-2 border rounded-lg ${
 						regMode === "NORMAL" ? "border-blue-500" : ""
 					}`}
-					onClick={() => setRegMode("NORMAL")}>
+					onClick={() => {
+						setGoogleInfo({});
+						setRegMode("NORMAL");
+						handleNextStep();
+					}}>
 					<Lock className="w-6 h-6" />
 					Normal
 				</div>
