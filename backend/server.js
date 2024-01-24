@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const morgan = require("morgan");
 const dotenv = require("dotenv");
+const useragent = require("express-useragent");
 
 // init the config from .env file
 dotenv.config();
@@ -20,6 +21,8 @@ const { mailTransporter } = require("./init.nodemailer");
 const { UserPlan } = require("./models/sql/UserPlan");
 const { Role } = require("./models/sql/Role");
 const { User } = require("./models/sql/User");
+const { LoginToken } = require("./models/sql/LoginToken");
+const { LoginHistory } = require("./models/sql/LoginHistory");
 const { Institute } = require("./models/sql/Institute");
 const { UserInstitute } = require("./models/sql/UserInstitute");
 const { Permission } = require("./models/sql/Permission");
@@ -31,7 +34,7 @@ const { Currency } = require("./models/sql/Currency");
 const { Transaction } = require("./models/sql/Transaction");
 const { DiscountCoupon } = require("./models/sql/DiscountCoupon");
 const {
-  DiscountCouponApplicablePlan,
+	DiscountCouponApplicablePlan,
 } = require("./models/sql/DiscountCouponApplicablePlan");
 const { Invite } = require("./models/sql/Invite");
 
@@ -63,30 +66,37 @@ const { bulkCreateSampleData } = require("./sample_data");
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(useragent.express());
 
 // initialize databases
 const mongoURI = process.env.MONGO_SRV_URL;
 mongoose
-  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("Connected to MongoDB Atlas"))
-  .catch((err) => console.log(err));
+	.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+	.then(() => console.log("Connected to MongoDB Atlas"))
+	.catch((err) => console.log(err));
 
 initializeSequelize()
-  .then(() => {
-    console.log("Sequelize initialized");
-    // bulkCreateSampleData()
-    //   .then(() => {
-    //     console.log("Sample data created!");
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+	.then(() => {
+		console.log("Sequelize initialized");
+		// bulkCreateSampleData()
+		// 	.then(() => {
+		// 		console.log("Sample data created!");
+		// 	})
+		// 	.catch((err) => {
+		// 		console.log(err);
+		// 	});
+	})
+	.catch((err) => {
+		console.log(err);
+	});
 
 // bind routers
+app.get("/info", (req, res) => {
+	return res.status(200).json({
+		message: "Running.",
+	});
+});
+
 app.use("/content", asanaRouter);
 app.use("/content", playlistRouter);
 app.use("/user", userRouter);
@@ -110,5 +120,5 @@ app.use("/plan-pricing", planPricingRouter);
 const port = parseInt(process.env.SERVER_PORT);
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+	console.log(`Server is running on port ${port}`);
 });
