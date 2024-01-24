@@ -55,6 +55,7 @@ const transactionRouter = require("./routes/Transaction");
 const teacherPlaylistRouter = require("./routes/TeacherPlaylist");
 const userInstitutePlanRoleRouter = require("./routes/UserInstitutePlanRole");
 const institutePlaylistRouter = require("./routes/InstitutePlaylist");
+const planPricingRouter = require("./routes/PlanPricing");
 // DEV : sample data creation
 const { bulkCreateSampleData } = require("./sample_data");
 
@@ -105,6 +106,7 @@ app.use("/discount-coupon", discountCouponRouter);
 app.use("/transaction", transactionRouter);
 app.use("/teacher-playlist", teacherPlaylistRouter);
 app.use("/uipr", userInstitutePlanRoleRouter);
+app.use("/plan-pricing", planPricingRouter);
 const port = parseInt(process.env.SERVER_PORT);
 
 app.listen(port, () => {
