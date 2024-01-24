@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { User } = require("../models/sql/User");
 const {
-  HTTP_BAD_REQUEST,
-  HTTP_OK,
-  HTTP_INTERNAL_SERVER_ERROR,
+	HTTP_BAD_REQUEST,
+	HTTP_OK,
+	HTTP_INTERNAL_SERVER_ERROR,
 } = require("../utils/http_status_codes");
 const { Plan } = require("../models/sql/Plan");
 const { Institute } = require("../models/sql/Institute");
@@ -12,377 +12,392 @@ const { Role } = require("../models/sql/Role");
 const { sequelize } = require("../init.sequelize");
 const bcrypyt = require("bcrypt");
 const { UserPlan } = require("../models/sql/UserPlan");
-const { verifyToken, TOKEN_TYPE_ACCESS } = require("../utils/jwt");
 const {
-  UserInstitutePlanRole,
+	verifyToken,
+	TOKEN_TYPE_ACCESS,
+	authenticateToken,
+} = require("../utils/jwt");
+const {
+	UserInstitutePlanRole,
 } = require("../models/sql/UserInstitutePlanRole");
 const { GetUserInfo, GetUser } = require("../services/User.service");
+const { hasPermission } = require("../utils/hasPermission");
 
 router.post("/get-by-id", async (req, res) => {
-  const { user_id } = req.body;
+	const { user_id } = req.body;
 
-  if (!user_id) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Missing required fields" });
-  }
-  try {
-    const [user, errorUser] = await GetUserInfo({ user_id: user_id }, [
-      "user_id",
-      "name",
-      "email",
-      "phone",
-    ]);
+	if (!user_id) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Missing required fields" });
+	}
+	try {
+		const [user, errorUser] = await GetUserInfo({ user_id: user_id }, [
+			"user_id",
+			"name",
+			"email",
+			"phone",
+		]);
 
-    if (!user || errorUser) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "User does not exist" });
-    }
+		if (!user || errorUser) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "User does not exist" });
+		}
 
-    return res.status(HTTP_OK).json({ user });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to fetch user" });
-  }
+		return res.status(HTTP_OK).json({ user });
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ error: "Failed to fetch user" });
+	}
 });
 
 router.post("/get-by-token", async (req, res) => {
-  const { access_token } = req.body;
+	const { access_token } = req.body;
 
-  if (!access_token) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Missing required fields" });
-  }
+	if (!access_token) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Missing required fields" });
+	}
 
-  try {
-    const [decoded, error] = verifyToken(access_token);
+	try {
+		const [decoded, error] = verifyToken(access_token);
 
-    if (!decoded || error) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "Invalid access token" });
-    }
+		if (!decoded || error) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "Invalid access token" });
+		}
 
-    if (decoded.token_type !== TOKEN_TYPE_ACCESS) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "Invalid access token" });
-    }
+		if (decoded.token_type !== TOKEN_TYPE_ACCESS) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "Invalid access token" });
+		}
 
-    const [user, errorUser] = await GetUserInfo(
-      {
-        user_id: decoded.user.user_id,
-      },
-      ["user_id", "name", "email", "phone"]
-    );
+		const [user, errorUser] = await GetUserInfo(
+			{
+				user_id: decoded.user.user_id,
+			},
+			["user_id", "name", "email", "phone"]
+		);
 
-    if (!user || errorUser) {
-      return res.status(HTTP_BAD_REQUEST).json({ error: errorUser });
-    }
+		if (!user || errorUser) {
+			return res.status(HTTP_BAD_REQUEST).json({ error: errorUser });
+		}
 
-    return res.status(HTTP_OK).json({ user });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to fetch user" });
-  }
+		return res.status(HTTP_OK).json({ user });
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ error: "Failed to fetch user" });
+	}
 });
 
-router.post("/get-by-username", async (req, res) => {
-  const { username } = req.body;
+router.post(
+	"/get-by-username",
+	authenticateToken,
+	(req, res, next) => hasPermission(req, res, next, "USER_READ"),
+	async (req, res) => {
+		const { username } = req.body;
 
-  if (!username) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Missing required fields" });
-  }
+		if (!username) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "Missing required fields" });
+		}
 
-  try {
-    const [user, errorUser] = await GetUser({ username });
+		try {
+			const [user, errorUser] = await GetUser({ username });
 
-    if (!user || errorUser) {
-      return res.status(HTTP_BAD_REQUEST).json({ error: errorUser });
-    }
+			if (!user || errorUser) {
+				return res.status(HTTP_BAD_REQUEST).json({ error: errorUser });
+			}
 
-    return res.status(HTTP_OK).json({ user });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to fetch user" });
-  }
-});
+			return res.status(HTTP_OK).json({ user });
+		} catch (error) {
+			console.error(error);
+			return res
+				.status(HTTP_INTERNAL_SERVER_ERROR)
+				.json({ error: "Failed to fetch user" });
+		}
+	}
+);
 
 router.post("/get-by-email", async (req, res) => {
-  const { email } = req.body;
+	const { email } = req.body;
 
-  if (!email) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Missing required fields" });
-  }
+	if (!email) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Missing required fields" });
+	}
 
-  try {
-    const [user, errorUser] = await GetUser({ email });
+	try {
+		const [user, errorUser] = await GetUser({ email });
 
-    if (!user || errorUser) {
-      return res.status(HTTP_BAD_REQUEST).json({ error: errorUser });
-    }
+		if (!user || errorUser) {
+			return res.status(HTTP_BAD_REQUEST).json({ error: errorUser });
+		}
 
-    return res.status(HTTP_OK).json({ user });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to fetch user" });
-  }
+		return res.status(HTTP_OK).json({ user });
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ error: "Failed to fetch user" });
+	}
 });
 
 router.post("/get-by-phone", async (req, res) => {
-  const { phone } = req.body;
+	const { phone } = req.body;
 
-  if (!phone) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Missing required fields" });
-  }
+	if (!phone) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Missing required fields" });
+	}
 
-  try {
-    const [user, errorUser] = await GetUser({ phone });
+	try {
+		const [user, errorUser] = await GetUser({ phone });
 
-    if (!user || errorUser) {
-      return res.status(HTTP_BAD_REQUEST).json({ error: errorUser });
-    }
+		if (!user || errorUser) {
+			return res.status(HTTP_BAD_REQUEST).json({ error: errorUser });
+		}
 
-    return res.status(HTTP_OK).json({ user });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to fetch user" });
-  }
+		return res.status(HTTP_OK).json({ user });
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ error: "Failed to fetch user" });
+	}
 });
 
 router.post("/get-by-instituteid", async (req, res) => {
-  const { institute_id } = req.body;
+	const { institute_id } = req.body;
 
-  if (!institute_id) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Missing required fields" });
-  }
+	if (!institute_id) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Missing required fields" });
+	}
 
-  try {
-    const users = await sequelize.query(
-      `
+	try {
+		const users = await sequelize.query(
+			`
       SELECT user.* from public.user 
       JOIN institute on user.institute_id = institute.institute_id 
       where institute.institute_id = ${institute_id};
       `,
-      {
-        model: User,
-        mapToModel: true,
-      }
-    );
+			{
+				model: User,
+				mapToModel: true,
+			}
+		);
 
-    return res.status(HTTP_OK).json({ users });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to fetch users" });
-  }
+		return res.status(HTTP_OK).json({ users });
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ error: "Failed to fetch users" });
+	}
 });
 
 router.post("/get-by-planid", async (req, res) => {
-  const { plan_id } = req.body;
+	const { plan_id } = req.body;
 
-  if (!plan_id) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Missing required fields" });
-  }
+	if (!plan_id) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Missing required fields" });
+	}
 
-  try {
-    const users = await sequelize.query(
-      `
+	try {
+		const users = await sequelize.query(
+			`
       SELECT u.* from user u
       JOIN user_plan up on up.user_id = u.user_id
       JOIN plan p on up.plan_id = p.plan_id
       where p.plan_id = ${plan_id};
       `,
-      {
-        model: User,
-        mapToModel: true,
-      }
-    );
+			{
+				model: User,
+				mapToModel: true,
+			}
+		);
 
-    return res.status(HTTP_OK).json({ users });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to fetch users" });
-  }
+		return res.status(HTTP_OK).json({ users });
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ error: "Failed to fetch users" });
+	}
 });
 
 router.post("/update-profile", async (req, res) => {
-  const { user_id, name, email, phone } = req.body;
+	const { user_id, name, email, phone } = req.body;
 
-  if (!user_id) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Missing required fields" });
-  }
+	if (!user_id) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Missing required fields" });
+	}
 
-  try {
-    const n = await User.update(
-      { name, email, phone },
-      {
-        where: { user_id: user_id },
-      }
-    );
+	try {
+		const n = await User.update(
+			{ name, email, phone },
+			{
+				where: { user_id: user_id },
+			}
+		);
 
-    if (n.length > 0 && n[0] !== 1) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "User does not exist" });
-    }
+		if (n.length > 0 && n[0] !== 1) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "User does not exist" });
+		}
 
-    const user = await User.findByPk(user_id, {
-      include: [{ model: Role, attributes: ["name"] }],
-    });
+		const user = await User.findByPk(user_id, {
+			include: [{ model: Role, attributes: ["name"] }],
+		});
 
-    if (!user) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "User does not exist" });
-    }
+		if (!user) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "User does not exist" });
+		}
 
-    const plan = await UserPlan.findOne({
-      include: [{ model: User, where: { user_id: user.user_id } }],
-    });
+		const plan = await UserPlan.findOne({
+			include: [{ model: User, where: { user_id: user.user_id } }],
+		});
 
-    return res
-      .status(HTTP_OK)
-      .json({ message: "updated successfully", user, plan });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to update user" });
-  }
+		return res
+			.status(HTTP_OK)
+			.json({ message: "updated successfully", user, plan });
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ error: "Failed to update user" });
+	}
 });
 
 router.post("/update-password", async (req, res) => {
-  const { user_id, old_password, new_password, confirm_new_password } =
-    req.body;
+	const { user_id, old_password, new_password, confirm_new_password } =
+		req.body;
 
-  if (!user_id || !old_password || !new_password || !confirm_new_password) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Missing required fields" });
-  }
+	if (!user_id || !old_password || !new_password || !confirm_new_password) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Missing required fields" });
+	}
 
-  if (new_password !== confirm_new_password) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Passwords do not match" });
-  }
+	if (new_password !== confirm_new_password) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Passwords do not match" });
+	}
 
-  try {
-    const user = await User.findByPk(user_id);
+	try {
+		const user = await User.findByPk(user_id);
 
-    if (!user) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "User does not exist" });
-    }
+		if (!user) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "User does not exist" });
+		}
 
-    // check old password
-    const validPassword = await bcrypyt.compare(old_password, user.password);
+		// check old password
+		const validPassword = await bcrypyt.compare(
+			old_password,
+			user.password
+		);
 
-    if (!validPassword) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "Invalid old password; try again" });
-    }
+		if (!validPassword) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "Invalid old password; try again" });
+		}
 
-    // hash password
-    const hashedPassword = await bcrypyt.hash(new_password, 10);
+		// hash password
+		const hashedPassword = await bcrypyt.hash(new_password, 10);
 
-    const n = await User.update(
-      { password: hashedPassword },
-      {
-        where: { user_id: user_id },
-      }
-    );
+		const n = await User.update(
+			{ password: hashedPassword },
+			{
+				where: { user_id: user_id },
+			}
+		);
 
-    if (n.length > 0 && n[0] !== 1) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "User does not exist" });
-    }
+		if (n.length > 0 && n[0] !== 1) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "User does not exist" });
+		}
 
-    return res.status(HTTP_OK).json({ message: "updated successfully" });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to update user" });
-  }
+		return res.status(HTTP_OK).json({ message: "updated successfully" });
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ error: "Failed to update user" });
+	}
 });
 
 router.delete("/delete-by-id", async (req, res) => {
-  const { user_id } = req.body;
+	const { user_id } = req.body;
 
-  if (!user_id) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Missing required fields" });
-  }
+	if (!user_id) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Missing required fields" });
+	}
 
-  try {
-    const n = await User.destroy({ where: { user_id: user_id } });
+	try {
+		const n = await User.destroy({ where: { user_id: user_id } });
 
-    if (n !== 1) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "User does not exist" });
-    }
+		if (n !== 1) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "User does not exist" });
+		}
 
-    return res.status(HTTP_OK).json({ message: "Deleted user successfully" });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to fetch user" });
-  }
+		return res
+			.status(HTTP_OK)
+			.json({ message: "Deleted user successfully" });
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ error: "Failed to fetch user" });
+	}
 });
 
 router.get("/get-all-teachers", async (req, res) => {
-  try {
-    const users = await UserInstitutePlanRole.findAll({
-      where: { role_id: 4 },
-      include: [{ model: User }],
-    });
-    if (!users) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "Teachers dont exist" });
-    }
-    return res.status(HTTP_OK).json({ users });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to fetch teachers" });
-  }
+	try {
+		const users = await UserInstitutePlanRole.findAll({
+			where: { role_id: 4 },
+			include: [{ model: User }],
+		});
+		if (!users) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "Teachers dont exist" });
+		}
+		return res.status(HTTP_OK).json({ users });
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ error: "Failed to fetch teachers" });
+	}
 });
 
 router.get("/get-all-institutes", async (req, res) => {
@@ -426,117 +441,120 @@ router.get("/get-all-students", async (req, res) => {
 });
 
 router.post("/reset-password", async (req, res) => {
-  const { user_id, new_password, confirm_new_password } = req.body;
-  console.log(req.body);
-  if (!user_id || !new_password || !confirm_new_password) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Missing required fields" });
-  }
-  if (new_password !== confirm_new_password) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Passwords do not match" });
-  }
-  console.log("hi");
-  try {
-    const user = await User.findByPk(user_id);
+	const { user_id, new_password, confirm_new_password } = req.body;
+	console.log(req.body);
+	if (!user_id || !new_password || !confirm_new_password) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Missing required fields" });
+	}
+	if (new_password !== confirm_new_password) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Passwords do not match" });
+	}
+	console.log("hi");
+	try {
+		const user = await User.findByPk(user_id);
 
-    if (!user) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "User does not exist" });
-    }
-    console.log(new_password, user.password);
-    const samePasswords = await bcrypyt.compare(new_password, user.password);
-    if (samePasswords) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "Password not allowed; try again" });
-    }
+		if (!user) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "User does not exist" });
+		}
+		console.log(new_password, user.password);
+		const samePasswords = await bcrypyt.compare(
+			new_password,
+			user.password
+		);
+		if (samePasswords) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "Password not allowed; try again" });
+		}
 
-    const hashedPassword = await bcrypyt.hash(new_password, 10);
-    const n = await User.update(
-      { password: hashedPassword },
-      {
-        where: { user_id: user_id },
-      }
-    );
+		const hashedPassword = await bcrypyt.hash(new_password, 10);
+		const n = await User.update(
+			{ password: hashedPassword },
+			{
+				where: { user_id: user_id },
+			}
+		);
 
-    if (n.length > 0 && n[0] !== 1) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "User does not exist" });
-    }
-    return res.status(HTTP_OK).json({ message: "Updated successfully" });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to update user" });
-  }
+		if (n.length > 0 && n[0] !== 1) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "User does not exist" });
+		}
+		return res.status(HTTP_OK).json({ message: "Updated successfully" });
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ error: "Failed to update user" });
+	}
 });
 
 router.post("/get-by-email-and-name", async (req, res) => {
-  const { email, name } = req.body;
+	const { email, name } = req.body;
 
-  if (!email || !name) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Missing required fields" });
-  }
+	if (!email || !name) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Missing required fields" });
+	}
 
-  try {
-    const user = await User.findOne({
-      where: { email: email, name: name },
-      include: [{ model: Role, attributes: ["name"] }],
-    });
+	try {
+		const user = await User.findOne({
+			where: { email: email, name: name },
+			include: [{ model: Role, attributes: ["name"] }],
+		});
 
-    if (!user) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "User does not exist" });
-    }
+		if (!user) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "User does not exist" });
+		}
 
-    const plan = await UserPlan.findOne({
-      include: [{ model: User, where: { user_id: user.user_id } }],
-    });
+		const plan = await UserPlan.findOne({
+			include: [{ model: User, where: { user_id: user.user_id } }],
+		});
 
-    return res.status(HTTP_OK).json({ user, plan });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to fetch user" });
-  }
+		return res.status(HTTP_OK).json({ user, plan });
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ error: "Failed to fetch user" });
+	}
 });
 
 router.post("/check-username", async (req, res) => {
-  const { username } = req.body;
+	const { username } = req.body;
 
-  if (!username) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ error: "Missing required fields" });
-  }
+	if (!username) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Missing required fields" });
+	}
 
-  try {
-    const user = await User.findOne({
-      where: { username: username },
-      attributes: ["user_id"],
-    });
+	try {
+		const user = await User.findOne({
+			where: { username: username },
+			attributes: ["user_id"],
+		});
 
-    if (!user) {
-      return res.status(HTTP_OK).json({ exists: false });
-    }
+		if (!user) {
+			return res.status(HTTP_OK).json({ exists: false });
+		}
 
-    return res.status(HTTP_OK).json({ exists: true });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Error checking username" });
-  }
+		return res.status(HTTP_OK).json({ exists: true });
+	} catch (error) {
+		console.error(error);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ error: "Error checking username" });
+	}
 });
 
 module.exports = router;
