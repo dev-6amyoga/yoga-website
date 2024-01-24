@@ -16,6 +16,7 @@ import DiscountManagement from "../pages/admin/discount-management";
 import Institutes from "../pages/admin/member-management/Institutes";
 import Teachers from "../pages/admin/member-management/Teachers";
 import Students from "../pages/admin/member-management/Students";
+import LogPayment from "../pages/admin/payment-registration/LogPayment";
 export const AdminRoutes = [
   {
     path: "/admin",
@@ -53,7 +54,10 @@ export const AdminRoutes = [
     path: "/admin/members/students",
     element: <Students />,
   },
-
+  {
+    path: "/admin/log-payment",
+    element: <LogPayment />,
+  },
   {
     path: "/content/video/transition/create",
     element: <RegisterTransitionVideoForm />,

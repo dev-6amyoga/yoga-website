@@ -163,6 +163,13 @@ export default function AdminNavbar() {
                 </Link>
               </ButtonDropdown.Item>
             </ButtonDropdown>
+            <Button
+              onClick={() => {
+                navigate("/admin/log-payment");
+              }}
+            >
+              Log a payment
+            </Button>
             <ButtonDropdown className="w-full">
               <ButtonDropdown.Item main>Plan Management</ButtonDropdown.Item>
               <ButtonDropdown.Item>
