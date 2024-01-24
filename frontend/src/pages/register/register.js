@@ -229,6 +229,7 @@ export default function Register({ switchForm }) {
 						setGeneralInfo={setGeneralInfo}
 						setLoading={setLoading}
 						clientID={clientID}
+						handleNextStep={handleNextStep}
 					/>
 				);
 			case 2:
@@ -239,10 +240,17 @@ export default function Register({ switchForm }) {
 						setBlockStep={setBlockStep}
 						setLoading={setLoading}
 						googleInfo={googleInfo}
+						handleNextStep={handleNextStep}
 					/>
 				);
 			case 3:
-				return <RoleSelectorForm role={role} setRole={setRole} />;
+				return (
+					<RoleSelectorForm
+						role={role}
+						setRole={setRole}
+						handleNextStep={handleNextStep}
+					/>
+				);
 			case 4:
 				return role === "STUDENT" ? (
 					<PhoneNumberForm
@@ -250,6 +258,7 @@ export default function Register({ switchForm }) {
 						setPhoneInfo={setPhoneInfo}
 						setBlockStep={setBlockPhoneStep}
 						setLoading={setLoading}
+						handleNextStep={handleNextStep}
 					/>
 				) : (
 					<InstituteDetailsForm
@@ -258,6 +267,7 @@ export default function Register({ switchForm }) {
 						setBillingAddressSame={setBillingAddressSame}
 						setBlockStep={setBlockStep}
 						setLoading={setLoading}
+						handleNextStep={handleNextStep}
 					/>
 				);
 			case 5:
@@ -300,6 +310,7 @@ export default function Register({ switchForm }) {
 							setPhoneInfo={setPhoneInfo}
 							setBlockStep={setBlockPhoneStep}
 							setLoading={setLoading}
+							handleNextStep={handleNextStep}
 						/>
 						{!personalBusinessPhoneInfoSame && (
 							<>
@@ -310,6 +321,7 @@ export default function Register({ switchForm }) {
 									setPhoneInfo={setBusinessPhoneInfo}
 									setBlockStep={setBlockBusinessPhoneStep}
 									setLoading={setLoading}
+									handleNextStep={handleNextStep}
 								/>
 							</>
 						)}

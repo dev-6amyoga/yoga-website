@@ -3,8 +3,8 @@ import { Button, Input } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
-import getFormData from "../../../utils/getFormData";
 import { validateEmail, validatePassword } from "../../../utils/formValidation";
+import getFormData from "../../../utils/getFormData";
 
 export default function GeneralInformationForm({
 	generalInfo,
@@ -12,6 +12,7 @@ export default function GeneralInformationForm({
 	googleInfo,
 	setBlockStep,
 	setLoading,
+	handleNextStep,
 }) {
 	const [username, setUsername] = useState("");
 
@@ -59,6 +60,7 @@ export default function GeneralInformationForm({
 		setGeneralInfo(formData);
 		setInfoSaved(true);
 		toast("Progress saved!", { type: "success" });
+		handleNextStep();
 	};
 
 	useEffect(() => {

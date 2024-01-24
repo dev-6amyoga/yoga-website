@@ -7,10 +7,12 @@ export default function PhoneNumberForm({
 	setPhoneInfo,
 	setBlockStep,
 	setLoading,
+	handleNextStep,
 }) {
 	const handlePhoneChange = (value) => {
 		setPhoneInfo({ phone_no: value, verified: true });
 		setBlockStep(false);
+		handleNextStep();
 	};
 
 	useEffect(() => {
