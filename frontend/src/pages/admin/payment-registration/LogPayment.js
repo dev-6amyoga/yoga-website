@@ -10,6 +10,7 @@ import {
   Input,
   Text,
   ButtonGroup,
+  Divider,
 } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { useCallback } from "react";
@@ -21,6 +22,7 @@ export default function LogPayment() {
   const [userStatus, setUserStatus] = useState("EXISTING");
   const [user_id, setUserId] = useState(0);
   const [plan_id, setPlanId] = useState(0);
+  const [amount, setAmount] = useState(0);
   const [validityFromDate, setValidityFromDate] = useState("");
   const [validityToDate, setValidityToDate] = useState(null);
   const [userPlans, setUserPlans] = useState([]);
@@ -67,6 +69,28 @@ export default function LogPayment() {
   const appendToUsers = (newUserData) => {
     setStudentData((prevUsers) => [...prevUsers, newUserData]);
   };
+  useEffect(() => {
+    const fetchData = async () => {
+      Fetch({
+        url: "http://localhost:4000/plan-pricing/get-inr-for-plan",
+        method: "POST",
+        data: {
+          plan_id: plan_id,
+        },
+      }).then((res) => {
+        if (res && res.status === 200) {
+          setAmount(res.data.plan_pricing[0].denomination);
+        } else {
+          toast("Error; retry", {
+            type: "error",
+          });
+        }
+      });
+    };
+    if (plan_id != 0) {
+      fetchData();
+    }
+  }, [plan_id]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -554,6 +578,25 @@ export default function LogPayment() {
                   <Text>{validityToDate}</Text>
                   <h6>Payment Method</h6>
                   <Input width="100%" name="payment_method"></Input>
+                  <br />
+                  <Divider />
+                  <h5>Price : INR {amount}</h5>
+                  <h5>
+                    <Text type="secondary">
+                      SGST (9%) : INR {amount * 0.09}
+                    </Text>
+                  </h5>
+                  <h5>
+                    <Text type="secondary">
+                      CGST (9%) : INR {amount * 0.09}
+                    </Text>
+                  </h5>
+                  <h4>
+                    <Text type="success">
+                      Net Amount : INR {amount + amount * 0.09 + amount * 0.09}
+                    </Text>
+                  </h4>
+                  <br />
                   <h6>Amount Paid (in INR)</h6>
                   <Input width="100%" name="amount"></Input>
                   <h6>Payment Date</h6>
