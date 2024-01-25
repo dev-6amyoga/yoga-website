@@ -6,11 +6,18 @@ import {
   Table,
   Text,
   Select,
+  Tooltip,
 } from "@geist-ui/core";
 import { useEffect, useState } from "react";
+import { Search } from "@geist-ui/icons";
 import AdminNavbar from "../Common/AdminNavbar/AdminNavbar";
-import "./AllPlaylists.css";
 import Papa from "papaparse";
+import {
+  PlusCircle,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  XCircle,
+} from "@geist-ui/icons";
 
 export default function AllPlaylists() {
   const [delState, setDelState] = useState(false);
@@ -18,7 +25,6 @@ export default function AllPlaylists() {
   const closeDelHandler = (event) => {
     setDelState(false);
   };
-
   const [playlist1, setPlaylist1] = useState([]);
   const [playlistAsanas, setPlaylistAsanas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,6 +53,30 @@ export default function AllPlaylists() {
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setModalData({ ...modalData, [id]: value });
+  };
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredTransitions, setFilteredTransitions] = useState([]);
+  useEffect(() => {
+    if (searchTerm.length > 0) {
+      console.log(searchTerm);
+      setFilteredTransitions(
+        playlist1.filter((transition) =>
+          transition.playlist_name
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredTransitions(playlist1);
+    }
+  }, [searchTerm]);
+
+  const [newAsana, setNewAsana] = useState({ id: "", asana_name: "" });
+  const handleAddNewAsana = () => {
+    setModalData((prevData) => ({
+      ...prevData,
+      asana_ids: [...prevData.asana_ids, newAsana.id],
+    }));
   };
 
   useEffect(() => {
@@ -86,6 +116,7 @@ export default function AllPlaylists() {
         );
         const data = await response.json();
         setPlaylist1(data);
+        setFilteredTransitions(data);
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -94,7 +125,6 @@ export default function AllPlaylists() {
     };
     fetchData();
   }, []);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -135,7 +165,11 @@ export default function AllPlaylists() {
         }
       );
       if (response.ok) {
+        console.log(modalData);
         setPlaylist1((prev) =>
+          prev.map((p1) => (p1.playlist_id === playlistId ? modalData : p1))
+        );
+        setFilteredTransitions((prev) =>
           prev.map((p1) => (p1.playlist_id === playlistId ? modalData : p1))
         );
         setModalState(false);
@@ -224,6 +258,32 @@ export default function AllPlaylists() {
     );
   };
 
+  const handleAsanaReorder = (currentIndex, direction) => {
+    const newAsanaIds = [...modalData.asana_ids];
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    [newAsanaIds[currentIndex], newAsanaIds[newIndex]] = [
+      newAsanaIds[newIndex],
+      newAsanaIds[currentIndex],
+    ];
+
+    setModalData((prevData) => ({
+      ...prevData,
+      asana_ids: newAsanaIds,
+    }));
+  };
+  const handleRemoveAsana = (indexToRemove) => {
+    setModalData((prevData) => {
+      const newAsanaIds = prevData.asana_ids.filter(
+        (_, index) => index !== indexToRemove
+      );
+
+      return {
+        ...prevData,
+        asana_ids: newAsanaIds,
+      };
+    });
+  };
+
   return (
     <div className="allAsanas min-h-screen">
       <AdminNavbar />
@@ -236,10 +296,20 @@ export default function AllPlaylists() {
           Download CSV
         </Button>
         <br />
+        <Input
+          icon={<Search />}
+          scale={5 / 3}
+          clearable
+          type="warning"
+          placeholder="Search"
+          className="bg-white "
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         {loading ? (
           <Text>Loading</Text>
         ) : (
-          <Table width={100} data={sortedPlaylists} className="bg-white ">
+          <Table width={100} data={filteredTransitions} className="bg-white ">
             <Table.Column prop="playlist_id" label="Playlist ID" />
             <Table.Column prop="playlist_name" label="Playlist Name" />
 
@@ -272,7 +342,11 @@ export default function AllPlaylists() {
         )}
       </div>
       <div>
-        <Modal visible={modalState} onClose={() => setModalState(false)}>
+        <Modal
+          visible={modalState}
+          onClose={() => setModalState(false)}
+          width="30rem"
+        >
           <Modal.Title>Update Playlist</Modal.Title>
           <Modal.Subtitle>{modalData.playlist_name}</Modal.Subtitle>
           <Modal.Content>
@@ -285,6 +359,8 @@ export default function AllPlaylists() {
               >
                 Playlist Name
               </Input>
+              <br />
+              <br />
               {modalData.asana_ids.map((asanaId, index) => {
                 const asana = playlistAsanas.find(
                   (asana) => asana.id === asanaId
@@ -293,25 +369,82 @@ export default function AllPlaylists() {
                 return (
                   <div>
                     <Text>Asana {index + 1}</Text>
-                    <Select
-                      key={index}
-                      width="100%"
-                      placeholder={`Select Asana ${index + 1}`}
-                      value={asanaName}
-                      onChange={(value) => handleAsanaNameChange(value, index)}
-                    >
-                      {playlistAsanas.map((asanaOption) => (
-                        <Select.Option
-                          key={asanaOption.id}
-                          value={asanaOption.asana_name}
+                    <Grid.Container gap={1} justify="left" height="40px">
+                      <Grid>
+                        {" "}
+                        <Select
+                          key={index}
+                          width="100%"
+                          placeholder={`Select Asana ${index + 1}`}
+                          value={asanaName}
+                          onChange={(value) =>
+                            handleAsanaNameChange(value, index)
+                          }
                         >
-                          {asanaOption.asana_name}
-                        </Select.Option>
-                      ))}
-                    </Select>
+                          {playlistAsanas.map((asanaOption) => (
+                            <Select.Option
+                              key={asanaOption.id}
+                              value={asanaOption.asana_name}
+                            >
+                              {asanaOption.asana_name}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Grid>
+                      <Grid>
+                        {" "}
+                        {index > 0 && (
+                          <Tooltip text={"Move Up"} type="dark">
+                            {" "}
+                            <Button
+                              icon={<ArrowUpCircle />}
+                              auto
+                              scale={2 / 3}
+                              onClick={() => handleAsanaReorder(index, "up")}
+                            />
+                          </Tooltip>
+                        )}
+                      </Grid>
+                      <Grid>
+                        {" "}
+                        {index < modalData.asana_ids.length - 1 && (
+                          <Tooltip text={"Move Down"} type="dark">
+                            {" "}
+                            <Button
+                              icon={<ArrowDownCircle />}
+                              auto
+                              scale={2 / 3}
+                              onClick={() => handleAsanaReorder(index, "down")}
+                            />
+                          </Tooltip>
+                        )}
+                      </Grid>
+                      <Grid>
+                        <Tooltip text={"Delete Asana"} type="dark">
+                          {" "}
+                          <Button
+                            type="error"
+                            icon={<XCircle />}
+                            auto
+                            scale={2 / 3}
+                            onClick={() => handleRemoveAsana(index)}
+                          />
+                        </Tooltip>
+                      </Grid>
+                    </Grid.Container>
                   </div>
                 );
               })}
+              <br />
+              <Tooltip text={"Add New Asana"} type="dark">
+                {" "}
+                <Button
+                  iconRight={<PlusCircle />}
+                  auto
+                  scale={2 / 3}
+                  onClick={handleAddNewAsana}
+                />
+              </Tooltip>
             </form>
           </Modal.Content>
           <Modal.Action passive onClick={() => setModalState(false)}>

@@ -12,6 +12,7 @@ import AdminNavbar from "../Common/AdminNavbar/AdminNavbar";
 import "./AllAsanas.css";
 import { toast } from "react-toastify";
 import Papa from "papaparse";
+import { Search } from "@geist-ui/icons";
 
 export default function AllAsanas() {
   const [asanas, setAsanas] = useState([]);
@@ -34,6 +35,20 @@ export default function AllAsanas() {
     asana_difficulty: "",
   });
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredTransitions, setFilteredTransitions] = useState([]);
+  useEffect(() => {
+    if (searchTerm.length > 0) {
+      console.log(searchTerm);
+      setFilteredTransitions(
+        asanas.filter((transition) =>
+          transition.asana_name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredTransitions(asanas);
+    }
+  }, [searchTerm]);
   const handleDownload = (data1) => {
     const csv = Papa.unparse(data1);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -91,6 +106,7 @@ export default function AllAsanas() {
         );
         const data = await response.json();
         setAsanas(data);
+        setFilteredTransitions(data);
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -273,10 +289,20 @@ export default function AllAsanas() {
           Download CSV
         </Button>
         <br />
+        <Input
+          icon={<Search />}
+          scale={5 / 3}
+          clearable
+          type="warning"
+          placeholder="Search"
+          className="bg-white "
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         {loading ? (
           <Text>Loading</Text>
         ) : (
-          <Table width={100} data={sortedAsanas} className="bg-white ">
+          <Table width={100} data={filteredTransitions} className="bg-white ">
             <Table.Column prop="id" label="Asana ID" />
             <Table.Column prop="asana_name" label="Asana Name" />
             <Table.Column prop="asana_desc" label="Description" />

@@ -1,9 +1,9 @@
-import { Button, Grid, Modal, Table } from "@geist-ui/core";
+import { Button, Grid, Modal, Table, Input } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import AdminNavbar from "../Common/AdminNavbar/AdminNavbar";
-import "./AllPlaylists.css";
 import { toast } from "react-toastify";
 import Papa from "papaparse";
+import { Search } from "@geist-ui/icons";
 
 export default function AllAsanaCategories() {
   const [delState, setDelState] = useState(false);
@@ -12,6 +12,22 @@ export default function AllAsanaCategories() {
     setDelState(false);
   };
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredTransitions, setFilteredTransitions] = useState([]);
+  useEffect(() => {
+    if (searchTerm.length > 0) {
+      console.log(searchTerm);
+      setFilteredTransitions(
+        categories.filter((transition) =>
+          transition.asana_category
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredTransitions(categories);
+    }
+  }, [searchTerm]);
   const [categories, setCategories] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
@@ -21,6 +37,7 @@ export default function AllAsanaCategories() {
         );
         const data = await response.json();
         setCategories(data);
+        setFilteredTransitions(data);
       } catch (error) {
         toast(error);
       }
@@ -107,7 +124,18 @@ export default function AllAsanaCategories() {
           Download CSV
         </Button>
         <br />
-        <Table width={100} data={categories} className="bg-white ">
+        <Input
+          icon={<Search />}
+          scale={5 / 3}
+          clearable
+          type="warning"
+          placeholder="Search"
+          className="bg-white "
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <br />
+        <Table width={100} data={filteredTransitions} className="bg-white ">
           <Table.Column prop="asana_category_id" label="ID" />
           <Table.Column prop="asana_category" label="Asana Category" />
           <Table.Column

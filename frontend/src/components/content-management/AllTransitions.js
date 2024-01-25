@@ -1,7 +1,7 @@
-import { Button, Grid, Modal, Table } from "@geist-ui/core";
+import { Button, Grid, Modal, Table, Input } from "@geist-ui/core";
 import { useEffect, useState } from "react";
+import { Search } from "@geist-ui/icons";
 import AdminNavbar from "../Common/AdminNavbar/AdminNavbar";
-import "./AllPlaylists.css";
 import { toast } from "react-toastify";
 import Papa from "papaparse";
 
@@ -11,6 +11,22 @@ export default function AllTransitions() {
   const closeDelHandler = (event) => {
     setDelState(false);
   };
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredTransitions, setFilteredTransitions] = useState([]);
+  useEffect(() => {
+    if (searchTerm.length > 0) {
+      console.log(searchTerm);
+      setFilteredTransitions(
+        transitions.filter((transition) =>
+          transition.transition_video_name
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredTransitions(transitions);
+    }
+  }, [searchTerm]);
   const [transitions, setTransitions] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
@@ -20,13 +36,13 @@ export default function AllTransitions() {
         );
         const data = await response.json();
         setTransitions(data);
+        setFilteredTransitions(data);
       } catch (error) {
         toast(error);
       }
     };
     fetchData();
   }, []);
-
   const deleteCategory = async () => {
     try {
       const del_id = delId;
@@ -52,7 +68,6 @@ export default function AllTransitions() {
       console.log(error);
     }
   };
-
   const renderAction = (value, rowData, index) => {
     const handleDelete = async () => {
       try {
@@ -80,7 +95,6 @@ export default function AllTransitions() {
       </Grid.Container>
     );
   };
-
   const handleDownload = (data1) => {
     const csv = Papa.unparse(data1);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -95,7 +109,6 @@ export default function AllTransitions() {
       document.body.removeChild(link);
     }
   };
-
   return (
     <div className="allAsanas min-h-screen">
       <AdminNavbar />
@@ -108,8 +121,18 @@ export default function AllTransitions() {
           Download CSV
         </Button>
         <br />
+        <Input
+          icon={<Search />}
+          scale={5 / 3}
+          clearable
+          type="warning"
+          placeholder="Search"
+          className="bg-white "
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
 
-        <Table width={100} data={transitions} className="bg-white ">
+        <Table width={100} data={filteredTransitions} className="bg-white ">
           <Table.Column prop="transition_id" label="ID" />
           <Table.Column prop="transition_video_name" label="Transition Name" />
           <Table.Column
