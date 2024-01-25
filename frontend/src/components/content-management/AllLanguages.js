@@ -1,12 +1,26 @@
-import { Button, Grid, Modal, Table } from "@geist-ui/core";
+import { Button, Grid, Modal, Table, Input } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import AdminNavbar from "../Common/AdminNavbar/AdminNavbar";
-import "./AllPlaylists.css";
 import Papa from "papaparse";
+import { Search } from "@geist-ui/icons";
 
 export default function AllLanguages() {
   const [delState, setDelState] = useState(false);
   const [delLanguageId, setDelLanguageId] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredTransitions, setFilteredTransitions] = useState([]);
+  useEffect(() => {
+    if (searchTerm.length > 0) {
+      console.log(searchTerm);
+      setFilteredTransitions(
+        languages.filter((transition) =>
+          transition.language.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredTransitions(languages);
+    }
+  }, [searchTerm]);
   const closeDelHandler = (event) => {
     setDelState(false);
   };
@@ -19,6 +33,7 @@ export default function AllLanguages() {
         );
         const data = await response.json();
         setLanguages(data);
+        setFilteredTransitions(data);
       } catch (error) {
         console.log(error);
       }
@@ -104,8 +119,17 @@ export default function AllLanguages() {
           Download CSV
         </Button>
         <br />
-
-        <Table width={100} data={languages} className="bg-white ">
+        <Input
+          icon={<Search />}
+          scale={5 / 3}
+          clearable
+          type="warning"
+          placeholder="Search"
+          className="bg-white "
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <Table width={100} data={filteredTransitions} className="bg-white ">
           <Table.Column prop="language_id" label="Language ID" />
           <Table.Column prop="language" label="Language" />
           <Table.Column
