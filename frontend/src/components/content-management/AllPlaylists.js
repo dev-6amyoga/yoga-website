@@ -70,7 +70,6 @@ export default function AllPlaylists() {
       setFilteredTransitions(playlist1);
     }
   }, [searchTerm]);
-
   const [newAsana, setNewAsana] = useState({ id: "", asana_name: "" });
   const handleAddNewAsana = () => {
     setModalData((prevData) => ({
@@ -78,7 +77,6 @@ export default function AllPlaylists() {
       asana_ids: [...prevData.asana_ids, newAsana.id],
     }));
   };
-
   useEffect(() => {
     const fetchData = async (playlistId) => {
       try {
@@ -139,7 +137,6 @@ export default function AllPlaylists() {
     };
     fetchData();
   }, []);
-
   useEffect(() => {
     const sortedData = [...playlist1].sort((a, b) => {
       if (sortOrder === "asc") {

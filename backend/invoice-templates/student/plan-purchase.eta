@@ -1,0 +1,29 @@
+<% layout('../layout/layout.eta') %>
+
+<style>
+* {
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+  padding: 0;
+  margin: 0;
+}
+
+
+</style>
+
+<h2>Student Plan Purchase Invoice</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Plan</th>
+      <th>Price</th>
+      <th>Tax</th>
+      <th>Discount</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+
+  <tbody>
+  </tbody>
+</table>

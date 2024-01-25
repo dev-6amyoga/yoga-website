@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 import { Fetch } from "../../utils/Fetch";
 import { Table, Grid, Button } from "@geist-ui/core";
 import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
+import Papa from "papaparse";
+
 export default function StudentTransactionHistory() {
   let user = useUserStore((state) => state.user);
   const [transactions, setTransactions] = useState([]);
@@ -31,7 +33,20 @@ export default function StudentTransactionHistory() {
       fetchData();
     }
   }, [user]);
-
+  const handleDownload = (data1) => {
+    const csv = Papa.unparse(data1);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "data.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
   const renderAction = (value, rowData, index) => {
     return (
       <Grid.Container gap={0.1}>
@@ -56,6 +71,14 @@ export default function StudentTransactionHistory() {
       </div>
       <div className="flex flex-col items-center justify-center py-20">
         <div className="elements">
+          <Button
+            onClick={() => {
+              handleDownload(transactions);
+            }}
+          >
+            Download CSV
+          </Button>
+          <br />
           <Table width={100} data={transactions} className="bg-white ">
             <Table.Column
               prop="payment_date"

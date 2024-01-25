@@ -10,7 +10,6 @@ import {
   Spacer,
 } from "@geist-ui/core";
 import React, { useCallback, useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
 import useUserStore from "../../store/UserStore";
@@ -18,7 +17,6 @@ import { Fetch } from "../../utils/Fetch";
 import RenderRazorpay from "./RenderRazorpay";
 
 function StudentPlan() {
-  const notify = (x) => toast(x);
   let user = useUserStore((state) => state.user);
   const [allPlans, setAllPlans] = useState([]);
   const [showCard, setShowCard] = useState(false);
@@ -32,17 +30,62 @@ function StudentPlan() {
   const today = new Date();
   const formattedDate = today.toISOString().split("T")[0];
   const [myPlans, setMyPlans] = useState([]);
-  // const [countryInfo, setCountryInfo] = useState(null);
+  const [currentStatus, setCurrentStatus] = useState("");
+  const [validityFromDate, setValidityFromDate] = useState("");
   const [selectedValidity, setSelectedValidity] = useState(30);
+  // const [countryInfo, setCountryInfo] = useState(null);
   // const [selectedCurrency, setSelectedCurrency] = useState(1);
   // const [allCurrencies, setAllCurrencies] = useState([]);
   const [planId, setPlanId] = useState(0);
   const [toBeRegistered, setToBeRegistered] = useState({});
   const calculateEndDate = (validityDays) => {
-    const endDate = new Date(today);
-    endDate.setUTCDate(today.getUTCDate() + validityDays);
+    const endDate = new Date(validityFromDate);
+    endDate.setUTCDate(endDate.getUTCDate() + validityDays);
     return endDate.toISOString().split("T")[0];
   };
+  const getEndDate = (userPlan) => {
+    var updatedValidityString = "";
+    if (userPlan.length === 0) {
+      setCurrentStatus("ACTIVE");
+      var today = new Date();
+      updatedValidityString = today.toISOString();
+      console.log("New plan starts from date:", updatedValidityString);
+    } else if (userPlan.length === 1) {
+      setCurrentStatus("STAGED");
+      var validityDate = new Date(userPlan[0].validity_to);
+      validityDate.setDate(validityDate.getDate() + 1);
+      updatedValidityString = validityDate.toISOString();
+      console.log("New plan validity from date:", updatedValidityString);
+    } else {
+      var highestValidityDate = null;
+      setCurrentStatus("STAGED");
+      for (var i = 0; i !== userPlan.length; i++) {
+        var validityDate = new Date(userPlan[i].validity_to);
+        if (
+          highestValidityDate === null ||
+          validityDate > highestValidityDate
+        ) {
+          highestValidityDate = validityDate;
+        }
+      }
+      if (highestValidityDate !== null) {
+        highestValidityDate.setDate(highestValidityDate.getDate() + 1);
+        updatedValidityString = highestValidityDate.toISOString();
+        console.log("New plan validity from date:", updatedValidityString);
+      } else {
+        console.log("No valid validity_to dates found.");
+      }
+    }
+    return updatedValidityString;
+  };
+  useEffect(() => {
+    const fetchData = async () => {
+      setValidityFromDate(getEndDate(myPlans));
+    };
+    if (myPlans) {
+      fetchData();
+    }
+  }, [myPlans]);
   const calculateEndDate1 = (startDate, validityDays) => {
     startDate.setUTCDate(startDate.getUTCDate() + validityDays);
     return startDate.toISOString().split("T")[0];
@@ -117,26 +160,21 @@ function StudentPlan() {
             }
           }
           if (data["userPlan"].length > 1) {
-            let found = 0;
             for (var i = 0; i !== data["userPlan"].length; i++) {
               if (data["userPlan"][i].current_status === "ACTIVE") {
-                setPlanId(data["userPlan"][0]["plan_id"]);
-                found = 1;
+                setPlanId(data["userPlan"][i]["plan_id"]);
                 break;
               }
-            }
-            if (found === 0) {
-              notify("You don't have a plan yet! Purchase one to continue");
             }
           } else {
             if (data["userPlan"][0].current_status === "ACTIVE") {
               setPlanId(data["userPlan"][0]["plan_id"]);
             } else {
-              notify("You don't have a plan yet! Purchase one to continue");
+              toast("You don't have a plan yet! Purchase one to continue");
             }
           }
         } else {
-          notify("You don't have a plan yet! Purchase one to continue");
+          toast("You don't have a plan yet! Purchase one to continue");
         }
       } catch (error) {
         console.log(error);
@@ -146,7 +184,6 @@ function StudentPlan() {
       fetchData();
     }
   }, [user]);
-
   // const fetchCurrencies = useCallback(async () => {
   //   try {
   //     const response = await Fetch({
@@ -156,11 +193,10 @@ function StudentPlan() {
   //     setAllCurrencies(response?.data?.currencies);
   //     console.log("Fetching currencies");
   //   } catch (error) {
-  //     notify("Error fetching plans", { type: "error" });
+  //     toast("Error fetching plans", { type: "error" });
   //     console.log(error);
   //   }
   // }, []);
-
   const fetchPlans = useCallback(async () => {
     try {
       const response = await fetch(
@@ -169,11 +205,10 @@ function StudentPlan() {
       const data = await response.json();
       setAllPlans(data?.plans);
     } catch (error) {
-      notify("Error fetching plans", { type: "error" });
+      toast("Error fetching plans", { type: "error" });
       console.log(error);
     }
   }, []);
-
   useEffect(() => {
     fetchPlans();
   }, [fetchPlans]);
@@ -181,108 +216,55 @@ function StudentPlan() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (planId !== 0) {
-      console.log(planId);
-      let staged = [];
-      let expired = [];
-      let active = [];
-      for (var i = 0; i !== myPlans.length; i++) {
-        if (myPlans[i].current_status === "EXPIRED") {
-          expired.push(myPlans[i]);
-        } else if (myPlans[i].current_status === "ACTIVE") {
-          active.push(myPlans[i]);
-        } else if (myPlans[i].current_status === "STAGED") {
-          staged.push(myPlans[i]);
-        }
-      }
-      if (active.length > 1) {
-        toast("Error");
-      } else {
-        notify(
+      if (currentStatus !== "ACTIVE") {
+        toast(
           "You have an active plan! If you purchase a new plan, it will be staged."
         );
-        let userPlanData = {};
-        if (staged.length === 0) {
-          console.log(active[0].validity_to);
-          const originalDate = new Date(
-            active[0].validity_to ?? active[0].validity_to
-          );
-          originalDate.setDate(originalDate.getDate() + 1);
-          const validityFromDate = originalDate.toISOString();
-          const validityTo = new Date(validityFromDate);
-          validityTo.setDate(validityTo.getDate() + selectedValidity);
-          const validityToDate = validityTo.toISOString();
-          console.log(validityFromDate, validityToDate);
-          userPlanData = {
-            purchase_date: formattedDate,
-            validity_from: validityFromDate,
-            validity_to: validityToDate,
-            cancellation_date: null,
-            auto_renewal_enabled: false,
-            user_id: user?.user_id,
-            plan_id: cardData.plan_id,
-            discount_coupon_id: 0,
-            referral_code_id: 0,
-            amount: cardData.pricing[0].denomination * 118,
-            currency: "INR",
-            current_status: "STAGED",
-          };
-          setToBeRegistered(userPlanData);
-          console.log(userPlanData);
-        } else {
-          console.log(staged);
-          const dates = staged.map((obj) => new Date(obj.validity_to));
-          const indexOfHighestDate = dates.indexOf(
-            new Date(Math.max(...dates))
-          );
-          const highestDateObject = staged[indexOfHighestDate];
-          const originalDate = new Date(highestDateObject.validity_to);
-          originalDate.setDate(originalDate.getDate() + 1);
-          const validityFromDate = originalDate.toISOString();
-          const validityTo = new Date(validityFromDate);
-          validityTo.setDate(validityTo.getDate() + selectedValidity);
-          const validityToDate = validityTo.toISOString();
-          console.log(validityFromDate, validityToDate);
-          userPlanData = {
-            purchase_date: formattedDate,
-            validity_from: validityFromDate,
-            validity_to: validityToDate,
-            cancellation_date: null,
-            auto_renewal_enabled: false,
-            user_id: user?.user_id,
-            plan_id: cardData.plan_id,
-            discount_coupon_id: 0,
-            referral_code_id: 0,
-            amount: cardData.pricing[0].denomination * 118,
-            currency: "INR",
-            current_status: "STAGED",
-          };
-          setToBeRegistered(userPlanData);
-          console.log(userPlanData);
-        }
-        try {
-          const response = await Fetch({
-            url: "http://localhost:4000/payment/order",
-            method: "POST",
-            data: userPlanData,
-          });
-          if (response.status === 200) {
-            const responseJson = response.data;
-            const razorpayOrder = responseJson.order;
-            if (razorpayOrder && razorpayOrder["id"]) {
-              setOrderDetails({
-                orderId: razorpayOrder["id"],
-                currency: razorpayOrder["currency"],
-                amount: razorpayOrder["amount"],
-              });
-              setDisplayRazorpay(true);
-            }
-          } else {
-            const errorData = await response.json();
-            notify(errorData.error);
+      }
+      let userPlanData = {};
+      const validityTo = new Date(validityFromDate);
+      validityTo.setDate(validityTo.getDate() + selectedValidity);
+      const validityToDate = validityTo.toISOString();
+      console.log(validityFromDate, validityToDate);
+      userPlanData = {
+        purchase_date: formattedDate,
+        validity_from: validityFromDate,
+        validity_to: validityToDate,
+        cancellation_date: null,
+        auto_renewal_enabled: false,
+        user_id: user?.user_id,
+        plan_id: cardData.plan_id,
+        discount_coupon_id: 0,
+        referral_code_id: 0,
+        amount: cardData.pricing[0].denomination * 118,
+        currency: "INR",
+        current_status: currentStatus,
+      };
+      setToBeRegistered(userPlanData);
+      console.log(userPlanData);
+      try {
+        const response = await Fetch({
+          url: "http://localhost:4000/payment/order",
+          method: "POST",
+          data: userPlanData,
+        });
+        if (response.status === 200) {
+          const responseJson = response.data;
+          const razorpayOrder = responseJson.order;
+          if (razorpayOrder && razorpayOrder["id"]) {
+            setOrderDetails({
+              orderId: razorpayOrder["id"],
+              currency: razorpayOrder["currency"],
+              amount: razorpayOrder["amount"],
+            });
+            setDisplayRazorpay(true);
           }
-        } catch (error) {
-          console.log(error);
+        } else {
+          const errorData = await response.json();
+          toast(errorData.error);
         }
+      } catch (error) {
+        console.log(error);
       }
     } else {
       const discount_coupon_id = document.querySelector(
@@ -298,8 +280,8 @@ function StudentPlan() {
         auto_renewal_enabled: false,
         user_id: user?.user_id,
         plan_id: cardData.plan_id,
-        discount_coupon_id: discount_coupon_id,
-        referral_code_id: referral_code_id,
+        discount_coupon_id: 0,
+        referral_code_id: 0,
         amount: cardData.pricing[0].denomination * 118,
         currency: "INR",
         current_status: "ACTIVE",
@@ -324,7 +306,7 @@ function StudentPlan() {
           }
         } else {
           const errorData = await response.json();
-          notify(errorData.error);
+          toast(errorData.error);
         }
       } catch (error) {
         console.log(error);
@@ -354,24 +336,9 @@ function StudentPlan() {
     );
   };
 
-  const registerUserPlan = async () => {
-    // const discount_coupon_id = document.querySelector(
-    //   "#discount_coupon_id"
-    // ).value;
-    // const referral_code_id = document.querySelector("#referral_code_id").value;
-    // const userPlanData = {
-    //   purchase_date: formattedDate,
-    //   validity_from: formattedDate,
-    //   validity_to: calculateEndDate(selectedValidity),
-    //   cancellation_date: null,
-    //   auto_renewal_enabled: false,
-    //   user_id: user?.user_id,
-    //   plan_id: cardData.plan_id,
-    //   discount_coupon_id: 0,
-    //   referral_code_id: 0,
-    //   amount: 100,
-    //   currency: "INR",
-    // };
+  const registerUserPlan = async (order_id) => {
+    toBeRegistered.transaction_order_id = order_id;
+    console.log(toBeRegistered);
     try {
       const response = await fetch("http://localhost:4000/user-plan/register", {
         method: "POST",
@@ -381,14 +348,14 @@ function StudentPlan() {
         body: JSON.stringify(toBeRegistered),
       });
       if (response.ok) {
-        notify("Plan subscribed successfully", { type: "success" });
+        toast("Plan subscribed successfully", { type: "success" });
       } else {
         const errorData = await response.json();
-        notify(errorData.error);
+        toast(errorData.error);
       }
     } catch (error) {
       console.log(error);
-      notify("Error subscribing plan", { type: "error" });
+      toast("Error subscribing plan", { type: "error" });
     }
   };
 
@@ -537,7 +504,7 @@ function StudentPlan() {
               </ButtonGroup>
               <p>
                 {" "}
-                <h5>Plan Start Date :</h5> {formattedDate}
+                <h5>Plan Start Date :</h5> {validityFromDate}
               </p>
               <p>
                 {" "}
