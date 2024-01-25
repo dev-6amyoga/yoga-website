@@ -47,6 +47,28 @@ export default function StudentTransactionHistory() {
       document.body.removeChild(link);
     }
   };
+  const subscribePlan = async (rowData) => {
+    console.log(rowData.user_id, rowData.transaction_order_id);
+    try {
+      const response = await fetch(
+        "http://localhost:4000/invoice/student/plan",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: rowData.user_id,
+            transaction_order_id: rowData.transaction_order_id,
+          }),
+        }
+      );
+      const data = await response.json();
+      console.log(data);
+    } catch (err) {
+      toast(err);
+    }
+  };
   const renderAction = (value, rowData, index) => {
     return (
       <Grid.Container gap={0.1}>
@@ -56,7 +78,9 @@ export default function StudentTransactionHistory() {
             auto
             scale={1 / 3}
             font="12px"
-            //   onClick={subscribePlan}
+            onClick={() => {
+              subscribePlan(rowData);
+            }}
           >
             Download Invoice
           </Button>
@@ -83,8 +107,13 @@ export default function StudentTransactionHistory() {
             <Table.Column
               prop="payment_date"
               label="Payment Date"
+              // render={(data) => {
+              //   return Intl.DateTimeFormat("en-US", {
+              //     timeZone: "Asia/Kolkata",
+              //   }).format(Date(data));
+              // }}
               render={(data) => {
-                return Date(data);
+                Date(data);
               }}
             />
             <Table.Column

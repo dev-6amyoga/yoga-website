@@ -146,7 +146,7 @@ export default function Login({ switchForm }) {
     try {
       const response = await Fetch({
         url: "http://localhost:4000/auth/login",
-        // url: "http://192.168.0.103:4000/auth/login",
+        // url: "http://192.168.1.20:4000/auth/login",
         method: "POST",
         data: formData,
       });
@@ -203,7 +203,7 @@ export default function Login({ switchForm }) {
     } catch (error) {
       removeCookie("6amyoga_access_token");
       removeCookie("6amyoga_refresh_token");
-      console.log(error.response.data.error);
+      console.log(error.response?.data?.error);
       toast(error?.response?.data?.error, { type: "error" });
     }
   };
