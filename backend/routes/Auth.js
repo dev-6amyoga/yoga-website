@@ -24,6 +24,7 @@ const {
 	verifyToken,
 	TOKEN_TYPE_REFRESH,
 	TOKEN_TYPE_ACCESS,
+	authenticateToken,
 } = require("../utils/jwt");
 const { GetUserInfo } = require("../services/User.service");
 const {
@@ -116,16 +117,24 @@ router.post("/login", async (req, res) => {
 
 	// TODO: check if login history shows different IP
 
-	const login_history = await LoginHistory.findAll({
+	// check if user has active login token
+	const login_token_history = await LoginToken.findAll({
 		where: {
-			user_id: user.user_id,
+			user_id: user?.user_id,
+			refresh_token_expiry_at: {
+				[Op.gt]: new Date(),
+			},
 		},
 	});
 
-	if (login_history) {
-		const login_history_json = login_history.map((lh) => lh.toJSON());
+	if (login_token_history) {
+		const login_token_history_json = login_token_history.map((lth) =>
+			lth.toJSON()
+		);
 
-		if (login_history_json.findIndex((lh) => lh.ip !== req.ip) > -1) {
+		if (
+			login_token_history_json.findIndex((lth) => lth.ip !== req.ip) > -1
+		) {
 			return res
 				.status(HTTP_BAD_REQUEST)
 				.json({ error: "Varying IP Address; One device login only" });
@@ -140,7 +149,7 @@ router.post("/login", async (req, res) => {
 	const t = await sequelize.transaction();
 
 	try {
-		// TODO: delete all previous tokens of user
+		// TODO: delete all previous tokens of user from same ip?
 
 		// add current token to login token table
 		await LoginToken.create(
@@ -151,6 +160,8 @@ router.post("/login", async (req, res) => {
 				access_token_expiry_at,
 				refresh_token_creation_at,
 				refresh_token_expiry_at,
+				ip: req.ip,
+				user_id: user?.user_id,
 			},
 			{ transaction: t }
 		);
@@ -176,6 +187,39 @@ router.post("/login", async (req, res) => {
 		await t.rollback();
 		return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
 			message: "internal server error",
+		});
+	}
+});
+
+router.post("/logout", authenticateToken, async (req, res) => {
+	if (!req.user) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "No user logged in" });
+	}
+
+	const { user_id } = req.user;
+
+	const t = await sequelize.transaction();
+
+	try {
+		await LoginToken.destroy({
+			where: {
+				user_id,
+			},
+			transaction: t,
+			force: true,
+		});
+
+		await t.commit();
+
+		return res.status(HTTP_OK).json({ message: "Logged out" });
+	} catch (error) {
+		console.error(error);
+		await t.rollback();
+
+		return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+			error: error.message,
 		});
 	}
 });

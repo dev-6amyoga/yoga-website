@@ -3,6 +3,8 @@ const dotenv = require("dotenv");
 const { User } = require("../models/sql/User");
 const { Role } = require("../models/sql/Role");
 const { HTTP_FORBIDDEN } = require("./http_status_codes");
+const { LoginToken } = require("../models/sql/LoginToken");
+const { Op } = require("sequelize");
 
 dotenv.config();
 
@@ -88,16 +90,24 @@ async function authenticateToken(req, res, next) {
 
 		if (!u) res.status(HTTP_FORBIDDEN).json({ message: "Forbidden" });
 
-		// TODO : get roles and permissions
+		const login_token = await LoginToken.findOne({
+			where: {
+				access_token: token,
+				user_id: u.user_id,
+				refresh_token_expiry_at: {
+					[Op.gt]: new Date(),
+				},
+			},
+		});
+
+		if (!login_token)
+			return res
+				.status(HTTP_FORBIDDEN)
+				.json({ message: "Token unavailable" });
 
 		req.user = u.toJSON();
 
 		next();
-
-		// jwt.verify(refreshToken, JWT_TOKEN_SECRET, (err, decoded) => {
-		// 	const user = decoded.user;
-
-		// });
 	});
 }
 
