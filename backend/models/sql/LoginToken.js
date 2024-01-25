@@ -21,6 +21,10 @@ const LoginToken = sequelize.define(
 			allowNull: false,
 			unique: true,
 		},
+		ip: {
+			type: DataTypes.STRING,
+			allowNull: true,
+		},
 		access_token_creation_at: {
 			type: DataTypes.DATE,
 			allowNull: false,
