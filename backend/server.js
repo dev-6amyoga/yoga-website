@@ -9,6 +9,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const dotenv = require("dotenv");
 const useragent = require("express-useragent");
+const path = require("path");
 
 // init the config from .env file
 dotenv.config();
@@ -26,7 +27,7 @@ const { RolePermission } = require("./models/sql/RolePermission");
 const { LoginToken } = require("./models/sql/LoginToken");
 const { LoginHistory } = require("./models/sql/LoginHistory");
 const { Institute } = require("./models/sql/Institute");
-const { UserInstitute } = require("./models/sql/UserInstitute");
+// const { UserInstitute } = require("./models/sql/UserInstitute");
 const { Plan } = require("./models/sql/Plan");
 const { PlanPricing } = require("./models/sql/PlanPricing");
 const { ReferralCode } = require("./models/sql/ReferralCode");
@@ -70,6 +71,7 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(useragent.express());
+app.use("/static", express.static(path.join(__dirname, "public")));
 
 // initialize databases
 const mongoURI = process.env.MONGO_SRV_URL;

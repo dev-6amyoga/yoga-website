@@ -8,22 +8,86 @@
   margin: 0;
 }
 
+body {
+  margin: 20px;
+}
 
+h2 {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.center {
+  width: 100%;
+  max-width: 800px;
+  margin: 20px auto;
+}
 </style>
 
 <h2>Student Plan Purchase Invoice</h2>
 
-<table>
-  <thead>
-    <tr>
-      <th>Plan</th>
-      <th>Price</th>
-      <th>Tax</th>
-      <th>Discount</th>
-      <th>Total</th>
-    </tr>
-  </thead>
+<div class="center">
+  <p>
+    <strong>Transaction Order ID: </strong> <%= it.transaction.transaction_order_id %>
+    <br />
+    <strong>Invoice Date:</strong> <%= it.transaction.payment_date %>
+    <br />
+    <strong>Buyer Name:</strong> <%= it.user.name %>
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Plan</th>
+        <th>Price</th>
+        <th>Discount</th>
+        <th>GST</th>
+        <th>Total</th>
+      </tr>
+    </thead>
 
-  <tbody>
-  </tbody>
-</table>
+    <tbody>
+      <tr>
+        <td>
+          <strong><%= it.plan.name %></strong>
+          <br /><br/>
+          <small>
+            <strong>Plan Description : </strong>
+            <br />
+            <% if (it.plan.has_basic_playlist) { %>
+              <p>This plan has a basic playlist.</p>
+            <% } else { %>
+              <p>This plan does not have a basic playlist.</p>
+            <% } %>
+            <% if (it.plan.has_playlist_creation) { %>
+              <p>This plan has playlist creation option.</p>
+            <% } else { %>
+              <p>This plan does not have playlist creation option.</p>
+            <% } %>
+          </small>
+        </td>
+        <td>
+          INR <%=it.plan_pricing.denomination %> 
+        </td>
+        <td>
+          <p>INR 0</p>
+        </td>
+        <td>
+          <p><% const multipliedValue = it.plan_pricing.denomination * 0.18;%>INR <%=multipliedValue%></p><br/>
+          <small>
+            9% SGST (INR <%=it.plan_pricing.denomination %>  * 0.09) = INR <% const sgst =it.plan_pricing.denomination * 0.09%><%=sgst%>
+          </small><br/>
+          <small>
+            9% CGST (INR <%=it.plan_pricing.denomination %>  * 0.09) = INR <% const cgst =it.plan_pricing.denomination * 0.09%><%=cgst%>
+          </small>
+        </td>
+        <td>
+          <p>INR <% const res = it.plan_pricing.denomination * 1.18;%><%=res%></p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    <strong>Amount Paid:</strong> Rs.2360 (Rupees Two Thousand Three Hundred and Sixty Only)
+  </p>
+</div>
