@@ -49,12 +49,25 @@ export default function StudentNavbar() {
         );
         const data = await response.json();
         if (data["userPlan"].length != 0) {
-          setUserPlan(data["userPlan"]);
-          setPlanId(data["userPlan"]["plan_id"]);
-          if (data?.userPlan?.plan?.has_playlist_creation) {
+          const indexOfActiveUserPlan = data["userPlan"].findIndex(
+            (plan) => plan.current_status === "ACTIVE"
+          );
+          setUserPlan(data["userPlan"][indexOfActiveUserPlan]);
+          setPlanId(data["userPlan"][indexOfActiveUserPlan]["plan_id"]);
+          if (
+            data["userPlan"][indexOfActiveUserPlan]["plan"]
+              .has_playlist_creation
+          ) {
             setDisabledTailorMade(false);
           } else {
             setDisabledTailorMade(true);
+          }
+          if (
+            data["userPlan"][indexOfActiveUserPlan]["plan"].has_basic_playlist
+          ) {
+            setDisabled(false);
+          } else {
+            setDisabled(true);
           }
         } else {
           setDisabled(true);

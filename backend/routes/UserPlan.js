@@ -76,6 +76,7 @@ router.post("/register", async (req, res) => {
     user_id,
     plan_id,
     current_status,
+    transaction_order_id,
   } = req.body;
   console.log("registering!!");
 
@@ -85,7 +86,8 @@ router.post("/register", async (req, res) => {
     !validity_from ||
     !validity_to ||
     !purchase_date ||
-    !current_status
+    !current_status ||
+    !transaction_order_id
   )
     return res
       .status(HTTP_BAD_REQUEST)
@@ -160,6 +162,7 @@ router.post("/register", async (req, res) => {
         user_id: user_id,
         plan_id: plan_id,
         current_status: current_status,
+        transaction_order_id: transaction_order_id,
       },
       { transaction: t }
     );

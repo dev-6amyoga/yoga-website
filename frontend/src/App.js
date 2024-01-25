@@ -7,6 +7,7 @@ function App() {
   const canvas = useRef(null);
   const scale = 2;
   const frames = 300;
+  const navigate = useNavigate();
 
   // const [scrollPos, setScrollPos] = useState(0);
   const [ctx, setCtx] = useState(null);
@@ -19,12 +20,16 @@ function App() {
     if (canvas.current) {
       const c = canvas.current.getContext("2d");
       setCtx(c);
+    }
+  }, [canvas]);
 
+  useEffect(() => {
+    if (ctx) {
       const img = new Image();
-
+      console.log("here");
       img.src = `http://localhost:3000/frames/Untitled00108000.jpg`;
       img.onload = () => {
-        c.drawImage(
+        ctx.drawImage(
           img,
           0,
           0,
@@ -33,7 +38,7 @@ function App() {
         );
       };
     }
-  }, [canvas]);
+  }, [ctx]);
 
   useEffect(() => {
     if (canvas) {
@@ -44,7 +49,6 @@ function App() {
 
   useEffect(() => {
     const dim = canvas.current.getBoundingClientRect();
-    console.log(dim);
     setScreenDimensions({
       width: dim.width,
       height: dim.height,
@@ -81,16 +85,14 @@ function App() {
       onScroll={handleScroll}
     >
       <div className="h-[300vh] bg-transparent pointer-events-auto"></div>
-
-      <div className="h-[300vh] absolute top-0 w-full bg-black bg-opacity-10 z-20 pointer-events-auto">
-        <div className="h-screen top-0 w-full text-white">
-          <h1>6AM Yoga</h1>
-          <p>tagline wohohoohohoohohohohoho tagline ends</p>
+      {/* now right click on plan-purchase.html and start preview and then share that url with live share localhost:5050 or somethign */}
+      <div className="h-[300vh] absolute top-0 w-full bg-black bg-opacity-10 z-[1000] pointer-events-auto">
+        <div className="h-screen w-full relative">
+          <div className="w-full flex items-center justify-center absolute bottom-0">
+            <Button onClick={() => navigate("/auth")}>Enter</Button>
+          </div>
         </div>
-        <div className="h-screen top-0 w-full text-white">
-          <h1>6AM Yoga</h1>
-          <p>tagline wohohoohohoohohohohoho tagline ends</p>
-        </div>
+        <div className="h-screen w-full text-white"></div>
       </div>
 
       <canvas

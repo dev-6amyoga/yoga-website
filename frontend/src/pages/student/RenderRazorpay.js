@@ -90,7 +90,7 @@ const RenderRazorpay = ({
           toast(status, { type });
           if (status === "succeeded") {
             console.log("IT WAS A SUCCESS YAYAYAY");
-            onSuccessCallback();
+            onSuccessCallback(orderDetails.orderId);
             // navigate(redirectUrl);
           }
         } else {

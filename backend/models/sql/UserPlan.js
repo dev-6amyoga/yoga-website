@@ -24,6 +24,10 @@ const UserPlan = sequelize.define(
       type: DataTypes.DATE,
       allowNull: false,
     },
+    transaction_order_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     is_active: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,

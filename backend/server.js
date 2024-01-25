@@ -35,7 +35,7 @@ const { Currency } = require("./models/sql/Currency");
 const { Transaction } = require("./models/sql/Transaction");
 const { DiscountCoupon } = require("./models/sql/DiscountCoupon");
 const {
-	DiscountCouponApplicablePlan,
+  DiscountCouponApplicablePlan,
 } = require("./models/sql/DiscountCouponApplicablePlan");
 const { Invite } = require("./models/sql/Invite");
 
@@ -60,6 +60,8 @@ const teacherPlaylistRouter = require("./routes/TeacherPlaylist");
 const userInstitutePlanRoleRouter = require("./routes/UserInstitutePlanRole");
 const institutePlaylistRouter = require("./routes/InstitutePlaylist");
 const planPricingRouter = require("./routes/PlanPricing");
+const invoiceRouter = require("./routes/Invoice");
+
 // DEV : sample data creation
 const { bulkCreateSampleData } = require("./sample_data");
 
@@ -72,30 +74,30 @@ app.use(useragent.express());
 // initialize databases
 const mongoURI = process.env.MONGO_SRV_URL;
 mongoose
-	.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-	.then(() => console.log("Connected to MongoDB Atlas"))
-	.catch((err) => console.log(err));
+  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("Connected to MongoDB Atlas"))
+  .catch((err) => console.log(err));
 
 initializeSequelize()
-	.then(() => {
-		console.log("Sequelize initialized");
-		// bulkCreateSampleData()
-		// 	.then(() => {
-		// 		console.log("Sample data created!");
-		// 	})
-		// 	.catch((err) => {
-		// 		console.log(err);
-		// 	});
-	})
-	.catch((err) => {
-		console.log(err);
-	});
+  .then(() => {
+    console.log("Sequelize initialized");
+    // bulkCreateSampleData()
+    // 	.then(() => {
+    // 		console.log("Sample data created!");
+    // 	})
+    // 	.catch((err) => {
+    // 		console.log(err);
+    // 	});
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 // bind routers
 app.get("/info", (req, res) => {
-	return res.status(200).json({
-		message: "Running.",
-	});
+  return res.status(200).json({
+    message: "Running.",
+  });
 });
 
 app.use("/content", asanaRouter);
@@ -118,8 +120,10 @@ app.use("/transaction", transactionRouter);
 app.use("/teacher-playlist", teacherPlaylistRouter);
 app.use("/uipr", userInstitutePlanRoleRouter);
 app.use("/plan-pricing", planPricingRouter);
+app.use("/invoice", invoiceRouter);
+
 const port = parseInt(process.env.SERVER_PORT);
 
 app.listen(port, () => {
-	console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 });
