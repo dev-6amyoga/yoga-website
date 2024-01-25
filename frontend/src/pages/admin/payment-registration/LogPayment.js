@@ -27,6 +27,7 @@ export default function LogPayment() {
   const [validityToDate, setValidityToDate] = useState(null);
   const [userPlans, setUserPlans] = useState([]);
   const [students, setStudents] = useState([]);
+  const [institutes, setInstitutes] = useState([]);
   const [currentStatus, setCurrentStatus] = useState("");
   const [studentPlans, setStudentPlans] = useState([]);
   const [institutePlans, setInstitutePlans] = useState([]);
@@ -35,6 +36,7 @@ export default function LogPayment() {
   const [modalData, setModalData] = useState({});
   const [paymentFor, setPaymentFor] = useState("");
   const [studentData, setStudentData] = useState([]);
+  const [instituteData, setInstituteData] = useState([]);
   const [userType, setUserType] = useState("");
   const [nextClicked, setNextClicked] = useState(false);
   const [showUserSelection, setShowUserSelection] = useState(false);
@@ -68,6 +70,9 @@ export default function LogPayment() {
   };
   const appendToUsers = (newUserData) => {
     setStudentData((prevUsers) => [...prevUsers, newUserData]);
+  };
+  const appendToInstitutes = (newUserData) => {
+    setInstituteData((prevUsers) => [...prevUsers, newUserData]);
   };
   useEffect(() => {
     const fetchData = async () => {
@@ -106,9 +111,9 @@ export default function LogPayment() {
         );
         const data = await response.json();
         if (data["userPlan"]) {
+          console.log(data["userPlan"]);
           setUserPlans(data["userPlan"]);
         } else {
-          toast("You don't have a plan yet! Purchase one to continue");
         }
       } catch (error) {
         console.log(error);
@@ -156,6 +161,47 @@ export default function LogPayment() {
     };
     fetchData();
   }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await Fetch({
+          url: "http://localhost:4000/user/get-all-institutes",
+          method: "GET",
+        });
+        const data = response.data;
+        setInstitutes(data.users);
+        setInstituteData([]);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, []);
+  useEffect(() => {
+    if (institutes.length > 0) {
+      setInstituteData([]);
+      for (var i = 0; i != institutes.length; i++) {
+        let uId = institutes[i].user_id;
+        Fetch({
+          url: "http://localhost:4000/institute/get-by-instituteid",
+          method: "POST",
+          data: {
+            institute_id: institutes[i].institute_id,
+          },
+        }).then((res) => {
+          if (res && res.status === 200) {
+            res.data.user_id = uId;
+            console.log(res.data);
+            appendToInstitutes(res.data);
+          } else {
+            toast("Error updating profile; retry", {
+              type: "error",
+            });
+          }
+        });
+      }
+    }
+  }, [institutes]);
   const fetchPlans = useCallback(async () => {
     try {
       const response = await fetch(
@@ -473,6 +519,29 @@ export default function LogPayment() {
                   {userType === "INSTITUTE_OWNER" && (
                     <div>
                       <h5>Existing Institutes</h5>
+                      <Table
+                        width={35}
+                        data={instituteData}
+                        className="bg-white"
+                      >
+                        <Table.Column
+                          label="Institute Name"
+                          width={150}
+                          prop="name"
+                        />
+                        <Table.Column
+                          label="Email ID"
+                          width={150}
+                          prop="email"
+                        />
+                        <Table.Column label="Phone" width={150} prop="phone" />
+                        <Table.Column
+                          prop="operation"
+                          label="SELECT"
+                          width={150}
+                          render={renderAction}
+                        />
+                      </Table>
                     </div>
                   )}
                 </div>
@@ -517,7 +586,31 @@ export default function LogPayment() {
                 </div>
               )}
               {userType === "INSTITUTE_OWNER" && (
-                <Modal.Content>Institute Plans</Modal.Content>
+                <div>
+                  <Table width={40} data={institutePlans} className="bg-white ">
+                    <Table.Column prop="name" label="Plan Name" />
+                    <Table.Column
+                      prop="has_playlist_creation"
+                      label="Make Custom Playlists"
+                      render={(data) => {
+                        return data ? "Yes" : "No";
+                      }}
+                    />
+                    <Table.Column
+                      prop="playlist_creation_limit"
+                      label="Number of Custom Playlists"
+                      render={(data) => {
+                        return data ? data : "0";
+                      }}
+                    />
+                    <Table.Column
+                      prop="operation"
+                      label="Purchase"
+                      width={150}
+                      render={renderAction1}
+                    />
+                  </Table>
+                </div>
               )}
               <Modal.Action passive onClick={() => setPlanAddition(false)}>
                 Cancel
