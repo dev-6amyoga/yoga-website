@@ -13,24 +13,64 @@ import { useState } from "react";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import { FaPause, FaPlay } from "react-icons/fa";
 import { toast } from "react-toastify";
+import useUserStore from "../../store/UserStore";
 import { STATE_VIDEO_PAUSED } from "../../store/VideoStore";
+import useWatchHistoryStore from "../../store/WatchHistoryStore";
+import { Fetch } from "../../utils/Fetch";
 import VideoPlaybar from "./VideoPlaybar";
 
 function VideoPlayer() {
+	const user = useUserStore((state) => state.user);
+
 	const player = useRef(null);
-	const queue = usePlaylistStore((state) => state.queue);
-	let popFromQueue = usePlaylistStore((state) => state.popFromQueue);
+	const [queue, popFromQueue] = usePlaylistStore((state) => [
+		state.queue,
+		state.popFromQueue,
+	]);
 
-	const seekQueue = useVideoStore((state) => state.seekQueue);
-	let popFromSeekQueue = useVideoStore((state) => state.popFromSeekQueue);
+	const [
+		seekQueue,
+		popFromSeekQueue,
+		currentVideo,
+		setPlaylistState,
+		setCurrentVideo,
+		videoState,
+		setVideoState,
+	] = useVideoStore((state) => [
+		state.seekQueue,
+		state.popFromSeekQueue,
+		state.currentVideo,
+		state.setPlaylistState,
+		state.setCurrentVideo,
+		state.videoState,
+		state.setVideoState,
+	]);
 
-	let currentVideo = useVideoStore((state) => state.currentVideo);
-	// let playlistState = useVideoStore((state) => state.playlistState);
-	let setPlaylistState = useVideoStore((state) => state.setPlaylistState);
+	// watch history store
+	let [
+		addToWatchHistory,
+		committedTs,
+		setCommittedTs,
+		addToCommittedTs,
+		watchTimeBuffer,
+		updateWatchTimeBuffer,
+		watchTimeArchive,
+		updateWatchTimeArchive,
+		flushWatchTimeBuffer,
+	] = useWatchHistoryStore((state) => [
+		state.addToWatchHistory,
+		state.committedTs,
+		state.setCommittedTs,
+		state.addToCommittedTs,
+		state.watchTimeBuffer,
+		state.updateWatchTimeBuffer,
+		state.watchTimeArchive,
+		state.updateWatchTimeArchive,
+		state.flushWatchTimeBuffer,
+	]);
 
-	let setCurrentVideo = useVideoStore((state) => state.setCurrentVideo);
-	let videoState = useVideoStore((state) => state.videoState);
-	let setVideoState = useVideoStore((state) => state.setVideoState);
+	const [commitTimeInterval, setCommitTimeInterval] = useState(null);
+	const [flushTimeInterval, setFlushTimeInterval] = useState(null);
 
 	const [playerVideoId, setPlayerVideoId] = useState(currentVideo);
 
@@ -40,6 +80,90 @@ function VideoPlayer() {
 	const [videoStateVisible, setVideoStateVisible] = useState(false);
 
 	const draggableHandle = useRef(null);
+
+	/* when video changes
+					- flush 
+					- reset committedTs
+					- clear previous interval to flush 
+					- start interval timer to flush	watch duration buffer  [10s]
+					- clear previous interval to commit time
+					- start interval timer to commit time [5s]
+	*/
+	useEffect(() => {
+		console.log("CURRENT VIDEO", currentVideo);
+		// flushing
+		flushWatchTimeBuffer(user?.id);
+
+		// resetting committedTs
+		setCommittedTs(0);
+
+		// clearing previous interval to flush
+		console.log("Clearing previous flushTimeInterval");
+		if (flushTimeInterval) {
+			clearInterval(flushTimeInterval);
+		}
+
+		// clearing previous commitTimeInterval
+		console.log("Clearing previous commitTimeInterval");
+		if (commitTimeInterval) {
+			clearInterval(commitTimeInterval);
+		}
+
+		if (currentVideo) {
+			// TODO : send to watch history
+			Fetch({
+				url: "http://localhost:4000/watch-history/create",
+				method: "POST",
+				// TODO : fix thiss
+				data: {
+					user_id: user?.id || 9,
+					asana_id: currentVideo?.video?.id,
+					playlist_id: null,
+				},
+			})
+				.then((res) => {})
+				.catch((err) => {});
+
+			// starting interval timer to flush watch duration buffer
+			console.log("Starting new flushTimeInterval");
+			setFlushTimeInterval(
+				setInterval(() => {
+					flushWatchTimeBuffer(user?.id);
+				}, 10000)
+			);
+
+			// starting interval timer to commit time
+			console.log("Starting new commitTimeInterval");
+			setCommitTimeInterval(
+				setInterval(() => {
+					console.log("COMMITTING TIME", player.current.currentTime);
+					// TODO : fix this
+					updateWatchTimeBuffer({
+						user_id: 9,
+						asana_id: currentVideo?.video?.id,
+						playlist_id: null,
+						currentTime: player.current.currentTime,
+					});
+					addToCommittedTs(player.current.currentTime);
+				}, 5000)
+			);
+		}
+	}, [currentVideo]);
+
+	useEffect(() => {
+		if (watchTimeArchive && watchTimeArchive.length > 0) {
+			console.log(
+				"DURATIONS : ",
+				watchTimeArchive?.reduce((acc, curr) => {
+					if (!acc[curr.asana_id]) {
+						acc[curr.asana_id] = 0;
+					}
+					acc[curr.asana_id] += curr.timedelta;
+					return acc;
+				}, {})
+			);
+		}
+	}, [watchTimeArchive]);
 
 	// when theres a pause or play, the state is shown for 300ms
 	useEffect(() => {
@@ -77,10 +201,12 @@ function VideoPlayer() {
 			if (seekTime && player.current) {
 				player.current.currentTime =
 					player.current.currentTime + Number(seekTime);
+
+				addToCommittedTs(player.current.currentTime);
 			}
 			popFromSeekQueue(0);
 		}
-	}, [seekQueue, popFromSeekQueue]);
+	}, [seekQueue, popFromSeekQueue, addToCommittedTs]);
 
 	// change play/pause based on video state
 	useEffect(() => {
@@ -148,6 +274,7 @@ function VideoPlayer() {
 	const moveToTimestamp = (t) => {
 		if (player.current) {
 			player.current.currentTime = t;
+			addToCommittedTs(player.current.currentTime);
 		}
 	};
 
