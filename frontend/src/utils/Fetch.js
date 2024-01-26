@@ -2,28 +2,35 @@ import axios from "axios";
 import useUserStore from "../store/UserStore";
 
 export const Fetch = ({
-	url = null,
-	method = "GET",
-	token = null,
-	data = null,
-	params = {},
-	headers = {},
+  url = null,
+  method = "GET",
+  token = null,
+  data = null,
+  responseType,
+  params = {},
+  headers = {},
 }) => {
-	let h = { ...headers };
+  let h = { ...headers };
 
-	if (token) {
-		h["token"] = token || useUserStore.getState().accessToken;
-	}
+  if (token) {
+    h["token"] = token || useUserStore.getState().accessToken;
+  }
 
-	if (data) {
-		h["Content-Type"] = "application/json";
-	}
+  if (data) {
+    h["Content-Type"] = "application/json";
+  }
 
-	return axios.request({
-		method: method,
-		headers: h,
-		url: url,
-		data: data,
-		params: params,
-	});
+  let req = {
+    method: method,
+    headers: h,
+    url: url,
+    data: data,
+    params: params,
+  };
+
+  if (responseType) {
+    req.responseType = responseType;
+  }
+
+  return axios.request(req);
 };

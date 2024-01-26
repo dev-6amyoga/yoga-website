@@ -173,6 +173,9 @@ export default function AllAsanas() {
         setAsanas((prevAsanas) =>
           prevAsanas.map((asana) => (asana.id === asanaId ? modalData : asana))
         );
+        setFilteredTransitions((prevAsanas) =>
+          prevAsanas.map((asana) => (asana.id === asanaId ? modalData : asana))
+        );
         setModalState(false);
       } else {
         toast("Error updating asana:", response.status);

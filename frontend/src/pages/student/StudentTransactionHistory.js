@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../../store/UserStore";
 import { toast } from "react-toastify";
@@ -10,6 +10,8 @@ import Papa from "papaparse";
 export default function StudentTransactionHistory() {
   let user = useUserStore((state) => state.user);
   const [transactions, setTransactions] = useState([]);
+  const downloadATag = useRef(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -39,37 +41,48 @@ export default function StudentTransactionHistory() {
     const link = document.createElement("a");
     if (link.download !== undefined) {
       const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", "data.csv");
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      downloadATag.current.setAttribute("href", url);
+      downloadATag.current.setAttribute("download", "data.csv");
+      // downloadATag.current.style.visibility = "hidden";
+      downloadATag.current.click();
     }
   };
-  const subscribePlan = async (rowData) => {
+  // here req sent
+  const subscribePlan = async (rowData, setLoading) => {
     console.log(rowData.user_id, rowData.transaction_order_id);
     try {
-      const response = await fetch(
-        "http://localhost:4000/invoice/student/plan",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: rowData.user_id,
-            transaction_order_id: rowData.transaction_order_id,
-          }),
-        }
+      setLoading(true);
+      const response = await Fetch({
+        url: "http://localhost:4000/invoice/student/plan",
+        method: "POST",
+        responseType: "arraybuffer",
+        data: JSON.stringify({
+          user_id: rowData.user_id,
+          transaction_order_id: rowData.transaction_order_id,
+        }),
+      });
+      // console.log(typeof response.data);
+      const dataBuffer = new Blob([response.data], { type: "application/pdf" });
+      const url = URL.createObjectURL(dataBuffer);
+      console.log(downloadATag.current);
+
+      downloadATag.current.setAttribute("href", url);
+      downloadATag.current.setAttribute(
+        "download",
+        `6AMYOGA_plan_purchase_${rowData.transaction_order_id}.pdf`
       );
-      const data = await response.json();
-      console.log(data);
+      downloadATag.current.click();
+      // console.log("DONE!", dataBuffer);
+      setLoading(false);
     } catch (err) {
+      console.log(err);
       toast(err);
+      setLoading(false);
     }
+    // setLoading(false)
   };
-  const renderAction = (value, rowData, index) => {
+  const RenderAction = (value, rowData, index) => {
+    const [loading, setLoading] = useState(false);
     return (
       <Grid.Container gap={0.1}>
         <Grid>
@@ -78,8 +91,10 @@ export default function StudentTransactionHistory() {
             auto
             scale={1 / 3}
             font="12px"
+            disabled={loading}
+            loading={loading}
             onClick={() => {
-              subscribePlan(rowData);
+              subscribePlan(rowData, setLoading);
             }}
           >
             Download Invoice
@@ -94,6 +109,9 @@ export default function StudentTransactionHistory() {
         <StudentNavbar />
       </div>
       <div className="flex flex-col items-center justify-center py-20">
+        {/* <a className="" ref={downloadATag} target="_blank" rel="noreferer">
+          TAGGGGGG
+        </a> */}
         <div className="elements">
           <Button
             onClick={() => {
@@ -137,7 +155,7 @@ export default function StudentTransactionHistory() {
               prop="operation"
               label="Download Invoice"
               width={150}
-              render={renderAction}
+              render={RenderAction}
             />
           </Table>
         </div>

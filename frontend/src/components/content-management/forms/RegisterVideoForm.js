@@ -145,12 +145,6 @@ export default function RegisterVideoForm() {
       combinedData.mat_starting_position === null ||
       combinedData.mat_ending_position === null
     ) {
-      // c3b045a15ec9a79d383d49c3c9acb278
-      if (combinedData.person_starting_position === null) {
-        console.log("nulnullnull");
-      } else {
-        console.log(combinedData.person_starting_position);
-      }
       toast("Missing required fields!");
     } else if (withAudio === false && muted === false && counter === false) {
       toast("One or more of the audio options must be selected!");
@@ -159,8 +153,14 @@ export default function RegisterVideoForm() {
       for (var i = 0; i !== data.length; i++) {
         if (data[i].asana_name === combinedData.asana_name) {
           if (data[i].language === combinedData.language) {
-            toast("Asana already exists with the same language!");
-            toastShown = true;
+            if (
+              data[i].counter === combinedData.counter &&
+              data[i].muted === combinedData.muted &&
+              data[i].asana_withAudio === combinedData.asana_withAudio
+            ) {
+              toast("Asana already exists with the same language!");
+              toastShown = true;
+            }
           } else if (data[i].asana_videoID === combinedData.asana_videoID) {
             toast("Asana already exists with the same Video ID !");
             toastShown = true;
@@ -276,11 +276,7 @@ export default function RegisterVideoForm() {
           </Select>
           <br />
           <Text h5>Audio Settings </Text>
-          <Checkbox.Group
-            value={["with_audio"]}
-            onChange={hello}
-            name="audio_settings"
-          >
+          <Checkbox.Group value={[]} onChange={hello} name="audio_settings">
             <Checkbox value="with_audio">With Audio?</Checkbox>
             <Checkbox value="muted">Muted?</Checkbox>
             <Checkbox value="with_timer">With Timer?</Checkbox>
