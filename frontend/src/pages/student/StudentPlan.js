@@ -341,7 +341,7 @@ function StudentPlan() {
 
   const registerUserPlan = async (order_id) => {
     toBeRegistered.transaction_order_id = order_id;
-    console.log(toBeRegistered);
+    toBeRegistered.user_type = "STUDENT";
     try {
       const response = await fetch("http://localhost:4000/user-plan/register", {
         method: "POST",
@@ -352,6 +352,21 @@ function StudentPlan() {
       });
       if (response.ok) {
         toast("Plan subscribed successfully", { type: "success" });
+        //invoice download here!! order_id, toBeRegistered.user_id
+        const response1 = await Fetch({
+          url: "http://localhost:4000/invoice/student/mail-invoice",
+          method: "POST",
+          data: JSON.stringify({
+            user_id: toBeRegistered.user_id,
+            transaction_order_id: order_id,
+          }),
+        });
+        if (response1.ok) {
+          console.log(response1);
+          toast("Invoice has been sent to your email ID!");
+        } else {
+          console.log(response1);
+        }
       } else {
         const errorData = await response.json();
         toast(errorData.error);

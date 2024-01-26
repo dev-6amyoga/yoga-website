@@ -1,5 +1,6 @@
 const express = require("express");
-
+const pdfkit = require("pdfkit");
+const fs = require("fs");
 const eta = require("eta");
 const path = require("path");
 const {
@@ -7,6 +8,8 @@ const {
   HTTP_OK,
   HTTP_INTERNAL_SERVER_ERROR,
 } = require("../utils/http_status_codes");
+const { mailTransporter } = require("../init.nodemailer");
+
 const { Transaction } = require("../models/sql/Transaction");
 const { Plan } = require("../models/sql/Plan");
 const { User } = require("../models/sql/User");
@@ -206,17 +209,6 @@ router.post("/student/plan", async (req, res) => {
     plan: plan.toJSON(),
     plan_pricing: pricing.toJSON(),
   };
-  // const content = await renderer.renderAsync("/student/plan-purchase", details);
-  // return res.status(200).send(
-  //   await renderer.renderAsync("/student/plan-purchase", {
-  //     transaction: transaction,
-  //     user: user,
-  //     userPlan: userPlan,
-  //     plan: plan,
-  //     pricing: pricing,
-  //   })
-  // );
-
   const content = await renderer.renderAsync("/student/plan-purchase", details);
 
   HTMLToPDF.generatePdf(
@@ -235,4 +227,108 @@ router.post("/student/plan", async (req, res) => {
     });
 });
 
+router.post("/student/mail-invoice", async (req, res) => {
+  const { user_id, transaction_order_id } = req.body;
+  if (!user_id || !transaction_order_id) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ message: "Missing required fields" });
+  }
+
+  const transaction = await Transaction.findOne({
+    where: { transaction_order_id: transaction_order_id },
+  });
+  if (!transaction) {
+    return res
+      .status(HTTP_NOT_FOUND)
+      .json({ message: "Transaction not found" });
+  }
+  const user = await User.findOne({
+    where: { user_id: user_id },
+  });
+  if (!user) {
+    return res.status(HTTP_NOT_FOUND).json({ message: "User not found" });
+  }
+  const userPlan = await UserPlan.findOne({
+    where: { transaction_order_id: transaction_order_id, user_id: user_id },
+  });
+  if (!userPlan) {
+    return res.status(HTTP_NOT_FOUND).json({ message: "User plan not found" });
+  }
+
+  const plan = await Plan.findOne({
+    where: { plan_id: userPlan.plan_id },
+  });
+  if (!plan) {
+    return res
+      .status(HTTP_NOT_FOUND)
+      .json({ message: "Plan details not found" });
+  }
+
+  const pricing = await PlanPricing.findOne({
+    where: { plan_id: userPlan.plan_id, currency_id: 1 },
+  });
+  if (!pricing) {
+    return res
+      .status(HTTP_NOT_FOUND)
+      .json({ message: "Pricing details not found" });
+  }
+
+  const details = {
+    user: user.toJSON(),
+    transaction: transaction.toJSON(),
+    user_plan: userPlan.toJSON(),
+    plan: plan.toJSON(),
+    plan_pricing: pricing.toJSON(),
+  };
+
+  const content = await renderer.renderAsync("/student/plan-purchase", details);
+
+  const pdfBuffer = await new Promise((resolve, reject) => {
+    const pdfStream = new pdfkit();
+    const buffers = [];
+    pdfStream.on("data", (data) => {
+      buffers.push(data);
+    });
+    pdfStream.on("end", () => {
+      resolve(Buffer.concat(buffers));
+    });
+    pdfStream.on("error", reject);
+    pdfStream.end(content);
+  });
+
+  // const pdfBuffer = await HTMLToPDF.generatePdf(
+  //   { content: content },
+  //   { format: "A4", printBackground: true, preferCSSPageSize: true }
+  // ).toBuffer();
+
+  mailTransporter.sendMail(
+    {
+      from: "dev.6amyoga@gmail.com",
+      to: user.email,
+      subject: "6AM Yoga | Invoice for your recent payment",
+      text: "Welcome to 6AM Yoga! Please find attached, the invoice for your recent transaction!",
+      attachments: [
+        {
+          filename: "invoice.pdf",
+          content: pdfBuffer,
+          encoding: "base64",
+        },
+      ],
+    },
+    async (err, info) => {
+      if (err) {
+        await t.rollback();
+        console.error(err);
+        res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+          message: "Internal server error; try again",
+        });
+      } else {
+        res.status(HTTP_OK).json({
+          message: "Email sent",
+        });
+      }
+    }
+  );
+});
 module.exports = router;
