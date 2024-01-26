@@ -49,6 +49,10 @@ const UserPlan = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    user_type: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     referral_code_id: {
       type: DataTypes.INTEGER,
       allowNull: true,

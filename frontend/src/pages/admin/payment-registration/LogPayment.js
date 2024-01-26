@@ -354,6 +354,7 @@ export default function LogPayment() {
       user_id: user_id,
       plan_id: plan_id,
       current_status: currentStatus,
+      user_type: userType === "STUDENT" ? "STUDENT" : "INSTITUTE",
     };
     // current_status;
     const transactionData = {

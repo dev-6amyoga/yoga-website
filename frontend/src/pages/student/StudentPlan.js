@@ -107,6 +107,7 @@ function StudentPlan() {
           }
         );
         const data = await response.json();
+        console.log(data);
         if (data["userPlan"].length != 0) {
           setMyPlans(data["userPlan"]);
           for (var i = 0; i !== data["userPlan"].length; i++) {
@@ -215,6 +216,7 @@ function StudentPlan() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(planId);
     if (planId !== 0) {
       if (currentStatus !== "ACTIVE") {
         toast(
@@ -239,6 +241,7 @@ function StudentPlan() {
         amount: cardData.pricing[0].denomination * 118,
         currency: "INR",
         current_status: currentStatus,
+        user_type: "STUDENT",
       };
       setToBeRegistered(userPlanData);
       console.log(userPlanData);
