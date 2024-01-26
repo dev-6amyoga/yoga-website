@@ -109,9 +109,9 @@ export default function StudentTransactionHistory() {
         <StudentNavbar />
       </div>
       <div className="flex flex-col items-center justify-center py-20">
-        {/* <a className="" ref={downloadATag} target="_blank" rel="noreferer">
-          TAGGGGGG
-        </a> */}
+        <a className="" ref={downloadATag} target="_blank" rel="noreferer">
+          {/* TAGGGGGG */}
+        </a>
         <div className="elements">
           <Button
             onClick={() => {

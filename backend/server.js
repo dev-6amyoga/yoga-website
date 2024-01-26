@@ -39,7 +39,7 @@ const {
   DiscountCouponApplicablePlan,
 } = require("./models/sql/DiscountCouponApplicablePlan");
 const { Invite } = require("./models/sql/Invite");
-
+const { EmailVerification } = require("./models/sql/EmailVerification");
 // routers
 const asanaRouter = require("./routes/Asana");
 const authRouter = require("./routes/Auth");

@@ -28,7 +28,7 @@ export default function Register({ switchForm }) {
   const [blockStep, setBlockStep] = useState(false);
   const [blockPhoneStep, setBlockPhoneStep] = useState(false);
   const [blockBusinessPhoneStep, setBlockBusinessPhoneStep] = useState(false);
-
+  const [token, setToken] = useState("");
   const [role, setRole] = useState("STUDENT"); // STUDENT | INSTITUTE_OWNER
   const [regMode, setRegMode] = useState("NORMAL"); // NORMAL | GOOGLE
 
@@ -64,13 +64,24 @@ export default function Register({ switchForm }) {
     role,
   ]);
 
-  useEffect(() => {
-    console.log(blockStep);
-  }, [blockStep]);
-
   // const navigate = useNavigate();
 
   const [billingAddressSame, setBillingAddressSame] = useState(true);
+
+  const getEmailVerification = async (token) => {
+    Fetch({
+      url: "http://localhost:4000/invite/get-email-verification-by-token",
+      method: "POST",
+      data: {
+        token: token,
+      },
+    }).then((res) => {
+      if (res.status === 200) {
+        console.log(res.data.invite);
+        return res.data.invite;
+      }
+    });
+  };
 
   const handleStudentRegistration = async () => {
     const newUser = {
@@ -79,53 +90,58 @@ export default function Register({ switchForm }) {
       role_name: "STUDENT",
       is_google_login: googleInfo && googleInfo?.verified ? true : false,
     };
-
-    console.log(newUser);
-
-    try {
-      let url = "http://localhost:4000/auth/register";
-      if (googleInfo && googleInfo?.verified) {
-        url += "-google";
-        newUser.client_id = clientID;
-        newUser.jwt_token = googleInfo?.jwt_token;
+    Fetch({
+      url: "http://localhost:4000/invite/get-email-verification-by-token",
+      method: "POST",
+      data: {
+        token: token,
+      },
+    }).then(async (res) => {
+      if (res.status === 200) {
+        const invite = res.data.invite;
+        if (invite?.is_verified) {
+          try {
+            let url = "http://localhost:4000/auth/register";
+            if (googleInfo && googleInfo?.verified) {
+              url += "-google";
+              newUser.client_id = clientID;
+              newUser.jwt_token = googleInfo?.jwt_token;
+            }
+            const response = await Fetch({
+              url: url,
+              method: "POST",
+              data: newUser,
+            });
+            if (response.status === 200) {
+              toast("New User added successfully! Kindly login.", {
+                type: "success",
+              });
+              setTimeout(() => {
+                window.location.reload();
+              }, 2000);
+            } else {
+              const errorData = response.data;
+              toast(errorData?.message, { type: "error" });
+            }
+          } catch (error) {
+            console.log(error);
+            toast("Error registering new user, try again!", { type: "error" });
+          }
+        } else {
+          toast("Email has not yet been verified!");
+        }
       }
-
-      const response = await Fetch({
-        url: url,
-        method: "POST",
-        data: newUser,
-      });
-
-      if (response.status === 200) {
-        toast("New User added successfully! Kindly login.", {
-          type: "success",
-        });
-
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      } else {
-        const errorData = response.data;
-        toast(errorData?.message, { type: "error" });
-      }
-    } catch (error) {
-      console.log(error);
-      toast("Error registering new user, try again!", { type: "error" });
-    }
+    });
   };
-
   const handleInstituteRegistration = async () => {
     try {
       if (instituteInfo?.pincode)
         instituteInfo.pincode = parseInt(instituteInfo?.pincode);
-      // console.log(instituteInfo?.pincode);
     } catch (err) {
       notify("Pincode must be a number");
       return;
     }
-
     const addressCombination = `${instituteInfo?.address1}, ${instituteInfo?.address2}, ${instituteInfo?.city} - ${instituteInfo?.pincode}, ${instituteInfo?.state}, ${instituteInfo?.country}`;
-
     const user = {
       name: generalInfo?.name,
       username: generalInfo?.username,
@@ -134,9 +150,8 @@ export default function Register({ switchForm }) {
       password: generalInfo?.password,
       confirm_password: generalInfo?.confirm_password,
       role_name: "INSTITUTE_OWNER",
-      is_google_login: googleInfo && googleInfo?.verified,
+      is_google_login: googleInfo && googleInfo?.verified ? true : false,
     };
-
     const institute = {
       name: instituteInfo?.institute_name,
       address1: instituteInfo?.address1,
@@ -146,67 +161,86 @@ export default function Register({ switchForm }) {
         ? addressCombination
         : instituteInfo?.billing_address,
       email: instituteInfo?.contact_email,
-      phone: instituteInfo?.contact_phone,
+      phone: businessPhoneInfo.phone_no
+        ? businessPhoneInfo.phone_no
+        : phoneInfo?.phone_no,
       gstin: instituteInfo?.gstin,
     };
-
-    console.log(user, institute);
-
     Fetch({
-      url: "http://localhost:4000/institute/register",
+      url: "http://localhost:4000/invite/get-email-verification-by-token",
       method: "POST",
-      data: institute,
-    })
-      .then((res) => {
-        if (res && res.status === 200) {
-          toast("Institute added successfully", {
-            type: "success",
-          });
-          user.institute_name = institute.name;
-          let url = "http://localhost:4000/auth/register";
-          if (googleInfo && googleInfo?.verified) {
-            url += "-google";
-          }
+      data: {
+        token: token,
+      },
+    }).then(async (res) => {
+      if (res.status === 200) {
+        const invite = res.data.invite;
+        if (invite?.is_verified) {
           Fetch({
-            url: url,
+            url: "http://localhost:4000/institute/register",
             method: "POST",
-            data: user,
+            data: institute,
           })
             .then((res) => {
               if (res && res.status === 200) {
-                toast("User added successfully", {
+                toast("Institute added successfully", {
                   type: "success",
                 });
-                setTimeout(() => {
-                  window.location.reload();
-                }, 2000);
+                user.institute_name = institute.name;
+                let url = "http://localhost:4000/auth/register";
+                if (googleInfo && googleInfo?.verified) {
+                  url += "-google";
+                }
+                Fetch({
+                  url: url,
+                  method: "POST",
+                  data: user,
+                })
+                  .then((res) => {
+                    if (res && res.status === 200) {
+                      toast("User added successfully", {
+                        type: "success",
+                      });
+                      setTimeout(() => {
+                        window.location.reload();
+                      }, 2000);
+                    } else {
+                      toast("Error registering user", {
+                        type: "error",
+                      });
+                    }
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                    toast(
+                      "Error registering user: " + err?.response?.data?.error,
+                      {
+                        type: "error",
+                      }
+                    );
+                  });
               } else {
-                toast("Error registering user", {
-                  type: "error",
-                });
+                console.log(invite.is_verified);
+                toast("Error registering institute", { type: "error" });
               }
             })
             .catch((err) => {
               console.log(err);
-              toast("Error registering user: " + err?.response?.data?.error, {
-                type: "error",
-              });
+              toast(
+                "Error registering institute: " + err?.response?.data?.error,
+                {
+                  type: "error",
+                }
+              );
             });
         } else {
-          toast("Error registering institute", { type: "error" });
+          toast("Email has not yet been verified!");
         }
-      })
-      .catch((err) => {
-        console.log(err);
-        toast("Error registering institute: " + err?.response?.data?.error, {
-          type: "error",
-        });
-      });
+      }
+    });
   };
-
   const maxSteps = 5;
   const minSteps = 1;
-
   const handleNextStep = () => {
     if (
       (role === "STUDENT" && step < maxSteps) ||
@@ -214,13 +248,31 @@ export default function Register({ switchForm }) {
     )
       setStep((s) => s + 1);
   };
-
   const handlePrevStep = () => {
     if (step > minSteps) setStep((s) => s - 1);
     setBlockStep(false);
     setLoading(false);
   };
 
+  const sendEmail = async () => {
+    toast("Sending email!");
+    console.log(generalInfo);
+    console.log(generalInfo.email_id, generalInfo.name);
+    Fetch({
+      url: "http://localhost:4000/invite/create-email-verification",
+      method: "POST",
+      data: { email: generalInfo.email_id, name: generalInfo.name },
+    })
+      .then((res) => {
+        toast("Email sent successfully", { type: "success" });
+        setToken(res.data.token);
+      })
+      .catch((err) => {
+        toast(`Error : ${err?.response?.data?.message}`, {
+          type: "error",
+        });
+      });
+  };
   const handlePhoneSubmit = (e) => {
     e.preventDefault();
     const formData = getFormData(e);
@@ -286,8 +338,13 @@ export default function Register({ switchForm }) {
               We will send an email to <b>{generalInfo?.email_id}</b>
             </p>
             <p>
-              Please <b className="text-blue-400">verify</b> your email to be
-              able to access your account!
+              Please{" "}
+              <Button onClick={sendEmail}>
+                Verify
+                {/* <b className="text-blue-400">verify</b> */}
+              </Button>{" "}
+              <br />
+              your email to be able to access your account!
             </p>
           </div>
         ) : (
@@ -352,8 +409,13 @@ export default function Register({ switchForm }) {
               We will send an email to <b>{generalInfo?.email_id}</b>
             </p>
             <p>
-              Please <b className="text-blue-400">verify</b> your email to be
-              able to access your account!
+              Please{" "}
+              <Button onClick={sendEmail}>
+                {/* Verify */}
+                <b className="text-blue-400">Verify</b>
+              </Button>{" "}
+              <br />
+              your email to be able to access your account!
             </p>
           </div>
         ) : (
@@ -395,9 +457,9 @@ export default function Register({ switchForm }) {
               loading={loading}
               width={step === 1 ? "100%" : null}
               iconRight={<ArrowRight />}
-              disabled={
-                loading || blockStep || blockPhoneStep || blockBusinessPhoneStep
-              }
+              //   disabled={
+              //     loading || blockStep || blockPhoneStep || blockBusinessPhoneStep
+              //   }
             >
               Next
             </Button>
