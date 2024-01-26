@@ -8,10 +8,6 @@
   margin: 0;
 }
 
-body {
-  margin: 20px;
-}
-
 h2 {
   text-align: center;
   margin: 20px 0;
@@ -30,9 +26,38 @@ h2 {
   <p>
     <strong>Transaction Order ID: </strong> <%= it.transaction.transaction_order_id %>
     <br />
-    <strong>Invoice Date:</strong> <%= it.transaction.payment_date %>
+    <strong>Purchase Date:</strong>           
+          <%
+            const purchaseDate = it.user_plan.purchase_date && new Date(it.user_plan.purchase_date);
+            const formattedDate = purchaseDate?.toISOString().split('T')[0];
+          %>
+          <%= formattedDate %>
     <br />
-    <strong>Buyer Name:</strong> <%= it.user.name %>
+    <table>
+      <thead>
+        <tr>
+          <th>Buyer Name</th>
+          <th>Buyer Email</th>
+          <th>Buyer Phone</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td>
+            <strong><%= it.user.name %></strong>
+            <br /><br/>
+          </td>
+          <td>
+            <%=it.user.email %> 
+          </td>
+          <td>
+            <p> <%=it.user.phone %> </p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
   </p>
   <table>
     <thead>
@@ -66,28 +91,27 @@ h2 {
           </small>
         </td>
         <td>
-          INR <%=it.plan_pricing.denomination %> 
+          INR <%=it.plan_pricing?.denomination %> 
         </td>
         <td>
           <p>INR 0</p>
         </td>
         <td>
-          <p><% const multipliedValue = it.plan_pricing.denomination * 0.18;%>INR <%=multipliedValue%></p><br/>
+          <p><% const multipliedValue = (it.plan_pricing.denomination * 0.18).toFixed(2);%>INR <%=multipliedValue%></p><br/>
           <small>
-            9% SGST (INR <%=it.plan_pricing.denomination %>  * 0.09) = INR <% const sgst =it.plan_pricing.denomination * 0.09%><%=sgst%>
+            9% SGST (INR <%=it.plan_pricing?.denomination %>  * 0.09) = INR <% const sgst = (it.plan_pricing.denomination * 0.09).toFixed(2) %><%=sgst%>
           </small><br/>
           <small>
-            9% CGST (INR <%=it.plan_pricing.denomination %>  * 0.09) = INR <% const cgst =it.plan_pricing.denomination * 0.09%><%=cgst%>
+            9% CGST (INR <%=it.plan_pricing?.denomination %>  * 0.09) = INR <% const cgst = (it.plan_pricing.denomination * 0.09).toFixed(2) %><%=cgst%>
           </small>
         </td>
         <td>
-          <p>INR <% const res = it.plan_pricing.denomination * 1.18;%><%=res%></p>
+          <p>INR <% const res = (it.plan_pricing?.denomination * 1.18).toFixed(2);%><%=res%></p>
         </td>
       </tr>
     </tbody>
   </table>
 
   <p>
-    <strong>Amount Paid:</strong> Rs.2360 (Rupees Two Thousand Three Hundred and Sixty Only)
   </p>
 </div>
