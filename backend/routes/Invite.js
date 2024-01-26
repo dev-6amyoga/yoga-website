@@ -8,11 +8,12 @@ const {
 } = require("../utils/http_status_codes");
 
 const { Invite } = require("../models/sql/Invite");
-
+const { EmailVerification } = require("../models/sql/EmailVerification");
 const { sequelize } = require("../init.sequelize");
 const { User } = require("../models/sql/User");
 const { Role } = require("../models/sql/Role");
 const tokenUtils = require("../utils/invite_token");
+const emailVerificationToken = require("../utils/email_verification_token");
 const { mailTransporter } = require("../init.nodemailer");
 const { Institute } = require("../models/sql/Institute");
 
@@ -114,13 +115,6 @@ router.post("/get-by-token", async (req, res) => {
     });
   }
 });
-
-// if (!created) {
-//   await t.rollback();
-//   return res.status(HTTP_BAD_REQUEST).json({
-//     message: "Teacher already exists with the given email",
-//   });
-// }
 
 router.post("/create", async (req, res) => {
   const { user_id, name, email, phone, invite_type } = req.body;
@@ -628,6 +622,150 @@ router.post("/get-all-by-inviterid", async (req, res) => {
       invites,
     });
   } catch (err) {
+    console.log(err);
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
+  }
+});
+
+router.post("/create-email-verification", async (req, res) => {
+  const { name, email } = req.body;
+  if (!email || !name) {
+    return res.status(HTTP_BAD_REQUEST).json({
+      message: "Missing required fields",
+    });
+  }
+  const t = await sequelize.transaction();
+  try {
+    const token = tokenUtils.enc_token(name, email);
+    console.log("TOKEN : ", token);
+    mailTransporter.sendMail(
+      {
+        from: "dev.6amyoga@gmail.com",
+        to: email,
+        subject: "6AM Yoga | Teacher Invite",
+        // text: "Welcome to 6AM Yoga!",
+        text: `Welcome to 6AM Yoga! Please click on the link to verify your email: http://localhost:3000/auth/verify-email?token=${token}`,
+      },
+      async (err, info) => {
+        if (err) {
+          await t.rollback();
+          console.error(err);
+          res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+            message: "Internal server error; try again",
+          });
+        } else {
+          await EmailVerification.create(
+            {
+              token: token,
+              email: email,
+              name: name,
+              is_verified: false,
+              expiry_date: new Date(Date.now() + 30 * 60 * 1000),
+            },
+            { transaction: t }
+          );
+          await t.commit();
+          res.status(HTTP_OK).json({
+            message: "Email sent",
+            token: token,
+          });
+        }
+      }
+    );
+    return res;
+  } catch (err) {
+    console.log(err);
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
+  }
+});
+
+router.post("/get-email-verification-by-token", async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(HTTP_BAD_REQUEST).json({
+      message: "Missing required fields",
+    });
+  }
+
+  try {
+    const invite = await EmailVerification.findOne({
+      where: { token },
+    });
+
+    if (!invite) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        message: "Invalid token",
+      });
+    }
+    return res.status(HTTP_OK).json({
+      invite: {
+        ...invite.toJSON(),
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
+  }
+});
+
+router.post("/email-verified", async (req, res) => {
+  const { token } = req.body;
+  console.log(token);
+  if (!token) {
+    return res.status(HTTP_BAD_REQUEST).json({
+      message: "Missing required fields",
+    });
+  }
+  const t = await sequelize.transaction();
+  try {
+    // get invite
+    const invite = await EmailVerification.findOne({
+      where: { token: token },
+    });
+
+    if (!invite) {
+      await t.rollback();
+      return res.status(HTTP_BAD_REQUEST).json({
+        message: "Invite not found",
+      });
+    }
+    if (invite.expiry_date < new Date()) {
+      await t.rollback();
+      return res.status(HTTP_BAD_REQUEST).json({
+        message: "Invite expired",
+      });
+    }
+    if (invite.is_verified === true) {
+      await t.rollback();
+      return res.status(HTTP_BAD_REQUEST).json({
+        message: "Invite already accepted",
+      });
+    }
+    // accept
+    const n = await EmailVerification.update(
+      {
+        is_verified: true,
+      },
+      {
+        where: {
+          token: token,
+        },
+        transaction: t,
+      }
+    );
+    await t.commit();
+    return res.status(HTTP_OK).json({
+      message: "Successfully verified",
+    });
+  } catch (err) {
+    await t.rollback();
     console.log(err);
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
       message: "Internal server error",
