@@ -77,6 +77,7 @@ router.post("/register", async (req, res) => {
     plan_id,
     current_status,
     transaction_order_id,
+    user_type,
   } = req.body;
   console.log("registering!!");
 
@@ -87,7 +88,8 @@ router.post("/register", async (req, res) => {
     !validity_to ||
     !purchase_date ||
     !current_status ||
-    !transaction_order_id
+    !transaction_order_id ||
+    !user_type
   )
     return res
       .status(HTTP_BAD_REQUEST)
@@ -163,22 +165,10 @@ router.post("/register", async (req, res) => {
         plan_id: plan_id,
         current_status: current_status,
         transaction_order_id: transaction_order_id,
+        user_type: user_type,
       },
       { transaction: t }
     );
-
-    // const x = await UserInstitutePlanRole.update(
-    //   {
-    //     user_id: user_id,
-    //     plan_id: plan_id,
-    //   },
-    //   {
-    //     where: {
-    //       user_id: user_id,
-    //     },
-    //   }
-    // );
-
     await timeout(t.commit(), 5000, new Error("timeout; try again"));
     return res.status(HTTP_OK).json({ userPlan: newUserPlan });
   } catch (error) {

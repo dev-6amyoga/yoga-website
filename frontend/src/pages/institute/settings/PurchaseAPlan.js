@@ -26,7 +26,9 @@ export default function PurchaseAPlan() {
   const [refreshLoading, setRefreshLoading] = useState(false);
   const notify = (x) => toast(x);
   const [teachers, setTeachers] = useState([]);
+  const [transactionId, setTransactionId] = useState("");
   const [allPlans, setAllPlans] = useState([]);
+  const [currentStatus, setCurrentStatus] = useState("ACTIVE");
   const [modifiedPlans, setModifiedPlans] = useState([]);
   const [planId, setPlanId] = useState(0);
   const [showCard, setShowCard] = useState(false);
@@ -46,11 +48,9 @@ export default function PurchaseAPlan() {
     endDate.setUTCDate(today.getUTCDate() + validityDays);
     return endDate.toISOString().split("T")[0];
   };
-
   const handleValidityChange = (validity) => {
     setSelectedValidity(validity);
   };
-
   useEffect(() => {
     for (var x = 0; x < allPlans.length; x++) {
       var newPlan = {
@@ -82,11 +82,11 @@ export default function PurchaseAPlan() {
           }
         );
         const data = await response.json();
-        if (data["userPlan"]) {
-          console.log(data["userPlan"]);
-          console.log(data["userPlan"]["plan_id"]);
+        console.log(data);
+        if (data["userPlan"].length != 0) {
           setPlanId(data["userPlan"]["plan_id"]);
         } else {
+          setPlanId(0);
           notify("You don't have a plan yet! Purchase one to continue");
         }
       } catch (error) {
@@ -159,8 +159,7 @@ export default function PurchaseAPlan() {
     getTeachers();
   }, [getTeachers]);
 
-  async function registerUserPlan() {
-    console.log("in reg user plan");
+  const registerUserPlan = async (t1) => {
     const discount_coupon_id = document.querySelector(
       "#discount_coupon_id"
     ).value;
@@ -177,8 +176,12 @@ export default function PurchaseAPlan() {
       referral_code_id: 0,
       amount: 100,
       currency: "INR",
+      current_status: currentStatus,
+      transaction_order_id: t1,
+      user_type: "INSTITUTE",
     };
-    // console.log(userPlanData);
+    console.log(userPlanData);
+    console.log(t1);
     try {
       const response = await fetch("http://localhost:4000/user-plan/register", {
         method: "POST",
@@ -188,21 +191,25 @@ export default function PurchaseAPlan() {
         body: JSON.stringify(userPlanData),
       });
       if (response.ok) {
-        for (var t1 = 0; t1 < teachers.length; t1++) {
+        console.log("registered");
+        for (var te1 = 0; te1 < teachers.length; te1++) {
           const userPlanData = {
             purchase_date: formattedDate,
             validity_from: formattedDate,
             validity_to: calculateEndDate(selectedValidity),
             cancellation_date: null,
             auto_renewal_enabled: false,
-            user_id: teachers[t1].user_id,
+            user_id: teachers[te1].user_id,
             plan_id: cardData.plan_id,
             discount_coupon_id: 0,
             referral_code_id: 0,
             amount: 100,
             currency: "INR",
+            current_status: currentStatus,
+            transaction_order_id: t1 + "T1_TEACHER" + String(te1),
+            user_type: "INSTITUTE",
           };
-          // console.log(userPlanData);
+          console.log(userPlanData);
           try {
             const response = await fetch(
               "http://localhost:4000/user-plan/register",
@@ -217,6 +224,7 @@ export default function PurchaseAPlan() {
             if (response.ok) {
               notify("New User-Plan added successfully");
             } else {
+              console.log(response);
               notify("An error occured!");
             }
           } catch (err) {
@@ -230,7 +238,7 @@ export default function PurchaseAPlan() {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
