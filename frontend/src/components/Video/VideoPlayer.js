@@ -7,6 +7,7 @@ import useVideoStore, {
 } from "../../store/VideoStore";
 // import asanas from "../../data/asanas.json";
 import { Stream } from "@cloudflare/stream-react";
+import YouTube from "react-youtube";
 
 import { Button, Loading } from "@geist-ui/core";
 import { useState } from "react";
@@ -21,7 +22,6 @@ import VideoPlaybar from "./VideoPlaybar";
 
 function VideoPlayer() {
   const user = useUserStore((state) => state.user);
-
   const player = useRef(null);
   const [queue, popFromQueue] = usePlaylistStore((state) => [
     state.queue,
@@ -362,7 +362,7 @@ function VideoPlayer() {
               <Button onClick={handleStartPlaylist}>Start Playlist</Button>
             </div>
           ) : (
-            <div className="text-lg">No video in queue</div>
+            <div className="text-lg"> </div>
           )}
         </div>
       </div>

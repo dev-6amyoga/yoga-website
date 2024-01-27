@@ -7,42 +7,47 @@ import StudentProfile from "../pages/student/StudentProfile";
 import StudentSettings from "../pages/student/StudentSettings";
 import StudentTransactionHistory from "../pages/student/StudentTransactionHistory";
 import StudentWatchHistory from "../pages/student/StudentWatchHistory";
+import ContactUs from "../pages/student/ContactUs";
 export const StudentRoutes = [
-	{
-		path: "/student/playlist-view",
-		element: <StudentHome />,
-	},
+  {
+    path: "/student/playlist-view",
+    element: <StudentHome />,
+  },
+  {
+    path: "/student/contact-us",
+    element: <ContactUs />,
+  },
 
-	{
-		path: "/student/purchase-a-plan",
-		element: <StudentPlan />,
-	},
-	{
-		path: "/student/free-videos",
-		element: <FreeVideos />,
-	},
-	{
-		path: "/student",
-		element: <StudentMain />,
-	},
-	{
-		path: "/student/register-new-playlist",
-		element: <RegisterNewPlaylistStudent />,
-	},
-	{
-		path: "/student/my-profile",
-		element: <StudentProfile />,
-	},
-	{
-		path: "/student/settings",
-		element: <StudentSettings />,
-	},
-	{
-		path: "/student/transactions",
-		element: <StudentTransactionHistory />,
-	},
-	{
-		path: "/student/watch-history",
-		element: <StudentWatchHistory />,
-	},
+  {
+    path: "/student/purchase-a-plan",
+    element: <StudentPlan />,
+  },
+  {
+    path: "/student/free-videos",
+    element: <FreeVideos />,
+  },
+  {
+    path: "/student",
+    element: <StudentMain />,
+  },
+  {
+    path: "/student/register-new-playlist",
+    element: <RegisterNewPlaylistStudent />,
+  },
+  {
+    path: "/student/my-profile",
+    element: <StudentProfile />,
+  },
+  {
+    path: "/student/settings",
+    element: <StudentSettings />,
+  },
+  {
+    path: "/student/transactions",
+    element: <StudentTransactionHistory />,
+  },
+  {
+    path: "/student/watch-history",
+    element: <StudentWatchHistory />,
+  },
 ];
