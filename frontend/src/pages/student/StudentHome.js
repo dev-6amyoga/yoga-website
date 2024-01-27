@@ -8,8 +8,18 @@ import VideoQueue from "../../components/Video/VideoQueue";
 import useUserStore from "../../store/UserStore";
 import { useState, useEffect } from "react";
 import { Stream } from "@cloudflare/stream-react";
-
+import "./MovingText.css";
 function StudentHome() {
+  const [position, setPosition] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPosition((prevPosition) => (prevPosition + 1) % 100);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
+
   let user = useUserStore((state) => state.user);
   const [userPlan, setUserPlan] = useState({});
   const [planId, setPlanId] = useState(0);
@@ -44,6 +54,17 @@ function StudentHome() {
       {/* <div>Welcome {user.name}!</div> */}
       <br />
       <br />
+      <div className="moving-text-bar">
+        <div
+          className="moving-text"
+          style={{ transform: `translateX(${position}%)` }}
+        >
+          This video is for personal self-practice only and not to be used by
+          teachers for taking classes. Any unauthorized use may kindly be
+          notified to : +91-9980802351
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-7 gap-4 my-10">
           <VideoPlayerWrapper />
