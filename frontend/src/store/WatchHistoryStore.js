@@ -68,7 +68,7 @@ const useWatchHistoryStore = create((set, get) => ({
 			method: "POST",
 			token: true,
 			data: {
-				user_id: user_id || 9,
+				user_id: user_id,
 				watch_time_logs,
 			},
 		})
