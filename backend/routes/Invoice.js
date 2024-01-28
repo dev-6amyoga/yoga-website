@@ -7,6 +7,7 @@ const {
   HTTP_BAD_REQUEST,
   HTTP_OK,
   HTTP_INTERNAL_SERVER_ERROR,
+  HTTP_NOT_FOUND,
 } = require("../utils/http_status_codes");
 const { mailTransporter } = require("../init.nodemailer");
 
@@ -211,20 +212,20 @@ router.post("/student/plan", async (req, res) => {
   };
   const content = await renderer.renderAsync("/student/plan-purchase", details);
 
-  HTMLToPDF.generatePdf(
-    { content: content },
-    { format: "A4", printBackground: true, preferCSSPageSize: true }
-  )
-    .then((buffer) => {
-      return res
-        .status(200)
-        .header("Content-Type", "application/pdf")
-        .send(buffer);
-    })
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).send();
-    });
+  // HTMLToPDF.generatePdf(
+  //   { content: content },
+  //   { format: "A4", printBackground: true, preferCSSPageSize: true }
+  // )
+  //   .then((buffer) => {
+  //     return res
+  //       .status(200)
+  //       .header("Content-Type", "application/pdf")
+  //       .send(buffer);
+  //   })
+  //   .catch((err) => {
+  //     console.log(err);
+  //     return res.status(500).send();
+  //   });
 });
 
 router.post("/student/mail-invoice", async (req, res) => {
@@ -284,51 +285,42 @@ router.post("/student/mail-invoice", async (req, res) => {
 
   const content = await renderer.renderAsync("/student/plan-purchase", details);
 
-  const pdfBuffer = await new Promise((resolve, reject) => {
-    const pdfStream = new pdfkit();
-    const buffers = [];
-    pdfStream.on("data", (data) => {
-      buffers.push(data);
-    });
-    pdfStream.on("end", () => {
-      resolve(Buffer.concat(buffers));
-    });
-    pdfStream.on("error", reject);
-    pdfStream.end(content);
-  });
-
-  // const pdfBuffer = await HTMLToPDF.generatePdf(
-  //   { content: content },
-  //   { format: "A4", printBackground: true, preferCSSPageSize: true }
-  // ).toBuffer();
-
-  mailTransporter.sendMail(
-    {
-      from: "dev.6amyoga@gmail.com",
-      to: user.email,
-      subject: "6AM Yoga | Invoice for your recent payment",
-      text: "Welcome to 6AM Yoga! Please find attached, the invoice for your recent transaction!",
-      attachments: [
+  HTMLToPDF.generatePdf(
+    { content: content },
+    { format: "A4", printBackground: true, preferCSSPageSize: true }
+  )
+    .then((buffer) => {
+      mailTransporter.sendMail(
         {
-          filename: "invoice.pdf",
-          content: pdfBuffer,
-          encoding: "base64",
+          from: "dev.6amyoga@gmail.com",
+          to: user.email,
+          subject: `6AM Yoga | Invoice for your recent payment`,
+          text: "Welcome to 6AM Yoga! Please find attached, the invoice for your recent transaction!",
+          attachments: [
+            {
+              filename: "invoice.pdf",
+              content: Buffer.from(buffer, "base64"),
+              encoding: "base64",
+            },
+          ],
         },
-      ],
-    },
-    async (err, info) => {
-      if (err) {
-        await t.rollback();
-        console.error(err);
-        res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-          message: "Internal server error; try again",
-        });
-      } else {
-        res.status(HTTP_OK).json({
-          message: "Email sent",
-        });
-      }
-    }
-  );
+        async (err, info) => {
+          if (err) {
+            console.error(err);
+            res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+              message: "Internal server error; try again",
+            });
+          } else {
+            res.status(HTTP_OK).json({
+              message: "Email sent",
+            });
+          }
+        }
+      );
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).send();
+    });
 });
 module.exports = router;

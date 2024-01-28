@@ -86,10 +86,6 @@ function StudentPlan() {
       fetchData();
     }
   }, [myPlans]);
-  const calculateEndDate1 = (startDate, validityDays) => {
-    startDate.setUTCDate(startDate.getUTCDate() + validityDays);
-    return startDate.toISOString().split("T")[0];
-  };
   const handleValidityChange = (validity) => {
     setSelectedValidity(validity);
   };
@@ -175,6 +171,7 @@ function StudentPlan() {
             }
           }
         } else {
+          setPlanId(0);
           toast("You don't have a plan yet! Purchase one to continue");
         }
       } catch (error) {
@@ -287,7 +284,8 @@ function StudentPlan() {
         referral_code_id: 0,
         amount: cardData.pricing[0].denomination * 118,
         currency: "INR",
-        current_status: "ACTIVE",
+        current_status: currentStatus,
+        user_type: "STUDENT",
       };
       setToBeRegistered(userPlanData);
       try {

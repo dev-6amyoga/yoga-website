@@ -132,7 +132,9 @@ export default function StudentNavbar() {
             >
               Make your own Playlist
             </Button>
-            <Button>About Us</Button>
+            <Button onClick={() => navigate("/student/about-us")}>
+              About Us
+            </Button>
             <Button onClick={() => navigate("/student/contact-us")}>
               Contact Us
             </Button>

@@ -12,7 +12,9 @@ const { sequelize } = require("../init.sequelize");
 const { Op } = require("sequelize");
 const { User } = require("../models/sql/User");
 const { Role } = require("../models/sql/Role");
-const { UserInstitutePlanRole } = require( "../models/sql/UserInstitutePlanRole" )
+const {
+  UserInstitutePlanRole,
+} = require("../models/sql/UserInstitutePlanRole");
 
 const router = express.Router();
 
@@ -496,6 +498,7 @@ router.post("/get-by-userid", async (req, res) => {
 });
 
 router.post("/teacher/get-all-by-instituteid", async (req, res) => {
+  console.log(req.body);
   const { institute_id } = req.body;
   if (!institute_id) {
     return res
@@ -505,15 +508,10 @@ router.post("/teacher/get-all-by-instituteid", async (req, res) => {
 
   const t = await sequelize.transaction();
   try {
-    const ui = await UserInstitutePlanRole.findAll({
+    const teachers = await UserInstitutePlanRole.findAll({
       where: { institute_id },
       attributes: ["user_id", "institute_id", "role_id"],
       include: [
-        {
-          model: Institute,
-          attributes: ["institute_id", "name", "email", "phone"],
-          required: true,
-        },
         {
           model: User,
           attributes: ["user_id", "username", "name", "email", "phone"],
@@ -528,7 +526,7 @@ router.post("/teacher/get-all-by-instituteid", async (req, res) => {
       ],
     });
     await t.commit();
-    return res.status(HTTP_OK).json({ teachers: ui });
+    return res.status(HTTP_OK).json({ teachers });
   } catch (err) {
     await t.rollback();
     console.error(err);

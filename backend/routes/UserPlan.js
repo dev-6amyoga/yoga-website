@@ -14,7 +14,7 @@ const { timeout } = require("../utils/promise_timeout");
 const {
   UserInstitutePlanRole,
 } = require("../models/sql/UserInstitutePlanRole");
-
+const { Institute } = require("../models/sql/Institute");
 router.get("/get-all-user-plans", async (req, res) => {
   try {
     const userplans = await UserPlan.findAll();
@@ -63,6 +63,44 @@ router.post("/get-user-plan-by-id", async (req, res) => {
   }
 });
 
+router.post("/get-user-institute-plan-by-id", async (req, res) => {
+  const { user_id, institute_id } = req.body;
+  if (!user_id || !institute_id) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Missing required fields" });
+  }
+  try {
+    const userPlan = await UserPlan.findAll({
+      where: {
+        user_id: user_id,
+        institute_id: institute_id,
+      },
+      include: [
+        { model: User, attributes: ["name"] },
+        {
+          model: Plan,
+          attributes: [
+            "name",
+            "has_basic_playlist",
+            "has_playlist_creation",
+            "playlist_creation_limit",
+            "has_self_audio_upload",
+            "number_of_teachers",
+          ],
+        },
+        { model: Institute, attributes: ["institute_id", "name"] },
+      ],
+    });
+    return res.status(HTTP_OK).json({ userPlan: userPlan ? userPlan : null });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to fetch user" });
+  }
+});
+
 router.post("/register", async (req, res) => {
   console.log(req.body);
   const {
@@ -78,6 +116,7 @@ router.post("/register", async (req, res) => {
     current_status,
     transaction_order_id,
     user_type,
+    institute_id,
   } = req.body;
   console.log("registering!!");
 
@@ -98,6 +137,7 @@ router.post("/register", async (req, res) => {
   const user_plan = await UserPlan.findOne({
     where: {
       user_id: user_id,
+      institute_id: institute_id,
       [Op.or]: [
         {
           validity_from: {
@@ -117,7 +157,7 @@ router.post("/register", async (req, res) => {
         },
       ],
     },
-    attributes: ["user_id", "validity_from", "validity_to"],
+    attributes: ["user_id", "institute_id", "validity_from", "validity_to"],
   });
 
   if (user_plan)
@@ -166,6 +206,7 @@ router.post("/register", async (req, res) => {
         current_status: current_status,
         transaction_order_id: transaction_order_id,
         user_type: user_type,
+        institute_id: institute_id,
       },
       { transaction: t }
     );
