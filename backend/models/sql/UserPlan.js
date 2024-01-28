@@ -3,6 +3,7 @@ const { DataTypes } = require("sequelize");
 const { options } = require("./defaultOptions");
 const { User } = require("./User");
 const { Plan } = require("./Plan");
+const { Institute } = require("./Institute");
 
 const UserPlan = sequelize.define(
   "user_plan",
@@ -49,6 +50,10 @@ const UserPlan = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    institute_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     user_type: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -63,5 +68,6 @@ const UserPlan = sequelize.define(
 
 UserPlan.belongsTo(User, { foreignKey: "user_id", onDelete: "CASCADE" });
 UserPlan.belongsTo(Plan, { foreignKey: "plan_id" });
+UserPlan.belongsTo(Institute, { foreignKey: "institute_id" });
 
 module.exports = { UserPlan };

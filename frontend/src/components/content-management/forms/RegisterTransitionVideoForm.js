@@ -100,13 +100,7 @@ export default function RegisterTransitionVideoForm() {
     if (
       combinedData.transition_video_name === "" ||
       combinedData.transition_video_ID === "" ||
-      combinedData.language === "" ||
-      combinedData.person_starting_position === null ||
-      combinedData.person_ending_position === null ||
-      combinedData.mat_starting_position === null ||
-      combinedData.mat_ending_position === null ||
-      combinedData.asana_category_start === null ||
-      combinedData.asana_category_end === null
+      combinedData.language === ""
     ) {
       toast("Misssing required fields!");
     } else {

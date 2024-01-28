@@ -22,6 +22,7 @@ export default function LogPayment() {
   const [userStatus, setUserStatus] = useState("EXISTING");
   const [user_id, setUserId] = useState(0);
   const [plan_id, setPlanId] = useState(0);
+  const [instituteId, setInstituteId] = useState(0);
   const [amount, setAmount] = useState(0);
   const [validityFromDate, setValidityFromDate] = useState("");
   const [validityToDate, setValidityToDate] = useState(null);
@@ -235,6 +236,8 @@ export default function LogPayment() {
     const handleLog = async () => {
       try {
         setUserId(rowData.user_id);
+        console.log(rowData.institute_id);
+        setInstituteId(rowData.institute_id);
         // setStudentModalState(true);
         // setPlanConfirmed(true);
         setPlanAddition(true);
@@ -354,7 +357,9 @@ export default function LogPayment() {
       user_id: user_id,
       plan_id: plan_id,
       current_status: currentStatus,
+      transaction_order_id: "MANUAL",
       user_type: userType === "STUDENT" ? "STUDENT" : "INSTITUTE",
+      institute_id: instituteId && instituteId !== 0 ? instituteId : 0,
     };
     // current_status;
     const transactionData = {

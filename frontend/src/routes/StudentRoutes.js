@@ -7,6 +7,7 @@ import StudentProfile from "../pages/student/StudentProfile";
 import StudentSettings from "../pages/student/StudentSettings";
 import StudentTransactionHistory from "../pages/student/StudentTransactionHistory";
 import StudentWatchHistory from "../pages/student/StudentWatchHistory";
+import AboutUs from "../pages/student/AboutUs";
 import ContactUs from "../pages/student/ContactUs";
 export const StudentRoutes = [
   {
@@ -16,6 +17,10 @@ export const StudentRoutes = [
   {
     path: "/student/contact-us",
     element: <ContactUs />,
+  },
+  {
+    path: "/student/about-us",
+    element: <AboutUs />,
   },
 
   {

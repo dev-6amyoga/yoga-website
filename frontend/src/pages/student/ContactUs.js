@@ -1,6 +1,45 @@
-import { Card, Text, Link } from "@geist-ui/core";
+import { Card, Text, Link, Input, Textarea, Button } from "@geist-ui/core";
 import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
+import getFormData from "../../utils/getFormData";
+import { validateEmail, validatePhone } from "../../utils/formValidation";
+import { toast } from "react-toastify";
 export default function ContactUs() {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = getFormData(e);
+    const [validPhone, phoneError] = validatePhone(formData.query_phone);
+    if (!validPhone) {
+      toast(phoneError.message, { type: "error" });
+      return;
+    }
+    if (!formData.query_phone.startsWith("+91")) {
+      formData.query_phone = "+91" + formData.query_phone;
+    }
+    const [validEmail, emailError] = validateEmail(formData.query_email);
+    if (!validEmail) {
+      toast(emailError.message, { type: "error" });
+      return;
+    }
+    console.log(formData);
+    try {
+      const response = await fetch("http://localhost:4000/query/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      if (response.ok) {
+        toast("Query submitted!");
+      } else {
+        toast(
+          "Could not submit query. An error occured!Kindly contact us directly."
+        );
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
     <div>
       <div>
@@ -20,8 +59,7 @@ export default function ContactUs() {
         </div>
         <div className="flex flex-col items-center p-6 rounded-md bg-gray-200 shadow-md mt-10 mx-10">
           <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
-          <div className="max-w-[1200px] mx-auto mt-5 overflow-hidden rounded-md">
-            {/* YouTube player */}
+          <div className="mt-5 overflow-hidden rounded-md">
             <Card width="100%" type="dark">
               <Text h4 my={0}>
                 Phone Number
@@ -41,6 +79,35 @@ export default function ContactUs() {
                   Our Youtube Channel
                 </Link>
               </Card.Footer>
+            </Card>
+          </div>
+        </div>
+        <div className="flex flex-col items-right p-6 rounded-md bg-gray-200 shadow-md mt-10 mx-10">
+          <h1 className="text-3xl font-bold mb-4">Submit your queries here!</h1>
+          <div className="mt-5 overflow-hidden rounded-md">
+            <Card width="100%">
+              <form
+                className="flex flex-col justify-center"
+                onSubmit={handleSubmit}
+              >
+                <h6>Name</h6>
+                <Input width="100%" name="query_name" />
+                <h6>Email</h6>
+                <Input width="100%" name="query_email" />
+                <h6>Phone No.</h6>
+                <Input width="100%" name="query_phone" />
+                <h6>Query</h6>
+                <Textarea
+                  type="success"
+                  height="100px"
+                  placeholder="Please enter your query here"
+                  name="query_text"
+                />
+                <br />
+                <Button type="success" htmlType="submit">
+                  Submit
+                </Button>
+              </form>
             </Card>
           </div>
         </div>

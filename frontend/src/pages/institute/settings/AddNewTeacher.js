@@ -1,6 +1,7 @@
 import { Button, Input, Table, Tag } from "@geist-ui/core";
 import { Copy } from "@geist-ui/icons";
 import { useCallback, useEffect, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { toast } from "react-toastify";
 import InstitutePageWrapper from "../../../components/Common/InstitutePageWrapper";
 import useUserStore from "../../../store/UserStore";
@@ -9,9 +10,53 @@ import { validateEmail, validatePhone } from "../../../utils/formValidation";
 import getFormData from "../../../utils/getFormData";
 
 export default function AddNewTeacher() {
-  const user = useUserStore((state) => state.user);
+  const [currentTeachersCount, setCurrentTeachersCount] = useState([]);
+  const [allowedTeachersCount, setAllowedTeachersCount] = useState(0);
+  const [user, institutes, currentInstituteId] = useUserStore(
+    useShallow((state) => [
+      state.user,
+      state.institutes,
+      state.currentInstituteId,
+    ])
+  );
+  useEffect(() => {
+    console.log(currentTeachersCount);
+    console.log(user.user_id);
+    Fetch({
+      url: "http://localhost:4000/user-plan/get-user-institute-plan-by-id",
+      method: "POST",
+      data: {
+        user_id: user.user_id,
+        institute_id: currentInstituteId,
+      },
+    }).then((res) => {
+      console.log(res.data);
+      for (var i = 0; i !== res.data.userPlan.length; i++) {
+        if (res.data.userPlan[i].current_status === "ACTIVE") {
+          setAllowedTeachersCount(
+            res.data.userPlan[i]?.plan?.number_of_teachers
+          );
+          break;
+        } else {
+          toast(
+            "You dont have an active plan! Please head to the Purchase A Plan page"
+          );
+        }
+      }
+    });
+  }, [currentInstituteId, user]);
+  const [instituteData, setInstituteData] = useState({});
+  const [currentInstitute, setCurrentInstitute] = useState(null);
+  useState(() => {
+    if (currentInstituteId) {
+      setCurrentInstitute(
+        institutes?.find(
+          (institute) => institute.institute_id === currentInstituteId
+        )
+      );
+    }
+  }, [currentInstituteId, institutes]);
   const [invites, setInvites] = useState([]);
-  const [instituteID, setInstituteID] = useState(0);
   const [addLoading, setAddLoading] = useState(false);
   const [refreshLoading, setRefreshLoading] = useState(false);
 
@@ -39,33 +84,24 @@ export default function AddNewTeacher() {
     }
   }, [user]);
 
-  const getInstituteID = useCallback(async () => {
-    if (user) {
-      setRefreshLoading(true);
+  useEffect(() => {
+    const fetchData = async () => {
       Fetch({
-        url: "http://localhost:4000/user-institute/get-institute-by-user-id",
+        url: "http://localhost:4000/institute/teacher/get-all-by-instituteid",
         method: "POST",
         data: {
-          user_id: user?.user_id,
+          institute_id: currentInstituteId,
         },
-      })
-        .then((res) => {
-          setInstituteID(res.data.user_institute.institute_id);
-          setRefreshLoading(false);
-        })
-        .catch((err) => {
-          toast(`Error : ${err?.response?.data?.message}`, {
-            type: "error",
-          });
-          setRefreshLoading(false);
-        });
+      }).then((res) => {
+        setCurrentTeachersCount(
+          res.data.teachers ? res.data.teachers.length : 0
+        );
+      });
+    };
+    if (currentInstituteId && currentInstituteId !== 0) {
+      fetchData();
     }
-  }, [user]);
-
-  useEffect(() => {
-    getInstituteID();
-  }, [getInstituteID]);
-
+  }, [currentInstituteId]);
   useEffect(() => {
     getInvites();
   }, [getInvites]);
@@ -75,6 +111,17 @@ export default function AddNewTeacher() {
     setAddLoading(true);
 
     const formData = getFormData(e);
+    if (currentTeachersCount === allowedTeachersCount) {
+      toast(
+        "You cannot add more teachers as this is the maximum permitted by your plan. Kindly upgrade your plan."
+      );
+      return;
+    }
+    if (currentTeachersCount > allowedTeachersCount) {
+      toast(
+        "You cannot add more teachers as this is the maximum permitted by your plan. Kindly upgrade your plan."
+      );
+    }
 
     if (!formData) return;
 
