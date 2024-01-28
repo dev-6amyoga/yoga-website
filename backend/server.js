@@ -36,12 +36,12 @@ const { Currency } = require("./models/sql/Currency");
 const { Transaction } = require("./models/sql/Transaction");
 const { DiscountCoupon } = require("./models/sql/DiscountCoupon");
 const {
-	DiscountCouponApplicablePlan,
+  DiscountCouponApplicablePlan,
 } = require("./models/sql/DiscountCouponApplicablePlan");
 const { Invite } = require("./models/sql/Invite");
 const { EmailVerification } = require("./models/sql/EmailVerification");
-
-// mongo models
+const { Queries } = require("./models/sql/Queries");
+// mongo models;]
 const { Asana } = "./models/mongo/Asana.js";
 const { AsanaCategory } = "./models/mongo/AsanaCategory.js";
 const { InstitutePlaylist } = "./models/mongo/InstitutePlaylist.js";
@@ -79,6 +79,7 @@ const planPricingRouter = require("./routes/PlanPricing");
 const invoiceRouter = require("./routes/Invoice");
 const watchHistoryRouter = require("./routes/WatchHistory");
 const watchTimeLogRouter = require("./routes/WatchTimeLog");
+const queryRouter = require("./routes/Queries");
 
 // DEV : sample data creation
 const { bulkCreateSampleData } = require("./sample_data");
@@ -93,30 +94,30 @@ app.use("/static", express.static(path.join(__dirname, "public")));
 // initialize databases
 const mongoURI = process.env.MONGO_SRV_URL;
 mongoose
-	.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-	.then(() => console.log("Connected to MongoDB Atlas"))
-	.catch((err) => console.log(err));
+  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("Connected to MongoDB Atlas"))
+  .catch((err) => console.log(err));
 
 initializeSequelize()
-	.then(() => {
-		console.log("Sequelize initialized");
-		// bulkCreateSampleData()
-		// 	.then(() => {
-		// 		console.log("Sample data created!");
-		// 	})
-		// 	.catch((err) => {
-		// 		console.log(err);
-		// 	});
-	})
-	.catch((err) => {
-		console.log(err);
-	});
+  .then(() => {
+    console.log("Sequelize initialized");
+    // bulkCreateSampleData()
+    // 	.then(() => {
+    // 		console.log("Sample data created!");
+    // 	})
+    // 	.catch((err) => {
+    // 		console.log(err);
+    // 	});
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 // bind routers
 app.get("/info", (req, res) => {
-	return res.status(200).json({
-		message: "Running.",
-	});
+  return res.status(200).json({
+    message: "Running.",
+  });
 });
 
 app.use("/content", asanaRouter);
@@ -142,9 +143,10 @@ app.use("/plan-pricing", planPricingRouter);
 app.use("/invoice", invoiceRouter);
 app.use("/watch-history", watchHistoryRouter);
 app.use("/watch-time", watchTimeLogRouter);
+app.use("/query", queryRouter);
 
 const port = parseInt(process.env.SERVER_PORT);
 
 app.listen(port, () => {
-	console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 });

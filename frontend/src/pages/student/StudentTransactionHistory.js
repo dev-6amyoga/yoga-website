@@ -55,7 +55,7 @@ export default function StudentTransactionHistory() {
       const response = await Fetch({
         url: "http://localhost:4000/invoice/student/plan",
         method: "POST",
-        responseType: "arraybuffer",
+        // responseType: "arraybuffer",
         data: JSON.stringify({
           user_id: rowData.user_id,
           transaction_order_id: rowData.transaction_order_id,
