@@ -2,18 +2,17 @@ const { sequelize } = require("../../init.sequelize");
 const { DataTypes } = require("sequelize");
 const { options } = require("./defaultOptions");
 const { User } = require("./User");
-const { DiscountCoupon } = require("./DiscountCoupon");
-const { ReferralCode } = require("./ReferralCode");
+const { Transaction } = require("./Transaction");
 
-const Transaction = sequelize.define(
-	"transaction",
+const Refund = sequelize.define(
+	"refund",
 	{
-		transaction_id: {
+		refund_id: {
 			type: DataTypes.INTEGER,
 			autoIncrement: true,
 			primaryKey: true,
 		},
-		payment_for: {
+		refund_reason: {
 			type: DataTypes.STRING,
 			allowNull: false,
 		},
@@ -25,7 +24,7 @@ const Transaction = sequelize.define(
 			type: DataTypes.INTEGER,
 			allowNull: false,
 		},
-		payment_status: {
+		refund_status: {
 			type: DataTypes.STRING,
 			allowNull: false,
 		},
@@ -33,16 +32,16 @@ const Transaction = sequelize.define(
 			type: DataTypes.DATE,
 			allowNull: false,
 		},
-		transaction_order_id: {
+		refund_order_id: {
 			type: DataTypes.STRING,
 			allowNull: false,
 			unique: true,
 		},
-		transaction_payment_id: {
+		refund_payment_id: {
 			type: DataTypes.STRING,
 			allowNull: true,
 		},
-		transaction_signature: {
+		refund_signature: {
 			type: DataTypes.STRING,
 			allowNull: true,
 		},
@@ -50,16 +49,11 @@ const Transaction = sequelize.define(
 	{ ...options }
 );
 
-Transaction.belongsTo(User, { foreignKey: "user_id", onDelete: "CASCADE" });
-Transaction.belongsTo(DiscountCoupon, {
-	foreignKey: "discount_coupon_id",
-	onDelete: "SET NULL",
-	onUpdate: "CASCADE",
-});
-Transaction.belongsTo(ReferralCode, {
-	foreignKey: "referral_code_id",
-	onDelete: "SET NULL",
+Refund.belongsTo(User, { foreignKey: "user_id", onDelete: "CASCADE" });
+Refund.belongsTo(Transaction, {
+	foreignKey: "transaction_id",
+	onDelete: "CASCADE",
 	onUpdate: "CASCADE",
 });
 
-module.exports = { Transaction };
+module.exports = { Refund };
