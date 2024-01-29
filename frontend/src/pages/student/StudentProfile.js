@@ -23,6 +23,9 @@ export default function StudentProfile() {
   const navigate = useNavigate();
   const [userData, setUserData] = useState({});
   const [update, setUpdate] = useState(false);
+  const [token, setToken] = useState("");
+  const [isEmailUpdate, setIsEmailUpdate] = useState(false);
+  const [isPhoneUpdate, setIsPhoneUpdate] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [updateData, setUpdateData] = useState({});
   const closeUpdateHandler = (event) => {
@@ -52,7 +55,6 @@ export default function StudentProfile() {
       setIsEditing(true);
     } else {
       const formData = getFormData(e);
-      console.log(formData);
       if (
         formData.name_profile === "" &&
         formData.email_profile === "" &&
@@ -75,7 +77,6 @@ export default function StudentProfile() {
 
   const updateProfile = async () => {
     setUpdate(false);
-    console.log(user?.user_id);
     const updateData1 = {
       user_id: user?.user_id,
       name:
@@ -106,43 +107,100 @@ export default function StudentProfile() {
       return;
     }
 
-    console.log(updateData1, "IS BEING SENT!!");
-    Fetch({
-      url: "http://localhost:4000/user/update-profile",
-      method: "POST",
-      data: JSON.stringify(updateData1),
-    })
-      .then((res) => {
-        if (res && res.status === 200) {
-          Fetch({
-            url: "http://localhost:4000/user/get-by-id",
-            method: "POST",
-            data: {
-              user_id: user?.user_id,
-            },
-          }).then((res) => {
-            if (res && res.status === 200) {
-              toast("Profile updated successfully", {
-                type: "success",
-              });
-              // console.log(res.data.user);
-              setUserData(res.data.user);
-            } else {
-              toast("Error updating profile; retry", {
-                type: "error",
-              });
-            }
-          });
-        } else {
-          toast("Error updating profile; retry", { type: "error" });
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        toast("Error updating profile", { type: "error" });
-      });
+    if (
+      updateData.email_profile !== "" &&
+      updateData.email_profile !== userData.email
+    ) {
+      //send verification mail with link which opens a page with a button, saying do you really want to update your email id to : -----------------
+      //if they click yes, then update.
+      setIsEmailUpdate(true);
+      toast("Email Update");
+    }
+    if (
+      updateData.phone_profile !== "" &&
+      updateData.phone_profile !== userData.phone
+    ) {
+      //do otp verification on old number and if verified then register new number.
+      setIsPhoneUpdate(true);
+      toast("Phone Update");
+    }
+
+    // Fetch({
+    //   url: "http://localhost:4000/user/update-profile",
+    //   method: "POST",
+    //   data: JSON.stringify(updateData1),
+    // })
+    //   .then((res) => {
+    //     if (res && res.status === 200) {
+    //       Fetch({
+    //         url: "http://localhost:4000/user/get-by-id",
+    //         method: "POST",
+    //         data: {
+    //           user_id: user?.user_id,
+    //         },
+    //       }).then((res) => {
+    //         if (res && res.status === 200) {
+    //           toast("Profile updated successfully", {
+    //             type: "success",
+    //           });
+    //           setUserData(res.data.user);
+    //         } else {
+    //           toast("Error updating profile; retry", {
+    //             type: "error",
+    //           });
+    //         }
+    //       });
+    //     } else {
+    //       toast("Error updating profile; retry", { type: "error" });
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     toast("Error updating profile", { type: "error" });
+    //   });
   };
 
+  const sendEmail = async () => {
+    Fetch({
+      url: "http://localhost:4000/update-request/register",
+      method: "POST",
+      data: {
+        user_id: userData.user_id,
+        username: userData.username,
+        name: userData.name,
+        old_email: userData.email,
+        new_email: updateData.email_profile,
+        phone: userData.phone,
+        request_date: new Date(),
+        is_approved: false,
+      },
+    })
+      .then((res) => {
+        toast("Update sent successfully", { type: "success" });
+      })
+      .catch((err) => {
+        toast(`Error : ${err?.response?.data?.message}`, {
+          type: "error",
+        });
+      });
+    // Fetch({
+    //   url: "http://localhost:4000/invite/create-email-update-verification",
+    //   method: "POST",
+    //   data: {
+    //     email: userData.email,
+    //     name: userData.name,
+    //     updated_email: updateData.email_profile,
+    //   },
+    // })
+    //   .then((res) => {
+    //     toast("Email sent successfully", { type: "success" });
+    //     setToken(res.data.token);
+    //   })
+    //   .catch((err) => {
+    //     toast(`Error : ${err?.response?.data?.message}`, {
+    //       type: "error",
+    //     });
+    //   });
+  };
   return (
     <div>
       <div>
@@ -242,6 +300,18 @@ export default function StudentProfile() {
           </Modal.Action>
           <Modal.Action onClick={updateProfile}>Yes</Modal.Action>
         </Modal>
+        {isEmailUpdate && (
+          <Card type="error">
+            <div className="border text-center rounded-lg p-4">
+              <p>We will send a request to the admin.</p>
+              <p>
+                Please <Button onClick={sendEmail}>Send A Request</Button>{" "}
+                <br />
+                to update your Email ID.
+              </p>
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   );

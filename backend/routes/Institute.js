@@ -498,33 +498,34 @@ router.post("/get-by-userid", async (req, res) => {
 });
 
 router.post("/teacher/get-all-by-instituteid", async (req, res) => {
-  console.log(req.body);
   const { institute_id } = req.body;
   if (!institute_id) {
     return res
       .status(HTTP_BAD_REQUEST)
       .json({ error: "Missing required fields" });
   }
-
   const t = await sequelize.transaction();
   try {
-    const teachers = await UserInstitutePlanRole.findAll({
-      where: { institute_id },
-      attributes: ["user_id", "institute_id", "role_id"],
-      include: [
-        {
-          model: User,
-          attributes: ["user_id", "username", "name", "email", "phone"],
-          required: true,
-        },
-        {
-          model: Role,
-          attributes: ["name"],
-          where: { name: "TEACHER" },
-          required: true,
-        },
-      ],
-    });
+    const teachers = await UserInstitutePlanRole.findAll(
+      {
+        where: { institute_id },
+        attributes: ["user_id", "institute_id", "role_id"],
+        include: [
+          {
+            model: User,
+            attributes: ["user_id", "username", "name", "email", "phone"],
+            required: true,
+          },
+          {
+            model: Role,
+            attributes: ["name"],
+            where: { name: "TEACHER" },
+            required: true,
+          },
+        ],
+      },
+      { transaction: t }
+    );
     await t.commit();
     return res.status(HTTP_OK).json({ teachers });
   } catch (err) {
