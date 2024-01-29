@@ -41,6 +41,7 @@ const {
 const { Invite } = require("./models/sql/Invite");
 const { EmailVerification } = require("./models/sql/EmailVerification");
 const { Queries } = require("./models/sql/Queries");
+const { UpdateRequests } = require("./models/sql/UpdateRequests");
 // mongo models;]
 const { Asana } = "./models/mongo/Asana.js";
 const { AsanaCategory } = "./models/mongo/AsanaCategory.js";
@@ -54,7 +55,6 @@ const { User: UserMongo } = "./models/mongo/User.js";
 const { UserPlaylistCount } = "./models/mongo/UserPlaylistCount.js";
 const { WatchHistory } = "./models/mongo/WatchHistory.js";
 const { WatchTimeLog } = "./models/mongo/WatchTimeLog.js";
-
 // routers
 const asanaRouter = require("./routes/Asana");
 const authRouter = require("./routes/Auth");
@@ -80,7 +80,7 @@ const invoiceRouter = require("./routes/Invoice");
 const watchHistoryRouter = require("./routes/WatchHistory");
 const watchTimeLogRouter = require("./routes/WatchTimeLog");
 const queryRouter = require("./routes/Queries");
-
+const updateRequestsRouter = require("./routes/UpdateRequests");
 // DEV : sample data creation
 const { bulkCreateSampleData } = require("./sample_data");
 
@@ -144,7 +144,7 @@ app.use("/invoice", invoiceRouter);
 app.use("/watch-history", watchHistoryRouter);
 app.use("/watch-time", watchTimeLogRouter);
 app.use("/query", queryRouter);
-
+app.use("/update-request", updateRequestsRouter);
 const port = parseInt(process.env.SERVER_PORT);
 
 app.listen(port, () => {

@@ -5,6 +5,8 @@ import {
   Input,
   Progress,
   Spacer,
+  Modal,
+  Card,
 } from "@geist-ui/core";
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight } from "react-feather";
@@ -27,6 +29,8 @@ export default function Register({ switchForm }) {
   const [step, setStep] = useState(1);
   const [blockStep, setBlockStep] = useState(false);
   const [blockPhoneStep, setBlockPhoneStep] = useState(false);
+  const [disclaimerModal, setDisclaimerModal] = useState(false);
+  const [disclaimerAcceptedVar, setDisclaimerAcceptedVar] = useState(false);
   const [blockBusinessPhoneStep, setBlockBusinessPhoneStep] = useState(false);
   const [token, setToken] = useState("");
   const [role, setRole] = useState("STUDENT"); // STUDENT | INSTITUTE_OWNER
@@ -48,7 +52,6 @@ export default function Register({ switchForm }) {
 
   useEffect(() => {
     setClientID(process.env.REACT_APP_GOOGLE_CLIENT_ID);
-    console.log(process.env.REACT_APP_GOOGLE_CLIENT_ID);
   }, []);
 
   useEffect(() => {
@@ -68,28 +71,120 @@ export default function Register({ switchForm }) {
 
   const [billingAddressSame, setBillingAddressSame] = useState(true);
 
-  const getEmailVerification = async (token) => {
-    Fetch({
-      url: "http://localhost:4000/invite/get-email-verification-by-token",
-      method: "POST",
-      data: {
-        token: token,
-      },
-    }).then((res) => {
-      if (res.status === 200) {
-        console.log(res.data.invite);
-        return res.data.invite;
+  useEffect(() => {
+    const fetchData = async () => {
+      if (role === "STUDENT") {
+        const newUser = {
+          ...generalInfo,
+          phone_no: phoneInfo?.phone_no,
+          role_name: "STUDENT",
+          is_google_login: googleInfo && googleInfo?.verified ? true : false,
+        };
+        let url = "http://localhost:4000/auth/register";
+        if (googleInfo && googleInfo?.verified) {
+          url += "-google";
+          newUser.client_id = clientID;
+          newUser.jwt_token = googleInfo?.jwt_token;
+        }
+        const response = await Fetch({
+          url: url,
+          method: "POST",
+          data: newUser,
+        });
+        if (response.status === 200) {
+          toast("New User added successfully! Kindly login.", {
+            type: "success",
+          });
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          const errorData = response.data;
+          toast(errorData?.message, { type: "error" });
+        }
       }
-    });
-  };
+      if (role === "INSTITUTE_OWNER") {
+        try {
+          if (instituteInfo?.pincode)
+            instituteInfo.pincode = parseInt(instituteInfo?.pincode);
+        } catch (err) {
+          notify("Pincode must be a number");
+          return;
+        }
+        const addressCombination = `${instituteInfo?.address1}, ${instituteInfo?.address2}, ${instituteInfo?.city} - ${instituteInfo?.pincode}, ${instituteInfo?.state}, ${instituteInfo?.country}`;
+        const user = {
+          name: generalInfo?.name,
+          username: generalInfo?.username,
+          email_id: generalInfo?.email_id,
+          phone_no: phoneInfo?.phone_no,
+          password: generalInfo?.password,
+          confirm_password: generalInfo?.confirm_password,
+          role_name: "INSTITUTE_OWNER",
+          is_google_login: googleInfo && googleInfo?.verified ? true : false,
+        };
+        const institute = {
+          name: instituteInfo?.institute_name,
+          address1: instituteInfo?.address1,
+          address2: instituteInfo?.address2,
+          pincode: instituteInfo?.pincode,
+          billing_address: billingAddressSame
+            ? addressCombination
+            : instituteInfo?.billing_address,
+          email: instituteInfo?.contact_email,
+          phone: businessPhoneInfo.phone_no
+            ? businessPhoneInfo.phone_no
+            : phoneInfo?.phone_no,
+          gstin: instituteInfo?.gstin,
+        };
+        Fetch({
+          url: "http://localhost:4000/institute/register",
+          method: "POST",
+          data: institute,
+        }).then((res) => {
+          if (res && res.status === 200) {
+            toast("Institute added successfully", {
+              type: "success",
+            });
+            user.institute_name = institute.name;
+            let url = "http://localhost:4000/auth/register";
+            if (googleInfo && googleInfo?.verified) {
+              url += "-google";
+            }
+            Fetch({
+              url: url,
+              method: "POST",
+              data: user,
+            })
+              .then((res) => {
+                if (res && res.status === 200) {
+                  toast("User added successfully", {
+                    type: "success",
+                  });
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 2000);
+                } else {
+                  toast("Error registering user", {
+                    type: "error",
+                  });
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+                toast("Error registering user: " + err?.response?.data?.error, {
+                  type: "error",
+                });
+              });
+          }
+        });
+      }
+    };
+    if (disclaimerAcceptedVar) {
+      fetchData();
+    }
+  }, [disclaimerAcceptedVar]);
 
   const handleStudentRegistration = async () => {
-    const newUser = {
-      ...generalInfo,
-      phone_no: phoneInfo?.phone_no,
-      role_name: "STUDENT",
-      is_google_login: googleInfo && googleInfo?.verified ? true : false,
-    };
     Fetch({
       url: "http://localhost:4000/invite/get-email-verification-by-token",
       method: "POST",
@@ -100,33 +195,7 @@ export default function Register({ switchForm }) {
       if (res.status === 200) {
         const invite = res.data.invite;
         if (invite?.is_verified) {
-          try {
-            let url = "http://localhost:4000/auth/register";
-            if (googleInfo && googleInfo?.verified) {
-              url += "-google";
-              newUser.client_id = clientID;
-              newUser.jwt_token = googleInfo?.jwt_token;
-            }
-            const response = await Fetch({
-              url: url,
-              method: "POST",
-              data: newUser,
-            });
-            if (response.status === 200) {
-              toast("New User added successfully! Kindly login.", {
-                type: "success",
-              });
-              setTimeout(() => {
-                window.location.reload();
-              }, 2000);
-            } else {
-              const errorData = response.data;
-              toast(errorData?.message, { type: "error" });
-            }
-          } catch (error) {
-            console.log(error);
-            toast("Error registering new user, try again!", { type: "error" });
-          }
+          setDisclaimerModal(true);
         } else {
           toast("Email has not yet been verified!");
         }
@@ -134,38 +203,6 @@ export default function Register({ switchForm }) {
     });
   };
   const handleInstituteRegistration = async () => {
-    try {
-      if (instituteInfo?.pincode)
-        instituteInfo.pincode = parseInt(instituteInfo?.pincode);
-    } catch (err) {
-      notify("Pincode must be a number");
-      return;
-    }
-    const addressCombination = `${instituteInfo?.address1}, ${instituteInfo?.address2}, ${instituteInfo?.city} - ${instituteInfo?.pincode}, ${instituteInfo?.state}, ${instituteInfo?.country}`;
-    const user = {
-      name: generalInfo?.name,
-      username: generalInfo?.username,
-      email_id: generalInfo?.email_id,
-      phone_no: phoneInfo?.phone_no,
-      password: generalInfo?.password,
-      confirm_password: generalInfo?.confirm_password,
-      role_name: "INSTITUTE_OWNER",
-      is_google_login: googleInfo && googleInfo?.verified ? true : false,
-    };
-    const institute = {
-      name: instituteInfo?.institute_name,
-      address1: instituteInfo?.address1,
-      address2: instituteInfo?.address2,
-      pincode: instituteInfo?.pincode,
-      billing_address: billingAddressSame
-        ? addressCombination
-        : instituteInfo?.billing_address,
-      email: instituteInfo?.contact_email,
-      phone: businessPhoneInfo.phone_no
-        ? businessPhoneInfo.phone_no
-        : phoneInfo?.phone_no,
-      gstin: instituteInfo?.gstin,
-    };
     Fetch({
       url: "http://localhost:4000/invite/get-email-verification-by-token",
       method: "POST",
@@ -176,63 +213,7 @@ export default function Register({ switchForm }) {
       if (res.status === 200) {
         const invite = res.data.invite;
         if (invite?.is_verified) {
-          Fetch({
-            url: "http://localhost:4000/institute/register",
-            method: "POST",
-            data: institute,
-          })
-            .then((res) => {
-              if (res && res.status === 200) {
-                toast("Institute added successfully", {
-                  type: "success",
-                });
-                user.institute_name = institute.name;
-                let url = "http://localhost:4000/auth/register";
-                if (googleInfo && googleInfo?.verified) {
-                  url += "-google";
-                }
-                Fetch({
-                  url: url,
-                  method: "POST",
-                  data: user,
-                })
-                  .then((res) => {
-                    if (res && res.status === 200) {
-                      toast("User added successfully", {
-                        type: "success",
-                      });
-                      setTimeout(() => {
-                        window.location.reload();
-                      }, 2000);
-                    } else {
-                      toast("Error registering user", {
-                        type: "error",
-                      });
-                    }
-                  })
-                  .catch((err) => {
-                    console.log(err);
-                    toast(
-                      "Error registering user: " + err?.response?.data?.error,
-                      {
-                        type: "error",
-                      }
-                    );
-                  });
-              } else {
-                console.log(invite.is_verified);
-                toast("Error registering institute", { type: "error" });
-              }
-            })
-            .catch((err) => {
-              console.log(err);
-              toast(
-                "Error registering institute: " + err?.response?.data?.error,
-                {
-                  type: "error",
-                }
-              );
-            });
+          setDisclaimerModal(true);
         } else {
           toast("Email has not yet been verified!");
         }
@@ -437,6 +418,10 @@ export default function Register({ switchForm }) {
     clientID,
   ]);
 
+  const disclaimerAccepted = async () => {
+    setDisclaimerModal(false);
+    setDisclaimerAcceptedVar(true);
+  };
   return (
     <GoogleOAuthProvider clientId={clientID}>
       <div className="bg-white p-4 rounded-lg max-w-xl mx-auto">
@@ -498,6 +483,45 @@ export default function Register({ switchForm }) {
           </h5>
         </div>
       </div>
+      <Modal
+        visible={disclaimerModal}
+        onClose={() => setDisclaimerModal(() => false)}
+      >
+        <Modal.Title>Disclaimer</Modal.Title>
+        <Modal.Content>
+          <Card shadow>
+            {" "}
+            <div className="flex flex-col gap-3">
+              <p>
+                I would like to utilize in the yoga videos offered by 6AM Yoga.
+                I fully understand that yoga includes physical activity that may
+                or may not cause physical injury.
+              </p>
+              <p>
+                I agree to declare any health issues and/or conditions I may
+                have before signing up for the platform. I declare that a
+                physician's approval has been taken before enrollment.{" "}
+              </p>
+              <p>
+                In the event that poses might be uncomfortable, any suggested
+                modifications can be discussed with me. If there's any strain or
+                fatigue, I can come out of the pose to rest and understand that
+                each and every one have their own physical limitations.
+              </p>
+              <p>
+                I fully recognize that any injuries sustained from the yoga
+                practice will be my responsibility. Therefore I release 6AM Yoga
+                of any liabilities in this regard. I have read and fully
+                understood the terms of the declaration and accept all of it.
+              </p>
+            </div>
+          </Card>
+        </Modal.Content>
+        <Modal.Action onClick={() => disclaimerAccepted()}>Accept</Modal.Action>
+        <Modal.Action onClick={() => setDisclaimerModal(false)}>
+          Cancel
+        </Modal.Action>
+      </Modal>
     </GoogleOAuthProvider>
   );
 }

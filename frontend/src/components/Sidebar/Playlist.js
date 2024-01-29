@@ -100,6 +100,7 @@ function Playlist() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setAsanaDetails([]);
       for (var i = 0; i < modalData.asana_ids.length; i++) {
         try {
           const response = await fetch(
@@ -270,16 +271,13 @@ function Playlist() {
 
   const getAllAsanas = async (asana_ids) => {
     if (asana_ids.length === 0) {
-      console.log("Empty asana_ids array");
       return [];
     }
     const allAsanasData = asana_ids.map((asana_id) => {
       if (Number(asana_id)) {
-        console.log("NUMBER ID");
         const asanaObject = allAsanas.find((asana) => asana.id === asana_id);
         return asanaObject || null;
       } else {
-        console.log("STRING ID");
         const transitionObject = allTransitions.find(
           (transition) => transition.transition_id === asana_id
         );
@@ -292,7 +290,6 @@ function Playlist() {
   const handleAddToQueue = (asana_ids) => {
     getAllAsanas(asana_ids)
       .then((asanas) => {
-        console.log("ASANAS ARE : ", asanas);
         addToQueue(asanas);
       })
       .catch((err) => console.log(err));
@@ -318,9 +315,12 @@ function Playlist() {
         <Modal.Subtitle>{modalData.playlist_name}</Modal.Subtitle>
         {asana_details?.map((asanaDetail) => (
           <div>
-            <p>{asanaDetail.asana_name}</p>
+            <p>
+              {asanaDetail.asana_name} - {asanaDetail.language}
+            </p>
           </div>
         ))}
+
         <Modal.Action passive onClick={closeModal}>
           Close
         </Modal.Action>
