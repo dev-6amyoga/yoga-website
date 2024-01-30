@@ -141,12 +141,14 @@ export default function Students() {
       <AdminNavbar />
       <div className="allAsanas flex flex-col items-center min-h-screen justify-center">
         <div className="elements">
-          <Table width="100%" data={studentData} className="bg-white">
-            <Table.Column prop="user_id" label="ID" />
-            <Table.Column label="Student Name" width={150} prop="name" />
-            <Table.Column label="Email ID" width={200} prop="email" />
-            <Table.Column label="Phone" width={150} prop="phone" />
-          </Table>
+          <Card>
+            <Table width="100%" data={studentData} className="bg-white">
+              <Table.Column prop="user_id" label="ID" />
+              <Table.Column label="Student Name" width={150} prop="name" />
+              <Table.Column label="Email ID" width={200} prop="email" />
+              <Table.Column label="Phone" width={150} prop="phone" />
+            </Table>
+          </Card>
         </div>
 
         <Card>
