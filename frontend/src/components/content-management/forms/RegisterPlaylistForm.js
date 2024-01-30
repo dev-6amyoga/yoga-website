@@ -209,24 +209,6 @@ export default function RegisterPlaylistForm() {
             endVideo,
             "Supine"
           );
-          if (startVideo.person_ending_position === "Left") {
-            const matchingTransition1 = transitions.find((transition) => {
-              return (
-                transition.person_starting_position ===
-                  startVideo.person_ending_position &&
-                transition.person_ending_position ===
-                  endVideo.person_starting_position &&
-                transition.language === endVideo.language
-              );
-            });
-            setPlaylistTemp((prevPlaylist) => [
-              ...prevPlaylist,
-              {
-                rowData: matchingTransition1,
-                count: 1,
-              },
-            ]);
-          }
           const matchingTransition2 = transitions.find((transition) => {
             return (
               transition.mat_starting_position === "Front" &&
@@ -259,23 +241,6 @@ export default function RegisterPlaylistForm() {
             endVideo,
             "Prone"
           );
-          if (startVideo.person_ending_position === "Left") {
-            const matchingTransition1 = transitions.find((transition) => {
-              return (
-                transition.person_starting_position ===
-                  startVideo.person_ending_position &&
-                transition.person_ending_position ===
-                  endVideo.person_starting_position
-              );
-            });
-            setPlaylistTemp((prevPlaylist) => [
-              ...prevPlaylist,
-              {
-                rowData: matchingTransition1,
-                count: 1,
-              },
-            ]);
-          }
           const matchingTransition2 = transitions.find((transition) => {
             return (
               transition.mat_starting_position === "Front" &&
@@ -521,6 +486,7 @@ export default function RegisterPlaylistForm() {
             endVideo,
             "Prone"
           );
+          console.log(matchingTransition);
           setPlaylistTemp((prevPlaylist) => [
             ...prevPlaylist,
             {
@@ -560,22 +526,6 @@ export default function RegisterPlaylistForm() {
               count: 1,
             },
           ]);
-          if (endVideo.person_starting_position === "Left") {
-            const matchingTransition1 = transitions.find((transition) => {
-              return (
-                transition.person_starting_position ===
-                  endVideo.person_starting_position &&
-                transition.person_ending_position === "Front"
-              );
-            });
-            setPlaylistTemp((prevPlaylist) => [
-              ...prevPlaylist,
-              {
-                rowData: matchingTransition1,
-                count: 1,
-              },
-            ]);
-          }
           const matchingTransition3 = transitions.find((transition) => {
             return (
               transition.asana_category_end === "Standing" &&
@@ -594,6 +544,21 @@ export default function RegisterPlaylistForm() {
               count: 1,
             },
           ]);
+          if (endVideo.person_starting_position === "Left") {
+            const matchingTransition1 = transitions.find((transition) => {
+              return (
+                transition.person_starting_position === "Front" &&
+                transition.person_ending_position === "Left"
+              );
+            });
+            setPlaylistTemp((prevPlaylist) => [
+              ...prevPlaylist,
+              {
+                rowData: matchingTransition1,
+                count: 1,
+              },
+            ]);
+          }
         }
         if (
           startVideo.asana_category === "Prone" &&
@@ -804,7 +769,12 @@ export default function RegisterPlaylistForm() {
                 prop="rowData.asana_name"
                 label="Asana Name"
                 render={(_, rowData) => {
-                  return <p>{rowData.rowData.asana_name}</p>;
+                  return (
+                    <p>
+                      {rowData.rowData.asana_name ||
+                        rowData.rowData.transition_video_name}
+                    </p>
+                  );
                 }}
               />
               <Table.Column
