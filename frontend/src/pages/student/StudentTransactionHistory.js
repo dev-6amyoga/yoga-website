@@ -94,7 +94,7 @@ export default function StudentTransactionHistory() {
 						scale={1 / 3}
 						font="12px"
 						disabled={
-							loading || rowData?.payment_status !== "success"
+							loading || rowData?.payment_status !== "succeeded"
 						}
 						loading={loading}
 						onClick={() => {
