@@ -42,9 +42,13 @@ const UpdateRequests = sequelize.define(
       type: DataTypes.DATE,
       allowNull: false,
     },
-    is_approved: {
+    admin_approved: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+    },
+    approval_status: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   { ...options }
