@@ -19,42 +19,16 @@ const { initializeSequelize } = require("./init.sequelize");
 const { mailTransporter } = require("./init.nodemailer");
 
 // sql models
-const { UserPlan } = require("./models/sql/UserPlan");
-const { Role } = require("./models/sql/Role");
-const { User } = require("./models/sql/User");
-const { Permission } = require("./models/sql/Permission");
-const { RolePermission } = require("./models/sql/RolePermission");
-const { LoginToken } = require("./models/sql/LoginToken");
-const { LoginHistory } = require("./models/sql/LoginHistory");
-const { Institute } = require("./models/sql/Institute");
-// const { UserInstitute } = require("./models/sql/UserInstitute");
-const { Plan } = require("./models/sql/Plan");
-const { PlanPricing } = require("./models/sql/PlanPricing");
-const { ReferralCode } = require("./models/sql/ReferralCode");
-const { ReferralCodeUsage } = require("./models/sql/ReferralCodeUsage");
-const { Currency } = require("./models/sql/Currency");
-const { Transaction } = require("./models/sql/Transaction");
-const { DiscountCoupon } = require("./models/sql/DiscountCoupon");
-const {
-  DiscountCouponApplicablePlan,
-} = require("./models/sql/DiscountCouponApplicablePlan");
-const { Invite } = require("./models/sql/Invite");
-const { EmailVerification } = require("./models/sql/EmailVerification");
-const { Queries } = require("./models/sql/Queries");
-const { UpdateRequests } = require("./models/sql/UpdateRequests");
-// mongo models;]
-const { Asana } = "./models/mongo/Asana.js";
-const { AsanaCategory } = "./models/mongo/AsanaCategory.js";
-const { InstitutePlaylist } = "./models/mongo/InstitutePlaylist.js";
-const { Language } = "./models/mongo/Language.js";
-const { Playlist } = "./models/mongo/Playlist.js";
-const { PlaylistUser } = "./models/mongo/PlaylistUser.js";
-const { TeacherPlaylist } = "./models/mongo/TeacherPlaylist.js";
-const { TransitionVideo } = "./models/mongo/TransitionVideo.js";
-const { User: UserMongo } = "./models/mongo/User.js";
-const { UserPlaylistCount } = "./models/mongo/UserPlaylistCount.js";
-const { WatchHistory } = "./models/mongo/WatchHistory.js";
-const { WatchTimeLog } = "./models/mongo/WatchTimeLog.js";
+var glob = require("glob");
+
+glob.sync("./models/sql/*.js").forEach(function (file) {
+	require(path.resolve(file));
+});
+
+glob.sync("./models/mongo/*.js").forEach(function (file) {
+	require(path.resolve(file));
+});
+
 // routers
 const asanaRouter = require("./routes/Asana");
 const authRouter = require("./routes/Auth");
@@ -94,30 +68,30 @@ app.use("/static", express.static(path.join(__dirname, "public")));
 // initialize databases
 const mongoURI = process.env.MONGO_SRV_URL;
 mongoose
-  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("Connected to MongoDB Atlas"))
-  .catch((err) => console.log(err));
+	.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+	.then(() => console.log("Connected to MongoDB Atlas"))
+	.catch((err) => console.log(err));
 
 initializeSequelize()
-  .then(() => {
-    console.log("Sequelize initialized");
-    // bulkCreateSampleData()
-    // 	.then(() => {
-    // 		console.log("Sample data created!");
-    // 	})
-    // 	.catch((err) => {
-    // 		console.log(err);
-    // 	});
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+	.then(() => {
+		console.log("Sequelize initialized");
+		// bulkCreateSampleData()
+		// 	.then(() => {
+		// 		console.log("Sample data created!");
+		// 	})
+		// 	.catch((err) => {
+		// 		console.log(err);
+		// 	});
+	})
+	.catch((err) => {
+		console.error(err);
+	});
 
 // bind routers
 app.get("/info", (req, res) => {
-  return res.status(200).json({
-    message: "Running.",
-  });
+	return res.status(200).json({
+		message: "Running.",
+	});
 });
 
 app.use("/content", asanaRouter);
@@ -148,5 +122,5 @@ app.use("/update-request", updateRequestsRouter);
 const port = parseInt(process.env.SERVER_PORT);
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+	console.log(`Server is running on port ${port}`);
 });

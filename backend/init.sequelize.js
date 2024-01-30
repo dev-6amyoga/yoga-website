@@ -13,7 +13,7 @@ const DB_DATABASE = process.env.DB_DATABASE,
 // console.log(DB_DATABASE, DB_USERNAME, DB_PASSWORD);
 var sequelize = new Sequelize(DB_DATABASE, DB_USERNAME, DB_PASSWORD, {
 	dialect: "postgres",
-	logging: false,
+	logging: true,
 	host: DB_HOST,
 	port: DB_PORT,
 	dialectOptions: {},

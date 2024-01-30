@@ -9,6 +9,8 @@ const {
 	HTTP_INTERNAL_SERVER_ERROR,
 } = require("../utils/http_status_codes");
 const WatchTimeLog = require("../models/mongo/WatchTimeLog");
+const WatchTimeQuota = require("../models/mongo/WatchTimeQuota");
+const { GetCurrentUserPlan } = require("../services/UserPlan.service");
 
 router.post("/update", async (req, res) => {
 	const { user_id, watch_time_logs } = req.body;
@@ -19,8 +21,18 @@ router.post("/update", async (req, res) => {
 			.json({ message: "Missing required fields" });
 	}
 
+	// get user plan
+	const [user_plan, error] = GetCurrentUserPlan(user_id);
+
+	if (!user_plan || error) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ message: error || "User currenly has no plan" });
+	}
+
 	// reduce it to unique asana_id, playlist_id
 	let reduced_watch_time = [];
+	let total_watch_time = 0;
 
 	watch_time_logs.forEach((wtl) => {
 		const idx = reduced_watch_time.findIndex(
@@ -41,6 +53,7 @@ router.post("/update", async (req, res) => {
 					reduced_watch_time[idx].duration = wtl.timedelta;
 				}
 			}
+			total_watch_time += wtl.timedelta;
 		}
 	});
 
@@ -52,11 +65,13 @@ router.post("/update", async (req, res) => {
   duration
  }
  */
+	// start a db session
 	const session = await WatchTimeLog.startSession();
 
 	await session.withTransaction(async () => {
 		const promises = [];
 		reduced_watch_time.forEach((wtl) => {
+			// update watch time logs
 			promises.push(
 				WatchTimeLog.updateOne(
 					{
@@ -82,6 +97,34 @@ router.post("/update", async (req, res) => {
 			);
 		});
 
+		let updatedWatchTimeQuota = await WatchTimeQuota.findOneAndUpdate(
+			{
+				user_plan_id: user_plan?.user_plan_id,
+			},
+			[
+				{
+					$project: {
+						$sub: [$quota, total_watch_time],
+					},
+				},
+			],
+			{ upsert: false, returnDocument: "after", lean: true }
+		);
+
+		if (!updatedWatchTimeQuota) {
+			await session.abortTransaction();
+			return res.status(HTTP_BAD_REQUEST).json({
+				message: "Could not update watch time quota",
+			});
+		} else {
+			await session.commitTransaction();
+			if (updatedWatchTimeQuota.quota < 0) {
+				return res.status(HTTP_BAD_REQUEST).json({
+					message: "Watch time quota exceeded",
+				});
+			}
+		}
+
 		await Promise.all(promises)
 			.then((values) => {
 				console.log(values);
@@ -90,9 +133,9 @@ router.post("/update", async (req, res) => {
 			.then(() => {
 				return res.status(HTTP_OK).json({ reduced_watch_time });
 			})
-			.catch((err) => {
+			.catch(async (err) => {
 				console.log(err);
-				session.abortTransaction();
+				await session.abortTransaction();
 				return res
 					.status(HTTP_INTERNAL_SERVER_ERROR)
 					.json({ message: err });
