@@ -93,6 +93,9 @@ export default function AllPlaylists() {
           setPlaylist1((prev) =>
             prev.filter((playlist) => playlist.playlist_id !== playlistId)
           );
+          setFilteredTransitions((prev) =>
+            prev.filter((playlist) => playlist.playlist_id !== playlistId)
+          );
         } else {
           console.log("Error deleting playlist:", response.status);
         }
@@ -162,7 +165,6 @@ export default function AllPlaylists() {
         }
       );
       if (response.ok) {
-        console.log(modalData);
         setPlaylist1((prev) =>
           prev.map((p1) => (p1.playlist_id === playlistId ? modalData : p1))
         );
