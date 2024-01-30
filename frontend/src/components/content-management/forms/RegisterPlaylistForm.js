@@ -283,9 +283,8 @@ export default function RegisterPlaylistForm() {
           if (endVideo.person_starting_position === "Left") {
             const matchingTransition1 = transitions.find((transition) => {
               return (
-                transition.person_starting_position ===
-                  endVideo.person_starting_position &&
-                transition.person_ending_position === "Front"
+                transition.person_starting_position === "Front" &&
+                transition.person_ending_position === "Left"
               );
             });
             setPlaylistTemp((prevPlaylist) => [
