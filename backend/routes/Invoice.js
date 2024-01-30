@@ -260,51 +260,44 @@ router.post("/student/mail-invoice", async (req, res) => {
 		details
 	);
 
-	const pdfBuffer = await new Promise((resolve, reject) => {
-		const pdfStream = new pdfkit();
-		const buffers = [];
-		pdfStream.on("data", (data) => {
-			buffers.push(data);
-		});
-		pdfStream.on("end", () => {
-			resolve(Buffer.concat(buffers));
-		});
-		pdfStream.on("error", reject);
-		pdfStream.end(content);
-	});
-
-	// const pdfBuffer = await HTMLToPDF.generatePdf(
-	//   { content: content },
-	//   { format: "A4", printBackground: true, preferCSSPageSize: true }
-	// ).toBuffer();
-
-	mailTransporter.sendMail(
-		{
-			from: "dev.6amyoga@gmail.com",
-			to: user.email,
-			subject: "6AM Yoga | Invoice for your recent payment",
-			text: "Welcome to 6AM Yoga! Please find attached, the invoice for your recent transaction!",
-			attachments: [
+	HTMLToPDF.generatePdf(
+		{ content: content },
+		{ format: "A4", printBackground: true, preferCSSPageSize: true }
+	)
+		.then((buffer) => {
+			// change email
+			mailTransporter.sendMail(
 				{
-					filename: "invoice.pdf",
-					content: pdfBuffer,
-					encoding: "base64",
+					from: "dev.6amyoga@gmail.com",
+					to: "dev.6amyoga@gmail.com",
+					subject: "6AM Yoga | Invoice for your recent payment",
+					text: "Welcome to 6AM Yoga! Please find attached, the invoice for your recent transaction!",
+					attachments: [
+						{
+							filename: "invoice.pdf",
+							content: Buffer.from(buffer, "base64"),
+							encoding: "base64",
+						},
+					],
 				},
-			],
-		},
-		async (err, info) => {
-			if (err) {
-				await t.rollback();
-				console.error(err);
-				res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-					message: "Internal server error; try again",
-				});
-			} else {
-				res.status(HTTP_OK).json({
-					message: "Email sent",
-				});
-			}
-		}
-	);
+				async (err, info) => {
+					if (err) {
+						await t.rollback();
+						console.error(err);
+						res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+							message: "Internal server error; try again",
+						});
+					} else {
+						res.status(HTTP_OK).json({
+							message: "Email sent",
+						});
+					}
+				}
+			);
+		})
+		.catch((err) => {
+			console.log(err);
+			return res.status(500).send();
+		});
 });
 module.exports = router;
