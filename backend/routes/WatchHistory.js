@@ -51,7 +51,37 @@ router.post("/get", async (req, res) => {
 			.json({ message: "Missing required fields" });
 	}
 
-	const watchHistory = await WatchHistory.find({ user_id });
+	const watchHistory = await WatchHistory.aggregate([
+		{
+			$match: {
+				user_id: user_id,
+			},
+		},
+		{
+			$sort: {
+				created_at: -1,
+			},
+		},
+		{
+			$lookup: {
+				from: "asanas",
+				localField: "asana_id",
+				foreignField: "id",
+				as: "asana",
+				pipeline: [
+					{
+						$project: {
+							id: 1,
+							asana_name: 1,
+							asana_desc: 1,
+							asana_category: 1,
+							asana_videoID: 1,
+						},
+					},
+				],
+			},
+		},
+	]);
 
 	return res.status(HTTP_OK).json({ watchHistory });
 });
