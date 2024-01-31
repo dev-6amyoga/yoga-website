@@ -21,13 +21,15 @@ router.post("/update", async (req, res) => {
 			.json({ message: "Missing required fields" });
 	}
 
+	// console.log(GetCurrentUserPlan(user_id);
+
 	// get user plan
-	const [user_plan, error] = GetCurrentUserPlan(user_id);
+	const [user_plan, error] = await GetCurrentUserPlan(user_id);
 
 	if (!user_plan || error) {
 		return res
 			.status(HTTP_BAD_REQUEST)
-			.json({ message: error || "User currenly has no plan" });
+			.json({ message: error || "User currenly has no active plan" });
 	}
 
 	// reduce it to unique asana_id, playlist_id
@@ -40,6 +42,7 @@ router.post("/update", async (req, res) => {
 				x.asana_id === wtl.asana_id && x.playlist_id === wtl.playlist_id
 		);
 
+		total_watch_time += wtl.timedelta;
 		if (idx === -1) {
 			const { timedelta, ...w } = wtl;
 			w.duration = timedelta;
@@ -53,9 +56,10 @@ router.post("/update", async (req, res) => {
 					reduced_watch_time[idx].duration = wtl.timedelta;
 				}
 			}
-			total_watch_time += wtl.timedelta;
 		}
 	});
+
+	console.log({ reduced_watch_time, total_watch_time });
 
 	/*
  {
@@ -104,12 +108,17 @@ router.post("/update", async (req, res) => {
 			[
 				{
 					$project: {
-						$sub: [$quota, total_watch_time],
+						user_plan_id: user_plan?.user_plan_id,
+						quota: {
+							$subtract: ["$quota", total_watch_time],
+						},
 					},
 				},
 			],
 			{ upsert: false, returnDocument: "after", lean: true }
 		);
+
+		console.log(updatedWatchTimeQuota);
 
 		if (!updatedWatchTimeQuota) {
 			await session.abortTransaction();
