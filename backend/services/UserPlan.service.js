@@ -1,5 +1,6 @@
 const { USER_PLAN_ACTIVE } = require("../enums/user_plan_status");
 const { sequelize } = require("../init.sequelize");
+const { Plan } = require("../models/sql/Plan");
 const { UserPlan } = require("../models/sql/UserPlan");
 
 const GetCurrentUserPlan = async (user_id) => {
@@ -14,6 +15,7 @@ const GetCurrentUserPlan = async (user_id) => {
 				user_id,
 				current_status: USER_PLAN_ACTIVE,
 			},
+			include: [{ model: Plan }],
 			transaction: t,
 		});
 

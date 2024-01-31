@@ -185,4 +185,39 @@ router.post("/get", async (req, res) => {
 	}
 });
 
+router.post("/get-quota", async (req, res) => {
+	const { user_id } = req.body;
+
+	if (!user_id) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ message: "Missing required fields" });
+	}
+
+	try {
+		const [user_plan, error] = await GetCurrentUserPlan(user_id);
+
+		if (error) {
+			return res.status(HTTP_BAD_REQUEST).json({ message: error });
+		}
+
+		let quota = await WatchTimeQuota.findOne({
+			user_plan_id: user_plan?.user_plan_id,
+		});
+
+		if (!quota) {
+			return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+				message: "Could not fetch watch time quota",
+			});
+		}
+
+		return res.status(HTTP_OK).json({ quota, user_plan });
+	} catch (err) {
+		console.log(err);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ message: "Something went wrong" });
+	}
+});
+
 module.exports = router;
