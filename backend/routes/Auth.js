@@ -386,7 +386,7 @@ router.post("/register", async (req, res) => {
 				user_id: newUser.user_id,
 				institute_id: institute ? institute.institute_id : null,
 				role_id: role.role_id,
-				plan_id: null,
+				user_plan_id: null,
 			},
 			{ transaction: t }
 		);

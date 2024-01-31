@@ -16,6 +16,8 @@ const {
 } = require("../models/sql/UserInstitutePlanRole");
 const { Institute } = require("../models/sql/Institute");
 const { USER_PLAN_ACTIVE } = require("../enums/user_plan_status");
+const { Role } = require("../models/sql/Role");
+const WatchTimeQuota = require("../models/mongo/WatchTimeQuota");
 router.get("/get-all-user-plans", async (req, res) => {
 	try {
 		const userplans = await UserPlan.findAll();
@@ -168,15 +170,16 @@ router.post("/register", async (req, res) => {
 	try {
 		// find plan by id
 		let plan = null;
-		if (plan_id !== "") {
+		if (plan_id) {
 			plan = await Plan.findOne(
 				{
 					where: { plan_id: plan_id },
-					attributes: ["plan_id"],
 				},
 				{ transaction: t }
 			);
 			if (!plan) throw new Error("Plan doesn't exist");
+		} else {
+			throw new Error("Plan doesn't exist");
 		}
 
 		// find user by id
@@ -188,6 +191,13 @@ router.post("/register", async (req, res) => {
 			{ transaction: t }
 		);
 		if (!user) throw new Error("User doesn't exist");
+
+		const role = await Role.findOne({
+			where: { name: user_type },
+			attributes: ["role_id"],
+		});
+
+		if (!role) throw new Error("Role doesn't exist");
 
 		// create userPlan
 		const newUserPlan = await UserPlan.create(
@@ -207,6 +217,29 @@ router.post("/register", async (req, res) => {
 			},
 			{ transaction: t }
 		);
+
+		const x = await UserInstitutePlanRole.update(
+			{
+				user_plan_id: newUserPlan.user_plan_id,
+			},
+			{
+				transaction: t,
+				where: { user_id: user_id, role_id: role.role_id },
+			}
+		);
+
+		if (x[0] === 0) {
+			throw new Error("Failed to update user");
+		}
+
+		// add quota
+		if (current_status === USER_PLAN_ACTIVE) {
+			await WatchTimeQuota.create({
+				user_plan_id: newUserPlan.user_plan_id,
+				quota: plan.watch_time_limit,
+			});
+		}
+
 		await timeout(t.commit(), 5000, new Error("timeout; try again"));
 		return res.status(HTTP_OK).json({ userPlan: newUserPlan });
 	} catch (error) {
@@ -217,7 +250,7 @@ router.post("/register", async (req, res) => {
 			case "User doesn't exist":
 				return res
 					.status(HTTP_BAD_REQUEST)
-					.json({ error: "Missing required fields" });
+					.json({ error: "Invalid request" });
 		}
 	}
 });

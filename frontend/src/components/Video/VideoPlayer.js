@@ -71,7 +71,7 @@ function VideoPlayer() {
 	const [commitTimeInterval, setCommitTimeInterval] = useState(null);
 	const [flushTimeInterval, setFlushTimeInterval] = useState(null);
 
-	const [playerVideoId, setPlayerVideoId] = useState(currentVideo);
+	const [playerVideoId, setPlayerVideoId] = useState(null);
 
 	const [duration, setDuration] = useState(0);
 	const [currentTime, setCurrentTime] = useState(0);
@@ -145,21 +145,40 @@ function VideoPlayer() {
 				}, 5000)
 			);
 		}
+	}, [currentVideo]);
+
+	useEffect(() => {
+		console.log({
+			user,
+			queue,
+			committedTs,
+			watchTimeBuffer,
+			watchTimeArchive,
+			seekQueue,
+			currentVideo,
+			videoState,
+			commitTimeInterval,
+			flushTimeInterval,
+			playerVideoId,
+			duration,
+			currentTime,
+			videoStateVisible,
+		});
 
 		return () => {
 			// clearing previous interval to flush
-			console.log("Clearing previous flushTimeInterval");
 			if (flushTimeInterval) {
+				console.log("Clearing previous flushTimeInterval");
 				clearInterval(flushTimeInterval);
 			}
 
 			// clearing previous commitTimeInterval
-			console.log("Clearing previous commitTimeInterval");
 			if (commitTimeInterval) {
+				console.log("Clearing previous commitTimeInterval");
 				clearInterval(commitTimeInterval);
 			}
 		};
-	}, [currentVideo]);
+	}, [commitTimeInterval, flushTimeInterval]);
 
 	useEffect(() => {
 		if (watchTimeArchive && watchTimeArchive.length > 0) {
