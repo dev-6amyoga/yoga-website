@@ -6,6 +6,7 @@ import {
   Input,
   Modal,
   Table,
+  Select,
 } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -745,15 +746,52 @@ export default function RegisterPlaylistForm() {
       </Grid.Container>
     );
   };
+
+  const [filterCategory, setFilterCategory] = useState("");
+  const handleFilterChange = (e) => {
+    setFilterCategory(e.target.value);
+  };
+  const uniqueCategories = [
+    "All",
+    ...new Set(sortedAsanas.map((asana) => asana.asana_category)),
+  ];
+
+  const filteredAsanas = sortedAsanas.filter(
+    (asana) =>
+      filterCategory === "All" ||
+      asana.asana_category.toLowerCase().includes(filterCategory.toLowerCase())
+  );
+
   return (
     <div className="video_form min-h-screen">
       <AdminNavbar />
       <div className="flex items-center justify-center my-20 gap-8">
-        <Table width={60} data={sortedAsanas} className="bg-white ">
+        <Table width={60} data={filteredAsanas} className="bg-white">
           <Table.Column prop="asana_name" label="Asana Name" />
-          <Table.Column prop="language" label="Asana Name" />
-
-          <Table.Column prop="asana_category" label="Category" />
+          <Table.Column
+            prop="language"
+            label="Language"
+            render={(data) => (data.language !== "" ? data.language : "none")}
+          />
+          <Table.Column prop="asana_category" label="Category">
+            <Select
+              placeholder="Select Category"
+              width="150px"
+              groupedBy
+              onChange={(value) => setFilterCategory(value)}
+            >
+              {uniqueCategories.map((category, index) => (
+                <Select.Option key={index} value={category}>
+                  {category}
+                </Select.Option>
+              ))}
+            </Select>
+          </Table.Column>
+          {/* <Table.Filter
+              type="text"
+              value={filterCategory}
+              onChange={handleFilterChange}
+            /> */}
           <Table.Column
             prop="in_playlist"
             label="Add To Playlist"
@@ -761,6 +799,7 @@ export default function RegisterPlaylistForm() {
             render={renderAction2}
           />
         </Table>
+
         {playlist_temp.length > 0 && (
           <Card>
             <Table width={40} data={playlist_temp} className="bg-dark ">
@@ -787,7 +826,13 @@ export default function RegisterPlaylistForm() {
                 prop="rowData.language"
                 label="Language"
                 render={(_, rowData) => {
-                  return <p>{rowData.rowData.language}</p>;
+                  return (
+                    <p>
+                      {rowData.rowData.language
+                        ? "None"
+                        : rowData.rowData.language}
+                    </p>
+                  );
                 }}
               />
               <Table.Column prop="count" label="Count" />

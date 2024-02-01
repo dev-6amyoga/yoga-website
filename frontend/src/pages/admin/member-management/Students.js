@@ -80,8 +80,12 @@ export default function Students() {
         .then((res) => {
           if (res.status === 200) {
             toast("Email Update Approved", { type: "success" });
-            rowData.status = "ACCEPTED";
-            console.log(index);
+            setUpdateRequests((prevRequests) =>
+              prevRequests.filter(
+                (request) =>
+                  request.update_request_id !== rowData.update_request_id
+              )
+            );
           }
         })
         .catch((err) => {
@@ -100,6 +104,12 @@ export default function Students() {
         .then((res) => {
           if (res.status === 200) {
             toast("Email Update Rejected", { type: "success" });
+            setUpdateRequests((prevRequests) =>
+              prevRequests.filter(
+                (request) =>
+                  request.update_request_id !== rowData.update_request_id
+              )
+            );
           }
         })
         .catch((err) => {
@@ -152,7 +162,7 @@ export default function Students() {
         </div>
 
         <Card>
-          <Text h4>Email Update Requests</Text>
+          <Text h4>Pending Email Update Requests</Text>
           <div className="flex flex-col items-start gap-2 p-6 bg-gray-500 text-white mt-4 mx-4 rounded-md">
             <Card width="100%">
               <Table width="100%" data={updateRequests} className="bg-white">

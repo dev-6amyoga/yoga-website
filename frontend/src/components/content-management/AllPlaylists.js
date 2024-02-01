@@ -311,7 +311,6 @@ export default function AllPlaylists() {
           <Table width={100} data={filteredTransitions} className="bg-white ">
             <Table.Column prop="playlist_id" label="Playlist ID" />
             <Table.Column prop="playlist_name" label="Playlist Name" />
-
             <Table.Column
               prop="asana_ids"
               label="Asana Names"
@@ -344,7 +343,7 @@ export default function AllPlaylists() {
         <Modal
           visible={modalState}
           onClose={() => setModalState(false)}
-          width="30rem"
+          width="50rem"
         >
           <Modal.Title>Update Playlist</Modal.Title>
           <Modal.Subtitle>{modalData.playlist_name}</Modal.Subtitle>
@@ -385,7 +384,9 @@ export default function AllPlaylists() {
                               key={asanaOption.id}
                               value={asanaOption.asana_name}
                             >
-                              {asanaOption.asana_name}
+                              {asanaOption.asana_name +
+                                " " +
+                                asanaOption.language}
                             </Select.Option>
                           ))}
                         </Select>
