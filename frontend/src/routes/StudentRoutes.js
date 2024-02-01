@@ -8,6 +8,7 @@ import StudentSettings from "../pages/student/StudentSettings";
 import StudentTransactionHistory from "../pages/student/StudentTransactionHistory";
 import StudentWatchHistory from "../pages/student/StudentWatchHistory";
 import AboutUs from "../pages/student/AboutUs";
+import ViewAllPlaylists from "../pages/student/ViewAllPlaylists";
 import ContactUs from "../pages/student/ContactUs";
 export const StudentRoutes = [
   {
@@ -38,6 +39,10 @@ export const StudentRoutes = [
   {
     path: "/student/register-new-playlist",
     element: <RegisterNewPlaylistStudent />,
+  },
+  {
+    path: "/student/view-all-playlists",
+    element: <ViewAllPlaylists />,
   },
   {
     path: "/student/my-profile",

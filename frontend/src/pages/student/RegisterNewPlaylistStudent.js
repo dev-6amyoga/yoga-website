@@ -7,27 +7,21 @@ import {
   Divider,
   Grid,
   Modal,
+  Select,
 } from "@geist-ui/core";
 import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
 import useUserStore from "../../store/UserStore";
 import { useState, useEffect } from "react";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function RegisterNewPlaylistStudent() {
-  const notify = (x) => toast(x);
-  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const navigate = useNavigate();
   let user = useUserStore((state) => state.user);
-  const user_id = user?.user_id;
-  const [planId, setPlanId] = useState(0);
-  const [planDetails, setPlanDetails] = useState({});
   const [asanas, setAsanas] = useState([]);
   const [playlist_temp, setPlaylistTemp] = useState([]);
   const [modalState, setModalState] = useState(false);
-  const [currentCount, setCurrentCount] = useState(0);
-  const [maxCount, setMaxCount] = useState(0);
-  const [maxStudId, setMaxStudId] = useState(0);
   const [modalData, setModalData] = useState({
     rowData: {
       asana_name: "",
@@ -35,75 +29,14 @@ export default function RegisterNewPlaylistStudent() {
     count: "",
     index: 0,
   });
-  ////////////////////////////////////////////////////////
 
-  const [userPlaylist, setUserPlaylist] = useState({});
-  const [incremented, setIncremented] = useState(false);
-
-  const incrementPlaylistField = (field) => {
-    setUserPlaylist((prevPlaylist) => ({
-      ...prevPlaylist,
-      [field]: prevPlaylist[field] + 1,
-    }));
-    setIncremented(true);
-  };
-
-  const [prevUserPlaylist, setPrevUserPlaylist] = useState(() => userPlaylist);
-
-  useEffect(() => {
-    async function fetchCount() {
-      if (typeof window !== "undefined") {
-        if (userPlaylist !== prevUserPlaylist) {
-          if (incremented) {
-            try {
-              const response = await fetch(
-                `http://localhost:4000/user-playlist-count/updateUserPlaylistCount/${user_id}`,
-                {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify(userPlaylist),
-                }
-              );
-              if (response.ok) {
-                console.log(currentCount);
-                setCurrentCount((prevCount) => prevCount + 1);
-              } else {
-                notify("Error updating asana:", response.status);
-              }
-            } catch (error) {
-              console.error(error);
-            }
-            setIncremented(false);
-          }
-          setPrevUserPlaylist(userPlaylist);
-        }
-      }
-    }
-    fetchCount();
-  }, [userPlaylist, incremented, user_id]);
-
-  ////////////////////////////////////////////////////////
-
-  const findRecordByKeyValue = (array, key, value) => {
-    return array.find((item) => item[key] === value);
-  };
-  const getMaxPlaylistCount = (userId, l1) => {
-    const counts = l1
-      .filter((id) => id.startsWith(`S_${userId}_`))
-      .map((id) => parseInt(id.split("_")[2]));
-    if (counts.length === 0) {
-      return null;
-    }
-    return Math.max(...counts);
-  };
+  const [userPlaylists, setUserPlaylists] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "http://localhost:4000/user-playlists/getAllUserPlaylists",
+          `http://localhost:4000/user-playlists/getAllUserPlaylists/${user?.user_id}`,
           {
             method: "GET",
             headers: {
@@ -113,117 +46,15 @@ export default function RegisterNewPlaylistStudent() {
         );
         const data = await response.json();
         const playlistIds = data.map((item) => item.playlist_id);
-        if (getMaxPlaylistCount(user_id, playlistIds) != null) {
-          setMaxStudId(getMaxPlaylistCount(user_id, playlistIds));
-        } else {
-          setMaxStudId(0);
-        }
+        setUserPlaylists(data);
       } catch (error) {
-        notify(error);
+        toast(error);
       }
     };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (typeof window !== "undefined") {
-        try {
-          const response = await fetch(
-            "http://localhost:4000/user-plan/get-user-plan-by-id",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ user_id: user?.user_id }),
-            }
-          );
-          const data = await response.json();
-          const retrievedPlanId = data?.userPlan?.plan_id;
-          setPlanId(retrievedPlanId);
-          if (retrievedPlanId) {
-            try {
-              const response1 = await fetch(
-                "http://localhost:4000/plan/get-plan-by-id",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    plan_id: retrievedPlanId,
-                  }),
-                }
-              );
-              const data1 = await response1.json();
-              if (data1["plan"]) {
-                setPlanDetails(data1["plan"]);
-                try {
-                  const response3 = await fetch(
-                    "http://localhost:4000/user-playlist-count/getAllUserPlaylistCounts"
-                  );
-                  const data3 = await response3.json();
-                  console.log(data3);
-                  const isUserPresent = data3.some(
-                    (record) => record.user_id === user_id
-                  );
-                  if (isUserPresent) {
-                    const record = findRecordByKeyValue(
-                      data3,
-                      "user_id",
-                      user_id
-                    );
-                    setUserPlaylist(record);
-                    setCurrentCount(record.current_count);
-                    setMaxCount(record.maximum_count);
-                  } else {
-                    const maxPlaylistUserId = Math.max(
-                      ...data3.map((record) => record.playlist_user_id),
-                      0
-                    );
-                    const newRecord = {
-                      playlist_user_id: maxPlaylistUserId + 1,
-                      user_id: user_id,
-                      user_type: "STUDENT",
-                      current_count: 0,
-                      maximum_count: data1["plan"]["playlist_creation_limit"],
-                    };
-                    try {
-                      const response = await fetch(
-                        "http://localhost:4000/user-playlist-count/addUserPlaylistCount",
-                        {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify(newRecord),
-                        }
-                      );
-                      if (response.ok) {
-                        notify("Count added successfully");
-                      } else {
-                        console.error("Failed to add count");
-                      }
-                    } catch (error) {
-                      console.error("Error during count addition:", error);
-                    }
-                  }
-                } catch (error) {
-                  notify(error);
-                }
-              }
-            } catch (error) {
-              notify(error);
-            }
-          }
-        } catch (error) {
-          notify(error);
-        }
-      }
-    };
-    fetchData();
-  }, [user_id]);
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -234,7 +65,7 @@ export default function RegisterNewPlaylistStudent() {
         const data = await response.json();
         setAsanas(data);
       } catch (error) {
-        notify(error);
+        toast(error);
       }
     };
     fetchData();
@@ -244,13 +75,6 @@ export default function RegisterNewPlaylistStudent() {
     const { id, value } = e.target;
     setModalData({ ...modalData, [id]: value });
   };
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCurrentDateTime(new Date());
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
 
   const updateData = () => {
     const x = document.getElementById("asana_count_playlist").value;
@@ -314,7 +138,7 @@ export default function RegisterNewPlaylistStudent() {
         },
       ]);
     } else {
-      notify("Invalid count entered. Please enter a valid number.");
+      toast("Invalid count entered. Please enter a valid number.");
     }
   };
 
@@ -324,7 +148,6 @@ export default function RegisterNewPlaylistStudent() {
     const playlist_sequence = {};
     playlist_sequence["playlist_name"] = playlist_name;
     playlist_sequence["asana_ids"] = [];
-    // const creation_date_and_time = currentDateTime;
     playlist_temp.map((item) => {
       const asana_id_playlist = item["rowData"]["id"];
       const asana_count = Number(item["count"]);
@@ -332,38 +155,34 @@ export default function RegisterNewPlaylistStudent() {
         playlist_sequence["asana_ids"].push(Number(asana_id_playlist));
       }
     });
-    const newId = "S_" + String(user_id) + "_" + String(maxStudId + 1);
+    const newId =
+      "S_" + String(user?.user_id) + "_" + String(userPlaylists.length + 1);
     const newRecord = {
       playlist_id: newId,
-      playlist_user_id: user_id,
-      user_type: user["role"]["name"],
+      playlist_user_id: user?.user_id,
       playlist_name: playlist_sequence["playlist_name"],
       asana_ids: playlist_sequence["asana_ids"],
     };
-    if (currentCount === maxCount) {
-      notify("LIMIT REACHED!!");
-    } else {
-      incrementPlaylistField("current_count");
-      try {
-        const response = await fetch(
-          "http://localhost:4000/user-playlists/addUserPlaylist",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newRecord),
-          }
-        );
-        if (response.ok) {
-          setMaxStudId((prevMaxStudId) => prevMaxStudId + 1);
-          notify("Playlist added successfully");
-        } else {
-          console.error("Failed to add playlist");
+    console.log(newRecord);
+    try {
+      const response = await fetch(
+        "http://localhost:4000/user-playlists/addUserPlaylist",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newRecord),
         }
-      } catch (error) {
-        console.error("Error during playlist addition:", error);
+      );
+      if (response.ok) {
+        toast("Playlist added successfully");
+        navigate("/student/view-all-playlists");
+      } else {
+        console.error("Failed to add playlist");
       }
+    } catch (error) {
+      console.error("Error during playlist addition:", error);
     }
   };
 
@@ -371,14 +190,7 @@ export default function RegisterNewPlaylistStudent() {
     const inputId = `asana_count_${rowData.id}`;
     return (
       <div>
-        <Input
-          width="50%"
-          id={inputId}
-          placeholder="1"
-          // type="number"
-          min="1"
-          pattern="\d+"
-        />
+        <Input width="50%" id={inputId} placeholder="1" min="1" pattern="\d+" />
         <Button
           type="warning"
           auto
@@ -392,23 +204,42 @@ export default function RegisterNewPlaylistStudent() {
     );
   };
 
+  const [filterCategory, setFilterCategory] = useState("");
+
+  const uniqueCategories = [
+    "All",
+    ...new Set(asanas.map((asana) => asana.asana_category)),
+  ];
+
+  const filteredAsanas = asanas.filter(
+    (asana) =>
+      filterCategory === "All" ||
+      asana.asana_category.toLowerCase().includes(filterCategory.toLowerCase())
+  );
+
   return (
     <div className="flex-col justify-center">
       <StudentNavbar />
       <br />
       <br />
-      <Card width={50}>
-        <h4>My Library</h4>
-        <br />
-        <h5>Maximum playlists that can be made : {maxCount}</h5>
-        <h5>Playlists already made : {currentCount}</h5>
-      </Card>
-
       <div className="flex items-center justify-center my-20 gap-8">
         <Card>
-          <Table width={60} data={asanas} className="bg-white ">
+          <Table width={60} data={filteredAsanas} className="bg-white ">
             <Table.Column prop="asana_name" label="Asana Name" />
-            <Table.Column prop="asana_category" label="Category" />
+            <Table.Column prop="asana_category" label="Category">
+              <Select
+                placeholder="Select Category"
+                width="150px"
+                groupedBy
+                onChange={(value) => setFilterCategory(value)}
+              >
+                {uniqueCategories.map((category, index) => (
+                  <Select.Option key={index} value={category}>
+                    {category}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Table.Column>
             <Table.Column
               prop="in_playlist"
               label="Add To Playlist"

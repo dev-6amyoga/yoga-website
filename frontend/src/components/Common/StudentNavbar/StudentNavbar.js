@@ -1,4 +1,4 @@
-import { Button, Drawer } from "@geist-ui/core";
+import { Button, Drawer, ButtonDropdown } from "@geist-ui/core";
 import { Menu, User } from "@geist-ui/icons";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -126,12 +126,23 @@ export default function StudentNavbar() {
             >
               6AM Yoga Playlists
             </Button>
-            <Button
-              onClick={() => navigate("/student/register-new-playlist")}
-              disabled={disabledTailorMade}
-            >
-              Make your own Playlist
-            </Button>
+            <ButtonDropdown className="w-full" disabled={disabledTailorMade}>
+              <ButtonDropdown.Item main>My Playlists</ButtonDropdown.Item>
+              <ButtonDropdown.Item
+                onClick={() => {
+                  navigate("/student/register-new-playlist");
+                }}
+              >
+                Register New Playlist
+              </ButtonDropdown.Item>
+              <ButtonDropdown.Item
+                onClick={() => {
+                  navigate("/student/view-all-playlists");
+                }}
+              >
+                View All Playlists
+              </ButtonDropdown.Item>
+            </ButtonDropdown>
             <Button onClick={() => navigate("/student/about-us")}>
               About Us
             </Button>
