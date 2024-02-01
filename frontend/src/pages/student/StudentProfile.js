@@ -124,39 +124,6 @@ export default function StudentProfile() {
       setIsPhoneUpdate(true);
       toast("Phone Update");
     }
-
-    // Fetch({
-    //   url: "http://localhost:4000/user/update-profile",
-    //   method: "POST",
-    //   data: JSON.stringify(updateData1),
-    // })
-    //   .then((res) => {
-    //     if (res && res.status === 200) {
-    //       Fetch({
-    //         url: "http://localhost:4000/user/get-by-id",
-    //         method: "POST",
-    //         data: {
-    //           user_id: user?.user_id,
-    //         },
-    //       }).then((res) => {
-    //         if (res && res.status === 200) {
-    //           toast("Profile updated successfully", {
-    //             type: "success",
-    //           });
-    //           setUserData(res.data.user);
-    //         } else {
-    //           toast("Error updating profile; retry", {
-    //             type: "error",
-    //           });
-    //         }
-    //       });
-    //     } else {
-    //       toast("Error updating profile; retry", { type: "error" });
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     toast("Error updating profile", { type: "error" });
-    //   });
   };
 
   const sendEmail = async () => {
@@ -175,31 +142,14 @@ export default function StudentProfile() {
       },
     })
       .then((res) => {
+        console.log(res);
         toast("Update sent successfully", { type: "success" });
       })
       .catch((err) => {
-        toast(`Error : ${err?.response?.data?.message}`, {
+        toast(`Error : ${err.response.data.error}`, {
           type: "error",
         });
       });
-    // Fetch({
-    //   url: "http://localhost:4000/invite/create-email-update-verification",
-    //   method: "POST",
-    //   data: {
-    //     email: userData.email,
-    //     name: userData.name,
-    //     updated_email: updateData.email_profile,
-    //   },
-    // })
-    //   .then((res) => {
-    //     toast("Email sent successfully", { type: "success" });
-    //     setToken(res.data.token);
-    //   })
-    //   .catch((err) => {
-    //     toast(`Error : ${err?.response?.data?.message}`, {
-    //       type: "error",
-    //     });
-    //   });
   };
   return (
     <div>
