@@ -6,6 +6,8 @@ const {
   HTTP_OK,
   HTTP_INTERNAL_SERVER_ERROR,
 } = require("../utils/http_status_codes");
+const { Op } = require("sequelize");
+
 const { Plan } = require("../models/sql/Plan");
 const { Institute } = require("../models/sql/Institute");
 const { Role } = require("../models/sql/Role");
@@ -243,9 +245,8 @@ router.post("/get-by-planid", async (req, res) => {
 });
 
 router.post("/update-profile", async (req, res) => {
-  console.log(req.body);
   const { user_id, name, email, phone } = req.body;
-  console.log(user_id);
+  console.log(req.body);
   if (!user_id) {
     return res
       .status(HTTP_BAD_REQUEST)
@@ -253,14 +254,31 @@ router.post("/update-profile", async (req, res) => {
   }
 
   try {
-    const n = await User.update(
+    // Check if email or phone already exists for another user
+    const existingUser = await User.findOne({
+      where: {
+        [Op.and]: [
+          { [Op.or]: [{ email }, { phone }] },
+          { user_id: { [Op.ne]: user_id } }, // Exclude the current user from the check
+        ],
+      },
+    });
+
+    if (existingUser) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ error: "Email or phone already exists for another user" });
+    }
+
+    // Update the user's profile
+    const [n] = await User.update(
       { name, email, phone },
       {
         where: { user_id: user_id },
       }
     );
 
-    if (n.length > 0 && n[0] !== 1) {
+    if (n !== 1) {
       return res
         .status(HTTP_BAD_REQUEST)
         .json({ error: "User does not exist" });
@@ -282,7 +300,7 @@ router.post("/update-profile", async (req, res) => {
 
     return res
       .status(HTTP_OK)
-      .json({ message: "updated successfully", user, plan });
+      .json({ message: "Updated successfully", user, plan });
   } catch (error) {
     console.error(error);
     return res
