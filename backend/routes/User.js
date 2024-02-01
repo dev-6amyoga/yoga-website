@@ -551,4 +551,33 @@ router.post("/check-username", async (req, res) => {
   }
 });
 
+router.post("/update-email", async (req, res) => {
+  const { user_id, email } = req.body;
+  console.log(user_id, email);
+  if (!user_id || !email) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Missing required fields" });
+  }
+  try {
+    const n = await User.update(
+      { email },
+      {
+        where: { user_id: user_id },
+      }
+    );
+    if (n.length > 0 && n[0] !== 1) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ error: "User does not exist" });
+    }
+
+    return res.status(HTTP_OK).json({ message: "updated successfully" });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to update user" });
+  }
+});
 module.exports = router;

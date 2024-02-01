@@ -46,7 +46,7 @@ const UpdateRequests = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    approval_status: {
+    approval_token: {
       type: DataTypes.STRING,
       allowNull: true,
     },

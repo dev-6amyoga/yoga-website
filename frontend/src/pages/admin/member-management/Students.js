@@ -80,12 +80,6 @@ export default function Students() {
         .then((res) => {
           if (res.status === 200) {
             toast("Email Update Approved", { type: "success" });
-            setUpdateRequests((prevRequests) =>
-              prevRequests.filter(
-                (request) =>
-                  request.update_request_id !== rowData.update_request_id
-              )
-            );
           }
         })
         .catch((err) => {
@@ -104,12 +98,6 @@ export default function Students() {
         .then((res) => {
           if (res.status === 200) {
             toast("Email Update Rejected", { type: "success" });
-            setUpdateRequests((prevRequests) =>
-              prevRequests.filter(
-                (request) =>
-                  request.update_request_id !== rowData.update_request_id
-              )
-            );
           }
         })
         .catch((err) => {
@@ -145,6 +133,9 @@ export default function Students() {
       </Grid.Container>
     );
   };
+  const filteredUpdateRequests = updateRequests.filter(
+    (request) => !request.is_approved
+  );
 
   return (
     <div>
@@ -165,7 +156,11 @@ export default function Students() {
           <Text h4>Pending Email Update Requests</Text>
           <div className="flex flex-col items-start gap-2 p-6 bg-gray-500 text-white mt-4 mx-4 rounded-md">
             <Card width="100%">
-              <Table width="100%" data={updateRequests} className="bg-white">
+              <Table
+                width="100%"
+                data={filteredUpdateRequests}
+                className="bg-white"
+              >
                 <Table.Column prop="user_id" label="User ID" />
                 <Table.Column label="Student Name" width={150} prop="name" />
                 <Table.Column
