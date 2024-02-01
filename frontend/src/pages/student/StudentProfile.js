@@ -111,8 +111,6 @@ export default function StudentProfile() {
       updateData.email_profile !== "" &&
       updateData.email_profile !== userData.email
     ) {
-      //send verification mail with link which opens a page with a button, saying do you really want to update your email id to : -----------------
-      //if they click yes, then update.
       setIsEmailUpdate(true);
       toast("Email Update");
     }

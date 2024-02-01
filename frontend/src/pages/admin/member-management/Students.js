@@ -1,12 +1,23 @@
 import { toast } from "react-toastify";
 import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
 import { Fetch } from "../../../utils/Fetch";
-import { Table, Card, Text, Grid, Button } from "@geist-ui/core";
+import { Table, Card, Text, Grid, Button, Modal, Input } from "@geist-ui/core";
 import { useEffect, useState } from "react";
+import { validateEmail, validatePhone } from "../../../utils/formValidation";
 export default function Students() {
   const [students, setStudents] = useState([]);
   const [studentData, setStudentData] = useState([]);
   const [updateRequests, setUpdateRequests] = useState([]);
+  const [delState, setDelState] = useState(false);
+  const [delUserId, setDelUserId] = useState(0);
+  const [modalState, setModalState] = useState(false);
+  const [modalData, setModalData] = useState({
+    user_id: 0,
+    username: "",
+    name: "",
+    email: "",
+    phone: "",
+  });
   const appendToUsers = (newUserData) => {
     setStudentData((prevUsers) => [...prevUsers, newUserData]);
   };
@@ -51,7 +62,6 @@ export default function Students() {
     };
     fetchData();
   }, []);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -67,7 +77,6 @@ export default function Students() {
     };
     fetchData();
   }, []);
-
   const RenderAction = (value, rowData, index) => {
     const handleAccept = async () => {
       Fetch({
@@ -134,9 +143,117 @@ export default function Students() {
     );
   };
   const filteredUpdateRequests = updateRequests.filter(
-    (request) => !request.is_approved
+    (request) => !request.admin_approved
   );
+  const renderAction1 = (value, rowData, index) => {
+    const handleDelete = async () => {
+      try {
+        const userId = Number(rowData.user_id);
+        setDelUserId(userId);
+        setDelState(true);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    const handleUpdate = async () => {
+      setModalData(rowData);
+      setModalState(true);
+    };
+    return (
+      <Grid.Container gap={0.1}>
+        <Grid>
+          <Button
+            type="error"
+            auto
+            scale={1 / 3}
+            font="12px"
+            onClick={handleDelete}
+          >
+            Remove
+          </Button>
+        </Grid>
+        <Grid>
+          <Button
+            type="warning"
+            auto
+            scale={1 / 3}
+            font="12px"
+            onClick={() => handleUpdate(Number(rowData.user_id))}
+          >
+            Update
+          </Button>
+        </Grid>
+      </Grid.Container>
+    );
+  };
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setModalData({ ...modalData, [id]: value });
+  };
 
+  const deleteUser = async () => {
+    try {
+      const delId = delUserId;
+      const response = await fetch("http://localhost:4000/user/delete-by-id", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_id: delId }),
+      });
+      if (response.ok) {
+        toast("Deleted successfully!");
+        setStudentData((prev) =>
+          prev.filter((playlist) => playlist.user_id !== delId)
+        );
+      } else {
+        console.log("Error deleting user:", response.status);
+      }
+      setDelState(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const updateData = async () => {
+    console.log("Modal Data : ", modalData);
+    const [validEmail, emailError] = validateEmail(modalData.email);
+
+    if (!validEmail) {
+      toast(emailError.message, { type: "error" });
+      return;
+    }
+
+    const [validPhone, phoneError] = validatePhone(modalData.phone);
+
+    if (!validPhone) {
+      toast(phoneError.message, { type: "error" });
+      return;
+    }
+    try {
+      const response = await fetch(
+        "http://localhost:4000/user/update-profile",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(modalData),
+        }
+      );
+      if (response.ok) {
+        toast("Update successful!");
+        setStudentData((prev) =>
+          prev.map((p1) => (p1.user_id === modalData.user_id ? modalData : p1))
+        );
+        setModalState(false);
+      } else {
+        console.log("Error updating user details:", response.status);
+        console.log(response);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <div>
       <AdminNavbar />
@@ -145,9 +262,16 @@ export default function Students() {
           <Card>
             <Table width="100%" data={studentData} className="bg-white">
               <Table.Column prop="user_id" label="ID" />
+              <Table.Column label="Username" width={150} prop="username" />
               <Table.Column label="Student Name" width={150} prop="name" />
               <Table.Column label="Email ID" width={200} prop="email" />
               <Table.Column label="Phone" width={150} prop="phone" />
+              <Table.Column
+                prop="operation"
+                label="ACTIONS"
+                width={150}
+                render={renderAction1}
+              />
             </Table>
           </Card>
         </div>
@@ -184,6 +308,67 @@ export default function Students() {
             </Card>
           </div>
         </Card>
+        <div>
+          <Modal
+            visible={modalState}
+            onClose={() => setModalState(false)}
+            width="50rem"
+          >
+            <Modal.Title>Update User Details</Modal.Title>
+            <Modal.Content>
+              <form>
+                <Input
+                  width="100%"
+                  id="username"
+                  placeholder={modalData.username}
+                  onChange={handleInputChange}
+                >
+                  Username
+                </Input>
+                <Input
+                  width="100%"
+                  id="name"
+                  placeholder={modalData.name}
+                  onChange={handleInputChange}
+                >
+                  Name
+                </Input>
+                <Input
+                  width="100%"
+                  id="email"
+                  placeholder={modalData.email}
+                  onChange={handleInputChange}
+                >
+                  Email ID
+                </Input>
+                <Input
+                  width="100%"
+                  id="phone"
+                  placeholder={modalData.phone}
+                  onChange={handleInputChange}
+                >
+                  Phone Number
+                </Input>
+                <br />
+              </form>
+            </Modal.Content>
+            <Modal.Action passive onClick={() => setModalState(false)}>
+              Cancel
+            </Modal.Action>
+            <Modal.Action onClick={updateData}>Update</Modal.Action>
+          </Modal>
+
+          <Modal visible={delState} onClose={() => setDelState(false)}>
+            <Modal.Title>Delete User</Modal.Title>
+            <Modal.Content>
+              <p>Do you really wish to delete this user?</p>
+            </Modal.Content>
+            <Modal.Action passive onClick={() => setDelState(false)}>
+              No
+            </Modal.Action>
+            <Modal.Action onClick={deleteUser}>Yes</Modal.Action>
+          </Modal>
+        </div>
       </div>
     </div>
   );
