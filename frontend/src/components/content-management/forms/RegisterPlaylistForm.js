@@ -18,6 +18,15 @@ export default function RegisterPlaylistForm() {
   const navigate = useNavigate();
   const [asanas, setAsanas] = useState([]);
   const [transitions, setTransitions] = useState([]);
+  const predefinedOrder = [
+    "Warm Up",
+    "Suryanamaskara",
+    "Standing",
+    "Sitting",
+    "Supine",
+    "Prone",
+    "Pranayama",
+  ];
   const [sortedAsanas, setSortedAsanas] = useState([]);
   const sortOrder = "asc";
   const [playlist_temp, setPlaylistTemp] = useState([]);
@@ -44,14 +53,21 @@ export default function RegisterPlaylistForm() {
     fetchData();
   }, []);
   useEffect(() => {
-    const sortedData = [...asanas].sort((a, b) => {
-      if (sortOrder === "asc") {
-        return a.asana_category.localeCompare(b.asana_category);
-      } else {
-        return b.asana_category.localeCompare(a.asana_category);
-      }
+    // const sortedData = [...asanas].sort((a, b) => {
+    //   if (sortOrder === "asc") {
+    //     return a.asana_category.localeCompare(b.asana_category);
+    //   } else {
+    //     return b.asana_category.localeCompare(a.asana_category);
+    //   }
+    // });
+    const s1 = asanas.sort((a, b) => {
+      return (
+        predefinedOrder.indexOf(a.asana_category) -
+        predefinedOrder.indexOf(b.asana_category)
+      );
     });
-    setSortedAsanas(sortedData);
+
+    setSortedAsanas(s1);
   }, [asanas, sortOrder]);
   useEffect(() => {
     const fetchData = async () => {
@@ -89,11 +105,13 @@ export default function RegisterPlaylistForm() {
     return matchingTransition;
   };
   const addToPlaylist = (rowData) => {
+    console.log(rowData);
     var count = document.getElementById(`asana_count_${rowData.id}`).value;
     if (count === "") {
       count = 1;
     }
     if (playlist_temp.length === 0) {
+      console.log("in here");
       let filteredItems = transitions.filter(
         (item) =>
           item.asana_category_start === rowData.asana_category &&
@@ -109,6 +127,7 @@ export default function RegisterPlaylistForm() {
           "Transition video doesnt exist in this language or category of asana"
         );
       } else {
+        console.log(filteredItems);
         setPlaylistTemp((prevPlaylist) => [
           ...prevPlaylist,
           {
@@ -752,56 +771,58 @@ export default function RegisterPlaylistForm() {
     setFilterCategory(e.target.value);
   };
   const uniqueCategories = [
-    "All",
     ...new Set(sortedAsanas.map((asana) => asana.asana_category)),
   ];
 
-  const filteredAsanas = sortedAsanas.filter(
-    (asana) =>
-      filterCategory === "All" ||
-      asana.asana_category.toLowerCase().includes(filterCategory.toLowerCase())
+  const filteredAsanas = sortedAsanas.filter((asana) =>
+    asana.asana_category.toLowerCase().includes(filterCategory.toLowerCase())
   );
+
+  const filteredAsanasByCategory = uniqueCategories.map((category) => {
+    return {
+      category: category,
+      asanas: filteredAsanas.filter(
+        (asana) => asana.asana_category === category
+      ),
+    };
+  });
 
   return (
     <div className="video_form min-h-screen">
       <AdminNavbar />
-      <div className="flex items-center justify-center my-20 gap-8">
-        <Table width={60} data={filteredAsanas} className="bg-white">
-          <Table.Column prop="asana_name" label="Asana Name" />
-          <Table.Column
-            prop="language"
-            label="Language"
-            render={(data) => (data.language !== "" ? data.language : "none")}
-          />
-          <Table.Column prop="asana_category" label="Category">
-            <Select
-              placeholder="Select Category"
-              width="150px"
-              groupedBy
-              onChange={(value) => setFilterCategory(value)}
-            >
-              {uniqueCategories.map((category, index) => (
-                <Select.Option key={index} value={category}>
-                  {category}
-                </Select.Option>
-              ))}
-            </Select>
-          </Table.Column>
-          {/* <Table.Filter
-              type="text"
-              value={filterCategory}
-              onChange={handleFilterChange}
-            /> */}
-          <Table.Column
-            prop="in_playlist"
-            label="Add To Playlist"
-            width={150}
-            render={renderAction2}
-          />
-        </Table>
+      <div className="flex justify-center my-10 gap-8">
+        <div className="flex flex-col items-center justify-center my-10 gap-1">
+          {filteredAsanasByCategory.map((categoryData, index) => (
+            <Card key={index} shadow width="100%">
+              <Card.Content>
+                <h6>{categoryData.category}</h6>
+                <Table data={categoryData.asanas} className="bg-white">
+                  <Table.Column prop="asana_name" label="Asana Name" />
+                  <Table.Column
+                    prop="language"
+                    label="Language"
+                    render={(data) => {
+                      if (data === "") {
+                        return "No Audio";
+                      }
+                      return data.language;
+                    }}
+                  />
 
+                  <Table.Column prop="asana_category" label="Category" />
+                  <Table.Column
+                    prop="in_playlist"
+                    label="Add To Playlist"
+                    width={150}
+                    render={renderAction2}
+                  />
+                </Table>
+              </Card.Content>
+            </Card>
+          ))}
+        </div>
         {playlist_temp.length > 0 && (
-          <Card>
+          <Card height="50%">
             <Table width={40} data={playlist_temp} className="bg-dark ">
               <Table.Column
                 prop="rowData.asana_name"
@@ -809,8 +830,9 @@ export default function RegisterPlaylistForm() {
                 render={(_, rowData) => {
                   return (
                     <p>
-                      {rowData.rowData.asana_name ||
-                        rowData.rowData.transition_video_name}
+                      {rowData.rowData.asana_name
+                        ? rowData.rowData.asana_name
+                        : rowData.rowData.transition_video_name}
                     </p>
                   );
                 }}
@@ -826,13 +848,8 @@ export default function RegisterPlaylistForm() {
                 prop="rowData.language"
                 label="Language"
                 render={(_, rowData) => {
-                  return (
-                    <p>
-                      {rowData.rowData.language
-                        ? "None"
-                        : rowData.rowData.language}
-                    </p>
-                  );
+                  console.log(rowData);
+                  return <p>{rowData.rowData.language}</p>;
                 }}
               />
               <Table.Column prop="count" label="Count" />
@@ -856,7 +873,6 @@ export default function RegisterPlaylistForm() {
           </Card>
         )}
       </div>
-
       <div>
         <Modal visible={modalState} onClose={() => setModalState(false)}>
           <Modal.Title>Update</Modal.Title>
