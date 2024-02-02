@@ -104,6 +104,12 @@ export default function RegisterPlaylistForm() {
     });
     return matchingTransition;
   };
+
+  const [asanaInPlaylist, setAsanaInPlaylist] = useState({
+    transitions: [],
+    asana: {},
+  });
+
   const addToPlaylist = (rowData) => {
     console.log(rowData);
     var count = document.getElementById(`asana_count_${rowData.id}`).value;
@@ -140,7 +146,6 @@ export default function RegisterPlaylistForm() {
     if (playlist_temp.length !== 0) {
       let startVideo = playlist_temp[playlist_temp.length - 1].rowData;
       let endVideo = rowData;
-      console.log(startVideo, endVideo);
       if (startVideo.asana_category === endVideo.asana_category) {
         if (
           startVideo.person_ending_position === "Left" &&
