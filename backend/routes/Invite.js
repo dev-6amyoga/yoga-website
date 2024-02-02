@@ -205,8 +205,6 @@ router.post("/create", async (req, res) => {
         },
         transaction: t,
       });
-      console.log(teacher);
-      console.log(created);
       mailTransporter.sendMail(
         {
           from: "dev.6amyoga@gmail.com",

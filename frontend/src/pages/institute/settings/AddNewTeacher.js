@@ -20,7 +20,6 @@ export default function AddNewTeacher() {
     ])
   );
   useEffect(() => {
-    console.log(currentTeachersCount);
     console.log(user.user_id);
     Fetch({
       url: "http://localhost:4000/user-plan/get-user-institute-plan-by-id",
@@ -30,7 +29,6 @@ export default function AddNewTeacher() {
         institute_id: currentInstituteId,
       },
     }).then((res) => {
-      console.log(res.data);
       for (var i = 0; i !== res.data.userPlan.length; i++) {
         if (res.data.userPlan[i].current_status === "ACTIVE") {
           setAllowedTeachersCount(
@@ -45,6 +43,7 @@ export default function AddNewTeacher() {
       }
     });
   }, [currentInstituteId, user]);
+
   const [instituteData, setInstituteData] = useState({});
   const [currentInstitute, setCurrentInstitute] = useState(null);
   useState(() => {
