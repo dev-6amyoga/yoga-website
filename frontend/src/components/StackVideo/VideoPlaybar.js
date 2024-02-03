@@ -49,7 +49,8 @@ export default function VideoPlaybar({
 
 	const moveToTimestamp = useCallback(
 		(t) => {
-			addToSeekQueue(t - currentTime);
+			console.log("MOVING BY ", t - currentTime);
+			addToSeekQueue({ t, type: "move" });
 		},
 		[addToSeekQueue, currentTime]
 	);
@@ -67,7 +68,13 @@ export default function VideoPlaybar({
 	}, [handleFullScreen?.active]);
 
 	const seekOnClick = useCallback(
-		(e) => {
+		(e, location) => {
+			e.preventDefault();
+			console.log(
+				"Calling move to	timestamp from seekOnClick",
+				e.type,
+				location
+			);
 			moveToTimestamp(
 				(duration * (e.clientX - barBound.left)) / barBound.width
 			);
@@ -85,7 +92,7 @@ export default function VideoPlaybar({
 
 	const handleDragOnStop = useCallback(
 		(e, data) => {
-			seekOnClick(e);
+			seekOnClick(e, "boopdrag");
 			setMouseDown(false);
 		},
 		[seekOnClick]
@@ -103,13 +110,13 @@ export default function VideoPlaybar({
 
 	const draggedDuration = useMemo(() => {
 		const d = (duration * currentBoopPosition) / barBound.width;
-		// console.log(
-		// 	duration,
-		// 	currentBoopPosition,
-		// 	barBound.width,
-		// 	"------->",
-		// 	d
-		// );
+		console.log(
+			duration,
+			currentBoopPosition,
+			barBound.width,
+			"------->",
+			d
+		);
 		return d;
 	}, [barBound, currentBoopPosition, duration]);
 
@@ -117,7 +124,7 @@ export default function VideoPlaybar({
 		<>
 			<div
 				className={`w-[calc(100%-0.35rem)] h-[0.5rem] bg-white relative mx-auto`}
-				onClick={seekOnClick}
+				onClick={(e) => seekOnClick(e, "barclick")}
 				ref={barRef}>
 				<div
 					className={`bg-amber-600 h-full relative transition-all ease-linear ${
