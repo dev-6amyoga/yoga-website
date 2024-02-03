@@ -1,6 +1,6 @@
 import Playlist from "../../components/Sidebar/Playlist";
-import VideoPlayerWrapper from "../../components/Video/VideoPlayerWrapper";
-import VideoQueue from "../../components/Video/VideoQueue";
+import VideoPlayerWrapper from "../../components/StackVideo/VideoPlayerWrapper";
+import VideoQueue from "../../components/StackVideo/VideoQueue";
 
 export default function TestingVideo() {
 	return (
