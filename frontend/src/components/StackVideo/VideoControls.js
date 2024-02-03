@@ -70,11 +70,11 @@ function VideoControls({ handleFullScreen }) {
 	};
 
 	const handleSeekFoward = () => {
-		addToSeekQueue(5);
+		addToSeekQueue({ t: 10, type: "seek" });
 	};
 
 	const handleSeekBackward = () => {
-		addToSeekQueue(-5);
+		addToSeekQueue({ t: -10, type: "seek" });
 	};
 
 	return (
