@@ -72,6 +72,21 @@ function StreamStackItem({
 		}
 	}, [isActive, setDuration, metadataLoaded]);
 
+	useEffect(() => {
+		if (
+			!isActive &&
+			playerRef.current &&
+			playerRef.current.currentTime > 0
+		) {
+			console.log(
+				"PAUSE AND RESET ----------------------------->",
+				video.queue_id
+			);
+			playerRef.current?.pause();
+			playerRef.current.currentTime = 0;
+		}
+	}, [isActive]);
+
 	// pop from seek queue and update the time
 	useEffect(() => {
 		if (isActive && seekQueue.length > 0) {
@@ -247,6 +262,7 @@ function StreamStackItem({
 						"Loading start ----------------------------->",
 						video?.queue_id
 					);
+					if (isActive) handleLoading(true);
 				}}
 				onLoadedData={() => {
 					console.log(
