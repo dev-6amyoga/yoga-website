@@ -63,33 +63,33 @@ const useWatchHistoryStore = create((set, get) => ({
 			return;
 		}
 
-		Fetch({
-			url: "http://localhost:4000/watch-time/update",
-			method: "POST",
-			token: true,
-			data: {
-				user_id: user_id,
-				watch_time_logs,
-			},
-		})
-			.then((res) => {
-				if (res.status === 200) {
-					console.log("watch time buffer flushed");
-				}
-			})
-			.catch((err) => {
-				console.log(err);
-				// localStorage.setItem(
-				// 	"6amyoga_watch_time_logs",
-				// 	JSON.stringify(watch_time_logs)
-				// );
-				set((state) => ({
-					watchTimeBuffer: [
-						...state.watchTimeBuffer,
-						...watch_time_logs,
-					],
-				}));
-			});
+		// Fetch({
+		// 	url: "http://localhost:4000/watch-time/update",
+		// 	method: "POST",
+		// 	token: true,
+		// 	data: {
+		// 		user_id: user_id,
+		// 		watch_time_logs,
+		// 	},
+		// })
+		// 	.then((res) => {
+		// 		if (res.status === 200) {
+		// 			console.log("watch time buffer flushed");
+		// 		}
+		// 	})
+		// 	.catch((err) => {
+		// 		console.log(err);
+		// 		// localStorage.setItem(
+		// 		// 	"6amyoga_watch_time_logs",
+		// 		// 	JSON.stringify(watch_time_logs)
+		// 		// );
+		// 		set((state) => ({
+		// 			watchTimeBuffer: [
+		// 				...state.watchTimeBuffer,
+		// 				...watch_time_logs,
+		// 			],
+		// 		}));
+		// 	});
 
 		set((state) => ({
 			watchTimeBuffer: [],
