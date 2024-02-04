@@ -124,20 +124,10 @@ function StreamStackItem({
 	// pop from seek queue and update the time
 	useEffect(() => {
 		if (isActive && seekQueue.length > 0) {
-			const seekEvent = seekQueue[0];
-			if (seekEvent && playerRef.current) {
-				switch (seekEvent.type) {
-					case "seek":
-						playerRef.current.currentTime =
-							(playerRef.current?.currentTime || 0) +
-							Number(seekEvent.t);
-						break;
-					case "move":
-						playerRef.current.currentTime = seekEvent.t;
-						break;
-					default:
-						break;
-				}
+			const seekTime = seekQueue[0];
+			if (seekTime && playerRef.current) {
+				playerRef.current.currentTime =
+					(playerRef.current?.currentTime || 0) + Number(seekTime);
 
 				addToCommittedTs(playerRef.current?.currentTime);
 			}
@@ -293,7 +283,7 @@ function StreamStackItem({
 
 	const videoId = useMemo(() => {
 		const v =
-			video?.video?.asana_videoID || video?.video?.transition_videoID;
+			video?.video?.asana_videoID || video?.video?.transition_video_ID;
 		console.log("Recomputing video id cuz video changed?!?!?!", v);
 		return v;
 	}, [video]);
@@ -312,7 +302,6 @@ function StreamStackItem({
 						"Loading start ----------------------------->",
 						video?.queue_id
 					);
-					if (isActive) handleLoading(true);
 				}}
 				onLoadedData={() => {
 					console.log(

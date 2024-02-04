@@ -17,6 +17,8 @@ import Institutes from "../pages/admin/member-management/Institutes";
 import Teachers from "../pages/admin/member-management/Teachers";
 import Students from "../pages/admin/member-management/Students";
 import LogPayment from "../pages/admin/payment-registration/LogPayment";
+import RegisterNewSchedule from "../pages/admin/schedule-management/RegisterNewSchedule";
+import ViewAllSchedules from "../pages/admin/schedule-management/ViewAllSchedules";
 export const AdminRoutes = [
   {
     path: "/admin",
@@ -27,12 +29,20 @@ export const AdminRoutes = [
     element: <RegisterVideoForm />,
   },
   {
-    path: "/content/playlist/create",
-    element: <RegisterPlaylistForm />,
+    path: "/admin/schedule/register",
+    element: <RegisterNewSchedule />,
+  },
+  {
+    path: "/admin/schedule/view",
+    element: <ViewAllSchedules />,
   },
   {
     path: "/content/language/create",
     element: <RegisterLanguageForm />,
+  },
+  {
+    path: "/content/playlist/create",
+    element: <RegisterPlaylistForm />,
   },
   {
     path: "/content/asana-category/create",
