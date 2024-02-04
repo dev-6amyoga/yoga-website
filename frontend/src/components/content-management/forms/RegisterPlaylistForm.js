@@ -13,7 +13,6 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AdminNavbar from "../../Common/AdminNavbar/AdminNavbar";
-
 export default function RegisterPlaylistForm() {
   const navigate = useNavigate();
   const [asanas, setAsanas] = useState([]);
@@ -510,7 +509,6 @@ export default function RegisterPlaylistForm() {
             endVideo,
             "Prone"
           );
-          console.log(matchingTransition);
           setPlaylistTemp((prevPlaylist) => [
             ...prevPlaylist,
             {
