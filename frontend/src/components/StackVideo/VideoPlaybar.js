@@ -15,10 +15,17 @@ export default function VideoPlaybar({
 	handleSetPause,
 	handleFullScreen,
 }) {
-	const [currentTime, addToSeekQueue] = useVideoStore((state) => [
-		state.currentTime,
-		state.addToSeekQueue,
-	]);
+	const [currentTime, addToSeekQueue, setCurrentTime, currentVideo] =
+		useVideoStore((state) => [
+			state.currentTime,
+			state.addToSeekQueue,
+			state.setCurrentTime,
+			state.currentVideo,
+		]);
+
+	useEffect(() => {
+		setCurrentTime(0);
+	}, [currentVideo, setCurrentTime]);
 
 	const [mouseDown, setMouseDown] = useState(false);
 	const barRef = useRef(null);
@@ -49,10 +56,10 @@ export default function VideoPlaybar({
 
 	const moveToTimestamp = useCallback(
 		(t) => {
-			console.log("MOVING BY ", t - currentTime);
+			// console.log("MOVING BY ", t - currentTime);
 			addToSeekQueue({ t, type: "move" });
 		},
-		[addToSeekQueue, currentTime]
+		[addToSeekQueue]
 	);
 
 	useEffect(() => {
@@ -127,7 +134,7 @@ export default function VideoPlaybar({
 				onClick={(e) => seekOnClick(e, "barclick")}
 				ref={barRef}>
 				<div
-					className={`bg-amber-600 h-full relative transition-all ease-linear ${
+					className={`bg-amber-600 h-full relative transition-all duration-300 ease-in-out ${
 						videoState === STATE_VIDEO_ERROR ||
 						videoState === STATE_VIDEO_LOADING
 							? "opacity-0"
@@ -154,7 +161,9 @@ export default function VideoPlaybar({
 								? "opacity-0"
 								: "opacity-100"
 						} w-3 h-3  ${
-							mouseDown ? "" : "delay-75 transition-all"
+							mouseDown
+								? ""
+								: "duration-300 transition-all ease-in-out"
 						} ${
 							handleFullScreen.active
 								? "-top-[calc(50%-0.1rem)]"
@@ -185,7 +194,7 @@ export default function VideoPlaybar({
 				</DraggableCore>
 
 				<p
-					className={`text-white text-xs absolute right-0 -top-5 border rounded-full px-1`}>
+					className={`bg-black bg-opacity-40 text-white text-xs absolute right-0 -top-6 border rounded-full px-1`}>
 					{videoState === STATE_VIDEO_LOADING
 						? "--:--"
 						: toTimeString(currentTime.toFixed(0))}

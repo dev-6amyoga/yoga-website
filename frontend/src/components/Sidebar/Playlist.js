@@ -1,27 +1,10 @@
-import { Button, Divider, Modal, Tooltip } from "@geist-ui/core";
-import { memo, useEffect, useState } from "react";
+import { Divider, Modal, Tooltip } from "@geist-ui/core";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useShallow } from "zustand/react/shallow";
 import usePlaylistStore from "../../store/PlaylistStore";
 import useUserStore from "../../store/UserStore";
-
-function PlaylistItem({ playlist, add, deets }) {
-	return (
-		<div className="px-2 py-2 rounded-xl border border-zinc-800">
-			<div className="flex justify-between gap-8 items-center">
-				<p>{playlist.playlist_name}</p>
-				<div className="flex gap-4 items-center scale-75">
-					<Button auto type="outline" onClick={add}>
-						Add
-					</Button>
-					<Button auto type="outline" onClick={deets}>
-						Details
-					</Button>
-				</div>
-			</div>
-		</div>
-	);
-}
+import PlaylistItem from "./PlaylistItem";
 
 function Playlist() {
 	const [modalState, setModalState] = useState(false);
@@ -482,4 +465,4 @@ function Playlist() {
 	);
 }
 
-export default memo(Playlist);
+export default Playlist;

@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import useUserStore from "../../store/UserStore";
 import { STATE_VIDEO_PAUSED } from "../../store/VideoStore";
 import useWatchHistoryStore from "../../store/WatchHistoryStore";
+import { Fetch } from "../../utils/Fetch";
 
 function StreamStackItem({
 	video,
@@ -29,34 +30,50 @@ function StreamStackItem({
 		currentVideo,
 		videoState,
 		setCurrentTime,
+		volume,
+		setVolume,
 	] = useVideoStore((state) => [
 		state.seekQueue,
 		state.popFromSeekQueue,
 		state.currentVideo,
 		state.videoState,
 		state.setCurrentTime,
+		state.volume,
+		state.setVolume,
 	]);
 
 	// watch history store
+	// let [
+	// 	addToWatchHistory,
+	// 	committedTs,
+	// 	setCommittedTs,
+	// 	addToCommittedTs,
+	// 	watchTimeBuffer,
+	// 	updateWatchTimeBuffer,
+	// 	watchTimeArchive,
+	// 	updateWatchTimeArchive,
+	// 	flushWatchTimeBuffer,
+	// ] = useWatchHistoryStore((state) => [
+	// 	state.addToWatchHistory,
+	// 	state.committedTs,
+	// 	state.setCommittedTs,
+	// 	state.addToCommittedTs,
+	// 	state.watchTimeBuffer,
+	// 	state.updateWatchTimeBuffer,
+	// 	state.watchTimeArchive,
+	// 	state.updateWatchTimeArchive,
+	// 	state.flushWatchTimeBuffer,
+	// ]);
+
 	let [
-		addToWatchHistory,
-		committedTs,
 		setCommittedTs,
 		addToCommittedTs,
-		watchTimeBuffer,
 		updateWatchTimeBuffer,
-		watchTimeArchive,
-		updateWatchTimeArchive,
 		flushWatchTimeBuffer,
 	] = useWatchHistoryStore((state) => [
-		state.addToWatchHistory,
-		state.committedTs,
 		state.setCommittedTs,
 		state.addToCommittedTs,
-		state.watchTimeBuffer,
 		state.updateWatchTimeBuffer,
-		state.watchTimeArchive,
-		state.updateWatchTimeArchive,
 		state.flushWatchTimeBuffer,
 	]);
 
@@ -70,22 +87,39 @@ function StreamStackItem({
 			);
 			setDuration(playerRef?.current?.duration || 0);
 		}
-	}, [isActive, setDuration, metadataLoaded]);
+	}, [isActive, setDuration, metadataLoaded, video.queue_id]);
 
+	// pause and reset the video when its not active
 	useEffect(() => {
-		if (
-			!isActive &&
-			playerRef.current &&
-			playerRef.current.currentTime > 0
-		) {
+		const pr = playerRef.current;
+		if (!isActive && pr && pr.currentTime > 0) {
 			console.log(
 				"PAUSE AND RESET ----------------------------->",
 				video.queue_id
 			);
-			playerRef.current?.pause();
-			playerRef.current.currentTime = 0;
+			pr.muted = true;
+			setVolume(0);
+			pr?.pause();
+			pr.currentTime = 0;
 		}
-	}, [isActive]);
+
+		return () => {
+			if (pr) {
+				pr?.pause();
+				pr.currentTime = 0;
+			}
+		};
+	}, [isActive, video.queue_id]);
+
+	// set the volume
+	useEffect(() => {
+		if (playerRef.current) {
+			if (volume > 0) {
+				playerRef.current.muted = false;
+			}
+			playerRef.current.volume = volume;
+		}
+	}, [volume]);
 
 	// pop from seek queue and update the time
 	useEffect(() => {
@@ -119,14 +153,29 @@ function StreamStackItem({
 			} else {
 				playerRef.current
 					.play()
-					.then((res) => {})
+					.then((res) => {
+						playerRef.current.muted = true;
+						playerRef.current
+							.play()
+							.then((res) => {
+								playerRef.current.muted = false;
+								if (volume === 0) {
+									setVolume(0.5);
+								}
+							})
+							.catch((err) => {
+								console.error(err);
+							});
+					})
 					.catch((err) => {
+						console.error(err);
 						toast("Error playing video", { type: "error" });
 					});
 			}
 		}
 	}, [videoState, isActive]);
 
+	// poll to update the current time, every 500ms, clear the timeout on unmount
 	useEffect(() => {
 		const int = setInterval(() => {
 			if (playerRef.current?.currentTime && isActive) {
@@ -139,6 +188,7 @@ function StreamStackItem({
 		};
 	}, [currentVideo, isActive]);
 
+	// clear timeouts before unmount
 	useEffect(() => {
 		return () => {
 			// clearing previous interval to flush
@@ -183,18 +233,18 @@ function StreamStackItem({
 			}
 
 			// TODO : send to watch history
-			// Fetch({
-			// 	url: "http://localhost:4000/watch-history/create",
-			// 	method: "POST",
-			// 	// TODO : fix thiss
-			// 	data: {
-			// 		user_id: user?.user_id,
-			// 		asana_id: video?.video?.id,
-			// 		playlist_id: null,
-			// 	},
-			// })
-			// 	.then((res) => {})
-			// 	.catch((err) => {});
+			Fetch({
+				url: "http://localhost:4000/watch-history/create",
+				method: "POST",
+				// TODO : fix thiss
+				data: {
+					user_id: user?.user_id,
+					asana_id: video?.video?.id,
+					playlist_id: null,
+				},
+			})
+				.then((res) => {})
+				.catch((err) => {});
 
 			// starting interval timer to flush watch duration buffer
 			console.log("Starting new flushTimeInterval");
