@@ -29,12 +29,14 @@ function VideoPlayer() {
 		setCurrentVideo,
 		videoState,
 		setVideoState,
+		playlistState,
 		setPlaylistState,
 	] = useVideoStore((state) => [
 		state.currentVideo,
 		state.setCurrentVideo,
 		state.videoState,
 		state.setVideoState,
+		state.playlistState,
 		state.setPlaylistState,
 	]);
 
@@ -74,6 +76,15 @@ function VideoPlayer() {
 			playerVideo.current = null;
 		}
 	}, [currentVideo]);
+
+	useEffect(() => {
+		if (queue && queue.length > 0 && playlistState) {
+			setCurrentVideo(queue[0]);
+		} else {
+			setCurrentVideo(null);
+			setVideoState(STATE_VIDEO_PAUSED);
+		}
+	}, [queue, playlistState, setCurrentVideo, setVideoState]);
 
 	const handleEnd = useCallback(() => {
 		console.log("Video ended ------------------>");
@@ -138,8 +149,11 @@ function VideoPlayer() {
 					{currentVideo ? (
 						<>
 							{videoState === STATE_VIDEO_ERROR ? (
-								<div className="text-lg">
-									Error : Video playback error
+								<div className="text-lg flex flex-col gap-4 items-center justify-center">
+									<p>Error : Video playback error</p>
+									<Button onClick={handleSetPlay}>
+										Refresh
+									</Button>
 								</div>
 							) : (
 								<div className="relative w-full h-full">
@@ -181,7 +195,7 @@ function VideoPlayer() {
 										<></>
 									)}
 									<div className="absolute bottom-0 h-40 w-full hover:opacity-100 opacity-0 transition-opacity duration-300 ease-in-out z-20">
-										<div className="absolute bottom-0 w-full bg-black bg-opacity-60">
+										<div className="absolute bottom-0 w-full bg-black bg-opacity-40">
 											<VideoPlaybar
 												duration={duration}
 												draggableHandle={

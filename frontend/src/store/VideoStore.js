@@ -34,6 +34,13 @@ const useVideoStore = create((set) => ({
 			};
 		}),
 
+	volume: 0.0,
+	setVolume: (volume) => {
+		set((state) => {
+			return { volume };
+		});
+	},
+
 	// seekQueue holds the seek times that the user has clicked on
 	seekQueue: [],
 	addToSeekQueue: (seekTime) =>
