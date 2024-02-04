@@ -13,7 +13,7 @@ import {
 	FaStepForward,
 } from "react-icons/fa";
 
-import { IoMdVolumeLow, IoMdVolumeOff } from "react-icons/io";
+import { IoMdVolumeHigh, IoMdVolumeLow, IoMdVolumeOff } from "react-icons/io";
 
 import { BsArrowsAngleContract } from "react-icons/bs";
 
@@ -138,8 +138,10 @@ function VideoControls({ handleFullScreen }) {
 				<div className="col-start-9 flex items-center gap-1 mb-1">
 					{volume === 0 ? (
 						<IoMdVolumeOff onClick={() => setVolume(0.3)} />
+					) : volume > 0.5 ? (
+						<IoMdVolumeHigh onClick={() => setVolume(0)} />
 					) : (
-						<IoMdVolumeLow />
+						<IoMdVolumeLow onClick={() => setVolume(0.0)} />
 					)}
 					<input
 						type="range"
