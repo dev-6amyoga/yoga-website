@@ -22,10 +22,11 @@ export default function LoginGoogle() {
         email: email,
       });
       console.log(response);
+      var userExists = false;
       if (response.status === 200) {
         userExists = true;
       }
-      var userExists = false;
+      console.log.log(response.data.user);
       setUser(response.data.user);
       SetType(response.data.user_type);
       // for (const entry of response.data) {
@@ -36,6 +37,7 @@ export default function LoginGoogle() {
       //     break;
       //   }
       // }
+      console.log(userExists);
       setLoginStatus(userExists ? "Login successful" : "Invalid credentials");
     } catch (error) {
       console.error(error);
@@ -44,6 +46,7 @@ export default function LoginGoogle() {
   }
 
   useEffect(() => {
+    console.log(loginStatus, type);
     if (loginStatus === "Login successful" && type === "student") {
       navigate("/student");
     } else if (loginStatus === "Login successful" && type === "admin") {
