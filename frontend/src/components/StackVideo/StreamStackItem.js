@@ -124,11 +124,18 @@ function StreamStackItem({
 	// pop from seek queue and update the time
 	useEffect(() => {
 		if (isActive && seekQueue.length > 0) {
-			const seekTime = seekQueue[0];
-			if (seekTime && playerRef.current) {
-				playerRef.current.currentTime =
-					(playerRef.current?.currentTime || 0) + Number(seekTime);
-
+			const seekEvent = seekQueue[0];
+			if (seekEvent && playerRef.current) {
+				switch (seekEvent.type) {
+					case "seek":
+						playerRef.current.currentTime += seekEvent.t;
+						break;
+					case "move":
+						playerRef.current.currentTime = seekEvent.t;
+						break;
+					default:
+						break;
+				}
 				addToCommittedTs(playerRef.current?.currentTime);
 			}
 			popFromSeekQueue(0);
