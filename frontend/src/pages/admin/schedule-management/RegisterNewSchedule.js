@@ -14,12 +14,19 @@ import { toast } from "react-toastify";
 import getFormData from "../../../utils/getFormData";
 import CustomInput from "../../../components/Common/CustomInput";
 import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
+import { Fetch } from "../../../utils/Fetch";
 import { transitionGenerator } from "../../../components/transition-generator/TransitionGenerator";
 export default function RegisterNewSchedule() {
   const navigate = useNavigate();
   const [asanas, setAsanas] = useState([]);
   const [sortedAsanas, setSortedAsanas] = useState([]);
-  const [scheduleFor, setScheduleFor] = useState("");
+  const [scheduleFor, setScheduleFor] = useState(null);
+
+  const [allStudents, setAllStudents] = useState([]);
+  const [allTeachers, setAllTeachers] = useState([]);
+  const [allInstitutes, setAllInstitutes] = useState([]);
+  const [applicableUsers, setApplicableUsers] = useState([]);
+
   const [transitions, setTransitions] = useState([]);
   const [schedule, setSchedule] = useState([]);
   const [filterCategory, setFilterCategory] = useState("");
@@ -44,6 +51,73 @@ export default function RegisterNewSchedule() {
     "Prone",
     "Pranayama",
   ];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await Fetch({
+          url: "http://localhost:4000/user/get-all-students",
+          method: "GET",
+        });
+        const data = response.data;
+        const flattenedStudents = data.users.map((student) => ({
+          user_id: student.user_id,
+          username: student.user.username,
+          name: student.user.name,
+          email: student.user.email,
+          phone: student.user.phone,
+        }));
+        setAllStudents(flattenedStudents);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await Fetch({
+          url: "http://localhost:4000/user/get-all-teachers",
+          method: "GET",
+        });
+        const data = response.data;
+        const flattenedStudents = data.users.map((teacher) => ({
+          user_id: teacher.user_id,
+          username: teacher.user?.username,
+          name: teacher.user?.name,
+          email: teacher.user?.email,
+          institute: teacher.institute?.name,
+        }));
+        setAllTeachers(flattenedStudents);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await Fetch({
+          url: "http://localhost:4000/user/get-all-institutes",
+          method: "GET",
+        });
+        const data = response.data;
+        console.log(data.users);
+        const flattenedStudents = data.users.map((teacher) => ({
+          owner: teacher.user?.name,
+          institute: teacher.institute?.name,
+          institute_id: teacher.institute?.institute_id,
+        }));
+        setAllInstitutes(flattenedStudents);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -151,13 +225,12 @@ export default function RegisterNewSchedule() {
     setScheduleFor(val);
   };
 
-  useEffect(() => {
-    console.log(scheduleFor);
-  }, [scheduleFor]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = getFormData(e);
     console.log(formData);
+    console.log(applicableUsers);
+    console.log(schedule);
   };
 
   const renderAction = (value, rowData, index) => {
@@ -212,6 +285,35 @@ export default function RegisterNewSchedule() {
     }
     setModalState(false);
   };
+  const handleUserRowSelection = (userId, userType) => {
+    const userKey = `${userType}_${userId}`;
+    setApplicableUsers((prevUsers) => {
+      if (prevUsers.includes(userKey)) {
+        return prevUsers.filter((user) => user !== userKey);
+      } else {
+        return [...prevUsers, userKey];
+      }
+    });
+  };
+
+  const handleChooseAll = (userType, data) => {
+    for (var i = 0; i < data.length; i++) {
+      let userKey = "";
+      if (userType === "Institute") {
+        userKey = `${userType}_${data[i].institute_id}`;
+      } else {
+        userKey = `${userType}_${data[i].user_id}`;
+      }
+      setApplicableUsers((prevUsers) => {
+        if (prevUsers.includes(userKey)) {
+          return prevUsers.filter((user) => user !== userKey);
+        } else {
+          return [...prevUsers, userKey];
+        }
+      });
+    }
+  };
+
   return (
     <div className="video_form min-h-screen">
       <AdminNavbar />
@@ -246,6 +348,7 @@ export default function RegisterNewSchedule() {
             </Card>
           ))}
         </div>
+
         {schedule.length > 0 && (
           <Card height="50%">
             <Table width={40} data={schedule} className="bg-dark ">
@@ -301,15 +404,154 @@ export default function RegisterNewSchedule() {
                 Validity To
               </CustomInput>
               <Select
+                multiple
+                width="100%"
                 onChange={handler}
                 name="schedule_for"
                 placeholder="Select User Type"
               >
-                <Select.Option value="Student">Student</Select.Option>
-                <Select.Option value="Teacher">Teacher</Select.Option>
-                <Select.Option value="Institute">Institute</Select.Option>
+                <Select.Option key="Student" value="Student">
+                  Student
+                </Select.Option>
+                <Select.Option key="Teacher" value="Teacher">
+                  Teacher
+                </Select.Option>
+                <Select.Option key="Institute" value="Institute">
+                  Institute
+                </Select.Option>
               </Select>
               <br />
+              <br />
+              <div>
+                {scheduleFor?.includes("Student") && (
+                  <div>
+                    <Button
+                      onClick={() => handleChooseAll("Student", allStudents)}
+                    >
+                      Choose All Students
+                    </Button>
+                    <br />
+
+                    <Table width={50} data={allStudents} className="bg-white">
+                      <Table.Column
+                        label="Username"
+                        width={150}
+                        prop="username"
+                      />
+                      <Table.Column
+                        label="Student Name"
+                        width={150}
+                        prop="name"
+                      />
+                      <Table.Column label="Email ID" width={200} prop="email" />
+                      <Table.Column
+                        label="Action"
+                        width={150}
+                        prop="user_id"
+                        render={(row) => (
+                          <Button
+                            onClick={() => {
+                              console.log(row);
+                              handleUserRowSelection(row, "Student");
+                            }}
+                          >
+                            {applicableUsers.includes(`Student_${row}`)
+                              ? "Remove from Applicable Users"
+                              : "Add to Applicable Users"}
+                          </Button>
+                        )}
+                      />
+                    </Table>
+                  </div>
+                )}
+                <br />
+                {scheduleFor?.includes("Teacher") && (
+                  <div>
+                    <Button
+                      onClick={() => handleChooseAll("Teacher", allTeachers)}
+                    >
+                      Choose All Teachers
+                    </Button>
+                    <br />
+                    <Table width={50} data={allTeachers} className="bg-white">
+                      <Table.Column
+                        label="Username"
+                        width={150}
+                        prop="username"
+                      />
+                      <Table.Column
+                        label="Teacher Name"
+                        width={150}
+                        prop="name"
+                      />
+                      <Table.Column label="Email ID" width={200} prop="email" />
+                      <Table.Column
+                        label="Institute"
+                        width={200}
+                        prop="institute"
+                      />
+                      <Table.Column
+                        label="Action"
+                        width={150}
+                        prop="user_id"
+                        render={(row) => (
+                          <Button
+                            onClick={() => {
+                              console.log(row);
+                              handleUserRowSelection(row, "Teacher");
+                            }}
+                          >
+                            {applicableUsers.includes(`Teacher_${row}`)
+                              ? "Remove from Applicable Users"
+                              : "Add to Applicable Users"}
+                          </Button>
+                        )}
+                      />
+                    </Table>
+                  </div>
+                )}
+                <br />
+                {scheduleFor?.includes("Institute") && (
+                  <div>
+                    <Button
+                      onClick={() =>
+                        handleChooseAll("Institute", allInstitutes)
+                      }
+                    >
+                      Choose All Institutes
+                    </Button>
+                    <br />
+                    <Table width={50} data={allInstitutes} className="bg-white">
+                      <Table.Column
+                        label="Institute Owner Name"
+                        width={150}
+                        prop="owner"
+                      />
+                      <Table.Column
+                        label="Institute"
+                        width={200}
+                        prop="institute"
+                      />
+                      <Table.Column
+                        label="Action"
+                        width={150}
+                        prop="institute_id"
+                        render={(row) => (
+                          <Button
+                            onClick={() => {
+                              handleUserRowSelection(row, "Institute");
+                            }}
+                          >
+                            {applicableUsers.includes(`Institute_${row}`)
+                              ? "Remove from Applicable Users"
+                              : "Add to Applicable Users"}
+                          </Button>
+                        )}
+                      />
+                    </Table>
+                  </div>
+                )}
+              </div>
 
               <Button htmlType="submit">Submit</Button>
             </form>
