@@ -399,7 +399,7 @@ router.get("/get-all-teachers", async (req, res) => {
   try {
     const users = await UserInstitutePlanRole.findAll({
       where: { role_id: 4 },
-      include: [{ model: User }],
+      include: [{ model: User }, { model: Institute }],
     });
     if (!users) {
       return res
@@ -419,7 +419,7 @@ router.get("/get-all-institutes", async (req, res) => {
   try {
     const users = await UserInstitutePlanRole.findAll({
       where: { role_id: 2 },
-      include: [{ model: User }],
+      include: [{ model: User }, { model: Institute }],
     });
     if (!users) {
       return res
