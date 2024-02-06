@@ -164,37 +164,31 @@ function VideoPlayer() {
 												.slice(0, 2)
 												.map((queueItem) => {
 													return (
-														<AnimatePresence
+														<StreamStackItem
 															key={
 																queueItem.queue_id
 															}
-															initial={false}
-															mode="wait">
-															<StreamStackItem
-																video={
-																	queueItem
-																}
-																handleEnd={
-																	handleEnd
-																}
-																handleLoading={
-																	handleLoading
-																}
-																handlePlaybackError={
-																	handlePlaybackError
-																}
-																setDuration={
-																	setDuration
-																}
-																isActive={
-																	currentVideo?.queue_id ===
-																	queueItem?.queue_id
-																}
-																setVideoStateVisible={
-																	setVideoStateVisible
-																}
-															/>
-														</AnimatePresence>
+															video={queueItem}
+															handleEnd={
+																handleEnd
+															}
+															handleLoading={
+																handleLoading
+															}
+															handlePlaybackError={
+																handlePlaybackError
+															}
+															setDuration={
+																setDuration
+															}
+															isActive={
+																currentVideo?.queue_id ===
+																queueItem?.queue_id
+															}
+															setVideoStateVisible={
+																setVideoStateVisible
+															}
+														/>
 													);
 												})}
 										</div>
