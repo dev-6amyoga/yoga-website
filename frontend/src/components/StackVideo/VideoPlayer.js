@@ -7,6 +7,7 @@ import useVideoStore, {
 } from "../../store/VideoStore";
 
 import { Button, Loading } from "@geist-ui/core";
+import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import { FaPause, FaPlay } from "react-icons/fa";
@@ -163,31 +164,36 @@ function VideoPlayer() {
 												.slice(0, 2)
 												.map((queueItem) => {
 													return (
-														<StreamStackItem
-															key={
-																queueItem.queue_id
-															}
-															video={queueItem}
-															handleEnd={
-																handleEnd
-															}
-															handleLoading={
-																handleLoading
-															}
-															handlePlaybackError={
-																handlePlaybackError
-															}
-															setDuration={
-																setDuration
-															}
-															isActive={
-																currentVideo?.queue_id ===
-																queueItem?.queue_id
-															}
-															setVideoStateVisible={
-																setVideoStateVisible
-															}
-														/>
+														<AnimatePresence
+															initial={false}>
+															<StreamStackItem
+																key={
+																	queueItem.queue_id
+																}
+																video={
+																	queueItem
+																}
+																handleEnd={
+																	handleEnd
+																}
+																handleLoading={
+																	handleLoading
+																}
+																handlePlaybackError={
+																	handlePlaybackError
+																}
+																setDuration={
+																	setDuration
+																}
+																isActive={
+																	currentVideo?.queue_id ===
+																	queueItem?.queue_id
+																}
+																setVideoStateVisible={
+																	setVideoStateVisible
+																}
+															/>
+														</AnimatePresence>
 													);
 												})}
 										</div>
