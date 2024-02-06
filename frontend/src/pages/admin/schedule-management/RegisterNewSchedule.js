@@ -104,7 +104,6 @@ export default function RegisterNewSchedule() {
           method: "GET",
         });
         const data = response.data;
-        console.log(data.users);
         const flattenedStudents = data.users.map((teacher) => ({
           owner: teacher.user?.name,
           institute: teacher.institute?.name,
@@ -180,19 +179,23 @@ export default function RegisterNewSchedule() {
       count = Number(count);
     }
     if (schedule.length === 0) {
-      const x = transitionGenerator(rowData, rowData, transitions);
-      setSchedule((prev) => [
-        ...prev,
-        ...x.map((item) => ({ rowData: item, count: 1 })),
-      ]);
+      const x = transitionGenerator("start", rowData, transitions);
+      if (x.length !== 0) {
+        setSchedule((prev) => [
+          ...prev,
+          ...x.map((item) => ({ rowData: item, count: 1 })),
+        ]);
+      }
     } else {
       let startVideo = schedule[schedule.length - 1].rowData;
       let endVideo = rowData;
       const x = transitionGenerator(startVideo, endVideo, transitions);
-      setSchedule((prev) => [
-        ...prev,
-        ...x.map((item) => ({ rowData: item, count: 1 })),
-      ]);
+      if (x.length !== 0) {
+        setSchedule((prev) => [
+          ...prev,
+          ...x.map((item) => ({ rowData: item, count: 1 })),
+        ]);
+      }
     }
     setSchedule((prev) => [
       ...prev,
@@ -228,17 +231,120 @@ export default function RegisterNewSchedule() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = getFormData(e);
-    console.log(formData);
-    console.log(applicableUsers);
-    console.log(schedule);
+    let to_be_inserted = {
+      schedule_name: formData.playlist_name,
+      validity_from: formData.validity_from,
+      validity_to: formData.validity_to,
+      asana_ids: [],
+      applicable_ids: [],
+    };
+    schedule.map((item) => {
+      const asana_id_playlist =
+        item["rowData"]["id"] || item["rowData"]["transition_id"];
+      const asana_count = Number(item["count"]);
+      for (let i = 0; i < asana_count; i++) {
+        to_be_inserted["asana_ids"].push(asana_id_playlist);
+      }
+    });
+    to_be_inserted["applicable_ids"] = applicableUsers;
+    console.log(to_be_inserted);
+
+    try {
+      const response = await fetch(
+        "http://localhost:4000/schedule/addSchedule",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(to_be_inserted),
+        }
+      );
+      if (response.ok) {
+        toast("Schedule added successfully");
+        // navigate("/admin/allPlaylists");
+      } else {
+        console.error("Failed to add schedule");
+      }
+    } catch (error) {
+      console.error("Error during schedule addition:", error);
+    }
   };
 
   const renderAction = (value, rowData, index) => {
     const handleDelete = () => {
-      setSchedule((prevPlaylist) =>
-        prevPlaylist.filter((entry) => entry !== rowData)
-      );
+      setSchedule((prevSchedule) => {
+        const currentIndex = prevSchedule.findIndex(
+          (entry) => entry === rowData
+        );
+        const prevAsanaIndex = prevSchedule
+          .slice(0, currentIndex)
+          .reverse()
+          .findIndex((entry) => {
+            return (
+              entry.rowData?.asana_name && !entry.rowData?.transition_video_name
+            );
+          });
+        const prevAsana =
+          prevAsanaIndex !== -1
+            ? prevSchedule[currentIndex - prevAsanaIndex - 1]
+            : null;
+        const nextAsanaIndex = prevSchedule
+          .slice(currentIndex + 1)
+          .findIndex((entry) => entry.rowData?.asana_name);
+        const startIndex =
+          prevAsanaIndex !== -1 ? currentIndex - prevAsanaIndex : 0;
+        const endIndex =
+          nextAsanaIndex !== -1 ? currentIndex + 1 + nextAsanaIndex : undefined;
+        const nextAsana =
+          nextAsanaIndex !== -1
+            ? prevSchedule[currentIndex + 1 + nextAsanaIndex]
+            : null;
+        const filteredSchedule = prevSchedule.filter(
+          (_, index) =>
+            index < startIndex || (endIndex !== undefined && index >= endIndex)
+        );
+        let updatedSchedule = [];
+        if (prevAsana === null && nextAsana !== null) {
+          const x = transitionGenerator(
+            "start",
+            nextAsana.rowData,
+            transitions
+          );
+          if (x.length !== 0) {
+            updatedSchedule = [
+              ...x.map((item) => ({ rowData: item, count: 1 })),
+              ...filteredSchedule,
+            ];
+          }
+        }
+        if (prevAsana !== null && nextAsana === null) {
+          updatedSchedule = filteredSchedule;
+        }
+        if (prevAsana === null && nextAsana === null) {
+          updatedSchedule = filteredSchedule;
+        }
+        if (prevAsana !== null && nextAsana !== null) {
+          const x = transitionGenerator(
+            prevAsana.rowData,
+            nextAsana.rowData,
+            transitions
+          );
+          updatedSchedule = [
+            ...filteredSchedule.slice(
+              0,
+              filteredSchedule.findIndex((entry) => entry === prevAsana) + 1
+            ),
+            ...x.map((item) => ({ rowData: item, count: 1 })),
+            ...filteredSchedule.slice(
+              filteredSchedule.findIndex((entry) => entry === nextAsana)
+            ),
+          ];
+        }
+        return updatedSchedule;
+      });
     };
+
     const handleUpdate = async () => {
       setModalData(rowData);
       setModalState(true);
@@ -383,10 +489,16 @@ export default function RegisterNewSchedule() {
               />
               <Table.Column prop="count" label="Count" />
               <Table.Column
-                prop="operation"
+                prop="operations"
                 label="ACTIONS"
                 width={150}
-                render={renderAction}
+                render={(value, rowData) => {
+                  if (rowData.rowData?.asana_name) {
+                    return renderAction(value, rowData);
+                  } else {
+                    return null;
+                  }
+                }}
               />
             </Table>
             <Divider />
@@ -451,7 +563,6 @@ export default function RegisterNewSchedule() {
                         render={(row) => (
                           <Button
                             onClick={() => {
-                              console.log(row);
                               handleUserRowSelection(row, "Student");
                             }}
                           >
@@ -497,7 +608,6 @@ export default function RegisterNewSchedule() {
                         render={(row) => (
                           <Button
                             onClick={() => {
-                              console.log(row);
                               handleUserRowSelection(row, "Teacher");
                             }}
                           >

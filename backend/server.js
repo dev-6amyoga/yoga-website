@@ -35,6 +35,7 @@ const authRouter = require("./routes/Auth");
 const instituteRouter = require("./routes/Institute");
 const userRouter = require("./routes/User");
 const playlistRouter = require("./routes/Playlist");
+const scheduleRouter = require("./routes/Schedule");
 const planRouter = require("./routes/Plan");
 const userPlanRouter = require("./routes/UserPlan");
 const currencyRouter = require("./routes/Currency");
@@ -96,6 +97,7 @@ app.get("/info", (req, res) => {
 
 app.use("/content", asanaRouter);
 app.use("/content", playlistRouter);
+app.use("/schedule", scheduleRouter);
 app.use("/user", userRouter);
 app.use("/auth", authRouter);
 app.use("/plan", planRouter);
