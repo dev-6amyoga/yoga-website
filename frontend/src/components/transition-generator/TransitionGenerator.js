@@ -1,8 +1,8 @@
 export const transitionGenerator = (startVideo, endVideo, transitions) => {
-  if (startVideo === endVideo) {
-    const matchingTransition = transitions.find((transition) => {
+  if (startVideo === "start") {
+    const matchingTransition1 = transitions.find((transition) => {
       return (
-        transition.asana_category_start === startVideo.asana_category &&
+        transition.asana_category_start === endVideo.asana_category &&
         transition.asana_category_end === endVideo.asana_category &&
         transition.language === endVideo.language &&
         transition.mat_starting_position === null &&
@@ -11,7 +11,29 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         transition.person_ending_position === null
       );
     });
-    return [matchingTransition];
+    if (endVideo.person_starting_position === "Left") {
+      const matchingTransition2 = transitions.find((transition) => {
+        return (
+          transition.asana_category_start === endVideo.asana_category &&
+          transition.person_starting_position === "Front" &&
+          transition.person_ending_position ===
+            endVideo.person_starting_position
+        );
+      });
+      if (matchingTransition2 && matchingTransition1) {
+        return [matchingTransition1, matchingTransition2];
+      } else {
+        return [];
+      }
+    }
+    if (matchingTransition1) {
+      return [matchingTransition1];
+    } else {
+      return [];
+    }
+  }
+  if (startVideo === endVideo) {
+    return [];
   } else {
     if (startVideo.asana_category === endVideo.asana_category) {
       if (
@@ -27,7 +49,11 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
               endVideo.person_starting_position
           );
         });
-        return [matchingTransition];
+        if (matchingTransition) {
+          return [matchingTransition];
+        } else {
+          return [];
+        }
       } else if (
         startVideo.person_ending_position === "Front" &&
         endVideo.person_starting_position === "Left"
@@ -41,7 +67,20 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
               endVideo.person_starting_position
           );
         });
-        return [matchingTransition];
+        if (matchingTransition) {
+          return [matchingTransition];
+        } else {
+          return [];
+        }
+      } else if (
+        startVideo.person_ending_position === endVideo.person_starting_position
+      ) {
+        return [];
+      } else if (
+        startVideo.asana_category === "Suryanamaskara" &&
+        endVideo.asana_category === "Suryanamaskara"
+      ) {
+        return [];
       }
     } else {
       if (
@@ -68,9 +107,17 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
                 endVideo.person_starting_position
             );
           });
-          return [matchingTransition1, matchingTransition2];
+          if (matchingTransition1 && matchingTransition2) {
+            return [matchingTransition1, matchingTransition2];
+          } else {
+            return [];
+          }
         }
-        return [matchingTransition1];
+        if (matchingTransition1) {
+          return [matchingTransition1];
+        } else {
+          return [];
+        }
       }
       if (
         (startVideo.asana_category === "Standing" &&
@@ -94,13 +141,20 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             return (
               transition.person_starting_position ===
                 startVideo.person_ending_position &&
-              transition.person_ending_position ===
-                endVideo.person_starting_position
+              transition.person_ending_position === "Front"
             );
           });
-          return [matchingTransition1, matchingTransition2];
+          if (matchingTransition1 && matchingTransition2) {
+            return [matchingTransition1, matchingTransition2];
+          } else {
+            return [];
+          }
         }
-        return [matchingTransition2];
+        if (matchingTransition2) {
+          return [matchingTransition2];
+        } else {
+          return [];
+        }
       }
       if (
         (startVideo.asana_category === "Standing" &&
@@ -125,7 +179,11 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             transition.person_ending_position === null
           );
         });
-        return [matchingTransition1, matchingTransition2];
+        if (matchingTransition1 && matchingTransition2) {
+          return [matchingTransition1, matchingTransition2];
+        } else {
+          return [];
+        }
       }
       if (
         (startVideo.asana_category === "Standing" &&
@@ -150,7 +208,11 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             transition.person_ending_position === null
           );
         });
-        return [matchingTransition1, matchingTransition2];
+        if (matchingTransition1 && matchingTransition2) {
+          return [matchingTransition1, matchingTransition2];
+        } else {
+          return [];
+        }
       }
       if (
         startVideo.asana_category === "Sitting" &&
@@ -174,9 +236,17 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
               transition.person_ending_position === "Left"
             );
           });
-          return [matchingTransition1, matchingTransition2];
+          if (matchingTransition1 && matchingTransition2) {
+            return [matchingTransition1, matchingTransition2];
+          } else {
+            return [];
+          }
         }
-        return [matchingTransition1];
+        if (matchingTransition1) {
+          return [matchingTransition1];
+        } else {
+          return [];
+        }
       }
       if (
         startVideo.asana_category === "Sitting" &&
@@ -200,8 +270,11 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             transition.person_ending_position === null
           );
         });
-        console.log(matchingTransition1, matchingTransition2);
-        return [matchingTransition1, matchingTransition2];
+        if (matchingTransition1 && matchingTransition2) {
+          return [matchingTransition1, matchingTransition2];
+        } else {
+          return [];
+        }
       }
       if (
         startVideo.asana_category === "Sitting" &&
@@ -225,7 +298,11 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             transition.person_ending_position === null
           );
         });
-        return [matchingTransition1, matchingTransition2];
+        if (matchingTransition1 && matchingTransition2) {
+          return [matchingTransition1, matchingTransition2];
+        } else {
+          return [];
+        }
       }
       if (
         startVideo.asana_category === "Supine" &&
@@ -267,14 +344,31 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
               transition.person_ending_position === "Left"
             );
           });
+          if (
+            matchingTransition1 &&
+            matchingTransition2 &&
+            matchingTransition3 &&
+            matchingTransition4
+          ) {
+            return [
+              matchingTransition1,
+              matchingTransition2,
+              matchingTransition3,
+              matchingTransition4,
+            ];
+          } else {
+            return [];
+          }
+        }
+        if (matchingTransition1 && matchingTransition2 && matchingTransition3) {
           return [
             matchingTransition1,
             matchingTransition2,
             matchingTransition3,
-            matchingTransition4,
           ];
+        } else {
+          return [];
         }
-        return [matchingTransition1, matchingTransition2, matchingTransition3];
       }
       if (
         startVideo.asana_category === "Supine" &&
@@ -309,7 +403,15 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             transition.person_ending_position === null
           );
         });
-        return [matchingTransition1, matchingTransition2, matchingTransition3];
+        if (matchingTransition1 && matchingTransition2 && matchingTransition3) {
+          return [
+            matchingTransition1,
+            matchingTransition2,
+            matchingTransition3,
+          ];
+        } else {
+          return [];
+        }
       }
       if (
         startVideo.asana_category === "Supine" &&
@@ -326,7 +428,11 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             transition.person_ending_position === null
           );
         });
-        return [matchingTransition1];
+        if (matchingTransition1) {
+          return [matchingTransition1];
+        } else {
+          return [];
+        }
       }
       if (
         startVideo.asana_category === "Prone" &&
@@ -368,14 +474,31 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
               transition.person_ending_position === "Left"
             );
           });
+          if (
+            matchingTransition1 &&
+            matchingTransition2 &&
+            matchingTransition3 &&
+            matchingTransition4
+          ) {
+            return [
+              matchingTransition1,
+              matchingTransition2,
+              matchingTransition3,
+              matchingTransition4,
+            ];
+          } else {
+            return [];
+          }
+        }
+        if (matchingTransition1 && matchingTransition2 && matchingTransition3) {
           return [
             matchingTransition1,
             matchingTransition2,
             matchingTransition3,
-            matchingTransition4,
           ];
+        } else {
+          return [];
         }
-        return [matchingTransition1, matchingTransition2, matchingTransition3];
       }
       if (
         startVideo.asana_category === "Prone" &&
@@ -399,7 +522,11 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             transition.language === endVideo.language
           );
         });
-        return [matchingTransition1, matchingTransition2];
+        if (matchingTransition1 && matchingTransition2) {
+          return [matchingTransition1, matchingTransition2];
+        } else {
+          return [];
+        }
       }
       if (
         startVideo.asana_category === "Prone" &&
@@ -416,7 +543,11 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             transition.person_ending_position === null
           );
         });
-        return [matchingTransition];
+        if (matchingTransition) {
+          return [matchingTransition];
+        } else {
+          return [];
+        }
       }
     }
   }
