@@ -146,7 +146,7 @@ function VideoPlayer() {
 	return (
 		<FullScreen handle={handleFullScreen}>
 			<div className="hover:cursor-pointer">
-				<div className="bg-yblue-100 grid place-items-center aspect-video rounded-xl overflow-hidden">
+				<div className="bg-black grid place-items-center aspect-video rounded-xl overflow-hidden">
 					{currentVideo ? (
 						<>
 							{videoState === STATE_VIDEO_ERROR ? (
@@ -165,11 +165,12 @@ function VideoPlayer() {
 												.map((queueItem) => {
 													return (
 														<AnimatePresence
-															initial={false}>
+															key={
+																queueItem.queue_id
+															}
+															initial={false}
+															mode="wait">
 															<StreamStackItem
-																key={
-																	queueItem.queue_id
-																}
 																video={
 																	queueItem
 																}

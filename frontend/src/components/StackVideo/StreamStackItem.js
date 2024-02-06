@@ -3,7 +3,6 @@ import useVideoStore, { STATE_VIDEO_PLAY } from "../../store/VideoStore";
 // import asanas from "../../data/asanas.json";
 
 import { Stream } from "@cloudflare/stream-react";
-import { motion } from "framer-motion";
 // import { toast } from "react-toastify";
 import useUserStore from "../../store/UserStore";
 import { STATE_VIDEO_PAUSED } from "../../store/VideoStore";
@@ -301,19 +300,20 @@ function StreamStackItem({
 	}, [video]);
 
 	return (
-		<motion.div
+		<div
 			className={`w-full h-full ${isActive ? "block" : "hidden"}`}
 			initial={{
 				opacity: 0,
+				transition: { duration: isActive ? 0.2 : 0.5, ease: "linear" },
 			}}
 			animate={{
-				opacity: 1,
-				transition: { duration: 0.5, ease: "easeInOut" },
+				opacity: isActive ? 1 : 0,
+				transition: { duration: 0.2, ease: "easeInOut" },
 			}}
 			exit={{
 				opacity: 0,
 				transition: {
-					duration: 0.5,
+					duration: 0.2,
 					ease: "easeInOut",
 				},
 			}}>
@@ -363,7 +363,7 @@ function StreamStackItem({
 					setMetadataLoaded(true);
 				}}
 			/>
-		</motion.div>
+		</div>
 	);
 }
 
