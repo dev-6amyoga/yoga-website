@@ -34,6 +34,12 @@ const useVideoStore = create((set) => ({
 			};
 		}),
 
+	autoplayInitialized: false,
+	setAutoplayInitialized: (autoplayInitialized) => {
+		set((state) => {
+			return { autoplayInitialized };
+		});
+	},
 	volume: 0.0,
 	setVolume: (volume) => {
 		set((state) => {
