@@ -2,83 +2,84 @@ import axios from "axios";
 import useUserStore from "../store/UserStore";
 
 export const Fetch = ({
-  url = null,
-  method = "GET",
-  token = null,
-  data = null,
-  responseType,
-  params = {},
-  headers = {},
+	url = null,
+	method = "GET",
+	token = null,
+	data = null,
+	responseType,
+	params = {},
+	headers = {},
 }) => {
-  let h = { ...headers };
+	let h = { ...headers };
 
-  if (token) {
-    h["token"] = token || useUserStore.getState().accessToken;
-  }
+	console.log("TOKEN : ", useUserStore.getState().accessToken);
+	if (token) {
+		h["token"] = token || useUserStore.getState().accessToken;
+	}
 
-  if (data) {
-    h["Content-Type"] = "application/json";
-  }
+	if (data) {
+		h["Content-Type"] = "application/json";
+	}
 
-  let req = {
-    method: method,
-    headers: h,
-    url: url,
-    data: data,
-    params: params,
-  };
+	let req = {
+		method: method,
+		headers: h,
+		url: url,
+		data: data,
+		params: params,
+	};
 
-  if (responseType) {
-    req.responseType = responseType;
-  }
+	if (responseType) {
+		req.responseType = responseType;
+	}
 
-  return axios.request(req);
+	return axios.request(req);
 };
 
 export const FetchRetry = async ({
-  url = null,
-  method = "GET",
-  token = null,
-  data = null,
-  responseType,
-  params = {},
-  headers = {},
-  n = 0,
-  retryDelayMs = 1000,
-  onRetry = null,
+	url = null,
+	method = "GET",
+	token = null,
+	data = null,
+	responseType,
+	params = {},
+	headers = {},
+	n = 0,
+	retryDelayMs = 1000,
+	onRetry = null,
 }) => {
-  return Fetch({
-    url,
-    method,
-    token,
-    data,
-    responseType,
-    params,
-    headers,
-  }).catch((err) => {
-    if (n === 1) {
-      throw err;
-    }
+	return Fetch({
+		url,
+		method,
+		token,
+		data,
+		responseType,
+		params,
+		headers,
+	}).catch((err) => {
+		if (n === 1) {
+			throw err;
+		}
 
-    if (onRetry) {
-      onRetry(err);
-    }
+		if (onRetry) {
+			onRetry(err);
+		}
 
-    setTimeout(
-      () =>
-        FetchRetry({
-          url,
-          method,
-          token,
-          data,
-          responseType,
-          params,
-          headers,
-          n: n - 1,
-          retryDelayMs,
-          onRetry,
-        }),
-      retryDelayMs
-    );
-  });
+		setTimeout(
+			() =>
+				FetchRetry({
+					url,
+					method,
+					token,
+					data,
+					responseType,
+					params,
+					headers,
+					n: n - 1,
+					retryDelayMs,
+					onRetry,
+				}),
+			retryDelayMs
+		);
+	});
 };

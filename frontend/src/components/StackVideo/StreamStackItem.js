@@ -302,21 +302,22 @@ function StreamStackItem({
 	return (
 		<div
 			className={`w-full h-full ${isActive ? "block" : "hidden"}`}
-			initial={{
-				opacity: 0,
-				transition: { duration: isActive ? 0.2 : 0.5, ease: "linear" },
-			}}
-			animate={{
-				opacity: isActive ? 1 : 0,
-				transition: { duration: 0.2, ease: "easeInOut" },
-			}}
-			exit={{
-				opacity: 0,
-				transition: {
-					duration: 0.2,
-					ease: "easeInOut",
-				},
-			}}>
+			// initial={{
+			// 	opacity: 0,
+			// 	transition: { duration: isActive ? 0.2 : 0.5, ease: "linear" },
+			// }}
+			// animate={{
+			// 	opacity: isActive ? 1 : 0,
+			// 	transition: { duration: 0.2, ease: "easeInOut" },
+			// }}
+			// exit={{
+			// 	opacity: 0,
+			// 	transition: {
+			// 		duration: 0.2,
+			// 		ease: "easeInOut",
+			// 	},
+			// }}
+		>
 			<Stream
 				streamRef={playerRef}
 				allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
