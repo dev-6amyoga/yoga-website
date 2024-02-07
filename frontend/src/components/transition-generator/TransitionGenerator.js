@@ -84,8 +84,31 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       }
     } else {
       if (
-        startVideo.asana_category === "Suryanamaskara" &&
-        endVideo.asana_category === "Standing"
+        startVideo.asana_category === "Prayer" &&
+        endVideo.asana_category === "Suryanamaskara"
+      ) {
+        const matchingTransition1 = transitions.find((transition) => {
+          return (
+            transition.asana_category_start === "Suryanamaskara" &&
+            transition.asana_category_end === "Suryanamaskara" &&
+            transition.language === endVideo.language &&
+            transition.mat_starting_position === null &&
+            transition.mat_ending_position === null &&
+            transition.person_starting_position === null &&
+            transition.person_ending_position === null
+          );
+        });
+        if (matchingTransition1) {
+          return [matchingTransition1];
+        } else {
+          return [];
+        }
+      }
+      if (
+        (startVideo.asana_category === "Suryanamaskara" &&
+          endVideo.asana_category === "Standing") ||
+        (startVideo.asana_category === "Prayer" &&
+          endVideo.asana_category === "Standing")
       ) {
         const matchingTransition1 = transitions.find((transition) => {
           return (
@@ -123,6 +146,8 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         (startVideo.asana_category === "Standing" &&
           endVideo.asana_category === "Sitting") ||
         (startVideo.asana_category === "Suryanamaskara" &&
+          endVideo.asana_category === "Sitting") ||
+        (startVideo.asana_category === "Prayer" &&
           endVideo.asana_category === "Sitting")
       ) {
         const matchingTransition2 = transitions.find((transition) => {
@@ -160,6 +185,8 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         (startVideo.asana_category === "Standing" &&
           endVideo.asana_category === "Supine") ||
         (startVideo.asana_category === "Suryanamaskara" &&
+          endVideo.asana_category === "Supine") ||
+        (startVideo.asana_category === "Prayer" &&
           endVideo.asana_category === "Supine")
       ) {
         const matchingTransition1 = transitions.find((transition) => {
@@ -189,6 +216,8 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         (startVideo.asana_category === "Standing" &&
           endVideo.asana_category === "Prone") ||
         (startVideo.asana_category === "Suryanamaskara" &&
+          endVideo.asana_category === "Prone") ||
+        (startVideo.asana_category === "Prayer" &&
           endVideo.asana_category === "Prone")
       ) {
         const matchingTransition1 = transitions.find((transition) => {
@@ -252,6 +281,17 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         startVideo.asana_category === "Sitting" &&
         endVideo.asana_category === "Supine"
       ) {
+        const matchingTransition = transitions.find((transition) => {
+          return (
+            transition.asana_category_start === "Sitting" &&
+            transition.asana_category_end === "Standing" &&
+            transition.language === endVideo.language &&
+            transition.mat_starting_position === null &&
+            transition.mat_ending_position === null &&
+            transition.person_starting_position === null &&
+            transition.person_ending_position === null
+          );
+        });
         const matchingTransition1 = transitions.find((transition) => {
           return (
             transition.mat_starting_position === "Front" &&
@@ -261,7 +301,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         });
         const matchingTransition2 = transitions.find((transition) => {
           return (
-            transition.asana_category_start === startVideo.asana_category &&
+            transition.asana_category_start === "Standing" &&
             transition.asana_category_end === endVideo.asana_category &&
             transition.language === endVideo.language &&
             transition.mat_starting_position === null &&
@@ -270,8 +310,8 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             transition.person_ending_position === null
           );
         });
-        if (matchingTransition1 && matchingTransition2) {
-          return [matchingTransition1, matchingTransition2];
+        if (matchingTransition && matchingTransition1 && matchingTransition2) {
+          return [matchingTransition, matchingTransition1, matchingTransition2];
         } else {
           return [];
         }
@@ -280,6 +320,17 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         startVideo.asana_category === "Sitting" &&
         endVideo.asana_category === "Prone"
       ) {
+        const matchingTransition = transitions.find((transition) => {
+          return (
+            transition.asana_category_start === "Sitting" &&
+            transition.asana_category_end === "Prone" &&
+            transition.language === endVideo.language &&
+            transition.mat_starting_position === null &&
+            transition.mat_ending_position === null &&
+            transition.person_starting_position === null &&
+            transition.person_ending_position === null
+          );
+        });
         const matchingTransition1 = transitions.find((transition) => {
           return (
             transition.mat_starting_position === "Front" &&
@@ -289,7 +340,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         });
         const matchingTransition2 = transitions.find((transition) => {
           return (
-            transition.asana_category_start === startVideo.asana_category &&
+            transition.asana_category_start === "Standing" &&
             transition.asana_category_end === endVideo.asana_category &&
             transition.language === endVideo.language &&
             transition.mat_starting_position === null &&
@@ -298,8 +349,8 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             transition.person_ending_position === null
           );
         });
-        if (matchingTransition1 && matchingTransition2) {
-          return [matchingTransition1, matchingTransition2];
+        if (matchingTransition && matchingTransition1 && matchingTransition2) {
+          return [matchingTransition, matchingTransition1, matchingTransition2];
         } else {
           return [];
         }
@@ -376,8 +427,8 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       ) {
         const matchingTransition1 = transitions.find((transition) => {
           return (
-            transition.asana_category_start === startVideo.asana_category &&
-            transition.asana_category_end === endVideo.asana_category &&
+            transition.asana_category_start === "Supine" &&
+            transition.asana_category_end === "Standing" &&
             transition.language === endVideo.language &&
             transition.mat_starting_position === null &&
             transition.mat_ending_position === null &&
@@ -385,6 +436,17 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             transition.person_ending_position === null
           );
         });
+        // const matchingTransition1 = transitions.find((transition) => {
+        //   return (
+        //     transition.asana_category_start === startVideo.asana_category &&
+        //     transition.asana_category_end === endVideo.asana_category &&
+        //     transition.language === endVideo.language &&
+        //     transition.mat_starting_position === null &&
+        //     transition.mat_ending_position === null &&
+        //     transition.person_starting_position === null &&
+        //     transition.person_ending_position === null
+        //   );
+        // });
         const matchingTransition2 = transitions.find((transition) => {
           return (
             transition.mat_starting_position === "Side" &&
@@ -395,7 +457,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         const matchingTransition3 = transitions.find((transition) => {
           return (
             transition.asana_category_end === "Sitting" &&
-            transition.asana_category_start === "Sitting" &&
+            transition.asana_category_start === "Standing" &&
             transition.language === endVideo.language &&
             transition.mat_starting_position === null &&
             transition.mat_ending_position === null &&
@@ -506,8 +568,8 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       ) {
         const matchingTransition1 = transitions.find((transition) => {
           return (
-            transition.asana_category_start === startVideo.asana_category &&
-            transition.asana_category_end === endVideo.asana_category &&
+            transition.asana_category_start === "Prone" &&
+            transition.asana_category_end === "Standing" &&
             transition.language === endVideo.language &&
             transition.mat_starting_position === null &&
             transition.mat_ending_position === null &&
@@ -515,6 +577,17 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             transition.person_ending_position === null
           );
         });
+        // const matchingTransition1 = transitions.find((transition) => {
+        //   return (
+        //     transition.asana_category_start === startVideo.asana_category &&
+        //     transition.asana_category_end === endVideo.asana_category &&
+        //     transition.language === endVideo.language &&
+        //     transition.mat_starting_position === null &&
+        //     transition.mat_ending_position === null &&
+        //     transition.person_starting_position === null &&
+        //     transition.person_ending_position === null
+        //   );
+        // });
         const matchingTransition2 = transitions.find((transition) => {
           return (
             transition.mat_starting_position === "Side" &&
@@ -522,8 +595,23 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             transition.language === endVideo.language
           );
         });
-        if (matchingTransition1 && matchingTransition2) {
-          return [matchingTransition1, matchingTransition2];
+        const matchingTransition3 = transitions.find((transition) => {
+          return (
+            transition.asana_category_end === "Sitting" &&
+            transition.asana_category_start === "Standing" &&
+            transition.language === endVideo.language &&
+            transition.mat_starting_position === null &&
+            transition.mat_ending_position === null &&
+            transition.person_starting_position === null &&
+            transition.person_ending_position === null
+          );
+        });
+        if (matchingTransition1 && matchingTransition2 && matchingTransition3) {
+          return [
+            matchingTransition1,
+            matchingTransition2,
+            matchingTransition3,
+          ];
         } else {
           return [];
         }

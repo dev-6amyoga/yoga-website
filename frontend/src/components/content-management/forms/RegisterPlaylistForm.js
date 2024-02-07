@@ -10,6 +10,7 @@ import {
 } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { transitionGenerator } from "../../transition-generator/TransitionGenerator";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AdminNavbar from "../../Common/AdminNavbar/AdminNavbar";
@@ -110,546 +111,29 @@ export default function RegisterPlaylistForm() {
   });
 
   const addToPlaylist = (rowData) => {
-    console.log(rowData);
     var count = document.getElementById(`asana_count_${rowData.id}`).value;
     if (count === "") {
       count = 1;
+    } else {
+      count = Number(count);
     }
     if (playlist_temp.length === 0) {
-      console.log("in here");
-      let filteredItems = transitions.filter(
-        (item) =>
-          item.asana_category_start === rowData.asana_category &&
-          item.asana_category_end === rowData.asana_category &&
-          item.language === rowData.language &&
-          item.mat_starting_position === null &&
-          item.mat_ending_position === null &&
-          item.person_starting_position === null &&
-          item.person_ending_position === null
-      );
-      if (filteredItems.length !== 1) {
-        toast(
-          "Transition video doesnt exist in this language or category of asana"
-        );
-      } else {
-        console.log(filteredItems);
-        setPlaylistTemp((prevPlaylist) => [
-          ...prevPlaylist,
-          {
-            rowData: filteredItems[0],
-            count: 1,
-          },
+      const x = transitionGenerator("start", rowData, transitions);
+      if (x.length !== 0) {
+        setPlaylistTemp((prev) => [
+          ...prev,
+          ...x.map((item) => ({ rowData: item, count: 1 })),
         ]);
       }
-    }
-    if (playlist_temp.length !== 0) {
+    } else {
       let startVideo = playlist_temp[playlist_temp.length - 1].rowData;
       let endVideo = rowData;
-      if (startVideo.asana_category === endVideo.asana_category) {
-        if (
-          startVideo.person_ending_position === "Left" &&
-          endVideo.person_starting_position === "Front"
-        ) {
-          const matchingTransition = transitions.find((transition) => {
-            return (
-              transition.asana_category === startVideo.asana_category_end &&
-              transition.person_starting_position ===
-                startVideo.person_ending_position &&
-              transition.person_ending_position ===
-                endVideo.person_starting_position
-            );
-          });
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition,
-              count: 1,
-            },
-          ]);
-        } else if (
-          startVideo.person_ending_position === "Front" &&
-          endVideo.person_starting_position === "Left"
-        ) {
-          const matchingTransition = transitions.find((transition) => {
-            return (
-              transition.asana_category === startVideo.asana_category_end &&
-              transition.person_starting_position ===
-                startVideo.person_ending_position &&
-              transition.person_ending_position ===
-                endVideo.person_starting_position
-            );
-          });
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition,
-              count: 1,
-            },
-          ]);
-        }
-      } else {
-        if (
-          startVideo.asana_category === "Standing" &&
-          endVideo.asana_category === "Sitting"
-        ) {
-          const matchingTransition = returnTransitionVideo(
-            startVideo,
-            "Standing",
-            endVideo,
-            "Sitting"
-          );
-          if (startVideo.person_ending_position === "Left") {
-            const matchingTransition1 = transitions.find((transition) => {
-              return (
-                transition.person_starting_position ===
-                  startVideo.person_ending_position &&
-                transition.person_ending_position ===
-                  endVideo.person_starting_position
-              );
-            });
-            setPlaylistTemp((prevPlaylist) => [
-              ...prevPlaylist,
-              {
-                rowData: matchingTransition1,
-                count: 1,
-              },
-            ]);
-          }
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition,
-              count: 1,
-            },
-          ]);
-        }
-        if (
-          startVideo.asana_category === "Standing" &&
-          endVideo.asana_category === "Supine"
-        ) {
-          const matchingTransition = returnTransitionVideo(
-            startVideo,
-            "Standing",
-            endVideo,
-            "Supine"
-          );
-          const matchingTransition2 = transitions.find((transition) => {
-            return (
-              transition.mat_starting_position === "Front" &&
-              transition.mat_ending_position === "Side" &&
-              transition.language === endVideo.language
-            );
-          });
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition2,
-              count: 1,
-            },
-          ]);
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition,
-              count: 1,
-            },
-          ]);
-        }
-        if (
-          startVideo.asana_category === "Standing" &&
-          endVideo.asana_category === "Prone"
-        ) {
-          const matchingTransition = returnTransitionVideo(
-            startVideo,
-            "Standing",
-            endVideo,
-            "Prone"
-          );
-          const matchingTransition2 = transitions.find((transition) => {
-            return (
-              transition.mat_starting_position === "Front" &&
-              transition.mat_ending_position === "Side"
-              // transition.language === endVideo.language
-            );
-          });
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition2,
-              count: 1,
-            },
-          ]);
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition,
-              count: 1,
-            },
-          ]);
-        }
-        if (
-          startVideo.asana_category === "Sitting" &&
-          endVideo.asana_category === "Standing"
-        ) {
-          const matchingTransition = returnTransitionVideo(
-            startVideo,
-            "Sitting",
-            endVideo,
-            "Standing"
-          );
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition,
-              count: 1,
-            },
-          ]);
-          if (endVideo.person_starting_position === "Left") {
-            const matchingTransition1 = transitions.find((transition) => {
-              return (
-                transition.person_starting_position === "Front" &&
-                transition.person_ending_position === "Left"
-              );
-            });
-            setPlaylistTemp((prevPlaylist) => [
-              ...prevPlaylist,
-              {
-                rowData: matchingTransition1,
-                count: 1,
-              },
-            ]);
-          }
-        }
-        if (
-          startVideo.asana_category === "Sitting" &&
-          endVideo.asana_category === "Supine"
-        ) {
-          const matchingTransition = returnTransitionVideo(
-            startVideo,
-            "Sitting",
-            endVideo,
-            "Supine"
-          );
-          const matchingTransition2 = transitions.find((transition) => {
-            return (
-              transition.mat_starting_position === "Front" &&
-              transition.mat_ending_position === "Side" &&
-              transition.language === endVideo.language
-            );
-          });
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition2,
-              count: 1,
-            },
-          ]);
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition,
-              count: 1,
-            },
-          ]);
-        }
-        if (
-          startVideo.asana_category === "Sitting" &&
-          endVideo.asana_category === "Prone"
-        ) {
-          const matchingTransition = returnTransitionVideo(
-            startVideo,
-            "Sitting",
-            endVideo,
-            "Prone"
-          );
-          const matchingTransition2 = transitions.find((transition) => {
-            return (
-              transition.mat_starting_position === "Front" &&
-              transition.mat_ending_position === "Side" &&
-              transition.language === endVideo.language
-            );
-          });
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition2,
-              count: 1,
-            },
-          ]);
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition,
-              count: 1,
-            },
-          ]);
-        }
-        if (
-          startVideo.asana_category === "Supine" &&
-          endVideo.asana_category === "Standing"
-        ) {
-          const matchingTransition = returnTransitionVideo(
-            startVideo,
-            "Supine",
-            endVideo,
-            "Standing"
-          );
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition,
-              count: 1,
-            },
-          ]);
-          const matchingTransition2 = transitions.find((transition) => {
-            return (
-              transition.mat_starting_position === "Side" &&
-              transition.mat_ending_position === "Front" &&
-              transition.language === endVideo.language
-            );
-          });
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition2,
-              count: 1,
-            },
-          ]);
-          const matchingTransition3 = transitions.find((transition) => {
-            return (
-              transition.asana_category_end === "Standing" &&
-              transition.asana_category_start === "Standing" &&
-              transition.language === endVideo.language &&
-              transition.mat_starting_position === null &&
-              transition.mat_ending_position === null &&
-              transition.person_starting_position === null &&
-              transition.person_ending_position === null
-            );
-          });
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition3,
-              count: 1,
-            },
-          ]);
-          if (endVideo.person_starting_position === "Left") {
-            const matchingTransition1 = transitions.find((transition) => {
-              return (
-                transition.person_starting_position === "Front" &&
-                transition.person_ending_position === "Left"
-              );
-            });
-            setPlaylistTemp((prevPlaylist) => [
-              ...prevPlaylist,
-              {
-                rowData: matchingTransition1,
-                count: 1,
-              },
-            ]);
-          }
-        }
-        if (
-          startVideo.asana_category === "Supine" &&
-          endVideo.asana_category === "Sitting"
-        ) {
-          const matchingTransition = returnTransitionVideo(
-            startVideo,
-            "Supine",
-            endVideo,
-            "Sitting"
-          );
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition,
-              count: 1,
-            },
-          ]);
-          const matchingTransition2 = transitions.find((transition) => {
-            return (
-              transition.mat_starting_position === "Side" &&
-              transition.mat_ending_position === "Front" &&
-              transition.language === endVideo.language
-            );
-          });
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition2,
-              count: 1,
-            },
-          ]);
-          const matchingTransition3 = transitions.find((transition) => {
-            return (
-              transition.asana_category_end === "Sitting" &&
-              transition.asana_category_start === "Sitting" &&
-              transition.language === endVideo.language &&
-              transition.mat_starting_position === null &&
-              transition.mat_ending_position === null &&
-              transition.person_starting_position === null &&
-              transition.person_ending_position === null
-            );
-          });
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition3,
-              count: 1,
-            },
-          ]);
-        }
-        if (
-          startVideo.asana_category === "Supine" &&
-          endVideo.asana_category === "Prone"
-        ) {
-          const matchingTransition = returnTransitionVideo(
-            startVideo,
-            "Supine",
-            endVideo,
-            "Prone"
-          );
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition,
-              count: 1,
-            },
-          ]);
-        }
-        if (
-          startVideo.asana_category === "Prone" &&
-          endVideo.asana_category === "Standing"
-        ) {
-          const matchingTransition = returnTransitionVideo(
-            startVideo,
-            "Prone",
-            endVideo,
-            "Standing"
-          );
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition,
-              count: 1,
-            },
-          ]);
-          const matchingTransition2 = transitions.find((transition) => {
-            return (
-              transition.mat_starting_position === "Side" &&
-              transition.mat_ending_position === "Front" &&
-              transition.language === endVideo.language
-            );
-          });
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition2,
-              count: 1,
-            },
-          ]);
-          const matchingTransition3 = transitions.find((transition) => {
-            return (
-              transition.asana_category_end === "Standing" &&
-              transition.asana_category_start === "Standing" &&
-              transition.language === endVideo.language &&
-              transition.mat_starting_position === null &&
-              transition.mat_ending_position === null &&
-              transition.person_starting_position === null &&
-              transition.person_ending_position === null
-            );
-          });
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition3,
-              count: 1,
-            },
-          ]);
-          if (endVideo.person_starting_position === "Left") {
-            const matchingTransition1 = transitions.find((transition) => {
-              return (
-                transition.person_starting_position === "Front" &&
-                transition.person_ending_position === "Left"
-              );
-            });
-            setPlaylistTemp((prevPlaylist) => [
-              ...prevPlaylist,
-              {
-                rowData: matchingTransition1,
-                count: 1,
-              },
-            ]);
-          }
-        }
-        if (
-          startVideo.asana_category === "Prone" &&
-          endVideo.asana_category === "Sitting"
-        ) {
-          const matchingTransition = returnTransitionVideo(
-            startVideo,
-            "Prone",
-            endVideo,
-            "Sitting"
-          );
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition,
-              count: 1,
-            },
-          ]);
-          const matchingTransition2 = transitions.find((transition) => {
-            return (
-              transition.mat_starting_position === "Side" &&
-              transition.mat_ending_position === "Front" &&
-              transition.language === endVideo.language
-            );
-          });
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition2,
-              count: 1,
-            },
-          ]);
-          const matchingTransition3 = transitions.find((transition) => {
-            return (
-              transition.asana_category_end === "Sitting" &&
-              transition.asana_category_start === "Sitting" &&
-              transition.language === endVideo.language &&
-              transition.mat_starting_position === null &&
-              transition.mat_ending_position === null &&
-              transition.person_starting_position === null &&
-              transition.person_ending_position === null
-            );
-          });
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition3,
-              count: 1,
-            },
-          ]);
-        }
-        if (
-          startVideo.asana_category === "Prone" &&
-          endVideo.asana_category === "Supine"
-        ) {
-          const matchingTransition = returnTransitionVideo(
-            startVideo,
-            "Prone",
-            endVideo,
-            "Supine"
-          );
-          setPlaylistTemp((prevPlaylist) => [
-            ...prevPlaylist,
-            {
-              rowData: matchingTransition,
-              count: 1,
-            },
-          ]);
-        }
+      const x = transitionGenerator(startVideo, endVideo, transitions);
+      if (x.length !== 0) {
+        setPlaylistTemp((prev) => [
+          ...prev,
+          ...x.map((item) => ({ rowData: item, count: 1 })),
+        ]);
       }
     }
     setPlaylistTemp((prevPlaylist) => [
@@ -732,9 +216,76 @@ export default function RegisterPlaylistForm() {
 
   const renderAction = (value, rowData, index) => {
     const handleDelete = () => {
-      setPlaylistTemp((prevPlaylist) =>
-        prevPlaylist.filter((entry) => entry !== rowData)
-      );
+      setPlaylistTemp((prevSchedule) => {
+        const currentIndex = prevSchedule.findIndex(
+          (entry) => entry === rowData
+        );
+        const prevAsanaIndex = prevSchedule
+          .slice(0, currentIndex)
+          .reverse()
+          .findIndex((entry) => {
+            return (
+              entry.rowData?.asana_name && !entry.rowData?.transition_video_name
+            );
+          });
+        const prevAsana =
+          prevAsanaIndex !== -1
+            ? prevSchedule[currentIndex - prevAsanaIndex - 1]
+            : null;
+        const nextAsanaIndex = prevSchedule
+          .slice(currentIndex + 1)
+          .findIndex((entry) => entry.rowData?.asana_name);
+        const startIndex =
+          prevAsanaIndex !== -1 ? currentIndex - prevAsanaIndex : 0;
+        const endIndex =
+          nextAsanaIndex !== -1 ? currentIndex + 1 + nextAsanaIndex : undefined;
+        const nextAsana =
+          nextAsanaIndex !== -1
+            ? prevSchedule[currentIndex + 1 + nextAsanaIndex]
+            : null;
+        const filteredSchedule = prevSchedule.filter(
+          (_, index) =>
+            index < startIndex || (endIndex !== undefined && index >= endIndex)
+        );
+        let updatedSchedule = [];
+        if (prevAsana === null && nextAsana !== null) {
+          const x = transitionGenerator(
+            "start",
+            nextAsana.rowData,
+            transitions
+          );
+          if (x.length !== 0) {
+            updatedSchedule = [
+              ...x.map((item) => ({ rowData: item, count: 1 })),
+              ...filteredSchedule,
+            ];
+          }
+        }
+        if (prevAsana !== null && nextAsana === null) {
+          updatedSchedule = filteredSchedule;
+        }
+        if (prevAsana === null && nextAsana === null) {
+          updatedSchedule = filteredSchedule;
+        }
+        if (prevAsana !== null && nextAsana !== null) {
+          const x = transitionGenerator(
+            prevAsana.rowData,
+            nextAsana.rowData,
+            transitions
+          );
+          updatedSchedule = [
+            ...filteredSchedule.slice(
+              0,
+              filteredSchedule.findIndex((entry) => entry === prevAsana) + 1
+            ),
+            ...x.map((item) => ({ rowData: item, count: 1 })),
+            ...filteredSchedule.slice(
+              filteredSchedule.findIndex((entry) => entry === nextAsana)
+            ),
+          ];
+        }
+        return updatedSchedule;
+      });
     };
     const handleUpdate = async () => {
       setModalData(rowData);
@@ -857,10 +408,16 @@ export default function RegisterPlaylistForm() {
               />
               <Table.Column prop="count" label="Count" />
               <Table.Column
-                prop="operation"
+                prop="operations"
                 label="ACTIONS"
                 width={150}
-                render={renderAction}
+                render={(value, rowData) => {
+                  if (rowData.rowData?.asana_name) {
+                    return renderAction(value, rowData);
+                  } else {
+                    return null;
+                  }
+                }}
               />
             </Table>
             <Divider />

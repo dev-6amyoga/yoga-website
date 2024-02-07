@@ -35,19 +35,13 @@ router.post("/video/addAsana", async (req, res) => {
 router.post("/video/addTransition", async (req, res) => {
   try {
     const requestData = req.body;
-    const maxIdAsana = await TransitionVideo.findOne()
-      .sort({ transition_id: -1 })
-      .limit(1);
-    console.log("maxIdAsana:", maxIdAsana);
-    let newId;
-    if (maxIdAsana) {
-      const numericPart = parseInt(maxIdAsana.transition_id.split("_")[1]);
-      const nextNumericPart = numericPart + 1;
-      newId = "T_" + nextNumericPart;
-    } else {
-      newId = "T_1";
-    }
-    console.log("newId:", newId);
+    const allIds = await TransitionVideo.find({}, { transition_id: 1, _id: 0 });
+    const numericParts = allIds.map(
+      (item) => parseInt(item.transition_id.split("_")[1]) || 0
+    );
+    const maxNumericPart = Math.max(...numericParts);
+    const newId = "T_" + (maxNumericPart + 1);
+    console.log(newId);
     requestData.transition_id = newId;
     const newAsana = new TransitionVideo(requestData);
     const savedAsana = await newAsana.save();
