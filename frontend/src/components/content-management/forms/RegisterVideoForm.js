@@ -170,7 +170,7 @@ export default function RegisterVideoForm() {
       if (toastShown) {
         console.log("wait");
       } else {
-        console.log("insert!!");
+        toast("Adding new asana, kindly wait!");
         try {
           const response = await fetch(
             "http://localhost:4000/content/video/addAsana",
@@ -255,6 +255,12 @@ export default function RegisterVideoForm() {
           </Select>
           <Input width="100%" id="asana_videoID" name="asana_videoID">
             Cloudflare Video ID
+          </Input>
+          <Input width="100%" id="asana_hls_url" name="asana_hls_url">
+            HLS URL
+          </Input>
+          <Input width="100%" id="asana_dash_url" name="asana_dash_url">
+            DASH URL
           </Input>
           <Text>Language</Text>
           <Select
