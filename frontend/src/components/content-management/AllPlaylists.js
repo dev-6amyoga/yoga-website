@@ -7,7 +7,6 @@ import {
   Text,
   Select,
   Tooltip,
-  Card,
 } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { Search } from "@geist-ui/icons";
@@ -32,18 +31,12 @@ export default function AllPlaylists() {
   const [playlistAsanas, setPlaylistAsanas] = useState([]);
   const [transitions, setTransitions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sortedPlaylists, setSortedPlaylists] = useState([]);
-  const [sortOrder, setSortOrder] = useState("asc");
   const [modalState, setModalState] = useState(false);
   const [modalData, setModalData] = useState({
     playlist_id: 0,
     playlist_name: "",
     asana_ids: [],
   });
-
-  useEffect(() => {
-    console.log("MODAL DATA IS : ", modalData);
-  }, [modalData]);
   const handleDownload = (data1) => {
     const csv = Papa.unparse(data1);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -64,6 +57,7 @@ export default function AllPlaylists() {
   };
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredTransitions, setFilteredTransitions] = useState([]);
+
   useEffect(() => {
     if (searchTerm.length > 0) {
       setFilteredTransitions(
@@ -76,14 +70,14 @@ export default function AllPlaylists() {
     } else {
       setFilteredTransitions(playlist1);
     }
-  }, [searchTerm]);
-  const [newAsana, setNewAsana] = useState({ id: "", asana_name: "" });
+  }, [searchTerm, playlist1]);
   const handleAddNewAsana = () => {
     setModalData((prevData) => ({
       ...prevData,
-      asana_ids: [...prevData.asana_ids, newAsana.id],
+      asana_ids: [...prevData.asana_ids, ""],
     }));
   };
+
   useEffect(() => {
     const fetchData = async (playlistId) => {
       try {
@@ -110,7 +104,7 @@ export default function AllPlaylists() {
         toast(error);
       }
     };
-    for (var i = 0; i != playlist1.length; i++) {
+    for (var i = 0; i !== playlist1.length; i++) {
       if (playlist1[i].asana_ids.length === 0) {
         fetchData(playlist1[i].playlist_id);
       }
@@ -161,16 +155,6 @@ export default function AllPlaylists() {
     };
     fetchData();
   }, []);
-  useEffect(() => {
-    const sortedData = [...playlist1].sort((a, b) => {
-      if (sortOrder === "asc") {
-        return a.playlist_name.localeCompare(b.playlist_name);
-      } else {
-        return b.playlist_name.localeCompare(a.playlist_name);
-      }
-    });
-    setSortedPlaylists(sortedData);
-  }, [playlist1, sortOrder]);
 
   const updateData = async () => {
     try {
@@ -206,7 +190,44 @@ export default function AllPlaylists() {
       (asana) => asana.asana_name === value
     );
     updatedAsanaIds[index] = selectedAsana ? selectedAsana.id : value;
-    setModalData((prevData) => ({ ...prevData, asana_ids: updatedAsanaIds }));
+    console.log(updatedAsanaIds);
+    const filteredAsanaIds = updatedAsanaIds.filter((asanaId) => {
+      return typeof asanaId !== "string" || !asanaId.startsWith("T_");
+    });
+    let resultArray = [];
+    const asanaData1 = playlistAsanas.find(
+      (asana) => asana.id === filteredAsanaIds[0]
+    );
+    const transitionResult = transitionGenerator(
+      "start",
+      asanaData1,
+      transitions
+    );
+    transitionResult?.forEach((element) => {
+      resultArray.push(element.transition_id);
+    });
+    resultArray.push(asanaData1.id);
+    for (let i = 0; i < filteredAsanaIds.length - 1; i++) {
+      const asanaData2 = playlistAsanas.find(
+        (asana) => asana.id === filteredAsanaIds[i]
+      );
+      const asanaData3 = playlistAsanas.find(
+        (asana) => asana.id === filteredAsanaIds[i + 1]
+      );
+      if (asanaData2 && asanaData3) {
+        const result = transitionGenerator(asanaData2, asanaData3, transitions);
+        result?.forEach((element) => {
+          resultArray.push(element.transition_id);
+        });
+        resultArray.push(asanaData3.id);
+      } else {
+        console.error("Asana data not found for IDs:");
+      }
+    }
+    setModalData((prevModalData) => ({
+      ...prevModalData,
+      asana_ids: resultArray,
+    }));
   };
 
   const deletePlaylist = async () => {
@@ -246,8 +267,40 @@ export default function AllPlaylists() {
     };
 
     const handleUpdate = async () => {
+      // try {
+      //   setAsanaDetailsArray([]);
+      //   const filteredAsanaIds = rowData.asana_ids.filter((asanaId) => {
+      //     return typeof asanaId !== "string" || !asanaId.startsWith("T_");
+      //   });
+      //   for (const asanaId of filteredAsanaIds) {
+      //     const response = await fetch(
+      //       "http://localhost:4000/content/playlists/addPlaylist",
+      //       {
+      //         method: "POST",
+      //         headers: {
+      //           "Content-Type": "application/json",
+      //         },
+      //         body: JSON.stringify({ asana_id: asanaId }),
+      //       }
+      //     );
+      //     if (response.ok) {
+      //       const asanaDetails = await response.json();
+      //       setAsanaDetailsArray((prevArray) => [
+      //         ...prevArray,
+      //         { id: asanaId, data: asanaDetails },
+      //       ]);
+      //     } else {
+      //       console.error(
+      //         "Error fetching asana details. Status:",
+      //         response.status
+      //       );
+      //     }
+      //   }
       setModalData(rowData);
       setModalState(true);
+      // } catch (error) {
+      //   console.error("Error fetching asana details:", error);
+      // }
     };
 
     return (
@@ -295,93 +348,113 @@ export default function AllPlaylists() {
         }
       }
     }
-    let prevAsana = asanas_before[asanas_before.length - 1];
-    let prevOfPrevAsana = asanas_before[asanas_before.length - 2];
-    let nextAsana = asanas_after[0];
-    let nextOfNextAsana = asanas_after[1];
-    if (
-      (direction === "up" && index > 0) ||
-      (direction === "down" && index < modalData.asana_ids.length - 1)
-    ) {
-      if (direction === "up") {
-        console.log(modalData.asana_ids[index], " moved up.");
-        console.log("Next asana now becomes : ", prevAsana);
-        console.log("Previous asana now becomes : ", prevOfPrevAsana);
-        console.log("Next of next asana becomes : ", nextAsana);
-        console.log(modalData.asana_ids);
-        // if (prevOfPrevAsana) {
-        //   modalData.asana_ids.splice(
-        //     prevOfPrevAsana["index"] + 1,
-        //     prevAsana["index"] - prevOfPrevAsana["index"] - 1
-        //   );
-        //   modalData.asana_ids.splice(
-        //     prevAsana["index"] + 1,
-        //     index - prevAsana["index"] - 1
-        //   );
-        //   modalData.asana_ids.splice(index + 1, nextAsana["index"] - index - 1);
-        //   console.log(modalData.asana_ids);
-        // } else {
-        // }
-        //remove prevprev-prev, prev-current, current-next
-        //now, alter modalData.asana_ids to change the order of asanas, and remove all transitions between them.
-      }
-      if (direction === "down") {
-        console.log(modalData.asana_ids[index], " moved down.");
-        console.log("Next asana now becomes : ", nextOfNextAsana);
-        console.log("Previous asana now becomes : ", nextAsana);
-        console.log("Previous of previous asana becomes : ", prevAsana);
-        console.log(modalData.asana_ids);
-        //remove prev-current, current-next, next-nextnext
-        //now, alter modalData.asana_ids to change the order of asanas, and remove all transitions between them.
+    let nowOrderAsanaIds = [];
+    if (direction === "up" && asanas_before.length > 0) {
+      const temp = asanas_before[asanas_before.length - 1];
+      asanas_before[asanas_before.length - 1] = {
+        index: index,
+        asana_id: modalData.asana_ids[index],
+      };
+      asanas_before.push(temp);
+      nowOrderAsanaIds = [...asanas_before, ...asanas_after].map(
+        (asana) => asana.asana_id
+      );
+    }
+
+    if (direction === "down" && asanas_after.length > 0) {
+      const updated_list = [
+        ...asanas_after.slice(0, 1),
+        {
+          index: index,
+          asana_id: modalData.asana_ids[index],
+        },
+        ...asanas_after.slice(1),
+      ];
+      asanas_after = updated_list;
+      nowOrderAsanaIds = [...asanas_before, ...asanas_after].map(
+        (asana) => asana.asana_id
+      );
+    }
+
+    let resultArray = [];
+    const asanaData1 = playlistAsanas.find(
+      (asana) => asana.id === nowOrderAsanaIds[0]
+    );
+    const transitionResult = transitionGenerator(
+      "start",
+      asanaData1,
+      transitions
+    );
+    transitionResult?.forEach((element) => {
+      resultArray.push(element.transition_id);
+    });
+    resultArray.push(asanaData1.id);
+    for (let i = 0; i < nowOrderAsanaIds.length - 1; i++) {
+      const asanaData2 = playlistAsanas.find(
+        (asana) => asana.id === nowOrderAsanaIds[i]
+      );
+      const asanaData3 = playlistAsanas.find(
+        (asana) => asana.id === nowOrderAsanaIds[i + 1]
+      );
+      if (asanaData2 && asanaData3) {
+        const result = transitionGenerator(asanaData2, asanaData3, transitions);
+        result?.forEach((element) => {
+          resultArray.push(element.transition_id);
+        });
+        resultArray.push(asanaData3.id);
+      } else {
+        console.error("Asana data not found for IDs:");
       }
     }
-    // setModalData((prevModalData) => {
-    //   const reorderedAsanas = [...prevModalData.asana_ids];
-    //   if (
-    //     (direction === "up" && index > 0) ||
-    //     (direction === "down" && index < reorderedAsanas.length - 1)
-    //   ) {
-    //     [
-    //       reorderedAsanas[index],
-    //       reorderedAsanas[index + (direction === "up" ? -1 : 1)],
-    //     ] = [
-    //       reorderedAsanas[index + (direction === "up" ? -1 : 1)],
-    //       reorderedAsanas[index],
-    //     ];
-    //   } else {
-    //     return prevModalData;
-    //   }
-    //   const updatedTransitions = [];
-    //   for (let i = 0; i < reorderedAsanas.length - 1; i++) {
-    //     const asana1 = playlistAsanas.find(
-    //       (asana) => asana.id === reorderedAsanas[i]
-    //     );
-    //     const asana2 = playlistAsanas.find(
-    //       (asana) => asana.id === reorderedAsanas[i + 1]
-    //     );
-    //     console.log(" SENDING : ", asana1, asana2);
-    //     const transitionsBetweenAsanas = transitionGenerator(asana1, asana2);
-    //     updatedTransitions.push(...transitionsBetweenAsanas);
-    //   }
-    //   return {
-    //     ...prevModalData,
-    //     asana_ids: reorderedAsanas,
-    //     transitions: updatedTransitions,
-    //   };
-    // });
+    setModalData((prevModalData) => ({
+      ...prevModalData,
+      asana_ids: resultArray,
+    }));
   };
 
   const handleRemoveAsana = (indexToRemove) => {
-    setModalData((prevData) => {
-      const newAsanaIds = prevData.asana_ids.filter(
-        (_, index) => index !== indexToRemove
-      );
-
-      return {
-        ...prevData,
-        asana_ids: newAsanaIds,
-      };
+    console.log(modalData.asana_ids);
+    const newAsanaIds = modalData.asana_ids.filter(
+      (_, index) => index !== indexToRemove
+    );
+    const filteredList = newAsanaIds.filter(
+      (item) => !(typeof item === "string" && item.startsWith("T_"))
+    );
+    console.log(filteredList);
+    let resultArray = [];
+    const asanaData1 = playlistAsanas.find(
+      (asana) => asana.id === filteredList[0]
+    );
+    const transitionResult = transitionGenerator(
+      "start",
+      asanaData1,
+      transitions
+    );
+    transitionResult?.forEach((element) => {
+      resultArray.push(element.transition_id);
     });
+    resultArray.push(asanaData1.id);
+    for (let i = 0; i < filteredList.length - 1; i++) {
+      const asanaData2 = playlistAsanas.find(
+        (asana) => asana.id === filteredList[i]
+      );
+      const asanaData3 = playlistAsanas.find(
+        (asana) => asana.id === filteredList[i + 1]
+      );
+      if (asanaData2 && asanaData3) {
+        const result = transitionGenerator(asanaData2, asanaData3, transitions);
+        result?.forEach((element) => {
+          resultArray.push(element.transition_id);
+        });
+        resultArray.push(asanaData3.id);
+      } else {
+        console.error("Asana data not found for IDs:");
+      }
+    }
+    setModalData((prevModalData) => ({
+      ...prevModalData,
+      asana_ids: resultArray,
+    }));
   };
 
   return (
@@ -462,14 +535,17 @@ export default function AllPlaylists() {
               <br />
 
               {modalData.asana_ids.map((asanaId, index) => {
-                const asana =
-                  playlistAsanas.find((asana) => asana.id === asanaId) ||
-                  transitions.find(
-                    (transition) => transition.transition_id === asanaId
-                  );
-                const isAsana = asana.asana_name ? true : false;
-                const asanaName =
-                  asana.asana_name || asana.transition_video_name;
+                let isAsana = true;
+                let asanaName = "";
+                if (asanaId !== "") {
+                  const asana =
+                    playlistAsanas.find((asana) => asana.id === asanaId) ||
+                    transitions.find(
+                      (transition) => transition.transition_id === asanaId
+                    );
+                  isAsana = asana.asana_name ? true : false;
+                  asanaName = asana.asana_name || asana.transition_video_name;
+                }
                 return (
                   <div>
                     {isAsana && (

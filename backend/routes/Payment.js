@@ -52,7 +52,7 @@ router.post("/commit", async (req, res) => {
     user_id: user making the payment
     status: success || failed || cancelled || timedout
   */
-	console.log({ body: req.body });
+  console.log({ body: req.body });
 
   const {
     user_id,

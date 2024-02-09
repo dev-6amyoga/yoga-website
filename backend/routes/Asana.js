@@ -80,6 +80,7 @@ router.post("/get-transition-by-id", async (req, res) => {
     });
   }
 });
+
 router.delete("/video/deleteTransition/:id", async (req, res) => {
   const transitionID = req.params.id;
   try {
@@ -268,4 +269,5 @@ router.delete("/asana/deleteAsanaCategory/:catId", async (req, res) => {
     });
   }
 });
+
 module.exports = router;
