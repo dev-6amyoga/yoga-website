@@ -9,6 +9,21 @@ const {
   HTTP_NOT_FOUND,
   HTTP_INTERNAL_SERVER_ERROR,
 } = require("../utils/http_status_codes");
+const { execSync } = require("child_process");
+const ffprobePath = require("ffprobe-static").path;
+function getVideoDuration(filePath) {
+  try {
+    const result = execSync(
+      `${ffprobePath} -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`,
+      { encoding: "utf-8" }
+    );
+    const duration = parseFloat(result);
+    return isNaN(duration) ? 0 : duration;
+  } catch (error) {
+    console.error("Error getting video duration:", error.message);
+    return 0;
+  }
+}
 
 router.post("/video/addAsana", async (req, res) => {
   try {
@@ -22,8 +37,12 @@ router.post("/video/addAsana", async (req, res) => {
     }
     requestData.id = newId;
     const newAsana = new Asana(requestData);
+    console.log(newAsana);
+    const hlsDuration = getVideoDuration(newAsana.asana_hls_url);
+    console.log(hlsDuration);
+    newAsana.duration = hlsDuration;
     const savedAsana = await newAsana.save();
-    res.status(200).json(savedAsana);
+    res.status(200).json(newAsana);
   } catch (error) {
     console.error("Error saving new Asana:", error);
     res.status(500).json({
@@ -41,9 +60,11 @@ router.post("/video/addTransition", async (req, res) => {
     );
     const maxNumericPart = Math.max(...numericParts);
     const newId = "T_" + (maxNumericPart + 1);
-    console.log(newId);
     requestData.transition_id = newId;
     const newAsana = new TransitionVideo(requestData);
+    const hlsDuration = getVideoDuration(newAsana.transition_hls_url);
+    console.log(hlsDuration);
+    newAsana.duration = hlsDuration;
     const savedAsana = await newAsana.save();
     res.status(200).json(savedAsana);
   } catch (error) {

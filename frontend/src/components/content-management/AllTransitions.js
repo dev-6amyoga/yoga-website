@@ -135,6 +135,8 @@ export default function AllTransitions() {
         <Table width={100} data={filteredTransitions} className="bg-white ">
           <Table.Column prop="transition_id" label="ID" />
           <Table.Column prop="transition_video_name" label="Transition Name" />
+          <Table.Column prop="transition_video_ID" label="Cloudflare ID" />
+          <Table.Column prop="duration" label="Transition Duration" />
           <Table.Column
             prop="operation"
             label="ACTIONS"
