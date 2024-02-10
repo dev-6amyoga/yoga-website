@@ -15,6 +15,7 @@ const asanaSchema = new mongoose.Schema({
   duration: Number,
   asana_difficulty: [String],
   language: String,
+  nobreak_asana: Boolean,
   muted: String,
   counter: String,
   person_starting_position: String,

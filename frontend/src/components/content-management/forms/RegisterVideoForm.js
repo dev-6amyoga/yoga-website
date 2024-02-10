@@ -11,15 +11,21 @@ export default function RegisterVideoForm() {
   const [data, setData] = useState([]);
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [asana_category, setAsanaCategory] = useState("");
+  const [noBreakAsana, setNoBreakAsana] = useState(false);
   const [asana_type, setAsanaType] = useState("");
   const [asana_difficulty, setAsanaDifficulty] = useState(null);
   const [counter, setCounter] = useState(false);
   const [muted, setMuted] = useState(false);
-  const [withAudio, setWithAudio] = useState(true);
+  const [withAudio, setWithAudio] = useState(false);
   const [tableLanguages, setTableLanguages] = useState([]);
   const [categories, setCategories] = useState([]);
+  const hello1 = (value) => {
+    console.log(value);
+    if (value.includes("true")) {
+      setNoBreakAsana(true);
+    }
+  };
   const hello = (value) => {
-    console.log("VALUE IS ", value);
     if (value.length === 0) {
       setWithAudio(false);
       setMuted(false);
@@ -120,6 +126,7 @@ export default function RegisterVideoForm() {
       asana_type: asana_type,
       asana_difficulty: asana_difficulty,
       counter: counter,
+      nobreak_asana: noBreakAsana,
       muted: muted,
       asana_withAudio: withAudio,
       person_starting_position: personStart,
@@ -131,9 +138,6 @@ export default function RegisterVideoForm() {
       ...formData,
       ...additionalData,
     };
-    console.log(combinedData);
-    console.log(data);
-    console.log(withAudio, muted, counter);
     if (
       combinedData.asana_name === "" ||
       combinedData.asana_type === "" ||
@@ -168,7 +172,6 @@ export default function RegisterVideoForm() {
         }
       }
       if (toastShown) {
-        console.log("wait");
       } else {
         toast("Adding new asana, kindly wait!");
         try {
@@ -189,7 +192,7 @@ export default function RegisterVideoForm() {
             console.log("Failed to add new Asana");
           }
         } catch (error) {
-          console.log("Error while making the request:", error);
+          toast("Error while making the request:", error);
         }
       }
     }
@@ -288,6 +291,10 @@ export default function RegisterVideoForm() {
             <Checkbox value="with_timer">With Timer?</Checkbox>
           </Checkbox.Group>
           <Divider />
+          <Text h5>No Break Asana</Text>
+          <Checkbox.Group value={[]} onChange={hello1} name="nobreak_asana">
+            <Checkbox value="true">No break asana?</Checkbox>
+          </Checkbox.Group>
 
           <Text h5>Person Starting Position</Text>
           <Select
