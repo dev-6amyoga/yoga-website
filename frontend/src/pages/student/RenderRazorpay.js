@@ -30,6 +30,7 @@ const RenderRazorpay = ({
 	keySecret,
 	orderId,
 	currency,
+	currencyId,
 	amount,
 	payment_for,
 	redirectUrl,
@@ -72,6 +73,11 @@ const RenderRazorpay = ({
 	const handlePaymentBackendCallback = useCallback(
 		async (status, orderDetails = {}) => {
 			// user_id, status, payment_for, payment_method, amount, signature, order_id, payment_id,
+			if (!currencyId) {
+				toast("Pick a currency!", { type: "error" });
+				return;
+			}
+
 			FetchRetry({
 				url: "http://localhost:4000/payment/commit",
 				method: "POST",
@@ -84,6 +90,7 @@ const RenderRazorpay = ({
 					signature: orderDetails?.signature,
 					order_id: orderDetails?.orderId,
 					payment_id: orderDetails?.paymentId,
+					currency_id: currencyId,
 				},
 				n: 10,
 				retryDelayMs: 2000,
@@ -199,7 +206,7 @@ const RenderRazorpay = ({
 			retry: {
 				enabled: false,
 			},
-			timeout: 900,
+			timeout: 20,
 			theme: {
 				color: "",
 			},

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { Code } from "@geist-ui/core";
+// import { Code } from "@geist-ui/core";
 import useVideoStore from "../../store/VideoStore";
 
 export default function VideoInfo() {
@@ -20,7 +20,7 @@ export default function VideoInfo() {
 		<div className="">
 			{currentVideo ? (
 				<div className="flex flex-col gap-4 py-4">
-					<Code block>{JSON.stringify(currentVideo, null, 4)}</Code>
+					{/* <Code block>{JSON.stringify(currentVideo, null, 4)}</Code> */}
 					<h3>
 						<span className="text-zinc-500 text-sm">
 							{currentVideo?.video?.transition_id
