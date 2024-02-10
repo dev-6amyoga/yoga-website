@@ -58,6 +58,7 @@ const queryRouter = require("./routes/Queries");
 const updateRequestsRouter = require("./routes/UpdateRequests");
 // DEV : sample data creation
 const { bulkCreateSampleData } = require("./sample_data");
+const helloWorld = require("./defer/helloWorld");
 
 // middleware
 app.use(cors());
@@ -102,7 +103,8 @@ initializeSequelize()
 	});
 
 // bind routers
-app.get("/info", (req, res) => {
+app.get("/info", async (req, res) => {
+	await helloWorld("6AMYOGA_BACKEND");
 	return res.status(200).json({
 		message: "Running.",
 	});
