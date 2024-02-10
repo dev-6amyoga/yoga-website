@@ -55,6 +55,10 @@ export default function Register({ switchForm }) {
   }, []);
 
   useEffect(() => {
+    console.log(generalInfo);
+  }, [generalInfo]);
+
+  useEffect(() => {
     if (role === "STUDENT") {
       setBlockStep(blockPhoneStep);
     } else if (role === "INSTITUTE_OWNER") {
@@ -86,6 +90,7 @@ export default function Register({ switchForm }) {
           newUser.client_id = clientID;
           newUser.jwt_token = googleInfo?.jwt_token;
         }
+        console.log(newUser, "TO BE REGISTERED ");
         const response = await Fetch({
           url: url,
           method: "POST",
@@ -422,6 +427,7 @@ export default function Register({ switchForm }) {
     setDisclaimerModal(false);
     setDisclaimerAcceptedVar(true);
   };
+
   return (
     <GoogleOAuthProvider clientId={clientID}>
       <div className="bg-white p-4 rounded-lg max-w-xl mx-auto">

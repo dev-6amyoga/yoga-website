@@ -28,7 +28,6 @@ export default function RegisterPlaylistForm() {
     "Pranayama",
   ];
   const [sortedAsanas, setSortedAsanas] = useState([]);
-  const sortOrder = "asc";
   const [playlist_temp, setPlaylistTemp] = useState([]);
   const [modalState, setModalState] = useState(false);
   const [modalData, setModalData] = useState({
@@ -53,22 +52,14 @@ export default function RegisterPlaylistForm() {
     fetchData();
   }, []);
   useEffect(() => {
-    // const sortedData = [...asanas].sort((a, b) => {
-    //   if (sortOrder === "asc") {
-    //     return a.asana_category.localeCompare(b.asana_category);
-    //   } else {
-    //     return b.asana_category.localeCompare(a.asana_category);
-    //   }
-    // });
     const s1 = asanas.sort((a, b) => {
       return (
         predefinedOrder.indexOf(a.asana_category) -
         predefinedOrder.indexOf(b.asana_category)
       );
     });
-
     setSortedAsanas(s1);
-  }, [asanas, sortOrder]);
+  }, [asanas]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -84,31 +75,6 @@ export default function RegisterPlaylistForm() {
     };
     fetchData();
   }, []);
-
-  const returnTransitionVideo = (
-    startVideo,
-    startVideoCategory,
-    endVideo,
-    endVideoCategory
-  ) => {
-    const matchingTransition = transitions.find((transition) => {
-      return (
-        transition.asana_category_start === startVideoCategory &&
-        transition.asana_category_end === endVideoCategory &&
-        transition.language === endVideo.language &&
-        transition.mat_starting_position === null &&
-        transition.mat_ending_position === null &&
-        transition.person_starting_position === null &&
-        transition.person_ending_position === null
-      );
-    });
-    return matchingTransition;
-  };
-
-  const [asanaInPlaylist, setAsanaInPlaylist] = useState({
-    transitions: [],
-    asana: {},
-  });
 
   const addToPlaylist = (rowData) => {
     var count = document.getElementById(`asana_count_${rowData.id}`).value;
@@ -160,6 +126,7 @@ export default function RegisterPlaylistForm() {
     }
     setModalState(false);
   };
+
   const renderAction2 = (value, rowData, index) => {
     const inputId = `asana_count_${rowData.id}`;
     return (
