@@ -11,6 +11,7 @@ import {
   Text,
   Tooltip,
 } from "@geist-ui/core";
+import { transitionGenerator } from "../../components/transition-generator/TransitionGenerator";
 import { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -192,18 +193,87 @@ export default function ViewAllPlaylists() {
     updatedAsanaIds[index] = selectedAsana ? selectedAsana.id : value;
     setModalData((prevData) => ({ ...prevData, asana_ids: updatedAsanaIds }));
   };
-  const handleAsanaReorder = (currentIndex, direction) => {
-    const newAsanaIds = [...modalData.asana_ids];
-    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
-    [newAsanaIds[currentIndex], newAsanaIds[newIndex]] = [
-      newAsanaIds[newIndex],
-      newAsanaIds[currentIndex],
-    ];
-    setModalData((prevData) => ({
-      ...prevData,
-      asana_ids: newAsanaIds,
+  const handleAsanaReorder = (index, direction) => {
+    let asanas_before = [];
+    let asanas_after = [];
+    for (var i = 0; i < modalData.asana_ids.length; i++) {
+      if (
+        !Number(modalData.asana_ids[i]) &&
+        modalData.asana_ids[i].startsWith("T_")
+      ) {
+      } else {
+        if (i < index) {
+          asanas_before.push({ index: i, asana_id: modalData.asana_ids[i] });
+        }
+        if (i > index) {
+          asanas_after.push({ index: i, asana_id: modalData.asana_ids[i] });
+        }
+      }
+    }
+    let nowOrderAsanaIds = [];
+    if (direction === "up" && asanas_before.length > 0) {
+      const temp = asanas_before[asanas_before.length - 1];
+      asanas_before[asanas_before.length - 1] = {
+        index: index,
+        asana_id: modalData.asana_ids[index],
+      };
+      asanas_before.push(temp);
+      nowOrderAsanaIds = [...asanas_before, ...asanas_after].map(
+        (asana) => asana.asana_id
+      );
+    }
+
+    if (direction === "down" && asanas_after.length > 0) {
+      const updated_list = [
+        ...asanas_after.slice(0, 1),
+        {
+          index: index,
+          asana_id: modalData.asana_ids[index],
+        },
+        ...asanas_after.slice(1),
+      ];
+      asanas_after = updated_list;
+      nowOrderAsanaIds = [...asanas_before, ...asanas_after].map(
+        (asana) => asana.asana_id
+      );
+    }
+
+    let resultArray = [];
+    const asanaData1 = playlistAsanas.find(
+      (asana) => asana.id === nowOrderAsanaIds[0]
+    );
+    const transitionResult = transitionGenerator(
+      "start",
+      asanaData1,
+      transitions
+    );
+    transitionResult?.forEach((element) => {
+      resultArray.push(element.transition_id);
+    });
+    resultArray.push(asanaData1.id);
+    for (let i = 0; i < nowOrderAsanaIds.length - 1; i++) {
+      const asanaData2 = playlistAsanas.find(
+        (asana) => asana.id === nowOrderAsanaIds[i]
+      );
+      const asanaData3 = playlistAsanas.find(
+        (asana) => asana.id === nowOrderAsanaIds[i + 1]
+      );
+      if (asanaData2 && asanaData3) {
+        const result = transitionGenerator(asanaData2, asanaData3, transitions);
+        result?.forEach((element) => {
+          resultArray.push(element.transition_id);
+        });
+        resultArray.push(asanaData3.id);
+      } else {
+        console.error("Asana data not found for IDs:");
+      }
+    }
+    setModalData((prevModalData) => ({
+      ...prevModalData,
+      asana_ids: resultArray,
     }));
   };
+
   const handleRemoveAsana = (indexToRemove) => {
     setModalData((prevData) => {
       const newAsanaIds = prevData.asana_ids.filter(
