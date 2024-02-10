@@ -1,8 +1,6 @@
 const { sequelize } = require("../../init.sequelize");
 const { DataTypes } = require("sequelize");
 const { options } = require("./defaultOptions");
-const { User } = require("./User");
-const { Transaction } = require("./Transaction");
 
 const Refund = sequelize.define(
 	"refund",
@@ -32,28 +30,24 @@ const Refund = sequelize.define(
 			type: DataTypes.DATE,
 			allowNull: false,
 		},
-		refund_order_id: {
-			type: DataTypes.STRING,
-			allowNull: false,
-			unique: true,
-		},
 		refund_payment_id: {
 			type: DataTypes.STRING,
 			allowNull: true,
 		},
-		refund_signature: {
+		refund_error_code: {
+			type: DataTypes.STRING,
+			allowNull: true,
+		},
+		refund_error_desc: {
+			type: DataTypes.STRING,
+			allowNull: true,
+		},
+		refund_error_reason: {
 			type: DataTypes.STRING,
 			allowNull: true,
 		},
 	},
 	{ ...options }
 );
-
-Refund.belongsTo(User, { foreignKey: "user_id", onDelete: "CASCADE" });
-Refund.belongsTo(Transaction, {
-	foreignKey: "transaction_id",
-	onDelete: "CASCADE",
-	onUpdate: "CASCADE",
-});
 
 module.exports = { Refund };

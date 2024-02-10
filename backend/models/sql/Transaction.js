@@ -4,6 +4,9 @@ const { options } = require("./defaultOptions");
 const { User } = require("./User");
 const { DiscountCoupon } = require("./DiscountCoupon");
 const { ReferralCode } = require("./ReferralCode");
+const { Currency } = require("./Currency");
+const { UserPlan } = require("./UserPlan");
+const { Refund } = require("./Refund");
 
 const Transaction = sequelize.define(
 	"transaction",
@@ -49,17 +52,5 @@ const Transaction = sequelize.define(
 	},
 	{ ...options }
 );
-
-Transaction.belongsTo(User, { foreignKey: "user_id", onDelete: "CASCADE" });
-Transaction.belongsTo(DiscountCoupon, {
-	foreignKey: "discount_coupon_id",
-	onDelete: "SET NULL",
-	onUpdate: "CASCADE",
-});
-Transaction.belongsTo(ReferralCode, {
-	foreignKey: "referral_code_id",
-	onDelete: "SET NULL",
-	onUpdate: "CASCADE",
-});
 
 module.exports = { Transaction };

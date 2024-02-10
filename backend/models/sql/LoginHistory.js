@@ -35,10 +35,4 @@ const LoginHistory = sequelize.define(
 	{ ...options }
 );
 
-LoginHistory.belongsTo(User, {
-	foreignKey: "user_id",
-	onDelete: "CASCADE",
-	onUpdate: "CASCADE",
-});
-
 module.exports = { LoginHistory };

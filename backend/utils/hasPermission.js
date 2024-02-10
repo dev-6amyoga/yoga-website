@@ -39,7 +39,7 @@ async function hasPermission(req, res, next, ...requiredPerms) {
 
 	// if root skip everything
 	let checkPerms = perms.findIndex((pp) => pp.role_id === 1) === -1;
-	// console.log({ checkPerms });
+	console.log({ checkPerms });
 
 	if (checkPerms) {
 		// check if user has perms
