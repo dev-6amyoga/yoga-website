@@ -6,7 +6,7 @@ const { Role } = require("../models/sql/Role");
 const {
   UserInstitutePlanRole,
 } = require("../models/sql/UserInstitutePlanRole");
-const { UserPlan } = require( "../models/sql/UserPlan" )
+const { UserPlan } = require("../models/sql/UserPlan");
 
 const GetUser = async (filter, attributes) => {
   // returns user
@@ -70,9 +70,11 @@ const GetUserInfo = async (filter, attributes = null) => {
     error = null;
   try {
     [user, errorUser] = await GetUser(filter, attributes);
+    console.log(user);
 
     if (!user || errorUser) {
       error = "User does not exist";
+      console.log(error);
       return [null, error];
     }
 
@@ -82,17 +84,21 @@ const GetUserInfo = async (filter, attributes = null) => {
       },
       include: [
         { model: Institute, attributes: ["institute_id", "name"] },
-        { model: UserPlan, attributes: ["user_plan_id", "plan_id"], include: [Plan] },
+        {
+          model: UserPlan,
+          attributes: ["user_plan_id", "plan_id"],
+          include: [Plan],
+        },
         { model: Role, attributes: ["role_id", "name"] },
       ],
     });
 
-				userInstitutePlanRoles = userInstitutePlanRoles.map(uipr => {
-					return {
-						...uipr.toJSON(),
-						plan: uipr.user_plan ? uipr.user_plan.plan : null
-					}
-				})
+    userInstitutePlanRoles = userInstitutePlanRoles.map((uipr) => {
+      return {
+        ...uipr.toJSON(),
+        plan: uipr.user_plan ? uipr.user_plan.plan : null,
+      };
+    });
 
     let roles = {};
 

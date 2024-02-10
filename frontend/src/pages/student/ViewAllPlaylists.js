@@ -24,6 +24,21 @@ import {
 
 export default function ViewAllPlaylists() {
   const navigate = useNavigate();
+  const [transitions, setTransitions] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4000/content/video/getAllTransitions"
+        );
+        const data = await response.json();
+        setTransitions(data);
+      } catch (error) {
+        toast(error);
+      }
+    };
+    fetchData();
+  }, []);
   const [delState, setDelState] = useState(false);
   const [delPlaylistId, setDelPlaylistId] = useState("");
   const [modalState, setModalState] = useState(false);
@@ -266,77 +281,103 @@ export default function ViewAllPlaylists() {
               </Input>
               <br />
               <br />
+
               {modalData.asana_ids.map((asanaId, index) => {
-                const asana = playlistAsanas.find(
-                  (asana) => asana.id === asanaId
-                );
-                const asanaName = asana ? asana.asana_name : asanaId;
+                let isAsana = true;
+                let asanaName = "";
+                if (asanaId !== "") {
+                  const asana =
+                    playlistAsanas.find((asana) => asana.id === asanaId) ||
+                    transitions.find(
+                      (transition) => transition.transition_id === asanaId
+                    );
+                  isAsana = asana.asana_name ? true : false;
+                  asanaName = asana.asana_name || asana.transition_video_name;
+                }
                 return (
                   <div>
-                    <Text>Asana {index + 1}</Text>
-                    <Grid.Container gap={1} justify="left" height="40px">
-                      <Grid>
-                        {" "}
-                        <Select
-                          key={index}
-                          width="100%"
-                          placeholder={`Select Asana ${index + 1}`}
-                          value={asanaName}
-                          onChange={(value) =>
-                            handleAsanaNameChange(value, index)
-                          }
-                        >
-                          {playlistAsanas.map((asanaOption) => (
-                            <Select.Option
-                              key={asanaOption.id}
-                              value={asanaOption.asana_name}
+                    {isAsana && (
+                      <div>
+                        <Text type="error">Asana {index + 1}</Text>
+                        <Grid.Container gap={1} justify="left" height="40px">
+                          <Grid>
+                            {" "}
+                            <Select
+                              key={index}
+                              width="100%"
+                              placeholder={`Select Asana ${index + 1}`}
+                              value={asanaName}
+                              onChange={(value) =>
+                                handleAsanaNameChange(value, index)
+                              }
                             >
-                              {asanaOption.asana_name}
-                            </Select.Option>
-                          ))}
-                        </Select>
-                      </Grid>
-                      <Grid>
-                        {" "}
-                        {index > 0 && (
-                          <Tooltip text={"Move Up"} type="dark">
+                              {playlistAsanas.map((asanaOption) => (
+                                <Select.Option
+                                  key={asanaOption.id}
+                                  value={asanaOption.asana_name}
+                                >
+                                  {asanaOption.asana_name +
+                                    " " +
+                                    asanaOption.language}
+                                </Select.Option>
+                              ))}
+                            </Select>
+                          </Grid>
+                          <Grid>
                             {" "}
-                            <Button
-                              icon={<ArrowUpCircle />}
-                              auto
-                              scale={2 / 3}
-                              onClick={() => handleAsanaReorder(index, "up")}
-                            />
-                          </Tooltip>
-                        )}
-                      </Grid>
-                      <Grid>
-                        {" "}
-                        {index < modalData.asana_ids.length - 1 && (
-                          <Tooltip text={"Move Down"} type="dark">
+                            {index > 0 && (
+                              <Tooltip text={"Move Up"} type="dark">
+                                {" "}
+                                <Button
+                                  icon={<ArrowUpCircle />}
+                                  auto
+                                  scale={2 / 3}
+                                  onClick={() =>
+                                    handleAsanaReorder(index, "up")
+                                  }
+                                />
+                              </Tooltip>
+                            )}
+                          </Grid>
+                          <Grid>
                             {" "}
-                            <Button
-                              icon={<ArrowDownCircle />}
-                              auto
-                              scale={2 / 3}
-                              onClick={() => handleAsanaReorder(index, "down")}
-                            />
-                          </Tooltip>
-                        )}
-                      </Grid>
-                      <Grid>
-                        <Tooltip text={"Delete Asana"} type="dark">
-                          {" "}
-                          <Button
-                            type="error"
-                            icon={<XCircle />}
-                            auto
-                            scale={2 / 3}
-                            onClick={() => handleRemoveAsana(index)}
-                          />
-                        </Tooltip>
-                      </Grid>
-                    </Grid.Container>
+                            {index < modalData.asana_ids.length - 1 && (
+                              <Tooltip text={"Move Down"} type="dark">
+                                {" "}
+                                <Button
+                                  icon={<ArrowDownCircle />}
+                                  auto
+                                  scale={2 / 3}
+                                  onClick={() =>
+                                    handleAsanaReorder(index, "down")
+                                  }
+                                />
+                              </Tooltip>
+                            )}
+                          </Grid>
+                          <Grid>
+                            <Tooltip text={"Delete Asana"} type="dark">
+                              {" "}
+                              <Button
+                                type="error"
+                                icon={<XCircle />}
+                                auto
+                                scale={2 / 3}
+                                onClick={() => handleRemoveAsana(index)}
+                              />
+                            </Tooltip>
+                          </Grid>
+                        </Grid.Container>
+                        <br />
+                      </div>
+                    )}
+                    {!isAsana && (
+                      <div>
+                        <Text type="success">Transition Video</Text>
+                        <h5>{asanaName}</h5>
+                        <br />
+                      </div>
+                    )}
                   </div>
                 );
               })}
