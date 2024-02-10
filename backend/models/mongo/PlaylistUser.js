@@ -4,7 +4,7 @@ const PlaylistSchemaUser = new mongoose.Schema({
   playlist_id: { type: String, required: true },
   playlist_user_id: Number,
   playlist_name: String,
-  asana_ids: [Number],
+  asana_ids: [mongoose.Schema.Types.Mixed],
 });
 
 const PlaylistUser = mongoose.model(
