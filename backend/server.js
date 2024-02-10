@@ -22,11 +22,11 @@ const { mailTransporter } = require("./init.nodemailer");
 var glob = require("glob");
 
 glob.sync("./models/sql/*.js").forEach(function (file) {
-  require(path.resolve(file));
+	require(path.resolve(file));
 });
 
 glob.sync("./models/mongo/*.js").forEach(function (file) {
-  require(path.resolve(file));
+	require(path.resolve(file));
 });
 
 // routers
@@ -62,37 +62,50 @@ const { bulkCreateSampleData } = require("./sample_data");
 // middleware
 app.use(cors());
 app.use(express.json());
-app.use(morgan("dev"));
+app.use(
+	morgan(function (tokens, req, res) {
+		return [
+			tokens.date(req, res, "iso"),
+			tokens.method(req, res),
+			tokens.url(req, res),
+			tokens.status(req, res),
+			tokens.res(req, res, "content-length"),
+			"-",
+			tokens["response-time"](req, res),
+			"ms",
+		].join(" ");
+	})
+);
 app.use(useragent.express());
 app.use("/static", express.static(path.join(__dirname, "public")));
 
 // initialize databases
 const mongoURI = process.env.MONGO_SRV_URL;
 mongoose
-  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("Connected to MongoDB Atlas"))
-  .catch((err) => console.log(err));
+	.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+	.then(() => console.log("Connected to MongoDB Atlas"))
+	.catch((err) => console.log(err));
 
 initializeSequelize()
-  .then(() => {
-    console.log("Sequelize initialized");
-    // bulkCreateSampleData()
-    //   .then(() => {
-    //     console.log("Sample data created!");
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
-  })
-  .catch((err) => {
-    console.error(err);
-  });
+	.then(() => {
+		console.log("Sequelize initialized");
+		// bulkCreateSampleData()
+		//   .then(() => {
+		//     console.log("Sample data created!");
+		//   })
+		//   .catch((err) => {
+		//     console.log(err);
+		//   });
+	})
+	.catch((err) => {
+		console.error(err);
+	});
 
 // bind routers
 app.get("/info", (req, res) => {
-  return res.status(200).json({
-    message: "Running.",
-  });
+	return res.status(200).json({
+		message: "Running.",
+	});
 });
 
 app.use("/content", asanaRouter);
@@ -124,5 +137,5 @@ app.use("/update-request", updateRequestsRouter);
 const port = parseInt(process.env.SERVER_PORT);
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+	console.log(`Server is running on port ${port}`);
 });
