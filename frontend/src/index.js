@@ -1,5 +1,6 @@
 import { CssBaseline, GeistProvider } from "@geist-ui/core";
-import React, { useEffect } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useCookies } from "react-cookie";
 import ReactDOM from "react-dom/client";
 import "react-phone-number-input/style.css";
@@ -240,15 +241,17 @@ function Index() {
 	// 		console.log(e);
 	// 	});
 	// }, []);
-
+	const queryClient = new QueryClient();
 	return (
 		<>
-			<GeistProvider>
-				<CssBaseline />
-				<RouterProvider router={router} />
-				<ToastContainer />
-				<LoginIndex />
-			</GeistProvider>
+			<QueryClientProvider client={queryClient}>
+				<GeistProvider>
+					<CssBaseline />
+					<RouterProvider router={router} />
+					<ToastContainer />
+					<LoginIndex />
+				</GeistProvider>
+			</QueryClientProvider>
 		</>
 	);
 }

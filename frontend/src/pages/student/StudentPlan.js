@@ -274,11 +274,11 @@ function StudentPlan() {
 	// const [selectedValidity, setSelectedValidity] = useState(30);
 
 	const [currencies, setAllCurrencies] = useState([]);
+	const [selectedCurrency, setSelectedCurrency] = useState("INR");
+	const [selectedCurrencyId, setSelectedCurrencyId] = useState(1);
 
 	const [planId, setPlanId] = useState(-1);
 	const [toBeRegistered, setToBeRegistered] = useState({});
-
-	const [selectedCurrency, setSelectedCurrency] = useState("INR");
 
 	const [loading, setLoading] = useState(false);
 
@@ -496,6 +496,21 @@ function StudentPlan() {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+
+		if (!user) {
+			toast("Please login to continue", { type: "error" });
+			return;
+		}
+
+		if (!cardData) {
+			toast("Please select a plan to continue", { type: "error" });
+			return;
+		}
+
+		if (!selectedCurrency || !selectedCurrencyId) {
+			toast("Please select a currency to continue", { type: "error" });
+			return;
+		}
 
 		let userPlanData = {
 			cancellation_date: null,
@@ -729,14 +744,33 @@ function StudentPlan() {
 
 			<div className="max-w-7xl w-full mt-10 mx-auto flex justify-end">
 				<div>
-					<p className="text-right">Select A Currency</p>
+					<p className="text-right">
+						Select A Currency |{" "}
+						{currencies.length > 0
+							? currencies[0].short_tag
+							: "???"}{" "}
+						| Selected : {selectedCurrency} | {selectedCurrencyId}
+					</p>
 					<Select
 						className=""
+						placeholder={
+							currencies.length > 0
+								? currencies[0].short_tag
+								: "INR"
+						}
 						initialValue={
-							currencies.length > 0 ? currencies[0].short_tag : ""
+							currencies.length > 0
+								? currencies[0].short_tag
+								: "INR"
 						}
 						// value={}
-						onChange={(val) => setSelectedCurrency(val)}>
+						onChange={(val) => {
+							setSelectedCurrency(val);
+							setSelectedCurrencyId(
+								currencies.find((x) => x.short_tag === val)
+									?.currency_id || null
+							);
+						}}>
 						{currencies?.map((cur) => {
 							return (
 								<Select.Option
@@ -954,6 +988,7 @@ function StudentPlan() {
 				keySecret={process.env.REACT_APP_RAZORPAY_KEY_SECRET}
 				orderId={orderDetails.orderId}
 				currency={orderDetails.currency}
+				currencyId={selectedCurrencyId}
 				amount={orderDetails.amount}
 				payment_for={"user_plan"}
 				redirectUrl={"/student"}
