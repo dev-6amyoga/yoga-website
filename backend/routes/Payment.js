@@ -202,8 +202,8 @@ router.post("/refund/history", async (req, res) => {
 });
 
 router.post("/refund/create", async (req, res) => {
-	const { transaction_id, transaction_payment_id, amount, currency } =
-		req.body;
+	console.log(req.body);
+	const { transaction_payment_id, amount, currency } = req.body;
 
 	if (!transaction_payment_id || !amount || !currency) {
 		return res
