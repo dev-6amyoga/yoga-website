@@ -283,6 +283,8 @@ export default function RegisterNewPlaylistStudent() {
       playlist_id: newId,
       playlist_user_id: user?.user_id,
       playlist_name: playlist_sequence["playlist_name"],
+      playlist_max_edit_count: 3,
+      playlist_current_edit_count: 0,
       asana_ids: playlist_sequence["asana_ids"],
     };
     console.log(newRecord);
