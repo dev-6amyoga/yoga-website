@@ -1,5 +1,5 @@
 import { Button, Input } from "@geist-ui/core";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -223,7 +223,14 @@ export default function Login({ switchForm }) {
 
 	return (
 		<div className="bg-white p-4 rounded-lg max-w-xl mx-auto border">
-			<h3 className="text-center text-2xl">Login</h3>
+			<div className="mb-4">
+				<img
+					src="/logo_6am.png"
+					alt="6AM Yoga"
+					className="mx-auto h-24 my-4"
+				/>
+				<h3 className="text-center text-2xl">Login</h3>
+			</div>
 			<hr />
 			{visible && (
 				<div className="flex flex-col gap-1 items-center w-full mt-4">
