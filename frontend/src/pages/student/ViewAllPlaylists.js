@@ -316,7 +316,9 @@ export default function ViewAllPlaylists() {
                     (asana) => asana.id === asanaId
                   );
                   return (
-                    <div key={index}>{asana ? asana.asana_name : asanaId}</div>
+                    <div key={index}>
+                      {asana ? asana.asana_name : asana.transition_video_name}
+                    </div>
                   );
                 })}
               </div>
