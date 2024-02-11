@@ -1,15 +1,15 @@
-import { Button } from "@geist-ui/core";
+import { Button, Drawer } from "@geist-ui/core";
+import { Menu, X } from "@geist-ui/icons";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function GeneralNavbar() {
 	const navigate = useNavigate();
-	return (
-		<div className="h-16 bg-white text-black px-4 shadow-sm flex items-center justify-between">
-			<div className="flex gap-4 items-center h-full">
-				<img src="/logo_6am.png" alt="6AM Yoga Logo" className="h-6" />
-				<h1 className="text-xl">My Yoga Teacher</h1>
-			</div>
-			<nav className="flex gap-4 items-center">
+	const [open, setOpen] = useState(false);
+
+	const NavLinks = () => {
+		return (
+			<>
 				<Link to="/" className="text-black">
 					Home
 				</Link>
@@ -34,7 +34,43 @@ export default function GeneralNavbar() {
 					}}>
 					Register Now!
 				</Button>
+			</>
+		);
+	};
+
+	return (
+		<div className="h-16 bg-white text-black px-4 shadow-sm flex items-center justify-between">
+			<div className="flex gap-4 items-center h-full">
+				<img src="/logo_6am.png" alt="6AM Yoga Logo" className="h-6" />
+				<h1 className="text-base md:text-xl">My Yoga Teacher</h1>
+			</div>
+			<nav className="md:flex gap-4 items-center hidden">
+				<NavLinks />
 			</nav>
+			<Button
+				auto
+				icon={<Menu />}
+				onClick={() => setOpen((p) => !p)}
+				className="block md:hidden"></Button>
+			<Drawer
+				visible={open}
+				onClose={() => setOpen(false)}
+				placement="left"
+				width="90%"
+				className=""
+				wrapClassName="relative block md:hidden">
+				<Drawer.Title>My Yoga Teacher</Drawer.Title>
+				<Drawer.Content className="relative">
+					<button
+						className="absolute -top-10 right-4 px-3 py-2 border rounded-lg"
+						onClick={() => setOpen(false)}>
+						<X />
+					</button>
+					<div className="flex flex-col gap-6 my-4 items-center text-xl">
+						<NavLinks />
+					</div>
+				</Drawer.Content>
+			</Drawer>
 		</div>
 	);
 }

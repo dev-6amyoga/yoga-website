@@ -70,6 +70,7 @@ router.post("/commit", async (req, res) => {
 		signature,
 		order_id,
 		payment_id,
+		currency_id,
 	} = req.body;
 
 	if (!user_id || !status) {
@@ -108,7 +109,8 @@ router.post("/commit", async (req, res) => {
 				!status ||
 				!signature ||
 				!order_id ||
-				!payment_id
+				!payment_id ||
+				!currency_id
 			) {
 				return res.status(HTTP_BAD_REQUEST).json({
 					message: "Missing required fields",
@@ -142,6 +144,7 @@ router.post("/commit", async (req, res) => {
 				transaction_payment_id: payment_id,
 				transaction_signature: signature,
 				user_id: user_id,
+				currency_id: currency_id,
 			},
 			{ transaction: t }
 		);
