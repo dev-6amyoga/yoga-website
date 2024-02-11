@@ -227,7 +227,7 @@ export default function Login({ switchForm }) {
 				<img
 					src="/logo_6am.png"
 					alt="6AM Yoga"
-					className="mx-auto h-24 my-4"
+					className="mx-auto max-h-24 my-4"
 				/>
 				<h3 className="text-center text-2xl">Login</h3>
 			</div>

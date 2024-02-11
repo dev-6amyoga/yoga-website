@@ -1,5 +1,10 @@
-import { Page } from "@geist-ui/core";
+import GeneralNavbar from "./GeneralNavbar/GeneralNavbar";
 
 export default function PageWrapper({ children }) {
-  return <Page>{children}</Page>;
+	return (
+		<div className="min-h-screen">
+			<GeneralNavbar />
+			<div>{children}</div>
+		</div>
+	);
 }

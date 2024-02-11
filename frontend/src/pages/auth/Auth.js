@@ -1,17 +1,27 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import PageWrapper from "../../components/Common/PageWrapper";
 import Login from "../login/login";
 import Register from "../register/register";
 import "./Auth.css";
 
 export default function Auth() {
+	const location = useLocation();
 	const [loginOpen, setLoginOpen] = useState(true);
 
-	return (
-		<div className="min-h-screen">
-			<div className="h-20 bg-zinc-800 text-white">
-				<h1 className="text-center">6AM Yoga</h1>
-			</div>
+	useEffect(() => {
+		if (location.state) {
+			// console.log(location.state);
+			setLoginOpen(
+				location?.state?.login !== undefined
+					? location?.state?.login
+					: false
+			);
+		}
+	}, [location]);
 
+	return (
+		<PageWrapper>
 			<div className="">
 				{loginOpen ? (
 					<div className="p-8 lg:p-20">
@@ -23,6 +33,6 @@ export default function Auth() {
 					</div>
 				)}
 			</div>
-		</div>
+		</PageWrapper>
 	);
 }
