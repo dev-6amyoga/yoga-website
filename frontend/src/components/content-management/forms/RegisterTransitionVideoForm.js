@@ -1,4 +1,4 @@
-import { Button, Input, Select, Text } from "@geist-ui/core";
+import { Button, Input, Select, Text, Divider, Checkbox } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -19,6 +19,8 @@ export default function RegisterTransitionVideoForm() {
   const [matEnd, setMatEnd] = useState(null);
   const [catStart, setCatStart] = useState(null);
   const [catEnd, setCatEnd] = useState(null);
+  const [goingToRelax, setGoingToRelax] = useState(false);
+  const [comingFromRelax, setComingFromRelax] = useState(false);
 
   const handlePersonStart = (val) => {
     setPersonStart(val);
@@ -91,12 +93,13 @@ export default function RegisterTransitionVideoForm() {
       person_ending_position: personEnd,
       mat_starting_position: matStart,
       mat_ending_position: matEnd,
+      going_to_relax: goingToRelax,
+      coming_from_relax: comingFromRelax,
     };
     const combinedData = {
       ...formData,
       ...additionalData,
     };
-    // console.log(combinedData);
     if (
       combinedData.transition_video_name === "" ||
       combinedData.transition_video_ID === "" ||
@@ -146,6 +149,30 @@ export default function RegisterTransitionVideoForm() {
     }
     // /video/addTransition
   };
+
+  const hello = (value) => {
+    if (value.length === 0) {
+      setGoingToRelax(false);
+      setComingFromRelax(false);
+    }
+    if (value.length !== 0) {
+      if (value.includes("going_to_relax")) {
+        if (value.includes("coming_from_relax")) {
+          toast("You cannot select both checkboxes!");
+        } else {
+          setGoingToRelax(true);
+        }
+      }
+      if (value.includes("coming_from_relax")) {
+        if (value.includes("going_to_relax")) {
+          toast("You cannot select both checkboxes!");
+        } else {
+          setComingFromRelax(true);
+        }
+      }
+    }
+  };
+
   return (
     <AdminPageWrapper heading="Register Transition Video">
       <div className="flex items-center justify-center min-h-screen max-w-7xl mx-auto">
@@ -189,6 +216,12 @@ export default function RegisterTransitionVideoForm() {
           <Text h6>DASH URL</Text>
           <Input width="100%" name="transition_dash_url"></Input>
 
+          <Text h5>Going To/Coming From Relaxation</Text>
+          <Checkbox.Group value={[]} onChange={hello} name="relax">
+            <Checkbox value="going_to_relax">Going To Relax</Checkbox>
+            <Checkbox value="coming_from_relax">Coming From Relax</Checkbox>
+          </Checkbox.Group>
+          <Divider />
           <Text>Language</Text>
           <Select
             placeholder="Choose Language"

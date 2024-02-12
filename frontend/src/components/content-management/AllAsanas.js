@@ -306,7 +306,7 @@ export default function AllAsanas() {
           <Text>Loading</Text>
         ) : (
           <Table width={100} data={filteredTransitions} className="bg-white ">
-            <Table.Column prop="id" label="Asana ID" />
+            {/* <Table.Column prop="id" label="Asana ID" /> */}
             <Table.Column prop="asana_name" label="Asana Name" />
             <Table.Column prop="asana_desc" label="Description" />
             <Table.Column prop="asana_category" label="Category" />
@@ -344,8 +344,19 @@ export default function AllAsanas() {
                 }
               }}
             />
-
             <Table.Column prop="asana_videoID" label="Video URL" />
+            <Table.Column prop="duration" label="Duration" />
+            <Table.Column
+              prop="nobreak_asana"
+              label="No Break Asana"
+              render={(data) => {
+                if (data) {
+                  return "True";
+                } else {
+                  return "False";
+                }
+              }}
+            />
             <Table.Column prop="asana_withAudio" label="With Audio?" />
             <Table.Column prop="muted" label="  Muted?" />
             <Table.Column prop="counter" label="Counter?" />

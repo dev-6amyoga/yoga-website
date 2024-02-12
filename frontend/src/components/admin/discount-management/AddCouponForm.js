@@ -8,6 +8,7 @@ export default function AddCouponForm({ visible, setVisible }) {
   const handleAddCoupon = (e) => {
     e.preventDefault();
     const formData = getFormData(e);
+    console.log();
 
     if (!formData.validity_from) return;
 

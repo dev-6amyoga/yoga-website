@@ -329,7 +329,17 @@ export default function RegisterPlaylistForm() {
                       return data.language;
                     }}
                   />
-
+                  <Table.Column
+                    prop="nobreak_asana"
+                    label="No Break?"
+                    render={(data) => {
+                      if (data) {
+                        return "Yes";
+                      } else {
+                        return "No";
+                      }
+                    }}
+                  />
                   <Table.Column prop="asana_category" label="Category" />
                   <Table.Column
                     prop="in_playlist"
