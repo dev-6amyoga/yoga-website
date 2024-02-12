@@ -13,8 +13,7 @@ import {
 } from "@geist-ui/core";
 import { transitionGenerator } from "../../components/transition-generator/TransitionGenerator";
 import { useState, useEffect } from "react";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import {
   PlusCircle,
@@ -482,10 +481,6 @@ export default function ViewAllPlaylists() {
           </Modal.Action>
           <Modal.Action onClick={deletePlaylist}>Yes</Modal.Action>
         </Modal>
-      </div>
-
-      <div>
-        <ToastContainer />
       </div>
     </div>
   );
