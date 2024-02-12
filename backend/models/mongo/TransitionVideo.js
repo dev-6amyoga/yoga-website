@@ -14,6 +14,8 @@ const transitionVideoSchema = new mongoose.Schema({
   person_ending_position: String,
   mat_starting_position: String,
   mat_ending_position: String,
+  going_to_relax: Boolean,
+  coming_from_relax: Boolean,
 });
 
 const TransitionVideo = mongoose.model(

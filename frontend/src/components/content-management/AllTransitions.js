@@ -28,6 +28,7 @@ export default function AllTransitions() {
     }
   }, [searchTerm]);
   const [transitions, setTransitions] = useState([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {

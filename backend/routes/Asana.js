@@ -75,6 +75,25 @@ router.post("/video/addTransition", async (req, res) => {
   }
 });
 
+router.post("/updateRecords", async (req, res) => {
+  try {
+    const result = await TransitionVideo.updateMany(
+      {},
+      { $set: { coming_from_relax: false } }
+    );
+    res.status(200).json({
+      success: true,
+      message: `Matched ${result.matchedCount} document(s) and modified ${result.modifiedCount} document(s)`,
+    });
+  } catch (error) {
+    console.error("Error updating documents:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+});
+
 router.get("/video/getAllTransitions", async (req, res) => {
   try {
     const asanas = await TransitionVideo.find();
