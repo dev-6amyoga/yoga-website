@@ -5,6 +5,7 @@ const { Role } = require("../models/sql/Role");
 const { HTTP_FORBIDDEN } = require("./http_status_codes");
 const { LoginToken } = require("../models/sql/LoginToken");
 const { Op } = require("sequelize");
+const { GetUserInfo } = require("../services/User.service");
 
 dotenv.config();
 
@@ -64,9 +65,11 @@ function verifyToken(token) {
 }
 
 async function authenticateToken(req, res, next) {
-	const authHeader = req.headers["token"];
+	console.log(req.headers);
+	const authHeader = req.headers["authorization"];
 	// const refreshToken = req.cookies["refreshToken"];
-	const token = authHeader;
+	const token = authHeader.split(" ")[1];
+	console.log(token);
 
 	if (token === null || token === undefined) return res.sendStatus(401);
 
@@ -76,17 +79,12 @@ async function authenticateToken(req, res, next) {
 			return res.status(HTTP_FORBIDDEN).json({ message: "Forbidden" });
 		}
 
-		const u = await User.findOne({
-			where: {
-				username: decoded?.user?.username,
-			},
-			include: [
-				{
-					model: Role,
-					attributes: ["name"],
-				},
-			],
-		});
+		const [u, error] = await GetUserInfo({ user_id: decoded.user.user_id });
+
+		if (error) {
+			console.error(error);
+			return res.status(HTTP_FORBIDDEN).json({ message: "Forbidden" });
+		}
 
 		if (!u) res.status(HTTP_FORBIDDEN).json({ message: "Forbidden" });
 
@@ -105,7 +103,7 @@ async function authenticateToken(req, res, next) {
 				.status(HTTP_FORBIDDEN)
 				.json({ message: "Token unavailable" });
 
-		req.user = u.toJSON();
+		req.user = u;
 
 		next();
 	});
