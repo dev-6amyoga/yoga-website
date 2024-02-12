@@ -248,7 +248,11 @@ function Index() {
 				<GeistProvider>
 					<CssBaseline />
 					<RouterProvider router={router} />
-					<ToastContainer />
+					<ToastContainer
+						autoClose={5000}
+						newestOnTop={true}
+						pauseOnHover={true}
+					/>
 					<LoginIndex />
 				</GeistProvider>
 			</QueryClientProvider>

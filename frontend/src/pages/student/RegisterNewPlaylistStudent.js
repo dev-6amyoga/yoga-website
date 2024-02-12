@@ -13,8 +13,7 @@ import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
 import useUserStore from "../../store/UserStore";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import { transitionGenerator } from "../../components/transition-generator/TransitionGenerator";
 export default function RegisterNewPlaylistStudent() {
   const navigate = useNavigate();
@@ -460,9 +459,6 @@ export default function RegisterNewPlaylistStudent() {
           </Modal.Action>
           <Modal.Action onClick={updateData}>Update</Modal.Action>
         </Modal>
-      </div>
-      <div>
-        <ToastContainer />
       </div>
     </div>
   );

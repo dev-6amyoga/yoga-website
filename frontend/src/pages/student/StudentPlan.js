@@ -43,78 +43,6 @@ function FeatureNotAvailable({ children }) {
 	);
 }
 
-function PlansTable({ allPlans, subscribePlan, selectedCurrency }) {
-	const renderAction = (value, rowData, index) => {
-		return (
-			<Button
-				type="error"
-				auto
-				scale={1 / 3}
-				font="12px"
-				onClick={() => subscribePlan(rowData)}>
-				Purchase
-			</Button>
-		);
-	};
-
-	return (
-		<Table data={allPlans} className="bg-white ">
-			{/* <Table.Column prop="plan_id" label="Plan ID" /> */}
-			<Table.Column prop="name" label="Plan Name" />
-			<Table.Column
-				prop="has_playlist_creation"
-				label="Make Custom Playlists"
-				render={(data) => {
-					return data ? "Yes" : "No";
-				}}
-			/>
-			<Table.Column
-				prop="playlist_creation_limit"
-				label="Number of Custom Playlists"
-				render={(data) => {
-					return data ? data : "0";
-				}}
-			/>
-			<Table.Column
-				prop="pricing"
-				label="Price"
-				render={(data) => {
-					const pricing = data.find(
-						(x) => x.currency.short_tag === selectedCurrency
-					);
-
-					return (
-						<p>
-							{data ? (
-								<>
-									<span>{pricing.currency.short_tag}</span>{" "}
-									<span>{pricing.denomination}</span>
-								</>
-							) : (
-								""
-							)}
-						</p>
-					);
-				}}
-			/>
-			<Table.Column
-				prop="watch_time_limit"
-				label="Watch Time Limit"
-				render={(data) => {
-					return <p>{data ? data / 3600 : 0} Hours</p>;
-				}}
-			/>
-			<Table.Column prop="plan_validity_days" label="Validity (Days)" />
-			<Table.Column
-				prop="operation"
-				label="Purchase"
-				width={100}
-				render={renderAction}
-			/>
-		</Table>
-	);
-}
-
 function PlansCards({ allPlans, subscribePlan, selectedCurrency }) {
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 place-items-center place-content-center w-full">
@@ -678,7 +606,7 @@ function StudentPlan() {
 		}
 	}, [myPlans]);
 
-	// on mount get student plans
+	// on mount get student plans & currencies
 	useEffect(() => {
 		fetchPlans();
 		fetchCurrencies();

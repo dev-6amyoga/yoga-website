@@ -1,6 +1,6 @@
 import { Button, Grid, Input, Modal, Table } from "@geist-ui/core";
 import React, { useEffect, useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar_Admin from "../../components/Common/AdminNavbar/AdminNavbar";
 import { Fetch } from "../../utils/Fetch";
@@ -172,9 +172,6 @@ export default function AdminHome() {
     <div>
       <div>
         <Navbar_Admin />
-      </div>
-      <div>
-        <ToastContainer />
       </div>
       <div className="elements">
         <Button

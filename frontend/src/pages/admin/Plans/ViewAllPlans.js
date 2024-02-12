@@ -8,8 +8,7 @@ import {
   Text,
 } from "@geist-ui/core";
 import { useEffect, useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
 import Papa from "papaparse";
 
@@ -186,9 +185,6 @@ export default function ViewAllPlans() {
     <div className="allAsanas min-h-screen">
       <AdminNavbar />
       <div className="elements">
-        <div>
-          <ToastContainer />
-        </div>
         <Button
           onClick={() => {
             handleDownload(sortedPlans);

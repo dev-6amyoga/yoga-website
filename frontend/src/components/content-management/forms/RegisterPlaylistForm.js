@@ -11,8 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { transitionGenerator } from "../../transition-generator/TransitionGenerator";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import {toast } from "react-toastify";
 import AdminNavbar from "../../Common/AdminNavbar/AdminNavbar";
 export default function RegisterPlaylistForm() {
   const navigate = useNavigate();
@@ -422,7 +421,6 @@ export default function RegisterPlaylistForm() {
           <Modal.Action onClick={updateData}>Update</Modal.Action>
         </Modal>
       </div>
-      <ToastContainer />
     </div>
   );
 }

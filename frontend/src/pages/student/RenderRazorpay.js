@@ -7,6 +7,12 @@ import { paymentMethodConfig } from "../../utils/razorpayUtils";
 // import Axios from "axios";
 // import crypto from "crypto";
 import HmacSHA256 from "crypto-js/hmac-sha256";
+import {
+	TRANSACTION_CANCELLED,
+	TRANSACTION_FAILED,
+	TRANSACTION_SUCCESS,
+	TRANSACTION_TIMEOUT,
+} from "../../enums/transaction_status";
 
 const loadScript = (src) => {
 	return new Promise((resolve) => {
@@ -34,7 +40,8 @@ const RenderRazorpay = ({
 	amount,
 	payment_for,
 	redirectUrl,
-	onSuccessCallback,
+	onErrorCallback = () => {},
+	onSuccessCallback = () => {},
 	displayRazorpay,
 	setDisplayRazorpay,
 }) => {
@@ -73,14 +80,25 @@ const RenderRazorpay = ({
 	const handlePaymentBackendCallback = useCallback(
 		async (status, orderDetails = {}) => {
 			// user_id, status, payment_for, payment_method, amount, signature, order_id, payment_id,
-			if (!currencyId) {
-				toast("Pick a currency!", { type: "error" });
-				return;
+			switch (status) {
+				case TRANSACTION_SUCCESS:
+					if (!currencyId) {
+						toast("Pick a currency!", { type: "error" });
+						return;
+					}
+					break;
+				case TRANSACTION_CANCELLED:
+				case TRANSACTION_TIMEOUT:
+				case TRANSACTION_FAILED:
+					break;
+				default:
+					break;
 			}
 
 			FetchRetry({
 				url: "http://localhost:4000/payment/commit",
 				method: "POST",
+				token: true,
 				data: {
 					user_id: userId,
 					status,
@@ -109,9 +127,13 @@ const RenderRazorpay = ({
 						if (status === "succeeded") {
 							console.log("IT WAS A SUCCESS YAYAYAY");
 							onSuccessCallback(orderDetails.orderId);
+						} else {
+							// console.log("IT WAS A FAILURE OOPS");
+							onErrorCallback();
 						}
 					} else {
 						setDisplayRazorpay(false);
+						onErrorCallback();
 						console.log("OOPS ERROR 1");
 
 						toast("Something went wrong, try again", {
@@ -121,11 +143,20 @@ const RenderRazorpay = ({
 				})
 				.catch((err) => {
 					setDisplayRazorpay(false);
+					onErrorCallback();
 					// console.log("OOPS ERROR 20", err);
 					toast("Something went wrong, try again", { type: "error" });
 				});
 		},
-		[setDisplayRazorpay, navigate, userId, amount, payment_for, redirectUrl]
+		[
+			setDisplayRazorpay,
+			userId,
+			amount,
+			payment_for,
+			currencyId,
+			onErrorCallback,
+			onSuccessCallback,
+		]
 	);
 
 	const handlePayment = useCallback(
