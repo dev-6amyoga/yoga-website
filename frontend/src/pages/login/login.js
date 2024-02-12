@@ -199,14 +199,13 @@ export default function Login({ switchForm }) {
 				const errorData = response.data;
 				removeCookie("6amyoga_access_token");
 				removeCookie("6amyoga_refresh_token");
-				console.log(errorData?.error.response.data);
-				// notify(errorData?.error);
+				console.log("here1");
+				toast(errorData?.error, { type: "error" });
 			}
 		} catch (error) {
 			removeCookie("6amyoga_access_token");
 			removeCookie("6amyoga_refresh_token");
-			console.log(error.response?.data?.error);
-			toast(error?.response?.data?.error, { type: "error" });
+			toast("Error logging in, try again", { type: "error" });
 		}
 	};
 

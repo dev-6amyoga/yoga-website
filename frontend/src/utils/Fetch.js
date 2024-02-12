@@ -12,9 +12,11 @@ export const Fetch = ({
 }) => {
 	let h = { ...headers };
 
-	console.log("TOKEN : ", useUserStore.getState().accessToken);
 	if (token) {
-		h["token"] = token || useUserStore.getState().accessToken;
+		console.log("TOKEN : ", useUserStore.getState().accessToken);
+		h["authorization"] = `Bearer ${
+			token ? useUserStore.getState().accessToken : ""
+		}`;
 	}
 
 	if (data) {

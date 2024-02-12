@@ -30,8 +30,9 @@ const {
 	REFUND_ERROR,
 } = require("../enums/refund_status");
 const { Op } = require("sequelize");
+const { authenticateToken } = require("../utils/jwt");
 
-router.post("/order", async (req, res) => {
+router.post("/order", authenticateToken, async (req, res) => {
 	const razorpay = new Razorpay({
 		key_id: RAZORPAY_KEY_ID,
 		key_secret: RAZORPAY_KEY_SECRET,
@@ -54,7 +55,8 @@ router.post("/order", async (req, res) => {
 		res.status(HTTP_BAD_REQUEST).json({ error: err.error });
 	}
 });
-router.post("/commit", async (req, res) => {
+
+router.post("/commit", authenticateToken, async (req, res) => {
 	/*
     user_id: user making the payment
     status: success || failed || cancelled || timedout
