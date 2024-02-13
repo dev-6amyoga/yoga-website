@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { transitionGenerator } from "../../transition-generator/TransitionGenerator";
-import {toast } from "react-toastify";
+import { toast } from "react-toastify";
 import AdminNavbar from "../../Common/AdminNavbar/AdminNavbar";
 export default function RegisterPlaylistForm() {
   const navigate = useNavigate();
