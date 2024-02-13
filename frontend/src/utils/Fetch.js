@@ -1,7 +1,7 @@
 import axios from "axios";
 import useUserStore from "../store/UserStore";
 
-export const Fetch = ({
+export const Fetch = async ({
 	url = null,
 	method = "GET",
 	token = null,
@@ -10,6 +10,8 @@ export const Fetch = ({
 	params = {},
 	headers = {},
 }) => {
+	console.log("FETCH : ", url, method, data);
+
 	let h = { ...headers };
 
 	if (token) {
@@ -34,6 +36,28 @@ export const Fetch = ({
 	if (responseType) {
 		req.responseType = responseType;
 	}
+
+	// try {
+	// 	const res = await axios.request(req);
+
+	// 	if (res.status === 403) {
+	// 		console.log("401 ERROR");
+	// 		// invalidate token?
+	// 		return Fetch({
+	// 			url,
+	// 			method,
+	// 			token,
+	// 			data,
+	// 			responseType,
+	// 			params,
+	// 			headers,
+	// 		});
+	// 	}
+	// 	return res;
+	// } catch (err) {
+	// 	console.log("FETCH ERROR : ", err);
+	// 	throw err;
+	// }
 
 	return axios.request(req);
 };
