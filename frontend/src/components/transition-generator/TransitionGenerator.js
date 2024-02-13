@@ -1,35 +1,213 @@
 export const transitionGenerator = (startVideo, endVideo, transitions) => {
   if (startVideo === "start") {
-    const matchingTransition1 = transitions.find((transition) => {
-      return (
-        transition.asana_category_start === endVideo.asana_category &&
-        transition.asana_category_end === endVideo.asana_category &&
-        transition.language === endVideo.language &&
-        transition.mat_starting_position === null &&
-        transition.mat_ending_position === null &&
-        transition.person_starting_position === null &&
-        transition.person_ending_position === null
-      );
-    });
-    if (endVideo.person_starting_position === "Left") {
-      const matchingTransition2 = transitions.find((transition) => {
+    if (endVideo.asana_category === "Standing") {
+      const standingTransition = transitions.find((transition) => {
         return (
-          transition.asana_category_start === endVideo.asana_category &&
-          transition.person_starting_position === "Front" &&
-          transition.person_ending_position ===
-            endVideo.person_starting_position
+          transition.transition_video_name === "Standing Position Transition"
         );
       });
-      if (matchingTransition2 && matchingTransition1) {
-        return [matchingTransition1, matchingTransition2];
+      if (endVideo.nobreak_asana === true) {
+        if (endVideo.person_starting_position === "Front") {
+          const matchingTransition1 = transitions.find((transition) => {
+            return (
+              transition.asana_category_start === "Standing" &&
+              transition.asana_category_end === "Standing" &&
+              transition.person_ending_position === "Front" &&
+              transition.person_starting_position === "Front" &&
+              transition.coming_from_relax === true &&
+              transition.going_to_relax === false
+            );
+          });
+          if (matchingTransition1) {
+            return [standingTransition, matchingTransition1];
+          } else {
+            return [];
+          }
+        }
+        if (endVideo.person_starting_position === "Left") {
+          const matchingTransition1 = transitions.find((transition) => {
+            return (
+              transition.transition_video_name ===
+              "Person Transit Front to Left"
+            );
+          });
+          const matchingTransition2 = transitions.find((transition) => {
+            return (
+              transition.asana_category_start === "Standing" &&
+              transition.asana_category_end === "Standing" &&
+              transition.person_ending_position === "Left" &&
+              transition.person_starting_position === "Left" &&
+              transition.coming_from_relax === true &&
+              transition.going_to_relax === false
+            );
+          });
+          console.log(matchingTransition1, matchingTransition2);
+          if (matchingTransition1 && matchingTransition2) {
+            return [
+              standingTransition,
+              matchingTransition1,
+              matchingTransition2,
+            ];
+          } else {
+            return [];
+          }
+        }
       } else {
-        return [];
+        if (endVideo.person_starting_position === "Front") {
+          return [standingTransition];
+        }
+        if (endVideo.person_starting_position === "Left") {
+          console.log("in false, left");
+          const matchingTransition1 = transitions.find((transition) => {
+            return (
+              transition.transition_video_name ===
+              "Person Transit Front to Left"
+            );
+          });
+          if (matchingTransition1) {
+            return [standingTransition, matchingTransition1];
+          } else {
+            return [];
+          }
+        }
       }
     }
-    if (matchingTransition1) {
-      return [matchingTransition1];
-    } else {
-      return [];
+    if (endVideo.asana_category === "Sitting") {
+      if (endVideo.nobreak_asana === false) {
+        const matchingTransition1 = transitions.find((transition) => {
+          return (
+            transition.asana_category_start === "Sitting" &&
+            transition.asana_category_end === "Sitting" &&
+            transition.coming_from_relax === false &&
+            transition.going_to_relax === false
+          );
+        });
+        if (matchingTransition1) {
+          return [matchingTransition1];
+        } else {
+          return [];
+        }
+      } else {
+        const matchingTransition1 = transitions.find((transition) => {
+          return (
+            transition.asana_category_start === "Sitting" &&
+            transition.asana_category_end === "Sitting" &&
+            transition.coming_from_relax === false &&
+            transition.going_to_relax === false
+          );
+        });
+        const matchingTransition2 = transitions.find((transition) => {
+          return (
+            transition.asana_category_start === "Sitting" &&
+            transition.asana_category_end === "Sitting" &&
+            transition.coming_from_relax === true &&
+            transition.going_to_relax === false
+          );
+        });
+        if (matchingTransition1 && matchingTransition2) {
+          return [matchingTransition1, matchingTransition2];
+        } else {
+          return [];
+        }
+      }
+    }
+    if (endVideo.asana_category === "Supine") {
+      const matTurningTransition = transitions.find((transition) => {
+        return (
+          transition.transition_video_name ===
+          "Turn Mat Front To Side Standing Transition"
+        );
+      });
+      if (endVideo.nobreak_asana === false) {
+        const matchingTransition = transitions.find((transition) => {
+          return (
+            transition.asana_category_start === "Supine" &&
+            transition.asana_category_end === "Supine" &&
+            transition.coming_from_relax === false &&
+            transition.going_to_relax === false
+          );
+        });
+        if (matchingTransition) {
+          return [matTurningTransition, matchingTransition];
+        } else {
+          return [];
+        }
+      } else {
+        const matchingTransition1 = transitions.find((transition) => {
+          return (
+            transition.asana_category_start === "Supine" &&
+            transition.asana_category_end === "Supine" &&
+            transition.coming_from_relax === false &&
+            transition.going_to_relax === false
+          );
+        });
+        const matchingTransition2 = transitions.find((transition) => {
+          return (
+            transition.asana_category_start === "Supine" &&
+            transition.asana_category_end === "Supine" &&
+            transition.coming_from_relax === true &&
+            transition.going_to_relax === false
+          );
+        });
+        if (matchingTransition1 && matchingTransition2) {
+          return [
+            matTurningTransition,
+            matchingTransition1,
+            matchingTransition2,
+          ];
+        } else {
+          return [];
+        }
+      }
+    }
+    if (endVideo.asana_category === "Prone") {
+      const matTurningTransition = transitions.find((transition) => {
+        return (
+          transition.transition_video_name ===
+          "Turn Mat Front To Side Standing Transition"
+        );
+      });
+      if (endVideo.nobreak_asana === false) {
+        const matchingTransition = transitions.find((transition) => {
+          return (
+            transition.asana_category_start === "Prone" &&
+            transition.asana_category_end === "Prone" &&
+            transition.coming_from_relax === false &&
+            transition.going_to_relax === false
+          );
+        });
+        if (matchingTransition) {
+          return [matTurningTransition, matchingTransition];
+        } else {
+          return [];
+        }
+      } else {
+        const matchingTransition1 = transitions.find((transition) => {
+          return (
+            transition.asana_category_start === "Prone" &&
+            transition.asana_category_end === "Prone" &&
+            transition.coming_from_relax === false &&
+            transition.going_to_relax === false
+          );
+        });
+        const matchingTransition2 = transitions.find((transition) => {
+          return (
+            transition.asana_category_start === "Prone" &&
+            transition.asana_category_end === "Prone" &&
+            transition.coming_from_relax === true &&
+            transition.going_to_relax === false
+          );
+        });
+        if (matchingTransition1 && matchingTransition2) {
+          return [
+            matTurningTransition,
+            matchingTransition1,
+            matchingTransition2,
+          ];
+        } else {
+          return [];
+        }
+      }
     }
   }
   if (startVideo === endVideo) {
@@ -984,7 +1162,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             const matchingTransition1 = transitions.find((transition) => {
               return (
                 transition.transition_video_name ===
-                "Person Transit Left to Front"
+                "Person Transit Front to Left"
               );
             });
             const matchingTransition2 = transitions.find((transition) => {
