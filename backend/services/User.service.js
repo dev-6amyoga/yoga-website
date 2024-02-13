@@ -4,42 +4,42 @@ const { Institute } = require("../models/sql/Institute");
 const { Role } = require("../models/sql/Role");
 
 const {
-  UserInstitutePlanRole,
+	UserInstitutePlanRole,
 } = require("../models/sql/UserInstitutePlanRole");
 const { UserPlan } = require("../models/sql/UserPlan");
 
 const GetUser = async (filter, attributes) => {
-  // returns user
+	// returns user
 
-  let user = null,
-    error = null;
+	let user = null,
+		error = null;
 
-  try {
-    let q = {
-      where: filter,
-    };
+	try {
+		let q = {
+			where: filter,
+		};
 
-    if (attributes) {
-      q.attributes = attributes;
-    }
+		if (attributes) {
+			q.attributes = attributes;
+		}
 
-    user = await User.findOne(q);
+		user = await User.findOne(q);
 
-    if (!user) {
-      console.log("here1");
-      error = "User does not exist";
-      return [null, error];
-    }
+		if (!user) {
+			console.log("here1");
+			error = "User does not exist";
+			return [null, error];
+		}
 
-    return [user, error];
-  } catch (err) {
-    return [null, err];
-  }
+		return [user, error];
+	} catch (err) {
+		return [null, err];
+	}
 };
 
 const GetUserInfo = async (filter, attributes = null) => {
-  // returns user with roles
-  /*
+	// returns user with roles
+	/*
  Returns
 		{
 				user_id: 1,
@@ -66,63 +66,63 @@ const GetUserInfo = async (filter, attributes = null) => {
 				}
 		}
  */
-  let user = null,
-    error = null;
-  try {
-    [user, errorUser] = await GetUser(filter, attributes);
-    console.log(user);
+	let user = null,
+		error = null;
+	try {
+		[user, errorUser] = await GetUser(filter, attributes);
+		// console.log(user);
 
-    if (!user || errorUser) {
-      error = "User does not exist";
-      console.log(error);
-      return [null, error];
-    }
+		if (!user || errorUser) {
+			error = "User does not exist";
+			console.log(error);
+			return [null, error];
+		}
 
-    let userInstitutePlanRoles = await UserInstitutePlanRole.findAll({
-      where: {
-        user_id: user.user_id,
-      },
-      include: [
-        { model: Institute, attributes: ["institute_id", "name"] },
-        {
-          model: UserPlan,
-          attributes: ["user_plan_id", "plan_id"],
-          include: [Plan],
-        },
-        { model: Role, attributes: ["role_id", "name"] },
-      ],
-    });
+		let userInstitutePlanRoles = await UserInstitutePlanRole.findAll({
+			where: {
+				user_id: user.user_id,
+			},
+			include: [
+				{ model: Institute, attributes: ["institute_id", "name"] },
+				{
+					model: UserPlan,
+					attributes: ["user_plan_id", "plan_id"],
+					include: [Plan],
+				},
+				{ model: Role, attributes: ["role_id", "name"] },
+			],
+		});
 
-    userInstitutePlanRoles = userInstitutePlanRoles.map((uipr) => {
-      return {
-        ...uipr.toJSON(),
-        plan: uipr.user_plan ? uipr.user_plan.plan : null,
-      };
-    });
+		userInstitutePlanRoles = userInstitutePlanRoles.map((uipr) => {
+			return {
+				...uipr.toJSON(),
+				plan: uipr.user_plan ? uipr.user_plan.plan : null,
+			};
+		});
 
-    let roles = {};
+		let roles = {};
 
-    userInstitutePlanRoles.forEach((uipr) => {
-      // const {role, institute, plan} = uipr;
-      if (!roles[uipr.role.name]) {
-        roles[uipr.role.name] = [];
-      }
+		userInstitutePlanRoles.forEach((uipr) => {
+			// const {role, institute, plan} = uipr;
+			if (!roles[uipr.role.name]) {
+				roles[uipr.role.name] = [];
+			}
 
-      roles[uipr.role.name].push(uipr);
-    });
+			roles[uipr.role.name].push(uipr);
+		});
 
-    let userInfo = {
-      ...user.toJSON(),
-      roles,
-    };
+		let userInfo = {
+			...user.toJSON(),
+			roles,
+		};
 
-    return [userInfo, error];
-  } catch (err) {
-    return [null, err];
-  }
+		return [userInfo, error];
+	} catch (err) {
+		return [null, err];
+	}
 };
 
 module.exports = {
-  GetUser,
-  GetUserInfo,
+	GetUser,
+	GetUserInfo,
 };

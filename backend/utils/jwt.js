@@ -59,16 +59,17 @@ function verifyToken(token) {
 	try {
 		decoded = jwt.verify(token, JWT_TOKEN_SECRET);
 	} catch (err) {
+		console.log(err);
 		error = err;
 	}
 	return [decoded, error];
 }
 
 async function authenticateToken(req, res, next) {
-	console.log(req.headers);
+	// console.log(req.headers);
 	const authHeader = req.headers["authorization"];
 	// const refreshToken = req.cookies["refreshToken"];
-	const token = authHeader.split(" ")[1];
+	const token = authHeader?.split(" ")[1];
 	console.log(token);
 
 	if (token === null || token === undefined) return res.sendStatus(401);
@@ -86,7 +87,10 @@ async function authenticateToken(req, res, next) {
 			return res.status(HTTP_FORBIDDEN).json({ message: "Forbidden" });
 		}
 
-		if (!u) res.status(HTTP_FORBIDDEN).json({ message: "Forbidden" });
+		if (!u) {
+			console.error("User not found");
+			return res.status(HTTP_FORBIDDEN).json({ message: "Forbidden" });
+		}
 
 		const login_token = await LoginToken.findOne({
 			where: {
@@ -98,10 +102,12 @@ async function authenticateToken(req, res, next) {
 			},
 		});
 
-		if (!login_token)
+		if (!login_token) {
+			console.log("Token unavailable");
 			return res
 				.status(HTTP_FORBIDDEN)
 				.json({ message: "Token unavailable" });
+		}
 
 		req.user = u;
 
