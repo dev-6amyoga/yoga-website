@@ -1,38 +1,52 @@
-// export default function withAuth(Component) {
-//   return function AuthenticatedPage(props) {
-//     let user = useUserStore((state) => state.user);
+import { useEffect } from "react";
+import { useHref, useLocation, useNavigate } from "react-router-dom";
+import {
+	ROLE_INSTITUTE_ADMIN,
+	ROLE_INSTITUTE_OWNER,
+	ROLE_ROOT,
+	ROLE_STUDENT,
+	ROLE_TEACHER,
+} from "../enums/roles";
+import useUserStore from "../store/UserStore";
 
-//     useEffect(() => {}, [user]);
-//     return (
-//       <>
-//         {user ? (
-//           <Component {...props} />
-//         ) : (
-//           <div className="min-h-screen grid place-content-center">
-//             <div className="text-center">Unauthorized Access</div>
-//           </div>
-//         )}
-//       </>
-//     );
-//   };
-// }
+export const withAuth = (Component, role = null) => {
+	switch (role) {
+		case ROLE_ROOT:
+		case ROLE_INSTITUTE_OWNER:
+		case ROLE_INSTITUTE_ADMIN:
+		case ROLE_TEACHER:
+		case ROLE_STUDENT:
+			break;
+		default:
+			if (role === null) {
+				break;
+			} else {
+				throw new Error("Invalid Role");
+			}
+	}
 
-// https://blog.logrocket.com/understanding-react-higher-order-components/
+	return function AuthenticatedComponent(props) {
+		const [user, currentRole] = useUserStore((state) => [
+			state.user,
+			state.currentRole,
+		]);
+		const navigate = useNavigate();
+		const location = useLocation();
 
-// const withEnhancement = (BaseComponent) => {
-//   // HOC logic using hooks
-//   return function EnhancedComponent(props) {
-//     // HOC-specific logic using hooks
-//     return <BaseComponent {...props} enhancedProp="someValue" />;
-//   };
-// };
+		useEffect(() => {
+			if (!user) {
+				navigate("/auth");
+			}
+		}, [user, navigate]);
 
-export const withAuth = (Component) => {
-	return <div>{Component}</div>;
+		useEffect(() => {
+			if (currentRole !== role) {
+				navigate("/unauthorized", {
+					state: { from: location.pathname },
+				});
+			}
+		}, [currentRole, location, navigate]);
+
+		return <Component {...props} />;
+	};
 };
-
-//  const user = useUserStore(state => state.user)
-
-//  useEffect(() => {}, [user])
-
-//   user ? <>{}</>

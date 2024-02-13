@@ -5,9 +5,11 @@ import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import AddCouponForm from "../../../components/admin/discount-management/AddCouponForm";
 import ApplicablePlansForm from "../../../components/admin/discount-management/ApplicablePlansForm";
 import EditCouponForm from "../../../components/admin/discount-management/EditCouponForm";
+import { ROLE_ROOT } from "../../../enums/roles";
 import { Fetch } from "../../../utils/Fetch";
+import { withAuth } from "../../../utils/withAuth";
 
-export default function DiscountManagement() {
+function DiscountManagement() {
 	const [coupons, setCoupons] = useState([]);
 	const [usageHistory, setUsageHistory] = useState([]);
 	const [addCouponModal, setAddCouponModal] = useState(false);
@@ -240,3 +242,5 @@ export default function DiscountManagement() {
 		</AdminPageWrapper>
 	);
 }
+
+export default withAuth(DiscountManagement, ROLE_ROOT);
