@@ -29,10 +29,10 @@ export default function AddNewTeacher() {
         institute_id: currentInstituteId,
       },
     }).then((res) => {
-      for (var i = 0; i !== res.data.userPlan.length; i++) {
-        if (res.data.userPlan[i].current_status === "ACTIVE") {
+      for (var i = 0; i !== res.data.userplans.length; i++) {
+        if (res.data.userplans[i].current_status === "ACTIVE") {
           setAllowedTeachersCount(
-            res.data.userPlan[i]?.plan?.number_of_teachers
+            res.data.userplans[i]?.plan?.number_of_teachers
           );
           break;
         } else {

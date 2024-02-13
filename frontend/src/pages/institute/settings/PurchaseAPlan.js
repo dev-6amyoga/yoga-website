@@ -327,35 +327,34 @@ export default function PurchaseAPlan() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/user-plan/get-user-institute-plan-by-id",
-					{
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-						body: JSON.stringify({
-							user_id: user?.user_id,
-							institute_id: currentInstituteId,
-						}),
-					}
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "http://localhost:4000/user-plan/get-user-institute-plan-by-id",
+					method: "POST",
+					data: {
+						user_id: user?.user_id,
+						institute_id: currentInstituteId,
+					},
+				});
+				const data = response.data;
 				console.log("DATA IS :", data);
-				if (data?.userPlan.length !== 0) {
-					setMyPlans(data?.userPlan);
-					if (data?.userPlan.length === 1) {
-						if (data?.userPlan[0].current_status === "ACTIVE") {
-							setPlanId(data?.userPlan[0]["plan_id"]);
+
+				if (data?.userplans.length !== 0) {
+					setMyPlans(data?.userplans);
+
+					if (data?.userplans.length === 1) {
+						if (data?.userplans[0].current_status === "ACTIVE") {
+							setPlanId(data?.userplans[0]["plan_id"]);
 						} else {
 							toast(
 								"You don't have a plan yet! Purchase one to continue"
 							);
 						}
 					} else {
-						for (var i = 0; i !== data?.userPlan.length; i++) {
-							if (data?.userPlan[i].current_status === "ACTIVE") {
-								setPlanId(data?.userPlan[i]["plan_id"]);
+						for (var i = 0; i !== data?.userplans.length; i++) {
+							if (
+								data?.userplans[i].current_status === "ACTIVE"
+							) {
+								setPlanId(data?.userplans[i]["plan_id"]);
 								break;
 							}
 						}
@@ -410,11 +409,6 @@ export default function PurchaseAPlan() {
 			return new Error("Invalid discount coupon");
 		}
 
-		// if (discountCoupon && discountCoupon.coupon_name === discount_coupon) {
-		// 	toast("Coupon already applied", { type: "error" });
-		// 	return null;
-		// }
-		// return new Error("Invalid discount coupon");
 		try {
 			const res = await Fetch({
 				url: "http://localhost:4000/discount-coupon/check-plan-mapping",
@@ -431,6 +425,7 @@ export default function PurchaseAPlan() {
 				setDiscountCouponApplied(true);
 				return null;
 			}
+
 			return new Error("Invalid discount coupon");
 		} catch (err) {
 			console.log(err);
@@ -441,91 +436,129 @@ export default function PurchaseAPlan() {
 	const registerUserPlan = async (t1) => {
 		toBeRegistered.transaction_order_id = t1;
 		try {
-			const response = await fetch(
-				"http://localhost:4000/user-plan/register",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(toBeRegistered),
-				}
-			);
-			if (response.ok) {
+			const response = await Fetch({
+				url: "http://localhost:4000/user-plan/register",
+				method: "POST",
+				data: toBeRegistered,
+			});
+			if (response.status === 200) {
 				toast("Plan subscribed successfully", {
 					type: "success",
 				});
 				//invoice download here!! order_id, toBeRegistered.user_id
 			} else {
-				const errorData = await response.json();
-				toast(errorData.error);
+				const errorData = response.data;
+				toast(errorData.error, { type: "error" });
 			}
 		} catch (error) {
 			console.log(error);
+			toast("Error registering plan", { type: "error" });
 		}
+
+		setShowCard(false);
 	};
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		let userPlanData = {};
 
-		const validityTo = new Date(validityFromDate);
-		// validityTo.setDate(validityTo.getDate() + selectedValidity);
-		const validityToDate = validityTo.toISOString();
+		if (!user) {
+			toast("Please login to continue", { type: "error" });
+			return;
+		}
 
-		userPlanData = {
-			purchase_date: formattedDate,
-			validity_from: validityFromDate,
-			validity_to: validityToDate,
+		if (!cardData) {
+			toast("Please select a plan to continue", { type: "error" });
+			return;
+		}
+
+		if (!selectedCurrency || !selectedCurrencyId) {
+			toast("Please select a currency to continue", { type: "error" });
+			return;
+		}
+
+		let userPlanData = {
+			user_id: user?.user_id,
+			plan_id: cardData?.plan_id,
+			institute_id: currentInstituteId,
+
 			cancellation_date: null,
 			auto_renewal_enabled: false,
-			user_id: user?.user_id,
-			plan_id: cardData.plan_id,
-			discount_coupon_id: 0,
-			referral_code_id: 0,
-			amount: cardData.pricing[0].denomination * 118,
-			currency: "INR",
-			current_status: currentStatus,
-			user_type: "INSTITUTE",
-			institute_id: currentInstituteId,
+
+			discount_coupon_id:
+				discountCoupon && discountCouponApplied
+					? discountCoupon.discount_coupon_id
+					: null,
+			referral_code_id: null,
+
+			amount: calculateTotalPrice(
+				price,
+				selectedCurrency,
+				true,
+				18,
+				discountCoupon
+			),
+			currency: selectedCurrency,
+
+			user_type: "INSTITUTE_OWNER",
 		};
-		setToBeRegistered(userPlanData);
-		if (teachers.length > cardData.number_of_teachers) {
-			toast(
-				"Please purchase a higher plan. You have more teachers than the selected plan permits."
-			);
-		} else {
+
+		if (planId !== -1) {
 			if (currentStatus !== "ACTIVE") {
 				toast(
 					"You have an active plan! If you purchase a new plan, it will be staged."
 				);
 			}
 
-			try {
-				const response = await Fetch({
-					url: "http://localhost:4000/payment/order",
-					method: "POST",
-					token: true,
-					data: userPlanData,
-				});
-				if (response.status === 200) {
-					const responseJson = response.data;
-					const razorpayOrder = responseJson.order;
-					if (razorpayOrder && razorpayOrder["id"]) {
-						setOrderDetails({
-							orderId: razorpayOrder["id"],
-							currency: razorpayOrder["currency"],
-							amount: razorpayOrder["amount"],
-						});
-						setDisplayRazorpay(true);
-					}
-				} else {
-					const errorData = await response.json();
-					toast(errorData.error);
+			// validity will start from the end of the previous plan
+			const validityTo = new Date(validityFromDate);
+			validityTo.setDate(
+				validityTo.getDate() + cardData.plan_validity_days
+			);
+
+			const validityToDate = validityTo?.toISOString();
+			console.log(validityFromDate, validityToDate);
+
+			userPlanData.purchase_date = formattedDate;
+			userPlanData.validity_from = validityFromDate;
+			userPlanData.validity_to = validityToDate;
+			userPlanData.current_status = currentStatus;
+
+			setToBeRegistered(userPlanData);
+		} else {
+			// TODO : referral code
+			userPlanData.purchase_date = formattedDate;
+			userPlanData.validity_from = formattedDate;
+			userPlanData.validity_to = calculateEndDate(
+				cardData.plan_validity_days
+			);
+			userPlanData.current_status = "ACTIVE";
+
+			setToBeRegistered(userPlanData);
+		}
+		try {
+			const response = await Fetch({
+				url: "http://localhost:4000/payment/order",
+				method: "POST",
+				token: true,
+				data: userPlanData,
+			});
+			if (response.status === 200) {
+				const razorpayOrder = response.data?.order;
+
+				if (razorpayOrder && razorpayOrder?.id) {
+					setOrderDetails({
+						orderId: razorpayOrder?.id,
+						currency: razorpayOrder?.currency,
+						amount: razorpayOrder?.amount,
+					});
+					setDisplayRazorpay(true);
 				}
-			} catch (error) {
-				console.log(error);
+			} else {
+				toast(response.data?.message);
 			}
+		} catch (error) {
+			console.log(error);
+			toast("Error setting up order, try again", { type: "error" });
 		}
 	};
 
@@ -557,6 +590,7 @@ export default function PurchaseAPlan() {
 					<Note label={false} type="success">
 						<h4>Plan History</h4>
 						<div className="flex flex-col gap-4">
+							<pre>{JSON.stringify(myPlans, null, 4)}</pre>
 							{myPlans &&
 								myPlans.map((x) => (
 									<Note
@@ -841,6 +875,7 @@ export default function PurchaseAPlan() {
 					keySecret={process.env.REACT_APP_RAZORPAY_KEY_SECRET}
 					orderId={orderDetails.orderId}
 					currency={orderDetails.currency}
+					currencyId={selectedCurrencyId}
 					amount={orderDetails.amount}
 					payment_for={"user_plan"}
 					redirectUrl={"/institute"}
