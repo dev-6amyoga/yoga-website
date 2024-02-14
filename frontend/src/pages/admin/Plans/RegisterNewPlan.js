@@ -1,9 +1,12 @@
+import { Button, Checkbox, Input, Select, Text } from "@geist-ui/core";
 import { useState } from "react";
-import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
-import { Button, Input, Card, Text, Select, Checkbox } from "@geist-ui/core";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-export default function RegisterNewPlan() {
+import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
+import { ROLE_ROOT } from "../../../enums/roles";
+import { withAuth } from "../../../utils/withAuth";
+
+function RegisterNewPlan() {
 	const navigate = useNavigate();
 	const [isChecked, setChecked] = useState(true);
 	const notify = (x) => toast(x);
@@ -120,3 +123,5 @@ export default function RegisterNewPlan() {
 		</div>
 	);
 }
+
+export default withAuth(RegisterNewPlan, ROLE_ROOT);

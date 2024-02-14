@@ -13,10 +13,12 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
 import CustomInput from "../../../components/Common/CustomInput";
+import { ROLE_ROOT } from "../../../enums/roles";
 import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
+import { withAuth } from "../../../utils/withAuth";
 
-export default function LogPayment() {
+function LogPayment() {
 	const [userStatus, setUserStatus] = useState("EXISTING");
 	const [user_id, setUserId] = useState(0);
 	const [plan_id, setPlanId] = useState(0);
@@ -775,3 +777,5 @@ export default function LogPayment() {
 		</div>
 	);
 }
+
+export default withAuth(LogPayment, ROLE_ROOT);

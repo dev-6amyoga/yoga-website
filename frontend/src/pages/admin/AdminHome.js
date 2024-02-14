@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar_Admin from "../../components/Common/AdminNavbar/AdminNavbar";
+import { ROLE_ROOT } from "../../enums/roles";
 import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
 import "./AdminHome.css";
@@ -305,4 +306,4 @@ function AdminHome() {
 	);
 }
 
-export default withAuth(AdminHome);
+export default withAuth(AdminHome, ROLE_ROOT);

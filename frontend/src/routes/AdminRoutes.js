@@ -20,7 +20,7 @@ import RegisterNewSchedule from "../pages/admin/schedule-management/RegisterNewS
 import ViewAllSchedules from "../pages/admin/schedule-management/ViewAllSchedules";
 import LogPayment from "../pages/admin/transactions/LogPayment";
 import RefundManagement from "../pages/admin/transactions/Refund";
-import { withAuth } from "../utils/withAuth";
+
 export const AdminRoutes = [
 	{
 		path: "/admin",

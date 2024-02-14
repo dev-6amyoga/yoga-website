@@ -1,11 +1,13 @@
-import { Button, Input, Card, Text } from "@geist-ui/core";
+import { Button, Card, Input, Text } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { ROLE_ROOT } from "../../../enums/roles";
+import { withAuth } from "../../../utils/withAuth";
 import AdminNavbar from "../../Common/AdminNavbar/AdminNavbar";
 import "./RegisterVideoForm.css";
-import { toast } from "react-toastify";
 
-export default function RegisterLanguageForm() {
+function RegisterLanguageForm() {
 	const navigate = useNavigate();
 	const notify = () => toast("Enter a valid language!");
 	const [tableLanguages, setTableLanguages] = useState([]);
@@ -100,3 +102,5 @@ export default function RegisterLanguageForm() {
 		</div>
 	);
 }
+
+export default withAuth(RegisterLanguageForm, ROLE_ROOT);

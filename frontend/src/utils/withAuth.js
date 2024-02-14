@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useHref, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
 	ROLE_INSTITUTE_ADMIN,
 	ROLE_INSTITUTE_OWNER,
@@ -32,21 +32,30 @@ export const withAuth = (Component, role = null) => {
 		]);
 		const navigate = useNavigate();
 		const location = useLocation();
+		const [show, setShow] = useState(false);
 
 		useEffect(() => {
+			// if not user
 			if (!user) {
-				navigate("/auth");
+				// if role is null, show the component
+				if (role === null) {
+					setShow(true);
+					return;
+				} else if (currentRole !== role) {
+					// if role is not null, and current role is not equal to role, navigate to unauthorized
+					navigate("/unauthorized", {
+						state: { from: location.pathname },
+					});
+					return;
+				} else if (currentRole === role) {
+					// if role is not null, and current role is equal to role, show the component
+					navigate("/auth");
+					return;
+				}
 			}
-		}, [user, navigate]);
+			setShow(true);
+		}, [user, currentRole, location, navigate]);
 
-		useEffect(() => {
-			if (currentRole !== role) {
-				navigate("/unauthorized", {
-					state: { from: location.pathname },
-				});
-			}
-		}, [currentRole, location, navigate]);
-
-		return <Component {...props} />;
+		return <>{show ? <Component {...props} /> : <></>}</>;
 	};
 };

@@ -1,15 +1,17 @@
 // http://localhost:4000/content/asana/addAsanaCategory
 
-import { Button, Input, Card, Text } from "@geist-ui/core";
+import { Button, Card, Input, Text } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AdminNavbar from "../../Common/AdminNavbar/AdminNavbar";
-import "./RegisterVideoForm.css";
-import getFormData from "../../../utils/getFormData";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ROLE_ROOT } from "../../../enums/roles";
+import getFormData from "../../../utils/getFormData";
+import { withAuth } from "../../../utils/withAuth";
+import AdminNavbar from "../../Common/AdminNavbar/AdminNavbar";
+import "./RegisterVideoForm.css";
 
-export default function RegisterNewCategoryForm() {
+function RegisterNewCategoryForm() {
 	const navigate = useNavigate();
 	const [categories, setCategories] = useState([]);
 	useEffect(() => {
@@ -97,3 +99,5 @@ export default function RegisterNewCategoryForm() {
 		</div>
 	);
 }
+
+export default withAuth(RegisterNewCategoryForm, ROLE_ROOT);
