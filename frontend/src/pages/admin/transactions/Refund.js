@@ -26,6 +26,8 @@ import RefundModal from "../../../components/admin/refund-management/RefundModal
 import TransactionModal from "../../../components/admin/refund-management/TransactionModal";
 import UserModal from "../../../components/admin/refund-management/UserModal";
 import UserPlanModal from "../../../components/admin/refund-management/UserPlanModal";
+import { ROLE_ROOT } from "../../../enums/roles";
+import { withAuth } from "../../../utils/withAuth";
 
 function Accordion({ title, children }) {
 	const [view, setView] = useState(false);
@@ -43,7 +45,7 @@ function Accordion({ title, children }) {
 	);
 }
 
-export default function RefundManagement() {
+function RefundManagement() {
 	const {
 		isLoading,
 		data: transactions,
@@ -328,3 +330,5 @@ export default function RefundManagement() {
 		</AdminPageWrapper>
 	);
 }
+
+export default withAuth(RefundManagement, ROLE_ROOT);

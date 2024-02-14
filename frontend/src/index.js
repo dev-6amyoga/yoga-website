@@ -71,7 +71,6 @@ function LoginIndex() {
 	);
 
 	const init = useCallback(() => {
-		console.log("");
 		const access_token = cookies["6amyoga_access_token"];
 		const refresh_token = cookies["6amyoga_refresh_token"];
 
@@ -133,6 +132,7 @@ function LoginIndex() {
 				})
 				.catch((err) => {
 					const errMsg = err?.response?.data?.message;
+					console.log({ verifyError: errMsg });
 					switch (errMsg) {
 						case "Access token expired":
 							Fetch({
@@ -224,13 +224,14 @@ function LoginIndex() {
 		setUserPlan,
 	]);
 
+	// refetch every 1 minute
 	useQuery({
 		queryKey: ["user"],
 		queryFn: init,
 		refetchOnMount: "always",
 		refetchOnWindowFocus: "always",
 		refetchOnReconnect: "always",
-		refetchInterval: 1000 * 60 * 2,
+		refetchInterval: 1000 * 60 * 1,
 	});
 
 	return <></>;
