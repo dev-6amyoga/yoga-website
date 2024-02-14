@@ -41,7 +41,6 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
               transition.going_to_relax === false
             );
           });
-          console.log(matchingTransition1, matchingTransition2);
           if (matchingTransition1 && matchingTransition2) {
             return [
               standingTransition,
@@ -57,7 +56,6 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           return [standingTransition];
         }
         if (endVideo.person_starting_position === "Left") {
-          console.log("in false, left");
           const matchingTransition1 = transitions.find((transition) => {
             return (
               transition.transition_video_name ===
@@ -245,10 +243,8 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         ) {
           const matchingTransition = transitions.find((transition) => {
             return (
-              transition.asana_category_start === "Standing" &&
-              transition.asana_category_end === "Standing" &&
-              transition.person_starting_position === "Left" &&
-              transition.person_ending_position === "Front"
+              transition.transition_video_name ===
+              "Person Transit Left to Front"
             );
           });
           if (matchingTransition) {
@@ -284,9 +280,8 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           });
           const matchingTransition2 = transitions.find((transition) => {
             return (
-              transition.asana_category === "Standing" &&
-              transition.person_starting_position === "Front" &&
-              transition.person_ending_position === "Left"
+              transition.transition_video_name ===
+              "Person Transit Front to Left"
             );
           });
           const matchingTransition3 = transitions.find((transition) => {
@@ -384,9 +379,8 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           });
           const matchingTransition2 = transitions.find((transition) => {
             return (
-              transition.asana_category === "Standing" &&
-              transition.person_starting_position === "Front" &&
-              transition.person_ending_position === "Left"
+              transition.transition_video_name ===
+              "Person Transit Front to Left"
             );
           });
           if (matchingTransition1 && matchingTransition2) {
@@ -415,6 +409,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
               transition.coming_from_relax === false
             );
           });
+          console.log(matchingTransition1, matchingTransition2);
           if (matchingTransition1 && matchingTransition2) {
             return [matchingTransition1, matchingTransition2];
           } else {
@@ -864,10 +859,8 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           if (startVideo.person_ending_position === "Left") {
             const matchingTransition1 = transitions.find((transition) => {
               return (
-                transition.asana_category_start === "Standing" &&
-                transition.asana_category_end === "Standing" &&
-                transition.person_ending_position === "Left" &&
-                transition.person_starting_position === "Front"
+                transition.transition_video_name ===
+                "Person Transit Left to Front"
               );
             });
             const matchingTransition2 = transitions.find((transition) => {
@@ -1162,7 +1155,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             const matchingTransition1 = transitions.find((transition) => {
               return (
                 transition.transition_video_name ===
-                "Person Transit Front to Left"
+                "Person Transit Left to Front"
               );
             });
             const matchingTransition2 = transitions.find((transition) => {
@@ -1173,7 +1166,6 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
                 transition.coming_from_relax === false
               );
             });
-            console.log(matchingTransition1, matchingTransition2);
             if (matchingTransition1 && matchingTransition2) {
               return [
                 matchingTransition1,
@@ -1934,7 +1926,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           startVideo.nobreak_asana === false &&
           endVideo.nobreak_asana === false
         ) {
-          return [sittingToSupine];
+          return [matTurningTransition, sittingToSupine];
         }
         if (
           startVideo.nobreak_asana === false &&
@@ -1960,8 +1952,8 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         ) {
           const matchingTransition1 = transitions.find((transition) => {
             return (
-              transition.asana_category_start === "Supine" &&
-              transition.asana_category_end === "Supine" &&
+              transition.asana_category_start === "Sitting" &&
+              transition.asana_category_end === "Sitting" &&
               transition.going_to_relax === true &&
               transition.coming_from_relax === false
             );
@@ -2668,8 +2660,10 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
             });
             const matchingTransition2 = transitions.find((transition) => {
               return (
-                transition.asana_category_start === "Prone" &&
-                transition.asana_category_end === "Prone" &&
+                transition.asana_category_start === "Standing" &&
+                transition.asana_category_end === "Standing" &&
+                transition.person_ending_position === "Left" &&
+                transition.person_starting_position === "Left" &&
                 transition.going_to_relax === true &&
                 transition.coming_from_relax === false
               );
