@@ -27,6 +27,10 @@ function VideoPlayer() {
 	const [
 		currentVideo,
 		setCurrentVideo,
+		markers,
+		setMarkers,
+		currentMarkerIdx,
+		setCurrentMarkerIdx,
 		videoState,
 		setVideoState,
 		playlistState,
@@ -34,6 +38,10 @@ function VideoPlayer() {
 	] = useVideoStore((state) => [
 		state.currentVideo,
 		state.setCurrentVideo,
+		state.markers,
+		state.setMarkers,
+		state.currentMarkerIdx,
+		state.setCurrentMarkerIdx,
 		state.videoState,
 		state.setVideoState,
 		state.playlistState,
@@ -80,11 +88,20 @@ function VideoPlayer() {
 	useEffect(() => {
 		if (queue && queue.length > 0 && playlistState) {
 			setCurrentVideo(queue[0]);
+			setCurrentMarkerIdx(0);
+			setMarkers(queue[0]?.video?.markers);
 		} else {
 			setCurrentVideo(null);
 			setVideoState(STATE_VIDEO_PAUSED);
 		}
-	}, [queue, playlistState, setCurrentVideo, setVideoState]);
+	}, [
+		queue,
+		playlistState,
+		setCurrentVideo,
+		setVideoState,
+		setMarkers,
+		setCurrentMarkerIdx,
+	]);
 
 	const handleEnd = useCallback(() => {
 		console.log("Video ended ------------------>");

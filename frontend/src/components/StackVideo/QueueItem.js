@@ -31,7 +31,7 @@ function QueueItem({ item, idx, pop, moveUp, moveDown, customerCode }) {
 	// );
 
 	return (
-		<div className="flex-shrink-0 flex flex-col gap-2 items-center px-1 py-2 bg-yblue-900 text-white rounded-xl">
+		<div className="flex-shrink-0 flex flex-col gap-2 items-center px-1 py-2 bg-yblue-900 text-white rounded-xl bg-black">
 			<img
 				src={`https://customer-${customerCode}.cloudflarestream.com/${
 					item?.video?.asana_videoID ??
