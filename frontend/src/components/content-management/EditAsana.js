@@ -63,6 +63,7 @@ function MarkerCard({
 	handleSave,
 	handleDelete,
 	moveToTimestamp,
+	isActive,
 }) {
 	const [markerData, setMarkerData] = useState(marker);
 	const [dirty, setDirty] = useState(false);
@@ -81,7 +82,10 @@ function MarkerCard({
 	};
 
 	return (
-		<div className="rounded-lg p-4 border flex flex-col justify-between shrink-0">
+		<div
+			className={`rounded-lg p-4  flex flex-col justify-between shrink-0 ${
+				isActive ? "border-2 border-amber-500" : "border"
+			}`}>
 			<div className="flex flex-col gap-2">
 				{dirty ? (
 					<Input
@@ -154,7 +158,10 @@ function EditAsana() {
 		state.addToSeekQueue,
 	]);
 
-	const [addToQueue] = usePlaylistStore((state) => [state.addToQueue]);
+	const [addToQueue, popFromQueue] = usePlaylistStore((state) => [
+		state.addToQueue,
+		state.popFromQueue,
+	]);
 
 	const [setEnableWatchHistory] = useWatchHistoryStore((state) => [
 		state.setEnableWatchHistory,
@@ -290,17 +297,6 @@ function EditAsana() {
 	}, []);
 
 	const currentMarkers = useMemo(() => {
-		// return [
-		// 	{
-		// 		timestamp: 0,
-		// 		title: "marker something something something",
-		// 	},
-		// 	{
-		// 		timestamp: 0,
-		// 		title: "marker something something something",
-		// 	},
-		// ];
-
 		let prevIdx = -1;
 		let nextIdx = -1;
 
@@ -329,6 +325,8 @@ function EditAsana() {
 		return [
 			prevIdx === -1 ? null : markers[prevIdx],
 			nextIdx === -1 ? null : markers[nextIdx],
+			prevIdx,
+			nextIdx,
 		];
 	}, [currentTime, markers]);
 
@@ -450,6 +448,9 @@ function EditAsana() {
 		if (asana?.id) {
 			addToQueue([asana]);
 		}
+		return () => {
+			popFromQueue(0);
+		};
 	}, [asana, addToQueue]);
 
 	// get asana by id
@@ -665,7 +666,8 @@ function EditAsana() {
 								} else {
 									setDirty(true);
 								}
-							}}>
+							}}
+							loading={loading}>
 							{dirty ? "Save Changes" : "Edit"}
 						</Button>
 						<Button
@@ -707,6 +709,7 @@ function EditAsana() {
 										handleSave={handleSaveMarker}
 										idx={idx}
 										moveToTimestamp={moveToTimestamp}
+										isActive={currentMarkers[2] === idx}
 									/>
 								);
 							})}
