@@ -1,20 +1,16 @@
-import React, { useEffect, useState } from "react";
-
 // import { Code } from "@geist-ui/core";
 import useVideoStore from "../../store/VideoStore";
 
 export default function VideoInfo() {
 	let currentVideo = useVideoStore((state) => state.currentVideo);
-	const [markers, setMarkers] = useState(null);
 
-	useEffect(() => {
-		if (currentVideo) {
-			console.log(currentVideo);
-			setMarkers(currentVideo?.video?.asana_markers);
-		} else {
-			setMarkers(null);
-		}
-	}, [currentVideo]);
+	const [markers, currentMarkerIdx, setCurrentMarkerIdx, addToSeekQueue] =
+		useVideoStore((state) => [
+			state.markers,
+			state.currentMarkerIdx,
+			state.setCurrentMarkerIdx,
+			state.addToSeekQueue,
+		]);
 
 	return (
 		<div className="">
@@ -40,12 +36,23 @@ export default function VideoInfo() {
 						<h5 className="">Markers</h5>
 						<div className="flex gap-1 flex-wrap mt-4">
 							{markers ? (
-								Object.keys(markers).map((k) => {
+								markers.map((k, idx) => {
 									return (
 										<p
-											key={k}
-											className="px-2 py-1 border rounded-full m-0 text-sm">
-											{k} : {markers[k].step}
+											key={k.timestamp}
+											className={`px-2 py-1 border rounded-full m-0 text-sm hover:cursor-pointer ${
+												currentMarkerIdx === idx
+													? "border-amber-500"
+													: ""
+											}`}
+											onClick={() => {
+												setCurrentMarkerIdx(idx);
+												addToSeekQueue({
+													t: k.timestamp,
+													type: "move",
+												});
+											}}>
+											{k.timestamp} : {k.title}
 										</p>
 									);
 								})
