@@ -158,9 +158,9 @@ function EditAsana() {
 		state.addToSeekQueue,
 	]);
 
-	const [addToQueue, popFromQueue] = usePlaylistStore((state) => [
+	const [addToQueue, clearQueue] = usePlaylistStore((state) => [
 		state.addToQueue,
-		state.popFromQueue,
+		state.clearQueue,
 	]);
 
 	const [setEnableWatchHistory] = useWatchHistoryStore((state) => [
@@ -444,12 +444,13 @@ function EditAsana() {
 
 	// set current video
 	useEffect(() => {
+		clearQueue();
 		// set current video
 		if (asana?.id) {
 			addToQueue([asana]);
 		}
 		return () => {
-			popFromQueue(0);
+			clearQueue();
 		};
 	}, [asana, addToQueue]);
 
