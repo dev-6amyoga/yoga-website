@@ -27,9 +27,7 @@ function VideoPlayer() {
 	const [
 		currentVideo,
 		setCurrentVideo,
-		markers,
 		setMarkers,
-		currentMarkerIdx,
 		setCurrentMarkerIdx,
 		videoState,
 		setVideoState,
@@ -38,9 +36,7 @@ function VideoPlayer() {
 	] = useVideoStore((state) => [
 		state.currentVideo,
 		state.setCurrentVideo,
-		state.markers,
 		state.setMarkers,
-		state.currentMarkerIdx,
 		state.setCurrentMarkerIdx,
 		state.videoState,
 		state.setVideoState,
