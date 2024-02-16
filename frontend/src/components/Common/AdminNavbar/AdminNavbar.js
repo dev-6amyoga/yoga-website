@@ -9,6 +9,94 @@ import { FetchRetry } from "../../../utils/Fetch";
 import RoleShifter from "../RoleShifter";
 import "./AdminNavbar.css";
 
+const paths = [
+	{
+		path: "/admin",
+		title: "Dashboard",
+	},
+	{
+		title: "Member Management",
+		type: "group",
+		subPaths: [
+			{ path: "/admin/members/institutes", title: "Institutes" },
+
+			{ path: "/admin/members/students", title: "Students" },
+
+			{ path: "/admin/members/teachers", title: "Teachers" },
+		],
+	},
+	{
+		title: "Schedule Management",
+		type: "group",
+		subPaths: [
+			{
+				path: "/admin/schedule/register",
+				title: "Register New Schedule",
+			},
+			{ path: "/admin/schedule/view", title: "View All Schedules" },
+		],
+	},
+	{
+		title: "Content Management",
+		type: "group",
+		subPaths: [
+			{ path: "/admin/video/create", title: "Register New Asana" },
+			{ path: "/admin/video/view-all", title: "View All Asanas" },
+			{
+				path: "/admin/video/transition/create",
+				title: "Register Transition Video",
+			},
+			{
+				path: "/admin/video/transition/all",
+				title: "View Transition Videos",
+			},
+			{
+				path: "/admin/playlist/create",
+				title: "Register New Playlist",
+			},
+			{ path: "/admin/playlist/view-all", title: "View All Playlists" },
+			{ path: "/admin/language/create", title: "Register Language" },
+			{ path: "/admin/language/view-all", title: "View All Languages" },
+			{
+				path: "/admin/asana-category/create",
+				title: "Register Asana Category",
+			},
+			{
+				path: "/admin/asana-category/all",
+				title: "View All Asana Categories",
+			},
+		],
+	},
+	{
+		title: "Transaction Management",
+		type: "group",
+		subPaths: [
+			{
+				path: "/admin/transactions/log-payment",
+				title: "Log a Payment",
+			},
+			{ path: "/admin/transactions/refund", title: "Refund Management" },
+		],
+	},
+	{
+		title: "Plan Management",
+		type: "group",
+		subPaths: [
+			{
+				path: "/admin/plan/create",
+				title: "Register New Plan",
+			},
+			{
+				path: "/admin/plan/view-all",
+				title: "View All Plans",
+			},
+		],
+	},
+	{ path: "/admin/discount-management", title: "Discount Management" },
+
+	{ title: "Free Videos" },
+];
+
 function AdminNavbar() {
 	const navigate = useNavigate();
 	const [open, setOpen] = useState(false);
@@ -34,14 +122,16 @@ function AdminNavbar() {
 			token: true,
 		})
 			.then((res) => {
-				removeCookie("6amyoga_access_token", {
-					domain: "localhost",
-					path: "/",
-				});
-				removeCookie("6amyoga_refresh_token", {
-					domain: "localhost",
-					path: "/",
-				});
+				// removeCookie("6amyoga_access_token", {
+				// 	domain: "localhost",
+				// 	path: "/",
+				// });
+				// removeCookie("6amyoga_refresh_token", {
+				// 	domain: "localhost",
+				// 	path: "/",
+				// });
+				sessionStorage.removeItem("6amyoga_access_token");
+				sessionStorage.removeItem("6amyoga_refresh_token");
 				resetUserState();
 				navigate("/auth");
 			})
@@ -71,177 +161,44 @@ function AdminNavbar() {
 				<Drawer.Content>
 					<div className="flex flex-col gap-4 w-full">
 						<RoleShifter />
-						<Button className="w-full">
-							<Link
-								to={"/admin"}
-								className="w-full text-zinc-800">
-								Dashboard
-							</Link>
-						</Button>
-						<ButtonDropdown className="w-full">
-							<ButtonDropdown.Item main>
-								Member Management
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item
-								onClick={() => {
-									navigate("/admin/members/institutes");
-								}}>
-								Institutes
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item
-								onClick={() => {
-									navigate("/admin/members/students");
-								}}>
-								Students
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item
-								onClick={() => {
-									navigate("/admin/members/teachers");
-								}}>
-								Teachers
-							</ButtonDropdown.Item>
-							admin/schedule/register
-						</ButtonDropdown>
-						<ButtonDropdown className="w-full">
-							<ButtonDropdown.Item main>
-								Schedule Management
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item
-								onClick={() => {
-									navigate("/admin/schedule/register");
-								}}>
-								Register New Schedule
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item
-								onClick={() => {
-									navigate("/admin/schedule/view");
-								}}>
-								View All Schedules
-							</ButtonDropdown.Item>
-						</ButtonDropdown>
 
-						<ButtonDropdown className="w-full">
-							<ButtonDropdown.Item main>
-								Content Management
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item>
-								<Link
-									to={"/content/video/create"}
-									className="w-full text-zinc-800">
-									Register New Asana
-								</Link>
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item>
-								<Link
-									to={"/admin/allAsanas"}
-									className="w-full text-zinc-800">
-									View All Asanas
-								</Link>
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item>
-								<Link
-									to={"/content/video/transition/create"}
-									className="w-full text-zinc-800">
-									Register Transition Video
-								</Link>
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item>
-								<Link
-									to={"/content/transition/all"}
-									className="w-full text-zinc-800">
-									View Transition Videos
-								</Link>
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item>
-								<Link
-									to={"/content/playlist/create"}
-									className="w-full text-zinc-800">
-									Register New Playlist
-								</Link>
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item>
-								<Link
-									to={"/admin/allPlaylists"}
-									className="w-full text-zinc-800">
-									View All Playlists
-								</Link>
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item>
-								<Link
-									to={"/content/language/create"}
-									className="w-full text-zinc-800">
-									Register Language
-								</Link>
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item>
-								<Link
-									to={"/admin/allLanguages"}
-									className="w-full text-zinc-800">
-									View All Languages
-								</Link>
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item>
-								<Link
-									to={"/content/asana-category/create"}
-									className="w-full text-zinc-800">
-									Register Asana Category
-								</Link>
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item>
-								<Link
-									to={"/content/asana-category/all"}
-									className="w-full text-zinc-800">
-									View All Asana Categories
-								</Link>
-							</ButtonDropdown.Item>
-						</ButtonDropdown>
-						<ButtonDropdown className="w-full">
-							<ButtonDropdown.Item main>
-								Transaction Management
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item>
-								<Link
-									to={"/admin/transactions/log-payment"}
-									className="w-full text-zinc-800">
-									Log a Payment
-								</Link>
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item>
-								<Link
-									to={"/admin/transactions/refund"}
-									className="w-full text-zinc-800">
-									Refund Management
-								</Link>
-							</ButtonDropdown.Item>
-						</ButtonDropdown>
-						<ButtonDropdown className="w-full">
-							<ButtonDropdown.Item main>
-								Plan Management
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item>
-								<Link
-									to={"/plan/registerNewPlan"}
-									className="w-full text-zinc-800">
-									Register New Plan
-								</Link>
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item>
-								<Link
-									to={"/plan/viewAllPlans"}
-									className="w-full text-zinc-800">
-									View All Plans
-								</Link>
-							</ButtonDropdown.Item>
-						</ButtonDropdown>
-						<Button className="w-full">
-							<Link
-								to={"/admin/discount-management"}
-								className="w-full text-zinc-800">
-								Discount Management
-							</Link>
-						</Button>
-						<Button className="w-full">Free Videos</Button>
-						<Button className="w-full">Reports</Button>
+						{paths.map((path, index) => {
+							if (path?.type === "group") {
+								return (
+									<ButtonDropdown key={index}>
+										<ButtonDropdown.Item main>
+											{path.title}
+										</ButtonDropdown.Item>
+
+										{path.subPaths.map((subPath, index) => (
+											<ButtonDropdown.Item
+												key={
+													"subPath" +
+													subPath.path +
+													index
+												}
+												onClick={() =>
+													navigate(subPath.path)
+												}>
+												{subPath.title}
+											</ButtonDropdown.Item>
+										))}
+									</ButtonDropdown>
+								);
+							} else {
+								return (
+									<Button
+										width="100%"
+										auto
+										key={"nav_path" + path.title}
+										onClick={() => {
+											navigate(path.path);
+										}}>
+										{path.title}
+									</Button>
+								);
+							}
+						})}
 						<hr />
 						<hr />
 						{user ? (

@@ -9,40 +9,40 @@ import TransactionHistoryInstitute from "../pages/institute/settings/Transaction
 import MakeNewPlaylist from "../pages/institute/settings/MakeNewPlaylist";
 import InstitutePlaylistPage from "../pages/institute/settings/InstitutePlaylistPage";
 export const InstituteRoutes = [
-  {
-    path: "/institute",
-    element: <InstituteHome />,
-  },
-  {
-    path: "institute/settings",
-    element: <InstituteSettings />,
-  },
-  {
-    path: "institute/user/settings",
-    element: <UserSettings />,
-  },
-  {
-    path: "institute/add-new-teacher",
-    element: <AddNewTeacher />,
-  },
-  {
-    path: "institute/member-management",
-    element: <MemberManagement />,
-  },
-  {
-    path: "institute/purchase-a-plan",
-    element: <PurchaseAPlan />,
-  },
-  {
-    path: "institute/view-transactions",
-    element: <TransactionHistoryInstitute />,
-  },
-  {
-    path: "institute/make-playlist",
-    element: <MakeNewPlaylist />,
-  },
-  {
-    path: "institute/playlist-page",
-    element: <InstitutePlaylistPage />,
-  },
+	{
+		path: "/institute",
+		element: <InstituteHome />,
+	},
+	{
+		path: "/institute/settings",
+		element: <InstituteSettings />,
+	},
+	{
+		path: "/institute/user/settings",
+		element: <UserSettings />,
+	},
+	{
+		path: "/institute/add-new-teacher",
+		element: <AddNewTeacher />,
+	},
+	{
+		path: "/institute/member-management",
+		element: <MemberManagement />,
+	},
+	{
+		path: "/institute/purchase-a-plan",
+		element: <PurchaseAPlan />,
+	},
+	{
+		path: "/institute/view-transactions",
+		element: <TransactionHistoryInstitute />,
+	},
+	{
+		path: "/institute/make-playlist",
+		element: <MakeNewPlaylist />,
+	},
+	{
+		path: "/institute/playlist-page",
+		element: <InstitutePlaylistPage />,
+	},
 ];

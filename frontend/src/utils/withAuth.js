@@ -9,21 +9,22 @@ import {
 } from "../enums/roles";
 import useUserStore from "../store/UserStore";
 
-export const withAuth = (Component, role = null) => {
-	switch (role) {
-		case ROLE_ROOT:
-		case ROLE_INSTITUTE_OWNER:
-		case ROLE_INSTITUTE_ADMIN:
-		case ROLE_TEACHER:
-		case ROLE_STUDENT:
-			break;
-		default:
-			if (role === null) {
-				break;
-			} else {
-				throw new Error("Invalid Role");
-			}
-	}
+export const withAuth = (Component, ...roles) => {
+	const isRoleValid = roles.every((role) => {
+		if (
+			role !== ROLE_INSTITUTE_ADMIN &&
+			role !== ROLE_INSTITUTE_OWNER &&
+			role !== ROLE_STUDENT &&
+			role !== ROLE_TEACHER &&
+			role !== ROLE_ROOT &&
+			role !== null
+		) {
+			return false;
+		}
+		return true;
+	});
+
+	console.log("withAuth : ", roles, isRoleValid);
 
 	return function AuthenticatedComponent(props) {
 		const [user, currentRole] = useUserStore((state) => [
@@ -35,26 +36,41 @@ export const withAuth = (Component, role = null) => {
 		const [show, setShow] = useState(false);
 
 		useEffect(() => {
-			// if not user
-			if (!user) {
-				// if role is null, show the component
-				if (role === null) {
+			console.log(
+				"withAuth : ",
+				roles,
+				currentRole,
+				roles.includes(currentRole),
+				location.pathname
+			);
+			// if user is there, check if role is valid
+			if (user) {
+				// if role is null, show the component [authenticated+public]
+				if (roles.includes(null)) {
 					setShow(true);
 					return;
-				} else if (currentRole !== role) {
+				} else if (!roles.includes(currentRole)) {
 					// if role is not null, and current role is not equal to role, navigate to unauthorized
 					navigate("/unauthorized", {
 						state: { from: location.pathname },
 					});
 					return;
-				} else if (currentRole === role) {
-					// if role is not null, and current role is equal to role, show the component
-					navigate("/auth");
-					return;
 				}
+				setShow(true);
+			} else {
+				setShow(false);
+				if (location && location.pathname !== "/auth") {
+					navigate("/auth", {
+						state: { login: true, from: location.pathname },
+					});
+				}
+				return;
 			}
-			setShow(true);
 		}, [user, currentRole, location, navigate]);
+
+		// useEffect(() => {
+		// 	console.log("withAuth : userChanged");
+		// }, [user]);
 
 		return <>{show ? <Component {...props} /> : <></>}</>;
 	};

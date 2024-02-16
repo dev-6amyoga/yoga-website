@@ -268,7 +268,7 @@ function RegisterNewSchedule() {
 			);
 			if (response.ok) {
 				toast("Schedule added successfully");
-				// navigate("/admin/allPlaylists");
+				// navigate("/admin/playlist/view-all");
 			} else {
 				console.error("Failed to add schedule");
 			}

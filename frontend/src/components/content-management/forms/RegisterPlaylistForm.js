@@ -173,7 +173,7 @@ function RegisterPlaylistForm() {
 			);
 			if (response.ok) {
 				toast("Playlist added successfully");
-				navigate("/admin/allPlaylists");
+				navigate("/admin/playlist/view-all");
 			} else {
 				console.error("Failed to add playlist");
 			}

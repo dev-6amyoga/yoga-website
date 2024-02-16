@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useVideoStore, { STATE_VIDEO_PLAY } from "../../store/VideoStore";
 // import asanas from "../../data/asanas.json";
 
@@ -46,35 +46,14 @@ function StreamStackItem({
 		state.setAutoplayInitialized,
 	]);
 
-	// watch history store
-	// let [
-	// 	addToWatchHistory,
-	// 	committedTs,
-	// 	setCommittedTs,
-	// 	addToCommittedTs,
-	// 	watchTimeBuffer,
-	// 	updateWatchTimeBuffer,
-	// 	watchTimeArchive,
-	// 	updateWatchTimeArchive,
-	// 	flushWatchTimeBuffer,
-	// ] = useWatchHistoryStore((state) => [
-	// 	state.addToWatchHistory,
-	// 	state.committedTs,
-	// 	state.setCommittedTs,
-	// 	state.addToCommittedTs,
-	// 	state.watchTimeBuffer,
-	// 	state.updateWatchTimeBuffer,
-	// 	state.watchTimeArchive,
-	// 	state.updateWatchTimeArchive,
-	// 	state.flushWatchTimeBuffer,
-	// ]);
-
 	let [
+		enableWatchHistory,
 		setCommittedTs,
 		addToCommittedTs,
 		updateWatchTimeBuffer,
 		flushWatchTimeBuffer,
 	] = useWatchHistoryStore((state) => [
+		state.enableWatchHistory,
 		state.setCommittedTs,
 		state.addToCommittedTs,
 		state.updateWatchTimeBuffer,
@@ -218,7 +197,7 @@ function StreamStackItem({
 					- start interval timer to commit time [5s]
 	*/
 	useEffect(() => {
-		if (isActive) {
+		if (isActive && enableWatchHistory) {
 			console.log("CURRENT VIDEO", video);
 			// flushing
 			flushWatchTimeBuffer(user?.user_id);
@@ -266,8 +245,16 @@ function StreamStackItem({
 				});
 				addToCommittedTs(playerRef.current?.currentTime);
 			}, 5000);
+		} else {
+			if (flushTimeInterval.current) {
+				clearInterval(flushTimeInterval.current);
+			}
+
+			if (commitTimeInterval.current) {
+				clearInterval(commitTimeInterval.current);
+			}
 		}
-	}, [isActive]);
+	}, [isActive, enableWatchHistory]);
 
 	// when theres a pause or play, the state is shown for 300ms
 	useEffect(() => {

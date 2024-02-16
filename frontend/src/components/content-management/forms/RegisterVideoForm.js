@@ -198,7 +198,7 @@ function RegisterVideoForm() {
 					);
 					if (response.ok) {
 						toast("New Asana added successfully");
-						navigate("/admin/allAsanas");
+						navigate("/admin/video/view-all");
 					} else {
 						console.log("Failed to add new Asana");
 					}

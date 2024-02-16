@@ -1,9 +1,10 @@
 import { Button, Drawer, Select } from "@geist-ui/core";
 import { Menu } from "@geist-ui/icons";
-import React, { memo, useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
 import useUserStore from "../../../store/UserStore";
+import { FetchRetry } from "../../../utils/Fetch";
 import RoleShifter from "../RoleShifter";
 
 function InstituteNavbar() {
@@ -29,16 +30,28 @@ function InstituteNavbar() {
 	]);
 
 	const handleLogout = () => {
-		removeCookie("6amyoga_access_token", {
-			domain: "localhost",
-			path: "/",
-		});
-		removeCookie("6amyoga_refresh_token", {
-			domain: "localhost",
-			path: "/",
-		});
-		resetUserState();
-		navigate("/auth");
+		FetchRetry({
+			url: "http://localhost:4000/auth/logout",
+			method: "POST",
+			token: true,
+		})
+			.then((res) => {
+				// removeCookie("6amyoga_access_token", {
+				// 	domain: "localhost",
+				// 	path: "/",
+				// });
+				// removeCookie("6amyoga_refresh_token", {
+				// 	domain: "localhost",
+				// 	path: "/",
+				// });
+				sessionStorage.removeItem("6amyoga_access_token");
+				sessionStorage.removeItem("6amyoga_refresh_token");
+				resetUserState();
+				navigate("/auth");
+			})
+			.catch((err) => {
+				console.error("Logout Error:", err);
+			});
 	};
 
 	useEffect(() => {}, [user]);

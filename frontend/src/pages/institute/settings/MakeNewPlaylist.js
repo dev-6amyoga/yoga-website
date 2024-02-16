@@ -8,13 +8,16 @@ import {
 	Select,
 	Table,
 } from "@geist-ui/core";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useShallow } from "zustand/react/shallow";
 import InstitutePageWrapper from "../../../components/Common/InstitutePageWrapper";
+import { ROLE_INSTITUTE_OWNER } from "../../../enums/roles";
 import useUserStore from "../../../store/UserStore";
-export default function MakeNewPlaylist() {
+import { withAuth } from "../../../utils/withAuth";
+
+function MakeNewPlaylist() {
 	const [user, institutes, currentInstituteId] = useUserStore(
 		useShallow((state) => [
 			state.user,
@@ -356,3 +359,5 @@ export default function MakeNewPlaylist() {
 		</InstitutePageWrapper>
 	);
 }
+
+export default withAuth(MakeNewPlaylist, ROLE_INSTITUTE_OWNER);

@@ -8,7 +8,9 @@ import { Fetch } from "../../../utils/Fetch";
 import RenderRazorpay from "../../student/RenderRazorpay";
 
 import { Card, Divider } from "@geist-ui/core";
+import { ROLE_INSTITUTE_OWNER } from "../../../enums/roles";
 import getFormData from "../../../utils/getFormData";
+import { withAuth } from "../../../utils/withAuth";
 
 function FeatureTag({ children }) {
 	return (
@@ -183,7 +185,7 @@ function calculateTotalPrice(
 	return Math.ceil(p * multiplier);
 }
 
-export default function PurchaseAPlan() {
+function PurchaseAPlan() {
 	const [user, institutes, currentInstituteId] = useUserStore(
 		useShallow((state) => [
 			state.user,
@@ -892,3 +894,5 @@ export default function PurchaseAPlan() {
 		</InstitutePageWrapper>
 	);
 }
+
+export default withAuth(PurchaseAPlan, ROLE_INSTITUTE_OWNER);

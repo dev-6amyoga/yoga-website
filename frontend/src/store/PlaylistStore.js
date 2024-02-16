@@ -49,11 +49,15 @@ const usePlaylistStore = create((set) => ({
 				queue: [
 					...state.queue,
 					...items.map((i, idx) => {
+						console.log(i, state.queue.length, idx);
 						return {
 							video: i,
 							idx: state.queue.length + idx + 1,
 							queue_id: uuidV5(
-								i._id + state.queue.length + idx + 1,
+								(i?._id || i?.id) +
+									state.queue.length +
+									idx +
+									1,
 								"ed46bc72-c770-4478-a8af-6183469acb64"
 							),
 						};

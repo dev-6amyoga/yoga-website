@@ -3,9 +3,9 @@ import {
 	QueryClient,
 	QueryClientProvider,
 	useQuery,
+	useQueryClient,
 } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { useCookies } from "react-cookie";
 import ReactDOM from "react-dom/client";
 import "react-phone-number-input/style.css";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
@@ -37,17 +37,20 @@ const router = createBrowserRouter([
 ]);
 
 function LoginIndex() {
-	const [cookies, setCookie, removeCookie] = useCookies([
-		"6amyoga_access_token",
-		"6amyoga_refresh_token",
-	]);
+	// const [cookies, setCookie, removeCookie] = useCookies([
+	// 	"6amyoga_access_token",
+	// 	"6amyoga_refresh_token",
+	// ]);
+	const queryClient = useQueryClient();
 
 	const [
 		user,
 		setUser,
 		userPlan,
 		setUserPlan,
+		accessToken,
 		setAccessToken,
+		refreshToken,
 		setRefreshToken,
 		setCurrentInstituteId,
 		setInstitutes,
@@ -60,7 +63,9 @@ function LoginIndex() {
 			state.setUser,
 			state.userPlan,
 			state.setUserPlan,
+			state.accessToken,
 			state.setAccessToken,
+			state.refreshToken,
 			state.setRefreshToken,
 			state.setCurrentInstituteId,
 			state.setInstitutes,
@@ -71,8 +76,11 @@ function LoginIndex() {
 	);
 
 	const init = useCallback(() => {
-		const access_token = cookies["6amyoga_access_token"];
-		const refresh_token = cookies["6amyoga_refresh_token"];
+		console.log("CALLING USER INIT FUNC --------->");
+		const access_token =
+			sessionStorage.getItem("6amyoga_access_token") || accessToken;
+		const refresh_token =
+			sessionStorage.getItem("6amyoga_refresh_token") || refreshToken;
 
 		if (access_token && refresh_token) {
 			Fetch({
@@ -115,11 +123,27 @@ function LoginIndex() {
 									].map((r) => r?.institute);
 									setInstitutes(ins);
 									setCurrentInstituteId(ins[0]?.institute_id);
-									setCookie(
+									// setCookie(
+									// 	"6amyoga_access_token",
+									// 	access_token,
+									// 	{
+									// 		domain: "localhost",
+									// 		path: "/",
+									// 	}
+									// );
+									// setCookie(
+									// 	"6amyoga_refresh_token",
+									// 	refresh_token,
+									// 	{
+									// 		domain: "localhost",
+									// 		path: "/",
+									// 	}
+									// );
+									sessionStorage.setItem(
 										"6amyoga_access_token",
 										access_token
 									);
-									setCookie(
+									sessionStorage.setItem(
 										"6amyoga_refresh_token",
 										refresh_token
 									);
@@ -144,38 +168,57 @@ function LoginIndex() {
 							})
 								.then((res) => {
 									if (res.status === 200) {
+										console.log(
+											"new access token ==> ",
+											res.data.accessToken
+										);
 										setAccessToken(res.data.accessToken);
 										setRefreshToken(refresh_token);
-										setCookie(
+										// setCookie(
+										// 	"6amyoga_access_token",
+										// 	res.data.accessToken,
+										// 	{
+										// 		domain: "localhost",
+										// 		path: "/",
+										// 	}
+										// );
+										// setCookie(
+										// 	"6amyoga_refresh_token",
+										// 	refresh_token,
+										// 	{
+										// 		domain: "localhost",
+										// 		path: "/",
+										// 	}
+										// );
+										sessionStorage.setItem(
 											"6amyoga_access_token",
-											res.data.accessToken,
-											{
-												domain: "localhost",
-												path: "/",
-											}
+											res.data.accessToken
 										);
-										setCookie(
+										sessionStorage.setItem(
 											"6amyoga_refresh_token",
-											refresh_token,
-											{
-												domain: "localhost",
-												path: "/",
-											}
+											refresh_token
 										);
+										queryClient.invalidateQueries(["user"]);
 									}
 								})
 								.catch((err) => {
 									console.log(err);
 									setAccessToken(null);
 									setRefreshToken(null);
-									removeCookie("6amyoga_access_token", {
-										domain: "localhost",
-										path: "/",
-									});
-									removeCookie("6amyoga_refresh_token", {
-										domain: "localhost",
-										path: "/",
-									});
+									// removeCookie("6amyoga_access_token", {
+									// 	domain: "localhost",
+									// 	path: "/",
+									// });
+									// removeCookie("6amyoga_refresh_token", {
+									// 	domain: "localhost",
+									// 	path: "/",
+									// });
+									sessionStorage.removeItem(
+										"6amyoga_access_token"
+									);
+									sessionStorage.removeItem(
+										"6amyoga_refresh_token"
+									);
 								});
 							break;
 						// refresh token expired
@@ -183,40 +226,46 @@ function LoginIndex() {
 						case "Refresh token expired":
 							setAccessToken(null);
 							setRefreshToken(null);
-							removeCookie("6amyoga_access_token", {
-								domain: "localhost",
-								path: "/",
-							});
-							removeCookie("6amyoga_refresh_token", {
-								domain: "localhost",
-								path: "/",
-							});
+							// removeCookie("6amyoga_access_token", {
+							// 	domain: "localhost",
+							// 	path: "/",
+							// });
+							// removeCookie("6amyoga_refresh_token", {
+							// 	domain: "localhost",
+							// 	path: "/",
+							// });
+							sessionStorage.removeItem("6amyoga_access_token");
+							sessionStorage.removeItem("6amyoga_refresh_token");
 							break;
 						// invalid response, let it go
 						default:
 							setAccessToken(null);
 							setRefreshToken(null);
-							removeCookie("6amyoga_access_token", {
-								domain: "localhost",
-								path: "/",
-							});
-							removeCookie("6amyoga_refresh_token", {
-								domain: "localhost",
-								path: "/",
-							});
+							// removeCookie("6amyoga_access_token", {
+							// 	domain: "localhost",
+							// 	path: "/",
+							// });
+							// removeCookie("6amyoga_refresh_token", {
+							// 	domain: "localhost",
+							// 	path: "/",
+							// });
+							sessionStorage.removeItem("6amyoga_access_token");
+							sessionStorage.removeItem("6amyoga_refresh_token");
 							break;
 					}
 				});
+		} else {
+			sessionStorage.setItem("6amyoga_access_token", "");
+			sessionStorage.setItem("6amyoga_refresh_token", "");
 		}
 		return null;
 	}, [
-		cookies,
-		user,
 		setUser,
+		queryClient,
+		accessToken,
+		refreshToken,
 		setAccessToken,
 		setRefreshToken,
-		setCookie,
-		removeCookie,
 		setCurrentInstituteId,
 		setInstitutes,
 		setCurrentRole,
@@ -231,7 +280,7 @@ function LoginIndex() {
 		refetchOnMount: "always",
 		refetchOnWindowFocus: "always",
 		refetchOnReconnect: "always",
-		refetchInterval: 1000 * 60 * 1,
+		refetchInterval: 1000 * 60 * 2,
 	});
 
 	return <></>;

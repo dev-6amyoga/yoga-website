@@ -61,7 +61,7 @@ function RegisterLanguageForm() {
 
 					if (response.ok) {
 						console.log("New Language added successfully");
-						navigate("/admin/allLanguages");
+						navigate("/admin/language/view-all");
 					} else {
 						console.error("Failed to add new Language");
 					}

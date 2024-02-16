@@ -6,8 +6,10 @@ import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 
 import { toast } from "react-toastify";
+import { ROLE_INSTITUTE_OWNER } from "../../../enums/roles";
+import { withAuth } from "../../../utils/withAuth";
 
-export default function MemberManagement() {
+function MemberManagement() {
 	const [teachers, setTeachers] = useState([]);
 	const [numberOfTeachers, setNumberOfTeachers] = useState(0);
 	const [user, institutes, currentInstituteId] = useUserStore(
@@ -164,3 +166,5 @@ export default function MemberManagement() {
 		</InstitutePageWrapper>
 	);
 }
+
+export default withAuth(MemberManagement, ROLE_INSTITUTE_OWNER);

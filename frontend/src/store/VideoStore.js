@@ -49,10 +49,11 @@ const useVideoStore = create((set) => ({
 
 	// seekQueue holds the seek times that the user has clicked on
 	seekQueue: [],
-	addToSeekQueue: (seekTime) =>
+	addToSeekQueue: (seekEvent) =>
 		set((state) => {
 			// console.log(state.seekQueue, seekTime)
-			return { seekQueue: [...state.seekQueue, seekTime] };
+			// {type: move | seek, time: number}
+			return { seekQueue: [...state.seekQueue, seekEvent] };
 		}),
 	popFromSeekQueue: (index) =>
 		set((state) => {

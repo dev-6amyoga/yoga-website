@@ -1,19 +1,12 @@
-import {
-	Button,
-	Grid,
-	Input,
-	Modal,
-	Select,
-	Table,
-	Text,
-} from "@geist-ui/core";
+import { Button, Dot, Input, Modal, Select, Table, Text } from "@geist-ui/core";
 import { Search } from "@geist-ui/icons";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ROLE_ROOT } from "../../enums/roles";
 import { withAuth } from "../../utils/withAuth";
-import AdminNavbar from "../Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../Common/AdminPageWrapper";
 import "./AllAsanas.css";
 
 function AllAsanas() {
@@ -36,9 +29,11 @@ function AllAsanas() {
 		asana_type: "",
 		asana_difficulty: "",
 	});
+	const navigate = useNavigate();
 
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filteredTransitions, setFilteredTransitions] = useState([]);
+
 	useEffect(() => {
 		if (searchTerm.length > 0) {
 			console.log(searchTerm);
@@ -53,6 +48,7 @@ function AllAsanas() {
 			setFilteredTransitions(asanas);
 		}
 	}, [searchTerm]);
+
 	const handleDownload = (data1) => {
 		const csv = Papa.unparse(data1);
 		const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -67,6 +63,7 @@ function AllAsanas() {
 			document.body.removeChild(link);
 		}
 	};
+
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -81,9 +78,11 @@ function AllAsanas() {
 		};
 		fetchData();
 	}, []);
+
 	const [category_modal, setCategoryModal] = useState("");
 	const [language_modal, setLanguageModal] = useState("");
 	const [type_modal, setTypeModal] = useState("");
+
 	const handler1 = (val) => {
 		setModalData({ ...modalData, asana_category: val });
 	};
@@ -261,35 +260,39 @@ function AllAsanas() {
 		};
 
 		return (
-			<Grid.Container gap={0.1}>
-				<Grid>
-					<Button
-						type="error"
-						auto
-						scale={1 / 3}
-						font="12px"
-						onClick={handleDelete}>
-						Remove
-					</Button>
-				</Grid>
-				<Grid>
-					<Button
-						type="warning"
-						auto
-						scale={1 / 3}
-						font="12px"
-						onClick={() => handleUpdate(Number(rowData.id))}>
-						Update
-					</Button>
-				</Grid>
-			</Grid.Container>
+			<div className="flex flex-col gap-2">
+				<Button type="error" auto scale={1 / 3} onClick={handleDelete}>
+					Remove
+				</Button>
+				<Button
+					type="warning"
+					auto
+					scale={1 / 3}
+					onClick={() => handleUpdate(Number(rowData.id))}>
+					Update
+				</Button>
+				<Button
+					scale={1 / 3}
+					onClick={() =>
+						navigate(`/admin/video/edit/${rowData?.id}`)
+					}>
+					Edit
+				</Button>
+			</div>
 		);
 	};
 
+	const renderBool = (value) => {
+		if (String(value).toLowerCase() === "true") {
+			return <Dot type="success" />;
+		} else {
+			return <Dot type="secondary" />;
+		}
+	};
+
 	return (
-		<div className="allAsanas min-h-screen">
-			<AdminNavbar />
-			<div className="elements">
+		<AdminPageWrapper>
+			<div className="">
 				<Button
 					onClick={() => {
 						handleDownload(asanas);
@@ -310,10 +313,7 @@ function AllAsanas() {
 				{loading ? (
 					<Text>Loading</Text>
 				) : (
-					<Table
-						width={100}
-						data={filteredTransitions}
-						className="bg-white ">
+					<Table data={filteredTransitions} className="bg-white ">
 						{/* <Table.Column prop="id" label="Asana ID" /> */}
 						<Table.Column prop="asana_name" label="Asana Name" />
 						<Table.Column prop="asana_desc" label="Description" />
@@ -357,20 +357,23 @@ function AllAsanas() {
 						<Table.Column
 							prop="nobreak_asana"
 							label="No Break Asana"
-							render={(data) => {
-								if (data) {
-									return "True";
-								} else {
-									return "False";
-								}
-							}}
+							render={renderBool}
 						/>
 						<Table.Column
 							prop="asana_withAudio"
 							label="With Audio?"
+							render={renderBool}
 						/>
-						<Table.Column prop="muted" label="  Muted?" />
-						<Table.Column prop="counter" label="Counter?" />
+						<Table.Column
+							prop="muted"
+							label="Muted?"
+							render={renderBool}
+						/>
+						<Table.Column
+							prop="counter"
+							label="Counter?"
+							render={renderBool}
+						/>
 						<Table.Column
 							prop="operation"
 							label="ACTIONS"
@@ -380,6 +383,7 @@ function AllAsanas() {
 					</Table>
 				)}
 			</div>
+
 			<div>
 				<Modal
 					visible={modalState}
@@ -486,7 +490,7 @@ function AllAsanas() {
 					<Modal.Action onClick={deleteAsana}>Yes</Modal.Action>
 				</Modal>
 			</div>
-		</div>
+		</AdminPageWrapper>
 	);
 }
 

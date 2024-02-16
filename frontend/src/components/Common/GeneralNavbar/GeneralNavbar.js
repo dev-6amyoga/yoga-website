@@ -47,11 +47,13 @@ export default function GeneralNavbar() {
 			<nav className="md:flex gap-4 items-center hidden">
 				<NavLinks />
 			</nav>
-			<Button
-				auto
-				icon={<Menu />}
-				onClick={() => setOpen((p) => !p)}
-				className="block md:hidden"></Button>
+			<div className="md:hidden">
+				<Button
+					auto
+					icon={<Menu />}
+					scale={0.8}
+					onClick={() => setOpen((p) => !p)}></Button>
+			</div>
 			<Drawer
 				visible={open}
 				onClose={() => setOpen(false)}
@@ -62,9 +64,9 @@ export default function GeneralNavbar() {
 				<Drawer.Title>My Yoga Teacher</Drawer.Title>
 				<Drawer.Content className="relative">
 					<button
-						className="absolute -top-10 right-4 px-3 py-2 border rounded-lg"
+						className="absolute -top-9 right-4 px-2 py-1 border rounded-lg"
 						onClick={() => setOpen(false)}>
-						<X />
+						<X className="w-5 h-5" />
 					</button>
 					<div className="flex flex-col gap-6 my-4 items-center text-xl">
 						<NavLinks />

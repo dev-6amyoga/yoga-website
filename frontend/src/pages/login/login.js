@@ -188,8 +188,23 @@ export default function Login({ switchForm }) {
 				// });
 
 				// set token cookies
-				setCookie("6amyoga_access_token", userData?.accessToken);
-				setCookie("6amyoga_refresh_token", userData?.refreshToken);
+				// setCookie("6amyoga_access_token", userData?.accessToken, {
+				// 	domain: "localhost",
+				// 	path: "/",
+				// });
+				// setCookie("6amyoga_refresh_token", userData?.refreshToken, {
+				// 	domain: "localhost",
+				// 	path: "/",
+				// });
+
+				sessionStorage.setItem(
+					"6amyoga_access_token",
+					userData?.accessToken
+				);
+				sessionStorage.setItem(
+					"6amyoga_refresh_token",
+					userData?.refreshToken
+				);
 
 				// console.log(userData);
 
@@ -197,14 +212,18 @@ export default function Login({ switchForm }) {
 				setCurrentRole(currRole);
 			} else {
 				const errorData = response.data;
-				removeCookie("6amyoga_access_token");
-				removeCookie("6amyoga_refresh_token");
+				// removeCookie("6amyoga_access_token");
+				// removeCookie("6amyoga_refresh_token");
+				sessionStorage.removeItem("6amyoga_access_token");
+				sessionStorage.removeItem("6amyoga_refresh_token");
 				console.log("here1");
 				toast(errorData?.error, { type: "error" });
 			}
 		} catch (error) {
-			removeCookie("6amyoga_access_token");
-			removeCookie("6amyoga_refresh_token");
+			// removeCookie("6amyoga_access_token");
+			// removeCookie("6amyoga_refresh_token");
+			sessionStorage.removeItem("6amyoga_access_token");
+			sessionStorage.removeItem("6amyoga_refresh_token");
 			toast("Error logging in, try again", { type: "error" });
 		}
 	};
