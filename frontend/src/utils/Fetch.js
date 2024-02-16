@@ -70,7 +70,7 @@ export const FetchRetry = async ({
 	responseType,
 	params = {},
 	headers = {},
-	n = 0,
+	n = 2,
 	retryDelayMs = 1000,
 	onRetry = null,
 }) => {

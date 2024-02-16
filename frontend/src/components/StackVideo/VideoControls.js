@@ -137,7 +137,7 @@ function VideoControls({ handleFullScreen }) {
 						type="range"
 						min="0"
 						max="100"
-						class="accent-orange-500"
+						className="accent-orange-500"
 						ref={volumeSliderRef}
 						onChange={(e) =>
 							setVolume(parseFloat(e.target.value) / 100)

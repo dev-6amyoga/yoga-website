@@ -10,6 +10,7 @@ import RegisterVideoForm from "../components/content-management/forms/RegisterVi
 import AdminHome from "../pages/admin/AdminHome";
 import RegisterNewPlan from "../pages/admin/Plans/RegisterNewPlan";
 // import Settings from '../pages/admin/settings/settings';
+import EditAsana from "../components/content-management/EditAsana";
 import RegisterNewCategoryForm from "../components/content-management/forms/RegisterNewCategoryForm";
 import ViewAllPlans from "../pages/admin/Plans/ViewAllPlans";
 import DiscountManagement from "../pages/admin/discount-management";
@@ -26,10 +27,29 @@ export const AdminRoutes = [
 		path: "/admin",
 		element: <AdminHome />,
 	},
+	// video
 	{
-		path: "/content/video/create",
+		path: "/admin/video/create",
 		element: <RegisterVideoForm />,
 	},
+	{
+		path: "/admin/video/edit/:asana_id",
+		element: <EditAsana />,
+	},
+	{
+		path: "/admin/video/view-all",
+		element: <AllAsanas />,
+	},
+	// video transition
+	{
+		path: "/admin/video/transition/create",
+		element: <RegisterTransitionVideoForm />,
+	},
+	{
+		path: "/admin/video/transition/all",
+		element: <AllTransitions />,
+	},
+	// schedule
 	{
 		path: "/admin/schedule/register",
 		element: <RegisterNewSchedule />,
@@ -38,22 +58,34 @@ export const AdminRoutes = [
 		path: "/admin/schedule/view",
 		element: <ViewAllSchedules />,
 	},
+	// language
 	{
-		path: "/content/language/create",
+		path: "/admin/language/create",
 		element: <RegisterLanguageForm />,
 	},
 	{
-		path: "/content/playlist/create",
+		path: "/admin/language/view-all",
+		element: <AllLanguages />,
+	},
+	// playlist
+	{
+		path: "/admin/playlist/create",
 		element: <RegisterPlaylistForm />,
 	},
 	{
-		path: "/content/asana-category/create",
+		path: "/admin/playlist/view-all",
+		element: <AllPlaylists />,
+	},
+	// asana category
+	{
+		path: "/admin/asana-category/create",
 		element: <RegisterNewCategoryForm />,
 	},
 	{
-		path: "/content/asana-category/all",
+		path: "/admin/asana-category/all",
 		element: <AllAsanaCategories />,
 	},
+	// members
 	{
 		path: "/admin/members/institutes",
 		element: <Institutes />,
@@ -66,6 +98,7 @@ export const AdminRoutes = [
 		path: "/admin/members/students",
 		element: <Students />,
 	},
+	// transactions
 	{
 		path: "/admin/transactions/log-payment",
 		element: <LogPayment />,
@@ -74,38 +107,16 @@ export const AdminRoutes = [
 		path: "/admin/transactions/refund",
 		element: <RefundManagement />,
 	},
+	// plans
 	{
-		path: "/content/video/transition/create",
-		element: <RegisterTransitionVideoForm />,
-	},
-	{
-		path: "/content/transition/all",
-		element: <AllTransitions />,
-	},
-	{
-		path: "/content/video/create/addmarkers",
-		element: <RegisterVideoForm />,
-	},
-	{
-		path: "/admin/allAsanas",
-		element: <AllAsanas />,
-	},
-	{
-		path: "/admin/allPlaylists",
-		element: <AllPlaylists />,
-	},
-	{
-		path: "/admin/allLanguages",
-		element: <AllLanguages />,
-	},
-	{
-		path: "/plan/registerNewPlan",
+		path: "/admin/plan/create",
 		element: <RegisterNewPlan />,
 	},
 	{
-		path: "/plan/viewAllPlans",
+		path: "/admin/plan/view-all",
 		element: <ViewAllPlans />,
 	},
+	// discount management
 	{
 		path: "/admin/discount-management",
 		element: <DiscountManagement />,

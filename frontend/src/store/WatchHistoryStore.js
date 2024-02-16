@@ -2,6 +2,9 @@ import { create } from "zustand";
 import { Fetch } from "../utils/Fetch";
 
 const useWatchHistoryStore = create((set, get) => ({
+	enableWatchHistory: true,
+	setEnableWatchHistory: (enable) => set({ enableWatchHistory: enable }),
+
 	watchHistory: false,
 	updateWatchHistory: (wh) =>
 		set((state) => {

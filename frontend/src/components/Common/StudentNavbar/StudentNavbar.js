@@ -7,6 +7,7 @@ import useUserStore from "../../../store/UserStore";
 import { Divider } from "@geist-ui/core";
 import { useCookies } from "react-cookie";
 import RoleShifter from "../RoleShifter";
+import { FetchRetry } from "../../../utils/Fetch";
 
 function StudentNavbar() {
 	const [open, setOpen] = useState(false);
@@ -26,17 +27,28 @@ function StudentNavbar() {
 	]);
 
 	const handleLogout = () => {
-		console.log("logout");
-		removeCookie("6amyoga_access_token", {
-			domain: "localhost",
-			path: "/",
-		});
-		removeCookie("6amyoga_refresh_token", {
-			domain: "localhost",
-			path: "/",
-		});
-		resetUserState();
-		navigate("/auth");
+		FetchRetry({
+			url: "http://localhost:4000/auth/logout",
+			method: "POST",
+			token: true,
+		})
+			.then((res) => {
+				// removeCookie("6amyoga_access_token", {
+				// 	domain: "localhost",
+				// 	path: "/",
+				// });
+				// removeCookie("6amyoga_refresh_token", {
+				// 	domain: "localhost",
+				// 	path: "/",
+				// });
+				sessionStorage.removeItem("6amyoga_access_token");
+				sessionStorage.removeItem("6amyoga_refresh_token");
+				resetUserState();
+				navigate("/auth");
+			})
+			.catch((err) => {
+				console.error("Logout Error:", err);
+			});
 	};
 
 	useEffect(() => {

@@ -58,7 +58,7 @@ function RegisterNewCategoryForm() {
 
 					if (response.ok) {
 						toast("New Category added successfully");
-						navigate("/content/asana-category/all");
+						navigate("/admin/asana-category/all");
 					} else {
 						toast("Failed to add new category");
 					}

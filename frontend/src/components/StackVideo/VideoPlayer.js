@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import usePlaylistStore from "../../store/PlaylistStore";
 import useVideoStore, {
 	STATE_VIDEO_ERROR,
@@ -7,7 +7,6 @@ import useVideoStore, {
 } from "../../store/VideoStore";
 
 import { Button, Loading } from "@geist-ui/core";
-import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import { FaPause, FaPlay } from "react-icons/fa";

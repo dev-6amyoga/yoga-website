@@ -2,8 +2,10 @@ import { Tabs } from "@geist-ui/core";
 import InstitutePageWrapper from "../../../components/Common/InstitutePageWrapper";
 import ChangePassword from "../../../components/Institute/UserSettings/ChangePassword";
 import GeneralSettings from "../../../components/Institute/UserSettings/GeneralSettings";
+import { withAuth } from "../../../utils/withAuth";
+import { ROLE_INSTITUTE_OWNER } from "../../../enums/roles";
 
-export default function UserSettings() {
+function UserSettings() {
 	return (
 		<InstitutePageWrapper heading="User Settings">
 			<div className="max-w-7xl mx-auto">
@@ -19,3 +21,5 @@ export default function UserSettings() {
 		</InstitutePageWrapper>
 	);
 }
+
+export default withAuth(UserSettings, ROLE_INSTITUTE_OWNER);

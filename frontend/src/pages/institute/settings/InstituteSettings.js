@@ -3,8 +3,10 @@ import InstitutePageWrapper from "../../../components/Common/InstitutePageWrappe
 import BillingSettings from "../../../components/Institute/InstituteSettings/BillingSettings";
 import ContactInfoSettings from "../../../components/Institute/InstituteSettings/ContactInfoSettings";
 import GeneralSettings from "../../../components/Institute/InstituteSettings/GeneralSettings";
+import { ROLE_INSTITUTE_OWNER } from "../../../enums/roles";
+import { withAuth } from "../../../utils/withAuth";
 
-export default function InstituteSettings() {
+function InstituteSettings() {
 	return (
 		<InstitutePageWrapper heading="Institute Settings">
 			<div className="max-w-7xl mx-auto">
@@ -23,3 +25,5 @@ export default function InstituteSettings() {
 		</InstitutePageWrapper>
 	);
 }
+
+export default withAuth(InstituteSettings, ROLE_INSTITUTE_OWNER);

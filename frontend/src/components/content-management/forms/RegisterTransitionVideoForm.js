@@ -143,7 +143,7 @@ function RegisterTransitionVideoForm() {
 					);
 					if (response.ok) {
 						toast("New Transition added successfully");
-						navigate("/content/transition/all");
+						navigate("/admin/video/transition/all");
 					} else {
 						console.log("Failed to add new transition");
 					}
