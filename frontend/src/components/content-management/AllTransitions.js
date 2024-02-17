@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { ROLE_ROOT } from "../../enums/roles";
 import { withAuth } from "../../utils/withAuth";
-import AdminNavbar from "../Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../Common/AdminPageWrapper";
 
 function AllTransitions() {
 	const [delState, setDelState] = useState(false);
@@ -112,9 +112,8 @@ function AllTransitions() {
 		}
 	};
 	return (
-		<div className="allAsanas min-h-screen">
-			<AdminNavbar />
-			<div className="elements">
+		<AdminPageWrapper heading="Content Management - View All Transitions">
+			<div>
 				<Button
 					onClick={() => {
 						handleDownload(transitions);
@@ -133,10 +132,7 @@ function AllTransitions() {
 					onChange={(e) => setSearchTerm(e.target.value)}
 				/>
 
-				<Table
-					width={100}
-					data={filteredTransitions}
-					className="bg-white ">
+				<Table data={filteredTransitions} className="bg-white ">
 					<Table.Column prop="transition_id" label="ID" />
 					<Table.Column
 						prop="transition_video_name"
@@ -167,7 +163,7 @@ function AllTransitions() {
 					<Modal.Action onClick={deleteCategory}>Yes</Modal.Action>
 				</Modal>
 			</div>
-		</div>
+		</AdminPageWrapper>
 	);
 }
 

@@ -1,8 +1,16 @@
-import { Button, Checkbox, Input, Select, Text } from "@geist-ui/core";
+import {
+	Button,
+	Card,
+	Checkbox,
+	Input,
+	Select,
+	Spacer,
+	Text,
+} from "@geist-ui/core";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { ROLE_ROOT } from "../../../enums/roles";
 import { withAuth } from "../../../utils/withAuth";
 
@@ -70,17 +78,12 @@ function RegisterNewPlan() {
 	};
 
 	return (
-		<div className="video_form min-h-screen">
-			<AdminNavbar />
-
-			<div className="flex items-center justify-center min-h-screen max-w-4xl mx-auto">
-				<form
-					className="flex flex-col gap-1 border-2 w-full p-4 rounded-md mx-auto bg-white"
-					onSubmit={handleSubmit}>
-					<Text h3>Register New Plan</Text>
-					<br />
-
-					<br />
+		<AdminPageWrapper heading="Plan Management - Register New Plan">
+			<Card>
+				<Text h3>Register New Plan</Text>
+				<hr />
+				<Spacer h={1} />
+				<form className="flex flex-col gap-1" onSubmit={handleSubmit}>
 					<Text h5>Plan Name:</Text>
 					<Input width="100%" id="plan_name"></Input>
 					<br />
@@ -119,8 +122,8 @@ function RegisterNewPlan() {
 					</Select>
 					<Button htmlType="submit">Submit</Button>
 				</form>
-			</div>
-		</div>
+			</Card>
+		</AdminPageWrapper>
 	);
 }
 

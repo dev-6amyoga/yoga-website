@@ -4,15 +4,15 @@ import AllLanguages from "../components/content-management/AllLanguages";
 import AllPlaylists from "../components/content-management/AllPlaylists";
 import AllTransitions from "../components/content-management/AllTransitions";
 import RegisterLanguageForm from "../components/content-management/forms/RegisterLanguage";
-import RegisterPlaylistForm from "../components/content-management/forms/RegisterPlaylistForm";
 import RegisterTransitionVideoForm from "../components/content-management/forms/RegisterTransitionVideoForm";
-import RegisterVideoForm from "../components/content-management/forms/RegisterVideoForm";
 import AdminHome from "../pages/admin/AdminHome";
 import RegisterNewPlan from "../pages/admin/Plans/RegisterNewPlan";
 // import Settings from '../pages/admin/settings/settings';
 import RegisterNewCategoryForm from "../components/content-management/forms/RegisterNewCategoryForm";
 import ViewAllPlans from "../pages/admin/Plans/ViewAllPlans";
+import RegisterPlaylist from "../pages/admin/content-management/playlist/RegisterPlaylist";
 import EditAsana from "../pages/admin/content-management/video/EditAsana";
+import RegisterVideo from "../pages/admin/content-management/video/RegisterVideo";
 import DiscountManagement from "../pages/admin/discount-management";
 import Institutes from "../pages/admin/member-management/Institutes";
 import Students from "../pages/admin/member-management/Students";
@@ -30,7 +30,7 @@ export const AdminRoutes = [
 	// video
 	{
 		path: "/admin/video/create",
-		element: <RegisterVideoForm />,
+		element: <RegisterVideo />,
 	},
 	{
 		path: "/admin/video/edit/:asana_id",
@@ -70,7 +70,7 @@ export const AdminRoutes = [
 	// playlist
 	{
 		path: "/admin/playlist/create",
-		element: <RegisterPlaylistForm />,
+		element: <RegisterPlaylist />,
 	},
 	{
 		path: "/admin/playlist/view-all",

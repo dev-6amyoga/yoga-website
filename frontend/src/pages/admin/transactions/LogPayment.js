@@ -11,7 +11,7 @@ import {
 import { ArrowRight, UserCheck, UserPlus } from "@geist-ui/icons";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import CustomInput from "../../../components/Common/CustomInput";
 import { ROLE_ROOT } from "../../../enums/roles";
 import { Fetch } from "../../../utils/Fetch";
@@ -20,25 +20,35 @@ import { withAuth } from "../../../utils/withAuth";
 
 function LogPayment() {
 	const [userStatus, setUserStatus] = useState("EXISTING");
+
 	const [user_id, setUserId] = useState(0);
 	const [plan_id, setPlanId] = useState(0);
 	const [instituteId, setInstituteId] = useState(0);
+
 	const [amount, setAmount] = useState(0);
+
 	const [validityFromDate, setValidityFromDate] = useState("");
 	const [validityToDate, setValidityToDate] = useState(null);
-	const [userPlans, setUserPlans] = useState([]);
+
 	const [students, setStudents] = useState([]);
 	const [institutes, setInstitutes] = useState([]);
+
 	const [currentStatus, setCurrentStatus] = useState("");
+
+	const [userPlans, setUserPlans] = useState([]);
 	const [studentPlans, setStudentPlans] = useState([]);
 	const [institutePlans, setInstitutePlans] = useState([]);
+
 	const [planConfirmed, setPlanConfirmed] = useState(false);
 	const [planAddition, setPlanAddition] = useState(false);
+
 	const [modalData, setModalData] = useState({});
 	const [paymentFor, setPaymentFor] = useState("");
+
 	const [studentData, setStudentData] = useState([]);
 	const [instituteData, setInstituteData] = useState([]);
 	const [userType, setUserType] = useState("");
+
 	const [nextClicked, setNextClicked] = useState(false);
 	const [showUserSelection, setShowUserSelection] = useState(false);
 
@@ -49,6 +59,7 @@ function LogPayment() {
 		console.log(endDate.toISOString().split("T")[0]);
 		setValidityToDate(endDate.toISOString().split("T")[0]);
 	};
+
 	useEffect(() => {
 		// Log the updated validityToDate whenever it changes
 		console.log("Validity To:", validityToDate);
@@ -424,17 +435,12 @@ function LogPayment() {
 		}
 	};
 	return (
-		<div className="bg-[#f0efed] min-h-screen">
-			<div className="h-20 bg-zinc-800 text-white">
-				<AdminNavbar />
-			</div>
+		<AdminPageWrapper heading="Log a payment">
 			<div className="">
 				<div className="p-8 lg:p-20">
-					<div className="bg-white p-4 rounded-lg max-w-xl mx-auto">
+					<div className="border bg-white p-4 rounded-lg max-w-xl mx-auto">
 						<h3 className="text-center text-2xl">Log a Payment</h3>
-						<br />
 						<hr />
-						<br />
 						<div className="flex flex-col gap-1 items-center w-full mt-4">
 							<div className="flex flex-row gap-1 items-center w-full mt-4">
 								<div
@@ -774,7 +780,7 @@ function LogPayment() {
 					</div>
 				</div>
 			</div>
-		</div>
+		</AdminPageWrapper>
 	);
 }
 

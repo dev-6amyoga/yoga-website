@@ -1,7 +1,16 @@
-import { Button, Card, Grid, Input, Modal, Table, Text } from "@geist-ui/core";
+import {
+	Button,
+	Card,
+	Grid,
+	Input,
+	Modal,
+	Spacer,
+	Table,
+	Text,
+} from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { ROLE_ROOT } from "../../../enums/roles";
 import { Fetch } from "../../../utils/Fetch";
 import { validateEmail, validatePhone } from "../../../utils/formValidation";
@@ -259,149 +268,125 @@ function Students() {
 		}
 	};
 	return (
-		<div>
-			<AdminNavbar />
-			<div className="allAsanas flex flex-col items-center min-h-screen justify-center">
-				<div className="elements">
-					<Card>
-						<Table
-							width="100%"
-							data={studentData}
-							className="bg-white">
-							<Table.Column prop="user_id" label="ID" />
-							<Table.Column
-								label="Username"
-								width={150}
-								prop="username"
-							/>
-							<Table.Column
-								label="Student Name"
-								width={150}
-								prop="name"
-							/>
-							<Table.Column
-								label="Email ID"
-								width={200}
-								prop="email"
-							/>
-							<Table.Column
-								label="Phone"
-								width={150}
-								prop="phone"
-							/>
-							<Table.Column
-								prop="operation"
-								label="ACTIONS"
-								width={150}
-								render={renderAction1}
-							/>
-						</Table>
-					</Card>
-				</div>
-
+		<AdminPageWrapper heading="Member Management - Students">
+			<div className="elements">
 				<Card>
-					<Text h4>Pending Email Update Requests</Text>
-					<div className="flex flex-col items-start gap-2 p-6 bg-gray-500 text-white mt-4 mx-4 rounded-md">
-						<Card width="100%">
-							<Table
-								width="100%"
-								data={filteredUpdateRequests}
-								className="bg-white">
-								<Table.Column prop="user_id" label="User ID" />
-								<Table.Column
-									label="Student Name"
-									width={150}
-									prop="name"
-								/>
-								<Table.Column
-									label="Old Email ID"
-									width={200}
-									prop="old_email"
-								/>
-								<Table.Column
-									label="New Email ID"
-									width={200}
-									prop="new_email"
-								/>
-								<Table.Column
-									label="Phone"
-									width={150}
-									prop="phone"
-								/>
-								<Table.Column
-									prop="operation"
-									label="Approve/Reject"
-									width={150}
-									render={RenderAction}
-								/>
-							</Table>
-						</Card>
-					</div>
+					<Table width="100%" data={studentData} className="bg-white">
+						<Table.Column prop="user_id" label="ID" />
+						<Table.Column
+							label="Username"
+							width={150}
+							prop="username"
+						/>
+						<Table.Column
+							label="Student Name"
+							width={150}
+							prop="name"
+						/>
+						<Table.Column
+							label="Email ID"
+							width={200}
+							prop="email"
+						/>
+						<Table.Column label="Phone" width={150} prop="phone" />
+						<Table.Column
+							prop="operation"
+							label="ACTIONS"
+							width={150}
+							render={renderAction1}
+						/>
+					</Table>
 				</Card>
-				<div>
-					<Modal
-						visible={modalState}
-						onClose={() => setModalState(false)}
-						width="50rem">
-						<Modal.Title>Update User Details</Modal.Title>
-						<Modal.Content>
-							<form>
-								<Input
-									width="100%"
-									id="username"
-									placeholder={modalData.username}
-									onChange={handleInputChange}>
-									Username
-								</Input>
-								<Input
-									width="100%"
-									id="name"
-									placeholder={modalData.name}
-									onChange={handleInputChange}>
-									Name
-								</Input>
-								<Input
-									width="100%"
-									id="email"
-									placeholder={modalData.email}
-									onChange={handleInputChange}>
-									Email ID
-								</Input>
-								<Input
-									width="100%"
-									id="phone"
-									placeholder={modalData.phone}
-									onChange={handleInputChange}>
-									Phone Number
-								</Input>
-								<br />
-							</form>
-						</Modal.Content>
-						<Modal.Action
-							passive
-							onClick={() => setModalState(false)}>
-							Cancel
-						</Modal.Action>
-						<Modal.Action onClick={updateData}>Update</Modal.Action>
-					</Modal>
-
-					<Modal
-						visible={delState}
-						onClose={() => setDelState(false)}>
-						<Modal.Title>Delete User</Modal.Title>
-						<Modal.Content>
-							<p>Do you really wish to delete this user?</p>
-						</Modal.Content>
-						<Modal.Action
-							passive
-							onClick={() => setDelState(false)}>
-							No
-						</Modal.Action>
-						<Modal.Action onClick={deleteUser}>Yes</Modal.Action>
-					</Modal>
-				</div>
 			</div>
-		</div>
+			<Spacer h={2} />
+			<Card>
+				<Text h4>Pending Email Update Requests</Text>
+				<Table
+					width="100%"
+					data={filteredUpdateRequests}
+					className="bg-white">
+					<Table.Column prop="user_id" label="User ID" />
+					<Table.Column
+						label="Student Name"
+						width={150}
+						prop="name"
+					/>
+					<Table.Column
+						label="Old Email ID"
+						width={200}
+						prop="old_email"
+					/>
+					<Table.Column
+						label="New Email ID"
+						width={200}
+						prop="new_email"
+					/>
+					<Table.Column label="Phone" width={150} prop="phone" />
+					<Table.Column
+						prop="operation"
+						label="Approve/Reject"
+						width={150}
+						render={RenderAction}
+					/>
+				</Table>
+			</Card>
+			<div>
+				<Modal
+					visible={modalState}
+					onClose={() => setModalState(false)}
+					width="50rem">
+					<Modal.Title>Update User Details</Modal.Title>
+					<Modal.Content>
+						<form>
+							<Input
+								width="100%"
+								id="username"
+								placeholder={modalData.username}
+								onChange={handleInputChange}>
+								Username
+							</Input>
+							<Input
+								width="100%"
+								id="name"
+								placeholder={modalData.name}
+								onChange={handleInputChange}>
+								Name
+							</Input>
+							<Input
+								width="100%"
+								id="email"
+								placeholder={modalData.email}
+								onChange={handleInputChange}>
+								Email ID
+							</Input>
+							<Input
+								width="100%"
+								id="phone"
+								placeholder={modalData.phone}
+								onChange={handleInputChange}>
+								Phone Number
+							</Input>
+							<br />
+						</form>
+					</Modal.Content>
+					<Modal.Action passive onClick={() => setModalState(false)}>
+						Cancel
+					</Modal.Action>
+					<Modal.Action onClick={updateData}>Update</Modal.Action>
+				</Modal>
+
+				<Modal visible={delState} onClose={() => setDelState(false)}>
+					<Modal.Title>Delete User</Modal.Title>
+					<Modal.Content>
+						<p>Do you really wish to delete this user?</p>
+					</Modal.Content>
+					<Modal.Action passive onClick={() => setDelState(false)}>
+						No
+					</Modal.Action>
+					<Modal.Action onClick={deleteUser}>Yes</Modal.Action>
+				</Modal>
+			</div>
+		</AdminPageWrapper>
 	);
 }
 

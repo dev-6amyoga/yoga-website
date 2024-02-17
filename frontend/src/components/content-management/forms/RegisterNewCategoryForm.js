@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { ROLE_ROOT } from "../../../enums/roles";
 import getFormData from "../../../utils/getFormData";
 import { withAuth } from "../../../utils/withAuth";
-import AdminNavbar from "../../Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../../Common/AdminPageWrapper";
 import "./RegisterVideoForm.css";
 
 function RegisterNewCategoryForm() {
@@ -70,15 +70,11 @@ function RegisterNewCategoryForm() {
 	};
 
 	return (
-		<div className="video_form min-h-screen">
-			<AdminNavbar />
-			<div className="flex items-center justify-center min-h-screen max-w-4xl mx-auto">
-				<form
-					className="flex flex-col gap-1 border-2 w-full p-4 rounded-md mx-auto bg-white"
-					onSubmit={handleSubmit}>
-					<Text h3>Register New Asana Category</Text>
+		<AdminPageWrapper heading="Content Management - Register New Asana Category">
+			<Card>
+				<form className="flex flex-col gap-1" onSubmit={handleSubmit}>
 					<br />
-					<Card shadow>
+					<Card>
 						<Text span style={{ color: "#949392" }}>
 							Existing Asana Categories :
 						</Text>
@@ -95,8 +91,8 @@ function RegisterNewCategoryForm() {
 					<br />
 					<Button htmlType="submit">Submit</Button>
 				</form>
-			</div>
-		</div>
+			</Card>
+		</AdminPageWrapper>
 	);
 }
 

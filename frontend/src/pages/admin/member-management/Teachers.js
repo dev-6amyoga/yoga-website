@@ -1,7 +1,7 @@
 import { Table } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { ROLE_ROOT } from "../../../enums/roles";
 import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
@@ -54,10 +54,9 @@ function Teachers() {
 		fetchData();
 	}, []);
 	return (
-		<div className="allAsanas min-h-screen">
-			<AdminNavbar />
+		<AdminPageWrapper heading="Member Management - Teachers">
 			<div className="elements">
-				<Table width={50} data={users} className="bg-white">
+				<Table data={users} className="bg-white">
 					<Table.Column prop="user_id" label="ID" />
 					<Table.Column
 						label="Teacher Name"
@@ -68,7 +67,7 @@ function Teachers() {
 					<Table.Column label="Phone" width={150} prop="phone" />
 				</Table>
 			</div>
-		</div>
+		</AdminPageWrapper>
 	);
 }
 
