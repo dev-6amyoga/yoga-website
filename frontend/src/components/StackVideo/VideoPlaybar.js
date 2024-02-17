@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DraggableCore } from "react-draggable";
+import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
 import usePlaylistStore from "../../store/PlaylistStore";
 import useVideoStore, {
   STATE_VIDEO_ERROR,
@@ -16,13 +17,25 @@ export default function VideoPlaybar({
   handleSetPause,
   handleFullScreen,
 }) {
-  const [currentTime, addToSeekQueue, setCurrentTime, currentVideo] =
-    useVideoStore((state) => [
-      state.currentTime,
-      state.addToSeekQueue,
-      state.setCurrentTime,
-      state.currentVideo,
-    ]);
+  const [
+    currentTime,
+    addToSeekQueue,
+    setCurrentTime,
+    currentVideo,
+    markers,
+    currentMarkerIdx,
+    setCurrentMarkerIdx,
+    viewMode,
+  ] = useVideoStore((state) => [
+    state.currentTime,
+    state.addToSeekQueue,
+    state.setCurrentTime,
+    state.currentVideo,
+    state.markers,
+    state.currentMarkerIdx,
+    state.setCurrentMarkerIdx,
+    state.viewMode,
+  ]);
 
   const popFromQueue = usePlaylistStore((state) => state.popFromQueue);
 
@@ -32,14 +45,42 @@ export default function VideoPlaybar({
     setCurrentTime(0);
   }, [currentVideo, setCurrentTime]);
 
+  const prevNextMarkers = useMemo(() => {
+    if (currentMarkerIdx === null || !markers || markers.length === 0) {
+      return [null, null];
+    }
+
+    if (currentMarkerIdx === markers.length - 1) {
+      return [markers[currentMarkerIdx], null];
+    }
+
+    return [markers[currentMarkerIdx], markers[currentMarkerIdx + 1]];
+  }, [currentMarkerIdx, markers]);
+
   // jugaad : if the video is less than 10 seconds, pop it from queue after 7.5 seconds
+  // check if the current time is past the marker, set the current marker index / go back to start of marker
   // FIX :
   useEffect(() => {
     if (currentVideo && duration > 0 && duration < 10 && currentTime >= 7.5) {
       popTimeout.current = setTimeout(() => {
         console.log("Popping from queue");
         popFromQueue(0);
-      }, 50);
+      }, 60);
+    }
+
+    // console.log(viewMode, currentTime, prevNextMarkers);
+    if (prevNextMarkers[1] && currentTime >= prevNextMarkers[1].timestamp) {
+      if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+        setCurrentMarkerIdx(
+          currentMarkerIdx + 1 > markers.length - 1 ? 0 : currentMarkerIdx + 1
+        );
+      } else {
+        // if in teaching mode, then go to start of current marker
+        addToSeekQueue({
+          t: prevNextMarkers[0].timestamp,
+          type: "move",
+        });
+      }
     }
 
     return () => {

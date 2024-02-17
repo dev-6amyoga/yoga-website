@@ -10,9 +10,9 @@ import RegisterVideoForm from "../components/content-management/forms/RegisterVi
 import AdminHome from "../pages/admin/AdminHome";
 import RegisterNewPlan from "../pages/admin/Plans/RegisterNewPlan";
 // import Settings from '../pages/admin/settings/settings';
-import EditAsana from "../components/content-management/EditAsana";
 import RegisterNewCategoryForm from "../components/content-management/forms/RegisterNewCategoryForm";
 import ViewAllPlans from "../pages/admin/Plans/ViewAllPlans";
+import EditAsana from "../pages/admin/content-management/video/EditAsana";
 import DiscountManagement from "../pages/admin/discount-management";
 import Institutes from "../pages/admin/member-management/Institutes";
 import Students from "../pages/admin/member-management/Students";
