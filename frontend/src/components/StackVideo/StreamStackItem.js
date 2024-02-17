@@ -92,7 +92,7 @@ function StreamStackItem({
 				pr.currentTime = 0;
 			}
 		};
-	}, [isActive, video.queue_id]);
+	}, [isActive, video.queue_id, setVolume]);
 
 	// set the volume
 	useEffect(() => {
@@ -158,7 +158,7 @@ function StreamStackItem({
 					});
 			}
 		}
-	}, [videoState, isActive]);
+	}, [videoState, isActive, autoplayInitialized, setAutoplayInitialized]);
 
 	// poll to update the current time, every 500ms, clear the timeout on unmount
 	useEffect(() => {

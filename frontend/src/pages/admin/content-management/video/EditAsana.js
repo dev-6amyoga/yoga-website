@@ -1,136 +1,20 @@
-import {
-	Button,
-	Description,
-	Input,
-	Modal,
-	Select,
-	Spacer,
-	Text,
-} from "@geist-ui/core";
+import { Button, Description, Input, Spacer, Text } from "@geist-ui/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBlocker, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Fetch } from "../../utils/Fetch";
-import VideoPlayer from "../StackVideo/VideoPlayer";
+import VideoPlayer from "../../../../components/StackVideo/VideoPlayer";
+import { Fetch } from "../../../../utils/Fetch";
 
 import { ArrowLeft, ArrowRight } from "@geist-ui/icons";
-import usePlaylistStore from "../../store/PlaylistStore";
-import useVideoStore from "../../store/VideoStore";
-import useWatchHistoryStore from "../../store/WatchHistoryStore";
-import getFormData from "../../utils/getFormData";
-import AdminPageWrapper from "../Common/AdminPageWrapper";
-
-const toTimeString = (seconds) => {
-	const s = seconds > 0 ? seconds : 0;
-
-	return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(
-		Math.ceil(s) % 60
-	).padStart(2, "0")}`;
-};
-
-function SaveChangesAlert({
-	unloadBlock,
-	handleUnloadToggle,
-	blocker,
-	updateData,
-}) {
-	return (
-		<Modal visible={blocker.state === "blocked"}>
-			<Modal.Title>Changes will be lost!</Modal.Title>
-			<Modal.Content>
-				Changes made will be lost if you proceed, are you sure?
-			</Modal.Content>
-			<Modal.Action
-				onClick={() => {
-					if (blocker?.reset) blocker.reset();
-				}}>
-				Cancel
-			</Modal.Action>
-			<Modal.Action
-				onClick={() => {
-					if (blocker?.proceed) blocker.proceed();
-					if (unloadBlock) handleUnloadToggle();
-				}}>
-				Proceed
-			</Modal.Action>
-		</Modal>
-	);
-}
-
-function MarkerCard({
-	idx,
-	marker,
-	handleSave,
-	handleDelete,
-	moveToTimestamp,
-}) {
-	const [markerData, setMarkerData] = useState(marker);
-	const [dirty, setDirty] = useState(false);
-
-	const handleChange = (e) => {
-		setMarkerData((m) => ({ ...m, [e.target.name]: e.target.value }));
-	};
-
-	const handleEdit = () => {
-		if (!dirty) {
-			setDirty(true);
-		} else {
-			handleSave(markerData, idx);
-			setDirty(false);
-		}
-	};
-
-	return (
-		<div className="rounded-lg p-4 border flex flex-col justify-between shrink-0">
-			<div className="flex flex-col gap-2">
-				{dirty ? (
-					<Input
-						initialValue={markerData.timestamp}
-						name="timestamp"
-						onChange={handleChange}>
-						Marker Timestamp
-					</Input>
-				) : (
-					<Button
-						scale={0.6}
-						auto
-						mb={1}
-						type="success"
-						onClick={() => {
-							moveToTimestamp(markerData.timestamp);
-						}}>
-						{`Marker : ${markerData?.timestamp}s | ${toTimeString(
-							markerData?.timestamp || 0
-						)}`}
-					</Button>
-				)}
-				{dirty ? (
-					<Input
-						initialValue={markerData.title}
-						name="title"
-						onChange={handleChange}>
-						Marker Title
-					</Input>
-				) : (
-					<p className="max-w-[22ch] break-all break-words text-sm">
-						{markerData.title}
-					</p>
-				)}
-			</div>
-			<div className="grid grid-cols-2 gap-2 pb-2">
-				<Button
-					scale={0.2}
-					onClick={handleEdit}
-					type={dirty ? "success" : "secondary"}>
-					{dirty ? "Save" : "Edit"}
-				</Button>
-				<Button scale={0.2} onClick={() => handleDelete(idx)}>
-					Delete
-				</Button>
-			</div>
-		</div>
-	);
-}
+import AdminPageWrapper from "../../../../components/Common/AdminPageWrapper";
+import EditVideoForm from "../../../../components/content-management/video/edit/EditVideoForm";
+import MarkerCard from "../../../../components/content-management/video/edit/MarkerCard";
+import SaveChangesAlert from "../../../../components/content-management/video/edit/SaveChangesAlert";
+import usePlaylistStore from "../../../../store/PlaylistStore";
+import useVideoStore from "../../../../store/VideoStore";
+import useWatchHistoryStore from "../../../../store/WatchHistoryStore";
+import getFormData from "../../../../utils/getFormData";
+import { toTimeString } from "../../../../utils/toTimeString";
 
 function EditAsana() {
 	const { asana_id } = useParams();
@@ -154,7 +38,10 @@ function EditAsana() {
 		state.addToSeekQueue,
 	]);
 
-	const [addToQueue] = usePlaylistStore((state) => [state.addToQueue]);
+	const [addToQueue, clearQueue] = usePlaylistStore((state) => [
+		state.addToQueue,
+		state.clearQueue,
+	]);
 
 	const [setEnableWatchHistory] = useWatchHistoryStore((state) => [
 		state.setEnableWatchHistory,
@@ -290,17 +177,6 @@ function EditAsana() {
 	}, []);
 
 	const currentMarkers = useMemo(() => {
-		// return [
-		// 	{
-		// 		timestamp: 0,
-		// 		title: "marker something something something",
-		// 	},
-		// 	{
-		// 		timestamp: 0,
-		// 		title: "marker something something something",
-		// 	},
-		// ];
-
 		let prevIdx = -1;
 		let nextIdx = -1;
 
@@ -329,6 +205,8 @@ function EditAsana() {
 		return [
 			prevIdx === -1 ? null : markers[prevIdx],
 			nextIdx === -1 ? null : markers[nextIdx],
+			prevIdx,
+			nextIdx,
 		];
 	}, [currentTime, markers]);
 
@@ -446,11 +324,15 @@ function EditAsana() {
 
 	// set current video
 	useEffect(() => {
+		clearQueue();
 		// set current video
 		if (asana?.id) {
 			addToQueue([asana]);
 		}
-	}, [asana, addToQueue]);
+		return () => {
+			clearQueue();
+		};
+	}, [asana, addToQueue, clearQueue]);
 
 	// get asana by id
 	useEffect(() => {
@@ -519,166 +401,21 @@ function EditAsana() {
 				dirty={dirty}
 			/>
 
-			<div className="rounded-lg border p-4">
-				<form className="flex flex-row gap-4" ref={editAsanaFormRef}>
-					<div className="flex-1 flex flex-col gap-3">
-						<Description title="Asana Details" />
-						<Text small type="secondary">
-							<Text span>Asana ID: </Text>
-							{asana.id}
-						</Text>
-						<Input
-							width="100%"
-							id="asana_name"
-							placeholder={modalData.asana_name}
-							onChange={handleInputChange}>
-							Asana Name
-						</Input>
-
-						<Input
-							width="100%"
-							id="asana_desc"
-							placeholder={modalData.asana_desc}
-							onChange={handleInputChange}>
-							Description
-						</Input>
-
-						<Input
-							width="100%"
-							id="asana_videoID"
-							placeholder={modalData.asana_videoID}
-							onChange={handleInputChange}>
-							Video ID
-						</Input>
-
-						<Input
-							width="100%"
-							id="asana_hls_url"
-							placeholder={modalData.asana_hls_url}
-							onChange={handleInputChange}>
-							HLS Url
-						</Input>
-
-						<Input
-							width="100%"
-							id="asana_dash_url"
-							placeholder={modalData.asana_dash_url}
-							onChange={handleInputChange}>
-							DASH Url
-						</Input>
-
-						<div className="grid grid-cols-4">
-							<div>
-								<Text p>Language</Text>
-								<Select
-									onChange={(val) =>
-										handleSelect(val, "language")
-									}
-									value={modalData.language}>
-									{tableLanguages &&
-										tableLanguages.map((language) => (
-											<Select.Option
-												key={language.language_id}
-												value={language.language}>
-												{language.language}
-											</Select.Option>
-										))}
-								</Select>
-							</div>
-
-							<div>
-								<Text p>Video Type</Text>
-								<Select
-									onChange={(val) =>
-										handleSelect(val, "asana_type")
-									}
-									value={modalData.asana_type}>
-									<Select.Option value="Single">
-										Single
-									</Select.Option>
-									<Select.Option value="Combination">
-										Combination
-									</Select.Option>
-								</Select>
-							</div>
-
-							<div>
-								<Text p>Asana Difficulty</Text>
-								<Select
-									onChange={(val) =>
-										handleSelect(val, "asana_difficulty")
-									}
-									value={modalData.asana_difficulty}>
-									<Select.Option value="Beginner">
-										Beginner
-									</Select.Option>
-									<Select.Option value="Intermediate">
-										Intermediate
-									</Select.Option>
-									<Select.Option value="Advanced">
-										Advanced
-									</Select.Option>
-								</Select>
-							</div>
-
-							<div>
-								<Text p>Category</Text>
-								<Select
-									onChange={(val) =>
-										handleSelect(val, "asana_category")
-									}
-									value={modalData.asana_category}>
-									{categories &&
-										categories.map((x) => (
-											<Select.Option
-												key={x.asana_category_id}
-												value={x.asana_category}>
-												{x.asana_category}
-											</Select.Option>
-										))}
-								</Select>
-							</div>
-						</div>
-					</div>
-					<div className="flex flex-col gap-2">
-						<Description title="Actions" />
-						{dirty ? (
-							<Button
-								scale={0.8}
-								type="secondary"
-								onClick={(e) => {
-									e.preventDefault();
-									resetChanges();
-								}}>
-								Reset Changes
-							</Button>
-						) : (
-							<></>
-						)}
-						<Button
-							scale={0.8}
-							type="warning"
-							onClick={(e) => {
-								e.preventDefault();
-								if (dirty) {
-									updateData();
-								} else {
-									setDirty(true);
-								}
-							}}>
-							{dirty ? "Save Changes" : "Edit"}
-						</Button>
-						<Button
-							scale={0.8}
-							type="error"
-							onClick={(e) => {
-								e.preventDefault();
-							}}>
-							Delete
-						</Button>
-					</div>
-				</form>
-			</div>
+			<EditVideoForm
+				asana={asana}
+				modalData={modalData}
+				setModalData={setModalData}
+				categories={categories}
+				dirty={dirty}
+				editAsanaFormRef={editAsanaFormRef}
+				handleInputChange={handleInputChange}
+				handleSelect={handleSelect}
+				loading={loading}
+				resetChanges={resetChanges}
+				setDirty={setDirty}
+				tableLanguages={tableLanguages}
+				updateData={updateData}
+			/>
 
 			<Spacer h={4} />
 
@@ -707,6 +444,7 @@ function EditAsana() {
 										handleSave={handleSaveMarker}
 										idx={idx}
 										moveToTimestamp={moveToTimestamp}
+										isActive={currentMarkers[2] === idx}
 									/>
 								);
 							})}

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { VIDEO_VIEW_STUDENT_MODE } from "../enums/video_view_modes";
 export const STATE_VIDEO_PLAY = "PLAY";
 export const STATE_VIDEO_PAUSED = "PAUSED";
 export const STATE_VIDEO_LOADING = "LOADING";
@@ -16,6 +17,17 @@ const useVideoStore = create((set) => ({
 	setCurrentVideo: (item) =>
 		set((state) => {
 			return { currentVideo: item };
+		}),
+
+	markers: [],
+	setMarkers: (markers) =>
+		set((state) => {
+			return { markers };
+		}),
+	currentMarkerIdx: null,
+	setCurrentMarkerIdx: (idx) =>
+		set((state) => {
+			return { currentMarkerIdx: idx };
 		}),
 
 	// videoState is one of the STATE_VIDEO_* constants
@@ -72,6 +84,12 @@ const useVideoStore = create((set) => ({
 	setCurrentTime: (time) =>
 		set((state) => {
 			return { currentTime: time };
+		}),
+
+	viewMode: VIDEO_VIEW_STUDENT_MODE,
+	setViewMode: (mode) =>
+		set((state) => {
+			return { viewMode: mode };
 		}),
 }));
 
