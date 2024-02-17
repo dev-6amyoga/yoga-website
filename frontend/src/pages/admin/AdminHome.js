@@ -3,7 +3,7 @@ import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Navbar_Admin from "../../components/Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../../components/Common/AdminPageWrapper";
 import { ROLE_ROOT } from "../../enums/roles";
 import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
@@ -173,136 +173,156 @@ function AdminHome() {
 	};
 
 	return (
-		<div>
+		<AdminPageWrapper heading="Admin Dashboard">
 			<div>
-				<Navbar_Admin />
+				<div className="elements">
+					<Button
+						onClick={() => {
+							handleDownload(sortedInstitutes);
+						}}>
+						Download CSV
+					</Button>
+					<br />
+					<Table
+						width={50}
+						data={sortedInstitutes}
+						className="bg-white ">
+						<Table.Column
+							prop="institute_id"
+							label="Institute ID"
+						/>
+						<Table.Column prop="name" label="Institute Name" />
+						<Table.Column prop="address1" label="Address 1" />
+						<Table.Column prop="address2" label="Address 2" />
+						<Table.Column prop="email" label="Email" />
+						<Table.Column prop="phone" label="Phone" />
+						<Table.Column
+							prop="billing_address"
+							label="Billing Address"
+						/>
+						<Table.Column
+							prop="operation"
+							label="ACTIONS"
+							width={150}
+							render={renderAction}
+						/>
+					</Table>
+				</div>
+
+				<div>
+					{/* update modal */}
+					<Modal
+						visible={modalState}
+						onClose={() => setModalState(false)}>
+						<Modal.Title>Update Institute</Modal.Title>
+						<Modal.Subtitle>{modalData.name}</Modal.Subtitle>
+						<Modal.Content>
+							<form>
+								<Input
+									width="100%"
+									id="name"
+									placeholder={modalData.name}
+									onChange={(e) =>
+										handleInputChange(
+											e.target.value,
+											"name"
+										)
+									}>
+									Institute Name
+								</Input>
+
+								<Input
+									width="100%"
+									id="address1"
+									placeholder={modalData.address1}
+									onChange={(e) =>
+										handleInputChange(
+											e.target.value,
+											"address1"
+										)
+									}>
+									Address1
+								</Input>
+
+								<Input
+									width="100%"
+									id="address2"
+									placeholder={modalData.address2}
+									onChange={(e) =>
+										handleInputChange(
+											e.target.value,
+											"address2"
+										)
+									}>
+									Address2
+								</Input>
+
+								<Input
+									width="100%"
+									id="email"
+									placeholder={modalData.email}
+									onChange={(e) =>
+										handleInputChange(
+											e.target.value,
+											"email"
+										)
+									}>
+									Email
+								</Input>
+
+								<Input
+									width="100%"
+									id="phone"
+									placeholder={modalData.phone}
+									onChange={(e) =>
+										handleInputChange(
+											e.target.value,
+											"phone"
+										)
+									}>
+									Phone
+								</Input>
+
+								<Input
+									width="100%"
+									id="billing _address"
+									placeholder={modalData.billing_address}
+									onChange={(e) =>
+										handleInputChange(
+											e.target.value,
+											"billing_address"
+										)
+									}>
+									Billing address
+								</Input>
+							</form>
+						</Modal.Content>
+
+						<Modal.Action
+							passive
+							onClick={() => setModalState(false)}>
+							Cancel
+						</Modal.Action>
+						<Modal.Action onClick={updateData}>Update</Modal.Action>
+					</Modal>
+					{/* delete modal */}
+					<Modal visible={delState} onClose={closeDelHandler}>
+						<Modal.Title>Delete institute</Modal.Title>
+						<Modal.Content>
+							<p>Do you really wish to delete this Institute?</p>
+						</Modal.Content>
+						<Modal.Action
+							passive
+							onClick={() => setDelState(false)}>
+							No
+						</Modal.Action>
+						<Modal.Action onClick={deleteInstitute}>
+							Yes
+						</Modal.Action>
+					</Modal>
+				</div>
 			</div>
-			<div className="elements">
-				<Button
-					onClick={() => {
-						handleDownload(sortedInstitutes);
-					}}>
-					Download CSV
-				</Button>
-				<br />
-				<Table width={50} data={sortedInstitutes} className="bg-white ">
-					<Table.Column prop="institute_id" label="Institute ID" />
-					<Table.Column prop="name" label="Institute Name" />
-					<Table.Column prop="address1" label="Address 1" />
-					<Table.Column prop="address2" label="Address 2" />
-					<Table.Column prop="email" label="Email" />
-					<Table.Column prop="phone" label="Phone" />
-					<Table.Column
-						prop="billing_address"
-						label="Billing Address"
-					/>
-					<Table.Column
-						prop="operation"
-						label="ACTIONS"
-						width={150}
-						render={renderAction}
-					/>
-				</Table>
-			</div>
-
-			<div>
-				{/* update modal */}
-				<Modal
-					visible={modalState}
-					onClose={() => setModalState(false)}>
-					<Modal.Title>Update Institute</Modal.Title>
-					<Modal.Subtitle>{modalData.name}</Modal.Subtitle>
-					<Modal.Content>
-						<form>
-							<Input
-								width="100%"
-								id="name"
-								placeholder={modalData.name}
-								onChange={(e) =>
-									handleInputChange(e.target.value, "name")
-								}>
-								Institute Name
-							</Input>
-
-							<Input
-								width="100%"
-								id="address1"
-								placeholder={modalData.address1}
-								onChange={(e) =>
-									handleInputChange(
-										e.target.value,
-										"address1"
-									)
-								}>
-								Address1
-							</Input>
-
-							<Input
-								width="100%"
-								id="address2"
-								placeholder={modalData.address2}
-								onChange={(e) =>
-									handleInputChange(
-										e.target.value,
-										"address2"
-									)
-								}>
-								Address2
-							</Input>
-
-							<Input
-								width="100%"
-								id="email"
-								placeholder={modalData.email}
-								onChange={(e) =>
-									handleInputChange(e.target.value, "email")
-								}>
-								Email
-							</Input>
-
-							<Input
-								width="100%"
-								id="phone"
-								placeholder={modalData.phone}
-								onChange={(e) =>
-									handleInputChange(e.target.value, "phone")
-								}>
-								Phone
-							</Input>
-
-							<Input
-								width="100%"
-								id="billing _address"
-								placeholder={modalData.billing_address}
-								onChange={(e) =>
-									handleInputChange(
-										e.target.value,
-										"billing_address"
-									)
-								}>
-								Billing address
-							</Input>
-						</form>
-					</Modal.Content>
-
-					<Modal.Action passive onClick={() => setModalState(false)}>
-						Cancel
-					</Modal.Action>
-					<Modal.Action onClick={updateData}>Update</Modal.Action>
-				</Modal>
-				{/* delete modal */}
-				<Modal visible={delState} onClose={closeDelHandler}>
-					<Modal.Title>Delete institute</Modal.Title>
-					<Modal.Content>
-						<p>Do you really wish to delete this Institute?</p>
-					</Modal.Content>
-					<Modal.Action passive onClick={() => setDelState(false)}>
-						No
-					</Modal.Action>
-					<Modal.Action onClick={deleteInstitute}>Yes</Modal.Action>
-				</Modal>
-			</div>
-		</div>
+		</AdminPageWrapper>
 	);
 }
 

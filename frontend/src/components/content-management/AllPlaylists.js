@@ -5,6 +5,7 @@ import {
 	Modal,
 	Select,
 	Table,
+	Tag,
 	Text,
 	Tooltip,
 } from "@geist-ui/core";
@@ -20,7 +21,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { ROLE_ROOT } from "../../enums/roles";
 import { withAuth } from "../../utils/withAuth";
-import AdminNavbar from "../Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../Common/AdminPageWrapper";
 import { transitionGenerator } from "../transition-generator/TransitionGenerator";
 
 function AllPlaylists() {
@@ -488,8 +489,7 @@ function AllPlaylists() {
 	};
 
 	return (
-		<div className="allAsanas min-h-screen">
-			<AdminNavbar />
+		<AdminPageWrapper heading="Content Management - View All Playlists">
 			<div className="elements">
 				<Button
 					onClick={() => {
@@ -511,10 +511,7 @@ function AllPlaylists() {
 				{loading ? (
 					<Text>Loading</Text>
 				) : (
-					<Table
-						width={100}
-						data={filteredTransitions}
-						className="bg-white ">
+					<Table data={filteredTransitions} className="bg-white ">
 						<Table.Column prop="playlist_id" label="Playlist ID" />
 						<Table.Column
 							prop="playlist_name"
@@ -524,17 +521,17 @@ function AllPlaylists() {
 							prop="asana_ids"
 							label="Asana Names"
 							render={(value, rowData) => (
-								<div>
+								<div className="flex flex-row flex-wrap gap-2 p-2">
 									{value.map((asanaId, index) => {
 										const asana = playlistAsanas.find(
 											(asana) => asana.id === asanaId
 										);
 										return (
-											<div key={index}>
+											<Tag key={index}>
 												{asana
 													? asana.asana_name
 													: asanaId}
-											</div>
+											</Tag>
 										);
 									})}
 								</div>
@@ -754,7 +751,7 @@ function AllPlaylists() {
 					<Modal.Action onClick={deletePlaylist}>Yes</Modal.Action>
 				</Modal>
 			</div>
-		</div>
+		</AdminPageWrapper>
 	);
 }
 

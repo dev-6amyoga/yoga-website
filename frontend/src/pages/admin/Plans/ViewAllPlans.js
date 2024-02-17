@@ -4,13 +4,14 @@ import {
 	Input,
 	Modal,
 	Select,
+	Spacer,
 	Table,
 	Text,
 } from "@geist-ui/core";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { ROLE_ROOT } from "../../../enums/roles";
 import { withAuth } from "../../../utils/withAuth";
 
@@ -186,8 +187,7 @@ function ViewAllPlans() {
 		}
 	};
 	return (
-		<div className="allAsanas min-h-screen">
-			<AdminNavbar />
+		<AdminPageWrapper heading="Plan Management - View All Plans">
 			<div className="elements">
 				<Button
 					onClick={() => {
@@ -195,8 +195,9 @@ function ViewAllPlans() {
 					}}>
 					Download CSV
 				</Button>
-				<br />
-				<Table width={50} data={sortedPlans} className="bg-white ">
+
+				<Spacer h={2} />
+				<Table data={sortedPlans}>
 					<Table.Column prop="plan_id" label="Plan ID" />
 					<Table.Column prop="name" label="Plan Name" />
 					<Table.Column
@@ -382,7 +383,7 @@ function ViewAllPlans() {
 					<Modal.Action onClick={deletePlan}>Yes</Modal.Action>
 				</Modal>
 			</div>
-		</div>
+		</AdminPageWrapper>
 	);
 }
 

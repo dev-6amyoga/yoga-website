@@ -1,15 +1,10 @@
-import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { ROLE_ROOT } from "../../../enums/roles";
 import { withAuth } from "../../../utils/withAuth";
 
 function ViewAllSchedules() {
 	return (
-		<div className="video_form min-h-screen">
-			<AdminNavbar />
-			<div className="flex justify-center my-10 gap-8">
-				View All Schedules
-			</div>
-		</div>
+		<AdminPageWrapper heading="Schedule Management - View All"></AdminPageWrapper>
 	);
 }
 

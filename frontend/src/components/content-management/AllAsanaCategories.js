@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { ROLE_ROOT } from "../../enums/roles";
 import { withAuth } from "../../utils/withAuth";
-import AdminNavbar from "../Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../Common/AdminPageWrapper";
 
 function AllAsanaCategories() {
 	const [delState, setDelState] = useState(false);
@@ -114,8 +114,7 @@ function AllAsanaCategories() {
 	};
 
 	return (
-		<div className="allAsanas min-h-screen">
-			<AdminNavbar />
+		<AdminPageWrapper heading="Content Management - View All Asana Categories">
 			<div className="elements">
 				<Button
 					onClick={() => {
@@ -135,10 +134,7 @@ function AllAsanaCategories() {
 					onChange={(e) => setSearchTerm(e.target.value)}
 				/>
 				<br />
-				<Table
-					width={100}
-					data={filteredTransitions}
-					className="bg-white ">
+				<Table data={filteredTransitions} className="bg-white ">
 					<Table.Column prop="asana_category_id" label="ID" />
 					<Table.Column
 						prop="asana_category"
@@ -164,7 +160,7 @@ function AllAsanaCategories() {
 					<Modal.Action onClick={deleteCategory}>Yes</Modal.Action>
 				</Modal>
 			</div>
-		</div>
+		</AdminPageWrapper>
 	);
 }
 

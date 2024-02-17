@@ -4,7 +4,7 @@ import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import { ROLE_ROOT } from "../../enums/roles";
 import { withAuth } from "../../utils/withAuth";
-import AdminNavbar from "../Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../Common/AdminPageWrapper";
 
 function AllLanguages() {
 	const [delState, setDelState] = useState(false);
@@ -111,8 +111,7 @@ function AllLanguages() {
 	};
 
 	return (
-		<div className="allAsanas min-h-screen">
-			<AdminNavbar />
+		<AdminPageWrapper heading="Content Management - View All Languages">
 			<div className="elements">
 				<Button
 					onClick={() => {
@@ -131,10 +130,7 @@ function AllLanguages() {
 					value={searchTerm}
 					onChange={(e) => setSearchTerm(e.target.value)}
 				/>
-				<Table
-					width={100}
-					data={filteredTransitions}
-					className="bg-white ">
+				<Table data={filteredTransitions} className="bg-white ">
 					<Table.Column prop="language_id" label="Language ID" />
 					<Table.Column prop="language" label="Language" />
 					<Table.Column
@@ -157,7 +153,7 @@ function AllLanguages() {
 					<Modal.Action onClick={deleteLanguage}>Yes</Modal.Action>
 				</Modal>
 			</div>
-		</div>
+		</AdminPageWrapper>
 	);
 }
 

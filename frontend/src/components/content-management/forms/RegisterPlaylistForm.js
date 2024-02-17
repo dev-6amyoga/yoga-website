@@ -1,8 +1,8 @@
 import {
 	Button,
 	Card,
+	Collapse,
 	Divider,
-	Grid,
 	Input,
 	Modal,
 	Table,
@@ -10,9 +10,6 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { ROLE_ROOT } from "../../../enums/roles";
-import { withAuth } from "../../../utils/withAuth";
-import AdminNavbar from "../../Common/AdminNavbar/AdminNavbar";
 import { transitionGenerator } from "../../transition-generator/TransitionGenerator";
 
 function RegisterPlaylistForm() {
@@ -269,28 +266,24 @@ function RegisterPlaylistForm() {
 		};
 
 		return (
-			<Grid.Container gap={0.1}>
-				<Grid>
-					<Button
-						type="error"
-						auto
-						scale={1 / 5}
-						font="12px"
-						onClick={handleDelete}>
-						Remove
-					</Button>
-				</Grid>
-				<Grid>
-					<Button
-						type="warning"
-						auto
-						scale={1 / 5}
-						font="12px"
-						onClick={() => handleUpdate(Number(rowData.id))}>
-						Update
-					</Button>
-				</Grid>
-			</Grid.Container>
+			<div>
+				<Button
+					type="error"
+					auto
+					scale={1 / 5}
+					font="12px"
+					onClick={handleDelete}>
+					Remove
+				</Button>
+				<Button
+					type="warning"
+					auto
+					scale={1 / 5}
+					font="12px"
+					onClick={() => handleUpdate(Number(rowData.id))}>
+					Update
+				</Button>
+			</div>
 		);
 	};
 
@@ -318,147 +311,132 @@ function RegisterPlaylistForm() {
 	});
 
 	return (
-		<div className="video_form min-h-screen">
-			<AdminNavbar />
-			<div className="flex justify-center my-10 gap-8">
-				<div className="flex flex-col items-center justify-center my-10 gap-1">
+		<div className="">
+			<div className="grid gap-4 grid-cols-3">
+				<Collapse.Group className="col-start-1 col-span-2">
 					{filteredAsanasByCategory.map((categoryData, index) => (
-						<Card key={index} shadow width="100%">
-							<Card.Content>
-								<h6>{categoryData.category}</h6>
-								<Table
-									data={categoryData.asanas}
-									className="bg-white">
-									<Table.Column
-										prop="asana_name"
-										label="Asana Name"
-									/>
-									<Table.Column
-										prop="language"
-										label="Language"
-										render={(data) => {
-											if (data === "") {
-												return "No Audio";
-											}
-											return data.language;
-										}}
-									/>
-									<Table.Column
-										prop="nobreak_asana"
-										label="No Break?"
-										render={(data) => {
-											if (data) {
-												return "Yes";
-											} else {
-												return "No";
-											}
-										}}
-									/>
-									<Table.Column
-										prop="asana_category"
-										label="Category"
-									/>
-									<Table.Column
-										prop="in_playlist"
-										label="Add To Playlist"
-										width={150}
-										render={renderAction2}
-									/>
-								</Table>
-							</Card.Content>
-						</Card>
+						<Collapse title={categoryData.category} key={index}>
+							<Table
+								data={categoryData.asanas}
+								className="bg-white">
+								<Table.Column
+									prop="asana_name"
+									label="Asana Name"
+								/>
+								<Table.Column
+									prop="language"
+									label="Language"
+									render={(data) => {
+										if (data === "") {
+											return "No Audio";
+										}
+										return data.language;
+									}}
+								/>
+								<Table.Column
+									prop="nobreak_asana"
+									label="No Break?"
+									render={(data) => {
+										if (data) {
+											return "Yes";
+										} else {
+											return "No";
+										}
+									}}
+								/>
+								<Table.Column
+									prop="asana_category"
+									label="Category"
+								/>
+								<Table.Column
+									prop="in_playlist"
+									label="Add To Playlist"
+									width={150}
+									render={renderAction2}
+								/>
+							</Table>
+						</Collapse>
 					))}
-				</div>
-				{playlist_temp.length > 0 && (
-					<Card height="50%">
-						<Table
-							width={40}
-							data={playlist_temp}
-							className="bg-dark ">
-							<Table.Column
-								prop="rowData.asana_name"
-								label="Asana Name"
-								render={(_, rowData) => {
-									return (
-										<p>
-											{rowData.rowData.asana_name
-												? rowData.rowData.asana_name
-												: rowData.rowData
-														.transition_video_name}
-										</p>
-									);
-								}}
-							/>
-							<Table.Column
-								prop="rowData.asana_category"
-								label="Category"
-								render={(_, rowData) => {
-									return (
-										<p>{rowData.rowData.asana_category}</p>
-									);
-								}}
-							/>
-							<Table.Column
-								prop="rowData.language"
-								label="Language"
-								render={(_, rowData) => {
-									console.log(rowData);
-									return <p>{rowData.rowData.language}</p>;
-								}}
-							/>
-							<Table.Column prop="count" label="Count" />
-							<Table.Column
-								prop="operations"
-								label="ACTIONS"
-								width={150}
-								render={(value, rowData) => {
-									if (rowData.rowData?.asana_name) {
-										return renderAction(value, rowData);
-									} else {
-										return null;
-									}
-								}}
-							/>
-						</Table>
-						<Divider />
-						<form
-							className="flex-col items-center justify-center space-y-10 my-10"
-							onSubmit={handleSubmit}>
-							<Input width="100%" id="playlist_name">
-								Playlist Name
-							</Input>
-							<Button htmlType="submit">Submit</Button>
-						</form>
-					</Card>
-				)}
+				</Collapse.Group>
+
+				<Card>
+					<Table data={playlist_temp}>
+						<Table.Column
+							prop="rowData.asana_name"
+							label="Asana Name"
+							render={(_, rowData) => {
+								return (
+									<p>
+										{rowData.rowData.asana_name
+											? rowData.rowData.asana_name
+											: rowData.rowData
+													.transition_video_name}
+									</p>
+								);
+							}}
+						/>
+						<Table.Column
+							prop="rowData.asana_category"
+							label="Category"
+							render={(_, rowData) => {
+								return <p>{rowData.rowData.asana_category}</p>;
+							}}
+						/>
+						<Table.Column
+							prop="rowData.language"
+							label="Language"
+							render={(_, rowData) => {
+								console.log(rowData);
+								return <p>{rowData.rowData.language}</p>;
+							}}
+						/>
+						<Table.Column prop="count" label="Count" />
+						<Table.Column
+							prop="operations"
+							label="ACTIONS"
+							width={150}
+							render={(value, rowData) => {
+								if (rowData.rowData?.asana_name) {
+									return renderAction(value, rowData);
+								} else {
+									return null;
+								}
+							}}
+						/>
+					</Table>
+					<Divider />
+					<form
+						className="flex-col items-center justify-center space-y-10 my-10"
+						onSubmit={handleSubmit}>
+						<Input width="100%" id="playlist_name">
+							Playlist Name
+						</Input>
+						<Button htmlType="submit">Submit</Button>
+					</form>
+				</Card>
 			</div>
-			<div>
-				<Modal
-					visible={modalState}
-					onClose={() => setModalState(false)}>
-					<Modal.Title>Update</Modal.Title>
-					<Modal.Subtitle>
-						{modalData.rowData.asana_name}
-					</Modal.Subtitle>
-					<Modal.Content>
-						<form>
-							<Input
-								width="100%"
-								id="asana_count_playlist"
-								placeholder={modalData.count}
-								onChange={handleInputChange}>
-								Count
-							</Input>
-						</form>
-					</Modal.Content>
-					<Modal.Action passive onClick={() => setModalState(false)}>
-						Cancel
-					</Modal.Action>
-					<Modal.Action onClick={updateData}>Update</Modal.Action>
-				</Modal>
-			</div>
+
+			<Modal visible={modalState} onClose={() => setModalState(false)}>
+				<Modal.Title>Update</Modal.Title>
+				<Modal.Subtitle>{modalData.rowData.asana_name}</Modal.Subtitle>
+				<Modal.Content>
+					<form>
+						<Input
+							width="100%"
+							id="asana_count_playlist"
+							placeholder={modalData.count}
+							onChange={handleInputChange}>
+							Count
+						</Input>
+					</form>
+				</Modal.Content>
+				<Modal.Action passive onClick={() => setModalState(false)}>
+					Cancel
+				</Modal.Action>
+				<Modal.Action onClick={updateData}>Update</Modal.Action>
+			</Modal>
 		</div>
 	);
 }
 
-export default withAuth(RegisterPlaylistForm, ROLE_ROOT);
+export default RegisterPlaylistForm;

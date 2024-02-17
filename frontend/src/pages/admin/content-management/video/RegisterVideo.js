@@ -1,10 +1,14 @@
-import RegisterVideoForm from "../../../components/content-management/forms/RegisterVideoForm";
-import PageWrapper from "../../../components/Common/PageWrapper";
+import AdminPageWrapper from "../../../../components/Common/AdminPageWrapper";
+import RegisterVideoForm from "../../../../components/content-management/forms/RegisterVideoForm";
+import { ROLE_ROOT } from "../../../../enums/roles";
+import { withAuth } from "../../../../utils/withAuth";
 
-export default function RegisterVideo() {
-  return (
-    // <PageWrapper>
-    <RegisterVideoForm />
-    // </PageWrapper>
-  );
+function RegisterVideo() {
+	return (
+		<AdminPageWrapper heading="Content Management - Register Video">
+			<RegisterVideoForm />
+		</AdminPageWrapper>
+	);
 }
+
+export default withAuth(RegisterVideo, ROLE_ROOT);

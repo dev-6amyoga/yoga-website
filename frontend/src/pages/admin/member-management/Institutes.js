@@ -1,7 +1,7 @@
 import { Card, Collapse, Text } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { ROLE_ROOT } from "../../../enums/roles";
 import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
@@ -138,14 +138,13 @@ function Institutes() {
 	};
 
 	return (
-		<div className="allAsanas min-h-screen">
-			<AdminNavbar />
+		<AdminPageWrapper heading="Member Management - Institutes">
 			<div className="flex flex-col items-center gap-2 p-6 bg-gray-500 text-white mt-10 mx-10 rounded-md">
 				<Card width="100%">
 					<InstituteCollapseGroup data={instituteData} />
 				</Card>
 			</div>
-		</div>
+		</AdminPageWrapper>
 	);
 }
 

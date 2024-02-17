@@ -1,6 +1,7 @@
 import {
 	Button,
 	Card,
+	Collapse,
 	Divider,
 	Grid,
 	Input,
@@ -11,7 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import AdminNavbar from "../../../components/Common/AdminNavbar/AdminNavbar";
+import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import CustomInput from "../../../components/Common/CustomInput";
 import { transitionGenerator } from "../../../components/transition-generator/TransitionGenerator";
 import { ROLE_ROOT } from "../../../enums/roles";
@@ -436,51 +437,49 @@ function RegisterNewSchedule() {
 	};
 
 	return (
-		<div className="video_form min-h-screen">
-			<AdminNavbar />
-			<div className="flex justify-center my-10 gap-8">
-				<div className="flex flex-col items-center justify-center my-10 gap-1">
+		<AdminPageWrapper heading="Schedule Management - Register">
+			<div className="grid grid-cols-3 my-10 gap-8">
+				{/* <div className="col-start-1 col-span-2 flex flex-col items-center justify-center gap-1"> */}
+				<Collapse.Group className="col-start-1 col-span-2">
 					{filteredAsanasByCategory.map((categoryData, index) => (
-						<Card key={index} shadow width="100%">
-							<Card.Content>
-								<h6>{categoryData.category}</h6>
-								<Table
-									data={categoryData.asanas}
-									className="bg-white">
-									<Table.Column
-										prop="asana_name"
-										label="Asana Name"
-									/>
-									<Table.Column
-										prop="language"
-										label="Language"
-										render={(data) => {
-											if (data === "") {
-												return "No Audio";
-											}
-											return data.language;
-										}}
-									/>
+						<Collapse key={index} title={categoryData.category}>
+							<Table
+								data={categoryData.asanas}
+								className="bg-white">
+								<Table.Column
+									prop="asana_name"
+									label="Asana Name"
+								/>
+								<Table.Column
+									prop="language"
+									label="Language"
+									render={(data) => {
+										if (data === "") {
+											return "No Audio";
+										}
+										return data.language;
+									}}
+								/>
 
-									<Table.Column
-										prop="asana_category"
-										label="Category"
-									/>
-									<Table.Column
-										prop="in_playlist"
-										label="Add To Playlist"
-										width={150}
-										render={renderAction2}
-									/>
-								</Table>
-							</Card.Content>
-						</Card>
+								<Table.Column
+									prop="asana_category"
+									label="Category"
+								/>
+								<Table.Column
+									prop="in_playlist"
+									label="Add To Playlist"
+									width={150}
+									render={renderAction2}
+								/>
+							</Table>
+						</Collapse>
 					))}
-				</div>
+				</Collapse.Group>
+				{/* </div> */}
 
-				{schedule.length > 0 && (
-					<Card height="50%">
-						<Table width={40} data={schedule} className="bg-dark ">
+				<div>
+					<Card>
+						<Table data={schedule} className="bg-dark ">
 							<Table.Column
 								prop="rowData.asana_name || rowData.transition_video_name"
 								label="Asana Name"
@@ -529,6 +528,7 @@ function RegisterNewSchedule() {
 							/>
 						</Table>
 						<Divider />
+
 						<form
 							className="flex-col items-center justify-center space-y-10 my-10"
 							onSubmit={handleSubmit}>
@@ -736,35 +736,33 @@ function RegisterNewSchedule() {
 							<Button htmlType="submit">Submit</Button>
 						</form>
 					</Card>
-				)}
+				</div>
 			</div>
-			<div>
-				<Modal
-					visible={modalState}
-					onClose={() => setModalState(false)}>
-					<Modal.Title>Update</Modal.Title>
-					<Modal.Subtitle>
-						{modalData.rowData.asana_name ||
-							modalData.rowData.transition_video_name}
-					</Modal.Subtitle>
-					<Modal.Content>
-						<form>
-							<Input
-								width="100%"
-								id="asana_count_playlist"
-								placeholder={modalData.count}
-								onChange={handleInputChange}>
-								Count
-							</Input>
-						</form>
-					</Modal.Content>
-					<Modal.Action passive onClick={() => setModalState(false)}>
-						Cancel
-					</Modal.Action>
-					<Modal.Action onClick={updateData}>Update</Modal.Action>
-				</Modal>
-			</div>
-		</div>
+
+			{/* modal */}
+			<Modal visible={modalState} onClose={() => setModalState(false)}>
+				<Modal.Title>Update</Modal.Title>
+				<Modal.Subtitle>
+					{modalData.rowData.asana_name ||
+						modalData.rowData.transition_video_name}
+				</Modal.Subtitle>
+				<Modal.Content>
+					<form>
+						<Input
+							width="100%"
+							id="asana_count_playlist"
+							placeholder={modalData.count}
+							onChange={handleInputChange}>
+							Count
+						</Input>
+					</form>
+				</Modal.Content>
+				<Modal.Action passive onClick={() => setModalState(false)}>
+					Cancel
+				</Modal.Action>
+				<Modal.Action onClick={updateData}>Update</Modal.Action>
+			</Modal>
+		</AdminPageWrapper>
 	);
 }
 
