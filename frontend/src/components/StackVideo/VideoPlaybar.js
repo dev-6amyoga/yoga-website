@@ -39,7 +39,7 @@ export default function VideoPlaybar({
       popTimeout.current = setTimeout(() => {
         console.log("Popping from queue");
         popFromQueue(0);
-      }, 60);
+      }, 50);
     }
 
     return () => {
