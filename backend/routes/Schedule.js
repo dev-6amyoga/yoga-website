@@ -24,4 +24,15 @@ router.post("/addSchedule", async (req, res) => {
   }
 });
 
+router.get("/getAllSchedulesForUser", async (req, res) => {
+  try {
+    const schedules = await Schedule.find();
+    res.json(schedules);
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to fetch schedules",
+    });
+  }
+});
 module.exports = router;
