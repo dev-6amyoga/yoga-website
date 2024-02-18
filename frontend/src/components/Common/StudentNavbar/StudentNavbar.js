@@ -6,8 +6,8 @@ import useUserStore from "../../../store/UserStore";
 // import StudentPlan from "../../../pages/student/StudentPlan";
 import { Divider } from "@geist-ui/core";
 import { useCookies } from "react-cookie";
-import RoleShifter from "../RoleShifter";
 import { FetchRetry } from "../../../utils/Fetch";
+import RoleShifter from "../RoleShifter";
 
 function StudentNavbar() {
 	const [open, setOpen] = useState(false);
@@ -106,15 +106,13 @@ function StudentNavbar() {
 
 	return (
 		<>
-			<div className="w-full px-4 py-1 flex bg-zinc-800 text-white items-center gap-4">
-				<Button
-					width={"100%"}
-					auto
-					ghost
-					onClick={() => setOpen(true)}
-					icon={<Menu />}
-				/>
-				<p className="font-bold text-xl">6AM Yoga</p>
+			<div className="w-full flex justify-center py-4">
+				<div className="w-full max-w-7xl mx-auto flex items-center gap-4 py-4 px-4 text-white bg-zinc-900 fixed z-[1000] rounded-full">
+					<button onClick={() => setOpen(true)}>
+						<Menu />
+					</button>
+					<h1 className="font-bold text-xl">6AM Yoga</h1>
+				</div>
 			</div>
 			<Drawer
 				visible={open}

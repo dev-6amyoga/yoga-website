@@ -141,16 +141,12 @@ function AdminNavbar() {
 	};
 
 	return (
-		<div>
-			<div className="w-full px-4 py-1 flex bg-zinc-800 text-white items-center gap-4">
-				<Button
-					width={"100%"}
-					auto
-					ghost
-					onClick={() => setOpen(true)}
-					icon={<Menu />}
-				/>
-				<p className="font-bold text-xl">6AM Yoga</p>
+		<div className="">
+			<div className="w-full flex items-center gap-4 py-4 px-8 text-white bg-zinc-900 fixed z-[1000]">
+				<button onClick={() => setOpen(true)}>
+					<Menu />
+				</button>
+				<h1 className="font-bold text-xl">6AM Yoga</h1>
 			</div>
 			<Drawer
 				visible={open}

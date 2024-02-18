@@ -6,6 +6,10 @@ const MarkerSchema = new mongoose.Schema({
 		type: Number,
 		default: 0,
 	},
+	loop: {
+		type: Boolean,
+		default: true,
+	},
 });
 
 const asanaSchema = new mongoose.Schema({
