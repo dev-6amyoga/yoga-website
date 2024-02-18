@@ -339,7 +339,7 @@ function StreamStackItem({
 					if (isActive) handleLoading(false);
 				}}
 				onSeeking={() => {
-					if (isActive) handleLoading(true);
+					// if (isActive) handleLoading(true);
 				}}
 				onSeeked={() => {
 					if (isActive) handleLoading(false);
