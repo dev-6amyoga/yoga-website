@@ -1,10 +1,10 @@
-import { Button, Note } from "@geist-ui/core";
-import React, { useEffect, useState } from "react";
-import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
+import { useEffect, useMemo, useState } from "react";
 import useUserStore from "../../store/UserStore";
 // import { useNavigate } from "react-router-dom";
-import VideoPlayerWrapper from "../../components/Video/VideoPlayerWrapper";
+import { Button, Card } from "@geist-ui/core";
+import { Eye } from "@geist-ui/icons";
 import YouTube from "react-youtube";
+import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
 export default function FreeVideos() {
 	const [planId, setPlanId] = useState(0);
 	const [currentVideoId, setCurrentVideoId] = useState("");
@@ -66,116 +66,69 @@ export default function FreeVideos() {
 		}
 	}, [user]);
 
+	const freeVideos = useMemo(
+		() => [
+			{
+				videoId: "jYIE9dtfmr8",
+				title: "Yoga to improve bowel movements",
+			},
+			{ videoId: "iRFQyZa-L6A", title: "Try this to know your BMI!" },
+			{
+				videoId: "MLXrRYpbskg",
+				title: "Improve Lung Capacity through yoga",
+			},
+			{ videoId: "sIT1RyjWgJM", title: "Slow down and reduce stress" },
+			{ videoId: "20fvnDTOkRg", title: "Yoga for eyes" },
+			{ videoId: "hRD0coM5esM", title: "Benefits of sweating" },
+			{ videoId: "EYe_w4HlRoo", title: "Easy Headstand" },
+			{ videoId: "CojVgFpvFlw", title: "Dont cut nails at night" },
+			{ videoId: "CP8HZllEO_s", title: "Ujjayi Pranayama" },
+			{ videoId: "JMdWiSQ4cXE", title: "Weight Loss Yoga" },
+			{ videoId: "odFz9kG3BaM", title: "Why chant Om" },
+			{ videoId: "GsBv5kuTAug", title: "Improve back posture" },
+			{ videoId: "vKn5-2vusMc", title: "OM or AUM" },
+			{ videoId: "sFmxJtjb43Y", title: "Master Class 16Dec23" },
+		],
+		[]
+	);
+
 	return (
-		<div>
-			<div>
-				<StudentNavbar />
+		<StudentPageWrapper heading="Free Videos">
+			<div className="rounded-lg bg-slate-100 p-2 md:p-8">
+				<YouTube
+					className="max-w-5xl mx-auto aspect-video"
+					iframeClassName="w-full h-full rounded-lg"
+					videoId={currentVideoId}
+					opts={videoOptions}
+					onEnd={handleEnd}
+					onReady={saveTarget}
+					onStateChange={iChanged}
+					onPlay={() => {}}
+					onPause={() => {}}
+				/>
 			</div>
-			<div className="flex">
-				<div className="flex flex-col items-start gap-2 p-6 bg-gray-500 text-white mt-10 mx-5 rounded-md">
-					<Button
-						onClick={() => setCurrentVideoId("jYIE9dtfmr8")}
-						className="mb-2"
-						width="100%">
-						Yoga to improve bowel movements
-					</Button>
-					<Button
-						onClick={() => setCurrentVideoId("iRFQyZa-L6A")}
-						className="mb-2"
-						width="100%">
-						Try this to know your BMI!
-					</Button>
-					<Button
-						onClick={() => setCurrentVideoId("MLXrRYpbskg")}
-						className="mb-2"
-						width="100%">
-						Improve Lung Capacity through yoga
-					</Button>
-					<Button
-						onClick={() => setCurrentVideoId("sIT1RyjWgJM")}
-						className="mb-2"
-						width="100%">
-						Slow down and reduce stress
-					</Button>
-					<Button
-						onClick={() => setCurrentVideoId("20fvnDTOkRg")}
-						className="mb-2"
-						width="100%">
-						Yoga for eyes
-					</Button>{" "}
-					<Button
-						onClick={() => setCurrentVideoId("hRD0coM5esM")}
-						className="mb-2"
-						width="100%">
-						Benefits of sweating
-					</Button>{" "}
-					<Button
-						onClick={() => setCurrentVideoId("EYe_w4HlRoo")}
-						className="mb-2"
-						width="100%">
-						Easy Headstand
-					</Button>{" "}
-					<Button
-						onClick={() => setCurrentVideoId("CojVgFpvFlw")}
-						className="mb-2"
-						width="100%">
-						Dont cut nails at night
-					</Button>
-					<Button
-						onClick={() => setCurrentVideoId("CP8HZllEO_s")}
-						className="mb-2"
-						width="100%">
-						Ujjayi Pranayama
-					</Button>{" "}
-					<Button
-						onClick={() => setCurrentVideoId("JMdWiSQ4cXE")}
-						className="mb-2"
-						width="100%">
-						Weight Loss Yoga
-					</Button>{" "}
-					<Button
-						onClick={() => setCurrentVideoId("odFz9kG3BaM")}
-						className="mb-2"
-						width="100%">
-						Why chant Om
-					</Button>{" "}
-					<Button
-						onClick={() => setCurrentVideoId("GsBv5kuTAug")}
-						className="mb-2"
-						width="100%">
-						Improve back posture
-					</Button>{" "}
-					<Button
-						onClick={() => setCurrentVideoId("vKn5-2vusMc")}
-						className="mb-2"
-						width="100%">
-						OM or AUM
-					</Button>{" "}
-					<Button
-						onClick={() => setCurrentVideoId("sFmxJtjb43Y")}
-						className="mb-2"
-						width="100%">
-						Master Class 16Dec23
-					</Button>
-				</div>
-				<div className="flex flex-col items-center p-6 rounded-md bg-gray-200 shadow-md max-w-[1000px] mx-auto mt-10">
-					<h1 className="text-4xl font-bold mb-4">Free Videos</h1>
-					<div className="max-w-[1200px] mx-auto mt-5 overflow-hidden rounded-md">
-						{/* YouTube player */}
-						<YouTube
-							className="w-[1000px] h-[600px]"
-							iframeClassName="w-full h-full"
-							videoId={currentVideoId}
-							opts={videoOptions}
-							onEnd={handleEnd}
-							onReady={saveTarget}
-							onStateChange={iChanged}
-							onPlay={() => {}}
-							onPause={() => {}}
-						/>
-					</div>
-				</div>
+
+			<div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-10">
+				{freeVideos.map((video, index) => (
+					<Card key={video?.videoId}>
+						<div className="flex items-center justify-between gap-4">
+							<p className="text-sm md:text-base">
+								{video?.title}
+							</p>
+							<Button
+								type="success"
+								auto
+								onClick={() => {
+									setCurrentVideoId(video?.videoId);
+								}}
+								icon={<Eye />}
+								scale={0.67}>
+								Watch
+							</Button>
+						</div>
+					</Card>
+				))}
 			</div>
-		</div>
+		</StudentPageWrapper>
 	);
 }
