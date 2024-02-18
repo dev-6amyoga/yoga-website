@@ -1,16 +1,30 @@
 // import { Code } from "@geist-ui/core";
+import { useEffect } from "react";
 import useVideoStore from "../../store/VideoStore";
 
 export default function VideoInfo() {
 	let currentVideo = useVideoStore((state) => state.currentVideo);
 
-	const [markers, currentMarkerIdx, setCurrentMarkerIdx, addToSeekQueue] =
-		useVideoStore((state) => [
-			state.markers,
-			state.currentMarkerIdx,
-			state.setCurrentMarkerIdx,
-			state.addToSeekQueue,
-		]);
+	const [
+		markers,
+		setMarkers,
+		currentMarkerIdx,
+		setCurrentMarkerIdx,
+		addToSeekQueue,
+	] = useVideoStore((state) => [
+		state.markers,
+		state.setMarkers,
+		state.currentMarkerIdx,
+		state.setCurrentMarkerIdx,
+		state.addToSeekQueue,
+	]);
+
+	useEffect(() => {
+		if (currentVideo) {
+			setCurrentMarkerIdx(0);
+			setMarkers(currentVideo?.video?.markers || []);
+		}
+	}, [currentVideo, setCurrentMarkerIdx, setMarkers]);
 
 	return (
 		<div className="">

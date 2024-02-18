@@ -444,7 +444,7 @@ function Playlist() {
 			<p className="pb-4 text-sm">
 				Choose from a variety of playlists to practice.
 			</p>
-			<div className="flex flex-row gap-2">
+			<div className="grid grid-cols-3 gap-2">
 				{playlists.map((playlist) => (
 					<PlaylistItem
 						key={playlist.playlist_name}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import useVideoStore from "../../store/VideoStore";
 
@@ -8,8 +8,8 @@ export default function VideoInfo() {
 
 	useEffect(() => {
 		if (currentVideo) {
-			console.log(currentVideo);
-			setMarkers(currentVideo?.video?.asana_markers);
+			console.log({ currentVideo });
+			setMarkers(currentVideo?.video?.markers);
 		} else {
 			setMarkers(null);
 		}
