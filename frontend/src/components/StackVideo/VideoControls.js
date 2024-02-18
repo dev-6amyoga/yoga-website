@@ -103,6 +103,10 @@ function VideoControls({ handleFullScreen }) {
 	const handlePrevMarker = () => {
 		console.log("Prev Marker");
 		if (markers.length > 0) {
+			if (currentMarkerIdx === 0) {
+				addToSeekQueue({ t: 0, type: "move" });
+				return;
+			}
 			const idx =
 				((currentMarkerIdx || 0) - 1 + markers.length) % markers.length;
 			setCurrentMarkerIdx(idx);
