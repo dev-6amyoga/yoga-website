@@ -66,7 +66,8 @@ export default function VideoInfo() {
 													type: "move",
 												});
 											}}>
-											{k.timestamp} : {k.title}
+											{k.timestamp} : {k.title}{" "}
+											{k.loop ? "🔁" : ""}
 										</p>
 									);
 								})

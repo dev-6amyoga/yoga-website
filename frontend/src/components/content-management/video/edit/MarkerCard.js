@@ -1,4 +1,4 @@
-import { Button, Input } from "@geist-ui/core";
+import { Button, Checkbox, Input, Tag } from "@geist-ui/core";
 import { useState } from "react";
 import { toTimeString } from "../../../../utils/toTimeString";
 
@@ -14,7 +14,11 @@ function MarkerCard({
 	const [dirty, setDirty] = useState(false);
 
 	const handleChange = (e) => {
-		setMarkerData((m) => ({ ...m, [e.target.name]: e.target.value }));
+		const name = e?.target?.name || e?.nativeEvent?.target?.name;
+		console.log(name, e.target.value, e.target.checked);
+		if (name === "loop")
+			setMarkerData((m) => ({ ...m, [name]: e.target.checked }));
+		else setMarkerData((m) => ({ ...m, [name]: e.target.value }));
 	};
 
 	const handleEdit = () => {
@@ -31,7 +35,7 @@ function MarkerCard({
 			className={`rounded-lg p-4  flex flex-col justify-between shrink-0 ${
 				isActive ? "border-2 border-amber-500" : "border"
 			}`}>
-			<div className="flex flex-col gap-2">
+			<div className="flex flex-col gap-4">
 				{dirty ? (
 					<Input
 						initialValue={markerData.timestamp}
@@ -53,20 +57,46 @@ function MarkerCard({
 						)}`}
 					</Button>
 				)}
-				{dirty ? (
-					<Input
-						initialValue={markerData.title}
-						name="title"
-						onChange={handleChange}>
-						Marker Title
-					</Input>
-				) : (
-					<p className="max-w-[22ch] break-all break-words text-sm">
-						{markerData.title}
-					</p>
-				)}
+				<div
+					className={`flex items-start ${
+						dirty
+							? "flex-col gap-4"
+							: "flex-row justify-between gap-2"
+					}`}>
+					{dirty ? (
+						<>
+							<Input
+								initialValue={markerData.title}
+								name="title"
+								onChange={handleChange}>
+								Marker Title
+							</Input>
+							<Checkbox
+								onChange={handleChange}
+								name="loop"
+								initialChecked={markerData.loop}>
+								Loop
+							</Checkbox>
+						</>
+					) : (
+						<>
+							<p className="max-w-[22ch] break-all break-words text-sm">
+								{markerData.title}
+							</p>
+							{markerData.loop ? (
+								<Tag type="success" scale={0.3}>
+									Loop On
+								</Tag>
+							) : (
+								<Tag type="warning" scale={0.3}>
+									Loop Off
+								</Tag>
+							)}
+						</>
+					)}
+				</div>
 			</div>
-			<div className="grid grid-cols-2 gap-2 pb-2">
+			<div className="grid grid-cols-2 gap-2 py-2">
 				<Button
 					scale={0.2}
 					onClick={handleEdit}
