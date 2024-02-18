@@ -1,4 +1,11 @@
-import { Button, Description, Input, Spacer, Text } from "@geist-ui/core";
+import {
+	Button,
+	Checkbox,
+	Description,
+	Input,
+	Spacer,
+	Text,
+} from "@geist-ui/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBlocker, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -89,6 +96,7 @@ function EditAsana() {
 	{
 		timestamp: Number,
 		title: String,
+		loop: bool
 	}
 	*/
 	const [markers, setMarkers] = useState([]);
@@ -249,6 +257,8 @@ function EditAsana() {
 				toast("Marker already exists", { type: "warning" });
 				return;
 			}
+
+			m.loop = m.loop === "on" ? true : false;
 
 			setMarkers((p) => {
 				// add marker in place
@@ -451,7 +461,7 @@ function EditAsana() {
 						</div>
 					</div>
 
-					<div className="grid grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 						{/* add marker form */}
 						<div className="border rounded-lg p-4">
 							<Description title="Add Marker" />
@@ -513,7 +523,7 @@ function EditAsana() {
 								</Button>
 							</div>
 
-							<Spacer h={1 / 2} />
+							<Spacer h={1} />
 
 							<form onSubmit={handleAddMarker}>
 								<div className="flex flex-row gap-2 items-end">
@@ -522,7 +532,7 @@ function EditAsana() {
 										initialValue={currentTime}
 										name="timestamp"
 										ref={addMarkerTimestampInputRef}>
-										Marker Timestamp
+										Marker Timestamp (in seconds)
 									</Input>
 									<Button
 										scale={0.8}
@@ -539,12 +549,17 @@ function EditAsana() {
 										Set Cur. Time
 									</Button>
 								</div>
-								<Spacer h={1 / 2} />
+								<Spacer h={1} />
 								<Input width="100%" name="title">
 									Marker Title
 								</Input>
+								<Spacer h={1} />
+								<Checkbox name="loop">
+									Loop (the marker will loop during "Teaching"
+									View Mode)
+								</Checkbox>
 
-								<Spacer h={1 / 2} />
+								<Spacer h={1} />
 
 								<Button
 									width="100%"
