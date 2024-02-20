@@ -1,96 +1,105 @@
-import { create } from "zustand";
-import { VIDEO_VIEW_STUDENT_MODE } from "../enums/video_view_modes";
-export const STATE_VIDEO_PLAY = "PLAY";
-export const STATE_VIDEO_PAUSED = "PAUSED";
-export const STATE_VIDEO_LOADING = "LOADING";
-export const STATE_VIDEO_ERROR = "ERROR";
+import { create } from 'zustand'
+import { VIDEO_VIEW_STUDENT_MODE } from '../enums/video_view_modes'
 
-const useVideoStore = create((set) => ({
-	playlistState: false,
-	setPlaylistState: (ps) =>
-		set((state) => {
-			return { playlistState: ps };
-		}),
+export const STATE_VIDEO_PLAY = 'PLAY',
+    STATE_VIDEO_PAUSED = 'PAUSED',
+    STATE_VIDEO_LOADING = 'LOADING',
+    STATE_VIDEO_ERROR = 'ERROR'
 
-	// currentVideo is the video object that is currently playing
-	currentVideo: null,
-	setCurrentVideo: (item) =>
-		set((state) => {
-			return { currentVideo: item };
-		}),
+export const useVideoStore = create((set) => ({
+    playlistState: false,
+    setPlaylistState: (ps) =>
+        set((state) => {
+            return { playlistState: ps }
+        }),
 
-	markers: [],
-	setMarkers: (markers) =>
-		set((state) => {
-			return { markers };
-		}),
-	currentMarkerIdx: null,
-	setCurrentMarkerIdx: (idx) =>
-		set((state) => {
-			return { currentMarkerIdx: idx };
-		}),
+    // currentVideo is the video object that is currently playing
+    currentVideo: null,
+    setCurrentVideo: (item) =>
+        set((state) => {
+            return { currentVideo: item }
+        }),
 
-	// videoState is one of the STATE_VIDEO_* constants
-	videoState: STATE_VIDEO_PAUSED,
-	setVideoState: (vs) =>
-		set((state) => {
-			return { videoState: vs };
-		}),
+    markers: [],
+    setMarkers: (markers) =>
+        set((state) => {
+            return { markers }
+        }),
+    currentMarkerIdx: null,
+    setCurrentMarkerIdx: (idx) =>
+        set((state) => {
+            return { currentMarkerIdx: idx }
+        }),
 
-	//
-	playbackRate: 1.0,
-	setPlaybackRate: (rate) =>
-		set((state) => {
-			return {
-				playbackRate: rate,
-			};
-		}),
+    // videoState is one of the STATE_VIDEO_* constants
+    videoState: STATE_VIDEO_PAUSED,
+    setVideoState: (vs) =>
+        set((state) => {
+            return { videoState: vs }
+        }),
 
-	autoplayInitialized: false,
-	setAutoplayInitialized: (autoplayInitialized) => {
-		set((state) => {
-			return { autoplayInitialized };
-		});
-	},
-	volume: 0.0,
-	setVolume: (volume) => {
-		set((state) => {
-			return { volume };
-		});
-	},
+    // pauseReason : if the pause is cause by a marker or a normal pause
+    pauseReason: null,
+    setPauseReason: (pauseReason) => {
+        set((state) => {
+            return { pauseReason }
+        })
+    },
 
-	// seekQueue holds the seek times that the user has clicked on
-	seekQueue: [],
-	addToSeekQueue: (seekEvent) =>
-		set((state) => {
-			// console.log(state.seekQueue, seekTime)
-			// {type: move | seek, time: number}
-			return { seekQueue: [...state.seekQueue, seekEvent] };
-		}),
-	popFromSeekQueue: (index) =>
-		set((state) => {
-			if (state.seekQueue.length > index) {
-				const sq = [...state.seekQueue];
-				sq.splice(index, 1);
-				// console.log(q, "in func after splice");
-				return {
-					seekQueue: sq,
-				};
-			}
-			return {};
-		}),
+    //
+    playbackRate: 1.0,
+    setPlaybackRate: (rate) =>
+        set((state) => {
+            return {
+                playbackRate: rate,
+            }
+        }),
 
-	currentTime: 0,
-	setCurrentTime: (time) =>
-		set((state) => {
-			return { currentTime: time };
-		}),
+    autoplayInitialized: false,
+    setAutoplayInitialized: (autoplayInitialized) => {
+        set((state) => {
+            return { autoplayInitialized }
+        })
+    },
+    volume: 0.0,
+    setVolume: (volume) => {
+        set((state) => {
+            return { volume }
+        })
+    },
 
-	viewMode: VIDEO_VIEW_STUDENT_MODE,
-	setViewMode: (mode) =>
-		set((state) => {
-			return { viewMode: mode };
-		}),
-}));
+    // seekQueue holds the seek times that the user has clicked on
+    seekQueue: [],
+    addToSeekQueue: (seekEvent) =>
+        set((state) => {
+            // console.log(state.seekQueue, seekTime)
+            // {type: move | seek, time: number}
+            return { seekQueue: [...state.seekQueue, seekEvent] }
+        }),
+    popFromSeekQueue: (index) =>
+        set((state) => {
+            if (state.seekQueue.length > index) {
+                const sq = [...state.seekQueue]
+                sq.splice(index, 1)
+                // console.log(q, "in func after splice");
+                return {
+                    seekQueue: sq,
+                }
+            }
+            return {}
+        }),
 
-export default useVideoStore;
+    currentTime: 0,
+    setCurrentTime: (time) =>
+        set((state) => {
+            return { currentTime: time }
+        }),
+
+    viewMode: VIDEO_VIEW_STUDENT_MODE,
+    setViewMode: (mode) =>
+        set((state) => {
+            return { viewMode: mode }
+        }),
+}))
+
+export default useVideoStore
