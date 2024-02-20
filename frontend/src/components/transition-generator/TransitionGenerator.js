@@ -207,6 +207,18 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         }
       }
     }
+    if (endVideo.asana_category === "Suryanamaskara") {
+      const matchingTransition1 = transitions.find((transition) => {
+        return (
+          transition.transition_video_name === "Standing Position Transition"
+        );
+      });
+      if (matchingTransition1) {
+        return [matchingTransition1];
+      } else {
+        return [];
+      }
+    }
   }
   if (startVideo === endVideo) {
     return [];

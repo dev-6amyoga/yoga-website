@@ -80,7 +80,6 @@ function LoginIndex() {
       sessionStorage.getItem("6amyoga_access_token") || accessToken;
     const refresh_token =
       sessionStorage.getItem("6amyoga_refresh_token") || refreshToken;
-
     if (access_token && refresh_token) {
       Fetch({
         url: "http://localhost:4000/auth/verify-tokens",

@@ -151,28 +151,29 @@ function InstituteNavbar() {
                 Member Management
               </Link>
             </Button>
-            <Button className="w-full">
-              <Link
-                to={"/institute/add-new-teacher"}
-                className="w-full text-zinc-800"
-              >
-                Add New Teacher
-              </Link>
+            <Button
+              onClick={() => {
+                navigate("/institute/add-new-teacher");
+              }}
+              disabled={!moreTeachers}
+            >
+              Add New Teacher
             </Button>
             <Button
               onClick={() => {
                 navigate("/institute/playlist-page");
               }}
+              disabled={!basicPlaylist}
             >
               Playlist Page
             </Button>
-            <Button>
-              <Link
-                to={"/institute/make-playlist"}
-                className="w-full text-zinc-800"
-              >
-                Make New Playlist
-              </Link>
+            <Button
+              onClick={() => {
+                navigate("/institute/make-playlist");
+              }}
+              disabled={!playlistCreation}
+            >
+              Make New Playlist
             </Button>
             <Button className="w-full">
               <Link
