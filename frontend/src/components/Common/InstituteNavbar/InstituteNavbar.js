@@ -151,38 +151,28 @@ function InstituteNavbar() {
                 Member Management
               </Link>
             </Button>
-            <Button
-              onClick={() => {
-                navigate("/institute/add-new-teacher");
-              }}
-              disabled={!moreTeachers}
-            >
-              Add New Teacher
+            <Button className="w-full">
+              <Link
+                to={"/institute/add-new-teacher"}
+                className="w-full text-zinc-800"
+              >
+                Add New Teacher
+              </Link>
             </Button>
             <Button
               onClick={() => {
                 navigate("/institute/playlist-page");
               }}
-              disabled={!basicPlaylist}
             >
               Playlist Page
             </Button>
-            <Button
-              onClick={() => {
-                navigate("/institute/make-playlist");
-              }}
-              disabled={!playlistCreation}
-            >
-              Make New Playlist
-            </Button>
-            <Button
-              className="w-full"
-              onClick={() => {
-                navigate("/institute/view-transactions");
-              }}
-              disabled={!selfAudio}
-            >
-              Upload your own audio
+            <Button>
+              <Link
+                to={"/institute/make-playlist"}
+                className="w-full text-zinc-800"
+              >
+                Make New Playlist
+              </Link>
             </Button>
             <Button className="w-full">
               <Link
