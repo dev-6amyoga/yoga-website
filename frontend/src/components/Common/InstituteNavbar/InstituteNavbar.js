@@ -175,6 +175,15 @@ function InstituteNavbar() {
             >
               Make New Playlist
             </Button>
+
+            <Button
+              onClick={() => {
+                navigate("/institute/make-playlist");
+              }}
+              disabled={!selfAudio}
+            >
+              Upload your own audio!
+            </Button>
             <Button className="w-full">
               <Link
                 to={"/institute/add-new-teacher"}
