@@ -498,7 +498,6 @@ router.post("/get-by-userid", async (req, res) => {
 });
 
 router.post("/teacher/get-all-by-instituteid", async (req, res) => {
-  console.log(req.body);
   const { institute_id } = req.body;
   if (!institute_id) {
     return res
