@@ -10,13 +10,13 @@ export default function GeneralNavbar() {
 	const NavLinks = () => {
 		return (
 			<>
-				<Link to="/" className="text-black">
+				<Link to="/" className="text-white">
 					Home
 				</Link>
-				<Link to="/about" className="text-black">
+				<Link to="/about" className="text-white">
 					About
 				</Link>
-				<Link to="/contact" className="text-black">
+				<Link to="/contact" className="text-white">
 					Contact
 				</Link>
 				<Button
@@ -39,12 +39,12 @@ export default function GeneralNavbar() {
 	};
 
 	return (
-		<div className="h-16 bg-white text-black px-4 shadow-sm flex items-center justify-between">
+		<div className="h-16 bg-zinc-900 text-white px-4 shadow-sm flex items-center justify-between">
 			<div className="flex gap-4 items-center h-full">
 				<img src="/logo_6am.png" alt="6AM Yoga Logo" className="h-6" />
 				<h1 className="text-base md:text-xl">My Yoga Teacher</h1>
 			</div>
-			<nav className="md:flex gap-4 items-center hidden">
+			<nav className="md:flex gap-4 items-center hidden text-white">
 				<NavLinks />
 			</nav>
 			<div className="md:hidden">
