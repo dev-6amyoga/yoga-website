@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DraggableCore } from 'react-draggable'
+import { SEEK_TYPE_MOVE } from '../../enums/seek_types'
+import { VIDEO_EVENT_MOVING_MARKER } from '../../enums/video_event'
+import { VIDEO_PAUSE_MARKER } from '../../enums/video_pause_reasons'
 import { VIDEO_VIEW_STUDENT_MODE } from '../../enums/video_view_modes'
 import usePlaylistStore from '../../store/PlaylistStore'
 import useVideoStore, {
@@ -8,7 +11,6 @@ import useVideoStore, {
     STATE_VIDEO_PAUSED,
 } from '../../store/VideoStore'
 import VideoControls from './VideoControls'
-import { VIDEO_PAUSE_MARKER } from '../../enums/video_pause_reasons'
 
 export default function VideoPlaybar({
     playbarVisible,
@@ -30,6 +32,8 @@ export default function VideoPlaybar({
         viewMode,
         setVideoState,
         setPauseReason,
+        videoEvent,
+        setVideoEvent,
     ] = useVideoStore((state) => [
         state.currentTime,
         state.addToSeekQueue,
@@ -41,6 +45,8 @@ export default function VideoPlaybar({
         state.viewMode,
         state.setVideoState,
         state.setPauseReason,
+        state.videoEvent,
+        state.setVideoEvent,
     ])
 
     const popFromQueue = usePlaylistStore((state) => state.popFromQueue)
@@ -52,6 +58,10 @@ export default function VideoPlaybar({
     }, [currentVideo, setCurrentTime])
 
     const prevNextMarkers = useMemo(() => {
+        console.log(
+            'CURRENT IDX CHANGED, SETTING PREV NEXT MARKERS',
+            currentMarkerIdx
+        )
         if (currentMarkerIdx === null || !markers || markers.length === 0) {
             return [null, null]
         }
@@ -81,37 +91,50 @@ export default function VideoPlaybar({
 
         // console.log(viewMode, currentTime, prevNextMarkers);
         // 0 : cur marker, 1 : next marker
-        // console.log(currentTime, prevNextMarkers)
-        if (prevNextMarkers[1] && currentTime >= prevNextMarkers[1].timestamp) {
-            if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
-                setCurrentMarkerIdx(
-                    currentMarkerIdx + 1 > markers.length - 1
-                        ? 0
-                        : currentMarkerIdx + 1
-                )
-            } else {
-                // if in teaching mode, then go to start of current marker
-                if (prevNextMarkers[0] && prevNextMarkers[0]?.loop) {
-                    addToSeekQueue({
-                        t: prevNextMarkers[0].timestamp,
-                        type: 'move',
-                    })
-                } else if (prevNextMarkers[0] && !prevNextMarkers[0]?.loop) {
-                    setVideoState(STATE_VIDEO_PAUSED)
-                    setPauseReason(VIDEO_PAUSE_MARKER)
-                }
-            }
-        }
-
         return () => {
             if (popTimeout.current) {
                 clearTimeout(popTimeout.current)
             }
         }
+    }, [currentVideo, duration, popFromQueue, currentTime])
+
+    useEffect(() => {
+        // console.log(
+        //     videoEvent,
+        //     currentTime,
+        //     prevNextMarkers[0],
+        //     prevNextMarkers[1]
+        // )
+        if (videoEvent && videoEvent?.type !== VIDEO_EVENT_MOVING_MARKER) {
+            if (
+                prevNextMarkers[1] &&
+                currentTime >= prevNextMarkers[1].timestamp
+            ) {
+                if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+                    setCurrentMarkerIdx(
+                        currentMarkerIdx + 1 > markers.length - 1
+                            ? 0
+                            : currentMarkerIdx + 1
+                    )
+                } else {
+                    // if in teaching mode, then go to start of current marker
+                    if (prevNextMarkers[0] && prevNextMarkers[0]?.loop) {
+                        addToSeekQueue({
+                            t: prevNextMarkers[0].timestamp,
+                            type: SEEK_TYPE_MOVE,
+                        })
+                    } else if (
+                        prevNextMarkers[0] &&
+                        !prevNextMarkers[0]?.loop
+                    ) {
+                        setVideoState(STATE_VIDEO_PAUSED)
+                        setPauseReason(VIDEO_PAUSE_MARKER)
+                    }
+                }
+            }
+        }
     }, [
-        currentVideo,
-        duration,
-        popFromQueue,
+        videoEvent,
         currentTime,
         setVideoState,
         prevNextMarkers,
@@ -120,6 +143,7 @@ export default function VideoPlaybar({
         currentMarkerIdx,
         setCurrentMarkerIdx,
         addToSeekQueue,
+        setPauseReason,
     ])
 
     const [mouseDown, setMouseDown] = useState(false)
@@ -152,7 +176,7 @@ export default function VideoPlaybar({
     const moveToTimestamp = useCallback(
         (t) => {
             // console.log("MOVING BY ", t - currentTime);
-            addToSeekQueue({ t, type: 'move' })
+            addToSeekQueue({ t, type: SEEK_TYPE_MOVE })
         },
         [addToSeekQueue]
     )
@@ -228,12 +252,13 @@ export default function VideoPlaybar({
     return (
         <>
             <div
-                className={`w-[calc(100%-0.35rem)] h-[0.5rem] bg-white relative mx-auto`}
+                className={`w-[calc(100%-0.35rem)] h-[0.5rem] bg-white relative mx-auto group`}
                 onClick={(e) => seekOnClick(e, 'barclick')}
                 ref={barRef}
             >
+                {/* orange bar */}
                 <div
-                    className={`bg-amber-600 h-full relative transition-all duration-300 ease-in-out ${
+                    className={`bg-amber-600 h-full relative transition-all duration-300 ease-linear ${
                         videoState === STATE_VIDEO_ERROR ||
                         videoState === STATE_VIDEO_LOADING
                             ? 'opacity-0'
@@ -244,6 +269,7 @@ export default function VideoPlaybar({
                     }}
                 ></div>
 
+                {/* boop */}
                 <DraggableCore
                     axis="x"
                     bounds="parent"
@@ -264,7 +290,7 @@ export default function VideoPlaybar({
                         } w-3 h-3  ${
                             mouseDown
                                 ? ''
-                                : 'duration-300 transition-all ease-in-out'
+                                : 'duration-300 transition-all ease-linear'
                         } ${
                             handleFullScreen.active
                                 ? '-top-[calc(50%-0.1rem)]'
@@ -296,6 +322,7 @@ export default function VideoPlaybar({
                     </div>
                 </DraggableCore>
 
+                {/* time */}
                 <p
                     className={`bg-black bg-opacity-40 text-white text-xs absolute right-0 -top-6 border rounded-full px-1`}
                 >

@@ -10,6 +10,7 @@ import { Button, Loading } from '@geist-ui/core'
 import { useState } from 'react'
 import { FullScreen, useFullScreenHandle } from 'react-full-screen'
 import { FaPause, FaPlay } from 'react-icons/fa'
+import { SEEK_TYPE_MOVE } from '../../enums/seek_types'
 import { VIDEO_PAUSE_MARKER } from '../../enums/video_pause_reasons'
 import { VIDEO_VIEW_TEACHING_MODE } from '../../enums/video_view_modes'
 import { STATE_VIDEO_PAUSED } from '../../store/VideoStore'
@@ -124,7 +125,7 @@ function VideoPlayer() {
                 )
                 addToSeekQueue({
                     t: currentMarker?.timestamp || 0,
-                    type: 'move',
+                    type: SEEK_TYPE_MOVE,
                 })
                 return
             }
@@ -152,7 +153,9 @@ function VideoPlayer() {
             }
         }
 
-        setVideoState(STATE_VIDEO_PLAY)
+        if (videoState !== STATE_VIDEO_PLAY) {
+            setVideoState(STATE_VIDEO_PLAY)
+        }
     }, [
         setVideoState,
         videoState,

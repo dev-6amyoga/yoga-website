@@ -1,7 +1,7 @@
 import usePlaylistStore from '../../store/PlaylistStore'
 import useVideoStore, { STATE_VIDEO_LOADING } from '../../store/VideoStore'
 // import asanas from "../../data/asanas.json";
-import { Loading, Popover, Toggle } from '@geist-ui/core'
+import { Loading, Toggle } from '@geist-ui/core'
 import { memo, useEffect } from 'react'
 import {
     FaBackward,
@@ -21,8 +21,8 @@ import { BsArrowsAngleContract } from 'react-icons/bs'
 
 // import { toast } from "react-toastify";
 import { useRef } from 'react'
-import { LuSettings } from 'react-icons/lu'
 import { toast } from 'react-toastify'
+import { SEEK_TYPE_MOVE, SEEK_TYPE_SEEK } from '../../enums/seek_types'
 import {
     VIDEO_VIEW_STUDENT_MODE,
     VIDEO_VIEW_TEACHING_MODE,
@@ -94,25 +94,25 @@ function VideoControls({ handleFullScreen }) {
     }
 
     const handleSeekFoward = () => {
-        addToSeekQueue({ t: 10, type: 'seek' })
+        addToSeekQueue({ t: 10, type: SEEK_TYPE_SEEK })
     }
 
     const handleSeekBackward = () => {
-        addToSeekQueue({ t: -10, type: 'seek' })
+        addToSeekQueue({ t: -10, type: SEEK_TYPE_SEEK })
     }
 
     const handlePrevMarker = () => {
         console.log('Prev Marker')
         if (markers.length > 0) {
             if (currentMarkerIdx === 0) {
-                addToSeekQueue({ t: 0, type: 'move' })
+                addToSeekQueue({ t: 0, type: SEEK_TYPE_MOVE })
                 return
             }
             const idx =
                 ((currentMarkerIdx || 0) - 1 + markers.length) % markers.length
             setCurrentMarkerIdx(idx)
             // seek to prev marker
-            addToSeekQueue({ t: markers[idx].timestamp, type: 'move' })
+            addToSeekQueue({ t: markers[idx].timestamp, type: SEEK_TYPE_MOVE })
         }
     }
 
@@ -122,7 +122,7 @@ function VideoControls({ handleFullScreen }) {
             const idx = ((currentMarkerIdx || 0) + 1) % markers.length
             setCurrentMarkerIdx(idx)
             // seek to next marker
-            addToSeekQueue({ t: markers[idx].timestamp, type: 'move' })
+            addToSeekQueue({ t: markers[idx].timestamp, type: SEEK_TYPE_MOVE })
         }
     }
 
@@ -151,7 +151,11 @@ function VideoControls({ handleFullScreen }) {
                 </button>
 
                 {/* seek back */}
-                <button onClick={handleSeekBackward} title="Rewind 10s">
+                <button
+                    onClick={handleSeekBackward}
+                    title="Rewind 10s"
+                    className="hidden md:block"
+                >
                     <FaBackward />
                 </button>
 
@@ -194,7 +198,11 @@ function VideoControls({ handleFullScreen }) {
                 )}
 
                 {/* seek forward */}
-                <button onClick={handleSeekFoward} title="Fast Forward 10s">
+                <button
+                    onClick={handleSeekFoward}
+                    title="Fast Forward 10s"
+                    className="hidden md:block"
+                >
                     <FaForward />
                 </button>
 
@@ -224,7 +232,7 @@ function VideoControls({ handleFullScreen }) {
                         type="range"
                         min="0"
                         max="100"
-                        className="accent-orange-500 mt-2"
+                        className="accent-orange-500 mt-2 hidden md:block"
                         ref={volumeSliderRef}
                         onChange={(e) =>
                             setVolume(parseFloat(e.target.value) / 100)
@@ -233,7 +241,7 @@ function VideoControls({ handleFullScreen }) {
                 </div>
 
                 {/* settings */}
-                <Popover
+                {/* <Popover
                     disableItemsAutoClose
                     content={
                         <>
@@ -261,7 +269,20 @@ function VideoControls({ handleFullScreen }) {
                     <button className="w-5 h-5 mt-2">
                         <LuSettings className="w-full h-full" />
                     </button>
-                </Popover>
+                </Popover> */}
+                <div className="flex items-center gap-2 group">
+                    <span className="group-hover:inline-block hidden text-xs">
+                        Student
+                    </span>
+                    <Toggle
+                        checked={viewMode === VIDEO_VIEW_TEACHING_MODE}
+                        type="secondary"
+                        onChange={handleViewModeToggle}
+                    />
+                    <span className="group-hover:inline-block hidden text-xs">
+                        Teacher
+                    </span>
+                </div>
 
                 {/* full screen */}
                 <button
