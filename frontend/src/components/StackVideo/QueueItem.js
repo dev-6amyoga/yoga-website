@@ -45,7 +45,7 @@ function QueueItem({ item, idx, pop, moveUp, moveDown, customerCode }) {
                 className="h-24 rounded-xl"
             />
             <div className="grid grid-cols-3 md:grid-cols-4">
-                <p className="m-0 text-sm col-start-1 col-span-2 md:col-span-3">
+                <p className="m-0 text-xs col-start-1 col-span-2 md:col-span-3">
                     {item?.video?.asana_name ??
                         item?.video?.transition_video_name}
                 </p>

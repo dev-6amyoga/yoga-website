@@ -9,39 +9,45 @@ export const STATE_VIDEO_PLAY = 'PLAY',
 export const useVideoStore = create((set) => ({
     playlistState: false,
     setPlaylistState: (ps) =>
-        set((state) => {
+        set(() => {
             return { playlistState: ps }
         }),
 
     // currentVideo is the video object that is currently playing
     currentVideo: null,
     setCurrentVideo: (item) =>
-        set((state) => {
+        set(() => {
             return { currentVideo: item }
         }),
 
     markers: [],
     setMarkers: (markers) =>
-        set((state) => {
+        set(() => {
             return { markers }
         }),
     currentMarkerIdx: null,
     setCurrentMarkerIdx: (idx) =>
-        set((state) => {
+        set(() => {
             return { currentMarkerIdx: idx }
+        }),
+
+    videoEvent: null,
+    setVideoEvent: (videoEvent) =>
+        set(() => {
+            return { videoEvent }
         }),
 
     // videoState is one of the STATE_VIDEO_* constants
     videoState: STATE_VIDEO_PAUSED,
     setVideoState: (vs) =>
-        set((state) => {
+        set(() => {
             return { videoState: vs }
         }),
 
     // pauseReason : if the pause is cause by a marker or a normal pause
     pauseReason: null,
     setPauseReason: (pauseReason) => {
-        set((state) => {
+        set(() => {
             return { pauseReason }
         })
     },
@@ -49,7 +55,7 @@ export const useVideoStore = create((set) => ({
     //
     playbackRate: 1.0,
     setPlaybackRate: (rate) =>
-        set((state) => {
+        set(() => {
             return {
                 playbackRate: rate,
             }
@@ -57,13 +63,13 @@ export const useVideoStore = create((set) => ({
 
     autoplayInitialized: false,
     setAutoplayInitialized: (autoplayInitialized) => {
-        set((state) => {
+        set(() => {
             return { autoplayInitialized }
         })
     },
     volume: 0.0,
     setVolume: (volume) => {
-        set((state) => {
+        set(() => {
             return { volume }
         })
     },
@@ -91,13 +97,13 @@ export const useVideoStore = create((set) => ({
 
     currentTime: 0,
     setCurrentTime: (time) =>
-        set((state) => {
+        set(() => {
             return { currentTime: time }
         }),
 
     viewMode: VIDEO_VIEW_STUDENT_MODE,
     setViewMode: (mode) =>
-        set((state) => {
+        set(() => {
             return { viewMode: mode }
         }),
 }))
