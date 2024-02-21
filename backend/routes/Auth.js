@@ -403,6 +403,7 @@ router.post("/register", async (req, res) => {
 
     // create user_institute
 
+    console.log(newUser.user_id, institute.institute_id, role.role_id);
     const user_institute_plan_role = await UserInstitutePlanRole.create(
       {
         user_id: newUser.user_id,
