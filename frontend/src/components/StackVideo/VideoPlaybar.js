@@ -99,13 +99,25 @@ export default function VideoPlaybar({
     }, [currentVideo, duration, popFromQueue, currentTime])
 
     useEffect(() => {
-        // console.log(
-        //     videoEvent,
-        //     currentTime,
-        //     prevNextMarkers[0],
-        //     prevNextMarkers[1]
-        // )
-        if (videoEvent && videoEvent?.type !== VIDEO_EVENT_MOVING_MARKER) {
+        console.log(
+            videoEvent,
+            currentTime,
+            prevNextMarkers[0],
+            prevNextMarkers[1]
+        )
+        // if (
+        //     videoEvent &&
+        //     videoEvent?.type === VIDEO_EVENT_MOVING_MARKER &&
+        //     Math.abs(currentTime - markers[videoEvent?.markerIdx].timestamp) < 1
+        // ) {
+        //     console.log('SETTING CURRENT IDX --->', videoEvent?.markerIdx || 0)
+        //     setCurrentMarkerIdx(videoEvent?.markerIdx || 0)
+        //     console.log('VIDEO EVENT --->', null)
+        //     setVideoEvent(null)
+        //     return
+        // }
+
+        if (videoEvent?.type !== VIDEO_EVENT_MOVING_MARKER) {
             if (
                 prevNextMarkers[1] &&
                 currentTime >= prevNextMarkers[1].timestamp
@@ -127,6 +139,9 @@ export default function VideoPlaybar({
                         prevNextMarkers[0] &&
                         !prevNextMarkers[0]?.loop
                     ) {
+                        console.log(
+                            "SETTING PAUSE REASON TO 'VIDEO_PAUSE_MARKER'"
+                        )
                         setVideoState(STATE_VIDEO_PAUSED)
                         setPauseReason(VIDEO_PAUSE_MARKER)
                     }
@@ -134,6 +149,7 @@ export default function VideoPlaybar({
             }
         }
     }, [
+        setVideoEvent,
         videoEvent,
         currentTime,
         setVideoState,
@@ -252,22 +268,34 @@ export default function VideoPlaybar({
     return (
         <>
             <div
-                className={`w-[calc(100%-0.35rem)] h-[0.5rem] bg-white relative mx-auto group`}
+                className={`w-[calc(100%-0.35rem)] h-[1.5rem] bg-transparent relative mx-auto group flex items-start mt-2`}
                 onClick={(e) => seekOnClick(e, 'barclick')}
                 ref={barRef}
             >
-                {/* orange bar */}
                 <div
-                    className={`bg-amber-600 h-full relative transition-all duration-300 ease-linear ${
-                        videoState === STATE_VIDEO_ERROR ||
-                        videoState === STATE_VIDEO_LOADING
-                            ? 'opacity-0'
-                            : 'opacity-100'
-                    }`}
-                    style={{
-                        width: `${(currentTime / duration) * 100}%`,
-                    }}
+                    className={`mt-3 w-full bg-white ${
+                        mouseDown ? 'h-[50%]' : 'h-[30%]'
+                    } absolute z-20`}
                 ></div>
+                <div
+                    className={`mt-4 w-[calc(100%+0.5rem)] -left-1 mx-auto bg-black bg-opacity-40 h-[32%] absolute z-10`}
+                ></div>
+                {/* orange bar */}
+                <div className="absolute z-[100] w-full h-full">
+                    <div
+                        className={`mt-3 bg-amber-600 ${
+                            mouseDown ? 'h-[50%]' : 'h-[30%]'
+                        } relative transition-all duration-300 ease-linear ${
+                            videoState === STATE_VIDEO_ERROR ||
+                            videoState === STATE_VIDEO_LOADING
+                                ? 'opacity-0'
+                                : 'opacity-100'
+                        }`}
+                        style={{
+                            width: `${(currentTime / duration) * 100}%`,
+                        }}
+                    ></div>
+                </div>
 
                 {/* boop */}
                 <DraggableCore
@@ -287,15 +315,19 @@ export default function VideoPlaybar({
                             videoState === STATE_VIDEO_LOADING
                                 ? 'opacity-0'
                                 : 'opacity-100'
-                        } w-3 h-3  ${
+                        } mt-4 w-3 h-3 hover:w-5 hover:h-5  ${
                             mouseDown
-                                ? ''
+                                ? 'w-5 h-5'
                                 : 'duration-300 transition-all ease-linear'
                         } ${
                             handleFullScreen.active
-                                ? '-top-[calc(50%-0.1rem)]'
-                                : '-top-[calc(50%)]'
-                        } bg-amber-600 border border-white rounded-full absolute`}
+                                ? mouseDown
+                                    ? '-top-[calc(50%-0.3rem)]'
+                                    : '-top-[calc(50%-0.3rem)] hover:-top-[calc(50%-0.1rem)]'
+                                : mouseDown
+                                ? '-top-[calc(50%-0.2rem)]'
+                                : '-top-[calc(50%-0.225rem)] hover:-top-[calc(50%+0.1rem)]'
+                        } bg-amber-600 border border-white rounded-full absolute z-[100]`}
                         ref={draggableHandle}
                         style={{
                             left: `${

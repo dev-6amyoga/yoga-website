@@ -1,3 +1,5 @@
+import './StackVideo.css'
+
 import { useCallback, useEffect, useRef } from 'react'
 import usePlaylistStore from '../../store/PlaylistStore'
 import useVideoStore, {
@@ -166,6 +168,11 @@ function VideoPlayer() {
         setPauseReason,
     ])
 
+    const handleSetPause = useCallback(() => {
+        console.log('SETTING VIDEO STATE TO PAUSE ------------>')
+        setVideoState(STATE_VIDEO_PAUSED)
+    }, [setVideoState])
+
     const handleLoading = useCallback(
         (loading) => {
             if (loading) setVideoState(STATE_VIDEO_LOADING)
@@ -175,11 +182,6 @@ function VideoPlayer() {
         },
         [handleSetPlay, setVideoState]
     )
-
-    const handleSetPause = useCallback(() => {
-        console.log('SETTING VIDEO STATE TO PAUSE ------------>')
-        setVideoState(STATE_VIDEO_PAUSED)
-    }, [setVideoState])
 
     const handlePlaybackError = useCallback(() => {
         console.log('Error playing video ------------------->')
@@ -194,12 +196,13 @@ function VideoPlayer() {
     }, [currentVideo, queue, setPlaylistState, setCurrentVideo])
 
     const handleAlternatePlayPause = useCallback(() => {
+        console.log('ALTERNATE PLAY PAUSE ------------>')
         if (videoState === STATE_VIDEO_PLAY) {
-            setVideoState(STATE_VIDEO_PAUSED)
+            handleSetPause()
         } else if (videoState === STATE_VIDEO_PAUSED) {
-            setVideoState(STATE_VIDEO_PLAY)
+            handleSetPlay()
         }
-    }, [setVideoState, videoState])
+    }, [videoState, handleSetPlay, handleSetPause])
 
     const handleFullScreen = useFullScreenHandle()
 
@@ -263,8 +266,8 @@ function VideoPlayer() {
                                     ) : (
                                         <></>
                                     )}
-                                    <div className="absolute bottom-0 h-40 w-full hover:opacity-100 opacity-0 transition-opacity duration-300 ease-in-out z-20">
-                                        <div className="absolute bottom-0 w-full bg-black bg-opacity-40">
+                                    <div className="absolute bottom-0 h-40 w-full hover:opacity-100 hover:delay-0 delay-1000 opacity-0 transition-opacity duration-300 ease-in-out z-20">
+                                        <div className="absolute bottom-0 w-full ">
                                             <VideoPlaybar
                                                 duration={duration}
                                                 draggableHandle={

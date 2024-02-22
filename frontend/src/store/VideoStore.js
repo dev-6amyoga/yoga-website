@@ -80,7 +80,10 @@ export const useVideoStore = create((set) => ({
         set((state) => {
             // console.log(state.seekQueue, seekTime)
             // {type: move | seek, time: number}
-            return { seekQueue: [...state.seekQueue, seekEvent] }
+            return {
+                seekQueue: [...state.seekQueue, seekEvent],
+                pauseReason: null,
+            }
         }),
     popFromSeekQueue: (index) =>
         set((state) => {
