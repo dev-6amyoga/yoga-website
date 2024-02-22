@@ -193,15 +193,14 @@ router.post("/get-by-instituteid", async (req, res) => {
   try {
     const users = await sequelize.query(
       `
-      SELECT user.* from public.user 
-      JOIN institute on user.institute_id = institute.institute_id 
-      where institute.institute_id = ${institute_id};
+      SELECT * from user_institute_plan_role WHERE institute_id = ${institute_id} AND role_id = 2;
       `,
       {
-        model: User,
+        model: UserInstitutePlanRole,
         mapToModel: true,
       }
     );
+    console.log(users, "ARE USERS");
 
     return res.status(HTTP_OK).json({ users });
   } catch (error) {

@@ -67,6 +67,44 @@ router.post("/get-user-plan-by-id", async (req, res) => {
   }
 });
 
+router.post("/get-active-user-plan-by-id", async (req, res) => {
+  const { user_id } = req.body;
+  if (!user_id) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Missing required fields" });
+  }
+  try {
+    const userPlan = await UserPlan.findAll({
+      where: {
+        user_id: user_id,
+        current_status: "ACTIVE",
+      },
+      include: [
+        { model: User, attributes: ["name"] },
+        {
+          model: Plan,
+          attributes: [
+            "name",
+            "has_basic_playlist",
+            "has_playlist_creation",
+            "playlist_creation_limit",
+            "has_self_audio_upload",
+            "number_of_teachers",
+          ],
+        },
+      ],
+      order: [["validity_to", "DESC"]],
+    });
+    return res.status(HTTP_OK).json({ userPlan: userPlan ? userPlan : null });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to fetch user" });
+  }
+});
+
 router.post("/get-user-institute-plan-by-id", async (req, res) => {
   const { user_id, institute_id } = req.body;
   if (!user_id || !institute_id) {

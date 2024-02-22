@@ -5,6 +5,7 @@ import { useShallow } from 'zustand/react/shallow'
 import usePlaylistStore from '../../store/PlaylistStore'
 import useUserStore from '../../store/UserStore'
 import PlaylistItem from './PlaylistItem'
+import { Fetch } from '../../utils/Fetch'
 
 function Playlist() {
     const [modalState, setModalState] = useState(false)
@@ -36,19 +37,38 @@ function Playlist() {
             state.currentInstituteId,
         ])
     )
-
     const user_id = user?.user_id
     const [currentInstitute, setCurrentInstitute] = useState(null)
     const [allAsanas, setAllAsanas] = useState([])
     const [allTransitions, setAllTransitions] = useState([])
+    const [schedulePresent, setSchedulePresent] = useState(false)
+    const [schedules, setSchedules] = useState([])
 
     useEffect(() => {
         console.log(currentInstitute, 'IS THE INSTITUTE')
         console.log(user_id, 'IS THE USER')
         console.log(user, 'IS THE USER')
         if (currentInstituteId) {
-            console.log('IS AN INSTITUTE')
+            Fetch({
+                url: 'http://localhost:4000/schedule/getSchedulesById',
+                method: 'POST',
+                data: {
+                    user_id: user_id,
+                    user_type: 'INSTITUTE',
+                    institute_id: currentInstituteId,
+                },
+            }).then((res) => {
+                if (res.status === 200) {
+                    setSchedules(res.data)
+                    if (res.data.length > 0) {
+                        setSchedulePresent(true)
+                    }
+                }
+            })
+
+            //after fetching, check if user_id is a teacher, and if so, fetch their schedules
         }
+        //user_id is a student, fetch their schedules
     }, [currentInstitute, user_id])
 
     useState(() => {
@@ -323,7 +343,9 @@ function Playlist() {
         <div className="rounded-xl">
             <Modal visible={modalState} onClose={closeModal}>
                 <Modal.Title>Playlist Details</Modal.Title>
-                <Modal.Subtitle>{modalData.playlist_name}</Modal.Subtitle>
+                <Modal.Subtitle>
+                    {modalData.playlist_name || modalData.schedule_name}
+                </Modal.Subtitle>
                 {asana_details?.map((asanaDetail) => (
                     <div>
                         <p>
@@ -360,6 +382,34 @@ function Playlist() {
                             />
                         ))}
                     </div>
+                    <Divider />
+                </div>
+            )}
+
+            {schedulePresent && (
+                <div>
+                    <h4>Schedules</h4>
+                    <p className="pb-4 text-sm">
+                        Choose from applicable schedules to practice.
+                    </p>
+                    <div className="flex flex-row gap-2">
+                        {schedules.map((schedule) => (
+                            <PlaylistItem
+                                key={schedule.schedule_name}
+                                type={
+                                    queue
+                                        ? queue.includes(schedule)
+                                            ? 'success'
+                                            : 'secondary'
+                                        : 'secondary'
+                                }
+                                add={() => handleAddToQueue(schedule.asana_ids)}
+                                deets={() => showDetails(schedule)}
+                                playlist={schedule}
+                            />
+                        ))}
+                    </div>
+                    <Divider />
                 </div>
             )}
 
@@ -395,9 +445,9 @@ function Playlist() {
 
                         <br />
                     </div>
+                    <Divider />
                 </div>
             )}
-            <Divider />
             {isTeacher && (
                 <div>
                     <h4>Made for you : </h4>
@@ -420,10 +470,9 @@ function Playlist() {
                             />
                         ))}
                     </div>
+                    <Divider />
                 </div>
             )}
-            <Divider />
-
             {isPersonal && (
                 <div>
                     <h4>My Playlists</h4>
@@ -447,10 +496,10 @@ function Playlist() {
                             />
                         ))}
                     </div>
+                    <Divider />
                 </div>
             )}
 
-            <Divider />
             <h4>6AM Yoga Playlists</h4>
             <p className="pb-4 text-sm">
                 Choose from a variety of playlists to practice.
@@ -472,6 +521,7 @@ function Playlist() {
                     />
                 ))}
             </div>
+            <Divider />
         </div>
     )
 }

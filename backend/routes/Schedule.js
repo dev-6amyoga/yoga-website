@@ -36,10 +36,41 @@ router.get("/getAllSchedules", async (req, res) => {
   }
 });
 
-router.post("/getScheduleById", async (req, res) => {
+router.post("/getSchedulesById", async (req, res) => {
   try {
+    const { user_id, user_type, institute_id } = req.body;
     const schedules = await Schedule.find();
-    res.json(schedules);
+    const currentDate = new Date();
+    var applicableId1 = "";
+    var applicableId2 = "";
+    if (user_type === "STUDENT" && institute_id === 0) {
+      applicableId1 = "Student_" + String(user_id);
+    }
+    if (user_type === "TEACHER") {
+      applicableId1 = "Teacher_" + String(user_id);
+      applicableId2 = "Institute_" + String(institute_id);
+    }
+    if (user_type === "INSTITUTE") {
+      applicableId1 = "Institute_" + String(institute_id);
+    }
+    var resultSet = [];
+    for (var i = 0; i < schedules.length; i++) {
+      const schedule = schedules[i];
+      if (
+        (applicableId2 !== "" &&
+          schedule.applicable_ids.includes(applicableId2)) ||
+        (applicableId1 !== "" &&
+          schedule.applicable_ids.includes(applicableId1))
+      ) {
+        const validityFrom = new Date(schedule.validity_from);
+        const validityTo = new Date(schedule.validity_to);
+        if (validityFrom <= currentDate && currentDate <= validityTo) {
+          resultSet.push(schedule);
+        }
+      }
+    }
+
+    res.status(200).json(resultSet);
   } catch (error) {
     console.error(error);
     res.status(HTTP_INTERNAL_SERVER_ERROR).json({
