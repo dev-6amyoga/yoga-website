@@ -28,7 +28,6 @@ export const PlanAllocator = (teacher_id, institute_id) => {
                         }).then((res) => {
                             if (res.status === 200) {
                                 setPlanId(res.data.userPlan[0].plan_id)
-                                console.log(res.data.userPlan[0])
                                 toast('User Plan Fetched')
                             }
                         })
