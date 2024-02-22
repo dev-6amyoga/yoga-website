@@ -36,7 +36,6 @@ router.post("/get-playlists", async (req, res) => {
     const allPlaylists = await InstitutePlaylist.find({
       institute_id: institute_id,
     });
-    console.log(institute_id, allPlaylists);
     res.status(200).json(allPlaylists);
   } catch (error) {
     console.error("Error getting playlists:", error);

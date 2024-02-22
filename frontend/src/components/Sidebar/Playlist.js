@@ -43,6 +43,9 @@ function Playlist() {
     const [allTransitions, setAllTransitions] = useState([])
     const [schedulePresent, setSchedulePresent] = useState(false)
     const [schedules, setSchedules] = useState([])
+    const [nextMonthSchedulePresent, setNextMonthSchedulePresent] =
+        useState(false)
+    const [nextMonthSchedules, setNextMonthSchedules] = useState([])
 
     useEffect(() => {
         console.log(currentInstitute, 'IS THE INSTITUTE')
@@ -62,6 +65,23 @@ function Playlist() {
                     setSchedules(res.data)
                     if (res.data.length > 0) {
                         setSchedulePresent(true)
+                        Fetch({
+                            url: 'http://localhost:4000/schedule/getNextMonthSchedulesById',
+                            method: 'POST',
+                            data: {
+                                user_id: user_id,
+                                user_type: 'INSTITUTE',
+                                institute_id: currentInstituteId,
+                            },
+                        }).then((res) => {
+                            if (res.status === 200) {
+                                console.log(res.data, 'IS RES!!')
+                                setNextMonthSchedules(res.data)
+                                if (res.data.length > 0) {
+                                    setNextMonthSchedulePresent(true)
+                                }
+                            }
+                        })
                     }
                 }
             })
@@ -327,13 +347,13 @@ function Playlist() {
     }
 
     const showDetails = (x) => {
+        console.log('in show details')
         setModalData(x)
         setModalState(true)
     }
     const closeModal = () => {
         setModalState(false)
     }
-
     const queue = usePlaylistStore((state) => state.queue)
     const archive = usePlaylistStore((state) => state.archive)
     const addToQueue = usePlaylistStore((state) => state.addToQueue)
@@ -346,10 +366,14 @@ function Playlist() {
                 <Modal.Subtitle>
                     {modalData.playlist_name || modalData.schedule_name}
                 </Modal.Subtitle>
+                {console.log(asana_details)}
                 {asana_details?.map((asanaDetail) => (
                     <div>
                         <p>
-                            {asanaDetail.asana_name} - {asanaDetail.language}
+                            {asanaDetail?.asana_name}
+                            {asanaDetail?.language
+                                ? ` - ${asanaDetail.language}`
+                                : ''}
                         </p>
                     </div>
                 ))}
@@ -358,7 +382,6 @@ function Playlist() {
                     Close
                 </Modal.Action>
             </Modal>
-
             {isInstitute && (
                 <div>
                     <h4>Institutes Playlists</h4>
@@ -379,13 +402,13 @@ function Playlist() {
                                 add={() => handleAddToQueue(playlist.asana_ids)}
                                 deets={() => showDetails(playlist)}
                                 playlist={playlist}
+                                isFuture={false}
                             />
                         ))}
                     </div>
                     <Divider />
                 </div>
             )}
-
             {schedulePresent && (
                 <div>
                     <h4>Schedules</h4>
@@ -406,13 +429,34 @@ function Playlist() {
                                 add={() => handleAddToQueue(schedule.asana_ids)}
                                 deets={() => showDetails(schedule)}
                                 playlist={schedule}
+                                isFuture={false}
+                            />
+                        ))}
+                    </div>
+                    <Divider />
+                    <h4>Next Months Schedules</h4>
+                    <p className="pb-4 text-sm">View Next Months Schedules.</p>
+                    <div className="flex flex-row gap-2">
+                        {nextMonthSchedules.map((schedule) => (
+                            <PlaylistItem
+                                key={schedule.schedule_name}
+                                type={
+                                    queue
+                                        ? queue.includes(schedule)
+                                            ? 'success'
+                                            : 'secondary'
+                                        : 'secondary'
+                                }
+                                add={() => handleAddToQueue(schedule.asana_ids)}
+                                deets={() => showDetails(schedule)}
+                                playlist={schedule}
+                                isFuture={true}
                             />
                         ))}
                     </div>
                     <Divider />
                 </div>
             )}
-
             {isTeacher && (
                 <div>
                     <h4>Teacher's Playlists</h4>
@@ -439,6 +483,7 @@ function Playlist() {
                                     }
                                     deets={() => showDetails(playlist)}
                                     playlist={playlist}
+                                    isFuture={false}
                                 />
                             </Tooltip>
                         ))}
@@ -467,6 +512,7 @@ function Playlist() {
                                 }
                                 deets={() => showDetails(playlist)}
                                 playlist={playlist}
+                                isFuture={false}
                             />
                         ))}
                     </div>
@@ -493,6 +539,7 @@ function Playlist() {
                                 add={() => handleAddToQueue(playlist.asana_ids)}
                                 deets={() => showDetails(playlist)}
                                 playlist={playlist}
+                                isFuture={false}
                             />
                         ))}
                     </div>
@@ -518,6 +565,7 @@ function Playlist() {
                         add={() => handleAddToQueue(playlist.asana_ids)}
                         deets={() => showDetails(playlist)}
                         playlist={playlist}
+                        isFuture={false}
                     />
                 ))}
             </div>
