@@ -191,7 +191,7 @@ function VideoControls({ handleFullScreen }) {
     }, [handleFullScreen.active])
 
     return (
-        <div className="flex justify-between items-center px-4 bg-black bg-opacity-40">
+        <div className="flex justify-between items-center px-4 pb-1">
             <div className="col-start-4 col-span-3 flex items-center justify-start text-white rounded-xl">
                 {/* {String(handleFullScreen.active)} */}
                 {/* previous video */}

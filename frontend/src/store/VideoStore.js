@@ -30,6 +30,25 @@ export const useVideoStore = create((set) => ({
         set(() => {
             return { currentMarkerIdx: idx }
         }),
+    autoSetCurrentMarkerIdx: (currentTime) => {
+        set((state) => {
+            if (state.markers.length === 0) {
+                return { currentMarkerIdx: null }
+            }
+
+            // find the first marker that is greater than the current time
+            const idx = state.markers.findIndex(
+                (m) => m.timestamp > currentTime
+            )
+
+            // if the current time is greater than the last marker, set to last marker
+            if (idx === -1) {
+                return { currentMarkerIdx: state.markers.length - 1 }
+            }
+
+            return { currentMarkerIdx: idx }
+        })
+    },
 
     videoEvent: null,
     setVideoEvent: (videoEvent) =>

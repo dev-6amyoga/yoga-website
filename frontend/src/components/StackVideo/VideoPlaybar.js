@@ -1,14 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DraggableCore } from 'react-draggable'
 import { SEEK_TYPE_MOVE } from '../../enums/seek_types'
-import { VIDEO_EVENT_MOVING_MARKER } from '../../enums/video_event'
-import { VIDEO_PAUSE_MARKER } from '../../enums/video_pause_reasons'
-import { VIDEO_VIEW_STUDENT_MODE } from '../../enums/video_view_modes'
 import usePlaylistStore from '../../store/PlaylistStore'
 import useVideoStore, {
     STATE_VIDEO_ERROR,
     STATE_VIDEO_LOADING,
-    STATE_VIDEO_PAUSED,
 } from '../../store/VideoStore'
 import VideoControls from './VideoControls'
 
@@ -117,37 +113,37 @@ export default function VideoPlaybar({
         //     return
         // }
 
-        if (videoEvent?.type !== VIDEO_EVENT_MOVING_MARKER) {
-            if (
-                prevNextMarkers[1] &&
-                currentTime >= prevNextMarkers[1].timestamp
-            ) {
-                if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
-                    setCurrentMarkerIdx(
-                        currentMarkerIdx + 1 > markers.length - 1
-                            ? 0
-                            : currentMarkerIdx + 1
-                    )
-                } else {
-                    // if in teaching mode, then go to start of current marker
-                    if (prevNextMarkers[0] && prevNextMarkers[0]?.loop) {
-                        addToSeekQueue({
-                            t: prevNextMarkers[0].timestamp,
-                            type: SEEK_TYPE_MOVE,
-                        })
-                    } else if (
-                        prevNextMarkers[0] &&
-                        !prevNextMarkers[0]?.loop
-                    ) {
-                        console.log(
-                            "SETTING PAUSE REASON TO 'VIDEO_PAUSE_MARKER'"
-                        )
-                        setVideoState(STATE_VIDEO_PAUSED)
-                        setPauseReason(VIDEO_PAUSE_MARKER)
-                    }
-                }
-            }
-        }
+        // if (videoEvent?.type !== VIDEO_EVENT_MOVING_MARKER) {
+        //     if (
+        //         prevNextMarkers[1] &&
+        //         currentTime >= prevNextMarkers[1].timestamp
+        //     ) {
+        //         if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+        //             setCurrentMarkerIdx(
+        //                 currentMarkerIdx + 1 > markers.length - 1
+        //                     ? 0
+        //                     : currentMarkerIdx + 1
+        //             )
+        //         } else {
+        //             // if in teaching mode, then go to start of current marker
+        //             if (prevNextMarkers[0] && prevNextMarkers[0]?.loop) {
+        //                 addToSeekQueue({
+        //                     t: prevNextMarkers[0].timestamp,
+        //                     type: SEEK_TYPE_MOVE,
+        //                 })
+        //             } else if (
+        //                 prevNextMarkers[0] &&
+        //                 !prevNextMarkers[0]?.loop
+        //             ) {
+        //                 console.log(
+        //                     "SETTING PAUSE REASON TO 'VIDEO_PAUSE_MARKER'"
+        //                 )
+        //                 setVideoState(STATE_VIDEO_PAUSED)
+        //                 setPauseReason(VIDEO_PAUSE_MARKER)
+        //             }
+        //         }
+        //     }
+        // }
     }, [
         setVideoEvent,
         videoEvent,
@@ -278,7 +274,7 @@ export default function VideoPlaybar({
                     } absolute z-20`}
                 ></div>
                 <div
-                    className={`mt-4 w-[calc(100%+0.5rem)] -left-1 mx-auto bg-black bg-opacity-40 h-[32%] absolute z-10`}
+                    className={`mt-4 w-[calc(100%+0.5rem)] -left-1 mx-auto h-[32%] absolute z-10`}
                 ></div>
                 {/* orange bar */}
                 <div className="absolute z-[100] w-full h-full">
@@ -311,8 +307,7 @@ export default function VideoPlaybar({
                 >
                     <div
                         className={`timeboop ${
-                            videoState === STATE_VIDEO_ERROR ||
-                            videoState === STATE_VIDEO_LOADING
+                            videoState === STATE_VIDEO_ERROR
                                 ? 'opacity-0'
                                 : 'opacity-100'
                         } mt-4 w-3 h-3 hover:w-5 hover:h-5  ${
