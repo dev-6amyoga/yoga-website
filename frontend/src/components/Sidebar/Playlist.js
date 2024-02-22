@@ -366,7 +366,10 @@ function Playlist() {
                 <Modal.Subtitle>
                     {modalData.playlist_name || modalData.schedule_name}
                 </Modal.Subtitle>
-                {console.log(asana_details)}
+                <h5>
+                    Playlist Duration : {(modalData.duration / 60).toFixed(2)}{' '}
+                    minutes
+                </h5>
                 {asana_details?.map((asanaDetail) => (
                     <div>
                         <p>
