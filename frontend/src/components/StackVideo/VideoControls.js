@@ -2,7 +2,7 @@ import usePlaylistStore from '../../store/PlaylistStore'
 import useVideoStore, { STATE_VIDEO_LOADING } from '../../store/VideoStore'
 // import asanas from "../../data/asanas.json";
 import { Loading, Toggle } from '@geist-ui/core'
-import { memo, useEffect } from 'react'
+import { memo, useCallback, useEffect, useMemo } from 'react'
 import {
     FaBackward,
     FaExpand,
@@ -22,7 +22,12 @@ import { BsArrowsAngleContract } from 'react-icons/bs'
 // import { toast } from "react-toastify";
 import { useRef } from 'react'
 import { toast } from 'react-toastify'
-import { SEEK_TYPE_MOVE, SEEK_TYPE_SEEK } from '../../enums/seek_types'
+import {
+    SEEK_TYPE_MARKER,
+    SEEK_TYPE_MOVE,
+    SEEK_TYPE_SEEK,
+} from '../../enums/seek_types'
+import { VIDEO_PAUSE_MARKER } from '../../enums/video_pause_reasons'
 import {
     VIDEO_VIEW_STUDENT_MODE,
     VIDEO_VIEW_TEACHING_MODE,
@@ -45,6 +50,8 @@ function VideoControls({ handleFullScreen }) {
         markers,
         currentMarkerIdx,
         setCurrentMarkerIdx,
+        pauseReason,
+        setPauseReason,
     ] = useVideoStore((state) => [
         state.videoState,
         state.setVideoState,
@@ -56,9 +63,11 @@ function VideoControls({ handleFullScreen }) {
         state.markers,
         state.currentMarkerIdx,
         state.setCurrentMarkerIdx,
+        state.pauseReason,
+        state.setPauseReason,
     ])
 
-    const handlePlay = () => {
+    const handlePlay = useCallback(() => {
         /*
 			-- if currentVideo is null then play (video starts)
 			-- else if video is running, pause. if video not running(paused), play
@@ -72,8 +81,34 @@ function VideoControls({ handleFullScreen }) {
         // 	return;
         // } else {
         // }
-        setVideoState(STATE_VIDEO_PLAY)
-    }
+        // setVideoState(STATE_VIDEO_PLAY)
+
+        console.log('SETTING VIDEO STATE TO PLAY ------------>')
+
+        if (videoState === STATE_VIDEO_PAUSED) {
+            if (pauseReason === VIDEO_PAUSE_MARKER) {
+                console.log('VIDEO PLAY : PAUSE REASON MARKER')
+                setCurrentMarkerIdx(
+                    currentMarkerIdx + 1 > markers.length - 1
+                        ? 0
+                        : currentMarkerIdx + 1
+                )
+                setPauseReason(null)
+            }
+        }
+
+        if (videoState !== STATE_VIDEO_PLAY) {
+            setVideoState(STATE_VIDEO_PLAY)
+        }
+    }, [
+        videoState,
+        pauseReason,
+        markers,
+        currentMarkerIdx,
+        setPauseReason,
+        setCurrentMarkerIdx,
+        setVideoState,
+    ])
 
     useEffect(() => {
         if (volumeSliderRef.current) {
@@ -81,27 +116,28 @@ function VideoControls({ handleFullScreen }) {
         }
     }, [volume])
 
-    const handlePause = () => {
+    const handlePause = useCallback(() => {
         /*
         -- if playing pause it
       */
+        console.log('SETTING VIDEO STATE TO PAUSE ------------>')
         setVideoState(STATE_VIDEO_PAUSED)
-    }
+    }, [setVideoState])
 
-    const handleNextVideo = () => {
+    const handleNextVideo = useCallback(() => {
         // remove from queue add to archive
         popFromQueue(0)
-    }
+    }, [popFromQueue])
 
-    const handleSeekFoward = () => {
+    const handleSeekFoward = useCallback(() => {
         addToSeekQueue({ t: 10, type: SEEK_TYPE_SEEK })
-    }
+    }, [addToSeekQueue])
 
-    const handleSeekBackward = () => {
+    const handleSeekBackward = useCallback(() => {
         addToSeekQueue({ t: -10, type: SEEK_TYPE_SEEK })
-    }
+    }, [addToSeekQueue])
 
-    const handlePrevMarker = () => {
+    const handlePrevMarker = useCallback(() => {
         console.log('Prev Marker')
         if (markers.length > 0) {
             if (currentMarkerIdx === 0) {
@@ -114,9 +150,9 @@ function VideoControls({ handleFullScreen }) {
             // seek to prev marker
             addToSeekQueue({ t: markers[idx].timestamp, type: SEEK_TYPE_MOVE })
         }
-    }
+    }, [markers, currentMarkerIdx, setCurrentMarkerIdx, addToSeekQueue])
 
-    const handleNextMarker = () => {
+    const handleNextMarker = useCallback(() => {
         console.log('Next Marker')
         if (markers.length > 0) {
             const idx = ((currentMarkerIdx || 0) + 1) % markers.length
@@ -124,51 +160,74 @@ function VideoControls({ handleFullScreen }) {
             // seek to next marker
             addToSeekQueue({ t: markers[idx].timestamp, type: SEEK_TYPE_MOVE })
         }
-    }
+    }, [markers, currentMarkerIdx, setCurrentMarkerIdx, addToSeekQueue])
 
-    const handleViewModeToggle = (e) => {
-        if (e.target.checked) {
-            toast('View Mode: teacher', { type: 'success' })
-            setViewMode(VIDEO_VIEW_TEACHING_MODE)
-        } else {
-            toast('View Mode: student', { type: 'success' })
-            setViewMode(VIDEO_VIEW_STUDENT_MODE)
-        }
-    }
+    const handleViewModeToggle = useCallback(
+        (e) => {
+            if (e.target.checked) {
+                toast('View Mode: teacher', { type: 'success' })
+                setViewMode(VIDEO_VIEW_TEACHING_MODE)
+            } else {
+                toast('View Mode: student', { type: 'success' })
+                setViewMode(VIDEO_VIEW_STUDENT_MODE)
+            }
+        },
+        [setViewMode]
+    )
+
+    const handleReplayMarkerAfterPause = useCallback(() => {
+        setPauseReason(null)
+        addToSeekQueue({
+            t: markers[currentMarkerIdx].timestamp,
+            type: SEEK_TYPE_MARKER,
+            idx: currentMarkerIdx,
+        })
+    }, [currentMarkerIdx, markers, setPauseReason, addToSeekQueue])
+
+    const iconButtonClass = useMemo(() => {
+        return handleFullScreen.active
+            ? 'video_controls__ctrl__button_fs '
+            : 'video_controls__ctrl__button '
+    }, [handleFullScreen.active])
 
     return (
-        <div className="flex justify-between items-center px-4 py-1">
-            <div className="col-start-4 col-span-3 flex gap-5 items-center justify-start text-white rounded-xl p-2">
+        <div className="flex justify-between items-center px-4 bg-black bg-opacity-40">
+            <div className="col-start-4 col-span-3 flex items-center justify-start text-white rounded-xl">
+                {/* {String(handleFullScreen.active)} */}
                 {/* previous video */}
                 <button
-                    className="w-5 h-5"
+                    className={iconButtonClass}
                     onClick={() => {
                         popFromArchive(-1)
                     }}
                     title="Previous video"
                 >
-                    <FaStepBackward className="w-full h-full" />
+                    <FaStepBackward className="video_controls__ctrl__button__icon" />
                 </button>
 
                 {/* seek back */}
                 <button
                     onClick={handleSeekBackward}
                     title="Rewind 10s"
-                    className="hidden md:block"
+                    className={iconButtonClass + ' hidden md:block'}
                 >
-                    <FaBackward />
+                    <FaBackward className="video_controls__ctrl__button__icon" />
                 </button>
 
                 {/* previous marker */}
                 {viewMode === VIDEO_VIEW_TEACHING_MODE && (
-                    <button onClick={handlePrevMarker} title="Prev Marker">
-                        <TbArrowBadgeLeft />
+                    <button
+                        className={iconButtonClass}
+                        onClick={handlePrevMarker}
+                        title="Prev Marker"
+                    >
+                        <TbArrowBadgeLeft className="video_controls__ctrl__button__icon" />
                     </button>
                 )}
 
                 {/* play/pause video */}
                 <button
-                    className={`w-5 h-5 ${
+                    className={`${iconButtonClass} ${
                         videoState === STATE_VIDEO_LOADING ? 'opacity-30' : ''
                     }`}
                     onClick={() => {
@@ -182,9 +241,9 @@ function VideoControls({ handleFullScreen }) {
                     title="Play/Pause"
                 >
                     {videoState === STATE_VIDEO_PLAY ? (
-                        <FaPause className="w-full h-full" />
+                        <FaPause className="video_controls__ctrl__button__icon" />
                     ) : videoState === STATE_VIDEO_PAUSED ? (
-                        <FaPlay className="w-full h-full" />
+                        <FaPlay className="video_controls__ctrl__button__icon" />
                     ) : (
                         <Loading color="#fff" />
                     )}
@@ -192,8 +251,12 @@ function VideoControls({ handleFullScreen }) {
 
                 {/* next marker */}
                 {viewMode === VIDEO_VIEW_TEACHING_MODE && (
-                    <button onClick={handleNextMarker} title="Next Marker">
-                        <TbArrowBadgeRight />
+                    <button
+                        className={iconButtonClass}
+                        onClick={handleNextMarker}
+                        title="Next Marker"
+                    >
+                        <TbArrowBadgeRight className="video_controls__ctrl__button__icon" />
                     </button>
                 )}
 
@@ -201,38 +264,56 @@ function VideoControls({ handleFullScreen }) {
                 <button
                     onClick={handleSeekFoward}
                     title="Fast Forward 10s"
-                    className="hidden md:block"
+                    className={iconButtonClass + ' hidden md:block'}
                 >
-                    <FaForward />
+                    <FaForward className="video_controls__ctrl__button__icon" />
                 </button>
 
                 {/* next video */}
                 <button
-                    className="w-5 h-5"
+                    className={iconButtonClass}
                     onClick={handleNextVideo}
                     title="Next Video"
                 >
-                    <FaStepForward className="w-full h-full" />
+                    <FaStepForward className="video_controls__ctrl__button__icon" />
                 </button>
+
+                {pauseReason === VIDEO_PAUSE_MARKER && (
+                    <button
+                        className="py-1 px-2 bg-white border rounded-full text-xs text-black"
+                        onClick={handleReplayMarkerAfterPause}
+                    >
+                        Replay Marker
+                    </button>
+                )}
             </div>
 
             {/* volume control */}
             <div className="flex items-center justify-center gap-4 text-white">
-                <div className="col-start-9 flex items-center gap-1 mb-1">
-                    <div className="mt-2">
+                <div className="col-start-9 flex items-center gap-1">
+                    <div className={iconButtonClass}>
                         {volume === 0 ? (
-                            <IoMdVolumeOff onClick={() => setVolume(0.3)} />
+                            <IoMdVolumeOff
+                                onClick={() => setVolume(0.3)}
+                                className="video_controls__ctrl__button__icon"
+                            />
                         ) : volume > 0.5 ? (
-                            <IoMdVolumeHigh onClick={() => setVolume(0)} />
+                            <IoMdVolumeHigh
+                                onClick={() => setVolume(0)}
+                                className="video_controls__ctrl__button__icon"
+                            />
                         ) : (
-                            <IoMdVolumeLow onClick={() => setVolume(0.0)} />
+                            <IoMdVolumeLow
+                                onClick={() => setVolume(0.0)}
+                                className="video_controls__ctrl__button__icon"
+                            />
                         )}
                     </div>
                     <input
                         type="range"
                         min="0"
                         max="100"
-                        className="accent-orange-500 mt-2 hidden md:block"
+                        className="accent-orange-500 hidden md:block"
                         ref={volumeSliderRef}
                         onChange={(e) =>
                             setVolume(parseFloat(e.target.value) / 100)
@@ -266,37 +347,48 @@ function VideoControls({ handleFullScreen }) {
                         </>
                     }
                 >
-                    <button className="w-5 h-5 mt-2">
-                        <LuSettings className="w-full h-full" />
+                    <button className="video_controls__ctrl__button mt-2">
+                        <LuSettings className="video_controls__ctrl__button__icon" />
                     </button>
                 </Popover> */}
-                <div className="flex items-center gap-2 group">
-                    <span className="group-hover:inline-block hidden text-xs">
-                        Student
+                <div className="flex items-center gap-3 group">
+                    <span
+                        className="group-hover:inline-block hidden text-sm capitalize"
+                        title="Current View Mode"
+                    >
+                        {viewMode}
                     </span>
-                    <Toggle
-                        checked={viewMode === VIDEO_VIEW_TEACHING_MODE}
-                        type="secondary"
-                        onChange={handleViewModeToggle}
-                    />
-                    <span className="group-hover:inline-block hidden text-xs">
-                        Teacher
-                    </span>
+                    <div
+                        className={handleFullScreen.active ? '-mt-3' : '-mt-1'}
+                        title="View Mode"
+                    >
+                        <Toggle
+                            checked={viewMode === VIDEO_VIEW_TEACHING_MODE}
+                            type="secondary"
+                            // className={+handleFullScreen.active ? 'scale-150' : ''}
+                            scale={handleFullScreen.active ? 2 : 1}
+                            onChange={handleViewModeToggle}
+                        />
+                    </div>
                 </div>
 
                 {/* full screen */}
                 <button
-                    className="w-5 h-5"
+                    className={
+                        handleFullScreen.active
+                            ? 'video_controls__ctrl__button_fs'
+                            : 'video_controls__ctrl__button'
+                    }
                     onClick={() => {
-                        if (handleFullScreen.active) handleFullScreen.exit()
-                        else handleFullScreen.enter()
+                        if (handleFullScreen?.active) handleFullScreen?.exit()
+                        else handleFullScreen?.enter()
                     }}
                     title="Full Screen"
                 >
                     {handleFullScreen.active ? (
-                        <BsArrowsAngleContract className="w-full h-full" />
+                        <BsArrowsAngleContract className="video_controls__ctrl__button__icon" />
                     ) : (
-                        <FaExpand className="w-full h-full" />
+                        <FaExpand className="video_controls__ctrl__button__icon" />
                     )}
                 </button>
             </div>

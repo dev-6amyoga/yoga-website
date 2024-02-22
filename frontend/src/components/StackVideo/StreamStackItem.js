@@ -362,18 +362,6 @@ function StreamStackItem({
                         video?.queue_id
                     )
                     if (isActive) handleLoading(false)
-                    if (
-                        videoEvent &&
-                        videoEvent?.type === VIDEO_EVENT_MOVING_MARKER
-                    ) {
-                        console.log(
-                            'SETTING CURRENT IDX --->',
-                            videoEvent?.markerIdx || 0
-                        )
-                        setCurrentMarkerIdx(videoEvent?.markerIdx || 0)
-                        console.log('VIDEO EVENT --->', null)
-                        setVideoEvent(null)
-                    }
                 }}
                 onSeeking={() => {
                     if (isActive) handleLoading(true)
