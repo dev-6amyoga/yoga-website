@@ -131,8 +131,6 @@ function StreamStackItem({
                         break
                     case SEEK_TYPE_MARKER:
                         playerRef.current.currentTime = seekEvent.t
-                        // set current marker here?
-                        // setCurrentMarkerIdx(seekEvent.idx)
                         break
                     default:
                         break
@@ -185,7 +183,7 @@ function StreamStackItem({
         }
     }, [videoState, isActive, autoplayInitialized, setAutoplayInitialized])
 
-    // poll to update the current time, every 10ms, clear the timeout on unmount
+    // poll to update the current time, every 20ms, clear the timeout on unmount
     useEffect(() => {
         const int = setInterval(() => {
             if (playerRef.current?.currentTime && isActive) {
@@ -196,7 +194,7 @@ function StreamStackItem({
         return () => {
             clearInterval(int)
         }
-    }, [currentVideo, isActive])
+    }, [currentVideo, isActive, setCurrentTime])
 
     // clear timeouts before unmount
     useEffect(() => {
