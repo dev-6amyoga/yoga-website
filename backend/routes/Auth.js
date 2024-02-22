@@ -37,7 +37,6 @@ router.use(requestIp.mw());
 
 router.post("/verify-google", async (req, res) => {
   const { client_id, jwtToken } = req.body;
-  console.log(client_id, jwtToken);
   try {
     const userInfo = await auth.verify(client_id, jwtToken);
     return res.status(HTTP_OK).json(userInfo);
@@ -49,9 +48,6 @@ router.post("/verify-google", async (req, res) => {
 
 router.post("/verify-tokens", async (req, res) => {
   const { access_token, refresh_token } = req.body;
-
-  console.log({ access_token, refresh_token });
-
   if (!access_token || !refresh_token) {
     return res
       .status(HTTP_BAD_REQUEST)
@@ -60,9 +56,6 @@ router.post("/verify-tokens", async (req, res) => {
 
   // decode and verify refresh token as it expires much later	than access token
   let [decodedRefresh, errorRefresh] = verifyToken(refresh_token);
-
-  console.log({ decodedRefresh, errorRefresh });
-
   if (!decodedRefresh || errorRefresh) {
     return res
       .status(HTTP_BAD_REQUEST)
@@ -91,10 +84,7 @@ router.post("/verify-tokens", async (req, res) => {
 router.post("/login", async (req, res) => {
   // const clientIp = req.clientIp;
 
-  // console.log("clientIp", clientIp);
-
   const { username, password } = req.body;
-  console.log(username, password);
   if (!username || !password)
     return res
       .status(HTTP_BAD_REQUEST)
@@ -102,7 +92,6 @@ router.post("/login", async (req, res) => {
 
   // check if user exists
   let [user, errorUser] = await GetUserInfo({ username });
-  console.log(user);
 
   if (!user || errorUser)
     return res.status(HTTP_BAD_REQUEST).json({ error: "User does not exist" });
@@ -180,7 +169,6 @@ router.post("/login", async (req, res) => {
     await t.commit();
     return res.status(HTTP_OK).json({ user, accessToken, refreshToken });
   } catch (err) {
-    console.log(err);
     await t.rollback();
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
       message: "internal server error",
@@ -229,8 +217,6 @@ router.post("/refresh-token", async (req, res) => {
   }
 
   const [decoded, error] = verifyToken(refresh_token);
-
-  console.log(decoded, error);
 
   if (!decoded || error) {
     return res.status(HTTP_BAD_REQUEST).json({ error: "Invalid token" });
@@ -290,7 +276,6 @@ router.post("/register", async (req, res) => {
     is_google_login,
   } = req.body;
   // validate inputs
-  console.log(req.body);
   if (
     !username ||
     !password ||
@@ -355,7 +340,6 @@ router.post("/register", async (req, res) => {
   try {
     // find insitite by name
     let institute = null;
-    // console.log({ institute_name });
     if (
       institute_name !== null &&
       institute_name !== undefined &&
@@ -369,8 +353,6 @@ router.post("/register", async (req, res) => {
         },
         { transaction: t }
       );
-
-      // console.log({ institute });
 
       if (institute === null) throw new Error("Institute doesn't exist");
     }
@@ -399,11 +381,7 @@ router.post("/register", async (req, res) => {
       { transaction: t }
     );
 
-    // console.log(newUser.toJSON());
-
     // create user_institute
-
-    console.log(newUser.user_id, institute.institute_id, role.role_id);
     const user_institute_plan_role = await UserInstitutePlanRole.create(
       {
         user_id: newUser.user_id,
@@ -447,8 +425,6 @@ router.post("/register-google", async (req, res) => {
     confirm_password,
     phone_no,
   } = req.body;
-
-  console.log(req.body);
   // const {access_token} = req.headers.authorization?.split(" ") ?? null
 
   // validate inputs
