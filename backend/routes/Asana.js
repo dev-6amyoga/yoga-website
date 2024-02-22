@@ -37,9 +37,7 @@ router.post("/video/addAsana", async (req, res) => {
     }
     requestData.id = newId;
     const newAsana = new Asana(requestData);
-    console.log(newAsana);
     const hlsDuration = getVideoDuration(newAsana.asana_hls_url);
-    console.log(hlsDuration);
     newAsana.duration = hlsDuration;
     const savedAsana = await newAsana.save();
     res.status(200).json(newAsana);
@@ -147,6 +145,10 @@ router.delete("/video/deleteTransition/:id", async (req, res) => {
 router.put("/video/updateAsana/:asanaId", async (req, res) => {
   const asanaId = req.params.asanaId;
   const updatedData = req.body;
+  if (updatedData.asana_hls_url !== "") {
+    const hlsDuration = getVideoDuration(updatedData.asana_hls_url);
+    updatedData.duration = hlsDuration;
+  }
   try {
     const existingAsana = await Asana.findOne({ id: asanaId });
     if (!existingAsana) {

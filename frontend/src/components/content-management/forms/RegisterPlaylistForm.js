@@ -6,6 +6,7 @@ import {
     Input,
     Modal,
     Table,
+    Text,
 } from '@geist-ui/core'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -77,9 +78,17 @@ function RegisterPlaylistForm() {
         var count = document.getElementById(`asana_count_${rowData.id}`).value
         if (count === '') {
             count = 1
+        } else if (
+            isNaN(count) ||
+            !Number.isInteger(Number(count)) ||
+            Number(count) < 1
+        ) {
+            toast('Invalid count entered. Please try again.')
+            return
         } else {
             count = Number(count)
         }
+
         if (playlist_temp.length === 0) {
             const x = transitionGenerator('start', rowData, transitions)
             if (x.length !== 0) {
@@ -312,6 +321,14 @@ function RegisterPlaylistForm() {
         }
     })
 
+    const [totalDuration, setTotalDuration] = useState(0)
+    useEffect(() => {
+        const newTotalDuration = playlist_temp.reduce(
+            (sum, asana) => sum + (asana.rowData.duration || 0) * asana.count,
+            0
+        )
+        setTotalDuration(newTotalDuration)
+    }, [playlist_temp, playlist_temp.map((asana) => asana.count)])
     const customerCode = 'eyxw0l155flsxhz3'
     return (
         <div className="">
@@ -434,6 +451,13 @@ function RegisterPlaylistForm() {
                         <Input width="100%" id="playlist_name">
                             Playlist Name
                         </Input>
+                        <br />
+                        <br />
+                        <Text>
+                            Playlist Duration :{' '}
+                            {(totalDuration / 60).toFixed(2)} minutes
+                        </Text>
+
                         <Button htmlType="submit">Submit</Button>
                     </form>
                 </Card>
