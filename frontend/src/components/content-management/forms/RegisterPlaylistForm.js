@@ -166,6 +166,7 @@ function RegisterPlaylistForm() {
                 playlist_sequence['asana_ids'].push(asana_id_playlist)
             }
         })
+        playlist_sequence['duration'] = totalDuration
         try {
             const response = await fetch(
                 'http://localhost:4000/content/playlists/addPlaylist',
