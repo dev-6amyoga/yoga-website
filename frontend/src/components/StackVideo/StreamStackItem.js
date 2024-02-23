@@ -176,12 +176,14 @@ function StreamStackItem({
             if (seekEvent && playerRef.current) {
                 switch (seekEvent.type) {
                     case SEEK_TYPE_SEEK:
-                        const ct = playerRef.current.currentTime + seekEvent.t
+                        let ct = playerRef.current.currentTime + seekEvent.t
                         if (ct > playerRef.current.duration) {
                             handleEnd()
                             popFromSeekQueue(0)
                             return
                         }
+                        if (ct < 0) ct = 0
+
                         playerRef.current.currentTime = ct
                         console.log(
                             'SEEKING ----------------------------->',
@@ -192,16 +194,29 @@ function StreamStackItem({
                         // popFromSeekQueue(0)
                         break
                     case SEEK_TYPE_MOVE:
-                        playerRef.current.currentTime = seekEvent.t
+                        let st = seekEvent.t < 0 ? 0 : seekEvent.t
+                        if (st > playerRef.current.duration) {
+                            handleEnd()
+                            popFromSeekQueue(0)
+                            return
+                        }
+
+                        playerRef.current.currentTime = st
                         console.log(
                             'SEEKING ----------------------------->',
                             playerRef.current.currentTime
                         )
-                        setCommitSeekTime(seekEvent.t)
+                        setCommitSeekTime(st)
                         // autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
                         // popFromSeekQueue(0)
                         break
                     case SEEK_TYPE_MARKER:
+                        if (seekEvent.t > playerRef.current.duration) {
+                            handleEnd()
+                            popFromSeekQueue(0)
+                            return
+                        }
+
                         playerRef.current.currentTime = seekEvent.t
                         // popFromSeekQueue(0)
                         setCommitSeekTime(seekEvent.t)
@@ -265,7 +280,14 @@ function StreamStackItem({
                     })
             }
         }
-    }, [videoState, isActive, autoplayInitialized, setAutoplayInitialized])
+    }, [
+        videoState,
+        isActive,
+        autoplayInitialized,
+        setAutoplayInitialized,
+        setPauseReason,
+        setVolume,
+    ])
 
     // poll to update the current time, every 20ms, clear the timeout on unmount
     useEffect(() => {
@@ -489,24 +511,7 @@ function StreamStackItem({
     }, [video])
 
     return (
-        <div
-            className={`h-full w-full ${isActive ? 'block' : 'hidden'}`}
-            // initial={{
-            // 	opacity: 0,
-            // 	transition: { duration: isActive ? 0.2 : 0.5, ease: "linear" },
-            // }}
-            // animate={{
-            // 	opacity: isActive ? 1 : 0,
-            // 	transition: { duration: 0.2, ease: "easeInOut" },
-            // }}
-            // exit={{
-            // 	opacity: 0,
-            // 	transition: {
-            // 		duration: 0.2,
-            // 		ease: "easeInOut",
-            // 	},
-            // }}
-        >
+        <div className={`h-full w-full ${isActive ? 'block' : 'hidden'}`}>
             <Stream
                 streamRef={playerRef}
                 allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
