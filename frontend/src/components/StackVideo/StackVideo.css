@@ -1,11 +1,11 @@
 .video_controls__ctrl__button {
-    @apply w-11 h-9 py-2 px-1 flex items-center justify-center;
+    @apply flex h-9 w-11 items-center justify-center px-1 py-2;
 }
 
 .video_controls__ctrl__button_fs {
-    @apply w-16 h-16 py-5 px-1 flex items-center justify-center;
+    @apply flex h-16 w-16 items-center justify-center px-1 py-5;
 }
 
 .video_controls__ctrl__button__icon {
-    @apply w-6 h-6;
+    @apply h-6 w-6;
 }

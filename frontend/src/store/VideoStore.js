@@ -33,7 +33,7 @@ export const useVideoStore = create((set) => ({
     autoSetCurrentMarkerIdx: (currentTime = undefined) => {
         set((state) => {
             let ct = currentTime ?? state.currentTime
-            console.log('autoSetCurrentMarkerIdx :', currentTime, '==>', ct)
+            // console.log('autoSetCurrentMarkerIdx :', currentTime, '==>', ct)
             // let prevIdx = state.currentMarkerIdx
 
             // if no markers, dont bother

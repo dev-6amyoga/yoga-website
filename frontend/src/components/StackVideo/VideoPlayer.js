@@ -200,18 +200,18 @@ function VideoPlayer() {
     return (
         <FullScreen handle={handleFullScreen}>
             <div className="hover:cursor-pointer">
-                <div className="bg-black grid place-items-center aspect-video rounded-xl overflow-hidden">
+                <div className="grid aspect-video place-items-center overflow-hidden rounded-xl bg-black ">
                     {currentVideo ? (
                         <>
                             {videoState === STATE_VIDEO_ERROR ? (
-                                <div className="text-lg flex flex-col gap-4 items-center justify-center">
+                                <div className="flex flex-col items-center justify-center gap-4 text-lg">
                                     <p>Error : Video playback error</p>
                                     <Button onClick={handleSetPlay}>
                                         Refresh
                                     </Button>
                                 </div>
                             ) : (
-                                <div className="relative w-full h-full">
+                                <div className="relative h-full w-full">
                                     {queue.length > 0 ? (
                                         <div className="">
                                             {queue
@@ -249,7 +249,7 @@ function VideoPlayer() {
                                     ) : (
                                         <></>
                                     )}
-                                    <div className="absolute bottom-0 h-40 w-full hover:opacity-100 hover:delay-0 delay-1000 opacity-0 transition-opacity duration-300 ease-in-out z-20">
+                                    <div className="absolute bottom-0 z-20 h-40 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0">
                                         <div className="absolute bottom-0 w-full ">
                                             <VideoPlaybar
                                                 duration={duration}
@@ -266,7 +266,7 @@ function VideoPlayer() {
                                         </div>
                                     </div>
                                     <div
-                                        className={`absolute w-full h-full top-0 left-0 right-0 bottom-0 bg-zinc-800 z-10 transition-all ${
+                                        className={`absolute bottom-0 left-0 right-0 top-0 z-10 h-full w-full bg-zinc-800 transition-all ${
                                             videoState ===
                                                 STATE_VIDEO_LOADING ||
                                             videoStateVisible
@@ -280,13 +280,13 @@ function VideoPlayer() {
                                         {videoState === STATE_VIDEO_LOADING ? (
                                             <Loading color="#fff" />
                                         ) : videoStateVisible ? (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <div className="w-8 h-8 text-white">
+                                            <div className="flex h-full w-full items-center justify-center">
+                                                <div className="h-8 w-8 text-white">
                                                     {videoState ===
                                                     STATE_VIDEO_PLAY ? (
-                                                        <FaPlay className="w-full h-full" />
+                                                        <FaPlay className="h-full w-full" />
                                                     ) : (
-                                                        <FaPause className="w-full h-full" />
+                                                        <FaPause className="h-full w-full" />
                                                     )}
                                                 </div>
                                             </div>
