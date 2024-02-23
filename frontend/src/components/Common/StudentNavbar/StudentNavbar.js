@@ -69,25 +69,33 @@ function StudentNavbar() {
 					const indexOfActiveUserPlan = data["userPlan"].findIndex(
 						(plan) => plan.current_status === "ACTIVE"
 					);
-					setUserPlan(data["userPlan"][indexOfActiveUserPlan]);
-					setPlanId(
-						data["userPlan"][indexOfActiveUserPlan]["plan_id"]
-					);
-					if (
-						data["userPlan"][indexOfActiveUserPlan]["plan"]
-							.has_playlist_creation
-					) {
-						setDisabledTailorMade(false);
-					} else {
+					console.log(data["userPlan"][indexOfActiveUserPlan], "IS PLAN");
+					if(data["userPlan"][indexOfActiveUserPlan].institute_id !== null){
+						
+						setDisabled(true);
 						setDisabledTailorMade(true);
 					}
-					if (
-						data["userPlan"][indexOfActiveUserPlan]["plan"]
-							.has_basic_playlist
-					) {
-						setDisabled(false);
-					} else {
-						setDisabled(true);
+					else{
+						setUserPlan(data["userPlan"][indexOfActiveUserPlan]);
+						setPlanId(
+							data["userPlan"][indexOfActiveUserPlan]["plan_id"]
+						);
+						if (
+							data["userPlan"][indexOfActiveUserPlan]["plan"]
+								.has_playlist_creation
+						) {
+							setDisabledTailorMade(false);
+						} else {
+							setDisabledTailorMade(true);
+						}
+						if (
+							data["userPlan"][indexOfActiveUserPlan]["plan"]
+								.has_basic_playlist
+						) {
+							setDisabled(false);
+						} else {
+							setDisabled(true);
+						}
 					}
 				} else {
 					setDisabled(true);
