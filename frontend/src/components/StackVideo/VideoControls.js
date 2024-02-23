@@ -191,7 +191,7 @@ function VideoControls({ handleFullScreen }) {
 
     return (
         <div className="flex items-center justify-between px-4 pb-1">
-            <div className="col-span-3 col-start-4 flex items-center justify-start rounded-xl text-white">
+            <div className="flex items-center justify-start rounded-xl text-white">
                 {/* {String(handleFullScreen.active)} */}
                 {/* previous video */}
                 <button
@@ -303,22 +303,22 @@ function VideoControls({ handleFullScreen }) {
 
             {/* volume control */}
             <div className="flex items-center justify-center gap-4 text-white">
-                <div className="col-start-9 flex items-center gap-1">
-                    <div className={iconButtonClass}>
+                <div className="group flex items-center gap-1">
+                    <div className={iconButtonClass + ''}>
                         {volume === 0 ? (
                             <IoMdVolumeOff
                                 onClick={() => setVolume(0.3)}
-                                className="video_controls__ctrl__button__icon"
+                                className="h-7 w-7"
                             />
                         ) : volume > 0.5 ? (
                             <IoMdVolumeHigh
                                 onClick={() => setVolume(0)}
-                                className="video_controls__ctrl__button__icon"
+                                className="h-7 w-7"
                             />
                         ) : (
                             <IoMdVolumeLow
                                 onClick={() => setVolume(0.0)}
-                                className="video_controls__ctrl__button__icon"
+                                className="h-7 w-7"
                             />
                         )}
                     </div>
@@ -326,7 +326,7 @@ function VideoControls({ handleFullScreen }) {
                         type="range"
                         min="0"
                         max="100"
-                        className="hidden accent-orange-500 md:block"
+                        className="hidden w-0 accent-orange-500 opacity-0 transition-all duration-300 group-hover:w-20 group-hover:opacity-100 md:block"
                         ref={volumeSliderRef}
                         onChange={(e) =>
                             setVolume(parseFloat(e.target.value) / 100)
@@ -334,39 +334,9 @@ function VideoControls({ handleFullScreen }) {
                     />
                 </div>
 
-                {/* settings */}
-                {/* <Popover
-                    disableItemsAutoClose
-                    content={
-                        <>
-                            <Popover.Item title>
-                                <span>Settings</span>
-                            </Popover.Item>
-                            <Popover.Item>
-                                <p>View Mode </p>
-                            </Popover.Item>
-                            <Popover.Item className="flex items-center gap-2">
-                                <span className="mt-1">Student</span>
-                                <Toggle
-                                    checked={
-                                        viewMode === VIDEO_VIEW_TEACHING_MODE
-                                    }
-                                    type="secondary"
-                                    onChange={handleViewModeToggle}
-                                />
-                                <span className="mt-1">Teacher</span>
-                            </Popover.Item>
-                            <Popover.Item line />
-                        </>
-                    }
-                >
-                    <button className="video_controls__ctrl__button mt-2">
-                        <LuSettings className="video_controls__ctrl__button__icon" />
-                    </button>
-                </Popover> */}
-                <div className="group flex items-center gap-3">
+                <div className="group mr-3 flex items-center gap-3">
                     <span
-                        className="hidden text-sm capitalize group-hover:inline-block"
+                        className="clip-rect-left-0 group-hover:clip-rect-full w-0 text-sm capitalize transition-all duration-300 group-hover:w-16"
                         title="Current View Mode"
                     >
                         {viewMode}
@@ -379,7 +349,7 @@ function VideoControls({ handleFullScreen }) {
                             checked={viewMode === VIDEO_VIEW_TEACHING_MODE}
                             type="secondary"
                             // className={+handleFullScreen.active ? 'scale-150' : ''}
-                            scale={handleFullScreen.active ? 2 : 1}
+                            scale={handleFullScreen.active ? 2 : 1.3}
                             onChange={handleViewModeToggle}
                         />
                     </div>
