@@ -33,7 +33,7 @@ function QueueItem({ item, idx, pop, moveUp, moveDown, customerCode }) {
     console.log(item?.video?.asana_name, item?.video?.asana_thumbnailTs)
 
     return (
-        <div className="flex-shrink-0 flex flex-col gap-2 items-center px-1 py-2 bg-yblue-900 text-white rounded-xl bg-black">
+        <div className="bg-yblue-900 flex flex-shrink-0 flex-col items-center gap-2 rounded-xl bg-black px-1 py-2 text-white">
             <img
                 src={`https://customer-${customerCode}.cloudflarestream.com/${
                     item?.video?.asana_videoID ??
@@ -44,29 +44,31 @@ function QueueItem({ item, idx, pop, moveUp, moveDown, customerCode }) {
                 alt={item?.video?.asana_name ?? item?.video?.transition_name}
                 className="h-24 rounded-xl"
             />
-            <div className="grid grid-cols-3 md:grid-cols-4">
-                <p className="m-0 text-xs col-start-1 col-span-2 md:col-span-3">
-                    {item?.video?.asana_name ??
-                        item?.video?.transition_video_name}
-                </p>
-                <div className="flex gap-1 col-start-3 md:col-start-4 col-span-1">
+            <div className="flex w-full justify-between gap-2 xl:grid xl:grid-cols-4">
+                <div className="flex-1 xl:col-span-3 xl:col-start-1">
+                    <p className="m-0 max-w-[15ch] text-ellipsis break-normal break-words text-xs xl:max-w-full">
+                        {item?.video?.asana_name ??
+                            item?.video?.transition_video_name}
+                    </p>
+                </div>
+                <div className="mx-auto flex gap-1 xl:col-span-1 xl:col-start-4 xl:mx-0">
                     <button
-                        className="w-5 h-5 md:w-6 md:h-6"
+                        className="hidden xl:inline-block xl:h-6 xl:w-6"
                         onClick={() => moveUp(idx)}
                     >
-                        <LuMoveUp className="w-full h-full" />
+                        <LuMoveUp className="h-full w-full" />
                     </button>
                     <button
-                        className="w-5 h-5 md:w-6 md:h-6"
+                        className="hidden xl:inline-block xl:h-6 xl:w-6"
                         onClick={() => moveDown(idx)}
                     >
-                        <LuMoveDown className="w-full h-full" />
+                        <LuMoveDown className="h-full w-full" />
                     </button>
                     <button
-                        className="w-5 h-5 md:w-6 md:h-6"
+                        className="h-5 w-5 xl:h-6 xl:w-6"
                         onClick={() => pop(idx)}
                     >
-                        <IoRemoveCircleOutline className="w-full h-full" />
+                        <IoRemoveCircleOutline className="h-full w-full" />
                     </button>
                 </div>
             </div>

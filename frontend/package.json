@@ -60,8 +60,10 @@
 		"@craco/craco": "^7.1.0",
 		"autoprefixer": "10.4.15",
 		"postcss": "8.4.29",
+		"prettier": "^3.2.5",
+		"prettier-plugin-tailwindcss": "^0.5.11",
 		"tailwind-scrollbar": "^3.1.0",
-		"tailwindcss": "3.3.3"
+		"tailwindcss": "^3.4.1"
 	},
 	"scripts": {
 		"start": "craco --openssl-legacy-provider start",

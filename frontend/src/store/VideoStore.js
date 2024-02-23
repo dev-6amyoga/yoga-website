@@ -30,19 +30,28 @@ export const useVideoStore = create((set) => ({
         set(() => {
             return { currentMarkerIdx: idx }
         }),
-    autoSetCurrentMarkerIdx: (currentTime) => {
+    autoSetCurrentMarkerIdx: (currentTime = undefined) => {
         set((state) => {
+            let ct = currentTime ?? state.currentTime
+            console.log('autoSetCurrentMarkerIdx :', currentTime, '==>', ct)
+            // let prevIdx = state.currentMarkerIdx
+
+            // if no markers, dont bother
             if (state.markers.length === 0) {
                 return { currentMarkerIdx: null }
             }
 
+            // if the current time is less than the first marker, set to null
+            if (ct < state.markers[0].timestamp) {
+                return { currentMarkerIdx: null }
+            }
+
             // find the first marker that is greater than the current time
-            const idx = state.markers.findIndex(
-                (m) => m.timestamp > currentTime
-            )
+            const idx = state.markers.findIndex((m) => m.timestamp > ct) - 1
+            console.log('autoSetCurrentMarkerIdx :', idx, ct)
 
             // if the current time is greater than the last marker, set to last marker
-            if (idx === -1) {
+            if (idx === -2) {
                 return { currentMarkerIdx: state.markers.length - 1 }
             }
 
@@ -127,6 +136,12 @@ export const useVideoStore = create((set) => ({
     setViewMode: (mode) =>
         set(() => {
             return { viewMode: mode }
+        }),
+
+    commitSeekTime: -1,
+    setCommitSeekTime: (time) =>
+        set(() => {
+            return { commitSeekTime: time }
         }),
 }))
 

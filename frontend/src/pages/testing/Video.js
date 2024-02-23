@@ -1,3 +1,5 @@
+import './Video.css'
+
 import { useEffect } from 'react'
 import Playlist from '../../components/Sidebar/Playlist'
 import VideoInfo from '../../components/StackVideo/VideoInfo'
@@ -15,19 +17,19 @@ export default function TestingVideo() {
     }, [setEnableWatchHistory])
 
     return (
-        <div className="max-w-7xl mx-auto my-20">
-            <div className="flex flex-col md:grid md:grid-cols-6 gap-2 grid-rows-2">
-                <div className="col-span-5 row-span-1">
+        <div className="mx-auto my-20 max-w-7xl p-4 xl:p-0">
+            <div className="video-grid mb-12 w-full gap-2">
+                <div className="video-area">
                     <VideoPlayer />
                 </div>
-                <div className="col-span-1 row-span-1">
+                <div className="queue-area">
                     <VideoQueue />
                 </div>
-                <div className="col-span-6 row-span-1 h-auto">
-                    <VideoInfo />
-                </div>
             </div>
-            <Playlist />
+            <div className="flex flex-col gap-4">
+                <VideoInfo />
+                <Playlist />
+            </div>
         </div>
     )
 }

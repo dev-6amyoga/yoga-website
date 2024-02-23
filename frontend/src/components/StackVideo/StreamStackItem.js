@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import useVideoStore, { STATE_VIDEO_PLAY } from '../../store/VideoStore'
+import useVideoStore, {
+    STATE_VIDEO_ERROR,
+    STATE_VIDEO_LOADING,
+    STATE_VIDEO_PLAY,
+} from '../../store/VideoStore'
 // import asanas from "../../data/asanas.json";
 
 import { Stream } from '@cloudflare/stream-react'
@@ -9,7 +13,9 @@ import {
     SEEK_TYPE_MOVE,
     SEEK_TYPE_SEEK,
 } from '../../enums/seek_types'
-import { VIDEO_EVENT_MOVING_MARKER } from '../../enums/video_event'
+import { VIDEO_PAUSE_MARKER } from '../../enums/video_pause_reasons'
+import { VIDEO_VIEW_STUDENT_MODE } from '../../enums/video_view_modes'
+import usePlaylistStore from '../../store/PlaylistStore'
 import useUserStore from '../../store/UserStore'
 import { STATE_VIDEO_PAUSED } from '../../store/VideoStore'
 import useWatchHistoryStore from '../../store/WatchHistoryStore'
@@ -31,32 +37,76 @@ function StreamStackItem({
     const [metadataLoaded, setMetadataLoaded] = useState(false)
 
     const [
+        // seek queue
         seekQueue,
         popFromSeekQueue,
+        addToSeekQueue,
+        // current video
         currentVideo,
+        // video state
         videoState,
+        setVideoState,
+        // current time
         setCurrentTime,
+        // volume
         volume,
         setVolume,
+        // autoplay initialized
         autoplayInitialized,
         setAutoplayInitialized,
+        // video event
         videoEvent,
         setVideoEvent,
+        // markers
+        currentMarkerIdx,
         setCurrentMarkerIdx,
+        autoSetCurrentMarkerIdx,
+        markers,
+        // view mode
+        viewMode,
+        // pause reason
+        pauseReason,
+        setPauseReason,
+        // commitSeekTime
+        commitSeekTime,
+        setCommitSeekTime,
     ] = useVideoStore((state) => [
+        //
         state.seekQueue,
         state.popFromSeekQueue,
+        state.addToSeekQueue,
+        //
         state.currentVideo,
+        //
         state.videoState,
+        state.setVideoState,
+        //
         state.setCurrentTime,
+        //
         state.volume,
         state.setVolume,
+        //
         state.autoplayInitialized,
         state.setAutoplayInitialized,
+        //
         state.videoEvent,
         state.setVideoEvent,
+        //
+        state.currentMarkerIdx,
         state.setCurrentMarkerIdx,
+        state.autoSetCurrentMarkerIdx,
+        state.markers,
+        //
+        state.viewMode,
+        //
+        state.pauseReason,
+        state.setPauseReason,
+        //
+        state.commitSeekTime,
+        state.setCommitSeekTime,
     ])
+
+    const popFromQueue = usePlaylistStore((state) => state.popFromQueue)
 
     let [
         enableWatchHistory,
@@ -121,23 +171,46 @@ function StreamStackItem({
         if (isActive && seekQueue.length > 0) {
             const seekEvent = seekQueue[0]
             console.log('SEEKING --->', seekEvent)
+            // setVideoState(STATE_VIDEO_PLAY)
+            // setPauseReason(null)
             if (seekEvent && playerRef.current) {
                 switch (seekEvent.type) {
                     case SEEK_TYPE_SEEK:
-                        playerRef.current.currentTime += seekEvent.t
+                        const ct = playerRef.current.currentTime + seekEvent.t
+                        if (ct > playerRef.current.duration) {
+                            handleEnd()
+                            popFromSeekQueue(0)
+                            return
+                        }
+                        playerRef.current.currentTime = ct
+                        console.log(
+                            'SEEKING ----------------------------->',
+                            playerRef.current.currentTime
+                        )
+                        setCommitSeekTime(ct)
+                        // autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
+                        // popFromSeekQueue(0)
                         break
                     case SEEK_TYPE_MOVE:
                         playerRef.current.currentTime = seekEvent.t
+                        console.log(
+                            'SEEKING ----------------------------->',
+                            playerRef.current.currentTime
+                        )
+                        setCommitSeekTime(seekEvent.t)
+                        // autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
+                        // popFromSeekQueue(0)
                         break
                     case SEEK_TYPE_MARKER:
                         playerRef.current.currentTime = seekEvent.t
+                        // popFromSeekQueue(0)
+                        setCommitSeekTime(seekEvent.t)
                         break
                     default:
                         break
                 }
                 addToCommittedTs(playerRef.current?.currentTime)
             }
-            popFromSeekQueue(0)
         }
     }, [
         isActive,
@@ -146,6 +219,12 @@ function StreamStackItem({
         addToCommittedTs,
         setVideoEvent,
         setCurrentMarkerIdx,
+        autoSetCurrentMarkerIdx,
+        setCommitSeekTime,
+        setVideoState,
+        setPauseReason,
+        popFromQueue,
+        handleEnd,
     ])
 
     // change play/pause based on video state
@@ -155,12 +234,21 @@ function StreamStackItem({
             playerRef.current !== null &&
             playerRef.current !== undefined
         ) {
+            setPauseReason(null)
             if (videoState === STATE_VIDEO_PAUSED) {
                 playerRef.current?.pause()
             } else {
                 playerRef.current
                     .play()
                     .then((res) => {
+                        if (volume === 0 && !autoplayInitialized) {
+                            setVolume(0.5)
+                            setAutoplayInitialized(true)
+                        }
+                    })
+                    .catch((err) => {
+                        console.error(err)
+                        // toast("Error playing video", { type: "error" });
                         playerRef.current.muted = true
                         playerRef.current
                             .play()
@@ -175,26 +263,117 @@ function StreamStackItem({
                                 console.error(err)
                             })
                     })
-                    .catch((err) => {
-                        console.error(err)
-                        // toast("Error playing video", { type: "error" });
-                    })
             }
         }
     }, [videoState, isActive, autoplayInitialized, setAutoplayInitialized])
 
     // poll to update the current time, every 20ms, clear the timeout on unmount
     useEffect(() => {
+        const checkSeek = (ct) => {
+            // check if seekQueue length is greater than 0,
+            // check if seekqueue[0] is of type marker
+            // check if the current time is === to the marker time
+            // pop from seekQueue
+            // console.log(
+            //     'checkSeek :',
+            //     commitSeekTime.toFixed(0) === ct.toFixed(0),
+            //     ct,
+            //     commitSeekTime,
+            //     seekQueue.length
+            // )
+            if (
+                seekQueue.length > 0 &&
+                commitSeekTime.toFixed(0) === ct.toFixed(0)
+            ) {
+                if (isActive) handleLoading(false)
+                autoSetCurrentMarkerIdx(commitSeekTime)
+                return true
+            } else {
+                return false
+            }
+        }
+
+        const checkPauseOrLoop = (ct) => {
+            // console.log('checkPauseOrLoop : ', ct)
+            if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+                // console.log('STUDENT --------->')
+                return false
+            } else {
+                // console.log('TEACHER --------->')
+                // either pause or loop
+                let currentMarker = markers[currentMarkerIdx]
+
+                if (currentMarkerIdx === markers.length - 1) {
+                    return false
+                } else if (ct > markers[currentMarkerIdx + 1]?.timestamp) {
+                    if (currentMarker.loop) {
+                        // console.log('LOOPING ----------------------------->')
+                        addToSeekQueue({
+                            type: SEEK_TYPE_MARKER,
+                            t: currentMarker.timestamp,
+                        })
+                        return true
+                    } else {
+                        setVideoState(STATE_VIDEO_PAUSED)
+                        setPauseReason(VIDEO_PAUSE_MARKER)
+                        return true
+                    }
+                }
+            }
+        }
+
         const int = setInterval(() => {
             if (playerRef.current?.currentTime && isActive) {
+                // check if the marker has been reached
+                if (checkSeek(playerRef.current?.currentTime)) {
+                    // popping from queue
+                    // console.log('POPPING FROM QUEUE ----------------------------->')
+                    popFromSeekQueue(0)
+                    setVideoState(STATE_VIDEO_PLAY)
+                    return
+                }
+
+                // pause if currenttime is greater than the timestamp of next?
+                if (
+                    videoState !== STATE_VIDEO_LOADING &&
+                    checkPauseOrLoop(playerRef.current?.currentTime)
+                ) {
+                    return
+                }
+
+                if (
+                    videoState !== STATE_VIDEO_LOADING ||
+                    videoState !== STATE_VIDEO_ERROR ||
+                    videoState !== STATE_VIDEO_PAUSED
+                )
+                    autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
                 setCurrentTime(playerRef.current?.currentTime)
             }
-        }, 20)
+        }, 250)
 
         return () => {
+            // console.log('CLEANING INTERVAL --------------------------------------->')
             clearInterval(int)
         }
-    }, [currentVideo, isActive, setCurrentTime])
+    }, [
+        currentVideo,
+        isActive,
+        setCurrentTime,
+        videoState,
+        popFromSeekQueue,
+        autoSetCurrentMarkerIdx,
+        seekQueue,
+        setVideoEvent,
+        setCurrentMarkerIdx,
+        markers,
+        viewMode,
+        currentMarkerIdx,
+        setVideoState,
+        addToSeekQueue,
+        commitSeekTime,
+        setPauseReason,
+        handleLoading,
+    ])
 
     // clear timeouts before unmount
     useEffect(() => {
@@ -221,7 +400,7 @@ function StreamStackItem({
 	*/
     useEffect(() => {
         if (isActive && enableWatchHistory) {
-            console.log('CURRENT VIDEO', video)
+            // console.log('CURRENT VIDEO', video)
             // flushing
             flushWatchTimeBuffer(user?.user_id)
 
@@ -311,7 +490,7 @@ function StreamStackItem({
 
     return (
         <div
-            className={`w-full h-full ${isActive ? 'block' : 'hidden'}`}
+            className={`h-full w-full ${isActive ? 'block' : 'hidden'}`}
             // initial={{
             // 	opacity: 0,
             // 	transition: { duration: isActive ? 0.2 : 0.5, ease: "linear" },
@@ -365,7 +544,7 @@ function StreamStackItem({
                     if (isActive) handleLoading(true)
                 }}
                 onSeeked={() => {
-                    if (isActive) handleLoading(false)
+                    // if (isActive) handleLoading(false)
                 }}
                 onError={() => {
                     if (isActive) handlePlaybackError()
