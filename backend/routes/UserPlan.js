@@ -18,6 +18,8 @@ const { Institute } = require("../models/sql/Institute");
 const { USER_PLAN_ACTIVE } = require("../enums/user_plan_status");
 const { Role } = require("../models/sql/Role");
 const WatchTimeQuota = require("../models/mongo/WatchTimeQuota");
+const WatchHistory = require("../models/mongo/WatchHistory");
+const WatchTimeLog = require("../models/mongo/WatchTimeLog");
 router.get("/get-all-user-plans", async (req, res) => {
   try {
     const userplans = await UserPlan.findAll();
@@ -186,8 +188,6 @@ router.post("/register", async (req, res) => {
     return res
       .status(HTTP_BAD_REQUEST)
       .json({ error: "Missing required fields" });
-
-  // if current status is active, check if user already has an active plan
   const user_plan = await UserPlan.findOne({
     where: {
       user_id: user_id,
@@ -204,8 +204,6 @@ router.post("/register", async (req, res) => {
     return res.status(HTTP_BAD_REQUEST).json({
       error: `User already has a plan that is ${current_status}`,
     });
-
-  // db transaction
   const t = await sequelize.transaction();
   try {
     // find plan by id
@@ -297,6 +295,47 @@ router.post("/register", async (req, res) => {
     }
   }
 });
+
+router.delete("/watch-time-quota-delete-all", async (req, res) => {
+  console.log("in delete quota");
+  try {
+    // await WatchTimeQuota.deleteMany({});
+    await WatchTimeLog.deleteMany({});
+    // await WatchHistory.deleteMany({});
+    res.status(200).json({ message: "All rows deleted successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// useEffect(() => {
+//     const deleteWatchTimeQuota = async () => {
+//         console.log('in use effect!!')
+//         try {
+//             const response = await fetch(
+//                 'http://localhost:4000/user-plan/watch-time-quota-delete-all',
+//                 {
+//                     method: 'DELETE',
+//                     headers: {
+//                         'Content-Type': 'application/json',
+//                     },
+//                 }
+//             )
+
+//             if (response.ok) {
+//                 const data = await response.json()
+//                 console.log(data.message)
+//             } else {
+//                 console.error('Failed to delete rows:', response.status)
+//             }
+//         } catch (error) {
+//             console.error('Error:', error)
+//         }
+//     }
+
+//     deleteWatchTimeQuota()
+// }, [])
 
 router.put("/update-user-plan", async (req, res) => {
   const {
