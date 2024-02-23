@@ -1,4 +1,5 @@
 @import './global.css';
+@import './common.css';
 
 @tailwind base;
 @tailwind components;
@@ -78,13 +79,15 @@
     }
     body {
         @apply bg-background text-foreground;
-        font-feature-settings: 'rlig' 1, 'calt' 1;
+        font-feature-settings:
+            'rlig' 1,
+            'calt' 1;
     }
 }
 
 /* Scrollbar settings */
 * {
-    @apply scrollbar-thin scroll-smooth scrollbar-thumb-slate-700 scrollbar-track-slate-300;
+    @apply scroll-smooth scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-700;
 }
 
 body {
@@ -118,5 +121,5 @@ h6 {
 }
 
 .card-base {
-    @apply p-4 border rounded-lg;
+    @apply rounded-lg border p-4;
 }
