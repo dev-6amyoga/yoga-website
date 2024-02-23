@@ -3,7 +3,7 @@ import React from 'react'
 import useUserStore from '../../store/UserStore'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import { PlanAllocator } from './PlanAllocator'
+import { usePlanAllocator } from './PlanAllocator'
 import { Fetch } from '../../utils/Fetch'
 import { useNavigate } from 'react-router-dom'
 import { FetchRetry } from '../../utils/Fetch'
@@ -24,9 +24,10 @@ export default function TeacherHome() {
             )
         }
     }, [currentInstituteId, institutes])
-    PlanAllocator(user?.user_id, currentInstituteId)
-    // get institute plan, allowed teachers, current teacher count, and accordingly add.
-    // make entry in user plan if institute has active plan, uipr tables
+    const { instituteOwnerId, userPlan } = usePlanAllocator(
+        user?.user_id,
+        currentInstituteId
+    )
     return (
         <TeacherPageWrapper>
             <h1>Welcome, {user?.name}</h1>

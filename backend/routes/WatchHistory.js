@@ -28,7 +28,6 @@ router.post("/create", async (req, res) => {
         asana_id,
         playlist_id,
       });
-
       await watchHistory.save();
     });
     await session.commitTransaction();
