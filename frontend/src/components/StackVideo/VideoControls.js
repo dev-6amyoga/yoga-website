@@ -130,11 +130,11 @@ function VideoControls({ handleFullScreen }) {
     }, [popFromQueue])
 
     const handleSeekFoward = useCallback(() => {
-        addToSeekQueue({ t: 10, type: SEEK_TYPE_SEEK })
+        addToSeekQueue({ t: 5, type: SEEK_TYPE_SEEK })
     }, [addToSeekQueue])
 
     const handleSeekBackward = useCallback(() => {
-        addToSeekQueue({ t: -10, type: SEEK_TYPE_SEEK })
+        addToSeekQueue({ t: -5, type: SEEK_TYPE_SEEK })
     }, [addToSeekQueue])
 
     const handlePrevMarker = useCallback(() => {
@@ -176,13 +176,12 @@ function VideoControls({ handleFullScreen }) {
     )
 
     const handleReplayMarkerAfterPause = useCallback(() => {
-        setPauseReason(null)
+        // setPauseReason(null)
         addToSeekQueue({
             t: markers[currentMarkerIdx].timestamp,
             type: SEEK_TYPE_MARKER,
-            idx: currentMarkerIdx,
         })
-    }, [currentMarkerIdx, markers, setPauseReason, addToSeekQueue])
+    }, [currentMarkerIdx, markers, addToSeekQueue])
 
     const iconButtonClass = useMemo(() => {
         return handleFullScreen.active
@@ -191,8 +190,8 @@ function VideoControls({ handleFullScreen }) {
     }, [handleFullScreen.active])
 
     return (
-        <div className="flex justify-between items-center px-4 pb-1">
-            <div className="col-start-4 col-span-3 flex items-center justify-start text-white rounded-xl">
+        <div className="flex items-center justify-between px-4 pb-1">
+            <div className="col-span-3 col-start-4 flex items-center justify-start rounded-xl text-white">
                 {/* {String(handleFullScreen.active)} */}
                 {/* previous video */}
                 <button
@@ -208,7 +207,7 @@ function VideoControls({ handleFullScreen }) {
                 {/* seek back */}
                 <button
                     onClick={handleSeekBackward}
-                    title="Rewind 10s"
+                    title="Rewind 5s"
                     className={iconButtonClass + ' hidden md:block'}
                 >
                     <FaBackward className="video_controls__ctrl__button__icon" />
@@ -263,7 +262,7 @@ function VideoControls({ handleFullScreen }) {
                 {/* seek forward */}
                 <button
                     onClick={handleSeekFoward}
-                    title="Fast Forward 10s"
+                    title="Fast Forward 5s"
                     className={iconButtonClass + ' hidden md:block'}
                 >
                     <FaForward className="video_controls__ctrl__button__icon" />
@@ -280,11 +279,25 @@ function VideoControls({ handleFullScreen }) {
 
                 {pauseReason === VIDEO_PAUSE_MARKER && (
                     <button
-                        className="py-1 px-2 bg-white border rounded-full text-xs text-black"
+                        className="rounded-full border bg-white text-xs text-black lg:px-2 lg:py-1"
                         onClick={handleReplayMarkerAfterPause}
                     >
-                        Replay Marker
+                        Replay
                     </button>
+                )}
+
+                {currentMarkerIdx !== null && markers.length > 0 ? (
+                    <span
+                        className="mx-2 hidden h-auto max-w-[200px] break-normal break-words text-xs text-white xl:block"
+                        title={markers[currentMarkerIdx].title}
+                    >
+                        {String(markers[currentMarkerIdx].title).substring(
+                            0,
+                            80
+                        ) + '...' ?? ''}
+                    </span>
+                ) : (
+                    <></>
                 )}
             </div>
 
@@ -313,7 +326,7 @@ function VideoControls({ handleFullScreen }) {
                         type="range"
                         min="0"
                         max="100"
-                        className="accent-orange-500 hidden md:block"
+                        className="hidden accent-orange-500 md:block"
                         ref={volumeSliderRef}
                         onChange={(e) =>
                             setVolume(parseFloat(e.target.value) / 100)
@@ -351,9 +364,9 @@ function VideoControls({ handleFullScreen }) {
                         <LuSettings className="video_controls__ctrl__button__icon" />
                     </button>
                 </Popover> */}
-                <div className="flex items-center gap-3 group">
+                <div className="group flex items-center gap-3">
                     <span
-                        className="group-hover:inline-block hidden text-sm capitalize"
+                        className="hidden text-sm capitalize group-hover:inline-block"
                         title="Current View Mode"
                     >
                         {viewMode}

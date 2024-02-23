@@ -94,69 +94,71 @@ export default function VideoPlaybar({
         }
     }, [currentVideo, duration, popFromQueue, currentTime])
 
-    useEffect(() => {
-        console.log(
-            videoEvent,
-            currentTime,
-            prevNextMarkers[0],
-            prevNextMarkers[1]
-        )
-        // if (
-        //     videoEvent &&
-        //     videoEvent?.type === VIDEO_EVENT_MOVING_MARKER &&
-        //     Math.abs(currentTime - markers[videoEvent?.markerIdx].timestamp) < 1
-        // ) {
-        //     console.log('SETTING CURRENT IDX --->', videoEvent?.markerIdx || 0)
-        //     setCurrentMarkerIdx(videoEvent?.markerIdx || 0)
-        //     console.log('VIDEO EVENT --->', null)
-        //     setVideoEvent(null)
-        //     return
-        // }
-
-        // if (videoEvent?.type !== VIDEO_EVENT_MOVING_MARKER) {
-        //     if (
-        //         prevNextMarkers[1] &&
-        //         currentTime >= prevNextMarkers[1].timestamp
-        //     ) {
-        //         if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
-        //             setCurrentMarkerIdx(
-        //                 currentMarkerIdx + 1 > markers.length - 1
-        //                     ? 0
-        //                     : currentMarkerIdx + 1
-        //             )
-        //         } else {
-        //             // if in teaching mode, then go to start of current marker
-        //             if (prevNextMarkers[0] && prevNextMarkers[0]?.loop) {
-        //                 addToSeekQueue({
-        //                     t: prevNextMarkers[0].timestamp,
-        //                     type: SEEK_TYPE_MOVE,
-        //                 })
-        //             } else if (
-        //                 prevNextMarkers[0] &&
-        //                 !prevNextMarkers[0]?.loop
-        //             ) {
-        //                 console.log(
-        //                     "SETTING PAUSE REASON TO 'VIDEO_PAUSE_MARKER'"
-        //                 )
-        //                 setVideoState(STATE_VIDEO_PAUSED)
-        //                 setPauseReason(VIDEO_PAUSE_MARKER)
-        //             }
-        //         }
-        //     }
-        // }
-    }, [
-        setVideoEvent,
-        videoEvent,
-        currentTime,
-        setVideoState,
-        prevNextMarkers,
-        viewMode,
-        markers,
-        currentMarkerIdx,
-        setCurrentMarkerIdx,
-        addToSeekQueue,
-        setPauseReason,
-    ])
+    useEffect(
+        () => {
+            // console.log(
+            //     videoEvent,
+            //     currentTime,
+            //     prevNextMarkers[0],
+            //     prevNextMarkers[1]
+            // )
+            // if (
+            //     videoEvent &&
+            //     videoEvent?.type === VIDEO_EVENT_MOVING_MARKER &&
+            //     Math.abs(currentTime - markers[videoEvent?.markerIdx].timestamp) < 1
+            // ) {
+            //     console.log('SETTING CURRENT IDX --->', videoEvent?.markerIdx || 0)
+            //     setCurrentMarkerIdx(videoEvent?.markerIdx || 0)
+            //     console.log('VIDEO EVENT --->', null)
+            //     setVideoEvent(null)
+            //     return
+            // }
+            // if (videoEvent?.type !== VIDEO_EVENT_MOVING_MARKER) {
+            //     if (
+            //         prevNextMarkers[1] &&
+            //         currentTime >= prevNextMarkers[1].timestamp
+            //     ) {
+            //         if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+            //             setCurrentMarkerIdx(
+            //                 currentMarkerIdx + 1 > markers.length - 1
+            //                     ? 0
+            //                     : currentMarkerIdx + 1
+            //             )
+            //         } else {
+            //             // if in teaching mode, then go to start of current marker
+            //             if (prevNextMarkers[0] && prevNextMarkers[0]?.loop) {
+            //                 addToSeekQueue({
+            //                     t: prevNextMarkers[0].timestamp,
+            //                     type: SEEK_TYPE_MOVE,
+            //                 })
+            //             } else if (
+            //                 prevNextMarkers[0] &&
+            //                 !prevNextMarkers[0]?.loop
+            //             ) {
+            //                 console.log(
+            //                     "SETTING PAUSE REASON TO 'VIDEO_PAUSE_MARKER'"
+            //                 )
+            //                 setVideoState(STATE_VIDEO_PAUSED)
+            //                 setPauseReason(VIDEO_PAUSE_MARKER)
+            //             }
+            //         }
+            //     }
+            // }
+        },
+        [
+            // setVideoEvent,
+            // videoEvent,
+            // currentTime,
+            // setVideoState,
+            // prevNextMarkers,
+            // viewMode,
+            // markers,
+            // currentMarkerIdx,
+            // setCurrentMarkerIdx,
+            // addToSeekQueue,
+            // setPauseReason,
+        ]
+    )
 
     const [mouseDown, setMouseDown] = useState(false)
     const barRef = useRef(null)

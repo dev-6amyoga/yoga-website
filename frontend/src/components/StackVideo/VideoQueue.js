@@ -17,16 +17,16 @@ function VideoQueue() {
     }, [])
 
     return (
-        <div className="col-start-7 col-span-2 bg-blue-50 rounded-xl h-full max-h-[50vh] overflow-y-auto overflow-x-hidden">
-            <div className="flex flex-col gap-2 items-center overflow-hidden">
-                <h3 className="text-center pt-2">Queue</h3>
+        <div className="overflow-y-auto overflow-x-hidden rounded-xl bg-blue-50 xl:h-full">
+            <div className="flex flex-col items-center gap-2 overflow-hidden">
+                <h3 className="pt-2 text-center">Queue</h3>
                 <Button auto type="secondary" onClick={clearQueue}>
                     Clear Queue
                 </Button>
                 {queue.length === 0 ? (
                     <p className="text-center">No videos in queue</p>
                 ) : (
-                    <div className="p-2 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-x-hidden">
+                    <div className="flex flex-row gap-2 overflow-x-auto p-2 md:overflow-x-hidden xl:flex-col">
                         {queue.map((queue_item, idx) => {
                             return (
                                 <QueueItem

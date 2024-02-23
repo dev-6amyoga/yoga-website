@@ -42,6 +42,7 @@ function VideoPlayer() {
         setPauseReason,
         currentMarkerIdx,
         setCurrentMarkerIdx,
+        // autoSetCurrentMarkerIdx,
         markersLength,
     ] = useVideoStore((state) => [
         state.currentVideo,
@@ -56,6 +57,7 @@ function VideoPlayer() {
         state.setPauseReason,
         state.currentMarkerIdx,
         state.setCurrentMarkerIdx,
+        // state.autoSetCurrentMarkerIdx,
         state?.markers?.length || 0,
     ])
 
@@ -75,27 +77,10 @@ function VideoPlayer() {
     // 	state.addToCommittedTs,
     // ]);
 
-    // const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0)
     const [videoStateVisible, setVideoStateVisible] = useState(false)
 
     const draggableHandle = useRef(null)
-
-    // // debug
-    // useEffect(() => {
-    // 	if (watchTimeArchive && watchTimeArchive.length > 0) {
-    // 		console.log(
-    // 			"DURATIONS : ",
-    // 			watchTimeArchive?.reduce((acc, curr) => {
-    // 				if (!acc[curr.asana_id]) {
-    // 					acc[curr.asana_id] = 0;
-    // 				}
-    // 				acc[curr.asana_id] += curr.timedelta;
-    // 				return acc;
-    // 			}, {})
-    // 		);
-    // 	}
-    // }, [watchTimeArchive]);
 
     // set player video ref
     useEffect(() => {
@@ -120,7 +105,7 @@ function VideoPlayer() {
         console.log('Video ended ------------------>')
         // check if teaching mode, loopback to previous marker
         if (viewMode === VIDEO_VIEW_TEACHING_MODE) {
-            if (currentMarker) {
+            if (currentMarker && currentMarker?.loop) {
                 console.log(
                     'VIDEO END : TEACHING MODE: moving to ',
                     currentMarker
@@ -146,11 +131,9 @@ function VideoPlayer() {
         if (videoState === STATE_VIDEO_PAUSED) {
             if (pauseReason === VIDEO_PAUSE_MARKER) {
                 console.log('VIDEO PLAY : PAUSE REASON MARKER')
-                setCurrentMarkerIdx(
-                    currentMarkerIdx + 1 > markersLength - 1
-                        ? 0
-                        : currentMarkerIdx + 1
-                )
+                // autoSetCurrentMarkerIdx()
+                // set next marker
+                setCurrentMarkerIdx((currentMarkerIdx + 1) % markersLength)
                 setPauseReason(null)
             }
         }
