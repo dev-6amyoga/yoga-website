@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import { useShallow } from 'zustand/react/shallow'
 import InstitutePageWrapper from '../../components/Common/InstitutePageWrapper'
 import { ROLE_INSTITUTE_OWNER } from '../../enums/roles'
 import useUserStore from '../../store/UserStore'
@@ -8,73 +7,58 @@ import { Fetch } from '../../utils/Fetch'
 import { withAuth } from '../../utils/withAuth'
 
 function InstituteHome() {
-    const [user, institutes, currentInstituteId] = useUserStore(
-        useShallow((state) => [
-            state.user,
-            state.institutes,
-            state.currentInstituteId,
-        ])
-    )
+    let [user, institutes, currentInstituteId] = useUserStore((state) => [
+        state.user,
+        state.institutes,
+        state.currentInstituteId,
+    ])
     const [instituteData, setInstituteData] = useState({})
     const [currentInstitute, setCurrentInstitute] = useState(null)
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(
-                    'http://localhost:4000/user-plan/get-user-plan-by-id',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ user_id: user?.user_id }),
-                    }
-                )
-                const data = await response.json()
-                console.log(data?.userPlan?.plan?.number_of_teachers)
-            } catch (error) {
-                console.log(error)
-            }
-        }
-        if (user) {
-            fetchData()
-        }
-    }, [user])
-
-    useEffect(() => {
         // console.log(user);
         const fetchData = async (id) => {
-            Fetch({
-                url: 'http://localhost:4000/institute/get-by-instituteid',
-                method: 'POST',
-                data: {
-                    institute_id: id,
-                },
-            }).then((res) => {
-                if (res && res.status === 200) {
-                    console.log(res.data)
-                    setInstituteData(res.data)
-                    // updateInstitute(res.data);
-                } else {
-                    toast('Error fetching institute; retry', {
-                        type: 'error',
-                    })
-                }
-            })
+            console.log('CALLING', id)
+            if (id) {
+                Fetch({
+                    url: 'http://localhost:4000/institute/get-by-instituteid',
+                    method: 'POST',
+                    data: {
+                        institute_id: id,
+                    },
+                }).then((res) => {
+                    if (res && res.status === 200) {
+                        console.log(res.data)
+                        setInstituteData(res.data)
+                        // updateInstitute(res.data);
+                    } else {
+                        toast('Error fetching institute; retry', {
+                            type: 'error',
+                        })
+                    }
+                })
+            }
         }
-        if (currentInstitute.institute_id != null) {
-            fetchData(currentInstitute.institute_id)
+        if (currentInstitute && currentInstitute.institute_id != null) {
+            fetchData(currentInstitute?.institute_id)
         }
     }, [currentInstitute])
 
-    useState(() => {
-        if (currentInstituteId) {
-            setCurrentInstitute(
-                institutes?.find(
-                    (institute) => institute.institute_id === currentInstituteId
+    useEffect(() => {
+        console.log({ currentInstituteId, institutes })
+        if (
+            currentInstituteId !== null &&
+            currentInstituteId !== undefined &&
+            institutes
+        ) {
+            setCurrentInstitute(() => {
+                const ins = institutes?.find(
+                    (institute) =>
+                        institute?.institute_id === currentInstituteId
                 )
-            )
+                console.log('Setting institute in ins home: ', ins)
+                return ins
+            })
         }
     }, [currentInstituteId, institutes])
 
@@ -82,8 +66,8 @@ function InstituteHome() {
         <InstitutePageWrapper heading="Institute Dashboard">
             <h2 className="">Welcome to 6AM Yoga</h2>
 
-            <div className="my-10 p-4 rounded-lg border">
-                <h3>Institute Info</h3>
+            <div className="my-10 rounded-lg border p-4">
+                <h3>Institute Info {currentInstituteId}</h3>
                 <hr />
                 <p>
                     <strong>Owner Name: </strong> {user?.name}

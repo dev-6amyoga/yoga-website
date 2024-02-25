@@ -4,7 +4,7 @@ import { memo, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import useUserStore from '../../../store/UserStore'
-import { FetchRetry } from '../../../utils/Fetch'
+import { Fetch } from '../../../utils/Fetch'
 import RoleShifter from '../RoleShifter'
 
 function TeacherNavbar() {
@@ -21,7 +21,7 @@ function TeacherNavbar() {
     const resetUserState = useUserStore((state) => state.resetUserState)
 
     const handleLogout = () => {
-        FetchRetry({
+        Fetch({
             url: 'http://localhost:4000/auth/logout',
             method: 'POST',
             token: true,
@@ -33,7 +33,9 @@ function TeacherNavbar() {
                 navigate('/auth')
             })
             .catch((err) => {
-                console.error('Logout Error:', err)
+                console.log('Logout Error:', err)
+                sessionStorage.removeItem('6amyoga_access_token')
+                sessionStorage.removeItem('6amyoga_refresh_token')
                 resetUserState()
                 navigate('/auth')
             })

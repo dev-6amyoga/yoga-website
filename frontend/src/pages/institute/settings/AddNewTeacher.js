@@ -5,6 +5,7 @@ import { toast } from 'react-toastify'
 import { useShallow } from 'zustand/react/shallow'
 import InstitutePageWrapper from '../../../components/Common/InstitutePageWrapper'
 import { ROLE_INSTITUTE_OWNER } from '../../../enums/roles'
+import { USER_PLAN_ACTIVE } from '../../../enums/user_plan_status'
 import useUserStore from '../../../store/UserStore'
 import { Fetch } from '../../../utils/Fetch'
 import { validateEmail, validatePhone } from '../../../utils/formValidation'
@@ -32,7 +33,7 @@ function AddNewTeacher() {
             },
         }).then((res) => {
             for (var i = 0; i !== res.data.userplans.length; i++) {
-                if (res.data.userplans[i].current_status === 'ACTIVE') {
+                if (res.data.userplans[i].current_status === USER_PLAN_ACTIVE) {
                     setAllowedTeachersCount(
                         res.data.userplans[i]?.plan?.number_of_teachers
                     )
@@ -309,8 +310,8 @@ function AddNewTeacher() {
                         {diff > 86400
                             ? (diff / 86400).toFixed(2) + ' Days'
                             : diff > 0
-                            ? (diff / 3600).toFixed(2) + ' Hours'
-                            : 'Expired'}
+                              ? (diff / 3600).toFixed(2) + ' Hours'
+                              : 'Expired'}
                     </span>
                     <br />
                     <span className="text-sm text-zinc-400">
@@ -326,7 +327,7 @@ function AddNewTeacher() {
             <div className="card-base">
                 <h3>Add a teacher</h3>
                 <form
-                    className="flex flex-col gap-2 my-8"
+                    className="my-8 flex flex-col gap-2"
                     onSubmit={handleSubmit}
                 >
                     <Input
@@ -353,7 +354,7 @@ function AddNewTeacher() {
                     >
                         Teacher Phone Number
                     </Input>
-                    <div className="flex flex-row gap-2 w-full">
+                    <div className="flex w-full flex-row gap-2">
                         <Button
                             className="flex-1"
                             type="secondary"
@@ -367,7 +368,7 @@ function AddNewTeacher() {
             </div>
 
             <div className="my-20">
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                     <h2>Invites</h2>
                     <Button onClick={getInvites} loading={refreshLoading}>
                         Refresh

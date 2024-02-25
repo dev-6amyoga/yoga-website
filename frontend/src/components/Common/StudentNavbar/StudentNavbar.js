@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import useUserStore from '../../../store/UserStore'
 // import StudentPlan from "../../../pages/student/StudentPlan";
 import { Divider } from '@geist-ui/core'
-import { FetchRetry } from '../../../utils/Fetch'
+import { USER_PLAN_ACTIVE } from '../../../enums/user_plan_status'
+import { Fetch } from '../../../utils/Fetch'
 import RoleShifter from '../RoleShifter'
 
 function StudentNavbar() {
@@ -22,7 +23,7 @@ function StudentNavbar() {
     const resetUserState = useUserStore((state) => state.resetUserState)
 
     const handleLogout = () => {
-        FetchRetry({
+        Fetch({
             url: 'http://localhost:4000/auth/logout',
             method: 'POST',
             token: true,
@@ -34,7 +35,9 @@ function StudentNavbar() {
                 navigate('/auth')
             })
             .catch((err) => {
-                console.error('Logout Error:', err)
+                console.log('Logout Error:', err)
+                sessionStorage.removeItem('6amyoga_access_token')
+                sessionStorage.removeItem('6amyoga_refresh_token')
                 resetUserState()
                 navigate('/auth')
             })
@@ -56,7 +59,7 @@ function StudentNavbar() {
                 const data = await response.json()
                 if (data['userPlan'].length !== 0) {
                     const indexOfActiveUserPlan = data['userPlan'].findIndex(
-                        (plan) => plan.current_status === 'ACTIVE'
+                        (plan) => plan.current_status === USER_PLAN_ACTIVE
                     )
                     setUserPlan(data['userPlan'][indexOfActiveUserPlan])
                     setPlanId(

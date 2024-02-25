@@ -37,9 +37,7 @@ const GetUser = async (filter, attributes) => {
 	}
 };
 
-const GetUserInfo = async (filter, attributes = null) => {
-	// returns user with roles
-	/*
+/*
  Returns
 		{
 				user_id: 1,
@@ -65,7 +63,12 @@ const GetUserInfo = async (filter, attributes = null) => {
 					]
 				}
 		}
+		@param filter: {}
+		@param attributes: []
  */
+const GetUserInfo = async (filter, attributes = null) => {
+	// returns user with roles
+
 	let user = null,
 		error = null;
 	try {

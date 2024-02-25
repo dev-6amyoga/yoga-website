@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
+import { USER_PLAN_ACTIVE } from '../../enums/user_plan_status'
 import { Fetch } from '../../utils/Fetch'
 
 export const usePlanAllocator = (teacher_id, institute_id) => {
@@ -34,7 +35,7 @@ export const usePlanAllocator = (teacher_id, institute_id) => {
                                         transaction_order_id:
                                             res.data.userPlan[0]
                                                 .transaction_order_id,
-                                        current_status: 'ACTIVE',
+                                        current_status: USER_PLAN_ACTIVE,
                                         user_type: 'TEACHER',
                                         user_id: teacher_id,
                                         plan_id: res.data.userPlan[0].plan_id,
