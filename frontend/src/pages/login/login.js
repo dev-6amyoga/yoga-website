@@ -151,8 +151,8 @@ export default function Login({ switchForm }) {
 
                 setRoles(userData?.user?.roles)
 
-                const currRole = Object.keys(userData?.user?.roles)[0]
                 // use first role as current role
+                const currRole = Object.keys(userData?.user?.roles)[0]
 
                 const currPlan = userData?.user?.roles[currRole][0]?.plan
                 setUserPlan(currPlan)
@@ -166,16 +166,16 @@ export default function Login({ switchForm }) {
 
                 setCurrentInstituteId(ins[0]?.institute_id)
 
-                console.log({
-                    user: userData?.user,
-                    roles: userData?.user?.roles,
-                    accessToken: userData?.accessToken,
-                    refreshToken: userData?.refreshToken,
-                    currentRole: currRole,
-                    userPlan: currPlan,
-                    institutes: ins,
-                    currentInstituteId: ins[0]?.institute_id,
-                })
+                // console.log({
+                //     user: userData?.user,
+                //     roles: userData?.user?.roles,
+                //     accessToken: userData?.accessToken,
+                //     refreshToken: userData?.refreshToken,
+                //     currentRole: currRole,
+                //     userPlan: currPlan,
+                //     institutes: ins,
+                //     currentInstituteId: ins[0]?.institute_id,
+                // })
 
                 sessionStorage.setItem(
                     '6amyoga_access_token',

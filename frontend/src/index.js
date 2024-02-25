@@ -52,11 +52,13 @@ function LoginIndex() {
         setAccessToken,
         refreshToken,
         setRefreshToken,
+        currentInstituteId,
         setCurrentInstituteId,
         setInstitutes,
         currentRole,
         setCurrentRole,
         setRoles,
+        resetUserState,
     ] = useUserStore(
         useShallow((state) => [
             state.user,
@@ -67,20 +69,27 @@ function LoginIndex() {
             state.setAccessToken,
             state.refreshToken,
             state.setRefreshToken,
+            state.currentInstituteId,
             state.setCurrentInstituteId,
             state.setInstitutes,
             state.currentRole,
             state.setCurrentRole,
             state.setRoles,
+            state.resetUserState,
         ])
     )
 
     const init = useCallback(() => {
+        console.log('INITTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
         const access_token =
             sessionStorage.getItem('6amyoga_access_token') || accessToken
         const refresh_token =
             sessionStorage.getItem('6amyoga_refresh_token') || refreshToken
+
+        console.log({ access_token, refresh_token })
+
         if (access_token && refresh_token) {
+            console.log('INIT : Verifying tokens')
             Fetch({
                 url: 'http://localhost:4000/auth/verify-tokens',
                 method: 'POST',
@@ -94,6 +103,7 @@ function LoginIndex() {
                         res.status === 200 &&
                         res?.data?.message === 'Token verified'
                     ) {
+                        console.log('INIT : Tokens verified, getting user')
                         Fetch({
                             url: 'http://localhost:4000/user/get-by-token',
                             method: 'POST',
@@ -103,39 +113,128 @@ function LoginIndex() {
                         })
                             .then((res) => {
                                 if (res.status === 200) {
-                                    const userData = res.data
-                                    setUser(userData.user)
+                                    console.log(
+                                        'INIT : User data received',
+                                        res.data
+                                    )
+                                    /*
+                                    {
+                                        user: {
+                                            "user_id": INT,
+                                            "name": STRING,
+                                            "email": STRING,
+                                            "phone": STRING,
+                                            "roles": {
+                                                <ROLE TYPE>: [
+                                                    {
+                                                        user_institute_plan_role_id
+                                                        created
+                                                        updated
+                                                        deletedAt
+                                                        user_id
+                                                        role_id
+                                                        institute_id
+                                                        user_plan_id
+                                                        institute: {
+                                                            institute_id
+                                                            name
+                                                        }
+                                                        user_plan: {
+                                                            user_plan_id
+                                                            plan_id
+                                                            plan
+                                                        }
+                                                        role: {}
+                                                        plan: {}
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                    */
+                                    const userData = res.data?.user
+                                    setUser(userData)
+
+                                    // tokens
                                     setAccessToken(access_token)
                                     setRefreshToken(refresh_token)
-                                    setRoles(userData?.user?.roles)
-                                    const currRole = Object.keys(
-                                        userData?.user?.roles
-                                    )[0]
-                                    setCurrentRole(currRole)
-                                    const currPlan =
-                                        userData?.user?.roles[currRole][0]?.plan
-                                    setUserPlan(currPlan)
-                                    const ins = userData?.user?.roles[
+
+                                    // set all roles
+                                    setRoles(userData?.roles)
+
+                                    // set current role
+                                    let currRole = currentRole
+                                    console.log(
+                                        'INIT : CURRENT ROLE: ',
                                         currRole
-                                    ].map((r) => r?.institute)
-                                    setInstitutes(ins)
-                                    setCurrentInstituteId(ins[0]?.institute_id)
-                                    // setCookie(
-                                    // 	"6amyoga_access_token",
-                                    // 	access_token,
-                                    // 	{
-                                    // 		domain: "localhost",
-                                    // 		path: "/",
-                                    // 	}
-                                    // );
-                                    // setCookie(
-                                    // 	"6amyoga_refresh_token",
-                                    // 	refresh_token,
-                                    // 	{
-                                    // 		domain: "localhost",
-                                    // 		path: "/",
-                                    // 	}
-                                    // );
+                                    )
+                                    // if current role is available, dont change it
+                                    if (
+                                        currRole === null ||
+                                        userData?.roles === null ||
+                                        userData?.roles === undefined ||
+                                        !userData?.roles[currRole]
+                                    ) {
+                                        currRole = Object.keys(
+                                            userData?.roles
+                                        )[0]
+
+                                        console.log(
+                                            'INIT : no curr role, settting role to ',
+                                            currRole
+                                        )
+
+                                        setCurrentRole(currRole)
+                                    }
+
+                                    // the plan of the current role
+
+                                    if (
+                                        currRole !== null &&
+                                        userData?.roles[currRole] &&
+                                        userData?.roles[currRole].length > 0
+                                    ) {
+                                        const currPlan =
+                                            userData?.roles[currRole][0]?.plan
+                                        setUserPlan(currPlan)
+                                    }
+
+                                    // set all institutes
+                                    if (
+                                        currRole !== null &&
+                                        userData?.roles &&
+                                        userData?.roles[currRole]
+                                    ) {
+                                        const ins = userData?.roles[
+                                            currRole
+                                        ]?.map((r) => r?.institute)
+                                        setInstitutes(ins)
+
+                                        console.log(
+                                            'INIT : CURRENT INST ID: ',
+                                            currentInstituteId
+                                        )
+
+                                        // if current institute is available, dont change it
+                                        if (
+                                            currentInstituteId !== null &&
+                                            ins.findIndex(
+                                                (i) =>
+                                                    i.institute_id ===
+                                                    currentInstituteId
+                                            ) !== -1
+                                        ) {
+                                        } else {
+                                            console.log('INIT : ', {
+                                                currentInstituteId:
+                                                    ins[0]?.institute_id,
+                                            })
+                                            setCurrentInstituteId(
+                                                ins[0]?.institute_id
+                                            )
+                                        }
+                                    }
+
                                     sessionStorage.setItem(
                                         '6amyoga_access_token',
                                         access_token
@@ -171,22 +270,6 @@ function LoginIndex() {
                                         )
                                         setAccessToken(res.data.accessToken)
                                         setRefreshToken(refresh_token)
-                                        // setCookie(
-                                        // 	"6amyoga_access_token",
-                                        // 	res.data.accessToken,
-                                        // 	{
-                                        // 		domain: "localhost",
-                                        // 		path: "/",
-                                        // 	}
-                                        // );
-                                        // setCookie(
-                                        // 	"6amyoga_refresh_token",
-                                        // 	refresh_token,
-                                        // 	{
-                                        // 		domain: "localhost",
-                                        // 		path: "/",
-                                        // 	}
-                                        // );
                                         sessionStorage.setItem(
                                             '6amyoga_access_token',
                                             res.data.accessToken
@@ -202,14 +285,6 @@ function LoginIndex() {
                                     console.log(err)
                                     setAccessToken(null)
                                     setRefreshToken(null)
-                                    // removeCookie("6amyoga_access_token", {
-                                    // 	domain: "localhost",
-                                    // 	path: "/",
-                                    // });
-                                    // removeCookie("6amyoga_refresh_token", {
-                                    // 	domain: "localhost",
-                                    // 	path: "/",
-                                    // });
                                     sessionStorage.removeItem(
                                         '6amyoga_access_token'
                                     )
@@ -223,16 +298,9 @@ function LoginIndex() {
                         case 'Refresh token expired':
                             setAccessToken(null)
                             setRefreshToken(null)
-                            // removeCookie("6amyoga_access_token", {
-                            // 	domain: "localhost",
-                            // 	path: "/",
-                            // });
-                            // removeCookie("6amyoga_refresh_token", {
-                            // 	domain: "localhost",
-                            // 	path: "/",
-                            // });
                             sessionStorage.removeItem('6amyoga_access_token')
                             sessionStorage.removeItem('6amyoga_refresh_token')
+                            resetUserState()
                             break
                         // invalid response, let it go
                         default:

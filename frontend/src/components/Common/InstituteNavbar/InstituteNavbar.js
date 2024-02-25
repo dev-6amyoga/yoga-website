@@ -1,35 +1,44 @@
-import { Button, Drawer, Select } from '@geist-ui/core'
-import { Menu } from '@geist-ui/icons'
+import { Button, Divider, Drawer, Select, Spacer } from '@geist-ui/core'
+import { Menu, Plus } from '@geist-ui/icons'
 import { memo, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { USER_PLAN_ACTIVE } from '../../../enums/user_plan_status'
 import useUserStore from '../../../store/UserStore'
-import { Fetch, FetchRetry } from '../../../utils/Fetch'
+import { Fetch } from '../../../utils/Fetch'
 import RoleShifter from '../RoleShifter'
 
 function InstituteNavbar() {
     const navigate = useNavigate()
     const [open, setOpen] = useState(false)
-    let user = useUserStore((state) => state.user)
-    const setUser = useUserStore((state) => state.setUser)
-    let institutes = useUserStore((state) => state.institutes)
     const [activePlanID, setActivePlanID] = useState(0)
     const [basicPlaylist, setBasicPlaylist] = useState(false)
     const [playlistCreation, setPlaylistCreation] = useState(false)
     const [selfAudio, setSelfAudio] = useState(false)
     const [moreTeachers, setMoreTeachers] = useState(false)
-    let currentInstituteId = useUserStore((state) => state.currentInstituteId)
-    let setCurrentInstituteId = useUserStore(
-        (state) => state.setCurrentInstituteId
-    )
+
+    const [
+        currentInstituteId,
+        setCurrentInstituteId,
+        user,
+        setUser,
+        institutes,
+    ] = useUserStore((state) => [
+        state.currentInstituteId,
+        state.setCurrentInstituteId,
+        state.user,
+        state.setUser,
+        state.institutes,
+    ])
 
     const handleInstituteSelection = (value) => {
+        console.log('Selected Institute:', value)
         setCurrentInstituteId(parseInt(value))
     }
 
     const resetUserState = useUserStore((state) => state.resetUserState)
     const handleLogout = () => {
-        FetchRetry({
+        Fetch({
             url: 'http://localhost:4000/auth/logout',
             method: 'POST',
             token: true,
@@ -41,53 +50,60 @@ function InstituteNavbar() {
                 navigate('/auth')
             })
             .catch((err) => {
-                console.error('Logout Error:', err)
+                console.log('Logout Error:', err)
+                sessionStorage.removeItem('6amyoga_access_token')
+                sessionStorage.removeItem('6amyoga_refresh_token')
                 resetUserState()
                 navigate('/auth')
             })
     }
 
     useEffect(() => {
-        Fetch({
-            url: 'http://localhost:4000/user-plan/get-user-institute-plan-by-id',
-            method: 'POST',
-            data: {
-                user_id: user.user_id,
-                institute_id: currentInstituteId,
-            },
-        }).then((res) => {
-            for (var i = 0; i !== res.data.userplans.length; i++) {
-                if (res.data.userplans[i].current_status === 'ACTIVE') {
-                    setActivePlanID(res.data.userplans[i]?.plan_id)
-                    if (res.data.userplans[i].plan.has_basic_playlist) {
-                        setBasicPlaylist(true)
+        if (user && currentInstituteId) {
+            Fetch({
+                url: 'http://localhost:4000/user-plan/get-user-institute-plan-by-id',
+                method: 'POST',
+                data: {
+                    user_id: user?.user_id,
+                    institute_id: currentInstituteId,
+                },
+            }).then((res) => {
+                for (var i = 0; i !== res.data.userplans.length; i++) {
+                    if (
+                        res.data.userplans[i].current_status ===
+                        USER_PLAN_ACTIVE
+                    ) {
+                        setActivePlanID(res.data.userplans[i]?.plan_id)
+                        if (res.data.userplans[i].plan.has_basic_playlist) {
+                            setBasicPlaylist(true)
+                        } else {
+                            setBasicPlaylist(false)
+                        }
+                        if (res.data.userplans[i].plan.has_playlist_creation) {
+                            setPlaylistCreation(true)
+                        } else {
+                            setPlaylistCreation(false)
+                        }
+                        if (res.data.userplans[i].plan.has_self_audio_upload) {
+                            setSelfAudio(true)
+                        } else {
+                            setSelfAudio(false)
+                        }
+                        if (res.data.userplans[i].plan.number_of_teachers > 0) {
+                            setMoreTeachers(true)
+                        } else {
+                            setMoreTeachers(false)
+                        }
+                        break
                     } else {
-                        setBasicPlaylist(false)
+                        toast(
+                            'You dont have an active plan! Please head to the Purchase A Plan page'
+                        )
                     }
-                    if (res.data.userplans[i].plan.has_playlist_creation) {
-                        setPlaylistCreation(true)
-                    } else {
-                        setPlaylistCreation(false)
-                    }
-                    if (res.data.userplans[i].plan.has_self_audio_upload) {
-                        setSelfAudio(true)
-                    } else {
-                        setSelfAudio(false)
-                    }
-                    if (res.data.userplans[i].plan.number_of_teachers > 0) {
-                        setMoreTeachers(true)
-                    } else {
-                        setMoreTeachers(false)
-                    }
-                    break
-                } else {
-                    toast(
-                        'You dont have an active plan! Please head to the Purchase A Plan page'
-                    )
                 }
-            }
-        })
-    }, [user])
+            })
+        }
+    }, [user, currentInstituteId])
 
     return (
         <div>
@@ -111,11 +127,22 @@ function InstituteNavbar() {
                 <Drawer.Content>
                     <div className="py-4">
                         <RoleShifter />
+                        <Divider />
+                        <Spacer h={1} />
+                        <Button
+                            iconRight={<Plus />}
+                            onClick={() => navigate('/institute/create')}
+                            width="100%"
+                        >
+                            Create Institute
+                        </Button>
+                        <Spacer h={1 / 2} />
                         <Select
                             width="100%"
                             value={String(currentInstituteId)}
                             placeholder="Select An Institute"
                             onChange={handleInstituteSelection}
+                            className="my-2"
                         >
                             {institutes?.map((institute) => {
                                 return (
@@ -129,6 +156,7 @@ function InstituteNavbar() {
                             })}
                         </Select>
                     </div>
+                    <Divider />
                     <div className="flex w-full flex-col gap-4">
                         <Button className="w-full">
                             <Link

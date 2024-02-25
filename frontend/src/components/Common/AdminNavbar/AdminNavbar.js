@@ -4,7 +4,7 @@ import { memo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useShallow } from 'zustand/react/shallow'
 import useUserStore from '../../../store/UserStore'
-import { FetchRetry } from '../../../utils/Fetch'
+import { Fetch } from '../../../utils/Fetch'
 import RoleShifter from '../RoleShifter'
 import './AdminNavbar.css'
 
@@ -110,7 +110,7 @@ function AdminNavbar() {
     )
 
     const handleLogout = () => {
-        FetchRetry({
+        Fetch({
             url: 'http://localhost:4000/auth/logout',
             method: 'POST',
             token: true,
@@ -122,7 +122,9 @@ function AdminNavbar() {
                 navigate('/auth')
             })
             .catch((err) => {
-                console.error('Logout Error:', err)
+                console.log('Logout Error:', err)
+                sessionStorage.removeItem('6amyoga_access_token')
+                sessionStorage.removeItem('6amyoga_refresh_token')
                 resetUserState()
                 navigate('/auth')
             })

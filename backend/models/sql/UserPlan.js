@@ -4,6 +4,13 @@ const { options } = require("./defaultOptions");
 const { User } = require("./User");
 const { Plan } = require("./Plan");
 const { Institute } = require("./Institute");
+const {
+	USER_PLAN_ACTIVE,
+	USER_PLAN_CANCELLED,
+	USER_PLAN_EXPIRED_BY_DATE,
+	USER_PLAN_EXPIRED_BY_USAGE,
+	USER_PLAN_STAGED,
+} = require("../../enums/user_plan_status");
 
 const UserPlan = sequelize.define(
 	"user_plan",
@@ -30,7 +37,14 @@ const UserPlan = sequelize.define(
 			allowNull: true,
 		},
 		current_status: {
-			type: DataTypes.STRING,
+			type: DataTypes.ENUM,
+			values: [
+				USER_PLAN_ACTIVE,
+				USER_PLAN_CANCELLED,
+				USER_PLAN_EXPIRED_BY_DATE,
+				USER_PLAN_EXPIRED_BY_USAGE,
+				USER_PLAN_STAGED,
+			],
 			allowNull: true,
 		},
 		auto_renewal_enabled: {
@@ -45,5 +59,10 @@ const UserPlan = sequelize.define(
 	},
 	{ ...options }
 );
+
+UserPlan.belongsTo(Institute, {
+	foreignKey: "institute_id",
+	onDelete: "CASCADE",
+});
 
 module.exports = { UserPlan };
