@@ -21,7 +21,6 @@ export const usePlanAllocator = (teacher_id, institute_id) => {
                     }).then((res) => {
                         if (res.status === 200) {
                             setInstituteOwnerId(res.data.users[0].user_id)
-                            toast('User Plan Fetched')
                             Fetch({
                                 url: 'http://localhost:4000/user-plan/get-active-user-plan-by-id',
                                 method: 'POST',
@@ -41,6 +40,60 @@ export const usePlanAllocator = (teacher_id, institute_id) => {
                                         plan_id: res.data.userPlan[0].plan_id,
                                         institute_id: institute_id,
                                     }
+                                    const toBeRegistered = {
+                                        transaction_order_id:
+                                            res.data.userPlan[0]
+                                                .transaction_order_id,
+                                        current_status: 'ACTIVE',
+                                        user_type: 'TEACHER',
+                                        user_id: teacher_id,
+                                        plan_id: res.data.userPlan[0].plan_id,
+                                        institute_id: institute_id,
+                                        purchase_date : res.data.userPlan[0].purchase_date,
+                                        validity_from : res.data.userPlan[0].validity_from,
+                                        validity_to : res.data.userPlan[0].validity_to,
+                                        cancellation_date : res.data.userPlan[0].cancellation_date,
+                                        auto_renewal_enabled : res.data.userPlan[0].auto_renewal_enabled,
+                                        discount_coupon_id : res.data.userPlan[0].discount_coupon_id,
+                                        referral_code_id : res.data.userPlan[0].referral_code_id,
+                                    }
+                                    console.log(toBeChecked);
+                                    Fetch({
+                                        url: 'http://localhost:4000/user-plan/get-user-plan-by-details',
+                                        method: 'POST',
+                                        data: toBeChecked,
+                                    }).then(async (res)=>{
+                                        if(res.status === 200){
+                                            
+                                            if(res.data.userPlan.length === 0){
+                                                toast("Adding now!");
+                                                const response = await Fetch({
+                                                    url: 'http://localhost:4000/user-plan/register',
+                                                    method: 'POST',
+                                                    data: toBeRegistered,
+                                                })
+                                                if (response.status === 200) {
+                                                    toast(
+                                                        'Plan subscribed successfully ',
+                                                        {
+                                                            type: 'success',
+                                                        }
+                                                    )
+                                                } else {
+                                                        toast(
+                                                            'Failed to subscribe plan for teacher', 
+                                                            {
+                                                                type: 'error',
+                                                            }
+                                                        )
+                                                    }
+                                            }
+                                            else{
+                                                console.log(res.data);
+                                            }
+
+                                        }
+                                    })
                                     console.log(toBeChecked)
                                     toast('User Plan Fetched')
                                 }
