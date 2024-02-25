@@ -307,9 +307,10 @@ function StudentPlan() {
             console.log({ planzzzzzzz: data })
 
             if (data?.userPlan.length !== 0) {
-                setMyPlans(data?.userPlan)
-
-                // update status of expired plans
+                const filteredPlans = data.userPlan.filter(
+                    (plan) => plan.institute_id === null
+                )
+                setMyPlans(filteredPlans)
                 for (var i = 0; i !== data?.userPlan.length; i++) {
                     if (data?.userPlan[i].validity_to < formattedDate) {
                         if (data?.userPlan[i].current_status !== 'EXPIRED') {
@@ -317,7 +318,6 @@ function StudentPlan() {
                                 ...data?.userPlan[i],
                                 current_status: 'EXPIRED',
                             }
-
                             try {
                                 const response = await Fetch({
                                     url: 'http://localhost:4000/user-plan/update-user-plan',
@@ -342,8 +342,8 @@ function StudentPlan() {
                 if (data['userPlan'].length > 1) {
                     for (var j = 0; j !== data['userPlan'].length; j++) {
                         if (
-                            data['userPlan'][j].current_status ===
-                            USER_PLAN_ACTIVE
+                            data['userPlan'][j].current_status === 'ACTIVE' &&
+                            data['userPlan'][j].institute_id === null
                         ) {
                             setPlanId(data['userPlan'][j]['plan_id'])
                             break
@@ -352,19 +352,18 @@ function StudentPlan() {
                 } else {
                     // set current plan id if plan is active
                     if (
-                        data['userPlan'][0].current_status === USER_PLAN_ACTIVE
+                        data['userPlan'][0].current_status === 'ACTIVE' &&
+                        data['userPlan'][0].institute_id === null
                     ) {
                         setPlanId(data['userPlan'][0]['plan_id'])
                     } else {
-                        // toast(
-                        // 	"You don't have a plan yet! Purchase one to continue"
-                        // );
+                        toast(
+                            "You don't have a plan yet! Purchase one to continue"
+                        )
                     }
                 }
             } else {
-                // toast(
-                // 	"You don't have a plan yet! Purchase one to continue"
-                // );
+                toast("You don't have a plan yet! Purchase one to continue")
             }
         } catch (error) {
             console.log(error)
@@ -505,6 +504,7 @@ function StudentPlan() {
             setToBeRegistered(userPlanData)
         }
         try {
+            console.log('BUYING : ', userPlanData)
             const response = await Fetch({
                 url: 'http://localhost:4000/payment/order',
                 method: 'POST',

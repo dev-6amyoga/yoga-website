@@ -446,4 +446,50 @@ router.put("/update-user-plan", async (req, res) => {
 	}
 });
 
+router.post("/get-user-plan-by-details", async (req, res) => {
+  const {
+    transaction_order_id,
+    current_status,
+    user_type,
+    user_id,
+    plan_id,
+    institute_id,
+  } = req.body;
+
+  if (
+    !transaction_order_id ||
+    !current_status ||
+    !user_type ||
+    !user_id ||
+    !plan_id ||
+    !institute_id
+  ) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Missing required fields" });
+  }
+  try {
+    const userPlan = await UserPlan.findAll({
+      where: {
+        user_id: user_id,
+        transaction_order_id: transaction_order_id,
+        current_status: current_status,
+        user_type: user_type,
+        user_id: user_id,
+        plan_id: plan_id,
+        institute_id: institute_id,
+      },
+      include: [{ model: User, attributes: ["name"] }],
+      order: [["validity_to", "DESC"]],
+    });
+    console.log(userPlan, "IS SENDING!");
+    return res.status(HTTP_OK).json({ userPlan: userPlan ? userPlan : null });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to fetch user" });
+  }
+});
+
 module.exports = router;

@@ -5,13 +5,26 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import useUserStore from '../../../store/UserStore'
 import { Fetch } from '../../../utils/Fetch'
+import { FetchRetry } from '../../../utils/Fetch'
 import RoleShifter from '../RoleShifter'
 
 function TeacherNavbar() {
     const [open, setOpen] = useState(false)
     const navigate = useNavigate()
+
     let user = useUserStore((state) => state.user)
-    const setUser = useUserStore((state) => state.setUser)
+    const institutes = useUserStore((state) => state.institutes)
+    let currentInstituteId = useUserStore((state) => state.currentInstituteId)
+    const [currentInstitute, setCurrentInstitute] = useState(null)
+    useEffect(() => {
+        if (currentInstituteId) {
+            setCurrentInstitute(
+                institutes?.find(
+                    (institute) => institute.institute_id === currentInstituteId
+                )
+            )
+        }
+    }, [currentInstituteId, institutes])
 
     const [planId, setPlanId] = useState(0)
     const [playDisabled, setPlayDisabled] = useState(true)
@@ -43,9 +56,10 @@ function TeacherNavbar() {
 
     useEffect(() => {
         const fetchData = async () => {
+            console.log('IN TEACHER NAVBAR!!')
             try {
                 const response = await fetch(
-                    'http://localhost:4000/user-plan/get-user-plan-by-id',
+                    'http://localhost:4000/user-plan/get-active-user-plan-by-id',
                     {
                         method: 'POST',
                         headers: {
@@ -55,14 +69,29 @@ function TeacherNavbar() {
                     }
                 )
                 const data = await response.json()
-                setPlayDisabled(!data?.userPlan?.plan.has_basic_playlist)
-                setTailorMadeDisabled(
-                    !data?.userPlan?.plan.has_playlist_creation
-                )
-                setSelfAudioDisabled(
-                    !data?.userPlan?.plan.has_self_audio_upload
-                )
-                const retrievedPlanId = data?.userPlan?.plan_id
+                console.log(data, 'IS OBTAINED!')
+                if (data.userPlan.length === 0) {
+                    toast('No Active Plans')
+                } else {
+                    console.log(currentInstituteId, 'IS ID')
+                    for (var i = 0; i < data.userPlan.length; i++) {
+                        if (
+                            data.userPlan[i].institute_id === currentInstituteId
+                        ) {
+                            console.log(data.userPlan[i], 'HAHAHAH')
+                            setPlayDisabled(
+                                !data.userPlan[i]?.plan.has_basic_playlist
+                            )
+                            setTailorMadeDisabled(
+                                !data.userPlan[i]?.plan.has_playlist_creation
+                            )
+                            setSelfAudioDisabled(
+                                !data.userPlan[i]?.plan.has_self_audio_upload
+                            )
+                            break
+                        }
+                    }
+                }
             } catch (err) {
                 toast(err)
             }
