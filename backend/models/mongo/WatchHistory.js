@@ -4,11 +4,22 @@ const watchHistorySchema = new mongoose.Schema({
 	user_id: {
 		type: mongoose.Schema.Types.Number,
 	},
-	asana_id: {
-		type: mongoose.Schema.Types.Number,
-	},
-	playlist_id: {
-		type: mongoose.Schema.Types.Number,
+	history: {
+		type: [
+			{
+				asana_id: {
+					type: mongoose.Schema.Types.Number,
+				},
+				playlist_id: {
+					type: mongoose.Schema.Types.Number,
+				},
+				watched_at: {
+					type: mongoose.Schema.Types.Date,
+					default: Date.now,
+				},
+			},
+		],
+		default: [],
 	},
 	created_at: {
 		type: mongoose.Schema.Types.Date,

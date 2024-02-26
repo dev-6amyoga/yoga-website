@@ -11,11 +11,19 @@ const {
 const WatchTimeLog = require("../models/mongo/WatchTimeLog");
 const WatchTimeQuota = require("../models/mongo/WatchTimeQuota");
 const { GetCurrentUserPlan } = require("../services/UserPlan.service");
+const { UserPlan } = require("../models/sql/UserPlan");
+const { authenticateToken } = require("../utils/jwt");
+const { USER_PLAN_EXPIRED_BY_USAGE } = require("../enums/user_plan_status");
+const { sequelize } = require("../init.sequelize");
 
-router.post("/update", async (req, res) => {
-	const { user_id, watch_time_logs } = req.body;
+router.post("/update", authenticateToken, async (req, res) => {
+	console.log("WatchTime /update");
+	const { institute_id, watch_time_logs } = req.body;
 
-	if (!user_id || !watch_time_logs) {
+	const { user_id } = req.user;
+
+	if (!user_id || !watch_time_logs || institute_id === undefined) {
+		console.log("Missing required fields");
 		return res
 			.status(HTTP_BAD_REQUEST)
 			.json({ message: "Missing required fields" });
@@ -24,13 +32,18 @@ router.post("/update", async (req, res) => {
 	// console.log(GetCurrentUserPlan(user_id);
 
 	// get user plan
-	const [user_plan, error] = await GetCurrentUserPlan(user_id);
+	console.log("GetCurrentUserPlan");
+	let [user_plan, error] = await GetCurrentUserPlan(user_id, institute_id);
+	// console.log({ user_plan, error });
 
 	if (!user_plan || error) {
+		console.log("User currenly has no active plan");
 		return res
 			.status(HTTP_BAD_REQUEST)
 			.json({ message: error || "User currenly has no active plan" });
 	}
+
+	// user_plan = user_plan.toJSON();
 
 	// reduce it to unique asana_id, playlist_id
 	let reduced_watch_time = [];
@@ -43,6 +56,7 @@ router.post("/update", async (req, res) => {
 		);
 
 		total_watch_time += wtl.timedelta;
+
 		if (idx === -1) {
 			const { timedelta, ...w } = wtl;
 			w.duration = timedelta;
@@ -76,6 +90,7 @@ router.post("/update", async (req, res) => {
 		const promises = [];
 		reduced_watch_time.forEach((wtl) => {
 			// update watch time logs
+			// TODO : make watch time log per day?
 			promises.push(
 				WatchTimeLog.updateOne(
 					{
@@ -103,12 +118,12 @@ router.post("/update", async (req, res) => {
 
 		let updatedWatchTimeQuota = await WatchTimeQuota.findOneAndUpdate(
 			{
-				user_plan_id: user_plan?.user_plan_id,
+				user_plan_id: user_plan?.get("user_plan_id"),
 			},
 			[
 				{
 					$project: {
-						user_plan_id: user_plan?.user_plan_id,
+						user_plan_id: user_plan?.get("user_plan_id"),
 						quota: {
 							$subtract: ["$quota", total_watch_time],
 						},
@@ -126,29 +141,48 @@ router.post("/update", async (req, res) => {
 				message: "Could not update watch time quota",
 			});
 		} else {
+			// TODO : where to commit, do we show extra usage or show lesser usage
 			await session.commitTransaction();
 			if (updatedWatchTimeQuota.quota < 0) {
-				return res.status(HTTP_BAD_REQUEST).json({
-					message: "Watch time quota exceeded",
-				});
+				// update expiry
+				const t = await sequelize.transaction();
+				// const up = await UserPlan.findOne({
+				// 	where: { user_plan_id: user_plan.user_plan_id },
+				// });
+				try {
+					user_plan.current_status = USER_PLAN_EXPIRED_BY_USAGE;
+					await user_plan.save();
+					await t.commit();
+					return res.status(HTTP_BAD_REQUEST).json({
+						message: "Watch time quota exceeded",
+						data: { committed: true },
+					});
+				} catch (err) {
+					console.log(err);
+					await t.rollback();
+					return res.status(HTTP_BAD_REQUEST).json({
+						message: "Watch time quota exceeded",
+						data: { committed: false },
+					});
+				}
 			}
-		}
 
-		await Promise.all(promises)
-			.then((values) => {
-				console.log(values);
-				return session.commitTransaction();
-			})
-			.then(() => {
-				return res.status(HTTP_OK).json({ reduced_watch_time });
-			})
-			.catch(async (err) => {
-				console.log(err);
-				await session.abortTransaction();
-				return res
-					.status(HTTP_INTERNAL_SERVER_ERROR)
-					.json({ message: err });
-			});
+			await Promise.all(promises)
+				.then((values) => {
+					console.log(values);
+					return session.commitTransaction();
+				})
+				.then(() => {
+					return res.status(HTTP_OK).json({ reduced_watch_time });
+				})
+				.catch(async (err) => {
+					console.log(err);
+					await session.abortTransaction();
+					return res
+						.status(HTTP_INTERNAL_SERVER_ERROR)
+						.json({ message: err });
+				});
+		}
 	});
 
 	session.endSession();

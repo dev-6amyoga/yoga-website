@@ -1,7 +1,7 @@
 import { Button, Divider, Note } from '@geist-ui/core'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
-import StudentPageWrapper from '../../components/Common/StudentPageWrapper'
+import InstitutePageWrapper from '../../components/Common/InstitutePageWrapper'
 import useUserStore from '../../store/UserStore'
 import { Fetch } from '../../utils/Fetch'
 import { getMongoDecimalValue } from '../../utils/getMongoDecimalValue'
@@ -124,7 +124,7 @@ export default function StudentWatchHistory() {
     }, [watchTimeLog])
 
     return (
-        <StudentPageWrapper heading="Watch History">
+        <InstitutePageWrapper heading="Watch History">
             <Button
                 onClick={() => {
                     fetchWatchHistory()
@@ -193,6 +193,6 @@ export default function StudentWatchHistory() {
                     ))}
                 </div>
             </section>
-        </StudentPageWrapper>
+        </InstitutePageWrapper>
     )
 }
