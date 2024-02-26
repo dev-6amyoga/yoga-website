@@ -18,7 +18,6 @@ const asanaSchema = new mongoose.Schema({
 
   asana_desc: String,
   asana_category: String,
-
   asana_thumbnailTs: {
     type: Number,
     default: 1,
@@ -27,29 +26,29 @@ const asanaSchema = new mongoose.Schema({
   asana_videoID: String,
   asana_hls_url: String,
   asana_dash_url: String,
-
+  ai_asana: Boolean,
   asana_withAudio: String,
   asana_audioLag: Number,
-
   asana_type: String,
-
   duration: Number,
   asana_difficulty: [String],
-
   markers: {
     type: [MarkerSchema],
     default: [],
   },
-
   muted: String,
   language: String,
-
   nobreak_asana: Boolean,
   person_starting_position: String,
   person_ending_position: String,
   mat_starting_position: String,
   mat_ending_position: String,
-
+  asana_stithi_start: String,
+  asana_stithi_end: String,
+  asana_namaskarastithi_start: String,
+  asana_namaskarastithi_end: String,
+  asana_eyestithi_start: String,
+  asana_eyestithi_end: String,
   counter: String,
 });
 

@@ -22,6 +22,7 @@ function RegisterTransitionVideoForm() {
 	const [matEnd, setMatEnd] = useState(null);
 	const [catStart, setCatStart] = useState(null);
 	const [catEnd, setCatEnd] = useState(null);
+	const [aiTransition, setAiTransition] = useState(false);
 	const [goingToRelax, setGoingToRelax] = useState(false);
 	const [comingFromRelax, setComingFromRelax] = useState(false);
 
@@ -98,6 +99,7 @@ function RegisterTransitionVideoForm() {
 			mat_ending_position: matEnd,
 			going_to_relax: goingToRelax,
 			coming_from_relax: comingFromRelax,
+			ai_transition : aiTransition,
 		};
 		const combinedData = {
 			...formData,
@@ -117,14 +119,14 @@ function RegisterTransitionVideoForm() {
 					combinedData.transition_video_name
 				) {
 					toast("Transition already exists with the same name!");
-					toastShown = true;
-				} else if (
-					data[i].transition_video_ID ===
-					combinedData.transition_video_ID
-				) {
-					toast("Transition already exists with the same Video ID !");
-					toastShown = true;
-				}
+					toastShown = true;}
+				// } else if (
+				// 	data[i].transition_video_ID ===
+				// 	combinedData.transition_video_ID
+				// ) {
+				// 	toast("Transition already exists with the same Video ID !");
+				// 	toastShown = true;
+				// }
 			}
 			if (toastShown) {
 				console.log("wait");
@@ -178,16 +180,36 @@ function RegisterTransitionVideoForm() {
 		}
 	};
 
+	const aiSetter = (value) => {
+		if (value.length === 0) {
+			setAiTransition(false);
+		}
+		if (value.length !== 0) {
+			if (value.includes("ai_transition")) {
+				if (value.includes("non_ai_transition")) {
+					toast("You cannot select both checkboxes!");
+				} else {
+					setAiTransition(true);
+				}
+			}
+			if (value.includes("non_ai_transition")) {
+				if (value.includes("ai_transition")) {
+					toast("You cannot select both checkboxes!");
+				} else {
+					setAiTransition(false);
+				}
+			}
+		}
+	};
+
 	return (
 		<AdminPageWrapper heading="Register Transition Video">
 			<div className="flex items-center justify-center min-h-screen max-w-7xl mx-auto">
 				<form
 					className="flex flex-col gap-1 border-2 w-full p-4 rounded-md mx-auto bg-white"
 					onSubmit={handleSubmit}>
-					{/* <Text h3>Register New Transition Video</Text> */}
 					<Text h6>Transition Video Name</Text>
 					<Input width="100%" name="transition_video_name">
-						{/* Transition Video Name */}
 					</Input>
 					<Text h6>Category From </Text>
 					<Select
@@ -229,6 +251,15 @@ function RegisterTransitionVideoForm() {
 						</Checkbox>
 						<Checkbox value="coming_from_relax">
 							Coming From Relax
+						</Checkbox>
+					</Checkbox.Group>
+
+					<Checkbox.Group value={[]} onChange={aiSetter} name="ai">
+						<Checkbox value="ai_transition">
+							AI Mode Transition
+						</Checkbox>
+						<Checkbox value="non_ai_transition">
+							Non AI Mode Transition
 						</Checkbox>
 					</Checkbox.Group>
 					<Divider />

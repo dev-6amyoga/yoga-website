@@ -7,6 +7,7 @@ const transitionVideoSchema = new mongoose.Schema({
   transition_hls_url: String,
   transition_dash_url: String,
   duration: Number,
+  ai_transition: Boolean,
   asana_category_start: String,
   asana_category_end: String,
   language: String,
