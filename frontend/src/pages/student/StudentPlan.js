@@ -74,7 +74,15 @@ function PlansCards({ allPlans, subscribePlan, selectedCurrency }) {
                                 </span>
                                 <br />
                                 <span className="text-3xl font-bold text-green-600">
-                                    {plan.watch_time_limit / 3600} Hours
+                                    {plan.watch_time_limit < 3600 ? (
+                                        <>
+                                            {plan.watch_time_limit / 60} Minutes
+                                        </>
+                                    ) : (
+                                        <>
+                                            {plan.watch_time_limit / 3600} Hours
+                                        </>
+                                    )}
                                 </span>
                             </p>
                             <Spacer h={1} />
@@ -509,6 +517,7 @@ function StudentPlan() {
                 url: 'http://localhost:4000/payment/order',
                 method: 'POST',
                 data: userPlanData,
+                token: true,
             })
             if (response.status === 200) {
                 const razorpayOrder = response.data?.order
@@ -544,51 +553,56 @@ function StudentPlan() {
     const registerUserPlan = async (order_id) => {
         toBeRegistered.transaction_order_id = order_id
         toBeRegistered.user_type = 'STUDENT'
+        toBeRegistered.institute_id = null
         setLoading(true)
 
         FetchRetry({
             url: 'http://localhost:4000/user-plan/register',
             method: 'POST',
+            token: true,
             data: toBeRegistered,
             n: 5,
             retryDelayMs: 2000,
         })
             .then((response) => {
+                console.log({ response })
                 if (response.status === 200) {
                     toast('Plan subscribed successfully', { type: 'success' })
                     //invoice download here!! order_id, toBeRegistered.user_id
-                    FetchRetry({
-                        url: 'http://localhost:4000/invoice/student/mail-invoice',
-                        method: 'POST',
-                        data: JSON.stringify({
-                            user_id: toBeRegistered.user_id,
-                            transaction_order_id: order_id,
-                        }),
-                        n: 2,
-                        retryDelayMs: 2000,
-                    })
-                        .then((responseInvoice) => {
-                            if (responseInvoice.status === 200) {
-                                toast('Invoice mailed successfully', {
-                                    type: 'success',
-                                })
-                            }
-                            setShowCard(false)
-                            setLoading(false)
-                        })
-                        .catch((error) => {
-                            console.log(error)
-                            setShowCard(false)
-                            toast(
-                                'Error mailing invoice; Download invoice in Transaction History',
-                                { type: 'error' }
-                            )
-                            setLoading(false)
-                        })
+                    // FetchRetry({
+                    //     url: 'http://localhost:4000/invoice/student/mail-invoice',
+                    //     method: 'POST',
+                    //     data: JSON.stringify({
+                    //         user_id: toBeRegistered.user_id,
+                    //         transaction_order_id: order_id,
+                    //     }),
+                    //     n: 2,
+                    //     retryDelayMs: 2000,
+                    // })
+                    //     .then((responseInvoice) => {
+                    //         if (responseInvoice.status === 200) {
+                    //             toast('Invoice mailed successfully', {
+                    //                 type: 'success',
+                    //             })
+                    //         }
+                    //         setShowCard(false)
+                    //         setLoading(false)
+                    //     })
+                    //     .catch((error) => {
+                    //         console.log(error)
+                    //         setShowCard(false)
+                    //         toast(
+                    //             'Error mailing invoice; Download invoice in Transaction History',
+                    //             { type: 'error' }
+                    //         )
+                    //         setLoading(false)
+                    //     })
 
                     fetchUserPlans()
+                    setLoading(false)
                 } else {
                     toast(response?.data?.message)
+                    setLoading(false)
                 }
             })
             .catch((error) => {
@@ -900,8 +914,20 @@ function StudentPlan() {
                                     <p className="flex flex-1 flex-col items-center rounded-lg border p-2 text-sm">
                                         <strong>Watch Hours Limit</strong>
                                         <span className="text-center">
-                                            {cardData?.watch_time_limit / 3600}{' '}
-                                            Hours
+                                            {cardData?.watch_time_limit <
+                                            3600 ? (
+                                                <>
+                                                    {cardData?.watch_time_limit /
+                                                        60}{' '}
+                                                    Minutes
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {cardData?.watch_time_limit /
+                                                        3600}{' '}
+                                                    Hours
+                                                </>
+                                            )}
                                         </span>
                                     </p>
                                 </div>

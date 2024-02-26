@@ -4,8 +4,8 @@ import { toast } from 'react-toastify'
 import { useShallow } from 'zustand/react/shallow'
 import usePlaylistStore from '../../store/PlaylistStore'
 import useUserStore from '../../store/UserStore'
-import PlaylistItem from './PlaylistItem'
 import { Fetch } from '../../utils/Fetch'
+import PlaylistItem from './PlaylistItem'
 
 function Playlist() {
     const [modalState, setModalState] = useState(false)
@@ -46,6 +46,10 @@ function Playlist() {
     const [nextMonthSchedulePresent, setNextMonthSchedulePresent] =
         useState(false)
     const [nextMonthSchedules, setNextMonthSchedules] = useState([])
+    const queue = usePlaylistStore((state) => state.queue)
+    const archive = usePlaylistStore((state) => state.archive)
+    const addToQueue = usePlaylistStore((state) => state.addToQueue)
+    const clearQueue = usePlaylistStore((state) => state.clearQueue)
 
     useEffect(() => {
         console.log(currentInstitute, 'IS THE INSTITUTE')
@@ -341,7 +345,7 @@ function Playlist() {
     const handleAddToQueue = (asana_ids) => {
         getAllAsanas(asana_ids)
             .then((asanas) => {
-                addToQueue(asanas)
+                addToQueue(asanas.filter((v) => v !== null))
             })
             .catch((err) => console.log(err))
     }
@@ -354,10 +358,6 @@ function Playlist() {
     const closeModal = () => {
         setModalState(false)
     }
-    const queue = usePlaylistStore((state) => state.queue)
-    const archive = usePlaylistStore((state) => state.archive)
-    const addToQueue = usePlaylistStore((state) => state.addToQueue)
-    const clearQueue = usePlaylistStore((state) => state.clearQueue)
 
     return (
         <div className="rounded-xl">

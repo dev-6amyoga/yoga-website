@@ -450,8 +450,12 @@ function StreamStackItem({
                     playlist_id: null,
                 },
             })
-                .then((res) => {})
-                .catch((err) => {})
+                .then((res) => {
+                    console.log('watch history created', res.data)
+                })
+                .catch((err) => {
+                    console.log(err)
+                })
 
             // starting interval timer to flush watch duration buffer
             flushTimeInterval.current = setInterval(() => {

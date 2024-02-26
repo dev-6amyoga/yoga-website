@@ -3,21 +3,33 @@ const { sequelize } = require("../init.sequelize");
 const { Plan } = require("../models/sql/Plan");
 const { UserPlan } = require("../models/sql/UserPlan");
 
-const GetCurrentUserPlan = async (user_id) => {
+const GetCurrentUserPlan = async (user_id, insitute_id) => {
 	let user_plan = null,
 		error = null;
 
 	const t = await sequelize.transaction();
 
 	try {
-		user_plan = await UserPlan.findOne({
-			where: {
-				user_id,
-				current_status: USER_PLAN_ACTIVE,
-			},
-			include: [{ model: Plan }],
-			transaction: t,
-		});
+		if (insitute_id) {
+			user_plan = await UserPlan.findOne({
+				where: {
+					user_id,
+					current_status: USER_PLAN_ACTIVE,
+					insitute_id: insitute_id,
+				},
+				include: [{ model: Plan }],
+				transaction: t,
+			});
+		} else {
+			user_plan = await UserPlan.findOne({
+				where: {
+					user_id,
+					current_status: USER_PLAN_ACTIVE,
+				},
+				include: [{ model: Plan }],
+				transaction: t,
+			});
+		}
 
 		if (!user_plan) {
 			await t.rollback();
