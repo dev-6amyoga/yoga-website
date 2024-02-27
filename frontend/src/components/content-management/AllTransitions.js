@@ -6,9 +6,11 @@ import { toast } from "react-toastify";
 import { ROLE_ROOT } from "../../enums/roles";
 import { withAuth } from "../../utils/withAuth";
 import AdminPageWrapper from "../Common/AdminPageWrapper";
+import { useNavigate } from "react-router-dom";
 
 function AllTransitions() {
 	const [delState, setDelState] = useState(false);
+	const navigate = useNavigate();
 	const [delId, setDelId] = useState("");
 	const closeDelHandler = (event) => {
 		setDelState(false);
@@ -120,6 +122,14 @@ function AllTransitions() {
 					}}>
 					Download CSV
 				</Button>
+				<br/>
+				{/* <Button
+					onClick={() => {
+						navigate('admin/video/transition/create');
+					}}>
+					Register Transition Video
+				</Button> */}
+				
 				<br />
 				<Input
 					icon={<Search />}

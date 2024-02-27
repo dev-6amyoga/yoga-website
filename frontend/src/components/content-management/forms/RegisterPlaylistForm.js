@@ -88,7 +88,6 @@ function RegisterPlaylistForm() {
         } else {
             count = Number(count)
         }
-
         if (playlist_temp.length === 0) {
             const x = transitionGenerator('start', rowData, transitions)
             if (x.length !== 0) {

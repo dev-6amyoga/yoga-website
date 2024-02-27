@@ -23,6 +23,7 @@ function RegisterTransitionVideoForm() {
 	const [catStart, setCatStart] = useState(null);
 	const [catEnd, setCatEnd] = useState(null);
 	const [aiTransition, setAiTransition] = useState(false);
+	const [nonAiTransition, setNonAiTransition] = useState(false);
 	const [goingToRelax, setGoingToRelax] = useState(false);
 	const [comingFromRelax, setComingFromRelax] = useState(false);
 
@@ -100,6 +101,7 @@ function RegisterTransitionVideoForm() {
 			going_to_relax: goingToRelax,
 			coming_from_relax: comingFromRelax,
 			ai_transition : aiTransition,
+			non_ai_transition : nonAiTransition
 		};
 		const combinedData = {
 			...formData,
@@ -183,20 +185,33 @@ function RegisterTransitionVideoForm() {
 	const aiSetter = (value) => {
 		if (value.length === 0) {
 			setAiTransition(false);
+			setNonAiTransition(false);
 		}
 		if (value.length !== 0) {
 			if (value.includes("ai_transition")) {
-				if (value.includes("non_ai_transition")) {
-					toast("You cannot select both checkboxes!");
+				if (value.length >1 ) {
+					toast("You cannot select more than 1 checkbox!");
 				} else {
 					setAiTransition(true);
+					setNonAiTransition(false);
 				}
 			}
 			if (value.includes("non_ai_transition")) {
-				if (value.includes("ai_transition")) {
-					toast("You cannot select both checkboxes!");
+				if (value.length >1 ) {
+					toast("You cannot select more than 1 checkbox!");
 				} else {
+					setNonAiTransition(true);
 					setAiTransition(false);
+				}
+			}
+			if(value.includes("both")){
+				if (value.includes("ai_transition") || value.includes("non_ai_transition")) {
+					toast("You cannot select more than 1 checkbox!");
+				}
+				else{
+					setAiTransition(true);
+					setNonAiTransition(true);
+
 				}
 			}
 		}
@@ -260,6 +275,9 @@ function RegisterTransitionVideoForm() {
 						</Checkbox>
 						<Checkbox value="non_ai_transition">
 							Non AI Mode Transition
+						</Checkbox>
+						<Checkbox value="both">
+							Both
 						</Checkbox>
 					</Checkbox.Group>
 					<Divider />
