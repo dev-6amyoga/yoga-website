@@ -27,6 +27,7 @@ const asanaSchema = new mongoose.Schema({
   asana_hls_url: String,
   asana_dash_url: String,
   ai_asana: Boolean,
+  non_ai_asana: Boolean,
   asana_withAudio: String,
   asana_audioLag: Number,
   asana_type: String,
