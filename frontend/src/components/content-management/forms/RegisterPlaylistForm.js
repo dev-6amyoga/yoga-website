@@ -18,12 +18,16 @@ function RegisterPlaylistForm() {
     const [asanas, setAsanas] = useState([])
     const [transitions, setTransitions] = useState([])
     const predefinedOrder = [
-        'Warm Up',
-        'Suryanamaskara',
+        'Prayer Standing',
+        'Prayer Sitting',
+        // 'Warm Up',
+        'Surayanamaskara With Prefix-Suffix',
+        'Surayanamaskara Without Prefix-Suffix',
         'Standing',
         'Sitting',
         'Supine',
         'Prone',
+        'Vajrasana',
         'Pranayama',
     ]
     const [sortedAsanas, setSortedAsanas] = useState([])
@@ -332,8 +336,8 @@ function RegisterPlaylistForm() {
     const customerCode = 'eyxw0l155flsxhz3'
     return (
         <div className="">
-            <div className="grid gap-4 grid-cols-3">
-                <Collapse.Group className="col-start-1 col-span-2">
+            <div className="grid grid-cols-3 gap-4">
+                <Collapse.Group className="col-span-2 col-start-1">
                     {filteredAsanasByCategory.map((categoryData, index) => (
                         <Collapse title={categoryData.category} key={index}>
                             <Table
@@ -445,7 +449,7 @@ function RegisterPlaylistForm() {
                     </Table>
                     <Divider />
                     <form
-                        className="flex-col items-center justify-center space-y-10 my-10"
+                        className="my-10 flex-col items-center justify-center space-y-10"
                         onSubmit={handleSubmit}
                     >
                         <Input width="100%" id="playlist_name">
