@@ -222,7 +222,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
     }
     if (endVideo.asana_category === "Supine") {
       const m1 = transitionFinder2(
-        "Turn Mat Front To Side Standing Transition AI + Non AI",
+        "Turn Mat Front To Side Standing Transition AI+Non AI",
         endVideo.language
       );
       const m2 = transitionFinder2(
@@ -243,7 +243,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
     }
     if (endVideo.asana_category === "Prone") {
       const m1 = transitionFinder2(
-        "Turn Mat Front To Side Standing Transition AI + Non AI",
+        "Turn Mat Front To Side Standing Transition AI+Non AI",
         endVideo.language
       );
       const m2 = transitionFinder2(
@@ -308,6 +308,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       else return [];
     }
     if (endVideo.asana_category === "Suryanamaskara With Prefix-Suffix") {
+      console.log("in hereee!!");
       const m1 = transitionFinder2(
         "Suryanamaskara Preparation And Mantra All",
         endVideo.language
@@ -894,7 +895,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           );
 
           const m2 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -925,7 +926,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           );
 
           const m3 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -957,7 +958,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           );
 
           const m2 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -979,7 +980,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           );
 
           const m3 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -997,7 +998,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       ) {
         if (startVideo.person_starting_position === "Front") {
           const m1 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -1033,7 +1034,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           );
 
           const m4 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -1060,7 +1061,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       ) {
         if (startVideo.person_starting_position === "Front") {
           const m1 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -1081,7 +1082,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           );
 
           const m2 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -1113,7 +1114,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           );
 
           const m2 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -1144,7 +1145,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           );
 
           const m3 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -1176,7 +1177,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           );
 
           const m2 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -1202,7 +1203,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           );
 
           const m3 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -1224,7 +1225,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       ) {
         if (startVideo.person_starting_position === "Front") {
           const m1 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -1260,7 +1261,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           );
 
           const m4 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -1287,7 +1288,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       ) {
         if (startVideo.person_starting_position === "Front") {
           const m1 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -1308,7 +1309,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           );
 
           const m2 = transitionFinder2(
-            "Turn Mat Front To Side Standing Transition AI + Non AI",
+            "Turn Mat Front To Side Standing Transition AI+Non AI",
             endVideo.language
           );
 
@@ -2857,7 +2858,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m3 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -2887,7 +2888,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m3 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -2907,7 +2908,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m2 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -2932,7 +2933,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m2 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3047,7 +3048,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m3 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3082,7 +3083,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m3 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3107,7 +3108,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m2 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3137,7 +3138,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m2 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3169,7 +3170,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m3 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3191,7 +3192,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m2 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3277,7 +3278,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m3 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3299,7 +3300,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m2 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3677,7 +3678,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m3 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3707,7 +3708,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m3 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3727,7 +3728,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m2 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3752,7 +3753,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m2 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3867,7 +3868,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m3 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3903,7 +3904,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m3 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3928,7 +3929,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m2 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3958,7 +3959,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m2 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -3990,7 +3991,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m3 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -4012,7 +4013,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m2 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -4098,7 +4099,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m3 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -4120,7 +4121,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         );
 
         const m2 = transitionFinder2(
-          "Turn Mat Side To Front Sitting Transition AI + Non AI",
+          "Turn Mat Side To Front Sitting Transition AI+Non AI",
           endVideo.language
         );
 
@@ -5330,7 +5331,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       startVideo.asana_category === "Prayer Standing" &&
       endVideo.asana_category === "Standing"
     ) {
-      if (endVideo.nobreak_asana == true) {
+      if (endVideo.nobreak_asana === true) {
         if (endVideo.person_starting_position === "Front") {
           const m1 = transitionFinder2(
             "Prayer Standing End",
@@ -5371,7 +5372,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           }
         }
       }
-      if (endVideo.nobreak_asana == false) {
+      if (endVideo.nobreak_asana === false) {
         if (endVideo.person_starting_position === "Front") {
           const m1 = transitionFinder2(
             "Prayer Standing End",
@@ -5407,7 +5408,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       startVideo.asana_category === "Prayer Standing" &&
       endVideo.asana_category === "Sitting"
     ) {
-      if (endVideo.nobreak_asana == true) {
+      if (endVideo.nobreak_asana === true) {
         const m1 = transitionFinder2("Prayer Standing End", endVideo.language);
 
         const m2 = transitionFinder2(
@@ -5426,7 +5427,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           return [];
         }
       }
-      if (endVideo.nobreak_asana == false) {
+      if (endVideo.nobreak_asana === false) {
         const m1 = transitionFinder2("Prayer Standing End", endVideo.language);
 
         const m2 = transitionFinder2(
@@ -5445,11 +5446,11 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       startVideo.asana_category === "Prayer Standing" &&
       endVideo.asana_category === "Supine"
     ) {
-      if (endVideo.nobreak_asana == true) {
+      if (endVideo.nobreak_asana === true) {
         const m1 = transitionFinder2("Prayer Standing End", endVideo.language);
 
         const m2 = transitionFinder2(
-          "Turn Mat Front To Side Standing Transition AI + Non AI",
+          "Turn Mat Front To Side Standing Transition AI+Non AI",
           endVideo.language
         );
 
@@ -5469,11 +5470,11 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           return [];
         }
       }
-      if (endVideo.nobreak_asana == false) {
+      if (endVideo.nobreak_asana === false) {
         const m1 = transitionFinder2("Prayer Standing End", endVideo.language);
 
         const m2 = transitionFinder2(
-          "Turn Mat Front To Side Standing Transition AI + Non AI",
+          "Turn Mat Front To Side Standing Transition AI+Non AI",
           endVideo.language
         );
 
@@ -5493,11 +5494,11 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       startVideo.asana_category === "Prayer Standing" &&
       endVideo.asana_category === "Prone"
     ) {
-      if (endVideo.nobreak_asana == true) {
+      if (endVideo.nobreak_asana === true) {
         const m1 = transitionFinder2("Prayer Standing End", endVideo.language);
 
         const m2 = transitionFinder2(
-          "Turn Mat Front To Side Standing Transition AI + Non AI",
+          "Turn Mat Front To Side Standing Transition AI+Non AI",
           endVideo.language
         );
 
@@ -5517,11 +5518,11 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           return [];
         }
       }
-      if (endVideo.nobreak_asana == false) {
+      if (endVideo.nobreak_asana === false) {
         const m1 = transitionFinder2("Prayer Standing End", endVideo.language);
 
         const m2 = transitionFinder2(
-          "Turn Mat Front To Side Standing Transition AI + Non AI",
+          "Turn Mat Front To Side Standing Transition AI+Non AI",
           endVideo.language
         );
 
@@ -5623,6 +5624,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       startVideo.asana_category === "Prayer Standing" &&
       endVideo.asana_category === "Suryanamaskara With Prefix-Suffix"
     ) {
+      console.log("here i am ");
       const m1 = transitionFinder2("Prayer Standing End", endVideo.language);
 
       const m2 = transitionFinder2(
@@ -5633,6 +5635,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
         "Inhale Arms Up Exhale Namaskara Suryanamaskara Prefix",
         endVideo.language
       );
+      console.log("in here", m1, m2, m3);
       if (m1 && m2 && m3) {
         return [m1, m2, m3];
       } else {
@@ -5662,7 +5665,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       startVideo.asana_category === "Prayer Sitting" &&
       endVideo.asana_category === "Standing"
     ) {
-      if (endVideo.nobreak_asana == true) {
+      if (endVideo.nobreak_asana === true) {
         if (endVideo.person_starting_position === "Front") {
           const m1 = transitionFinder2(
             "Prayer Sitting End To Dyanmudra",
@@ -5723,7 +5726,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           }
         }
       }
-      if (endVideo.nobreak_asana == false) {
+      if (endVideo.nobreak_asana === false) {
         if (endVideo.person_starting_position === "Front") {
           const m1 = transitionFinder2(
             "Prayer Sitting End To Dyanmudra",
@@ -5779,7 +5782,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       startVideo.asana_category === "Prayer Sitting" &&
       endVideo.asana_category === "Sitting"
     ) {
-      if (endVideo.nobreak_asana == true) {
+      if (endVideo.nobreak_asana === true) {
         const m1 = transitionFinder2(
           "Prayer Sitting End To Dyanmudra",
           endVideo.language
@@ -5801,7 +5804,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           return [];
         }
       }
-      if (endVideo.nobreak_asana == false) {
+      if (endVideo.nobreak_asana === false) {
         const m1 = transitionFinder2(
           "Prayer Sitting End To Dyanmudra",
           endVideo.language
@@ -5823,7 +5826,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       startVideo.asana_category === "Prayer Sitting" &&
       endVideo.asana_category === "Supine"
     ) {
-      if (endVideo.nobreak_asana == true) {
+      if (endVideo.nobreak_asana === true) {
         const m1 = transitionFinder2(
           "Prayer Sitting End To Dyanmudra",
           endVideo.language
@@ -5855,7 +5858,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           return [];
         }
       }
-      if (endVideo.nobreak_asana == false) {
+      if (endVideo.nobreak_asana === false) {
         const m1 = transitionFinder2(
           "Prayer Sitting End To Dyanmudra",
           endVideo.language
@@ -5887,7 +5890,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       startVideo.asana_category === "Prayer Sitting" &&
       endVideo.asana_category === "Prone"
     ) {
-      if (endVideo.nobreak_asana == true) {
+      if (endVideo.nobreak_asana === true) {
         const m1 = transitionFinder2(
           "Prayer Sitting End To Dyanmudra",
           endVideo.language
@@ -5919,7 +5922,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           return [];
         }
       }
-      if (endVideo.nobreak_asana == false) {
+      if (endVideo.nobreak_asana === false) {
         const m1 = transitionFinder2(
           "Prayer Sitting End To Dyanmudra",
           endVideo.language
@@ -6641,7 +6644,6 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           "Feet Together Hands Side Sitting Transition Non AI",
           endVideo.language
         );
-
         if (m1 && m2 && m3) {
           return [m1, m2, m3];
         } else {
