@@ -9,7 +9,6 @@ COPY ./*.json ./
 COPY ./*.yaml ./
 
 COPY ./enums ./enums
-COPY ./config ./config
 COPY ./invoice-templates ./invoice-templates
 COPY ./models ./models
 COPY ./routes ./routes
