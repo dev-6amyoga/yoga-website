@@ -133,10 +133,12 @@ router.post("/update", authenticateToken, async (req, res) => {
 			{ upsert: false, returnDocument: "after", lean: true }
 		);
 
-		console.log(updatedWatchTimeQuota);
+		console.log({ updatedWatchTimeQuota });
 
 		if (!updatedWatchTimeQuota) {
 			await session.abortTransaction();
+			session.endSession();
+
 			return res.status(HTTP_BAD_REQUEST).json({
 				message: "Could not update watch time quota",
 			});
@@ -153,6 +155,8 @@ router.post("/update", authenticateToken, async (req, res) => {
 					user_plan.current_status = USER_PLAN_EXPIRED_BY_USAGE;
 					await user_plan.save();
 					await t.commit();
+					session.endSession();
+
 					return res.status(HTTP_BAD_REQUEST).json({
 						message: "Watch time quota exceeded",
 						data: { committed: true },
@@ -160,6 +164,8 @@ router.post("/update", authenticateToken, async (req, res) => {
 				} catch (err) {
 					console.log(err);
 					await t.rollback();
+					session.endSession();
+
 					return res.status(HTTP_BAD_REQUEST).json({
 						message: "Watch time quota exceeded",
 						data: { committed: false },
@@ -173,22 +179,28 @@ router.post("/update", authenticateToken, async (req, res) => {
 					return session.commitTransaction();
 				})
 				.then(() => {
+					session.endSession();
+
 					return res.status(HTTP_OK).json({ reduced_watch_time });
 				})
 				.catch(async (err) => {
 					console.log(err);
 					await session.abortTransaction();
+					session.endSession();
+
 					return res
 						.status(HTTP_INTERNAL_SERVER_ERROR)
 						.json({ message: err });
 				});
 		}
 	});
-
-	session.endSession();
 });
 
-router.post("/get", async (req, res) => {
+router.post("/update-teacher", authenticateToken, async (req, res) => {});
+
+router.post("/update-institute", authenticateToken, async (req, res) => {});
+
+router.post("/get-logs", async (req, res) => {
 	const { user_id, from_date, to_date } = req.body;
 
 	if (!user_id) {
@@ -211,6 +223,51 @@ router.post("/get", async (req, res) => {
 			});
 		}
 		return res.status(HTTP_OK).json({ watchTimeLog });
+	} catch (err) {
+		console.log(err);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ message: "Something went wrong" });
+	}
+});
+
+router.post("/get-stats", async (req, res) => {
+	const { user_id } = req.body;
+
+	if (!user_id) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ message: "Missing required fields" });
+	}
+
+	try {
+		let watchTimeLog = await WatchTimeLog.find({
+			user_id,
+		});
+
+		if (!watchTimeLog) {
+			return res
+				.status(HTTP_OK)
+				.json({ watchTimeAll: 0, watchTimeToday: 0 });
+		}
+
+		// total of all time
+		let watchTimeAll = watchTimeLog.reduce((acc, wtl) => {
+			return acc + wtl.duration;
+		}, 0);
+
+		// total for today
+		let watchTimeToday = watchTimeLog.reduce((acc, wtl) => {
+			if (wtl.created_at > new Date().setHours(0, 0, 0, 0)) {
+				return acc + wtl.duration;
+			}
+			return acc;
+		}, 0);
+
+		return res.status(HTTP_OK).json({
+			watchTimeToday: watchTimeToday,
+			watchTimeAll: watchTimeAll,
+		});
 	} catch (err) {
 		console.log(err);
 		return res
