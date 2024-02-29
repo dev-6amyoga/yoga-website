@@ -142,6 +142,10 @@ app.get("/info", async (req, res) => {
 	});
 });
 
+app.get("/", (req, res) => {
+	return res.send(`Hello!`);
+});
+
 app.use("/content", asanaRouter);
 app.use("/content", playlistRouter);
 app.use("/schedule", scheduleRouter);

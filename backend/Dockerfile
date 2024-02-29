@@ -14,6 +14,7 @@ COPY ./models ./models
 COPY ./routes ./routes
 COPY ./services ./services
 COPY ./utils ./utils
+COPY ./public ./public
 
 RUN npm install
 
