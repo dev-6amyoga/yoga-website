@@ -87,9 +87,12 @@ router.post("/get", async (req, res) => {
 			},
 		},
 		{
+			$unwind: "$history",
+		},
+		{
 			$lookup: {
 				from: "asanas",
-				localField: "asana_id",
+				localField: "history.asana_id",
 				foreignField: "id",
 				as: "asana",
 				pipeline: [
@@ -104,6 +107,9 @@ router.post("/get", async (req, res) => {
 					},
 				],
 			},
+		},
+		{
+			$unwind: "$asana",
 		},
 	]);
 

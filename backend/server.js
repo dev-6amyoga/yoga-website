@@ -2,7 +2,6 @@ const express = require("express");
 const requestIp = require("request-ip");
 
 const app = express();
-app.use(requestIp.mw());
 
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -10,6 +9,9 @@ const morgan = require("morgan");
 const dotenv = require("dotenv");
 const useragent = require("express-useragent");
 const path = require("path");
+const compression = require("compression");
+const helmet = require("helmet");
+const RateLimit = require("express-rate-limit");
 
 // init the config from .env file
 dotenv.config();
@@ -58,11 +60,15 @@ const queryRouter = require("./routes/Queries");
 const updateRequestsRouter = require("./routes/UpdateRequests");
 // DEV : sample data creation
 const { bulkCreateSampleData } = require("./sample_data");
-const helloWorld = require("./defer/helloWorld");
+// const helloWorld = require("./defer/helloWorld");
 
 // middleware
 app.use(cors());
+
+// parse json body
 app.use(express.json());
+
+// logging
 app.use(
 	morgan(function (tokens, req, res) {
 		return [
@@ -77,7 +83,33 @@ app.use(
 		].join(" ");
 	})
 );
+
+// parsing user agent
 app.use(useragent.express());
+
+// compressing response
+app.use(compression());
+
+// getting ip address
+app.use(requestIp.mw());
+
+// securing the app with CSP policy
+app.use(
+	helmet.contentSecurityPolicy({
+		directives: {
+			"script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
+		},
+	})
+);
+
+// Apply rate limiter to all requests
+const limiter = RateLimit({
+	windowMs: 30 * 1000, // 30s
+	max: process.env.NODE_ENV === "production" ? 20 : 1000,
+});
+app.use(limiter);
+
+// static files
 app.use("/static", express.static(path.join(__dirname, "public")));
 
 // initialize databases
@@ -136,8 +168,9 @@ app.use("/watch-history", watchHistoryRouter);
 app.use("/watch-time", watchTimeLogRouter);
 app.use("/query", queryRouter);
 app.use("/update-request", updateRequestsRouter);
+
 const port = parseInt(process.env.SERVER_PORT);
 
-app.listen(port, () => {
+app.listen(port || 4000, () => {
 	console.log(`Server is running on port ${port}`);
 });

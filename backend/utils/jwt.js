@@ -70,7 +70,7 @@ async function authenticateToken(req, res, next) {
 	const authHeader = req.headers["authorization"];
 	// const refreshToken = req.cookies["refreshToken"];
 	const token = authHeader?.split(" ")[1];
-	console.log({ access_token: token });
+	console.log({ access_token: token !== undefined || token !== null });
 	// console.log({ authHeader });
 
 	if (token === null || token === undefined) return res.sendStatus(401);
