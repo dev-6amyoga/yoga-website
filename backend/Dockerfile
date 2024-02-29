@@ -12,7 +12,6 @@ COPY ./enums ./enums
 COPY ./invoice-templates ./invoice-templates
 COPY ./models ./models
 COPY ./routes ./routes
-COPY ./seeders ./seeders
 COPY ./services ./services
 COPY ./utils ./utils
 
