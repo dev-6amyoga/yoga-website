@@ -16,7 +16,7 @@ const RateLimit = require("express-rate-limit");
 // init the config from .env file
 dotenv.config();
 
-console.log(process.env);
+console.log({ env: process.env });
 
 // init the sequelize, nodemailer
 const { initializeSequelize } = require("./init.sequelize");
