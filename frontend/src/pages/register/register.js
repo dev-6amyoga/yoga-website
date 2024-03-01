@@ -261,6 +261,7 @@ export default function Register({ switchForm }) {
 				setToken(res.data.token);
 			})
 			.catch((err) => {
+				console.log(err);
 				toast(`Error : ${err?.response?.data?.message}`, {
 					type: "error",
 				});
