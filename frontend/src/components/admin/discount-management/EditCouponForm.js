@@ -40,7 +40,7 @@ export default function EditCouponForm({ visible, setVisible, coupon }) {
 								formData.validity_to
 							).toISOString();
 							Fetch({
-								url: "http://localhost:4000/discount-coupon/update",
+								url: "/discount-coupon/update",
 								method: "POST",
 								data: {
 									...formData,

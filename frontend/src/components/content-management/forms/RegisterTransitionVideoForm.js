@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ROLE_ROOT } from "../../../enums/roles";
+import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
 import { withAuth } from "../../../utils/withAuth";
 import AdminPageWrapper from "../../Common/AdminPageWrapper";
@@ -47,8 +48,8 @@ function RegisterTransitionVideoForm() {
 	};
 
 	useEffect(() => {
-		fetch("http://localhost:4000/content/video/getAllTransitions")
-			.then((response) => response.json())
+		Fetch("/content/video/getAllTransitions")
+			.then((response) => response.data)
 			.then((asanas) => {
 				setData(asanas);
 			})
@@ -60,10 +61,10 @@ function RegisterTransitionVideoForm() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/language/getAllLanguages"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/language/getAllLanguages",
+				});
+				const data = response.data;
 				setTableLanguages(data);
 			} catch (error) {
 				console.log(error);
@@ -75,10 +76,10 @@ function RegisterTransitionVideoForm() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/asana/getAllAsanaCategories"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/asana/getAllAsanaCategories",
+				});
+				const data = response.data;
 				setCategories(data);
 			} catch (error) {
 				console.log(error);
@@ -100,8 +101,8 @@ function RegisterTransitionVideoForm() {
 			mat_ending_position: matEnd,
 			going_to_relax: goingToRelax,
 			coming_from_relax: comingFromRelax,
-			ai_transition : aiTransition,
-			non_ai_transition : nonAiTransition
+			ai_transition: aiTransition,
+			non_ai_transition: nonAiTransition,
 		};
 		const combinedData = {
 			...formData,
@@ -121,7 +122,8 @@ function RegisterTransitionVideoForm() {
 					combinedData.transition_video_name
 				) {
 					toast("Transition already exists with the same name!");
-					toastShown = true;}
+					toastShown = true;
+				}
 				// } else if (
 				// 	data[i].transition_video_ID ===
 				// 	combinedData.transition_video_ID
@@ -135,17 +137,12 @@ function RegisterTransitionVideoForm() {
 			} else {
 				toast("Adding new transition, kindly wait!");
 				try {
-					const response = await fetch(
-						"http://localhost:4000/content/video/addTransition",
-						{
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json",
-							},
-							body: JSON.stringify(combinedData),
-						}
-					);
-					if (response.ok) {
+					const response = await Fetch({
+						url: "/content/video/addTransition",
+						method: "POST",
+						data: combinedData,
+					});
+					if (response?.status === 200) {
 						toast("New Transition added successfully");
 						navigate("/admin/video/transition/all");
 					} else {
@@ -189,7 +186,7 @@ function RegisterTransitionVideoForm() {
 		}
 		if (value.length !== 0) {
 			if (value.includes("ai_transition")) {
-				if (value.length >1 ) {
+				if (value.length > 1) {
 					toast("You cannot select more than 1 checkbox!");
 				} else {
 					setAiTransition(true);
@@ -197,21 +194,22 @@ function RegisterTransitionVideoForm() {
 				}
 			}
 			if (value.includes("non_ai_transition")) {
-				if (value.length >1 ) {
+				if (value.length > 1) {
 					toast("You cannot select more than 1 checkbox!");
 				} else {
 					setNonAiTransition(true);
 					setAiTransition(false);
 				}
 			}
-			if(value.includes("both")){
-				if (value.includes("ai_transition") || value.includes("non_ai_transition")) {
+			if (value.includes("both")) {
+				if (
+					value.includes("ai_transition") ||
+					value.includes("non_ai_transition")
+				) {
 					toast("You cannot select more than 1 checkbox!");
-				}
-				else{
+				} else {
 					setAiTransition(true);
 					setNonAiTransition(true);
-
 				}
 			}
 		}
@@ -224,8 +222,7 @@ function RegisterTransitionVideoForm() {
 					className="flex flex-col gap-1 border-2 w-full p-4 rounded-md mx-auto bg-white"
 					onSubmit={handleSubmit}>
 					<Text h6>Transition Video Name</Text>
-					<Input width="100%" name="transition_video_name">
-					</Input>
+					<Input width="100%" name="transition_video_name"></Input>
 					<Text h6>Category From </Text>
 					<Select
 						placeholder="Choose Category From"
@@ -276,9 +273,7 @@ function RegisterTransitionVideoForm() {
 						<Checkbox value="non_ai_transition">
 							Non AI Mode Transition
 						</Checkbox>
-						<Checkbox value="both">
-							Both
-						</Checkbox>
+						<Checkbox value="both">Both</Checkbox>
 					</Checkbox.Group>
 					<Divider />
 					<Text>Language</Text>

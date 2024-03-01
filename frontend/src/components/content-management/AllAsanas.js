@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ROLE_ROOT } from "../../enums/roles";
+import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
 import AdminPageWrapper from "../Common/AdminPageWrapper";
 import "./AllAsanas.css";
@@ -67,10 +68,10 @@ function AllAsanas() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/playlists/getAllPlaylists"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/playlists/getAllPlaylists",
+				});
+				const data = response.data;
 				setAllPlaylists(data);
 			} catch (error) {
 				toast(error);
@@ -104,10 +105,10 @@ function AllAsanas() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/video/getAllAsanas"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/video/getAllAsanas",
+				});
+				const data = response.data;
 				setAsanas(data);
 				setFilteredTransitions(data);
 				setLoading(false);
@@ -133,10 +134,10 @@ function AllAsanas() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/language/getAllLanguages"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/language/getAllLanguages",
+				});
+				const data = response.data;
 				setTableLanguages(data);
 			} catch (error) {
 				console.log(error);
@@ -148,10 +149,10 @@ function AllAsanas() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/asana/getAllAsanaCategories"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/asana/getAllAsanaCategories",
+				});
+				const data = response.data;
 				setCategories(data);
 			} catch (error) {
 				console.log(error);
@@ -162,17 +163,12 @@ function AllAsanas() {
 	const updateData = async () => {
 		try {
 			const asanaId = Number(modalData.id);
-			const response = await fetch(
-				`http://localhost:4000/content/video/updateAsana/${asanaId}`,
-				{
-					method: "PUT",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(modalData),
-				}
-			);
-			if (response.ok) {
+			const response = await Fetch({
+				url: `/content/video/updateAsana/${asanaId}`,
+				method: "PUT",
+				data: modalData,
+			});
+			if (response?.status === 200) {
 				setAsanas((prevAsanas) =>
 					prevAsanas.map((asana) =>
 						asana.id === asanaId ? modalData : asana
@@ -205,17 +201,12 @@ function AllAsanas() {
 					(id) => id !== asanaId
 				);
 				try {
-					const response = await fetch(
-						`http://localhost:4000/content/playlists/updatePlaylist/${allPlaylists[i].playlist_id}`,
-						{
-							method: "PUT",
-							headers: {
-								"Content-Type": "application/json",
-							},
-							body: JSON.stringify(allPlaylists[i]),
-						}
-					);
-					if (response.ok) {
+					const response = await Fetch({
+						url: `/content/playlists/updatePlaylist/${allPlaylists[i].playlist_id}`,
+						method: "PUT",
+						data: allPlaylists[i],
+					});
+					if (response?.status === 200) {
 						console.log(response);
 					} else {
 						console.log("Error updating asana:", response.status);
@@ -226,16 +217,11 @@ function AllAsanas() {
 			}
 		}
 		try {
-			const response = await fetch(
-				`http://localhost:4000/content/video/deleteAsana/${asanaId}`,
-				{
-					method: "DELETE",
-					headers: {
-						"Content-Type": "application/json",
-					},
-				}
-			);
-			if (response.ok) {
+			const response = await Fetch({
+				url: `/content/video/deleteAsana/${asanaId}`,
+				method: "DELETE",
+			});
+			if (response?.status === 200) {
 				toast("Deleted Successfully!");
 				setDeleteModal(false);
 				setAsanas((prevAsanas) =>

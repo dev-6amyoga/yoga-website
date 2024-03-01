@@ -84,7 +84,7 @@ export default function Register({ switchForm }) {
 					is_google_login:
 						googleInfo && googleInfo?.verified ? true : false,
 				};
-				let url = "http://localhost:4000/auth/register";
+				let url = "/auth/register";
 				if (googleInfo && googleInfo?.verified) {
 					url += "-google";
 					newUser.client_id = clientID;
@@ -96,7 +96,7 @@ export default function Register({ switchForm }) {
 					method: "POST",
 					data: newUser,
 				});
-				if (response.status === 200) {
+				if (response?.status === 200) {
 					toast("New User added successfully! Kindly login.", {
 						type: "success",
 					});
@@ -145,7 +145,7 @@ export default function Register({ switchForm }) {
 					gstin: instituteInfo?.gstin,
 				};
 				Fetch({
-					url: "http://localhost:4000/institute/register",
+					url: "/institute/register",
 					method: "POST",
 					data: institute,
 				}).then((res) => {
@@ -154,7 +154,7 @@ export default function Register({ switchForm }) {
 							type: "success",
 						});
 						user.institute_name = institute.name;
-						let url = "http://localhost:4000/auth/register";
+						let url = "/auth/register";
 						if (googleInfo && googleInfo?.verified) {
 							url += "-google";
 						}
@@ -198,7 +198,7 @@ export default function Register({ switchForm }) {
 
 	const handleStudentRegistration = async () => {
 		Fetch({
-			url: "http://localhost:4000/invite/get-email-verification-by-token",
+			url: "/invite/get-email-verification-by-token",
 			method: "POST",
 			data: {
 				token: token,
@@ -216,7 +216,7 @@ export default function Register({ switchForm }) {
 	};
 	const handleInstituteRegistration = async () => {
 		Fetch({
-			url: "http://localhost:4000/invite/get-email-verification-by-token",
+			url: "/invite/get-email-verification-by-token",
 			method: "POST",
 			data: {
 				token: token,
@@ -252,7 +252,7 @@ export default function Register({ switchForm }) {
 		console.log(generalInfo);
 		console.log(generalInfo.email_id, generalInfo.name);
 		Fetch({
-			url: "http://localhost:4000/invite/create-email-verification",
+			url: "/invite/create-email-verification",
 			method: "POST",
 			data: { email: generalInfo.email_id, name: generalInfo.name },
 		})

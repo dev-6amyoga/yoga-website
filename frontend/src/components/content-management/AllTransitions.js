@@ -2,11 +2,12 @@ import { Button, Grid, Input, Modal, Table } from "@geist-ui/core";
 import { Search } from "@geist-ui/icons";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ROLE_ROOT } from "../../enums/roles";
+import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
 import AdminPageWrapper from "../Common/AdminPageWrapper";
-import { useNavigate } from "react-router-dom";
 
 function AllTransitions() {
 	const [delState, setDelState] = useState(false);
@@ -36,10 +37,10 @@ function AllTransitions() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/video/getAllTransitions"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/video/getAllTransitions",
+				});
+				const data = response.data;
 				setTransitions(data);
 				setFilteredTransitions(data);
 			} catch (error) {
@@ -51,16 +52,11 @@ function AllTransitions() {
 	const deleteCategory = async () => {
 		try {
 			const del_id = delId;
-			const response = await fetch(
-				`http://localhost:4000/content/video/deleteTransition/${del_id}`,
-				{
-					method: "DELETE",
-					headers: {
-						"Content-Type": "application/json",
-					},
-				}
-			);
-			if (response.ok) {
+			const response = await Fetch({
+				url: `/content/video/deleteTransition/${del_id}`,
+				method: "DELETE",
+			});
+			if (response?.status === 200) {
 				toast("Transition deleted successfully!");
 				setTransitions((prev) =>
 					prev.filter((cat) => cat.transition_id !== del_id)
@@ -122,14 +118,14 @@ function AllTransitions() {
 					}}>
 					Download CSV
 				</Button>
-				<br/>
+				<br />
 				{/* <Button
 					onClick={() => {
 						navigate('admin/video/transition/create');
 					}}>
 					Register Transition Video
 				</Button> */}
-				
+
 				<br />
 				<Input
 					icon={<Search />}

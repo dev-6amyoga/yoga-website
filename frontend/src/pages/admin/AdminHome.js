@@ -37,7 +37,7 @@ function AdminHome() {
 		const fetchData = async () => {
 			try {
 				const response = await Fetch({
-					url: "http://localhost:4000/institute/get-all-institutes",
+					url: "/institute/get-all-institutes",
 					method: "GET",
 				});
 				const data = response.data;
@@ -116,11 +116,11 @@ function AdminHome() {
 		try {
 			const institute_id = DelinstituteId; // Assuming you have the institute ID to delete
 			const response = await Fetch({
-				url: `http://localhost:4000/institute/delete-by-id/${institute_id}`, // Adjust the endpoint
+				url: `/institute/delete-by-id/${institute_id}`, // Adjust the endpoint
 				method: "DELETE",
 			});
 
-			if (response.status === 200) {
+			if (response?.status === 200) {
 				console.log("Response from server:", response);
 				setInstitutes((prev) =>
 					prev.filter(
@@ -156,11 +156,11 @@ function AdminHome() {
 			const institute_id = Number(modalData.institute_id);
 			console.log(modalData);
 			const response = await Fetch({
-				url: `http://localhost:4000/institute/update/${institute_id}`,
+				url: `/institute/update/${institute_id}`,
 				method: "POST",
 				data: modalData,
 			});
-			if (response.status === 200) {
+			if (response?.status === 200) {
 				notify("Institute updated successfully");
 				setupdated(true);
 				setModalState(false);

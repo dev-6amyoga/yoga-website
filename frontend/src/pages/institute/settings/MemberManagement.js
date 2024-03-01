@@ -27,17 +27,12 @@ function MemberManagement() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/user-plan/get-user-plan-by-id",
-					{
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-						body: JSON.stringify({ user_id: user?.user_id }),
-					}
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/user-plan/get-user-plan-by-id",
+					method: "POST",
+					data: { user_id: user?.user_id },
+				});
+				const data = response.data;
 				console.log(data?.userPlan?.plan?.number_of_teachers);
 			} catch (error) {
 				console.log(error);
@@ -78,7 +73,7 @@ function MemberManagement() {
 		setTeachers([]);
 		try {
 			const res = await Fetch({
-				url: "http://localhost:4000/institute/teacher/get-all-by-instituteid",
+				url: "/institute/teacher/get-all-by-instituteid",
 				method: "POST",
 				data: {
 					institute_id: currentInstituteId,
@@ -101,7 +96,7 @@ function MemberManagement() {
 			const del_id = delUserID;
 			try {
 				Fetch({
-					url: "http://localhost:4000/user/delete-by-id",
+					url: "/user/delete-by-id",
 					method: "DELETE",
 					data: {
 						user_id: del_id,
@@ -132,16 +127,15 @@ function MemberManagement() {
 
 	return (
 		<InstitutePageWrapper heading="Member Management">
-			<div className="max-w-7xl mx-auto">
+			<div className="mx-auto max-w-7xl">
 				<h4>All Teachers</h4>
-				<Table width={50} data={teachers} className="bg-white ">
+				<Table data={teachers} className="bg-white ">
 					<Table.Column prop="name" label="Teacher Name" />
 					<Table.Column prop="username" label="Username" />
 					<Table.Column prop="email" label="Email ID" />
 					<Table.Column
 						prop="operation"
 						label="ACTIONS"
-						width={150}
 						render={renderAction}
 					/>
 				</Table>

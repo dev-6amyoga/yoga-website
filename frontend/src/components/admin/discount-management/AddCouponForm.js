@@ -17,7 +17,7 @@ export default function AddCouponForm({ visible, setVisible }) {
 		formData.validity_to = new Date(formData.validity_to).toISOString();
 
 		Fetch({
-			url: "http://localhost:4000/discount-coupon/create",
+			url: "/discount-coupon/create",
 			method: "POST",
 			data: formData,
 		})
