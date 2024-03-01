@@ -5,6 +5,7 @@ import VideoPlayerWrapper from "../../../components/Video/VideoPlayerWrapper";
 import VideoQueue from "../../../components/Video/VideoQueue";
 import { ROLE_INSTITUTE_OWNER } from "../../../enums/roles";
 import useUserStore from "../../../store/UserStore";
+import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
 
 function InstitutePlaylistPage() {
@@ -15,17 +16,12 @@ function InstitutePlaylistPage() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/user-plan/get-user-plan-by-id",
-					{
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-						body: JSON.stringify({ user_id: user?.user_id }),
-					}
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/user-plan/get-user-plan-by-id",
+					method: "POST",
+					data: { user_id: user?.user_id },
+				});
+				const data = response.data;
 				setUserPlan(data["userPlan"]);
 				setPlanId(data["userPlan"]["plan_id"]);
 			} catch (error) {

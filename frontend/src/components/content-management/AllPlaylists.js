@@ -20,6 +20,7 @@ import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { ROLE_ROOT } from "../../enums/roles";
+import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
 import AdminPageWrapper from "../Common/AdminPageWrapper";
 import { transitionGenerator } from "../transition-generator/TransitionGenerator";
@@ -84,16 +85,11 @@ function AllPlaylists() {
 	useEffect(() => {
 		const fetchData = async (playlistId) => {
 			try {
-				const response = await fetch(
-					`http://localhost:4000/content/playlists/deletePlaylist/${playlistId}`,
-					{
-						method: "DELETE",
-						headers: {
-							"Content-Type": "application/json",
-						},
-					}
-				);
-				if (response.ok) {
+				const response = await Fetch({
+					url: `/content/playlists/deletePlaylist/${playlistId}`,
+					method: "DELETE",
+				});
+				if (response?.status === 200) {
 					setPlaylist1((prev) =>
 						prev.filter(
 							(playlist) => playlist.playlist_id !== playlistId
@@ -120,10 +116,10 @@ function AllPlaylists() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/playlists/getAllPlaylists"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/playlists/getAllPlaylists",
+				});
+				const data = response.data;
 				setPlaylist1(data);
 				setFilteredTransitions(data);
 				setLoading(false);
@@ -137,10 +133,10 @@ function AllPlaylists() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/video/getAllAsanas"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/video/getAllAsanas",
+				});
+				const data = response.data;
 				setPlaylistAsanas(data);
 			} catch (error) {
 				toast(error);
@@ -151,10 +147,10 @@ function AllPlaylists() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/video/getAllTransitions"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/video/getAllTransitions",
+				});
+				const data = response.data;
 				setTransitions(data);
 			} catch (error) {
 				toast(error);
@@ -166,17 +162,12 @@ function AllPlaylists() {
 	const updateData = async () => {
 		try {
 			const playlistId = Number(modalData.playlist_id);
-			const response = await fetch(
-				`http://localhost:4000/content/playlists/updatePlaylist/${playlistId}`,
-				{
-					method: "PUT",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(modalData),
-				}
-			);
-			if (response.ok) {
+			const response = await Fetch({
+				url: `/content/playlists/updatePlaylist/${playlistId}`,
+				method: "PUT",
+				data: modalData,
+			});
+			if (response?.status === 200) {
 				setPlaylist1((prev) =>
 					prev.map((p1) =>
 						p1.playlist_id === playlistId ? modalData : p1
@@ -248,16 +239,11 @@ function AllPlaylists() {
 	const deletePlaylist = async () => {
 		try {
 			const playlistId = delPlaylistId;
-			const response = await fetch(
-				`http://localhost:4000/content/playlists/deletePlaylist/${playlistId}`,
-				{
-					method: "DELETE",
-					headers: {
-						"Content-Type": "application/json",
-					},
-				}
-			);
-			if (response.ok) {
+			const response = await Fetch({
+				url: `/content/playlists/deletePlaylist/${playlistId}`,
+				method: "DELETE",
+			});
+			if (response?.status === 200) {
 				setPlaylist1((prev) =>
 					prev.filter(
 						(playlist) => playlist.playlist_id !== playlistId
@@ -291,7 +277,7 @@ function AllPlaylists() {
 			//   });
 			//   for (const asanaId of filteredAsanaIds) {
 			//     const response = await fetch(
-			//       "http://localhost:4000/content/playlists/addPlaylist",
+			//       "/content/playlists/addPlaylist",
 			//       {
 			//         method: "POST",
 			//         headers: {
@@ -300,7 +286,7 @@ function AllPlaylists() {
 			//         body: JSON.stringify({ asana_id: asanaId }),
 			//       }
 			//     );
-			//     if (response.ok) {
+			//     if (response?.status === 200) {
 			//       const asanaDetails = await response.json();
 			//       setAsanaDetailsArray((prevArray) => [
 			//         ...prevArray,

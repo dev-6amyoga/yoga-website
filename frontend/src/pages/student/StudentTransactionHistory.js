@@ -14,17 +14,12 @@ export default function StudentTransactionHistory() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/transaction/get-transaction-by-user-id",
-					{
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-						body: JSON.stringify({ user_id: user?.user_id }),
-					}
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/transaction/get-transaction-by-user-id",
+					method: "POST",
+					data: { user_id: user?.user_id },
+				});
+				const data = response.data;
 				setTransactions(data["all_transaction_for_user"]);
 			} catch (error) {
 				console.log(error);
@@ -52,7 +47,7 @@ export default function StudentTransactionHistory() {
 		try {
 			setLoading(true);
 			const response = await Fetch({
-				url: "http://localhost:4000/invoice/student/plan",
+				url: "/invoice/student/plan",
 				method: "POST",
 				responseType: "arraybuffer",
 				data: JSON.stringify({

@@ -39,7 +39,7 @@ function Students() {
 			for (var i = 0; i !== students.length; i++) {
 				console.log(students[i].user_id);
 				Fetch({
-					url: "http://localhost:4000/user/get-by-id",
+					url: "/user/get-by-id",
 					method: "POST",
 					data: {
 						user_id: students[i].user_id,
@@ -62,7 +62,7 @@ function Students() {
 		const fetchData = async () => {
 			try {
 				const response = await Fetch({
-					url: "http://localhost:4000/user/get-all-students",
+					url: "/user/get-all-students",
 					method: "GET",
 				});
 				const data = response.data;
@@ -78,7 +78,7 @@ function Students() {
 		const fetchData = async () => {
 			try {
 				const response = await Fetch({
-					url: "http://localhost:4000/update-request/get-all",
+					url: "/update-request/get-all",
 					method: "GET",
 				});
 				const data = response.data;
@@ -92,7 +92,7 @@ function Students() {
 	const RenderAction = (value, rowData, index) => {
 		const handleAccept = async () => {
 			Fetch({
-				url: "http://localhost:4000/update-request/approve",
+				url: "/update-request/approve",
 				method: "POST",
 				data: {
 					update_request_id: rowData.update_request_id,
@@ -110,7 +110,7 @@ function Students() {
 		};
 		const handleReject = async () => {
 			Fetch({
-				url: "http://localhost:4000/update-request/reject",
+				url: "/update-request/reject",
 				method: "POST",
 				data: {
 					update_request_id: rowData.update_request_id,
@@ -202,17 +202,12 @@ function Students() {
 	const deleteUser = async () => {
 		try {
 			const delId = delUserId;
-			const response = await fetch(
-				"http://localhost:4000/user/delete-by-id",
-				{
-					method: "DELETE",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({ user_id: delId }),
-				}
-			);
-			if (response.ok) {
+			const response = await Fetch({
+				url: "/user/delete-by-id",
+				method: "DELETE",
+				data: { user_id: delId },
+			});
+			if (response?.status === 200) {
 				toast("Deleted successfully!");
 				setStudentData((prev) =>
 					prev.filter((playlist) => playlist.user_id !== delId)
@@ -241,17 +236,12 @@ function Students() {
 			return;
 		}
 		try {
-			const response = await fetch(
-				"http://localhost:4000/user/update-profile",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(modalData),
-				}
-			);
-			if (response.ok) {
+			const response = await Fetch({
+				url: "/user/update-profile",
+				method: "POST",
+				data: modalData,
+			});
+			if (response?.status === 200) {
 				toast("Update successful!");
 				setStudentData((prev) =>
 					prev.map((p1) =>

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ROLE_ROOT } from "../../../enums/roles";
+import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
 import AdminPageWrapper from "../../Common/AdminPageWrapper";
 import "./RegisterVideoForm.css";
@@ -16,10 +17,10 @@ function RegisterLanguageForm() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/language/getAllLanguages"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/language/getAllLanguages",
+				});
+				const data = response.data;
 				setTableLanguages(data);
 			} catch (error) {
 				console.log(error);
@@ -48,18 +49,13 @@ function RegisterLanguageForm() {
 				};
 				console.log(newLanguage);
 				try {
-					const response = await fetch(
-						"http://localhost:4000/content/language/addLanguage",
-						{
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json",
-							},
-							body: JSON.stringify(newLanguage),
-						}
-					);
+					const response = await Fetch({
+						url: "/content/language/addLanguage",
+						method: "POST",
+						data: newLanguage,
+					});
 
-					if (response.ok) {
+					if (response?.status === 200) {
 						console.log("New Language added successfully");
 						navigate("/admin/language/view-all");
 					} else {

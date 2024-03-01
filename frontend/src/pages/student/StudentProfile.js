@@ -25,7 +25,7 @@ export default function StudentProfile() {
 	};
 	useEffect(() => {
 		Fetch({
-			url: "http://localhost:4000/user/get-by-id",
+			url: "/user/get-by-id",
 			method: "POST",
 			data: {
 				user_id: user?.user_id,
@@ -118,7 +118,7 @@ export default function StudentProfile() {
 
 	const sendEmail = async () => {
 		Fetch({
-			url: "http://localhost:4000/update-request/register",
+			url: "/update-request/register",
 			method: "POST",
 			data: {
 				user_id: userData.user_id,

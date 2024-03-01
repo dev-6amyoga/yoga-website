@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import InstituteNavbar from "../../../components/Common/InstituteNavbar/InstituteNavbar";
 import { ROLE_INSTITUTE_OWNER } from "../../../enums/roles";
 import useUserStore from "../../../store/UserStore";
+import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
 
 function TransactionHistoryInstitute() {
@@ -11,17 +12,12 @@ function TransactionHistoryInstitute() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/transaction/get-transaction-by-user-id",
-					{
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-						body: JSON.stringify({ user_id: user?.user_id }),
-					}
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/transaction/get-transaction-by-user-id",
+					method: "POST",
+					data: { user_id: user?.user_id },
+				});
+				const data = response.data;
 				console.log(data);
 				setTransactions(data["all_transaction_for_user"]);
 			} catch (error) {

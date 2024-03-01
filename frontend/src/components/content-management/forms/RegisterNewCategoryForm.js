@@ -1,4 +1,4 @@
-// http://localhost:4000/content/asana/addAsanaCategory
+// /content/asana/addAsanaCategory
 
 import { Button, Card, Input, Text } from "@geist-ui/core";
 import { useEffect, useState } from "react";
@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ROLE_ROOT } from "../../../enums/roles";
+import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
 import { withAuth } from "../../../utils/withAuth";
 import AdminPageWrapper from "../../Common/AdminPageWrapper";
@@ -17,10 +18,10 @@ function RegisterNewCategoryForm() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/asana/getAllAsanaCategories"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/asana/getAllAsanaCategories",
+				});
+				const data = response.data;
 				setCategories(data);
 			} catch (error) {
 				console.log(error);
@@ -45,18 +46,13 @@ function RegisterNewCategoryForm() {
 				toast("Entered category already exists!");
 			} else {
 				try {
-					const response = await fetch(
-						"http://localhost:4000/content/asana/addAsanaCategory",
-						{
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json",
-							},
-							body: JSON.stringify(formData),
-						}
-					);
+					const response = await Fetch({
+						url: "/content/asana/addAsanaCategory",
+						method: "POST",
+						data: formData,
+					});
 
-					if (response.ok) {
+					if (response?.status === 200) {
 						toast("New Category added successfully");
 						navigate("/admin/asana-category/all");
 					} else {

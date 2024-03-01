@@ -5,6 +5,7 @@ import { Button, Card } from "@geist-ui/core";
 import { Eye } from "@geist-ui/icons";
 import YouTube from "react-youtube";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
+import { Fetch } from "../../utils/Fetch";
 export default function FreeVideos() {
 	const [planId, setPlanId] = useState(0);
 	const [currentVideoId, setCurrentVideoId] = useState("");
@@ -41,17 +42,12 @@ export default function FreeVideos() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/user-plan/get-user-plan-by-id",
-					{
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-						body: JSON.stringify({ user_id: user?.user_id }),
-					}
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/user-plan/get-user-plan-by-id",
+					method: "POST",
+					data: { user_id: user?.user_id },
+				});
+				const data = await response.data;
 				if (data["userPlan"]) {
 					setPlanId(data["userPlan"]["plan_id"]);
 				} else {

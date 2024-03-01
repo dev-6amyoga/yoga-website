@@ -61,7 +61,7 @@ function RegisterNewSchedule() {
 		const fetchData = async () => {
 			try {
 				const response = await Fetch({
-					url: "http://localhost:4000/user/get-all-students",
+					url: "/user/get-all-students",
 					method: "GET",
 				});
 				const data = response.data;
@@ -83,7 +83,7 @@ function RegisterNewSchedule() {
 		const fetchData = async () => {
 			try {
 				const response = await Fetch({
-					url: "http://localhost:4000/user/get-all-teachers",
+					url: "/user/get-all-teachers",
 					method: "GET",
 				});
 				const data = response.data;
@@ -105,7 +105,7 @@ function RegisterNewSchedule() {
 		const fetchData = async () => {
 			try {
 				const response = await Fetch({
-					url: "http://localhost:4000/user/get-all-institutes",
+					url: "/user/get-all-institutes",
 					method: "GET",
 				});
 				const data = response.data;
@@ -125,10 +125,10 @@ function RegisterNewSchedule() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/video/getAllAsanas"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/video/getAllAsanas",
+				});
+				const data = response.data;
 				setAsanas(data);
 			} catch (error) {
 				toast(error);
@@ -167,10 +167,10 @@ function RegisterNewSchedule() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/video/getAllTransitions"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/video/getAllTransitions",
+				});
+				const data = response.data;
 				setTransitions(data);
 			} catch (error) {
 				toast(error);
@@ -256,17 +256,12 @@ function RegisterNewSchedule() {
 		console.log(to_be_inserted);
 
 		try {
-			const response = await fetch(
-				"http://localhost:4000/schedule/addSchedule",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(to_be_inserted),
-				}
-			);
-			if (response.ok) {
+			const response = await Fetch({
+				url: "/schedule/addSchedule",
+				method: "POST",
+				data: to_be_inserted,
+			});
+			if (response?.status === 200) {
 				toast("Schedule added successfully");
 				// navigate("/admin/playlist/view-all");
 			} else {

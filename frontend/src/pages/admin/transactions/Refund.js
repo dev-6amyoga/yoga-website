@@ -55,7 +55,7 @@ function RefundManagement() {
 		queryKey: ["transactions"],
 		queryFn: async () => {
 			const res = await Fetch({
-				url: "http://localhost:4000/transaction/get-all",
+				url: "/transaction/get-all",
 				method: "GET",
 				token: true,
 			});

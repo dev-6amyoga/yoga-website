@@ -96,7 +96,7 @@ const RenderRazorpay = ({
 			}
 
 			FetchRetry({
-				url: "http://localhost:4000/payment/commit",
+				url: "/payment/commit",
 				method: "POST",
 				token: true,
 				data: {

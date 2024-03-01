@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { ROLE_ROOT } from "../../../enums/roles";
+import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
 
 function ViewAllPlans() {
@@ -43,10 +44,10 @@ function ViewAllPlans() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/plan/get-all"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/plan/get-all",
+				});
+				const data = response.data;
 				setPlans(data["plans"]);
 			} catch (error) {
 				console.log(error);
@@ -136,17 +137,12 @@ function ViewAllPlans() {
 		try {
 			const plan_id = delPlanId; // Assuming you have the plan ID to delete
 
-			const response = await fetch(
-				`http://localhost:4000/plan/deletePlan/${plan_id}`, // Adjust the endpoint
-				{
-					method: "DELETE",
-					headers: {
-						"Content-Type": "application/json",
-					},
-				}
-			);
+			const response = await Fetch({
+				url: `/plan/deletePlan/${plan_id}`, // Adjust the endpoint
+				method: "DELETE",
+			});
 
-			if (response.ok) {
+			if (response?.status === 200) {
 				console.log("Response from server:", response);
 				setPlans((prev) =>
 					prev.filter((plan) => plan.plan_id !== plan_id)
@@ -165,17 +161,12 @@ function ViewAllPlans() {
 		try {
 			const plan_id = Number(modalData.plan_id);
 			console.log(modalData);
-			const response = await fetch(
-				`http://localhost:4000/plan/update-plan/${plan_id}`,
-				{
-					method: "PUT",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(modalData),
-				}
-			);
-			if (response.ok) {
+			const response = await Fetch({
+				url: `/plan/update-plan/${plan_id}`,
+				method: "PUT",
+				data: modalData,
+			});
+			if (response?.status === 200) {
 				notify("Plan updated successfully");
 				setupdated(true);
 				setModalState(false);

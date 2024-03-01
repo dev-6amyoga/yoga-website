@@ -25,7 +25,7 @@ function Institutes() {
 			setInstituteData([]);
 			for (var i = 0; i != institutes.length; i++) {
 				Fetch({
-					url: "http://localhost:4000/institute/get-by-instituteid",
+					url: "/institute/get-by-instituteid",
 					method: "POST",
 					data: {
 						institute_id: institutes[i].institute_id,
@@ -47,7 +47,7 @@ function Institutes() {
 		const fetchData = async () => {
 			try {
 				const response = await Fetch({
-					url: "http://localhost:4000/user/get-all-institutes",
+					url: "/user/get-all-institutes",
 					method: "GET",
 				});
 				const data = response.data;
@@ -73,7 +73,7 @@ function Institutes() {
 						async (institute) => {
 							const id1 = institute.institute_id;
 							const res = await Fetch({
-								url: "http://localhost:4000/institute/teacher/get-all-by-instituteid",
+								url: "/institute/teacher/get-all-by-instituteid",
 								method: "POST",
 								data: {
 									institute_id: id1,

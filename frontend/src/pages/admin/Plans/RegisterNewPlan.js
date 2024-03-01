@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { ROLE_ROOT } from "../../../enums/roles";
+import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
 
 function RegisterNewPlan() {
@@ -45,23 +46,18 @@ function RegisterNewPlan() {
 		};
 
 		try {
-			const response = await fetch(
-				"http://localhost:4000/plan/register",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(new_plan),
-				}
-			);
-			if (response.ok) {
+			const response = await Fetch({
+				url: "/plan/register",
+				method: "POST",
+				body: new_plan,
+			});
+			if (response?.status === 200) {
 				notify("New Plan added successfully");
 				setTimeout(() => {
 					navigate("/admin");
 				}, 2000);
 			} else {
-				const errorData = await response.json();
+				const errorData = response.data;
 				notify(errorData.error);
 			}
 		} catch (error) {

@@ -4,6 +4,7 @@ import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { ROLE_ROOT } from "../../enums/roles";
+import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
 import AdminPageWrapper from "../Common/AdminPageWrapper";
 
@@ -34,10 +35,10 @@ function AllAsanaCategories() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/asana/getAllAsanaCategories"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/asana/getAllAsanaCategories",
+				});
+				const data = response.data;
 				setCategories(data);
 				setFilteredTransitions(data);
 			} catch (error) {
@@ -50,16 +51,11 @@ function AllAsanaCategories() {
 	const deleteCategory = async () => {
 		try {
 			const del_id = delId;
-			const response = await fetch(
-				`http://localhost:4000/content/asana/deleteAsanaCategory/${del_id}`,
-				{
-					method: "DELETE",
-					headers: {
-						"Content-Type": "application/json",
-					},
-				}
-			);
-			if (response.ok) {
+			const response = await Fetch({
+				url: `/content/asana/deleteAsanaCategory/${del_id}`,
+				method: "DELETE",
+			});
+			if (response?.status === 200) {
 				toast("Category deleted successfully!");
 				setCategories((prev) =>
 					prev.filter((cat) => cat.asana_category_id !== del_id)

@@ -33,7 +33,7 @@ function DiscountManagement() {
 
 	const fetchCoupons = () => {
 		Fetch({
-			url: "http://localhost:4000/discount-coupon/get-all",
+			url: "/discount-coupon/get-all",
 			method: "POST",
 		})
 			.then((res) => {
@@ -47,7 +47,7 @@ function DiscountManagement() {
 
 	const fetchCoupon = (discount_coupon_id) => {
 		Fetch({
-			url: "http://localhost:4000/discount-coupon/get-by-id",
+			url: "/discount-coupon/get-by-id",
 			method: "POST",
 			data: { discount_coupon_id },
 		})
@@ -72,7 +72,7 @@ function DiscountManagement() {
 
 	const handleCouponDelete = (id) => {
 		Fetch({
-			url: "http://localhost:4000/discount-coupon/delete",
+			url: "/discount-coupon/delete",
 			method: "DELETE",
 			data: { discount_coupon_id: id },
 		})

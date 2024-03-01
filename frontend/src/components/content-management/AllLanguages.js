@@ -3,6 +3,7 @@ import { Search } from "@geist-ui/icons";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import { ROLE_ROOT } from "../../enums/roles";
+import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
 import AdminPageWrapper from "../Common/AdminPageWrapper";
 
@@ -32,10 +33,10 @@ function AllLanguages() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(
-					"http://localhost:4000/content/language/getAllLanguages"
-				);
-				const data = await response.json();
+				const response = await Fetch({
+					url: "/content/language/getAllLanguages",
+				});
+				const data = response.data;
 				setLanguages(data);
 				setFilteredTransitions(data);
 			} catch (error) {
@@ -61,16 +62,11 @@ function AllLanguages() {
 	const deleteLanguage = async () => {
 		try {
 			const languageId = delLanguageId;
-			const response = await fetch(
-				`http://localhost:4000/content/video/deleteLanguage/${languageId}`,
-				{
-					method: "DELETE",
-					headers: {
-						"Content-Type": "application/json",
-					},
-				}
-			);
-			if (response.ok) {
+			const response = await Fetch({
+				url: `/content/video/deleteLanguage/${languageId}`,
+				method: "DELETE",
+			});
+			if (response?.status === 200) {
 				setLanguages((prev) =>
 					prev.filter((lang) => lang.language_id !== languageId)
 				);

@@ -121,7 +121,7 @@ function EditAsana() {
 	const updateData = useCallback(async () => {
 		setLoading(true);
 		Fetch({
-			url: `http://localhost:4000/content/video/updateAsana/${asana.id}`,
+			url: `/content/video/updateAsana/${asana.id}`,
 			method: "PUT",
 			data: { ...modalData, markers: markers },
 		})
@@ -350,7 +350,7 @@ function EditAsana() {
 		if (asana_id) {
 			setLoading(true);
 			Fetch({
-				url: "http://localhost:4000/content/get-asana-by-id",
+				url: "/content/get-asana-by-id",
 				method: "POST",
 				data: {
 					asana_id: asana_id,
@@ -375,7 +375,7 @@ function EditAsana() {
 		const fetchData = async () => {
 			try {
 				const response = await Fetch({
-					url: "http://localhost:4000/content/language/getAllLanguages",
+					url: "/content/language/getAllLanguages",
 				});
 				setTableLanguages(response.data);
 			} catch (error) {
@@ -390,7 +390,7 @@ function EditAsana() {
 		const fetchData = async () => {
 			try {
 				const response = await Fetch({
-					url: "http://localhost:4000/content/asana/getAllAsanaCategories",
+					url: "/content/asana/getAllAsanaCategories",
 				});
 				setCategories(response.data);
 			} catch (error) {
