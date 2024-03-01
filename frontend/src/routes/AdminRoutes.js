@@ -21,104 +21,108 @@ import RegisterNewSchedule from "../pages/admin/schedule-management/RegisterNewS
 import ViewAllSchedules from "../pages/admin/schedule-management/ViewAllSchedules";
 import LogPayment from "../pages/admin/transactions/LogPayment";
 import RefundManagement from "../pages/admin/transactions/Refund";
-
+import AllPlaylistConfigs from "../components/content-management/AllPlaylistConfigs";
 export const AdminRoutes = [
-	{
-		path: "/admin",
-		element: <AdminHome />,
-	},
-	// video
-	{
-		path: "/admin/video/create",
-		element: <RegisterVideo />,
-	},
-	{
-		path: "/admin/video/edit/:asana_id",
-		element: <EditAsana />,
-	},
-	{
-		path: "/admin/video/view-all",
-		element: <AllAsanas />,
-	},
-	// video transition
-	{
-		path: "/admin/video/transition/create",
-		element: <RegisterTransitionVideoForm />,
-	},
-	{
-		path: "/admin/video/transition/all",
-		element: <AllTransitions />,
-	},
-	// schedule
-	{
-		path: "/admin/schedule/register",
-		element: <RegisterNewSchedule />,
-	},
-	{
-		path: "/admin/schedule/view",
-		element: <ViewAllSchedules />,
-	},
-	// language
-	{
-		path: "/admin/language/create",
-		element: <RegisterLanguageForm />,
-	},
-	{
-		path: "/admin/language/view-all",
-		element: <AllLanguages />,
-	},
-	// playlist
-	{
-		path: "/admin/playlist/create",
-		element: <RegisterPlaylist />,
-	},
-	{
-		path: "/admin/playlist/view-all",
-		element: <AllPlaylists />,
-	},
-	// asana category
-	{
-		path: "/admin/asana-category/create",
-		element: <RegisterNewCategoryForm />,
-	},
-	{
-		path: "/admin/asana-category/all",
-		element: <AllAsanaCategories />,
-	},
-	// members
-	{
-		path: "/admin/members/institutes",
-		element: <Institutes />,
-	},
-	{
-		path: "/admin/members/teachers",
-		element: <Teachers />,
-	},
-	{
-		path: "/admin/members/students",
-		element: <Students />,
-	},
-	// transactions
-	{
-		path: "/admin/transactions/log-payment",
-		element: <LogPayment />,
-	},
-	{
-		path: "/admin/transactions/refund",
-		element: <RefundManagement />,
-	},
-	// plans
-	{
-		path: "/admin/plan/create",
-		element: <RegisterNewPlan />,
-	},
-	{
-		path: "/admin/plan/view-all",
-		element: <ViewAllPlans />,
-	},
-	// discount management
-	{
-		path: "/admin/discount-management",
-		element: <DiscountManagement />,
-	},
+  {
+    path: "/admin",
+    element: <AdminHome />,
+  },
+  // video
+  {
+    path: "/admin/video/create",
+    element: <RegisterVideo />,
+  },
+  {
+    path: "/admin/video/edit/:asana_id",
+    element: <EditAsana />,
+  },
+  {
+    path: "/admin/video/view-all",
+    element: <AllAsanas />,
+  },
+  // video transition
+  {
+    path: "/admin/video/transition/create",
+    element: <RegisterTransitionVideoForm />,
+  },
+  {
+    path: "/admin/video/transition/all",
+    element: <AllTransitions />,
+  },
+  // schedule
+  {
+    path: "/admin/schedule/register",
+    element: <RegisterNewSchedule />,
+  },
+  {
+    path: "/admin/schedule/view",
+    element: <ViewAllSchedules />,
+  },
+  // language
+  {
+    path: "/admin/language/create",
+    element: <RegisterLanguageForm />,
+  },
+  {
+    path: "/admin/language/view-all",
+    element: <AllLanguages />,
+  },
+  // playlist
+  {
+    path: "/admin/playlist/create",
+    element: <RegisterPlaylist />,
+  },
+  {
+    path: "/admin/playlist/view-all",
+    element: <AllPlaylists />,
+  },
+  {
+    path: "/admin/playlist-configs",
+    element: <AllPlaylistConfigs />,
+  },
+  // asana category
+  {
+    path: "/admin/asana-category/create",
+    element: <RegisterNewCategoryForm />,
+  },
+  {
+    path: "/admin/asana-category/all",
+    element: <AllAsanaCategories />,
+  },
+  // members
+  {
+    path: "/admin/members/institutes",
+    element: <Institutes />,
+  },
+  {
+    path: "/admin/members/teachers",
+    element: <Teachers />,
+  },
+  {
+    path: "/admin/members/students",
+    element: <Students />,
+  },
+  // transactions
+  {
+    path: "/admin/transactions/log-payment",
+    element: <LogPayment />,
+  },
+  {
+    path: "/admin/transactions/refund",
+    element: <RefundManagement />,
+  },
+  // plans
+  {
+    path: "/admin/plan/create",
+    element: <RegisterNewPlan />,
+  },
+  {
+    path: "/admin/plan/view-all",
+    element: <ViewAllPlans />,
+  },
+  // discount management
+  {
+    path: "/admin/discount-management",
+    element: <DiscountManagement />,
+  },
 ];
