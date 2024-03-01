@@ -644,7 +644,7 @@ router.post("/create-email-verification", async (req, res) => {
         to: email,
         subject: "6AM Yoga | Teacher Invite",
         // text: "Welcome to 6AM Yoga!",
-        text: `Welcome to 6AM Yoga! Please click on the link to verify your email: http://localhost:3000/auth/verify-email?token=${token}`,
+        text: `Welcome to 6AM Yoga! Please click on the link to verify your email: https://my-yogateacher.6amyoga.com/auth/verify-email?token=${token}`,
       },
       async (err, info) => {
         if (err) {
