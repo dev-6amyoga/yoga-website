@@ -7,6 +7,8 @@ const InstitutePlaylistSchema = new mongoose.Schema({
   playlist_name: String,
   asana_ids: [Number],
   applicable_teachers: [Number],
+  max_edit_count: Number,
+  current_edit_count: Number,
 });
 
 const InstitutePlaylist = mongoose.model(

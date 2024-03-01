@@ -16,7 +16,7 @@ const RateLimit = require("express-rate-limit");
 // init the config from .env file
 dotenv.config();
 
-console.log({ env: process.env });
+// console.log({ env: process.env });
 
 // init the sequelize, nodemailer
 const { initializeSequelize } = require("./init.sequelize");
@@ -45,7 +45,6 @@ const userPlanRouter = require("./routes/UserPlan");
 const currencyRouter = require("./routes/Currency");
 const referralCodeRouter = require("./routes/ReferralCode");
 const userPlaylistRouter = require("./routes/PlaylistUser");
-const UserPlaylistCountRouter = require("./routes/UserPlaylistCount");
 const inviteRouter = require("./routes/Invite");
 const paymentRouter = require("./routes/Payment");
 const userInstituteRouter = require("./routes/UserInstitute");
@@ -158,7 +157,6 @@ app.use("/user-plan", userPlanRouter);
 app.use("/currency", currencyRouter);
 app.use("/referral", referralCodeRouter);
 app.use("/user-playlists", userPlaylistRouter);
-app.use("/user-playlist-count", UserPlaylistCountRouter);
 app.use("/institute", instituteRouter);
 app.use("/institute-playlist", institutePlaylistRouter);
 app.use("/invite", inviteRouter);
