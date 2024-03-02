@@ -634,7 +634,7 @@ router.post("/create-email-verification", async (req, res) => {
       message: "Missing required fields",
     });
   }
-  const t = await sequelize.transaction();
+  //
   try {
     const token = tokenUtils.enc_token(name, email);
     console.log("TOKEN : ", token);
@@ -647,32 +647,30 @@ router.post("/create-email-verification", async (req, res) => {
         text: `Welcome to 6AM Yoga! Please click on the link to verify your email: https://my-yogateacher.6amyoga.com/auth/verify-email?token=${token}`,
       },
       async (err, info) => {
-        if (err) {
-          await t.rollback();
-          console.error(err);
-          res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            message: "Internal server error; try again",
-          });
-        } else {
+        const t = await sequelize.transaction();
+        console.log("Email sending :", err, info);
+        try {
           await EmailVerification.create(
             {
               token: token,
               email: email,
               name: name,
               is_verified: false,
+              err: err ? err : null,
               expiry_date: new Date(Date.now() + 30 * 60 * 1000),
             },
             { transaction: t }
           );
           await t.commit();
-          res.status(HTTP_OK).json({
-            message: "Email sent",
-            token: token,
-          });
+        } catch (err) {
+          await t.rollback();
+          console.log("Email failed");
         }
       }
     );
-    return res;
+    return res.status(HTTP_OK).json({
+      message: "Sending email...",
+    });
   } catch (err) {
     console.log(err);
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({

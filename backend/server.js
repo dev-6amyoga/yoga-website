@@ -65,21 +65,21 @@ const playlistConfigsRouter = require("./routes/PlaylistConfigs");
 const { bulkCreateSampleData } = require("./sample_data");
 // const helloWorld = require("./defer/helloWorld");
 
-// const corsOptions = {
-//   origin: [
-//     "https://my-yogateacher.6amyoga.com",
-//     "http://localhost:3000",
-//     "https://www.my-yogateacher.6amyoga.com",
-//     "https://yoga-website-orcin.vercel.app",
-//   ],
-//   optionSuccessStatus: 200,
-// };
-
-// allow everything
 const corsOptions = {
-  origin: "*",
+  origin: [
+    "https://my-yogateacher.6amyoga.com",
+    "http://localhost:3000",
+    "https://www.my-yogateacher.6amyoga.com",
+    "https://yoga-website-orcin.vercel.app",
+  ],
   optionSuccessStatus: 200,
 };
+
+// allow everything
+// const corsOptions = {
+//   origin: "*",
+//   optionSuccessStatus: 200,
+// };
 
 // middleware
 app.use(cors(corsOptions));
@@ -113,19 +113,19 @@ app.use(compression());
 app.use(requestIp.mw());
 
 // securing the app with CSP policy
-// app.use(
-//   helmet.contentSecurityPolicy({
-//     directives: {
-//       "script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
-//     },
-//   })
-// );
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      "script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
+    },
+  })
+);
 
 // Apply rate limiter to all requests
-// const limiter = RateLimit({
-// windowMs: 30 * 1000, // 30s
-//   max: process.env.NODE_ENV === "production" ? 50 : 1000,
-// });
+const limiter = RateLimit({
+  windowMs: 30 * 1000, // 30s
+  max: process.env.NODE_ENV === "production" ? 50 : 1000,
+});
 
 //   app.use(limiter);
 
