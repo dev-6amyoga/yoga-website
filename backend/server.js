@@ -65,13 +65,19 @@ const playlistConfigsRouter = require("./routes/PlaylistConfigs");
 const { bulkCreateSampleData } = require("./sample_data");
 // const helloWorld = require("./defer/helloWorld");
 
+// const corsOptions = {
+//   origin: [
+//     "https://my-yogateacher.6amyoga.com",
+//     "http://localhost:3000",
+//     "https://www.my-yogateacher.6amyoga.com",
+//     "https://yoga-website-orcin.vercel.app",
+//   ],
+//   optionSuccessStatus: 200,
+// };
+
+// allow everything
 const corsOptions = {
-  origin: [
-    "https://my-yogateacher.6amyoga.com",
-    "http://localhost:3000",
-    "https://www.my-yogateacher.6amyoga.com",
-    "https://yoga-website-orcin.vercel.app",
-  ],
+  origin: "*",
   optionSuccessStatus: 200,
 };
 
@@ -107,13 +113,13 @@ app.use(compression());
 app.use(requestIp.mw());
 
 // securing the app with CSP policy
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      "script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
-    },
-  })
-);
+// app.use(
+//   helmet.contentSecurityPolicy({
+//     directives: {
+//       "script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
+//     },
+//   })
+// );
 
 // Apply rate limiter to all requests
 const limiter = RateLimit({
