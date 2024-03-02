@@ -113,21 +113,21 @@ app.use(compression());
 app.use(requestIp.mw());
 
 // securing the app with CSP policy
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      "script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
-    },
-  })
-);
+// app.use(
+//   helmet.contentSecurityPolicy({
+//     directives: {
+//       "script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
+//     },
+//   })
+// );
 
 // Apply rate limiter to all requests
-const limiter = RateLimit({
-  windowMs: 30 * 1000, // 30s
-  max: process.env.NODE_ENV === "production" ? 50 : 1000,
-});
+// const limiter = RateLimit({
+// windowMs: 30 * 1000, // 30s
+//   max: process.env.NODE_ENV === "production" ? 50 : 1000,
+// });
 
-app.use(limiter);
+//   app.use(limiter);
 
 // static files
 app.use("/static", express.static(path.join(__dirname, "public")));
