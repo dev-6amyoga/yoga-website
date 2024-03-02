@@ -28,6 +28,10 @@ const EmailVerification = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    err: {
+      type: DataTypes.STRING,
+      defaultValue: null,
+    },
     expiry_date: {
       type: DataTypes.DATE,
       allowNull: false,
