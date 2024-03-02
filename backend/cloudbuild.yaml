@@ -9,13 +9,14 @@ steps:
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
     args:
-      - "run"
-      - "deploy"
-      - "backend"
-      - "--image"
-      - "gcr.io/$PROJECT_ID/SERVICE-NAME:$COMMIT_SHA"
-      - "--region"
-      - "asia-southeast1"
+      [
+        "run",
+        "deploy",
+        "backend",
+        "--image",
+        "gcr.io/PROJECT_ID/backend:$COMMIT_SHA",
+        "--region",
+        "asia-southeast1",
+      ]
 images:
-  - "gcr.io/$PROJECT_ID/SERVICE-NAME:$COMMIT_SHA"ss
-
+  - gcr.io/$PROJECT_ID/backend:$COMMIT_SHA
