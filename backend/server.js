@@ -113,13 +113,13 @@ app.use(compression());
 app.use(requestIp.mw());
 
 // securing the app with CSP policy
-// app.use(
-//   helmet.contentSecurityPolicy({
-//     directives: {
-//       "script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
-//     },
-//   })
-// );
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      "script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
+    },
+  })
+);
 
 // Apply rate limiter to all requests
 const limiter = RateLimit({
