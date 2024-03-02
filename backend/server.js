@@ -65,14 +65,16 @@ const playlistConfigsRouter = require("./routes/PlaylistConfigs");
 const { bulkCreateSampleData } = require("./sample_data");
 // const helloWorld = require("./defer/helloWorld");
 
-const corsOptions = {
-  origin: "https://my-yogateacher.6amyoga.com",
-  credentials: true,
-  optionSuccessStatus: 200,
-};
+// const corsOptions = {
+//   origin: "https://my-yogateacher.6amyoga.com",
+//   credentials: true,
+//   optionSuccessStatus: 200,
+// };
 
-// middleware
-app.use(cors(corsOptions));
+// // middleware
+// app.use(cors(corsOptions));
+
+app.use(cors());
 
 // parse json body
 app.use(express.json());
