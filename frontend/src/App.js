@@ -1,6 +1,7 @@
 import { Button } from "@geist-ui/core";
 import React, { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getFrontendDomain } from "./utils/getFrontendDomain";
 
 function App() {
   const screen = useRef(null);
@@ -27,7 +28,7 @@ function App() {
     if (ctx) {
       const img = new Image();
       console.log("here");
-      img.src = `${process.env.FRONTEND_DOMAIN}/frames/Untitled00108000.jpg`;
+      img.src = `${getFrontendDomain()}/frames/Untitled00108000.jpg`;
       img.onload = () => {
         ctx.drawImage(
           img,
@@ -60,11 +61,11 @@ function App() {
     console.log(e.target.scrollTop);
     const img = new Image();
     console.log(
-      `${process.env.FRONTEND_DOMAIN}/frames/Untitled00108${String(
+      `${getFrontendDomain()}/frames/Untitled00108${String(
         Math.floor(e.target.scrollTop / 5)
       ).padStart(3, "0")}.jpg`
     );
-    img.src = `${process.env.FRONTEND_DOMAIN}/frames/Untitled00108${String(
+    img.src = `${getFrontendDomain()}/frames/Untitled00108${String(
       Math.floor(e.target.scrollTop / 5)
     ).padStart(3, "0")}.jpg`;
     img.onload = () => {

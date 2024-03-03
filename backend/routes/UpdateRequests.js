@@ -10,6 +10,7 @@ const { GetUser } = require("../services/User.service");
 const router = express.Router();
 const tokenUtils = require("../utils/invite_token");
 const { mailTransporter } = require("../init.nodemailer");
+const getFrontendDomain = require("../utils/getFrontendDomain");
 
 router.post("/register", async (req, res) => {
   const { user_id, username, name, old_email, new_email, phone, request_date } =
@@ -117,9 +118,11 @@ router.post("/approve", async (req, res) => {
         subject: "6AM Yoga | Email ID Update",
         html: `
     <p>Welcome to 6AM Yoga!</p>
-    <p>We received a request to update your Email ID from : ${updateRequest.old_email} to : ${updateRequest.new_email}.</p>
+    <p>We received a request to update your Email ID from : ${
+      updateRequest.old_email
+    } to : ${updateRequest.new_email}.</p>
     <p>To verify the authenticity of this request and update your Email ID, kindly click on the following link:</p>
-    <p><a href=\`${process.env.FRONTEND_DOMAIN}/auth/update-email?token=${token}\`>Verify Email</a></p>
+    <p><a href=\`${getFrontendDomain()}/auth/update-email?token=${token}\`>Verify Email</a></p>
     <p>If this was not you, kindly ignore the mail and contact 6AM Yoga at +91-9980802351</p>
   `,
       },

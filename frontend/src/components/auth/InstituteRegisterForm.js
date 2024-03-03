@@ -2,6 +2,7 @@ import { AutoComplete, Button, Input, Spacer } from "@geist-ui/core";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Fetch } from "../../utils/Fetch";
+import { getFrontendDomain } from "../../utils/getFrontendDomain";
 
 export default function InstituteRegisterForm({
   handleSubmit,
@@ -89,7 +90,7 @@ export default function InstituteRegisterForm({
 
   const getCountries = useCallback(() => {
     Fetch({
-      url: `${process.env.FRONTEND_DOMAIN}/countries.json`,
+      url: `${getFrontendDomain()}/countries.json`,
       method: "GET",
     })
       .then((res) => {
@@ -104,7 +105,7 @@ export default function InstituteRegisterForm({
 
   const getStates = useCallback((country) => {
     Fetch({
-      url: `${process.env.FRONTEND_DOMAIN}/countries/${country}.json`,
+      url: `${getFrontendDomain()}/countries/${country}.json`,
       method: "GET",
     })
       .then((res) => {
