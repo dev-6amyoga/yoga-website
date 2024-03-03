@@ -1,8 +1,8 @@
 FROM node:20
 
-WORKDIR ./backend
+WORKDIR /backend
 
-COPY ./package*.json ./
+COPY package*.json ./
 
 COPY ./*.js ./
 COPY ./*.json ./
