@@ -63,12 +63,13 @@ const playlistConfigsRouter = require("./routes/PlaylistConfigs");
 
 // DEV : sample data creation
 const { bulkCreateSampleData } = require("./sample_data");
+const getFrontendDomain = require("./utils/getFrontendDomain");
 // const helloWorld = require("./defer/helloWorld");
 
 const corsOptions = {
   origin: [
     "https://my-yogateacher.6amyoga.com",
-    `${process.env.FRONTEND_DOMAIN}`,
+    `${getFrontendDomain()}`,
     "https://www.my-yogateacher.6amyoga.com",
     "https://yoga-website-orcin.vercel.app",
   ],

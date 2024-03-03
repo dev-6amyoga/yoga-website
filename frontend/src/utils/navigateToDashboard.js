@@ -15,7 +15,7 @@ export const navigateToDashboard = (currentRole, userPlan, navigate) => {
       break;
     case "STUDENT":
       if (userPlan === null) {
-        navigate("/student/playlist-view");
+        navigate("/student/free-videos");
       } else {
         navigate("/student/playlist-view");
       }

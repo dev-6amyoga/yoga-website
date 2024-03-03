@@ -11,6 +11,7 @@ import { Fetch } from "../../../utils/Fetch";
 import { validateEmail, validatePhone } from "../../../utils/formValidation";
 import getFormData from "../../../utils/getFormData";
 import { withAuth } from "../../../utils/withAuth";
+import { getFrontendDomain } from "../../../utils/getFrontendDomain";
 
 function AddNewTeacher() {
   const [currentTeachersCount, setCurrentTeachersCount] = useState([]);
@@ -226,7 +227,7 @@ function AddNewTeacher() {
   const copyToClipboard = (token) => {
     try {
       navigator.clipboard.writeText(
-        `${process.env.FRONTEND_DOMAIN}/teacher/invite?token=${token}`
+        `${getFrontendDomain()}/teacher/invite?token=${token}`
       );
       toast("Copied to clipboard", {
         type: "success",

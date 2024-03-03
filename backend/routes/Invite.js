@@ -22,6 +22,7 @@ const {
 } = require("../models/sql/UserInstitutePlanRole");
 // const { Op } = require('sequelize');
 const bcrypyt = require("bcrypt");
+const getFrontendDomain = require("../utils/getFrontendDomain");
 
 const router = express.Router();
 
@@ -161,7 +162,7 @@ router.post("/create", async (req, res) => {
           from: "dev.6amyoga@gmail.com",
           to: email,
           subject: "6AM Yoga | Teacher Invite",
-          text: `Welcome to 6AM Yoga! Please click on the link to accept the invite: ${process.env.FRONTEND_DOMAIN}/teacher/invite?token=${token}`,
+          text: `Welcome to 6AM Yoga! Please click on the link to accept the invite: ${getFrontendDomain()}/teacher/invite?token=${token}`,
         },
         async (err, info) => {
           if (err) {
@@ -210,7 +211,7 @@ router.post("/create", async (req, res) => {
           from: "dev.6amyoga@gmail.com",
           to: email,
           subject: "6AM Yoga | Teacher Invite",
-          text: `Welcome to 6AM Yoga! Please click on the link to accept the invite: ${process.env.FRONTEND_DOMAIN}/teacher/invite?token=${token}`,
+          text: `Welcome to 6AM Yoga! Please click on the link to accept the invite: ${getFrontendDomain()}/teacher/invite?token=${token}`,
         },
         async (err, info) => {
           if (err) {

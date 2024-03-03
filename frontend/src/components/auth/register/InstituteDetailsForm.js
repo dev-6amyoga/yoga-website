@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
 import { validateEmail } from "../../../utils/formValidation";
 import getFormData from "../../../utils/getFormData";
+import { getFrontendDomain } from "../../../utils/getFrontendDomain";
 
 export default function InstituteDetailsForm({
   setInstituteInfo,
@@ -103,7 +104,7 @@ export default function InstituteDetailsForm({
 
   const getCountries = useCallback(() => {
     Fetch({
-      url: `${process.env.FRONTEND_DOMAIN}/countries.json`,
+      url: `${getFrontendDomain()}/countries.json`,
       method: "GET",
     })
       .then((res) => {
@@ -118,7 +119,7 @@ export default function InstituteDetailsForm({
 
   const getStates = useCallback((country) => {
     Fetch({
-      url: `${process.env.FRONTEND_DOMAIN}/countries/${country}.json`,
+      url: `${getFrontendDomain()}/countries/${country}.json`,
       method: "GET",
     })
       .then((res) => {

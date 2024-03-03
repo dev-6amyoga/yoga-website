@@ -5,6 +5,7 @@ import { Fetch } from "../../../utils/Fetch";
 import { validateEmail } from "../../../utils/formValidation";
 import getFormData from "../../../utils/getFormData";
 import PhoneNumberForm from "../../auth/register/PhoneNumberForm";
+import { getFrontendDomain } from "../../../utils/getFrontendDomain";
 
 export default function CreateInstituteForm({
   setInstituteInfo,
@@ -98,7 +99,7 @@ export default function CreateInstituteForm({
 
   const getCountries = useCallback(() => {
     Fetch({
-      url: `${process.env.FRONTEND_DOMAIN}/countries.json`,
+      url: `${getFrontendDomain()}/countries.json`,
       method: "GET",
     })
       .then((res) => {
@@ -113,7 +114,7 @@ export default function CreateInstituteForm({
 
   const getStates = useCallback((country) => {
     Fetch({
-      url: `${process.env.FRONTEND_DOMAIN}/countries/${country}.json`,
+      url: `${getFrontendDomain()}/countries/${country}.json`,
       method: "GET",
     })
       .then((res) => {
