@@ -1,10 +1,22 @@
 steps:
   # Build the container image
   - name: "gcr.io/cloud-builders/docker"
-    args: ["build", "-t", "gcr.io/am-yoga-website/github.com/dev-6amyoga/yoga-website:$COMMIT_SHA", "-f", "./Dockerfile" "."]
+    args:
+      [
+        "build",
+        "-t",
+        "gcr.io/am-yoga-website/github.com/dev-6amyoga/yoga-website:$COMMIT_SHA",
+        "-f",
+        "./Dockerfile",
+        ".",
+      ]
   # Push the container image to Container Registry
   - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "gcr.io/am-yoga-website/github.com/dev-6amyoga/yoga-website:$COMMIT_SHA"]
+    args:
+      [
+        "push",
+        "gcr.io/am-yoga-website/github.com/dev-6amyoga/yoga-website:$COMMIT_SHA",
+      ]
   # Deploy container image to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
