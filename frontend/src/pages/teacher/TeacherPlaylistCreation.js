@@ -196,19 +196,14 @@ export default function TeacherPlaylistCreation() {
       current_edit_count: 0,
     };
     incrementPlaylistField("current_count");
-    console.log(newRecord);
+
     try {
-      const response = await fetch(
-        "http://localhost:4000/teacher-playlist/add-playlist",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newRecord),
-        }
-      );
-      if (response.ok) {
+      const response = await Fetch({
+        url: "/teacher-playlist/add-playlist",
+        method: "POST",
+        data: newRecord,
+      });
+      if (response.status === 200) {
         // setMaxStudId((prevMaxStudId) => prevMaxStudId + 1);
         toast("Playlist added successfully");
         navigate("/teacher/playlist");

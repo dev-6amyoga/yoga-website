@@ -68,7 +68,7 @@ const { bulkCreateSampleData } = require("./sample_data");
 const corsOptions = {
   origin: [
     "https://my-yogateacher.6amyoga.com",
-    "http://localhost:3000",
+    `${process.env.FRONTEND_DOMAIN}`,
     "https://www.my-yogateacher.6amyoga.com",
     "https://yoga-website-orcin.vercel.app",
   ],

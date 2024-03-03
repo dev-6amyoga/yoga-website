@@ -57,7 +57,7 @@ function Playlist() {
 		console.log(user, "IS THE USER");
 		if (currentInstituteId) {
 			Fetch({
-				url: "http://localhost:4000/schedule/getSchedulesById",
+				url: "/schedule/getSchedulesById",
 				method: "POST",
 				data: {
 					user_id: user_id,
@@ -70,7 +70,7 @@ function Playlist() {
 					if (res.data.length > 0) {
 						setSchedulePresent(true);
 						Fetch({
-							url: "http://localhost:4000/schedule/getNextMonthSchedulesById",
+							url: "/schedule/getNextMonthSchedulesById",
 							method: "POST",
 							data: {
 								user_id: user_id,

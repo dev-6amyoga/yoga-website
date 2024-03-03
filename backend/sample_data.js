@@ -46,6 +46,8 @@ const roles = [
   },
 ];
 
+// roles we have yes?
+
 const users = [
   {
     username: "root",
@@ -293,40 +295,36 @@ const currency = [
 ];
 
 const plan_pricing = [
-  // monthly
-  // INR
   { plan_id: 1, currency_id: 1, denomination: 1999 },
   { plan_id: 2, currency_id: 1, denomination: 2999 },
   { plan_id: 3, currency_id: 1, denomination: 4999 },
   { plan_id: 4, currency_id: 1, denomination: 14999 },
   { plan_id: 5, currency_id: 1, denomination: 24999 },
-  // USD
+
   { plan_id: 1, currency_id: 2, denomination: 35 },
   { plan_id: 2, currency_id: 2, denomination: 55 },
   { plan_id: 3, currency_id: 2, denomination: 90 },
   { plan_id: 4, currency_id: 2, denomination: 270 },
   { plan_id: 5, currency_id: 2, denomination: 450 },
-  // EUR
+
   { plan_id: 1, currency_id: 3, denomination: 35 },
   { plan_id: 2, currency_id: 3, denomination: 55 },
   { plan_id: 3, currency_id: 3, denomination: 90 },
   { plan_id: 4, currency_id: 3, denomination: 270 },
   { plan_id: 5, currency_id: 3, denomination: 450 },
 
-  // quarterly
-  // INR
   { plan_id: 6, currency_id: 1, denomination: 4999 },
   { plan_id: 7, currency_id: 1, denomination: 6999 },
   { plan_id: 8, currency_id: 1, denomination: 12499 },
   { plan_id: 9, currency_id: 1, denomination: 34999 },
   { plan_id: 10, currency_id: 1, denomination: 64999 },
-  // USD
+
   { plan_id: 6, currency_id: 2, denomination: 90 },
   { plan_id: 7, currency_id: 2, denomination: 125 },
   { plan_id: 8, currency_id: 2, denomination: 225 },
   { plan_id: 9, currency_id: 2, denomination: 700 },
   { plan_id: 10, currency_id: 2, denomination: 1150 },
-  // EUR
+
   { plan_id: 6, currency_id: 3, denomination: 90 },
   { plan_id: 7, currency_id: 3, denomination: 125 },
   { plan_id: 8, currency_id: 3, denomination: 225 },
