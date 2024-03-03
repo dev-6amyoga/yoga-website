@@ -7,7 +7,7 @@ steps:
         "-t",
         "gcr.io/am-yoga-website/github.com/dev-6amyoga/yoga-website:$COMMIT_SHA",
         "-f",
-        "./Dockerfile",
+        "./backend/Dockerfile",
         ".",
       ]
   # Push the container image to Container Registry
