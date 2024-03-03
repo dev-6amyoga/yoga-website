@@ -2,19 +2,19 @@ FROM node:20
 
 WORKDIR /
 
-COPY ./backend/package*.json ./backend/
+COPY ./package*.json ./
 
-COPY ./backend/*.js ./backend/
-COPY ./backend/*.json ./backend/
-COPY ./backend/*.yaml ./backend/
+COPY ./*.js ./
+COPY ./*.json ./
+COPY ./*.yaml ./
 
-COPY ./backend/enums ./backend/enums
-COPY ./backend/invoice-templates ./backend/invoice-templates
-COPY ./backend/models ./backend/models
-COPY ./backend/routes ./backend/routes
-COPY ./backend/services ./backend/services
-COPY ./backend/utils ./backend/utils
-COPY ./backend/public ./backend/public
+COPY ./enums ./enums
+COPY ./invoice-templates ./invoice-templates
+COPY ./models ./models
+COPY ./routes ./routes
+COPY ./services ./services
+COPY ./utils ./utils
+COPY ./public ./public
 
 RUN npm install
 
