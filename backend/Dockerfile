@@ -16,6 +16,8 @@ COPY ./backend/services ./backend/services
 COPY ./backend/utils ./backend/utils
 COPY ./backend/public ./backend/public
 
+WORKDIR /backend
+
 RUN npm install
 
 EXPOSE 4000
