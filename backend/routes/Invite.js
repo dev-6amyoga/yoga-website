@@ -648,6 +648,7 @@ router.post("/create-email-verification", async (req, res) => {
       },
       async (err, info) => {
         const t = await sequelize.transaction();
+
         console.log("Email sending :", err, info);
         try {
           await EmailVerification.create(
