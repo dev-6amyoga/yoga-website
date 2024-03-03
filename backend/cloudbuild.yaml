@@ -1,7 +1,5 @@
 steps:
-  - name: "idk"
-    entrypoint: "cd"
-    args: ["./backend"]
+  WORKDIR "/backend"
   # Build the container image
   - name: "gcr.io/cloud-builders/docker"
     args:
