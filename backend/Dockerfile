@@ -4,7 +4,7 @@ WORKDIR /
 
 COPY ./backend/package*.json ./backend/
 
-COPY .backend/*.js ./backend/
+COPY ./backend/*.js ./backend/
 COPY ./backend/*.json ./backend/
 COPY ./backend/*.yaml ./backend/
 
