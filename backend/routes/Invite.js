@@ -643,8 +643,7 @@ router.post("/create-email-verification", async (req, res) => {
       {
         from: "dev.6amyoga@gmail.com",
         to: email,
-        subject: "6AM Yoga | Teacher Invite",
-        // text: "Welcome to 6AM Yoga!",
+        subject: "6AM Yoga | User Verification",
         text: `Welcome to 6AM Yoga! Please click on the link to verify your email: https://my-yogateacher.6amyoga.com/auth/verify-email?token=${token}`,
       },
       async (err, info) => {
