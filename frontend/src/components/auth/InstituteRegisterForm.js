@@ -89,7 +89,7 @@ export default function InstituteRegisterForm({
 
   const getCountries = useCallback(() => {
     Fetch({
-      url: "http://localhost:3000/countries.json",
+      url: `${process.env.FRONTEND_DOMAIN}/countries.json`,
       method: "GET",
     })
       .then((res) => {
@@ -104,7 +104,7 @@ export default function InstituteRegisterForm({
 
   const getStates = useCallback((country) => {
     Fetch({
-      url: `http://localhost:3000/countries/${country}.json`,
+      url: `${process.env.FRONTEND_DOMAIN}/countries/${country}.json`,
       method: "GET",
     })
       .then((res) => {

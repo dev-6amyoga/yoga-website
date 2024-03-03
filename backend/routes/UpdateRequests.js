@@ -119,7 +119,7 @@ router.post("/approve", async (req, res) => {
     <p>Welcome to 6AM Yoga!</p>
     <p>We received a request to update your Email ID from : ${updateRequest.old_email} to : ${updateRequest.new_email}.</p>
     <p>To verify the authenticity of this request and update your Email ID, kindly click on the following link:</p>
-    <p><a href="http://localhost:3000/auth/update-email?token=${token}">Verify Email</a></p>
+    <p><a href=\`${process.env.FRONTEND_DOMAIN}/auth/update-email?token=${token}\`>Verify Email</a></p>
     <p>If this was not you, kindly ignore the mail and contact 6AM Yoga at +91-9980802351</p>
   `,
       },

@@ -27,7 +27,7 @@ function App() {
     if (ctx) {
       const img = new Image();
       console.log("here");
-      img.src = `http://localhost:3000/frames/Untitled00108000.jpg`;
+      img.src = `${process.env.FRONTEND_DOMAIN}/frames/Untitled00108000.jpg`;
       img.onload = () => {
         ctx.drawImage(
           img,
@@ -60,11 +60,11 @@ function App() {
     console.log(e.target.scrollTop);
     const img = new Image();
     console.log(
-      `http://localhost:3000/frames/Untitled00108${String(
+      `${process.env.FRONTEND_DOMAIN}/frames/Untitled00108${String(
         Math.floor(e.target.scrollTop / 5)
       ).padStart(3, "0")}.jpg`
     );
-    img.src = `http://localhost:3000/frames/Untitled00108${String(
+    img.src = `${process.env.FRONTEND_DOMAIN}/frames/Untitled00108${String(
       Math.floor(e.target.scrollTop / 5)
     ).padStart(3, "0")}.jpg`;
     img.onload = () => {
@@ -85,7 +85,6 @@ function App() {
       onScroll={handleScroll}
     >
       <div className="h-[300vh] bg-transparent pointer-events-auto"></div>
-      {/* now right click on plan-purchase.html and start preview and then share that url with live share localhost:5050 or somethign */}
       <div className="h-[300vh] absolute top-0 w-full bg-black bg-opacity-10 z-[1000] pointer-events-auto">
         <div className="h-screen w-full relative">
           <div className="w-full flex items-center justify-center absolute bottom-0">
