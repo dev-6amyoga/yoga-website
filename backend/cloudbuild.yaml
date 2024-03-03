@@ -15,6 +15,7 @@ steps:
         "backend",
         "--image",
         "gcr.io/PROJECT_ID/backend:$COMMIT_SHA",
+        "--no-cache",
         "--region",
         "asia-southeast1",
       ]
