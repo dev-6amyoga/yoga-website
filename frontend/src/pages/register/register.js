@@ -448,7 +448,7 @@ export default function Register({ switchForm }) {
         />
         <Spacer y={4} />
         {RenderStep}
-        <div className="flex flex-row justify-between my-10">
+        <div className="flex flex-row justify-between my-10 sm:flex flex-col py-2 gap-y-2">
           {(role === "STUDENT" && step < maxSteps) ||
           (role === "INSTITUTE_OWNER" && step < maxSteps + 1) ? (
             <Button
@@ -456,9 +456,9 @@ export default function Register({ switchForm }) {
               loading={loading}
               width={step === 1 ? "100%" : null}
               iconRight={<ArrowRight />}
-              //   disabled={
-              //     loading || blockStep || blockPhoneStep || blockBusinessPhoneStep
-              //   }
+              disabled={
+                loading || blockStep || blockPhoneStep || blockBusinessPhoneStep
+              }
             >
               Next
             </Button>
