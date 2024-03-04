@@ -683,7 +683,7 @@ router.post("/create-email-verification", async (req, res) => {
 
 router.post("/get-email-verification-by-token", async (req, res) => {
   const { token } = req.body;
-  console.log(token);
+  console.log(token, "WAS OBTAINED");
   if (!token) {
     return res.status(HTTP_BAD_REQUEST).json({
       message: "Missing required fields",
@@ -691,10 +691,12 @@ router.post("/get-email-verification-by-token", async (req, res) => {
   }
 
   try {
+    const allInvites = await EmailVerification.findAll();
+    console.log("All Invites are : ", allInvites);
     const invite = await EmailVerification.findOne({
       where: { token },
     });
-
+    console.log(invite, "IS THE RETRIEVED RECORD");
     if (!invite) {
       return res.status(HTTP_BAD_REQUEST).json({
         message: "Invalid token",
