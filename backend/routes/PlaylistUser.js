@@ -27,7 +27,7 @@ router.post("/addUserPlaylist", async (req, res) => {
     const requestData = req.body;
     const newUserPlaylist = new PlaylistUser(requestData);
     const savedUserPlaylist = await newUserPlaylist.save();
-    res.status(201).json(savedUserPlaylist);
+    res.status(20).json(savedUserPlaylist);
   } catch (error) {
     console.error("Error saving new Playlist:", error);
     res.status(HTTP_INTERNAL_SERVER_ERROR).json({
