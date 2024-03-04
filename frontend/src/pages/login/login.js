@@ -249,13 +249,15 @@ export default function Login({ switchForm }) {
             </Button>
           </form>
           <p>{"( or )"}</p>
-          <div className="flex flex-row	">
+          <div className="flex flex-col md:flex-row">
             <LoginGoogle />
-            &nbsp; &nbsp;
-            <Button width="50%" onClick={phoneSignInFunction}>
-              Login with Phone Number
-            </Button>
+            <div className="mt-2 md:mt-0 md:ml-2 md:bg-transparent">
+              <Button className="w-full md:w-1/2" onClick={phoneSignInFunction}>
+                Login with Phone Number
+              </Button>
+            </div>
           </div>
+
           <br />
           <h5 onClick={() => switchForm((s) => !s)} className="hover:pointer">
             Dont have an account?{" "}
