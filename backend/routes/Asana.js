@@ -237,7 +237,7 @@ router.post("/language/addLanguage", async (req, res) => {
     requestData.language_id = newLangID;
     const newLanguage = new Language(requestData);
     const savedLanguage = await newLanguage.save();
-    res.status(201).json(savedLanguage);
+    res.status(200).json(savedLanguage);
   } catch (err) {
     console.error("Error saving new Language:", error);
     res.status(HTTP_INTERNAL_SERVER_ERROR).json({
@@ -288,7 +288,7 @@ router.post("/asana/addAsanaCategory", async (req, res) => {
     requestData.asana_category_id = newId;
     const new1 = new AsanaCategory(requestData);
     const saved = await new1.save();
-    res.status(201).json(saved);
+    res.status(200).json(saved);
   } catch (err) {
     console.error("Error saving new Asana Category:", error);
     res.status(HTTP_INTERNAL_SERVER_ERROR).json({

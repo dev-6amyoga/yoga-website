@@ -63,7 +63,6 @@ export default function LoginGoogle() {
   }
 
   useEffect(() => {
-    console.log(loginStatus, type);
     if (loginStatus === "Login successful" && type === "student") {
       navigate("/student/free-videos");
     } else if (loginStatus === "Login successful" && type === "root") {
