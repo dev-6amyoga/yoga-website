@@ -192,9 +192,7 @@ export default function Register({ switchForm }) {
     Fetch({
       url: "/invite/get-email-verification-by-token",
       method: "POST",
-      data: {
-        token: token,
-      },
+      data: token,
     }).then(async (res) => {
       if (res.status === 200) {
         const invite = res.data.invite;

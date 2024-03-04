@@ -682,7 +682,7 @@ router.post("/create-email-verification", async (req, res) => {
 
 router.post("/get-email-verification-by-token", async (req, res) => {
   const { token } = req.body;
-
+  console.log(token);
   if (!token) {
     return res.status(HTTP_BAD_REQUEST).json({
       message: "Missing required fields",
