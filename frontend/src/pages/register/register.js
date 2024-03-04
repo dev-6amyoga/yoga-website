@@ -32,6 +32,7 @@ export default function Register({ switchForm }) {
   const [disclaimerAcceptedVar, setDisclaimerAcceptedVar] = useState(false);
   const [blockBusinessPhoneStep, setBlockBusinessPhoneStep] = useState(false);
   const [token, setToken] = useState("");
+  const [regVerifyDisabled, setRegVerifyDisabled] = useState(false);
   const [role, setRole] = useState("STUDENT"); // STUDENT | INSTITUTE_OWNER
   const [regMode, setRegMode] = useState("NORMAL"); // NORMAL | GOOGLE
 
@@ -239,8 +240,6 @@ export default function Register({ switchForm }) {
 
   const sendEmail = async () => {
     toast("Sending email!");
-    console.log(generalInfo);
-    console.log(generalInfo.email_id, generalInfo.name);
     Fetch({
       url: "/invite/create-email-verification",
       method: "POST",
@@ -249,6 +248,7 @@ export default function Register({ switchForm }) {
       .then((res) => {
         toast("Email sent successfully", { type: "success" });
         setToken(res.data.token);
+        setRegVerifyDisabled(true);
       })
       .catch((err) => {
         console.log(err);
@@ -326,9 +326,8 @@ export default function Register({ switchForm }) {
             </p>
             <p>
               Please{" "}
-              <Button onClick={sendEmail}>
+              <Button onClick={sendEmail} disabled={regVerifyDisabled}>
                 Verify
-                {/* <b className="text-blue-400">verify</b> */}
               </Button>{" "}
               <br />
               your email to be able to access your account!
@@ -472,6 +471,7 @@ export default function Register({ switchForm }) {
                   handleInstituteRegistration();
                 }
               }}
+              disabled={!regVerifyDisabled}
             >
               Register
             </Button>
