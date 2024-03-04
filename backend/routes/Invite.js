@@ -696,7 +696,6 @@ router.post("/get-email-verification-by-token", async (req, res) => {
     const invite = await EmailVerification.findOne({
       where: { token },
     });
-    console.log(invite, "IS THE RETRIEVED RECORD");
     if (!invite) {
       return res.status(HTTP_BAD_REQUEST).json({
         message: "Invalid token",
