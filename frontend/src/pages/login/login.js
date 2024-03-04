@@ -121,33 +121,22 @@ export default function Login({ switchForm }) {
         method: "POST",
         data: formData,
       });
-
       if (response && response?.status === 200) {
         const userData = response.data;
-        console.log(userData);
+        console.log(userData, "IS USER DATA!!");
         setUser(userData.user);
-
         setAccessToken(userData?.accessToken);
         setRefreshToken(userData?.refreshToken);
-
         setRoles(userData?.user?.roles);
-
-        // use first role as current role
         const currRole = Object.keys(userData?.user?.roles)[0];
-
         const currPlan = userData?.user?.roles[currRole][0]?.plan;
         setUserPlan(currPlan);
-
         console.log(userData?.user?.roles[currRole]);
         const ins = userData?.user?.roles[currRole].map((r) => r?.institute);
-
         setInstitutes(ins);
-
         setCurrentInstituteId(ins[0]?.institute_id);
-
         sessionStorage.setItem("6amyoga_access_token", userData?.accessToken);
         sessionStorage.setItem("6amyoga_refresh_token", userData?.refreshToken);
-
         setCurrentRole(currRole);
       } else {
         const errorData = response.data;
@@ -165,6 +154,13 @@ export default function Login({ switchForm }) {
       toast("Error logging in, try again", { type: "error" });
     }
   };
+
+  useEffect(() => {
+    console.log("in navigate use effect");
+    if (user && currentRole) {
+      navigateToDashboard(currentRole, userPlan, navigate);
+    }
+  }, [user, currentRole, navigate, userPlan]);
 
   const handleForgotPassword = () => {
     setMainVisible(false);
