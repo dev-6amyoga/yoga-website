@@ -1,9 +1,9 @@
-import { CssBaseline, GeistProvider } from "@geist-ui/core";
+import { CssBaseline, GeistProvider, Themes, useTheme } from "@geist-ui/core";
 import {
-	QueryClient,
-	QueryClientProvider,
-	useQuery,
-	useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 import { useCallback } from "react";
 import ReactDOM from "react-dom/client";
@@ -27,97 +27,91 @@ import { Fetch } from "./utils/Fetch";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 const router = createBrowserRouter([
-	...GeneralRoutes,
-	...AuthRoutes,
-	...AdminRoutes,
-	...InstituteRoutes,
-	...StudentRoutes,
-	...TeacherRoutes,
-	...TestingRoutes,
+  ...GeneralRoutes,
+  ...AuthRoutes,
+  ...AdminRoutes,
+  ...InstituteRoutes,
+  ...StudentRoutes,
+  ...TeacherRoutes,
+  ...TestingRoutes,
 ]);
 
 function LoginIndex() {
-	// const [cookies, setCookie, removeCookie] = useCookies([
-	// 	"6amyoga_access_token",
-	// 	"6amyoga_refresh_token",
-	// ]);
-	const queryClient = useQueryClient();
+  // const [cookies, setCookie, removeCookie] = useCookies([
+  // 	"6amyoga_access_token",
+  // 	"6amyoga_refresh_token",
+  // ]);
+  const queryClient = useQueryClient();
 
-	const [
-		user,
-		setUser,
-		userPlan,
-		setUserPlan,
-		accessToken,
-		setAccessToken,
-		refreshToken,
-		setRefreshToken,
-		currentInstituteId,
-		setCurrentInstituteId,
-		setInstitutes,
-		currentRole,
-		setCurrentRole,
-		setRoles,
-		resetUserState,
-	] = useUserStore(
-		useShallow((state) => [
-			state.user,
-			state.setUser,
-			state.userPlan,
-			state.setUserPlan,
-			state.accessToken,
-			state.setAccessToken,
-			state.refreshToken,
-			state.setRefreshToken,
-			state.currentInstituteId,
-			state.setCurrentInstituteId,
-			state.setInstitutes,
-			state.currentRole,
-			state.setCurrentRole,
-			state.setRoles,
-			state.resetUserState,
-		])
-	);
+  const [
+    user,
+    setUser,
+    userPlan,
+    setUserPlan,
+    accessToken,
+    setAccessToken,
+    refreshToken,
+    setRefreshToken,
+    currentInstituteId,
+    setCurrentInstituteId,
+    setInstitutes,
+    currentRole,
+    setCurrentRole,
+    setRoles,
+    resetUserState,
+  ] = useUserStore(
+    useShallow((state) => [
+      state.user,
+      state.setUser,
+      state.userPlan,
+      state.setUserPlan,
+      state.accessToken,
+      state.setAccessToken,
+      state.refreshToken,
+      state.setRefreshToken,
+      state.currentInstituteId,
+      state.setCurrentInstituteId,
+      state.setInstitutes,
+      state.currentRole,
+      state.setCurrentRole,
+      state.setRoles,
+      state.resetUserState,
+    ])
+  );
 
-	const init = useCallback(() => {
-		console.log("INITTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
-		const access_token =
-			sessionStorage.getItem("6amyoga_access_token") || accessToken;
-		const refresh_token =
-			sessionStorage.getItem("6amyoga_refresh_token") || refreshToken;
+  const init = useCallback(() => {
+    console.log("INITTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
+    const access_token =
+      sessionStorage.getItem("6amyoga_access_token") || accessToken;
+    const refresh_token =
+      sessionStorage.getItem("6amyoga_refresh_token") || refreshToken;
 
-		console.log({ access_token, refresh_token });
+    console.log({ access_token, refresh_token });
 
-		if (access_token && refresh_token) {
-			console.log("INIT : Verifying tokens");
-			Fetch({
-				url: "/auth/verify-tokens",
-				method: "POST",
-				data: {
-					access_token: access_token,
-					refresh_token: refresh_token,
-				},
-			})
-				.then((res) => {
-					if (
-						res.status === 200 &&
-						res?.data?.message === "Token verified"
-					) {
-						console.log("INIT : Tokens verified, getting user");
-						Fetch({
-							url: "/user/get-by-token",
-							method: "POST",
-							data: {
-								access_token: access_token,
-							},
-						})
-							.then((res) => {
-								if (res.status === 200) {
-									console.log(
-										"INIT : User data received",
-										res.data
-									);
-									/*
+    if (access_token && refresh_token) {
+      console.log("INIT : Verifying tokens");
+      Fetch({
+        url: "/auth/verify-tokens",
+        method: "POST",
+        data: {
+          access_token: access_token,
+          refresh_token: refresh_token,
+        },
+      })
+        .then((res) => {
+          if (res.status === 200 && res?.data?.message === "Token verified") {
+            console.log("INIT : Tokens verified, getting user");
+            Fetch({
+              url: "/user/get-by-token",
+              method: "POST",
+              data: {
+                access_token: access_token,
+              },
+            })
+              .then((res) => {
+                if (res.status === 200) {
+                  console.log("INIT : User data received", res.data);
+                  /*
                                     {
                                         user: {
                                             "user_id": INT,
@@ -152,236 +146,209 @@ function LoginIndex() {
                                         }
                                     }
                                     */
-									const userData = res.data?.user;
-									setUser(userData);
+                  const userData = res.data?.user;
+                  setUser(userData);
 
-									// tokens
-									setAccessToken(access_token);
-									setRefreshToken(refresh_token);
+                  // tokens
+                  setAccessToken(access_token);
+                  setRefreshToken(refresh_token);
 
-									// set all roles
-									setRoles(userData?.roles);
+                  // set all roles
+                  setRoles(userData?.roles);
 
-									// set current role
-									let currRole = currentRole;
-									console.log(
-										"INIT : CURRENT ROLE: ",
-										currRole
-									);
-									// if current role is available, dont change it
-									if (
-										currRole === null ||
-										userData?.roles === null ||
-										userData?.roles === undefined ||
-										!userData?.roles[currRole]
-									) {
-										currRole = Object.keys(
-											userData?.roles
-										)[0];
+                  // set current role
+                  let currRole = currentRole;
+                  console.log("INIT : CURRENT ROLE: ", currRole);
+                  // if current role is available, dont change it
+                  if (
+                    currRole === null ||
+                    userData?.roles === null ||
+                    userData?.roles === undefined ||
+                    !userData?.roles[currRole]
+                  ) {
+                    currRole = Object.keys(userData?.roles)[0];
 
-										console.log(
-											"INIT : no curr role, settting role to ",
-											currRole
-										);
+                    console.log(
+                      "INIT : no curr role, settting role to ",
+                      currRole
+                    );
 
-										setCurrentRole(currRole);
-									}
+                    setCurrentRole(currRole);
+                  }
 
-									// the plan of the current role
+                  // the plan of the current role
 
-									if (
-										currRole !== null &&
-										userData?.roles[currRole] &&
-										userData?.roles[currRole].length > 0
-									) {
-										const currPlan =
-											userData?.roles[currRole][0]?.plan;
-										setUserPlan(currPlan);
-									}
+                  if (
+                    currRole !== null &&
+                    userData?.roles[currRole] &&
+                    userData?.roles[currRole].length > 0
+                  ) {
+                    const currPlan = userData?.roles[currRole][0]?.plan;
+                    setUserPlan(currPlan);
+                  }
 
-									// set all institutes
-									if (
-										currRole !== null &&
-										userData?.roles &&
-										userData?.roles[currRole]
-									) {
-										const ins = userData?.roles[
-											currRole
-										]?.map((r) => r?.institute);
-										setInstitutes(ins);
+                  // set all institutes
+                  if (
+                    currRole !== null &&
+                    userData?.roles &&
+                    userData?.roles[currRole]
+                  ) {
+                    const ins = userData?.roles[currRole]?.map(
+                      (r) => r?.institute
+                    );
+                    setInstitutes(ins);
 
-										console.log(
-											"INIT : CURRENT INST ID: ",
-											currentInstituteId
-										);
+                    console.log("INIT : CURRENT INST ID: ", currentInstituteId);
 
-										// if current institute is available, dont change it
-										if (
-											currentInstituteId !== null &&
-											ins.findIndex(
-												(i) =>
-													i.institute_id ===
-													currentInstituteId
-											) !== -1
-										) {
-										} else {
-											console.log("INIT : ", {
-												currentInstituteId:
-													ins[0]?.institute_id,
-											});
-											setCurrentInstituteId(
-												ins[0]?.institute_id
-											);
-										}
-									}
+                    // if current institute is available, dont change it
+                    if (
+                      currentInstituteId !== null &&
+                      ins.findIndex(
+                        (i) => i.institute_id === currentInstituteId
+                      ) !== -1
+                    ) {
+                    } else {
+                      console.log("INIT : ", {
+                        currentInstituteId: ins[0]?.institute_id,
+                      });
+                      setCurrentInstituteId(ins[0]?.institute_id);
+                    }
+                  }
 
-									sessionStorage.setItem(
-										"6amyoga_access_token",
-										access_token
-									);
-									sessionStorage.setItem(
-										"6amyoga_refresh_token",
-										refresh_token
-									);
-								}
-							})
-							.catch((err) => {
-								console.log(err);
-							});
-					}
-				})
-				.catch((err) => {
-					const errMsg = err?.response?.data?.message;
-					console.log({ verifyError: errMsg });
-					switch (errMsg) {
-						case "Access token expired":
-							Fetch({
-								url: "/auth/refresh-token",
-								method: "POST",
-								data: {
-									refresh_token: refresh_token,
-								},
-							})
-								.then((res) => {
-									if (res.status === 200) {
-										console.log(
-											"new access token ==> ",
-											res.data.accessToken
-										);
-										setAccessToken(res.data.accessToken);
-										setRefreshToken(refresh_token);
-										sessionStorage.setItem(
-											"6amyoga_access_token",
-											res.data.accessToken
-										);
-										sessionStorage.setItem(
-											"6amyoga_refresh_token",
-											refresh_token
-										);
-										queryClient.invalidateQueries(["user"]);
-									}
-								})
-								.catch((err) => {
-									console.log(err);
-									setAccessToken(null);
-									setRefreshToken(null);
-									sessionStorage.removeItem(
-										"6amyoga_access_token"
-									);
-									sessionStorage.removeItem(
-										"6amyoga_refresh_token"
-									);
-								});
-							break;
-						// refresh token expired
-						// let them login again
-						case "Refresh token expired":
-							setAccessToken(null);
-							setRefreshToken(null);
-							sessionStorage.removeItem("6amyoga_access_token");
-							sessionStorage.removeItem("6amyoga_refresh_token");
-							resetUserState();
-							break;
-						// invalid response, let it go
-						default:
-							setAccessToken(null);
-							setRefreshToken(null);
-							// removeCookie("6amyoga_access_token", {
-							// 	domain: "localhost",
-							// 	path: "/",
-							// });
-							// removeCookie("6amyoga_refresh_token", {
-							// 	domain: "localhost",
-							// 	path: "/",
-							// });
-							sessionStorage.removeItem("6amyoga_access_token");
-							sessionStorage.removeItem("6amyoga_refresh_token");
-							break;
-					}
-				});
-		} else {
-			sessionStorage.setItem("6amyoga_access_token", "");
-			sessionStorage.setItem("6amyoga_refresh_token", "");
-		}
-		return null;
-	}, [
-		setUser,
-		queryClient,
-		accessToken,
-		refreshToken,
-		setAccessToken,
-		setRefreshToken,
-		setCurrentInstituteId,
-		setInstitutes,
-		setCurrentRole,
-		setRoles,
-		setUserPlan,
-	]);
+                  sessionStorage.setItem("6amyoga_access_token", access_token);
+                  sessionStorage.setItem(
+                    "6amyoga_refresh_token",
+                    refresh_token
+                  );
+                }
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }
+        })
+        .catch((err) => {
+          const errMsg = err?.response?.data?.message;
+          console.log({ verifyError: errMsg });
+          switch (errMsg) {
+            case "Access token expired":
+              Fetch({
+                url: "/auth/refresh-token",
+                method: "POST",
+                data: {
+                  refresh_token: refresh_token,
+                },
+              })
+                .then((res) => {
+                  if (res.status === 200) {
+                    console.log("new access token ==> ", res.data.accessToken);
+                    setAccessToken(res.data.accessToken);
+                    setRefreshToken(refresh_token);
+                    sessionStorage.setItem(
+                      "6amyoga_access_token",
+                      res.data.accessToken
+                    );
+                    sessionStorage.setItem(
+                      "6amyoga_refresh_token",
+                      refresh_token
+                    );
+                    queryClient.invalidateQueries(["user"]);
+                  }
+                })
+                .catch((err) => {
+                  console.log(err);
+                  setAccessToken(null);
+                  setRefreshToken(null);
+                  sessionStorage.removeItem("6amyoga_access_token");
+                  sessionStorage.removeItem("6amyoga_refresh_token");
+                });
+              break;
+            // refresh token expired
+            // let them login again
+            case "Refresh token expired":
+              setAccessToken(null);
+              setRefreshToken(null);
+              sessionStorage.removeItem("6amyoga_access_token");
+              sessionStorage.removeItem("6amyoga_refresh_token");
+              resetUserState();
+              break;
+            // invalid response, let it go
+            default:
+              setAccessToken(null);
+              setRefreshToken(null);
+              // removeCookie("6amyoga_access_token", {
+              // 	domain: "localhost",
+              // 	path: "/",
+              // });
+              // removeCookie("6amyoga_refresh_token", {
+              // 	domain: "localhost",
+              // 	path: "/",
+              // });
+              sessionStorage.removeItem("6amyoga_access_token");
+              sessionStorage.removeItem("6amyoga_refresh_token");
+              break;
+          }
+        });
+    } else {
+      sessionStorage.setItem("6amyoga_access_token", "");
+      sessionStorage.setItem("6amyoga_refresh_token", "");
+    }
+    return null;
+  }, [
+    setUser,
+    queryClient,
+    accessToken,
+    refreshToken,
+    setAccessToken,
+    setRefreshToken,
+    setCurrentInstituteId,
+    setInstitutes,
+    setCurrentRole,
+    setRoles,
+    setUserPlan,
+  ]);
 
-	// refetch every 1 minute
-	useQuery({
-		queryKey: ["user"],
-		queryFn: init,
-		refetchOnMount: "always",
-		refetchOnWindowFocus: "always",
-		refetchOnReconnect: "always",
-		refetchInterval: 1000 * 60 * 2,
-	});
+  // refetch every 1 minute
+  useQuery({
+    queryKey: ["user"],
+    queryFn: init,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
+    refetchOnReconnect: "always",
+    refetchInterval: 1000 * 60 * 2,
+  });
 
-	return <></>;
+  return <></>;
 }
 
 function Index() {
-	// const theme = Themes.createFromLight({
-	// 	type: "customLight",
-	// 	palette: {
-	// 		success: "linear-gradient(#e66465, #9198e5);",
-	// 	},
-	// });
+  const queryClient = new QueryClient();
 
-	// useEffect(() => {
-	// 	document.addEventListener("keydown", (e) => {
-	// 		e.preventDefault();
-	// 		console.log(e);
-	// 	});
-	// }, []);
-	const queryClient = new QueryClient();
-	return (
-		<>
-			<QueryClientProvider client={queryClient}>
-				<GeistProvider>
-					<CssBaseline />
-					<RouterProvider router={router} />
-					<ToastContainer
-						autoClose={5000}
-						newestOnTop={true}
-						pauseOnHover={true}
-					/>
-					<LoginIndex />
-				</GeistProvider>
-			</QueryClientProvider>
-		</>
-	);
+  //   const themes = Themes.create({
+  //     palette: {
+  // 		success: "#ff0000",
+  // 		warning: ""
+  // 	},
+  //   });
+
+  //   const theme = useTheme();
+
+  return (
+    <>
+      <QueryClientProvider client={queryClient}>
+        <GeistProvider>
+          <CssBaseline />
+          <RouterProvider router={router} />
+          <ToastContainer
+            autoClose={5000}
+            newestOnTop={true}
+            pauseOnHover={true}
+          />
+          <LoginIndex />
+        </GeistProvider>
+      </QueryClientProvider>
+    </>
+  );
 }
 
 // TODO : do we put back React.StrictMode

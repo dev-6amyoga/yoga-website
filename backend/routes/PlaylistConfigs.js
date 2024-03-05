@@ -19,8 +19,9 @@ router.post("/addConfig", async (req, res) => {
     if (maxIdPlaylist === null) {
       newPlaylistId = 1;
     } else {
-      newPlaylistId = maxIdPlaylist.playlist_id + 1;
+      newPlaylistId = maxIdPlaylist.playlist_config_id + 1;
     }
+    console.log(maxIdPlaylist);
     requestData.playlist_config_id = newPlaylistId;
     const newPlaylist = new PlaylistConfigs(requestData);
     const savedPlaylist = await newPlaylist.save();
