@@ -80,16 +80,11 @@ function LoginIndex() {
   );
 
   const init = useCallback(() => {
-    console.log("INITTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
     const access_token =
       sessionStorage.getItem("6amyoga_access_token") || accessToken;
     const refresh_token =
       sessionStorage.getItem("6amyoga_refresh_token") || refreshToken;
-
-    console.log({ access_token, refresh_token });
-
     if (access_token && refresh_token) {
-      console.log("INIT : Verifying tokens");
       Fetch({
         url: "/auth/verify-tokens",
         method: "POST",
@@ -100,7 +95,6 @@ function LoginIndex() {
       })
         .then((res) => {
           if (res.status === 200 && res?.data?.message === "Token verified") {
-            console.log("INIT : Tokens verified, getting user");
             Fetch({
               url: "/user/get-by-token",
               method: "POST",
@@ -110,42 +104,6 @@ function LoginIndex() {
             })
               .then((res) => {
                 if (res.status === 200) {
-                  console.log("INIT : User data received", res.data);
-                  /*
-                                    {
-                                        user: {
-                                            "user_id": INT,
-                                            "name": STRING,
-                                            "email": STRING,
-                                            "phone": STRING,
-                                            "roles": {
-                                                <ROLE TYPE>: [
-                                                    {
-                                                        user_institute_plan_role_id
-                                                        created
-                                                        updated
-                                                        deletedAt
-                                                        user_id
-                                                        role_id
-                                                        institute_id
-                                                        user_plan_id
-                                                        institute: {
-                                                            institute_id
-                                                            name
-                                                        }
-                                                        user_plan: {
-                                                            user_plan_id
-                                                            plan_id
-                                                            plan
-                                                        }
-                                                        role: {}
-                                                        plan: {}
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    }
-                                    */
                   const userData = res.data?.user;
                   setUser(userData);
 
@@ -158,7 +116,6 @@ function LoginIndex() {
 
                   // set current role
                   let currRole = currentRole;
-                  console.log("INIT : CURRENT ROLE: ", currRole);
                   // if current role is available, dont change it
                   if (
                     currRole === null ||
@@ -167,12 +124,6 @@ function LoginIndex() {
                     !userData?.roles[currRole]
                   ) {
                     currRole = Object.keys(userData?.roles)[0];
-
-                    console.log(
-                      "INIT : no curr role, settting role to ",
-                      currRole
-                    );
-
                     setCurrentRole(currRole);
                   }
 
@@ -197,9 +148,6 @@ function LoginIndex() {
                       (r) => r?.institute
                     );
                     setInstitutes(ins);
-
-                    console.log("INIT : CURRENT INST ID: ", currentInstituteId);
-
                     // if current institute is available, dont change it
                     if (
                       currentInstituteId !== null &&
@@ -208,9 +156,6 @@ function LoginIndex() {
                       ) !== -1
                     ) {
                     } else {
-                      console.log("INIT : ", {
-                        currentInstituteId: ins[0]?.institute_id,
-                      });
                       setCurrentInstituteId(ins[0]?.institute_id);
                     }
                   }
@@ -229,7 +174,6 @@ function LoginIndex() {
         })
         .catch((err) => {
           const errMsg = err?.response?.data?.message;
-          console.log({ verifyError: errMsg });
           switch (errMsg) {
             case "Access token expired":
               Fetch({
@@ -241,7 +185,6 @@ function LoginIndex() {
               })
                 .then((res) => {
                   if (res.status === 200) {
-                    console.log("new access token ==> ", res.data.accessToken);
                     setAccessToken(res.data.accessToken);
                     setRefreshToken(refresh_token);
                     sessionStorage.setItem(
