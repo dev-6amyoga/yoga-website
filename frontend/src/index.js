@@ -23,17 +23,40 @@ import { TeacherRoutes } from "./routes/TeacherRoutes";
 import { TestingRoutes } from "./routes/TestingRoutes";
 import useUserStore from "./store/UserStore";
 import { Fetch } from "./utils/Fetch";
+import { AnimatePresence, motion } from "framer-motion";
+import { Outlet, useLocation } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
+const Root = () => {
+  const location = useLocation();
+  // <AnimatePresence mode="wait">
+  //   <motion.div
+  //     key={location.pathname}
+  //     initial={{ opacity: 0 }}
+  //     animate={{ opacity: 1, transition: { duration: 0.3 } }}
+  //     exit={{ opacity: 0, transition: { duration: 0.3 } }}
+  //   >
+
+  //   </motion.div>
+  // </AnimatePresence>
+  return <Outlet />;
+};
+
 const router = createBrowserRouter([
-  ...GeneralRoutes,
-  ...AuthRoutes,
-  ...AdminRoutes,
-  ...InstituteRoutes,
-  ...StudentRoutes,
-  ...TeacherRoutes,
-  ...TestingRoutes,
+  {
+    path: "/",
+    element: <Root />,
+    children: [
+      ...GeneralRoutes,
+      ...AuthRoutes,
+      ...AdminRoutes,
+      ...InstituteRoutes,
+      ...StudentRoutes,
+      ...TeacherRoutes,
+      ...TestingRoutes,
+    ],
+  },
 ]);
 
 function LoginIndex() {
