@@ -98,9 +98,11 @@ export default function GeneralNavbar() {
     if (contentVisible) {
       setTimeout(() => {
         setContentVisible((p) => !p);
-      }, 300);
+      }, 400);
     } else {
-      setContentVisible((p) => !p);
+      setTimeout(() => {
+        setContentVisible((p) => !p);
+      }, 400);
     }
   };
 
@@ -171,11 +173,14 @@ export default function GeneralNavbar() {
         </div>
       </div>
       <div
-        className={`h-full bg-gray-400 bg-opacity-30 fixed top-0 z-50 text-white text-2xl ${open ? "w-full" : "w-0"} pointer-events transition-all duration-500`}
+        className={`h-full bg-grey-900 bg-opacity-60 backdrop-blur-sm fixed top-0 z-50 text-white text-2xl ${open ? "w-full" : "w-0"} pointer-events transition-all duration-500`}
       >
         <div
-          className={`${open ? "opacity-100" : "opacity-0"} delay-100 transition-all ${contentVisible ? "block" : "hidden"}`}
+          className={`${open ? "opacity-100" : "opacity-0"} delay-100 duration-100 transition-all ${contentVisible ? "block" : "hidden"}`}
         >
+          <div className="flex flex-col space-around items-center border">
+            <NavLinks />
+          </div>
           <div className="w-full flex items-center justify-center absolute bottom-0">
             <Button onClick={() => navigate("/auth")}>Enter</Button>
           </div>
