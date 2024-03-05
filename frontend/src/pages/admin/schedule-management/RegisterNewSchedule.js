@@ -63,13 +63,12 @@ function RegisterNewSchedule() {
           method: "GET",
         });
         const data = response.data;
-        console.log("obtained : ", data);
         const flattenedStudents = data.users.map((student) => ({
           user_id: student.user_id,
-          username: student.user.username,
-          name: student.user.name,
-          email: student.user.email,
-          phone: student.user.phone,
+          username: student.username,
+          name: student.name,
+          email: student.email,
+          phone: student.phone,
         }));
         setAllStudents(flattenedStudents);
       } catch (err) {
@@ -100,6 +99,7 @@ function RegisterNewSchedule() {
     };
     fetchData();
   }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -108,7 +108,7 @@ function RegisterNewSchedule() {
           method: "GET",
         });
         const data = response.data;
-        const flattenedStudents = data.users.map((teacher) => ({
+        const flattenedStudents = data.userInstituteData.map((teacher) => ({
           owner: teacher.user?.name,
           institute: teacher.institute?.name,
           institute_id: teacher.institute?.institute_id,
@@ -251,7 +251,6 @@ function RegisterNewSchedule() {
       }
     });
     to_be_inserted["applicable_ids"] = applicableUsers;
-    console.log(to_be_inserted);
 
     try {
       const response = await Fetch({

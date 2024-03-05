@@ -200,8 +200,6 @@ router.post("/get-by-instituteid", async (req, res) => {
         mapToModel: true,
       }
     );
-    console.log(users, "ARE USERS");
-
     return res.status(HTTP_OK).json({ users });
   } catch (error) {
     console.error(error);
@@ -278,7 +276,6 @@ router.post("/get-by-planid", async (req, res) => {
 
 router.post("/update-profile", async (req, res) => {
   const { user_id, name, email, phone } = req.body;
-  console.log(req.body);
   if (!user_id) {
     return res
       .status(HTTP_BAD_REQUEST)
@@ -449,20 +446,16 @@ router.get("/get-all-teachers", async (req, res) => {
 
 router.get("/get-all-institutes", async (req, res) => {
   try {
-    const users = await UserInstitutePlanRole.findAll({
+    const userInstituteData = await UserInstitutePlanRole.findAll({
       where: { role_id: 2 },
       include: [{ model: User }, { model: Institute }],
     });
-    if (!users) {
+    if (!userInstituteData) {
       return res
         .status(HTTP_BAD_REQUEST)
         .json({ error: "Institutes dont exist" });
     }
-
-    let userData = users.map((u) => {
-      return u.user;
-    });
-    return res.status(HTTP_OK).json({ users: userData });
+    return res.status(HTTP_OK).json({ userInstituteData });
   } catch (error) {
     console.error(error);
     return res
@@ -497,7 +490,6 @@ router.get("/get-all-students", async (req, res) => {
 
 router.post("/reset-password", async (req, res) => {
   const { user_id, new_password, confirm_new_password } = req.body;
-  console.log(req.body);
   if (!user_id || !new_password || !confirm_new_password) {
     return res
       .status(HTTP_BAD_REQUEST)
@@ -508,7 +500,6 @@ router.post("/reset-password", async (req, res) => {
       .status(HTTP_BAD_REQUEST)
       .json({ error: "Passwords do not match" });
   }
-  console.log("hi");
   try {
     const user = await User.findByPk(user_id);
 
@@ -517,7 +508,6 @@ router.post("/reset-password", async (req, res) => {
         .status(HTTP_BAD_REQUEST)
         .json({ error: "User does not exist" });
     }
-    console.log(new_password, user.password);
     const samePasswords = await bcrypyt.compare(new_password, user.password);
     if (samePasswords) {
       return res
@@ -611,7 +601,6 @@ router.post("/check-username", async (req, res) => {
 
 router.post("/update-email", async (req, res) => {
   const { user_id, email } = req.body;
-  console.log(user_id, email);
   if (!user_id || !email) {
     return res
       .status(HTTP_BAD_REQUEST)
