@@ -8,64 +8,65 @@ import { Fetch } from "../../utils/Fetch";
 import "./MovingText.css";
 
 function StudentHome() {
-	const [position, setPosition] = useState(0);
+  const [position, setPosition] = useState(0);
 
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setPosition((prevPosition) => (prevPosition + 1) % 100);
-		}, 100);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPosition((prevPosition) => (prevPosition + 1) % 100);
+    }, 100);
 
-		return () => clearInterval(interval);
-	}, []);
+    return () => clearInterval(interval);
+  }, []);
 
-	let user = useUserStore((state) => state.user);
-	const [userPlan, setUserPlan] = useState({});
-	const [planId, setPlanId] = useState(0);
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const response = await Fetch({
-					url: "/user-plan/get-user-plan-by-id",
-					method: "POST",
-					data: { user_id: user.user_id },
-				});
-				const data = response.data;
-				setUserPlan(data["userPlan"]);
-				setPlanId(data["userPlan"]["plan_id"]);
-			} catch (error) {
-				console.log(error);
-			}
-		};
-		if (user) {
-			fetchData();
-		}
-	}, [user]);
+  let user = useUserStore((state) => state.user);
+  const [userPlan, setUserPlan] = useState({});
+  const [planId, setPlanId] = useState(0);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await Fetch({
+          url: "/user-plan/get-user-plan-by-id",
+          method: "POST",
+          data: { user_id: user.user_id },
+        });
+        const data = response.data;
+        setUserPlan(data["userPlan"]);
+        setPlanId(data["userPlan"]["plan_id"]);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
 
-	return (
-		<div className="flex-col justify-center">
-			<StudentNavbar />
-			{/* <div>Welcome {user.name}!</div> */}
-			<br />
-			<br />
-			<div className="moving-text-bar">
-				<div
-					className="moving-text"
-					style={{ transform: `translateX(${position}%)` }}>
-					This video is for personal self-practice only and not to be
-					used by teachers for taking classes. Any unauthorized use
-					may kindly be notified to : +91-9980802351
-				</div>
-			</div>
+  return (
+    <div className="flex-col justify-center">
+      <StudentNavbar />
+      {/* <div>Welcome {user.name}!</div> */}
+      <br />
+      <br />
+      <div className="moving-text-bar py-2">
+        <div
+          className="moving-text"
+          style={{ transform: `translateX(${position + 5}%)` }}
+        >
+          This video is for personal self-practice only and not to be used by
+          teachers for taking classes. Any unauthorized use may kindly be
+          notified to : +91-9980802351
+        </div>
+      </div>
 
-			<div className="mx-auto max-w-7xl">
-				<div className="my-10">
-					<VideoPlayerWrapper />
-					<hr />
-					<Playlist />
-				</div>
-			</div>
-		</div>
-	);
+      <div className="mx-auto max-w-7xl">
+        <div className="my-10">
+          <VideoPlayerWrapper />
+          <hr />
+          <Playlist />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default StudentHome;
