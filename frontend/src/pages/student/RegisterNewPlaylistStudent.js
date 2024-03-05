@@ -14,6 +14,8 @@ import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
 import { transitionGenerator } from "../../components/transition-generator/TransitionGenerator";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
+import { MonthlyPlaylistChecker } from "../../utils/MonthlyPlaylistChecker";
+
 export default function RegisterNewPlaylistStudent() {
   const navigate = useNavigate();
   let user = useUserStore((state) => state.user);
@@ -21,6 +23,9 @@ export default function RegisterNewPlaylistStudent() {
   const [playlist_temp, setPlaylistTemp] = useState([]);
   const [modalState, setModalState] = useState(false);
   const [transitions, setTransitions] = useState([]);
+  const [playlistDurationLimit, setPlaylistDurationLimit] = useState(0);
+  const [playlistEditLimit, setPlaylistEditLimit] = useState(0);
+  const [monthlyPlaylistLimit, setMonthlyPlaylistLimit] = useState(0);
   const [modalData, setModalData] = useState({
     rowData: {
       asana_name: "",
@@ -38,7 +43,34 @@ export default function RegisterNewPlaylistStudent() {
     "Prone",
     "Pranayama",
   ];
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await Fetch({
+  //         url: "/playlist-configs/getAllConfigs",
+  //       });
+  //       const data = response.data;
+  //       for (var i = 0; i < data.length; i++) {
+  //         if (data[i].playlist_config_name === "PLAYLIST_EDIT_LIMIT") {
+  //           setPlaylistEditLimit(data[i].playlist_config_value);
+  //         }
+  //         if (data[i].playlist_config_name === "MONTHLY_PLAYLIST_LIMIT") {
+  //           setMonthlyPlaylistLimit(data[i].playlist_config_value);
+  //         }
+  //         if (data[i].playlist_config_name === "PLAYLIST_DURATION") {
+  //           setPlaylistDurationLimit(data[i].playlist_config_value);
+  //         }
+  //       }
+  //     } catch (error) {
+  //       toast(error);
+  //     }
+  //   };
+  //   fetchData();
+  // }, []);
+
   const [sortedAsanas, setSortedAsanas] = useState([]);
+
   useEffect(() => {
     const s1 = asanas.sort((a, b) => {
       return (
@@ -73,7 +105,13 @@ export default function RegisterNewPlaylistStudent() {
           method: "GET",
         });
         const data = response.data;
-
+        console.log("PLAYLISTS RN ARE : ", data);
+        const current_count = data.length;
+        if (current_count == monthlyPlaylistLimit) {
+          toast(
+            "You cannot make any more playlists this month. You have reached your maximum allowed playlists for this month."
+          );
+        }
         setUserPlaylists(data);
       } catch (error) {
         toast(error);
@@ -81,6 +119,13 @@ export default function RegisterNewPlaylistStudent() {
     };
     if (user) {
       fetchData();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      const x = MonthlyPlaylistChecker(user?.user_id);
+      console.log(x);
     }
   }, [user]);
 

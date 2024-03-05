@@ -1,10 +1,17 @@
 import GeneralNavbar from "./GeneralNavbar/GeneralNavbar";
 
-export default function PageWrapper({ children }) {
-	return (
-		<div className="min-h-screen">
-			<GeneralNavbar />
-			<div>{children}</div>
-		</div>
-	);
+export default function PageWrapper({ heading, children }) {
+  return (
+    <>
+      <GeneralNavbar />
+      <div className="">
+        {heading ? (
+          <h1 className="pt-4 font-bold text-center">{heading}</h1>
+        ) : (
+          <></>
+        )}
+        <div className="">{children}</div>
+      </div>
+    </>
+  );
 }
