@@ -108,37 +108,23 @@ export default function GeneralNavbar() {
 
   const NavLinks = () => {
     return (
-      <>
+      <div className="flex flex-col py-20 items-center gap-8 hover:gap-12 justify-items-center font-mono text-5xl">
         <Link to="/" className="text-white">
-          Home
+          HOME
         </Link>
         <Link to="/about-us" className="text-white">
-          About
+          ABOUT
         </Link>
         <Link to="/pricing" className="text-white">
-          Plans & Pricing
+          PLANS & PRICING
         </Link>
         <Link to="/contact-us" className="text-white">
-          Contact
+          CONTACT
         </Link>
-        <Button
-          auto
-          onClick={() => {
-            navigate("/auth", { state: { login: true } });
-          }}
-        >
-          Login
-        </Button>
-        <Button
-          auto
-          type="success"
-          onClick={() => {
-            navigate("/auth", { state: { login: false } });
-          }}
-        >
-          Register Now!
-        </Button>
-      </>
+        <Link to="/auth" className="text-white">
+          LOGIN/REGISTER
+        </Link>
+      </div>
     );
   };
   return (
@@ -178,11 +164,8 @@ export default function GeneralNavbar() {
         <div
           className={`${open ? "opacity-100" : "opacity-0"} delay-100 duration-100 transition-all ${contentVisible ? "block" : "hidden"}`}
         >
-          <div className="flex flex-col space-around items-center border">
+          <div className="flex flex-col space-around items-center">
             <NavLinks />
-          </div>
-          <div className="w-full flex items-center justify-center absolute bottom-0">
-            <Button onClick={() => navigate("/auth")}>Enter</Button>
           </div>
         </div>
       </div>
