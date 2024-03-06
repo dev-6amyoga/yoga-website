@@ -125,28 +125,15 @@ function App() {
                 ? "/frontpage_video_mobile.mp4"
                 : "/frontpage_video.mp4"
             }
-            // src={"/frontpage_video.mp4"}
             autoPlay
             loop
             muted
             className="w-full h-full object-cover"
           />
         </div>
-
-        {/* <div className="w-full flex items-center justify-center absolute bottom-0">
-          <Button onClick={() => navigate("/auth")}>Enter</Button>
-        </div> */}
         <div className="absolute z-20 h-full w-full text-white pl-16">
           <div className="h-screen w-full text-2xl">screen 1</div>
-          <div
-            className="h-screen w-full text-2xl"
-            // ref={screen2Ref}
-            // style={{
-            //   backgroundColor: isScreen2InView ? "red" : "blue",
-            // }}
-          >
-            screen 2
-          </div>
+          <div className="h-screen w-full text-2xl">screen 2</div>
         </div>
       </div>
     </PageWrapper>
