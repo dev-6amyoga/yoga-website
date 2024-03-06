@@ -3,6 +3,7 @@ import { Menu, X } from "@geist-ui/icons";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaGripLines, FaX } from "react-icons/fa6";
+import { FaBars } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -108,7 +109,7 @@ export default function GeneralNavbar() {
 
   const NavLinks = () => {
     return (
-      <div className="flex flex-col py-20 items-center gap-8 hover:gap-12 justify-items-center font-mono text-5xl">
+      <div className="flex flex-col py-20 items-center gap-8 hover:gap-12 justify-items-center font-mono text-5xl md : py-10 my-10 px-10 text-xl">
         <Link to="/" className="text-white hover:text-black">
           HOME
         </Link>
@@ -150,7 +151,7 @@ export default function GeneralNavbar() {
                     animate={{ x: 0, opacity: 1 }}
                     exit={{ x: 10, opacity: 0 }}
                   >
-                    <FaGripLines className="w-full h-full" />
+                    <FaBars className="w-full h-full" />
                   </motion.div>
                 )}
               </AnimatePresence>
