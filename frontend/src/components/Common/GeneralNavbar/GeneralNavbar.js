@@ -109,19 +109,19 @@ export default function GeneralNavbar() {
   const NavLinks = () => {
     return (
       <div className="flex flex-col py-20 items-center gap-8 hover:gap-12 justify-items-center font-mono text-5xl">
-        <Link to="/" className="text-white">
+        <Link to="/" className="text-white hover:text-black">
           HOME
         </Link>
-        <Link to="/about-us" className="text-white">
+        <Link to="/about-us" className="text-white hover:text-black">
           ABOUT
         </Link>
-        <Link to="/pricing" className="text-white">
+        <Link to="/pricing" className="text-white hover:text-black">
           PLANS & PRICING
         </Link>
-        <Link to="/contact-us" className="text-white">
+        <Link to="/contact-us" className="text-white hover:text-black">
           CONTACT
         </Link>
-        <Link to="/auth" className="text-white">
+        <Link to="/auth" className="text-white hover:text-black">
           LOGIN/REGISTER
         </Link>
       </div>
