@@ -6,6 +6,7 @@ import {
   Input,
   Modal,
   Table,
+  Text,
 } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -23,9 +24,51 @@ export default function RegisterNewPlaylistStudent() {
   const [playlist_temp, setPlaylistTemp] = useState([]);
   const [modalState, setModalState] = useState(false);
   const [transitions, setTransitions] = useState([]);
+  const [totalDuration, setTotalDuration] = useState(0);
   const [playlistDurationLimit, setPlaylistDurationLimit] = useState(0);
   const [playlistEditLimit, setPlaylistEditLimit] = useState(0);
   const [monthlyPlaylistLimit, setMonthlyPlaylistLimit] = useState(0);
+  const [durationToggle, setDurationToggle] = useState(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data } = await Fetch({
+          url: "/playlist-configs/getAllConfigs",
+        });
+        const maxPlaylistDuration = data.find(
+          (config) => config.playlist_config_name === "PLAYLIST_DURATION"
+        );
+        const playlistEditCount = data.find(
+          (config) => config.playlist_config_name === "PLAYLIST_EDIT_LIMIT"
+        );
+        setPlaylistDurationLimit(maxPlaylistDuration.playlist_config_value);
+        setPlaylistEditLimit(playlistEditCount);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const newTotalDuration = playlist_temp.reduce(
+      (sum, asana) => sum + (asana.rowData.duration || 0) * asana.count,
+      0
+    );
+    setTotalDuration(newTotalDuration);
+  }, [playlist_temp, playlist_temp.map((asana) => asana.count)]);
+
+  useEffect(() => {
+    const totalDurationInHours = parseFloat((totalDuration / 60).toFixed(2));
+    console.log(totalDurationInHours, playlistDurationLimit);
+    if (totalDurationInHours > playlistDurationLimit) {
+      toast("The maximum duration of the playlist is 80 minutes!");
+      setDurationToggle(true);
+    } else {
+      setDurationToggle(false);
+    }
+  }, [totalDuration, playlistDurationLimit]);
+
   const [modalData, setModalData] = useState({
     rowData: {
       asana_name: "",
@@ -105,8 +148,7 @@ export default function RegisterNewPlaylistStudent() {
           method: "GET",
         });
         const data = response.data;
-        console.log("PLAYLISTS RN ARE : ", data);
-        const current_count = data.length;
+        const current_count = data?.length;
         if (current_count == monthlyPlaylistLimit) {
           toast(
             "You cannot make any more playlists this month. You have reached your maximum allowed playlists for this month."
@@ -123,10 +165,20 @@ export default function RegisterNewPlaylistStudent() {
   }, [user]);
 
   useEffect(() => {
-    if (user) {
-      const x = MonthlyPlaylistChecker(user?.user_id);
-      console.log(x);
-    }
+    const fetchData = async () => {
+      if (user) {
+        try {
+          const x = await MonthlyPlaylistChecker(user?.user_id, "STUDENT");
+          if (x === -1) {
+            toast("You cannot make any more playlists this month!");
+          }
+        } catch (error) {
+          console.error("Error in MonthlyPlaylistChecker:", error);
+        }
+      }
+    };
+
+    fetchData();
   }, [user]);
 
   useEffect(() => {
@@ -266,12 +318,15 @@ export default function RegisterNewPlaylistStudent() {
   };
 
   const addToPlaylist = (rowData, inputId, index) => {
+    console.log(rowData, inputId);
     const countInput = document.getElementById(inputId);
     const countValue = countInput ? countInput.value : "";
     const count = countValue === "" ? 1 : parseInt(countValue, 10);
     if (!isNaN(count)) {
+      console.log("in here !");
       if (playlist_temp.length === 0) {
         const x = transitionGenerator("start", rowData, transitions);
+        console.log("this is ", x);
         if (x.length !== 0) {
           setPlaylistTemp((prev) => [
             ...prev,
@@ -315,15 +370,17 @@ export default function RegisterNewPlaylistStudent() {
         playlist_sequence["asana_ids"].push(asana_id_playlist);
       }
     });
+    playlist_sequence["duration"] = totalDuration;
     const newId =
       "S_" + String(user?.user_id) + "_" + String(userPlaylists.length + 1);
     const newRecord = {
       playlist_id: newId,
       playlist_user_id: user?.user_id,
       playlist_name: playlist_sequence["playlist_name"],
-      max_edit_count: 2,
+      max_edit_count: playlistEditLimit,
       current_edit_count: 0,
       asana_ids: playlist_sequence["asana_ids"],
+      duration: playlist_sequence["duration"],
     };
     console.log(newRecord);
     try {
@@ -466,7 +523,13 @@ export default function RegisterNewPlaylistStudent() {
               <Input width="100%" id="playlist_name">
                 Playlist Name
               </Input>
-              <Button htmlType="submit">Submit</Button>
+              <Text>
+                Playlist Duration : {(totalDuration / 60).toFixed(2)} minutes
+              </Text>
+
+              <Button htmlType="submit" disabled={durationToggle}>
+                Submit
+              </Button>
             </form>
           </Card>
         )}

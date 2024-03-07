@@ -50,6 +50,24 @@ export default function ViewAllPlaylists() {
   });
   let user = useUserStore((state) => state.user);
   const [userPlaylists, setUserPlaylists] = useState([]);
+  const [playlistEditLimit, setPlaylistEditLimit] = useState(0);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data } = await Fetch({
+          url: "/playlist-configs/getAllConfigs",
+        });
+        const playlistEditCount = data.find(
+          (config) => config.playlist_config_name === "PLAYLIST_EDIT_LIMIT"
+        );
+        console.log(playlistEditCount);
+        setPlaylistEditLimit(playlistEditCount);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, []);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -97,8 +115,14 @@ export default function ViewAllPlaylists() {
       setModalState(true);
     };
     const disabledUpdate =
-      rowData.current_edit_count === rowData.max_edit_count ? true : false;
-    const tooltipText = `You have ${rowData.max_edit_count - rowData.current_edit_count} edits remaining`;
+      rowData.current_edit_count === playlistEditLimit.playlist_config_value
+        ? true
+        : false;
+    console.log(
+      playlistEditLimit.playlist_config_value,
+      rowData.current_edit_count
+    );
+    const tooltipText = `You have ${playlistEditLimit.playlist_config_value - rowData.current_edit_count} edits remaining`;
 
     return (
       <Grid.Container gap={0.1}>

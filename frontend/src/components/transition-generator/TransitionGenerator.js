@@ -53,6 +53,7 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
     });
     return matchingTransition1;
   };
+  console.log(startVideo, endVideo);
   if (startVideo === "start") {
     if (endVideo.asana_category === "Standing") {
       if (endVideo.nobreak_asana === true) {

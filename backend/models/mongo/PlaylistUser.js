@@ -6,6 +6,7 @@ const PlaylistSchemaUser = new mongoose.Schema({
   playlist_name: String,
   max_edit_count: Number,
   current_edit_count: Number,
+  duration: Number,
   asana_ids: [mongoose.Schema.Types.Mixed],
 });
 
