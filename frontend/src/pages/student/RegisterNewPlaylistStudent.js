@@ -24,11 +24,13 @@ export default function RegisterNewPlaylistStudent() {
   const [playlist_temp, setPlaylistTemp] = useState([]);
   const [modalState, setModalState] = useState(false);
   const [transitions, setTransitions] = useState([]);
+  const [monthlyLimitUnattained, setMonthlyLimitUnattained] = useState(true);
   const [totalDuration, setTotalDuration] = useState(0);
   const [playlistDurationLimit, setPlaylistDurationLimit] = useState(0);
   const [playlistEditLimit, setPlaylistEditLimit] = useState(0);
   const [monthlyPlaylistLimit, setMonthlyPlaylistLimit] = useState(0);
   const [durationToggle, setDurationToggle] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -42,7 +44,7 @@ export default function RegisterNewPlaylistStudent() {
           (config) => config.playlist_config_name === "PLAYLIST_EDIT_LIMIT"
         );
         setPlaylistDurationLimit(maxPlaylistDuration.playlist_config_value);
-        setPlaylistEditLimit(playlistEditCount);
+        setPlaylistEditLimit(playlistEditCount.playlist_config_value);
       } catch (err) {
         console.log(err);
       }
@@ -87,31 +89,6 @@ export default function RegisterNewPlaylistStudent() {
     "Pranayama",
   ];
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await Fetch({
-  //         url: "/playlist-configs/getAllConfigs",
-  //       });
-  //       const data = response.data;
-  //       for (var i = 0; i < data.length; i++) {
-  //         if (data[i].playlist_config_name === "PLAYLIST_EDIT_LIMIT") {
-  //           setPlaylistEditLimit(data[i].playlist_config_value);
-  //         }
-  //         if (data[i].playlist_config_name === "MONTHLY_PLAYLIST_LIMIT") {
-  //           setMonthlyPlaylistLimit(data[i].playlist_config_value);
-  //         }
-  //         if (data[i].playlist_config_name === "PLAYLIST_DURATION") {
-  //           setPlaylistDurationLimit(data[i].playlist_config_value);
-  //         }
-  //       }
-  //     } catch (error) {
-  //       toast(error);
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
-
   const [sortedAsanas, setSortedAsanas] = useState([]);
 
   useEffect(() => {
@@ -148,11 +125,24 @@ export default function RegisterNewPlaylistStudent() {
           method: "GET",
         });
         const data = response.data;
+        const { data1 } = await Fetch({
+          url: "/playlist-configs/getAllConfigs",
+        });
+        const monthlyLimit = data1.find(
+          (config) => config.playlist_config_name === "MONTHLY_PLAYLIST_LIMIT"
+        );
+        setMonthlyPlaylistLimit(monthlyLimit.playlist_config_value);
         const current_count = data?.length;
-        if (current_count == monthlyPlaylistLimit) {
+        console.log(
+          current_count,
+          monthlyLimit.playlist_config_value,
+          "ahahahahha"
+        );
+        if (current_count >= monthlyLimit.playlist_config_value) {
           toast(
             "You cannot make any more playlists this month. You have reached your maximum allowed playlists for this month."
           );
+          setMonthlyLimitUnattained(false);
         }
         setUserPlaylists(data);
       } catch (error) {
@@ -440,100 +430,113 @@ export default function RegisterNewPlaylistStudent() {
   return (
     <div className="flex-col justify-center">
       <StudentNavbar />
-      <div className="flex justify-center my-10 gap-8">
-        <div className="flex flex-col items-center justify-center my-10 gap-1">
-          {filteredAsanasByCategory.map((categoryData, index) => (
-            <Card key={index} shadow width="100%">
-              <Card.Content>
-                <h6>{categoryData.category}</h6>
-                <Table data={categoryData.asanas} className="bg-white">
-                  <Table.Column prop="asana_name" label="Asana Name" />
-                  <Table.Column
-                    prop="language"
-                    label="Language"
-                    render={(data) => {
-                      if (data === "") {
-                        return "No Audio";
-                      }
-                      return data.language;
-                    }}
-                  />
+      {monthlyLimitUnattained && (
+        <div className="flex justify-center my-10 gap-8">
+          <div className="flex flex-col items-center justify-center my-10 gap-1">
+            {filteredAsanasByCategory.map((categoryData, index) => (
+              <Card key={index} shadow width="100%">
+                <Card.Content>
+                  <h6>{categoryData.category}</h6>
+                  <Table data={categoryData.asanas} className="bg-white">
+                    <Table.Column prop="asana_name" label="Asana Name" />
+                    <Table.Column
+                      prop="language"
+                      label="Language"
+                      render={(data) => {
+                        if (data === "") {
+                          return "No Audio";
+                        }
+                        return data.language;
+                      }}
+                    />
 
-                  <Table.Column prop="asana_category" label="Category" />
-                  <Table.Column
-                    prop="in_playlist"
-                    label="Add To Playlist"
-                    width={150}
-                    render={renderAction2}
-                  />
-                </Table>
-              </Card.Content>
+                    <Table.Column prop="asana_category" label="Category" />
+                    <Table.Column
+                      prop="in_playlist"
+                      label="Add To Playlist"
+                      width={150}
+                      render={renderAction2}
+                    />
+                  </Table>
+                </Card.Content>
+              </Card>
+            ))}
+          </div>
+          {playlist_temp.length > 0 && (
+            <Card height="50%">
+              <Table width={40} data={playlist_temp} className="bg-dark ">
+                <Table.Column
+                  prop="rowData.asana_name"
+                  label="Asana Name"
+                  render={(_, rowData) => {
+                    return (
+                      <p>
+                        {rowData.rowData.asana_name
+                          ? rowData.rowData.asana_name
+                          : rowData.rowData.transition_video_name}
+                      </p>
+                    );
+                  }}
+                />
+                <Table.Column
+                  prop="rowData.asana_category"
+                  label="Category"
+                  render={(_, rowData) => {
+                    return <p>{rowData.rowData.asana_category}</p>;
+                  }}
+                />
+                <Table.Column
+                  prop="rowData.language"
+                  label="Language"
+                  render={(_, rowData) => {
+                    return <p>{rowData.rowData.language}</p>;
+                  }}
+                />
+                <Table.Column prop="count" label="Count" />
+                <Table.Column
+                  prop="operations"
+                  label="ACTIONS"
+                  width={150}
+                  render={(value, rowData) => {
+                    if (rowData.rowData?.asana_name) {
+                      return renderAction(value, rowData);
+                    } else {
+                      return null;
+                    }
+                  }}
+                />
+              </Table>
+              <Divider />
+              <form
+                className="flex-col items-center justify-center space-y-10 my-10"
+                onSubmit={handleSubmit}
+              >
+                <Input width="100%" id="playlist_name">
+                  Playlist Name
+                </Input>
+                <Text>
+                  Playlist Duration : {(totalDuration / 60).toFixed(2)} minutes
+                </Text>
+
+                <Button htmlType="submit" disabled={durationToggle}>
+                  Submit
+                </Button>
+              </form>
             </Card>
-          ))}
+          )}
         </div>
-        {playlist_temp.length > 0 && (
-          <Card height="50%">
-            <Table width={40} data={playlist_temp} className="bg-dark ">
-              <Table.Column
-                prop="rowData.asana_name"
-                label="Asana Name"
-                render={(_, rowData) => {
-                  return (
-                    <p>
-                      {rowData.rowData.asana_name
-                        ? rowData.rowData.asana_name
-                        : rowData.rowData.transition_video_name}
-                    </p>
-                  );
-                }}
-              />
-              <Table.Column
-                prop="rowData.asana_category"
-                label="Category"
-                render={(_, rowData) => {
-                  return <p>{rowData.rowData.asana_category}</p>;
-                }}
-              />
-              <Table.Column
-                prop="rowData.language"
-                label="Language"
-                render={(_, rowData) => {
-                  return <p>{rowData.rowData.language}</p>;
-                }}
-              />
-              <Table.Column prop="count" label="Count" />
-              <Table.Column
-                prop="operations"
-                label="ACTIONS"
-                width={150}
-                render={(value, rowData) => {
-                  if (rowData.rowData?.asana_name) {
-                    return renderAction(value, rowData);
-                  } else {
-                    return null;
-                  }
-                }}
-              />
-            </Table>
-            <Divider />
-            <form
-              className="flex-col items-center justify-center space-y-10 my-10"
-              onSubmit={handleSubmit}
-            >
-              <Input width="100%" id="playlist_name">
-                Playlist Name
-              </Input>
-              <Text>
-                Playlist Duration : {(totalDuration / 60).toFixed(2)} minutes
-              </Text>
+      )}
 
-              <Button htmlType="submit" disabled={durationToggle}>
-                Submit
-              </Button>
-            </form>
-          </Card>
-        )}
-      </div>
+      {!monthlyLimitUnattained && (
+        <Card>
+          <Card.Content>
+            <h3 className="text-center">Update Email ID</h3>
+          </Card.Content>
+          {/* You cannot make any more playlists this month. Please head over to "All
+        Playlists" to manage them. */}
+        </Card>
+      )}
+
       <div>
         <Modal visible={modalState} onClose={() => setModalState(false)}>
           <Modal.Title>Update</Modal.Title>

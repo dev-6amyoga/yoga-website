@@ -61,7 +61,7 @@ export default function ViewAllPlaylists() {
           (config) => config.playlist_config_name === "PLAYLIST_EDIT_LIMIT"
         );
         console.log(playlistEditCount);
-        setPlaylistEditLimit(playlistEditCount);
+        setPlaylistEditLimit(playlistEditCount.playlist_config_value);
       } catch (err) {
         console.log(err);
       }
@@ -115,14 +115,8 @@ export default function ViewAllPlaylists() {
       setModalState(true);
     };
     const disabledUpdate =
-      rowData.current_edit_count === playlistEditLimit.playlist_config_value
-        ? true
-        : false;
-    console.log(
-      playlistEditLimit.playlist_config_value,
-      rowData.current_edit_count
-    );
-    const tooltipText = `You have ${playlistEditLimit.playlist_config_value - rowData.current_edit_count} edits remaining`;
+      rowData.current_edit_count === playlistEditLimit ? true : false;
+    const tooltipText = `You have ${playlistEditLimit - rowData.current_edit_count} edits remaining`;
 
     return (
       <Grid.Container gap={0.1}>
