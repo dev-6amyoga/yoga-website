@@ -1,11 +1,8 @@
-import { Button, Drawer } from "@geist-ui/core";
-import { Menu, X } from "@geist-ui/icons";
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { FaGripLines, FaX } from "react-icons/fa6";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
 import { FaBars } from "react-icons/fa6";
 import { RxCross1 } from "react-icons/rx";
-import { AnimatePresence, motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
 
 // export default function GeneralNavbar() {
 //   const navigate = useNavigate();
@@ -90,86 +87,92 @@ import { AnimatePresence, motion } from "framer-motion";
 // }
 
 export default function GeneralNavbar() {
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [contentVisible, setContentVisible] = useState(false);
-  const handleNavbarToggle = () => {
-    setOpen((p) => !p);
+	const navigate = useNavigate();
+	const [open, setOpen] = useState(false);
+	const [contentVisible, setContentVisible] = useState(false);
+	const handleNavbarToggle = () => {
+		setOpen((p) => !p);
 
-    if (contentVisible) {
-      setTimeout(() => {
-        setContentVisible((p) => !p);
-      }, 400);
-    } else {
-      setTimeout(() => {
-        setContentVisible((p) => !p);
-      }, 400);
-    }
-  };
+		if (contentVisible) {
+			setTimeout(() => {
+				setContentVisible((p) => !p);
+			}, 400);
+		} else {
+			setTimeout(() => {
+				setContentVisible((p) => !p);
+			}, 400);
+		}
+	};
 
-  const NavLinks = () => {
-    return (
-      <div className="flex flex-col py-20 items-center gap-8 hover:gap-12 justify-items-center font-mono text-5xl md : py-10 my-10 px-10 text-xl">
-        <Link to="/" className="text-white hover:text-black">
-          HOME
-        </Link>
-        <Link to="/about-us" className="text-white hover:text-black">
-          ABOUT
-        </Link>
-        <Link to="/pricing" className="text-white hover:text-black">
-          PLANS & PRICING
-        </Link>
-        <Link to="/contact-us" className="text-white hover:text-black">
-          CONTACT
-        </Link>
-        <Link to="/auth" className="text-white hover:text-black">
-          LOGIN/REGISTER
-        </Link>
-      </div>
-    );
-  };
-  return (
-    <div className="w-full h-screen">
-      <div className="fixed top-0 z-[100]">
-        <div className="min-h-screen w-12">
-          <div className="h-screen flex items-center justify-center pointer-events">
-            <div className="w-7 h-7 text-white" onClick={handleNavbarToggle}>
-              <AnimatePresence mode="wait">
-                {open ? (
-                  <motion.div
-                    key="open"
-                    initial={{ x: -10, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: 10, opacity: 0 }}
-                  >
-                    <RxCross1 className="w-full h-full" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="close"
-                    initial={{ x: -10, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: 10, opacity: 0 }}
-                  >
-                    <FaBars className="w-full h-full" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className={`h-full bg-grey-900 bg-opacity-60 backdrop-blur-sm fixed top-0 z-50 text-white text-2xl ${open ? "w-full" : "w-0"} pointer-events transition-all duration-500`}
-      >
-        <div
-          className={`${open ? "opacity-100" : "opacity-0"} delay-100 duration-100 transition-all ${contentVisible ? "block" : "hidden"}`}
-        >
-          <div className="flex flex-col space-around items-center">
-            <NavLinks />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+	const NavLinks = () => {
+		return (
+			<div className="flex flex-col items-center gap-8 md:gap-12 justify-center font-mono md:text-5xl text-2xl w-full min-h-screen">
+				<Link
+					to="/"
+					className="text-white hover:text-black transition-colors">
+					HOME
+				</Link>
+				<Link
+					to="/about-us"
+					className="text-white hover:text-black transition-colors">
+					ABOUT
+				</Link>
+				<Link
+					to="/pricing"
+					className="text-white hover:text-black transition-colors">
+					PLANS & PRICING
+				</Link>
+				<Link
+					to="/contact-us"
+					className="text-white hover:text-black transition-colors">
+					CONTACT
+				</Link>
+				<Link
+					to="/auth"
+					className="text-white hover:text-black transition-colors">
+					LOGIN/REGISTER
+				</Link>
+			</div>
+		);
+	};
+	return (
+		<div className="w-full h-screen">
+			<div className="fixed top-0 z-[100]">
+				<div className="min-h-screen w-12">
+					<div className="h-screen flex items-center justify-center pointer-events">
+						<div
+							className="w-7 h-7 text-white"
+							onClick={handleNavbarToggle}>
+							<AnimatePresence mode="wait">
+								{open ? (
+									<motion.div
+										key="open"
+										initial={{ x: -10, opacity: 0 }}
+										animate={{ x: 0, opacity: 1 }}
+										exit={{ x: 10, opacity: 0 }}>
+										<RxCross1 className="w-full h-full" />
+									</motion.div>
+								) : (
+									<motion.div
+										key="close"
+										initial={{ x: -10, opacity: 0 }}
+										animate={{ x: 0, opacity: 1 }}
+										exit={{ x: 10, opacity: 0 }}>
+										<FaBars className="w-full h-full" />
+									</motion.div>
+								)}
+							</AnimatePresence>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div
+				className={`h-full bg-grey-900 bg-opacity-40 backdrop-blur-md fixed top-0 z-50 text-white text-2xl ${open ? "w-full" : "w-0"} pointer-events transition-all duration-500`}>
+				<div
+					className={`${open ? "opacity-100" : "opacity-0"} delay-100 duration-100 transition-all ${contentVisible ? "block" : "hidden"}`}>
+					<NavLinks />
+				</div>
+			</div>
+		</div>
+	);
 }

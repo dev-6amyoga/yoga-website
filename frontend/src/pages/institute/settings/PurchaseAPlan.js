@@ -676,13 +676,13 @@ function PurchaseAPlan() {
 												VALID FROM :{" "}
 												{new Date(
 													x.validity_from
-												).toDateString()}
+												).toLocaleString()}
 											</span>
 											<span>
 												VALID TO :{" "}
 												{new Date(
 													x.validity_to
-												).toDateString()}
+												).toLocaleString()}
 											</span>
 										</div>
 									</Note>

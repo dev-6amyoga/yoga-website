@@ -3,7 +3,6 @@ import { Menu, Plus } from "@geist-ui/icons";
 import { memo, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { USER_PLAN_ACTIVE } from "../../../enums/user_plan_status";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import RoleShifter from "../RoleShifter";
@@ -23,13 +22,17 @@ function InstituteNavbar() {
 		user,
 		setUser,
 		institutes,
+		userPlan,
 	] = useUserStore((state) => [
 		state.currentInstituteId,
 		state.setCurrentInstituteId,
 		state.user,
 		state.setUser,
 		state.institutes,
+		state.userPlan,
 	]);
+
+	console.log({ userPlan });
 
 	const handleInstituteSelection = (value) => {
 		console.log("Selected Institute:", value);
@@ -59,51 +62,34 @@ function InstituteNavbar() {
 	};
 
 	useEffect(() => {
-		if (user && currentInstituteId) {
-			Fetch({
-				url: "/user-plan/get-user-institute-plan-by-id",
-				method: "POST",
-				data: {
-					user_id: user?.user_id,
-					institute_id: currentInstituteId,
-				},
-			}).then((res) => {
-				for (var i = 0; i !== res.data.userplans.length; i++) {
-					if (
-						res.data.userplans[i].current_status ===
-						USER_PLAN_ACTIVE
-					) {
-						setActivePlanID(res.data.userplans[i]?.plan_id);
-						if (res.data.userplans[i].plan.has_basic_playlist) {
-							setBasicPlaylist(true);
-						} else {
-							setBasicPlaylist(false);
-						}
-						if (res.data.userplans[i].plan.has_playlist_creation) {
-							setPlaylistCreation(true);
-						} else {
-							setPlaylistCreation(false);
-						}
-						if (res.data.userplans[i].plan.has_self_audio_upload) {
-							setSelfAudio(true);
-						} else {
-							setSelfAudio(false);
-						}
-						if (res.data.userplans[i].plan.number_of_teachers > 0) {
-							setMoreTeachers(true);
-						} else {
-							setMoreTeachers(false);
-						}
-						break;
-					} else {
-						toast(
-							"You dont have an active plan! Please head to the Purchase A Plan page"
-						);
-					}
-				}
-			});
+		if (userPlan) {
+			setActivePlanID(userPlan?.plan_id);
+			if (userPlan?.has_basic_playlist) {
+				setBasicPlaylist(true);
+			} else {
+				setBasicPlaylist(false);
+			}
+			if (userPlan?.has_playlist_creation) {
+				setPlaylistCreation(true);
+			} else {
+				setPlaylistCreation(false);
+			}
+			if (userPlan?.has_self_audio_upload) {
+				setSelfAudio(true);
+			} else {
+				setSelfAudio(false);
+			}
+			if (userPlan?.number_of_teachers > 0) {
+				setMoreTeachers(true);
+			} else {
+				setMoreTeachers(false);
+			}
+		} else {
+			toast(
+				"You dont have an active plan! Please head to the Purchase A Plan page"
+			);
 		}
-	}, [user, currentInstituteId]);
+	}, [userPlan]);
 
 	return (
 		<div>
@@ -126,6 +112,16 @@ function InstituteNavbar() {
 				<Drawer.Content>
 					<div className="py-4">
 						<RoleShifter />
+						<Spacer h={1} />
+						{userPlan ? (
+							<h5 className="rounded-lg bg-zinc-800 p-2 text-white">
+								Plan : {userPlan?.name}
+							</h5>
+						) : (
+							<h5 className="rounded-lg bg-zinc-800 p-2 text-white">
+								No active plan
+							</h5>
+						)}
 						<Divider />
 						<Spacer h={1} />
 						<Button
