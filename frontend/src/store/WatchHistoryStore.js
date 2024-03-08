@@ -26,6 +26,13 @@ const useWatchHistoryStore = create((set, get) => ({
    }
   */
 	watchTimeBuffer: [],
+	appendToWatchTimeBuffer: (watchTimeLogs) => {
+		set((state) => {
+			return {
+				watchTimeBuffer: [...watchTimeLogs, ...state.watchTimeBuffer],
+			};
+		});
+	},
 	updateWatchTimeBuffer: (wh) => {
 		const timedelta = wh.currentTime - get().committedTs;
 		// console.log({ timedelta });

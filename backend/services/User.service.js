@@ -85,21 +85,47 @@ const GetUserInfo = async (filter, attributes = null) => {
 			where: {
 				user_id: user.user_id,
 			},
+			attributes: [
+				"user_institute_plan_role_id",
+				"user_id",
+				"role_id",
+				"institute_id",
+				"user_plan_id",
+				"updated",
+			],
 			include: [
 				{ model: Institute, attributes: ["institute_id", "name"] },
 				{
 					model: UserPlan,
 					attributes: ["user_plan_id", "plan_id"],
-					include: [Plan],
+					include: [
+						{
+							model: Plan,
+							attributes: [
+								"plan_id",
+								"name",
+								"has_basic_playlist",
+								"has_playlist_creation",
+								"playlist_creation_limit",
+								"has_self_audio_upload",
+								"number_of_teachers",
+								"plan_validity_days",
+								"watch_time_limit",
+							],
+						},
+					],
 				},
 				{ model: Role, attributes: ["role_id", "name"] },
 			],
 		});
 
 		userInstitutePlanRoles = userInstitutePlanRoles.map((uipr) => {
+			const uiprJson = uipr.toJSON();
+			const p = uiprJson?.user_plan?.plan ?? null;
+			delete uiprJson.user_plan;
 			return {
-				...uipr.toJSON(),
-				plan: uipr.user_plan ? uipr.user_plan.plan : null,
+				...uiprJson,
+				plan: p,
 			};
 		});
 

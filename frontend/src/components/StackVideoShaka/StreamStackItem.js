@@ -6,7 +6,10 @@ import useVideoStore, {
 } from "../../store/VideoStore";
 // import asanas from "../../data/asanas.json";
 
-import { Stream } from "@cloudflare/stream-react";
+import ShakaPlayer from "shaka-player-react";
+
+import "shaka-player/dist/controls.css";
+
 // import { toast } from "react-toastify";
 import {
 	SEEK_TYPE_MARKER,
@@ -20,6 +23,34 @@ import useUserStore from "../../store/UserStore";
 import { STATE_VIDEO_PAUSED } from "../../store/VideoStore";
 import useWatchHistoryStore from "../../store/WatchHistoryStore";
 import { Fetch } from "../../utils/Fetch";
+
+// import * as shaka from "shaka-player";
+
+// class ShakaPlayerGoNext extends shaka.ui.Element {
+// 	constructor(parent, controls) {
+// 		super(parent, controls);
+
+// 		// The actual button that will be displayed
+// 		this.button_ = document.createElement("button");
+// 		this.button_.textContent = "Skip current video";
+// 		this.parent.appendChild(this.button_);
+
+// 		// Listen for clicks on the button to start the next playback
+// 		this.eventManager.listen(this.button_, "click", () => {
+// 			/* Your logic to pick the next video to be played */
+// 			console.log("next clicked");
+// 			// shaka.ui.Element gives us access to the player object as member of the class
+// 		});
+// 	}
+// }
+
+// ShakaPlayerGoNext.Factory = class {
+// 	create(rootElement, controls) {
+// 		return new ShakaPlayerGoNext(rootElement, controls);
+// 	}
+// };
+
+// shaka.ui.Controls.registerElement("next", new ShakaPlayerGoNext.Factory());
 
 function StreamStackItem({
 	video,
@@ -134,15 +165,15 @@ function StreamStackItem({
 			console.log(
 				"PLAYING ----------------------------->",
 				video.queue_id,
-				playerRef?.current
+				playerRef?.current.videoElement
 			);
-			setDuration(playerRef?.current?.duration || 0);
+			setDuration(playerRef?.current?.videoElement?.duration || 0);
 		}
 	}, [isActive, setDuration, metadataLoaded, video.queue_id]);
 
 	// pause and reset the video when its not active
 	useEffect(() => {
-		const pr = playerRef.current;
+		const pr = playerRef.current.videoElement;
 		if (!isActive && pr && pr.currentTime > 0) {
 			// console.log(
 			// 	"PAUSE AND RESET ----------------------------->",
@@ -166,9 +197,9 @@ function StreamStackItem({
 	useEffect(() => {
 		if (playerRef.current) {
 			if (volume > 0) {
-				playerRef.current.muted = false;
+				playerRef.current.videoElement.muted = false;
 			}
-			playerRef.current.volume = volume;
+			playerRef.current.videoElement.volume = volume;
 		}
 	}, [volume]);
 
@@ -182,18 +213,20 @@ function StreamStackItem({
 			if (seekEvent && playerRef.current) {
 				switch (seekEvent.type) {
 					case SEEK_TYPE_SEEK:
-						let ct = playerRef.current.currentTime + seekEvent.t;
-						if (ct > playerRef.current.duration) {
+						let ct =
+							playerRef.current.videoElement.currentTime +
+							seekEvent.t;
+						if (ct > playerRef.current.videoElement.duration) {
 							handleEnd();
 							popFromSeekQueue(0);
 							return;
 						}
 						if (ct < 0) ct = 0;
 
-						playerRef.current.currentTime = ct;
+						playerRef.current.videoElement.currentTime = ct;
 						console.log(
 							"SEEKING ----------------------------->",
-							playerRef.current.currentTime
+							playerRef.current.videoElement.currentTime
 						);
 						setCommitSeekTime(ct);
 						// autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
@@ -201,36 +234,40 @@ function StreamStackItem({
 						break;
 					case SEEK_TYPE_MOVE:
 						let st = seekEvent.t < 0 ? 0 : seekEvent.t;
-						if (st > playerRef.current.duration) {
+						if (st > playerRef.current.videoElement.duration) {
 							handleEnd();
 							popFromSeekQueue(0);
 							return;
 						}
 
-						playerRef.current.currentTime = st;
+						playerRef.current.videoElement.currentTime = st;
 						console.log(
 							"SEEKING ----------------------------->",
-							playerRef.current.currentTime
+							playerRef.current.videoElement.currentTime
 						);
 						setCommitSeekTime(st);
 						// autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
 						// popFromSeekQueue(0)
 						break;
 					case SEEK_TYPE_MARKER:
-						if (seekEvent.t > playerRef.current.duration) {
+						if (
+							seekEvent.t >
+							playerRef.current.videoElement.duration
+						) {
 							handleEnd();
 							popFromSeekQueue(0);
 							return;
 						}
 
-						playerRef.current.currentTime = seekEvent.t;
+						playerRef.current.videoElement.currentTime =
+							seekEvent.t;
 						// popFromSeekQueue(0)
 						setCommitSeekTime(seekEvent.t);
 						break;
 					default:
 						break;
 				}
-				addToCommittedTs(playerRef.current?.currentTime);
+				addToCommittedTs(playerRef.current?.videoElement.currentTime);
 			}
 		}
 	}, [
@@ -257,9 +294,9 @@ function StreamStackItem({
 		) {
 			setPauseReason(null);
 			if (videoState === STATE_VIDEO_PAUSED) {
-				playerRef.current?.pause();
+				playerRef.current?.videoElement?.pause();
 			} else {
-				playerRef.current
+				playerRef.current.videoElement
 					.play()
 					.then((res) => {
 						if (volume === 0 && !autoplayInitialized) {
@@ -270,11 +307,11 @@ function StreamStackItem({
 					.catch((err) => {
 						console.error(err);
 						// toast("Error playing video", { type: "error" });
-						playerRef.current.muted = true;
-						playerRef.current
+						playerRef.current.videoElement.muted = true;
+						playerRef.current.videoElement
 							.play()
 							.then((res) => {
-								playerRef.current.muted = false;
+								playerRef.current.videoElement.muted = false;
 								if (volume === 0 && !autoplayInitialized) {
 									setVolume(0.5);
 									setAutoplayInitialized(true);
@@ -351,9 +388,9 @@ function StreamStackItem({
 		};
 
 		const int = setInterval(() => {
-			if (playerRef.current?.currentTime && isActive) {
+			if (playerRef.current?.videoElement?.currentTime && isActive) {
 				// check if the marker has been reached
-				if (checkSeek(playerRef.current?.currentTime)) {
+				if (checkSeek(playerRef.current?.videoElement?.currentTime)) {
 					// popping from queue
 					// console.log('POPPING FROM QUEUE ----------------------------->')
 					popFromSeekQueue(0);
@@ -364,7 +401,9 @@ function StreamStackItem({
 				// pause if currenttime is greater than the timestamp of next?
 				if (
 					videoState !== STATE_VIDEO_LOADING &&
-					checkPauseOrLoop(playerRef.current?.currentTime)
+					checkPauseOrLoop(
+						playerRef.current?.videoElement?.currentTime
+					)
 				) {
 					return;
 				}
@@ -374,8 +413,10 @@ function StreamStackItem({
 					videoState !== STATE_VIDEO_ERROR ||
 					videoState !== STATE_VIDEO_PAUSED
 				)
-					autoSetCurrentMarkerIdx(playerRef.current?.currentTime);
-				setCurrentTime(playerRef.current?.currentTime);
+					autoSetCurrentMarkerIdx(
+						playerRef.current?.videoElement?.currentTime
+					);
+				setCurrentTime(playerRef.current?.videoElement?.currentTime);
 			}
 		}, 250);
 
@@ -460,7 +501,7 @@ function StreamStackItem({
 					- start interval timer to flush	watch duration buffer  [10s]
 					- clear previous interval to commit time
 					- start interval timer to commit time [5s]
-	*/
+	
 	useEffect(() => {
 		if (isActive && enableWatchHistory) {
 			// console.log('CURRENT VIDEO', video)
@@ -524,6 +565,7 @@ function StreamStackItem({
 			}
 		}
 	}, [isActive, enableWatchHistory]);
+	*/
 
 	// when theres a pause or play, the state is shown for 300ms
 	useEffect(() => {
@@ -548,60 +590,65 @@ function StreamStackItem({
 		};
 	}, [videoState, setVideoStateVisible]);
 
-	const videoId = useMemo(() => {
-		const v =
-			video?.video?.asana_videoID || video?.video?.transition_video_ID;
-		// console.log("Recomputing video id cuz video changed?!?!?!", v);
-		return v;
+	const videoUrl = useMemo(() => {
+		return (
+			(video?.video?.asana_dash_url ||
+				video?.video?.transition_dash_url) ??
+			""
+		);
 	}, [video]);
+
+	const playerOnMetadataLoaded = useCallback(() => {
+		setMetadataLoaded(true);
+	}, []);
+
+	const playerInit = useCallback((ref) => {
+		if (ref !== null) {
+			// console.log(ref);
+			playerRef.current = ref;
+
+			if (ref.ui) {
+				playerRef.current.ui.configure({
+					enableTooltips: true,
+					doubleClickForFullscreen: true,
+					seekOnTaps: true,
+					tapSeekDistance: 5,
+					enableKeyboardPlaybackControls: true,
+					enableFullscreenOnRotation: true,
+					keyboardSeekDistance: 5,
+					controlPanelElements: [
+						"rewind",
+						"play_pause",
+						"fast_forward",
+						"time_and_duration",
+						"spacer",
+						"mute",
+						"volume",
+						"fullscreen",
+					],
+					seekBarColors: {
+						base: "#FFFFFF",
+						buffered: "#DDDDDD",
+						played: "#FFBF00",
+					},
+					fastForwardRates: [2, 4, 8, 1],
+					rewindRates: [-1, -2, -4, -8],
+				});
+			}
+
+			// initialize events
+			// playerRef.current.player.
+		}
+	}, []);
 
 	return (
 		<div className={`h-full w-full ${isActive ? "block" : "hidden"}`}>
-			<Stream
-				streamRef={playerRef}
-				allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-				src={videoId}
-				startTime={0}
-				preload="auto"
-				onEnded={handleEnd}
-				onLoadStart={() => {
-					console.log(
-						"Loading start ----------------------------->",
-						video?.queue_id
-					);
-				}}
-				onLoadedData={() => {
-					console.log(
-						"First frame ready ---------------------->",
-						video?.queue_id
-					);
-				}}
-				onStalled={() => {
-					console.log(
-						"Stalled ----------------------------->",
-						video?.queue_id
-					);
-					if (isActive) handleLoading(true);
-				}}
-				onCanPlay={() => {
-					console.log(
-						"Can play ----------------------------->",
-						video?.queue_id
-					);
-					if (isActive) handleLoading(false);
-				}}
-				onSeeking={() => {
-					if (isActive) handleLoading(true);
-				}}
-				onSeeked={() => {
-					// if (isActive) handleLoading(false)
-				}}
-				onError={() => {
-					if (isActive) handlePlaybackError();
-				}}
-				onLoadedMetaData={() => {
-					setMetadataLoaded(true);
-				}}
+			<ShakaPlayer
+				ref={playerInit}
+				src={videoUrl}
+				width="100%"
+				height="100%"
+				className="custom-shaka"
 			/>
 		</div>
 	);

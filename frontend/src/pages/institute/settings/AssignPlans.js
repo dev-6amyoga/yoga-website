@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import { Fetch } from "../../../utils/Fetch";
+import { FetchRetry } from "../../../utils/Fetch";
 
 export const AssignPlans = async (
 	instituteId,
@@ -8,12 +8,19 @@ export const AssignPlans = async (
 	toBeRegistered
 ) => {
 	try {
-		const response = await Fetch({
+		const response = await FetchRetry({
 			url: "/user-plan/register",
 			method: "POST",
 			token: true,
-			data: toBeRegistered,
+			data: {
+				...toBeRegistered,
+				user_id: ownerId,
+				institute_id: instituteId,
+				plan_id: planId,
+			},
+			n: 3,
 		});
+
 		if (response?.status === 200) {
 			toast("Plan subscribed successfully for Institute", {
 				type: "success",
@@ -22,5 +29,9 @@ export const AssignPlans = async (
 		}
 	} catch (error) {
 		console.error("Error fetching data:", error);
+		toast(
+			"Error subscribing plan for Institute; Any amount debited from your account will be refunded in 3 to 5 business days.",
+			{ type: "error" }
+		);
 	}
 };

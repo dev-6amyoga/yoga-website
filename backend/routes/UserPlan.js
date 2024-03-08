@@ -21,6 +21,7 @@ const WatchTimeQuota = require("../models/mongo/WatchTimeQuota");
 const WatchHistory = require("../models/mongo/WatchHistory");
 const WatchTimeLog = require("../models/mongo/WatchTimeLog");
 const { authenticateToken } = require("../utils/jwt");
+const { ROLE_TEACHER } = require("../enums/role");
 router.get("/get-all-user-plans", async (req, res) => {
 	try {
 		const userplans = await UserPlan.findAll();
@@ -154,6 +155,85 @@ router.post("/get-user-institute-plan-by-id", async (req, res) => {
 			.json({ error: "Failed to fetch user" });
 	}
 });
+
+router.post(
+	"/get-teacher-institute-plan",
+	authenticateToken,
+	async (req, res) => {
+		const { institute_id } = req.body;
+		const { user_id } = req?.user;
+
+		if (!user_id || !institute_id) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "Missing required fields" });
+		}
+
+		try {
+			// find if user is a teacher in institute
+
+			const teacherUIPR = await UserInstitutePlanRole.findOne({
+				where: {
+					user_id: user_id,
+					institute_id: institute_id,
+				},
+				include: [
+					{
+						model: Role,
+						where: {
+							name: ROLE_TEACHER,
+						},
+					},
+				],
+			});
+
+			if (!teacherUIPR) {
+				return res
+					.status(HTTP_BAD_REQUEST)
+					.json({ error: "User is not a teacher in this institute" });
+			}
+
+			// find institute plan
+			const institute_plan = await UserPlan.findOne({
+				where: {
+					institute_id: institute_id,
+					current_status: USER_PLAN_ACTIVE,
+				},
+				include: [
+					{
+						model: Plan,
+						attributes: [
+							"plan_id",
+							"name",
+							"has_basic_playlist",
+							"has_playlist_creation",
+							"playlist_creation_limit",
+							"has_self_audio_upload",
+							"number_of_teachers",
+							"plan_validity_days",
+							"watch_time_limit",
+						],
+					},
+				],
+			});
+
+			if (!institute_plan) {
+				return res
+					.status(HTTP_BAD_REQUEST)
+					.json({ error: "Institute plan does not exist" });
+			}
+
+			return res.status(HTTP_OK).json({
+				institute_plan: institute_plan ? institute_plan : null,
+			});
+		} catch (error) {
+			console.error(error);
+			return res
+				.status(HTTP_INTERNAL_SERVER_ERROR)
+				.json({ error: "Failed to fetch user" });
+		}
+	}
+);
 
 router.post("/register", authenticateToken, async (req, res) => {
 	const {
@@ -303,46 +383,18 @@ router.post("/register", authenticateToken, async (req, res) => {
 	}
 });
 
-router.delete("/watch-time-quota-delete-all", async (req, res) => {
-	console.log("in delete quota");
-	try {
-		// await WatchTimeQuota.deleteMany({});
-		await WatchTimeLog.deleteMany({});
-		// await WatchHistory.deleteMany({});
-		res.status(200).json({ message: "All rows deleted successfully." });
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: "Internal Server Error" });
-	}
-});
-
-// useEffect(() => {
-//     const deleteWatchTimeQuota = async () => {
-//         console.log('in use effect!!')
-//         try {
-//             const response = await fetch(
-//                 'http://localhost:4000/user-plan/watch-time-quota-delete-all',
-//                 {
-//                     method: 'DELETE',
-//                     headers: {
-//                         'Content-Type': 'application/json',
-//                     },
-//                 }
-//             )
-
-//             if (response.ok) {
-//                 const data = await response.json()
-//                 console.log(data.message)
-//             } else {
-//                 console.error('Failed to delete rows:', response.status)
-//             }
-//         } catch (error) {
-//             console.error('Error:', error)
-//         }
-//     }
-
-//     deleteWatchTimeQuota()
-// }, [])
+// router.delete("/watch-time-quota-delete-all", async (req, res) => {
+// 	console.log("in delete quota");
+// 	try {
+// 		// await WatchTimeQuota.deleteMany({});
+// 		await WatchTimeLog.deleteMany({});
+// 		// await WatchHistory.deleteMany({});
+// 		res.status(200).json({ message: "All rows deleted successfully." });
+// 	} catch (error) {
+// 		console.error(error);
+// 		res.status(500).json({ error: "Internal Server Error" });
+// 	}
+// })
 
 router.put("/update-user-plan", async (req, res) => {
 	const {
