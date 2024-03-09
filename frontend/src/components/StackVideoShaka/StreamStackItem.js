@@ -6,7 +6,7 @@ import useVideoStore, {
 } from "../../store/VideoStore";
 // import asanas from "../../data/asanas.json";
 
-import ShakaPlayer from "shaka-player-react";
+import ShakaPlayer from "./ShakaPlayer";
 
 import "shaka-player/dist/controls.css";
 
@@ -24,33 +24,122 @@ import { STATE_VIDEO_PAUSED } from "../../store/VideoStore";
 import useWatchHistoryStore from "../../store/WatchHistoryStore";
 import { Fetch } from "../../utils/Fetch";
 
-// import * as shaka from "shaka-player";
+import shaka from "shaka-player/dist/shaka-player.ui";
 
-// class ShakaPlayerGoNext extends shaka.ui.Element {
-// 	constructor(parent, controls) {
-// 		super(parent, controls);
+// -----
+class ShakaPlayerGoNext extends shaka.ui.Element {
+	constructor(parent, controls, eventHandler) {
+		super(parent, controls);
 
-// 		// The actual button that will be displayed
-// 		this.button_ = document.createElement("button");
-// 		this.button_.textContent = "Skip current video";
-// 		this.parent.appendChild(this.button_);
+		// The actual button that will be displayed
+		this.button_ = document.createElement("button");
+		this.button_.innerHTML = `Next`;
 
-// 		// Listen for clicks on the button to start the next playback
-// 		this.eventManager.listen(this.button_, "click", () => {
-// 			/* Your logic to pick the next video to be played */
-// 			console.log("next clicked");
-// 			// shaka.ui.Element gives us access to the player object as member of the class
-// 		});
-// 	}
-// }
+		this.parent.appendChild(this.button_);
 
-// ShakaPlayerGoNext.Factory = class {
-// 	create(rootElement, controls) {
-// 		return new ShakaPlayerGoNext(rootElement, controls);
-// 	}
-// };
+		// Listen for clicks on the button to start the next playback
+		this.eventManager.listen(this.button_, "click", eventHandler);
+	}
+}
 
-// shaka.ui.Controls.registerElement("next", new ShakaPlayerGoNext.Factory());
+ShakaPlayerGoNext.Factory = class {
+	constructor(eventHandler) {
+		this.eventHandler = eventHandler;
+	}
+
+	create(rootElement, controls) {
+		return new ShakaPlayerGoNext(rootElement, controls, this.eventHandler);
+	}
+};
+
+// -----
+
+class ShakaPlayerGoPrev extends shaka.ui.Element {
+	constructor(parent, controls, eventHandler) {
+		super(parent, controls);
+
+		// The actual button that will be displayed
+		this.button_ = document.createElement("button");
+		this.button_.innerHTML = `Prev`;
+
+		this.parent.appendChild(this.button_);
+
+		// Listen for clicks on the button to start the next playback
+		this.eventManager.listen(this.button_, "click", eventHandler);
+	}
+}
+
+ShakaPlayerGoPrev.Factory = class {
+	constructor(eventHandler) {
+		this.eventHandler = eventHandler;
+	}
+
+	create(rootElement, controls) {
+		return new ShakaPlayerGoPrev(rootElement, controls, this.eventHandler);
+	}
+};
+
+// -----
+
+class ShakaPlayerGoSeekBackward extends shaka.ui.Element {
+	constructor(parent, controls, eventHandler) {
+		super(parent, controls);
+
+		// The actual button that will be displayed
+		this.button_ = document.createElement("button");
+		this.button_.innerHTML = `< 5`;
+
+		this.parent.appendChild(this.button_);
+
+		// Listen for clicks on the button to start the next playback
+		this.eventManager.listen(this.button_, "click", eventHandler);
+	}
+}
+
+ShakaPlayerGoSeekBackward.Factory = class {
+	constructor(eventHandler) {
+		this.eventHandler = eventHandler;
+	}
+
+	create(rootElement, controls) {
+		return new ShakaPlayerGoSeekBackward(
+			rootElement,
+			controls,
+			this.eventHandler
+		);
+	}
+};
+
+// -----
+
+class ShakaPlayerGoSeekForward extends shaka.ui.Element {
+	constructor(parent, controls, eventHandler) {
+		super(parent, controls);
+
+		// The actual button that will be displayed
+		this.button_ = document.createElement("button");
+		this.button_.innerHTML = `5 >`;
+
+		this.parent.appendChild(this.button_);
+
+		// Listen for clicks on the button to start the next playback
+		this.eventManager.listen(this.button_, "click", eventHandler);
+	}
+}
+
+ShakaPlayerGoSeekForward.Factory = class {
+	constructor(eventHandler) {
+		this.eventHandler = eventHandler;
+	}
+
+	create(rootElement, controls) {
+		return new ShakaPlayerGoSeekForward(
+			rootElement,
+			controls,
+			this.eventHandler
+		);
+	}
+};
 
 function StreamStackItem({
 	video,
@@ -137,7 +226,10 @@ function StreamStackItem({
 		state.setCommitSeekTime,
 	]);
 
-	const popFromQueue = usePlaylistStore((state) => state.popFromQueue);
+	const [popFromQueue, popFromArchive] = usePlaylistStore((state) => [
+		state.popFromQueue,
+		state.popFromArchive,
+	]);
 
 	let [
 		enableWatchHistory,
@@ -305,7 +397,7 @@ function StreamStackItem({
 						}
 					})
 					.catch((err) => {
-						console.error(err);
+						console.error("Error autoplay : ", err);
 						// toast("Error playing video", { type: "error" });
 						playerRef.current.videoElement.muted = true;
 						playerRef.current.videoElement
@@ -602,12 +694,48 @@ function StreamStackItem({
 		setMetadataLoaded(true);
 	}, []);
 
+	const handleNextVideo = useCallback(() => {
+		popFromQueue(0);
+	}, [popFromQueue]);
+
+	const handlePrevVideo = useCallback(() => {
+		popFromArchive(-1);
+	}, [popFromArchive]);
+
+	const handleSeekFoward = useCallback(() => {
+		addToSeekQueue({ t: 5, type: "seek" });
+	}, [addToSeekQueue]);
+
+	const handleSeekBackward = useCallback(() => {
+		addToSeekQueue({ t: -5, type: "seek" });
+	}, [addToSeekQueue]);
+
 	const playerInit = useCallback((ref) => {
 		if (ref !== null) {
 			// console.log(ref);
 			playerRef.current = ref;
 
 			if (ref.ui) {
+				shaka.ui.Controls.registerElement(
+					"next",
+					new ShakaPlayerGoNext.Factory(handleNextVideo)
+				);
+
+				shaka.ui.Controls.registerElement(
+					"prev",
+					new ShakaPlayerGoPrev.Factory(handlePrevVideo)
+				);
+
+				shaka.ui.Controls.registerElement(
+					"seek_forward",
+					new ShakaPlayerGoSeekForward.Factory(handleSeekFoward)
+				);
+
+				shaka.ui.Controls.registerElement(
+					"seek_backward",
+					new ShakaPlayerGoSeekBackward.Factory(handleSeekBackward)
+				);
+
 				playerRef.current.ui.configure({
 					enableTooltips: true,
 					doubleClickForFullscreen: true,
@@ -617,13 +745,15 @@ function StreamStackItem({
 					enableFullscreenOnRotation: true,
 					keyboardSeekDistance: 5,
 					controlPanelElements: [
-						"rewind",
+						"prev",
+						"seek_backward",
 						"play_pause",
-						"fast_forward",
-						"time_and_duration",
+						"seek_forward",
+						"next",
 						"spacer",
 						"mute",
 						"volume",
+						"time_and_duration",
 						"fullscreen",
 					],
 					seekBarColors: {
