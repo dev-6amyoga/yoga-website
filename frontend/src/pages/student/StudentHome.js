@@ -50,7 +50,7 @@ function StudentHome() {
       <div className="moving-text-bar py-2">
         <div
           className="moving-text"
-          style={{ transform: `translateX(${position + 5}%)` }}
+          style={{ transform: `translateX($-position - 5}%)` }}
         >
           This video is for personal self-practice only and not to be used by
           teachers for taking classes. Any unauthorized use may kindly be
