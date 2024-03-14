@@ -14,6 +14,10 @@ const paths = [
     title: "Dashboard",
   },
   {
+    path: "/admin/watch-analysis",
+    title: "Watch Analysis",
+  },
+  {
     title: "Member Management",
     type: "group",
     subPaths: [
