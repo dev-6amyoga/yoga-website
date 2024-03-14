@@ -16,6 +16,7 @@ import { transitionGenerator } from "../../components/transition-generator/Trans
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
 import { MonthlyPlaylistChecker } from "../../utils/MonthlyPlaylistChecker";
+import Papa from "papaparse";
 
 export default function RegisterNewPlaylistStudent() {
   const navigate = useNavigate();
@@ -426,7 +427,20 @@ export default function RegisterNewPlaylistStudent() {
       ),
     };
   });
-
+  const handleDownload = (data1) => {
+    const csv = Papa.unparse(data1);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "data.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
   return (
     <div className="flex-col justify-center">
       <StudentNavbar />

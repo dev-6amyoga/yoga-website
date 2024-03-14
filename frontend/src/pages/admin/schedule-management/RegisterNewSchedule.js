@@ -18,6 +18,7 @@ import { ROLE_ROOT } from "../../../enums/roles";
 import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
 import { withAuth } from "../../../utils/withAuth";
+import Papa from "papaparse";
 
 function RegisterNewSchedule() {
   const navigate = useNavigate();
@@ -415,6 +416,20 @@ function RegisterNewSchedule() {
           return [...prevUsers, userKey];
         }
       });
+    }
+  };
+  const handleDownload = (data1) => {
+    const csv = Papa.unparse(data1);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "data.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 

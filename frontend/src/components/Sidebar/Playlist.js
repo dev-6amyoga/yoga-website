@@ -52,9 +52,6 @@ function Playlist() {
   const clearQueue = usePlaylistStore((state) => state.clearQueue);
 
   useEffect(() => {
-    console.log(currentInstitute, "IS THE INSTITUTE");
-    console.log(user_id, "IS THE USER");
-    console.log(user, "IS THE USER");
     if (currentInstituteId) {
       Fetch({
         url: "/schedule/getSchedulesById",
@@ -94,7 +91,6 @@ function Playlist() {
     }
     //user_id is a student, fetch their schedules
   }, [currentInstitute, user_id]);
-
   useState(() => {
     if (currentInstituteId) {
       setCurrentInstitute(
@@ -127,6 +123,7 @@ function Playlist() {
           url: "/content/video/getAllTransitions",
         });
         const data = response.data;
+        console.log(data);
         setAllTransitions(data);
       } catch (error) {
         toast(error);
@@ -290,6 +287,7 @@ function Playlist() {
       return [];
     }
     const allAsanasData = asana_ids.map((asana_id) => {
+      console.log("FETCHING FOR : ", asana_id, "\n");
       if (Number(asana_id)) {
         const asanaObject = allAsanas.find((asana) => asana.id === asana_id);
         return asanaObject || null;
@@ -297,6 +295,7 @@ function Playlist() {
         const transitionObject = allTransitions.find(
           (transition) => transition.transition_id === asana_id
         );
+        console.log(transitionObject);
         return transitionObject || null;
       }
     });
@@ -306,6 +305,7 @@ function Playlist() {
   const handleAddToQueue = (asana_ids) => {
     getAllAsanas(asana_ids)
       .then((asanas) => {
+        console.log(asanas);
         addToQueue(asanas.filter((v) => v !== null));
       })
       .catch((err) => console.log(err));
