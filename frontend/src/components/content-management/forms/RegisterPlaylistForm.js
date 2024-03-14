@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
 import { transitionGenerator } from "../../transition-generator/TransitionGenerator";
+import Papa from "papaparse";
 
 function RegisterPlaylistForm() {
   const navigate = useNavigate();
@@ -94,7 +95,6 @@ function RegisterPlaylistForm() {
       count = Number(count);
     }
     if (playlist_temp.length === 0) {
-      console.log(rowData, "to be inserted");
       const x = transitionGenerator("start", rowData, transitions);
       if (x.length !== 0) {
         setPlaylistTemp((prev) => [
@@ -162,6 +162,7 @@ function RegisterPlaylistForm() {
     const playlist_sequence = {};
     playlist_sequence["playlist_name"] = playlist_name;
     playlist_sequence["asana_ids"] = [];
+
     playlist_temp.map((item) => {
       const asana_id_playlist =
         item["rowData"]["id"] || item["rowData"]["transition_id"];
@@ -171,6 +172,36 @@ function RegisterPlaylistForm() {
       }
     });
     playlist_sequence["duration"] = totalDuration;
+    const response1 = await Fetch({
+      url: "/content/get-asana-by-id",
+      method: "POST",
+      data: {
+        asana_id:
+          playlist_sequence["asana_ids"][
+            playlist_sequence["asana_ids"].length - 1
+          ],
+      },
+    });
+    if (response1?.status === 200) {
+      if (response1.data.asana_category === "Prayer Sitting") {
+        console.log(transitions);
+        const matchingTransition1 = transitions.find((transition) => {
+          return (
+            transition.transition_video_name === "Prayer Sitting Full Unlock"
+          );
+        });
+        console.log("gonna insert", matchingTransition1);
+        playlist_sequence["asana_ids"].push(matchingTransition1.transition_id);
+      }
+      if (response1.data.asana_category === "Prayer Standing") {
+        const matchingTransition1 = transitions.find((transition) => {
+          return transition.transition_video_name === "Prayer Standing End";
+        });
+        console.log("gonna insert", matchingTransition1);
+
+        playlist_sequence["asana_ids"].push(matchingTransition1.transition_id);
+      }
+    }
     try {
       const response = await Fetch({
         url: "/content/playlists/addPlaylist",
@@ -320,6 +351,20 @@ function RegisterPlaylistForm() {
     setTotalDuration(newTotalDuration);
   }, [playlist_temp, playlist_temp.map((asana) => asana.count)]);
   const customerCode = "eyxw0l155flsxhz3";
+  const handleDownload = (data1) => {
+    const csv = Papa.unparse(data1);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "data.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
   return (
     <div className="">
       <div className="grid grid-cols-3 gap-4">
@@ -386,7 +431,7 @@ function RegisterPlaylistForm() {
                   <p>
                     {rowData.rowData.asana_name
                       ? rowData.rowData.asana_name
-                      : rowData.rowData.transition_video_name}
+                      : rowData.rowData.transition_video_name || ""}
                   </p>
                 );
               }}

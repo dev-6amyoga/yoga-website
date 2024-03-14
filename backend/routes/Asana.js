@@ -49,6 +49,37 @@ router.post("/video/addAsana", async (req, res) => {
   }
 });
 
+router.put("/video/updateTransition/:transitionId", async (req, res) => {
+  const transitionId = req.params.transitionId;
+  const updatedData = req.body;
+  if (updatedData.asana_hls_url !== "") {
+    const hlsDuration = getVideoDuration(updatedData.transition_hls_url);
+    updatedData.duration = hlsDuration;
+  }
+  try {
+    const existingAsana = await TransitionVideo.findOne({
+      transition_id: transitionId,
+    });
+    if (!existingAsana) {
+      return res.status(HTTP_NOT_FOUND).json({ error: "Transition not found" });
+    }
+    const mergedData = { ...existingAsana.toObject(), ...updatedData };
+    const updatedAsana = await TransitionVideo.findOneAndUpdate(
+      { transition_id: transitionId },
+      mergedData,
+      {
+        new: true,
+      }
+    );
+    res.status(200).json(updatedAsana);
+  } catch (error) {
+    console.error(error);
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to update Asana",
+    });
+  }
+});
+
 router.post("/video/addTransition", async (req, res) => {
   try {
     const requestData = req.body;

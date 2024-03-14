@@ -14,6 +14,7 @@ import { useShallow } from "zustand/react/shallow";
 import TeacherPageWrapper from "../../components/Common/TeacherPageWrapper";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
+import Papa from "papaparse";
 
 export default function TeacherPlaylistCreation() {
   const navigate = useNavigate();
@@ -214,7 +215,20 @@ export default function TeacherPlaylistCreation() {
       console.error("Error during playlist addition:", error);
     }
   };
-
+  const handleDownload = (data1) => {
+    const csv = Papa.unparse(data1);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "data.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
   return (
     <TeacherPageWrapper heading="Make Playlist">
       <div>

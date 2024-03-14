@@ -16,6 +16,7 @@ import {
   XCircle,
 } from "@geist-ui/icons";
 import { useEffect, useState } from "react";
+import Papa from "papaparse";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
@@ -303,6 +304,20 @@ export default function ViewAllPlaylists() {
         asana_ids: newAsanaIds,
       };
     });
+  };
+  const handleDownload = (data1) => {
+    const csv = Papa.unparse(data1);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "data.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
   const handleInputChange = (e) => {
     const { id, value } = e.target;

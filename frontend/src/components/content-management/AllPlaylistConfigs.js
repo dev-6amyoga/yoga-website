@@ -15,7 +15,29 @@ function AllPlaylistConfigs() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredConfigs, setFilteredConfigs] = useState([]);
   const [playlistConfigs, setPlaylistConfigs] = useState([]);
+  const [modalState, setModalState] = useState(false);
+  const [modalData, setModalData] = useState({
+    playlist_config_id: 0,
+    playlist_config_name: "",
+    playlist_config_value: "",
+  });
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setModalData({ ...modalData, [id]: value });
+  };
 
+  const updateData = async () => {
+    console.log(modalData);
+    const response = await Fetch({
+      url: `/playlist-configs/updateConfig/${modalData.playlist_config_id}`,
+      method: "PUT",
+      data: modalData,
+    });
+    if (response.status === 200) {
+      toast("Success!");
+      setModalState(false);
+    }
+  };
   useEffect(() => {
     if (searchTerm.length > 0) {
       setFilteredConfigs(
@@ -99,9 +121,24 @@ function AllPlaylistConfigs() {
         console.error(error);
       }
     };
+    const handleUpdate = async () => {
+      setModalState(true);
+      setModalData(rowData);
+    };
 
     return (
       <Grid.Container gap={0.1}>
+        <Grid>
+          <Button
+            type="warning"
+            auto
+            scale={1 / 3}
+            font="12px"
+            onClick={handleUpdate}
+          >
+            Update
+          </Button>
+        </Grid>
         <Grid>
           <Button
             type="error"
@@ -208,6 +245,36 @@ function AllPlaylistConfigs() {
             No
           </Modal.Action>
           <Modal.Action onClick={deletePlaylistConfid}>Yes</Modal.Action>
+        </Modal>
+      </div>
+      <div>
+        <Modal
+          visible={modalState}
+          onClose={() => setModalState(false)}
+          width="50rem"
+        >
+          <Modal.Title>Update Confid Variable</Modal.Title>
+          <Modal.Subtitle>{modalData.playlist_config_name}</Modal.Subtitle>
+          <Modal.Content>
+            <form>
+              <Text>{modalData.playlist_config_name}</Text>
+              <br />
+              <Input
+                width="100%"
+                id="playlist_config_value"
+                placeholder={modalData.playlist_config_value}
+                onChange={handleInputChange}
+              >
+                Config Value
+              </Input>
+              <br />
+              <br />
+            </form>
+          </Modal.Content>
+          <Modal.Action passive onClick={() => setModalState(false)}>
+            Cancel
+          </Modal.Action>
+          <Modal.Action onClick={updateData}>Update</Modal.Action>
         </Modal>
       </div>
     </AdminPageWrapper>

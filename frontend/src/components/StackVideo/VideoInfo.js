@@ -89,7 +89,7 @@ export default function VideoInfo() {
                       <p
                         key={k.timestamp + String(currentMarkerIdx)}
                         className={`m-0 rounded-full border px-2 py-1 text-sm hover:cursor-pointer ${
-                          currentMarkerIdx === idx ? "border-amber-500" : ""
+                          currentMarkerIdx === idx ? "border-red-500" : ""
                         }`}
                         onClick={() => {
                           // TODO : fix this, bug when you go to previous marker

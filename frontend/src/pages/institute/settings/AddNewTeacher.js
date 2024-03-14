@@ -12,6 +12,7 @@ import { validateEmail, validatePhone } from "../../../utils/formValidation";
 import getFormData from "../../../utils/getFormData";
 import { withAuth } from "../../../utils/withAuth";
 import { getFrontendDomain } from "../../../utils/getFrontendDomain";
+import Papa from "papaparse";
 
 function AddNewTeacher() {
   const [currentTeachersCount, setCurrentTeachersCount] = useState([]);
@@ -317,6 +318,20 @@ function AddNewTeacher() {
     );
   };
 
+  const handleDownload = (data1) => {
+    const csv = Papa.unparse(data1);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "data.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
   return (
     <InstitutePageWrapper heading="Teacher Invite Management">
       <div className="card-base">

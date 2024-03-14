@@ -117,6 +117,7 @@ function AllPlaylists() {
         });
         const data = response.data;
         setPlaylist1(data);
+        console.log(data, "AHAHA");
         setFilteredTransitions(data);
         setLoading(false);
       } catch (error) {
@@ -254,7 +255,6 @@ function AllPlaylists() {
       (asana) => asana.asana_name === value
     );
     updatedAsanaIds[index] = selectedAsana ? selectedAsana.id : value;
-    console.log(updatedAsanaIds);
     const filteredAsanaIds = updatedAsanaIds.filter((asanaId) => {
       return typeof asanaId !== "string" || !asanaId.startsWith("T_");
     });
@@ -477,14 +477,12 @@ function AllPlaylists() {
   };
 
   const handleRemoveAsana = (indexToRemove) => {
-    console.log(modalData.asana_ids);
     const newAsanaIds = modalData.asana_ids.filter(
       (_, index) => index !== indexToRemove
     );
     const filteredList = newAsanaIds.filter(
       (item) => !(typeof item === "string" && item.startsWith("T_"))
     );
-    console.log(filteredList);
     let resultArray = [];
     const asanaData1 = playlistAsanas.find(
       (asana) => asana.id === filteredList[0]
@@ -542,41 +540,42 @@ function AllPlaylists() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        {loading ? (
-          <Text>Loading</Text>
-        ) : (
-          <Table data={filteredTransitions} className="bg-white ">
-            <Table.Column prop="playlist_id" label="Playlist ID" />
-            <Table.Column prop="playlist_name" label="Playlist Name" />
-            <Table.Column
-              prop="asana_ids"
-              label="Asana Names"
-              render={(value, rowData) => (
-                <div className="flex flex-row flex-wrap gap-2 p-2">
-                  {value.map((asanaId, index) => {
-                    const asana =
-                      playlistAsanas.find((asana) => asana.id === asanaId) ||
-                      transitions.find(
-                        (transition) => transition.transition_id === asanaId
-                      );
-                    return (
-                      <Tag key={index}>
-                        {asana ? asana.asana_name : asana.transition_video_name}
-                      </Tag>
-                    );
-                  })}
-                </div>
-              )}
-            />
 
-            <Table.Column
-              prop="operation"
-              label="ACTIONS"
-              width={150}
-              render={renderAction}
-            />
-          </Table>
-        )}
+        <Table data={filteredTransitions} className="bg-white ">
+          <Table.Column prop="playlist_id" label="Playlist ID" />
+          <Table.Column prop="playlist_name" label="Playlist Name" />
+          <Table.Column
+            prop="asana_ids"
+            label="Asana Names"
+            render={(value, rowData) => (
+              <div className="flex flex-row flex-wrap gap-2 p-2">
+                {value.map((asanaId, index) => {
+                  console.log(asanaId, value);
+                  const asana =
+                    playlistAsanas.find((asana) => asana.id === asanaId) ||
+                    transitions.find(
+                      (transition) => transition.transition_id === asanaId
+                    );
+                  console.log(asana, "MUAHAHA");
+                  return (
+                    <Tag key={index}>
+                      {asana
+                        ? asana.asana_name
+                        : asana?.transition_video_name || ""}
+                    </Tag>
+                  );
+                })}
+              </div>
+            )}
+          />
+
+          <Table.Column
+            prop="operation"
+            label="ACTIONS"
+            width={150}
+            render={renderAction}
+          />
+        </Table>
       </div>
       <div>
         <Modal
@@ -609,7 +608,8 @@ function AllPlaylists() {
                       (transition) => transition.transition_id === asanaId
                     );
                   isAsana = asana.asana_name ? true : false;
-                  asanaName = asana.asana_name || asana.transition_video_name;
+                  asanaName =
+                    asana.asana_name || asana.transition_video_name || "";
                 }
                 return (
                   <div>
