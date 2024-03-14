@@ -6,6 +6,7 @@ import AllTransitions from "../components/content-management/AllTransitions";
 import RegisterLanguageForm from "../components/content-management/forms/RegisterLanguage";
 import RegisterTransitionVideoForm from "../components/content-management/forms/RegisterTransitionVideoForm";
 import AdminHome from "../pages/admin/AdminHome";
+import WatchAnalysis from "../pages/admin/watch-analysis/WatchAnalysis";
 import RegisterNewPlan from "../pages/admin/Plans/RegisterNewPlan";
 // import Settings from '../pages/admin/settings/settings';
 import RegisterNewCategoryForm from "../components/content-management/forms/RegisterNewCategoryForm";
@@ -39,6 +40,10 @@ export const AdminRoutes = [
   {
     path: "/admin/video/view-all",
     element: <AllAsanas />,
+  },
+  {
+    path: "/admin/watch-analysis",
+    element: <WatchAnalysis />,
   },
   // video transition
   {
