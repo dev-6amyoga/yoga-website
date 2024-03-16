@@ -176,26 +176,22 @@ router.post("/get/:page", async (req, res) => {
 router.get("/video-view-counts", async (req, res) => {
   try {
     const allWatchHistory = await WatchHistory.find();
-    const historyCount = {};
-    // Count occurrences of each asana_id
-    allWatchHistory.forEach((entry) => {
+    const historyCount = allWatchHistory.reduce((acc, entry) => {
       entry.history.forEach((item) => {
         const { asana_id } = item;
         if (asana_id) {
-          historyCount[asana_id] = (historyCount[asana_id] || 0) + 1;
+          acc[asana_id] = (acc[asana_id] || 0) + 1;
         }
       });
-    });
-    const sortedKeys = Object.entries(historyCount)
-      .sort((a, b) => b[1] - a[1])
-      .map(([key, value]) => key);
-    const sortedItems = Object.entries(historyCount);
-    sortedItems.sort((a, b) => b[1] - a[1]);
-    const sortedDictionary = sortedItems.map(([key, value]) => ({
-      key,
-      value,
-    }));
-    res.json(sortedDictionary);
+      return acc;
+    }, {});
+    const result = Object.entries(historyCount).map(
+      ([asana_id, viewcount]) => ({
+        label: `Asana ${asana_id}`,
+        viewcount,
+      })
+    );
+    res.json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });

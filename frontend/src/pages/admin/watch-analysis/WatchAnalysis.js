@@ -9,9 +9,11 @@ import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
 
 function WatchAnalysis() {
   const [watchTimeCount, setWatchTimeCount] = useState([]);
+  const [viewCount, setViewCount] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [colors, setColors] = useState([]);
+  const [moreColors, setMoreColors] = useState([]);
 
   const generateColors = (numColors) => {
     const colors = [];
@@ -39,6 +41,28 @@ function WatchAnalysis() {
       } catch (error) {
         console.log(error);
         setError(error); // Set error state
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await Fetch({
+          url: "/watch-history/video-view-counts",
+        });
+        const data = response.data;
+        let COLORS = generateColors(data.length);
+        setMoreColors(COLORS);
+        console.log(data);
+        setViewCount(data);
+        setLoading(false);
+        setError(null);
+      } catch (error) {
+        console.log(error);
+        setError(error);
         setLoading(false);
       }
     };
@@ -92,6 +116,43 @@ function WatchAnalysis() {
                     <Cell
                       key={`cell-${index}`}
                       fill={colors[index % colors.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </Card>
+          </div>
+        ) : (
+          <div>No data available</div>
+        )}
+
+        {loading ? (
+          <div>Loading...</div>
+        ) : error ? (
+          <div>Error: {error.message}</div>
+        ) : viewCount && viewCount.length > 0 ? (
+          <div className="flex justify-center items-center h-full">
+            <Card width="50">
+              <Text h4 my={10}>
+                Asana View Count
+              </Text>
+              <PieChart width={400} height={400}>
+                <Pie
+                  data={viewCount}
+                  dataKey="viewcount"
+                  nameKey="label"
+                  cx={200}
+                  cy={200}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  label
+                >
+                  {viewCount.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={moreColors[index % moreColors.length]}
                     />
                   ))}
                 </Pie>
