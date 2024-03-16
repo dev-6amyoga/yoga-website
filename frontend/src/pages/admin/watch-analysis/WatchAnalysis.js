@@ -97,7 +97,7 @@ function WatchAnalysis() {
           <div>Error: {error.message}</div>
         ) : watchTimeCount && watchTimeCount.length > 0 ? (
           <div className="flex justify-center items-center h-full">
-            <Card width="50">
+            <Card width="30">
               <Text h4 my={10}>
                 Asana Watch Time
               </Text>
@@ -127,14 +127,14 @@ function WatchAnalysis() {
         ) : (
           <div>No data available</div>
         )}
-
+        <Spacer h={2} />
         {loading ? (
           <div>Loading...</div>
         ) : error ? (
           <div>Error: {error.message}</div>
         ) : viewCount && viewCount.length > 0 ? (
           <div className="flex justify-center items-center h-full">
-            <Card width="50">
+            <Card width="30">
               <Text h4 my={10}>
                 Asana View Count
               </Text>
