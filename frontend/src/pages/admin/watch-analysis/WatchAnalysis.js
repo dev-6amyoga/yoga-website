@@ -1,23 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { Button, Spacer } from "@geist-ui/core";
+import { Button, Card, Spacer, Text } from "@geist-ui/core";
 import Papa from "papaparse";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
 import { ROLE_ROOT } from "../../../enums/roles";
-import { Bar } from "react-chartjs-2";
+import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
 
 function WatchAnalysis() {
   const [watchTimeCount, setWatchTimeCount] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [colors, setColors] = useState([]);
+
+  const generateColors = (numColors) => {
+    const colors = [];
+    for (let i = 0; i < numColors; i++) {
+      const hue = (i * 360) / numColors;
+      colors.push(`hsl(${hue}, 70%, 50%)`);
+    }
+    return colors;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await Fetch({ url: "/watch-time/time-statistics" });
         const data = response.data;
-        setWatchTimeCount(data);
+        const reducedData = data.map((item) => ({
+          label: item.label,
+          duration: item.data.reduce((acc, curr) => acc + curr.duration, 0),
+        }));
+        let COLORS = generateColors(reducedData.length);
+        setColors(COLORS);
+        setWatchTimeCount(reducedData);
         setLoading(false);
         setError(null); // Reset error state
       } catch (error) {
@@ -54,37 +70,36 @@ function WatchAnalysis() {
         {loading ? (
           <div>Loading...</div>
         ) : error ? (
-          <div>Error: {error.message}</div> // Display error message
+          <div>Error: {error.message}</div>
         ) : watchTimeCount && watchTimeCount.length > 0 ? (
-          <Bar
-            data={{
-              labels: watchTimeCount.map((item) => `Asana ${item.asana_id}`),
-              datasets: [
-                {
-                  label: "Duration",
-                  data: watchTimeCount.map((item) => item.duration),
-                  backgroundColor: [
-                    "#FF6384",
-                    "#36A2EB",
-                    "#FFCE56",
-                    "#8A2BE2",
-                    "#00CED1",
-                  ],
-                },
-              ],
-            }}
-            options={{
-              indexAxis: "y",
-              scales: {
-                x: {
-                  beginAtZero: true,
-                },
-                y: {
-                  beginAtZero: true,
-                },
-              },
-            }}
-          />
+          <div className="flex justify-center items-center h-full">
+            <Card width="50">
+              <Text h4 my={10}>
+                Asana Watch Time
+              </Text>
+              <PieChart width={400} height={400}>
+                <Pie
+                  data={watchTimeCount}
+                  dataKey="duration"
+                  nameKey="label"
+                  cx={200}
+                  cy={200}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  label
+                >
+                  {watchTimeCount.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={colors[index % colors.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </Card>
+          </div>
         ) : (
           <div>No data available</div>
         )}
