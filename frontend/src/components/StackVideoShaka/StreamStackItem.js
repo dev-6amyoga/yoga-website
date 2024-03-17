@@ -33,7 +33,7 @@ class ShakaPlayerGoNext extends shaka.ui.Element {
 
 		// The actual button that will be displayed
 		this.button_ = document.createElement("button");
-		this.button_.innerHTML = `Next`;
+		this.button_.innerHTML = `<i class="fa-solid fa-forward-step"></i>`;
 
 		this.parent.appendChild(this.button_);
 
@@ -60,7 +60,7 @@ class ShakaPlayerGoPrev extends shaka.ui.Element {
 
 		// The actual button that will be displayed
 		this.button_ = document.createElement("button");
-		this.button_.innerHTML = `Prev`;
+		this.button_.innerHTML = `<i class="fa-solid fa-backward-step"></i>`;
 
 		this.parent.appendChild(this.button_);
 
@@ -710,72 +710,130 @@ function StreamStackItem({
 		addToSeekQueue({ t: -5, type: "seek" });
 	}, [addToSeekQueue]);
 
-	const playerInit = useCallback((ref) => {
-		if (ref !== null) {
-			// console.log(ref);
-			playerRef.current = ref;
+	const playerInit = useCallback(
+		(ref) => {
+			if (ref !== null) {
+				// console.log(ref);
+				setVideoState(STATE_VIDEO_LOADING);
+				playerRef.current = ref;
 
-			if (ref.ui) {
-				shaka.ui.Controls.registerElement(
-					"next",
-					new ShakaPlayerGoNext.Factory(handleNextVideo)
-				);
-
-				shaka.ui.Controls.registerElement(
-					"prev",
-					new ShakaPlayerGoPrev.Factory(handlePrevVideo)
-				);
-
-				shaka.ui.Controls.registerElement(
-					"seek_forward",
-					new ShakaPlayerGoSeekForward.Factory(handleSeekFoward)
-				);
-
-				shaka.ui.Controls.registerElement(
-					"seek_backward",
-					new ShakaPlayerGoSeekBackward.Factory(handleSeekBackward)
-				);
-
-				playerRef.current.ui.configure({
-					enableTooltips: true,
-					doubleClickForFullscreen: true,
-					seekOnTaps: true,
-					tapSeekDistance: 5,
-					enableKeyboardPlaybackControls: true,
-					enableFullscreenOnRotation: true,
-					keyboardSeekDistance: 5,
-					controlPanelElements: [
-						"prev",
-						"seek_backward",
-						"play_pause",
-						"seek_forward",
+				if (ref.ui) {
+					shaka.ui.Controls.registerElement(
 						"next",
-						"spacer",
-						"mute",
-						"volume",
-						"time_and_duration",
-						"fullscreen",
-					],
-					seekBarColors: {
-						base: "#FFFFFF",
-						buffered: "#DDDDDD",
-						played: "#FFBF00",
-					},
-					fastForwardRates: [2, 4, 8, 1],
-					rewindRates: [-1, -2, -4, -8],
-				});
-			}
+						new ShakaPlayerGoNext.Factory(handleNextVideo)
+					);
 
-			// initialize events
-			// playerRef.current.player.
-		}
-	}, []);
+					shaka.ui.Controls.registerElement(
+						"prev",
+						new ShakaPlayerGoPrev.Factory(handlePrevVideo)
+					);
+
+					shaka.ui.Controls.registerElement(
+						"seek_forward",
+						new ShakaPlayerGoSeekForward.Factory(handleSeekFoward)
+					);
+
+					shaka.ui.Controls.registerElement(
+						"seek_backward",
+						new ShakaPlayerGoSeekBackward.Factory(
+							handleSeekBackward
+						)
+					);
+
+					playerRef.current.ui.configure({
+						enableTooltips: true,
+						doubleClickForFullscreen: true,
+						seekOnTaps: true,
+						tapSeekDistance: 5,
+						enableKeyboardPlaybackControls: true,
+						enableFullscreenOnRotation: true,
+						keyboardSeekDistance: 5,
+						controlPanelElements: [
+							"prev",
+							"seek_backward",
+							"play_pause",
+							"seek_forward",
+							"next",
+							"spacer",
+							"mute",
+							"volume",
+							"time_and_duration",
+							"fullscreen",
+						],
+						seekBarColors: {
+							base: "#FFFFFF",
+							buffered: "#DDDDDD",
+							played: "#FFBF00",
+						},
+						fastForwardRates: [2, 4, 8, 1],
+						rewindRates: [-1, -2, -4, -8],
+					});
+				}
+
+				if (ref.player) {
+					// get the playready license acquisition url
+					console.log("Fetching DRM Info");
+					Fetch({
+						url: "/playback/get-playready-token",
+						method: "POST",
+						token: false,
+					})
+						.then((res) => {
+							const data = res.data;
+							console.log(data);
+
+							if (
+								data &&
+								data.licenseAcquisitionUrl &&
+								data.token
+							) {
+								console.log("DRM Info Received");
+								playerRef.current.player.configure({
+									drm: {
+										servers: {
+											"com.microsoft.playready":
+												data.licenseAcquisitionUrl +
+												"?ExpressPlayToken=" +
+												data.token,
+										},
+									},
+								});
+
+								console.log("Trying to load video");
+								playerRef.current.player
+									.load(videoUrl)
+									.then((res) => {
+										console.log("Video Loaded");
+										if (isActive)
+											setVideoState(STATE_VIDEO_PLAY);
+									})
+									.catch((err) => {
+										console.log("Error loading video", err);
+										setVideoState(STATE_VIDEO_ERROR);
+									});
+							}
+						})
+						.catch((err) => {
+							console.log("Error fetching DRM info :", err);
+						});
+				}
+			}
+		},
+		[
+			isActive,
+			videoUrl,
+			handleNextVideo,
+			handlePrevVideo,
+			handleSeekFoward,
+			handleSeekBackward,
+			setVideoState,
+		]
+	);
 
 	return (
 		<div className={`h-full w-full ${isActive ? "block" : "hidden"}`}>
 			<ShakaPlayer
 				ref={playerInit}
-				src={videoUrl}
 				width="100%"
 				height="100%"
 				className="custom-shaka"
