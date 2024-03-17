@@ -60,6 +60,7 @@ const watchTimeLogRouter = require("./routes/WatchTimeLog");
 const queryRouter = require("./routes/Queries");
 const updateRequestsRouter = require("./routes/UpdateRequests");
 const playlistConfigsRouter = require("./routes/PlaylistConfigs");
+const playbackRouter = require("./routes/Playback");
 
 // DEV : sample data creation
 const { bulkCreateSampleData } = require("./sample_data");
@@ -192,6 +193,7 @@ app.use("/watch-time", watchTimeLogRouter);
 app.use("/query", queryRouter);
 app.use("/update-request", updateRequestsRouter);
 app.use("/playlist-configs", playlistConfigsRouter);
+app.use("/playback", playbackRouter);
 
 const port = parseInt(process.env.SERVER_PORT);
 

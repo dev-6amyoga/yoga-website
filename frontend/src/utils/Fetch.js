@@ -13,7 +13,7 @@ export const Fetch = async ({
 }) => {
 	let h = { ...headers };
 
-	if (token) {
+	if (token !== null && token !== undefined && token === true) {
 		if (!useUserStore.getState().accessToken) {
 			throw new Error("No token found");
 		}
@@ -21,7 +21,7 @@ export const Fetch = async ({
 		h["authorization"] = `Bearer ${useUserStore.getState().accessToken}`;
 	}
 
-	if (data) {
+	if (data !== null && data !== undefined && method !== "GET") {
 		h["Content-Type"] = "application/json";
 	}
 
