@@ -331,4 +331,14 @@ router.get("/time-statistics", async (req, res) => {
   }
 });
 
+router.get("/all-watch-time-log", async (req, res) => {
+  try {
+    const allWatchHistory = await WatchTimeLog.find();
+    res.json(allWatchHistory);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button, Card, Spacer, Text } from "@geist-ui/core";
 import Papa from "papaparse";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
@@ -6,14 +6,33 @@ import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
 import { ROLE_ROOT } from "../../../enums/roles";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
+import SortableColumn from "../../../components/Common/DataTable/SortableColumn";
+import { DataTable } from "../../../components/Common/DataTable/DataTable";
 
 function WatchAnalysis() {
   const [watchTimeCount, setWatchTimeCount] = useState([]);
   const [viewCount, setViewCount] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [colors, setColors] = useState([]);
   const [moreColors, setMoreColors] = useState([]);
+  const [userAsanaStats, setUserAsanaStats] = useState([]);
+
+  //   const {
+  //     isLoading,
+  //     data: transactions,
+  //     error,
+  //     refetch: getTransactions,
+  //   } = useQuery({
+  //     queryKey: ["transactions"],
+  //     queryFn: async () => {
+  //       const res = await Fetch({
+  //         url: "/transaction/get-all",
+  //         method: "GET",
+  //         token: true,
+  //       });
+  //       return res?.data?.transactions;
+  //     },
+  //   });
 
   const generateColors = (numColors) => {
     const colors = [];
@@ -23,6 +42,32 @@ function WatchAnalysis() {
     }
     return colors;
   };
+
+  const columnsDataTable = useMemo(
+    () => [
+      {
+        accessorKey: "user_id",
+        header: ({ column }) => (
+          <SortableColumn column={column}>User ID</SortableColumn>
+        ),
+      },
+      {
+        accessorKey: "asana_id",
+        header: "Asana ID",
+      },
+      {
+        accessorKey: "totalDuration",
+        header: "Net Watch Time",
+      },
+      {
+        accessorKey: "totalCount",
+        header: ({ column }) => (
+          <SortableColumn column={column}>Net Watch Count</SortableColumn>
+        ),
+      },
+    ],
+    []
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,10 +82,8 @@ function WatchAnalysis() {
         setColors(COLORS);
         setWatchTimeCount(reducedData);
         setLoading(false);
-        setError(null); // Reset error state
       } catch (error) {
         console.log(error);
-        setError(error); // Set error state
         setLoading(false);
       }
     };
@@ -59,10 +102,33 @@ function WatchAnalysis() {
         console.log(data);
         setViewCount(data);
         setLoading(false);
-        setError(null);
       } catch (error) {
         console.log(error);
-        setError(error);
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await Fetch({
+          url: "/watch-history/combined-data",
+        });
+        const data = response.data;
+        const filteredData = data.filter(
+          (entry) =>
+            entry.asana_id > 0 &&
+            entry.user_id !== null &&
+            entry.user_id !== "null" &&
+            typeof entry.user_id !== "undefined"
+        );
+
+        setUserAsanaStats(filteredData);
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
         setLoading(false);
       }
     };
@@ -87,20 +153,18 @@ function WatchAnalysis() {
   return (
     <AdminPageWrapper heading="Watch Analysis">
       <div className="elements">
-        <Button onClick={() => handleDownload(watchTimeCount)}>
-          Download CSV
-        </Button>
         <Spacer h={2} />
         {loading ? (
           <div>Loading...</div>
-        ) : error ? (
-          <div>Error: {error.message}</div>
         ) : watchTimeCount && watchTimeCount.length > 0 ? (
           <div className="flex justify-center items-center h-full">
             <Card width="30">
               <Text h4 my={10}>
                 Asana Watch Time
               </Text>
+              <Button onClick={() => handleDownload(watchTimeCount)}>
+                Download CSV
+              </Button>
               <PieChart width={400} height={400}>
                 <Pie
                   data={watchTimeCount}
@@ -130,14 +194,15 @@ function WatchAnalysis() {
         <Spacer h={2} />
         {loading ? (
           <div>Loading...</div>
-        ) : error ? (
-          <div>Error: {error.message}</div>
         ) : viewCount && viewCount.length > 0 ? (
           <div className="flex justify-center items-center h-full">
             <Card width="30">
               <Text h4 my={10}>
                 Asana View Count
               </Text>
+              <Button onClick={() => handleDownload(viewCount)}>
+                Download CSV
+              </Button>
               <PieChart width={400} height={400}>
                 <Pie
                   data={viewCount}
@@ -160,6 +225,18 @@ function WatchAnalysis() {
                 <Legend />
               </PieChart>
             </Card>
+          </div>
+        ) : (
+          <div>No data available</div>
+        )}
+        <Spacer h={2} />
+        {userAsanaStats && userAsanaStats.length > 0 ? (
+          <div className="max-w-7xl">
+            <DataTable
+              columns={columnsDataTable}
+              data={userAsanaStats || []}
+              // refetch={getTransactions}
+            ></DataTable>
           </div>
         ) : (
           <div>No data available</div>

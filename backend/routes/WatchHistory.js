@@ -9,6 +9,7 @@ const {
   HTTP_INTERNAL_SERVER_ERROR,
 } = require("../utils/http_status_codes");
 const WatchHistory = require("../models/mongo/WatchHistory");
+const WatchTimeLog = require("../models/mongo/WatchTimeLog");
 
 router.post("/create", async (req, res) => {
   const { user_id, asana_id, playlist_id } = req.body;
@@ -191,6 +192,81 @@ router.get("/video-view-counts", async (req, res) => {
         viewcount,
       })
     );
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/all-watch-history", async (req, res) => {
+  try {
+    const allWatchHistory = await WatchHistory.find();
+    res.json(allWatchHistory);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/combined-data", async (req, res) => {
+  try {
+    const watchTimeLogs = await WatchTimeLog.find();
+    const watchHistory = await WatchHistory.find();
+
+    // Aggregate watch time logs data by user_id and asana_id
+    const aggregatedLogs = watchTimeLogs.reduce((acc, log) => {
+      const { user_id, asana_id, duration } = log;
+      if (!acc[user_id]) acc[user_id] = {};
+      if (!acc[user_id][asana_id])
+        acc[user_id][asana_id] = { totalDuration: 0, totalCount: 0 };
+      acc[user_id][asana_id].totalDuration += duration;
+      acc[user_id][asana_id].totalCount++;
+      return acc;
+    }, {});
+
+    // Aggregate watch history data by user_id and asana_id
+    const aggregatedHistory = watchHistory.reduce((acc, history) => {
+      const { user_id, history: entries } = history;
+      entries.forEach((entry) => {
+        const { asana_id } = entry;
+        if (!acc[user_id]) acc[user_id] = {};
+        if (!acc[user_id][asana_id])
+          acc[user_id][asana_id] = { totalDuration: 0, totalCount: 0 };
+        acc[user_id][asana_id].totalDuration += entry.duration;
+        acc[user_id][asana_id].totalCount++;
+      });
+      return acc;
+    }, {});
+
+    // Merge the aggregated data
+    const combinedData = {};
+    [watchTimeLogs, watchHistory].forEach((data) => {
+      data.forEach((item) => {
+        const { user_id, asana_id } = item;
+        if (!combinedData[user_id]) combinedData[user_id] = {};
+        if (!combinedData[user_id][asana_id])
+          combinedData[user_id][asana_id] = { totalDuration: 0, totalCount: 0 };
+        combinedData[user_id][asana_id].totalDuration += item.duration;
+        combinedData[user_id][asana_id].totalCount++;
+      });
+    });
+
+    // Format the result
+    const result = Object.entries(combinedData)
+      .map(([user_id, userData]) => {
+        const userResults = Object.entries(userData).map(
+          ([asana_id, { totalDuration, totalCount }]) => ({
+            user_id,
+            asana_id,
+            totalDuration,
+            totalCount,
+          })
+        );
+        return userResults;
+      })
+      .flat();
+
     res.json(result);
   } catch (error) {
     console.error(error);
