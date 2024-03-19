@@ -1,4 +1,4 @@
-import { CssBaseline, GeistProvider, Themes, useTheme } from "@geist-ui/core";
+import { GeistProvider } from "@geist-ui/core";
 import {
 	QueryClient,
 	QueryClientProvider,
@@ -8,7 +8,12 @@ import {
 import { useCallback } from "react";
 import ReactDOM from "react-dom/client";
 import "react-phone-number-input/style.css";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import {
+	Outlet,
+	RouterProvider,
+	createBrowserRouter,
+	useLocation,
+} from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useShallow } from "zustand/react/shallow";
@@ -24,8 +29,6 @@ import { TeacherRoutes } from "./routes/TeacherRoutes";
 import { TestingRoutes } from "./routes/TestingRoutes";
 import useUserStore from "./store/UserStore";
 import { Fetch } from "./utils/Fetch";
-import { AnimatePresence, motion } from "framer-motion";
-import { Outlet, useLocation } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -373,7 +376,7 @@ function Index() {
 		<>
 			<QueryClientProvider client={queryClient}>
 				<GeistProvider>
-					<CssBaseline />
+					{/* <CssBaseline /> */}
 					<RouterProvider router={router} />
 					<ToastContainer
 						autoClose={5000}
