@@ -167,6 +167,30 @@ h6 {
 	margin: 0 !important;
 }
 
+h1 {
+	@apply text-step-5 font-bold;
+}
+
+h2 {
+	@apply text-step-4 font-bold;
+}
+
+h3 {
+	@apply text-step-3 font-bold;
+}
+
+h4 {
+	@apply text-step-2 font-bold;
+}
+
+h5 {
+	@apply text-step-1 font-bold;
+}
+
+h6 {
+	@apply text-step-0 font-bold;
+}
+
 h1,
 h2,
 h3,
