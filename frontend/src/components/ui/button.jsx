@@ -1,24 +1,26 @@
-import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
 import * as React from "react";
 
+import { Loader2 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 const buttonVariants = cva(
-	"inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+	"relative inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
 	{
 		variants: {
 			variant: {
 				default:
-					"bg-primary text-primary-foreground hover:bg-primary/90",
+					"bg-y-darkgreen text-y-white border-2 border-transparent hover:border-y-black hover:bg-y-darkgreen/90",
 				destructive:
-					"bg-destructive text-destructive-foreground hover:bg-destructive/90",
+					"bg-y-red text-y-black btn-move-base transition-all text-y-black hover:solid-shadow",
 				outline:
-					"border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+					"border border-input bg-background hover:bg-y-white border-2 border-y-gray hover:border-y-black",
 				secondary:
-					"bg-secondary text-secondary-foreground hover:bg-secondary/80",
-				ghost: "hover:bg-accent hover:text-accent-foreground",
+					"bg-y-white text-y-black border-2 border-transparent hover:border-y-black hover:bg-y-white/90",
+				ghost: "hover:bg-y-white text-y-green btn-move-base transition-all hover:solid-shadow-darkgreen",
 				link: "text-primary underline-offset-4 hover:underline",
+				experiment:
+					"z-10 relative bg-y-darkgreen btn-move-base transition-all text-y-white hover:solid-shadow",
 			},
 			size: {
 				default: "h-10 px-4 py-2",
@@ -35,14 +37,36 @@ const buttonVariants = cva(
 );
 
 const Button = React.forwardRef(
-	({ className, variant, size, asChild = false, ...props }, ref) => {
-		const Comp = asChild ? Slot : "button";
+	(
+		{
+			className,
+			variant,
+			size,
+			loading,
+			disabled,
+			asChild = false,
+			children,
+			...props
+		},
+		ref
+	) => {
+		const Comp = "button";
 		return (
 			<Comp
 				className={cn(buttonVariants({ variant, size, className }))}
 				ref={ref}
-				{...props}
-			/>
+				disabled={disabled || loading}
+				{...props}>
+				<div
+					className={`absolute top-0 left-0 right-0 bottom-0 h-full w-full flex-center 
+						${loading ? "opacity-100" : "opacity-0"}
+						`}>
+					<Loader2 className="animate-spin" />
+				</div>
+				<div className={`${loading ? "opacity-0" : "opacity-100"}`}>
+					{children}
+				</div>
+			</Comp>
 		);
 	}
 );
