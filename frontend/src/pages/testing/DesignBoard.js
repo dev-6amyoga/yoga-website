@@ -17,7 +17,7 @@ function Box({ children, className }) {
 export default function DesignBoard() {
 	return (
 		<div className="p-4 my-20">
-			<div className="flex flex-col lg:grid lg:grid-cols-3">
+			<div className="flex flex-col xl:grid xl:grid-cols-3">
 				{/* colors */}
 				<Box className="lg:start-0 lg:col-span-3">
 					<div className="grid grid-cols-1 lg:grid-cols-7">
@@ -99,7 +99,7 @@ export default function DesignBoard() {
 				</Box>
 
 				{/* buttons */}
-				<Box className="lg:col-start-0 lg:col-span-1">
+				<Box className="lg:col-start-0 lg:col-span-2">
 					<div className="flex lg:flex-row flex-col gap-2">
 						<Button variant="default">Default (default)</Button>
 						<Button variant="default" size="lg">
