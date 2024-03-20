@@ -51,6 +51,7 @@ export default function LoginGoogle() {
             SetType("institute_admin");
           }
           if (maxRole === 2) {
+            console.log("in here!!");
             SetType("root");
           }
         }
