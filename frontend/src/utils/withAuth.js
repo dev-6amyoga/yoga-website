@@ -36,6 +36,9 @@ export const withAuth = (Component, ...roles) => {
     useEffect(() => {
       // if user is there, check if role is valid
       if (user) {
+        console.log(user, "IN WITH AUTH");
+        console.log(roles, " IN WITH AUTH");
+        console.log(currentRole, "IN WITH AUTH");
         // if role is null, show the component [authenticated+public]
         if (roles.includes(null)) {
           setShow(true);

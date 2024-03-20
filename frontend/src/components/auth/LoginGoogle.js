@@ -5,12 +5,14 @@ import { useNavigate } from "react-router-dom";
 import useUserStore from "../../store/UserStore";
 import { getBackendDomain } from "../../utils/getBackendDomain";
 import { Fetch } from "../../utils/Fetch";
-
+import { useShallow } from "zustand/react/shallow";
 export default function LoginGoogle() {
   const [loginStatus, setLoginStatus] = useState(null);
   const navigate = useNavigate();
   const [type, SetType] = useState("");
-  const setUser = useUserStore((state) => state.setUser);
+  const [setUser, setCurrentRole] = useUserStore(
+    useShallow((state) => [state.setUser, state.setCurrentRole])
+  );
   const [clientID, setClientID] = useState("");
 
   useEffect(() => {
@@ -36,11 +38,17 @@ export default function LoginGoogle() {
           },
         });
         const data = roleFetcher.data;
+        let maxRole = 0;
         if (data) {
-          const maxRole = Math.max(
-            ...data.user_role.map((role) => role.role_id)
-          );
-          console.log(maxRole);
+          for (var i = 0; i < data.user_role.length; i++) {
+            if (data.user_role[i].role_id == 1) {
+              maxRole = 1;
+            }
+          }
+          if (maxRole !== 1) {
+            maxRole = Math.max(...data.user_role.map((role) => role.role_id));
+          }
+          console.log("max", maxRole);
           if (maxRole === 5) {
             SetType("student");
           }
@@ -50,8 +58,8 @@ export default function LoginGoogle() {
           if (maxRole === 3) {
             SetType("institute_admin");
           }
-          if (maxRole === 2) {
-            console.log("in here!!");
+          if (maxRole === 1) {
+            setCurrentRole("ROOT");
             SetType("root");
           }
         }
@@ -67,6 +75,7 @@ export default function LoginGoogle() {
     if (loginStatus === "Login successful" && type === "student") {
       navigate("/student/free-videos");
     } else if (loginStatus === "Login successful" && type === "root") {
+      console.log("here!");
       navigate("/admin");
     } else if (loginStatus === "Login successful" && type === "teacher") {
       navigate("/teacher");
@@ -95,7 +104,6 @@ export default function LoginGoogle() {
             if (email_verified) {
               const email = payload.data.email;
               const name = payload.data.name;
-              console.log(email, name);
               verify_login(email, name);
             } else {
             }
