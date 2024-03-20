@@ -10,6 +10,10 @@
 		@apply flex items-center justify-center;
 	}
 
+	.flex-center-vertical {
+		@apply flex items-center;
+	}
+
 	.grid-center {
 		@apply grid place-items-center;
 	}
