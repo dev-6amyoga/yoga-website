@@ -15,112 +15,106 @@ const TOKEN_TYPE_ACCESS = "ACCESS_TOKEN";
 const TOKEN_TYPE_REFRESH = "REFRESH_TOKEN";
 
 function generateAccessToken(user) {
-	// TODO : update the expiry
+  // TODO : update the expiry
 
-	const now = new Date();
+  const now = new Date();
 
-	const exp = new Date();
-	exp.setSeconds(exp.getSeconds() + 300);
+  const exp = new Date();
+  exp.setSeconds(exp.getSeconds() + 300);
 
-	return [
-		jwt.sign(
-			{ token_type: TOKEN_TYPE_ACCESS, user: user },
-			JWT_TOKEN_SECRET,
-			{ expiresIn: "300s" }
-		),
-		now,
-		exp,
-	];
+  return [
+    jwt.sign({ token_type: TOKEN_TYPE_ACCESS, user: user }, JWT_TOKEN_SECRET, {
+      expiresIn: "300s",
+    }),
+    now,
+    exp,
+  ];
 }
 
 function generateRefreshToken(user) {
-	// TODO : update the expiry
+  // TODO : update the expiry
 
-	const now = new Date();
+  const now = new Date();
 
-	const exp = new Date();
-	exp.setHours(exp.getHours() + 1);
+  const exp = new Date();
+  exp.setHours(exp.getHours() + 1);
 
-	return [
-		jwt.sign(
-			{ token_type: TOKEN_TYPE_REFRESH, user: user },
-			JWT_TOKEN_SECRET,
-			{ expiresIn: "1h" }
-		),
-		now,
-		exp,
-	];
+  return [
+    jwt.sign({ token_type: TOKEN_TYPE_REFRESH, user: user }, JWT_TOKEN_SECRET, {
+      expiresIn: "1h",
+    }),
+    now,
+    exp,
+  ];
 }
 
 function verifyToken(token) {
-	let decoded = null,
-		error = null;
+  let decoded = null,
+    error = null;
 
-	try {
-		decoded = jwt.verify(token, JWT_TOKEN_SECRET);
-	} catch (err) {
-		console.log(err);
-		error = err;
-	}
-	return [decoded, error];
+  try {
+    decoded = jwt.verify(token, JWT_TOKEN_SECRET);
+  } catch (err) {
+    console.log(err);
+    error = err;
+  }
+  return [decoded, error];
 }
 
 async function authenticateToken(req, res, next) {
-	// console.log(req.headers);
-	const authHeader = req.headers["authorization"];
-	// const refreshToken = req.cookies["refreshToken"];
-	const token = authHeader?.split(" ")[1];
-	console.log({ access_token: token !== undefined || token !== null });
-	// console.log({ authHeader });
+  // console.log(req.headers);
+  const authHeader = req.headers["authorization"];
+  // const refreshToken = req.cookies["refreshToken"];
+  const token = authHeader?.split(" ")[1];
+  console.log({ access_token: token !== undefined || token !== null });
+  // console.log({ authHeader });
 
-	if (token === null || token === undefined) return res.sendStatus(401);
+  if (token === null || token === undefined) return res.sendStatus(401);
 
-	jwt.verify(token, JWT_TOKEN_SECRET, async (err, decoded) => {
-		if (err) {
-			console.error(err.message);
-			return res.status(HTTP_FORBIDDEN).json({ message: "Forbidden" });
-		}
+  jwt.verify(token, JWT_TOKEN_SECRET, async (err, decoded) => {
+    if (err) {
+      console.error(err.message);
+      return res.status(HTTP_FORBIDDEN).json({ message: "Forbidden" });
+    }
 
-		const [u, error] = await GetUserInfo({ user_id: decoded.user.user_id });
+    const [u, error] = await GetUserInfo({ user_id: decoded.user.user_id });
 
-		if (error) {
-			console.error(error);
-			return res.status(HTTP_FORBIDDEN).json({ message: "Forbidden" });
-		}
+    if (error) {
+      console.error(error);
+      return res.status(HTTP_FORBIDDEN).json({ message: "Forbidden" });
+    }
 
-		if (!u) {
-			console.error("User not found");
-			return res.status(HTTP_FORBIDDEN).json({ message: "Forbidden" });
-		}
+    if (!u) {
+      console.error("User not found");
+      return res.status(HTTP_FORBIDDEN).json({ message: "Forbidden" });
+    }
 
-		const login_token = await LoginToken.findOne({
-			where: {
-				access_token: token,
-				user_id: u.user_id,
-				refresh_token_expiry_at: {
-					[Op.gt]: new Date(),
-				},
-			},
-		});
+    const login_token = await LoginToken.findOne({
+      where: {
+        access_token: token,
+        user_id: u.user_id,
+        refresh_token_expiry_at: {
+          [Op.gt]: new Date(),
+        },
+      },
+    });
 
-		if (!login_token) {
-			console.log("Token unavailable");
-			return res
-				.status(HTTP_FORBIDDEN)
-				.json({ message: "Token unavailable" });
-		}
+    if (!login_token) {
+      console.log("Token unavailable");
+      return res.status(HTTP_FORBIDDEN).json({ message: "Token unavailable" });
+    }
 
-		req.user = u;
+    req.user = u;
 
-		next();
-	});
+    next();
+  });
 }
 
 module.exports = {
-	TOKEN_TYPE_ACCESS,
-	TOKEN_TYPE_REFRESH,
-	verifyToken,
-	generateAccessToken,
-	generateRefreshToken,
-	authenticateToken,
+  TOKEN_TYPE_ACCESS,
+  TOKEN_TYPE_REFRESH,
+  verifyToken,
+  generateAccessToken,
+  generateRefreshToken,
+  authenticateToken,
 };
