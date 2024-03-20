@@ -771,6 +771,11 @@ function StreamStackItem({
 				}
 
 				if (ref.player) {
+					playerRef.current.player.configure(
+						"manifest.dash.ignoreMinBufferTime",
+						true
+					);
+
 					// get the playready license acquisition url
 					console.log("Fetching DRM Info");
 					Fetch({

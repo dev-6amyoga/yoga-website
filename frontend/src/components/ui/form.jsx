@@ -1,8 +1,9 @@
-import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
+import * as React from "react";
 import { Controller, FormProvider, useFormContext } from "react-hook-form";
 
 import { cn } from "../../lib/utils";
+import { Input } from "./input";
 import { Label } from "./label";
 
 const Form = FormProvider;
@@ -126,13 +127,51 @@ const FormMessage = React.forwardRef(
 );
 FormMessage.displayName = "FormMessage";
 
+const FormFieldWrapper = ({
+	form,
+	name,
+	label,
+	placeholder,
+	description,
+	disabled = false,
+	className = "",
+	defaultValue,
+	type,
+	...props
+}) => {
+	return (
+		<FormField
+			control={form?.control}
+			name={name}
+			defaultValue={defaultValue ?? ""}
+			{...props}
+			render={({ field }) => (
+				<FormItem className={className}>
+					{label ? <FormLabel>{label}</FormLabel> : <></>}
+					<FormControl className="max-w-full">
+						<Input
+							placeholder={placeholder}
+							type={type ?? "text"}
+							disabled={disabled}
+							{...field}
+						/>
+					</FormControl>
+					<FormDescription>{description}</FormDescription>
+					<FormMessage />
+				</FormItem>
+			)}
+		/>
+	);
+};
+
 export {
-	useFormField,
 	Form,
-	FormItem,
-	FormLabel,
 	FormControl,
 	FormDescription,
-	FormMessage,
 	FormField,
+	FormFieldWrapper,
+	FormItem,
+	FormLabel,
+	FormMessage,
+	useFormField,
 };

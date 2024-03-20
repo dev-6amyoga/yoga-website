@@ -1,5 +1,7 @@
 import { Spacer } from "@geist-ui/core";
 import { Settings } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { Button } from "../../components/ui/button";
 import {
 	Card,
@@ -9,12 +11,30 @@ import {
 	CardHeader,
 	CardTitle,
 } from "../../components/ui/card";
+import { Form, FormFieldWrapper } from "../../components/ui/form";
 
 function Box({ children, className }) {
 	return <div className={`p-4 border ${className}`}>{children}</div>;
 }
 
 export default function DesignBoard() {
+	const form = useForm();
+	const [formData, setFormData] = useState({});
+
+	const onSubmit = (data) => {
+		setFormData(data);
+		console.log("SUBMITTED : ", data);
+	};
+
+	const onReset = (e) => {
+		e.preventDefault();
+		try {
+			form.reset();
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
 	return (
 		<div className="p-4 my-20">
 			<div className="flex flex-col xl:grid xl:grid-cols-3">
@@ -216,6 +236,7 @@ export default function DesignBoard() {
 					</div>
 				</Box>
 
+				{/* card */}
 				<Box className="">
 					<Card>
 						<CardHeader>
@@ -255,6 +276,81 @@ export default function DesignBoard() {
 						</CardFooter>
 					</Card>
 				</Box>
+
+				<Box>
+					<h1>Form Data</h1>
+					<pre>{JSON.stringify(formData, null, 2)}</pre>
+					<Spacer y={1} />
+					<Form {...form}>
+						<form
+							onSubmit={form.handleSubmit(onSubmit)}
+							className="flex flex-col gap-4">
+							<FormFieldWrapper
+								form={form}
+								type="text"
+								name="username"
+								label="Username"
+								defaultValue="Default Value Test"
+							/>
+							<FormFieldWrapper
+								form={form}
+								type="email"
+								name="email"
+								label="Email"
+							/>
+							<FormFieldWrapper
+								form={form}
+								type="email"
+								name="disabled"
+								label="Disabled"
+								disabled={true}
+							/>
+							<FormFieldWrapper
+								form={form}
+								type="datetime-local"
+								name="dob"
+								label="Date of Birth"
+							/>
+							<div className="flex items-end gap-4 w-full">
+								<FormFieldWrapper
+									form={form}
+									type="password"
+									name="password"
+									label="Password"
+									className="flex-1 flex-shrink-0"
+								/>
+								{/* <Button
+									variant="ghost"
+									size="lg"
+									onClick={(e) => {
+										e.preventDefault();
+
+										try {
+											console.log("resetting password");
+											form.reset({
+												password: "",
+											});
+										} catch (err) {
+											console.log(err);
+										}
+									}}>
+									Reset
+								</Button> */}
+							</div>
+							<Button variant="experiment" htmlType="submit">
+								Submit
+							</Button>
+							<Button
+								variant="ghost"
+								htmlType="reset"
+								onClick={onReset}>
+								Reset
+							</Button>
+						</form>
+					</Form>
+				</Box>
+
+				<Box></Box>
 			</div>
 		</div>
 	);
