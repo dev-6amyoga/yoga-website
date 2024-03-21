@@ -776,6 +776,11 @@ function StreamStackItem({
 						true
 					);
 
+					playerRef.current.player.configure(
+						"streaming.inaccurateManifestTolerance",
+						0
+					);
+
 					// get the playready license acquisition url
 					console.log("Fetching DRM Info");
 					Fetch({
