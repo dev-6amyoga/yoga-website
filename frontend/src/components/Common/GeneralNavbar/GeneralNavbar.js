@@ -136,12 +136,12 @@ export default function GeneralNavbar() {
 		);
 	};
 	return (
-		<div className="w-full h-screen">
+		<div className="">
 			<div className="fixed top-0 z-[100]">
-				<div className="min-h-screen w-12">
+				<div className="min-h-screen w-12 ">
 					<div className="h-screen flex items-center justify-center pointer-events">
 						<div
-							className="w-7 h-7 text-white"
+							className="w-7 h-7 text-black hover:cursor-pointer"
 							onClick={handleNavbarToggle}>
 							<AnimatePresence mode="wait">
 								{open ? (

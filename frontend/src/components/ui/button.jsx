@@ -12,7 +12,7 @@ const buttonVariants = cva(
 				default:
 					"bg-y-darkgreen text-y-white border-2 border-transparent hover:border-y-black hover:bg-y-darkgreen/90",
 				destructive:
-					"bg-y-red text-y-black btn-move-base transition-all text-y-black hover:solid-shadow",
+					"bg-y-red text-y-black btn-move-base transition-all text-y-black hover:solid-shadow-black",
 				outline:
 					"border border-input bg-background hover:bg-y-white border-2 border-y-gray hover:border-y-black",
 				secondary:
@@ -20,17 +20,19 @@ const buttonVariants = cva(
 				ghost: "hover:bg-y-white text-y-green btn-move-base transition-all hover:solid-shadow-darkgreen",
 				link: "text-primary underline-offset-4 hover:underline",
 				experiment:
-					"z-10 relative bg-y-darkgreen btn-move-base transition-all text-y-white hover:solid-shadow",
+					"z-10 relative bg-y-darkgreen btn-move-base transition-all text-y-white hover:solid-shadow-black",
+				dark: "z-10 relative bg-y-black btn-move-base transition-all text-y-white hover:solid-shadow-green",
 			},
 			size: {
 				default: "h-10 px-4 py-2",
 				sm: "h-9 rounded-md px-3",
+				xs: "h-5 rounded-full py-2 px-2 text-xs",
 				lg: "h-11 rounded-md px-8",
 				icon: "h-10 w-10",
 			},
 		},
 		defaultVariants: {
-			variant: "default",
+			variant: "experiment",
 			size: "default",
 		},
 	}

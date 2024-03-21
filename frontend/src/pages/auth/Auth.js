@@ -22,13 +22,13 @@ export default function Auth() {
 
 	return (
 		<PageWrapper>
-			<div className="">
+			<div className="bg-y-white min-h-screen grid place-items-center">
 				{loginOpen ? (
-					<div className="p-8 lg:p-20">
+					<div className="p-4 lg:p-20">
 						<Login switchForm={setLoginOpen} />
 					</div>
 				) : (
-					<div className="p-8 lg:p-20">
+					<div className="p-4 lg:p-20">
 						<Register switchForm={setLoginOpen} />
 					</div>
 				)}
