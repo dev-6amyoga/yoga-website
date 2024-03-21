@@ -776,10 +776,24 @@ function StreamStackItem({
 						true
 					);
 
-					playerRef.current.player.configure(
-						"streaming.inaccurateManifestTolerance",
-						0
-					);
+					playerRef.current.player.configure({
+						streaming: {
+							maxDisabledTime: 0,
+							inaccurateManifestTolerance: 0,
+							lowLatencyMode: true,
+							bufferingGoal: 16,
+							bufferBehind: 8,
+							ignoreTextStreamFailures: true,
+							stallThreshold: 3,
+							segmentPrefetchLimit: 3,
+							retryParameters: {
+								maxAttempts: 3,
+								timeout: 30000,
+								connectionTimeout: 30000,
+								stallTimeout: 15000,
+							},
+						},
+					});
 
 					// get the playready license acquisition url
 					console.log("Fetching DRM Info");
@@ -813,9 +827,7 @@ function StreamStackItem({
 								playerRef.current.player
 									.load(videoUrl)
 									.then((res) => {
-										console.log("Video Loaded");
-										if (isActive)
-											setVideoState(STATE_VIDEO_PLAY);
+										console.log("Video Loaded", video);
 									})
 									.catch((err) => {
 										console.log("Error loading video", err);
@@ -830,7 +842,7 @@ function StreamStackItem({
 			}
 		},
 		[
-			isActive,
+			video,
 			videoUrl,
 			handleNextVideo,
 			handlePrevVideo,
