@@ -546,8 +546,6 @@ export default function RegisterNewPlaylistStudent() {
           <Card.Content>
             <h3 className="text-center">Update Email ID</h3>
           </Card.Content>
-          {/* You cannot make any more playlists this month. Please head over to "All
-        Playlists" to manage them. */}
         </Card>
       )}
 

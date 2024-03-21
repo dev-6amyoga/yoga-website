@@ -41,7 +41,7 @@ export default function LoginGoogle() {
         let maxRole = 0;
         if (data) {
           for (var i = 0; i < data.user_role.length; i++) {
-            if (data.user_role[i].role_id == 1) {
+            if (data.user_role[i].role_id === 1) {
               maxRole = 1;
             }
           }

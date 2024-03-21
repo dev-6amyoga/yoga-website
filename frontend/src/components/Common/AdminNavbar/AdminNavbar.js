@@ -131,6 +131,7 @@ function AdminNavbar() {
       token: true,
     })
       .then((res) => {
+        console.log("hello");
         sessionStorage.removeItem("6amyoga_access_token");
         sessionStorage.removeItem("6amyoga_refresh_token");
         resetUserState();
