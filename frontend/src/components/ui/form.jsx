@@ -2,8 +2,10 @@ import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
 import { Controller, FormProvider, useFormContext } from "react-hook-form";
 
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { cn } from "../../lib/utils";
 import { Input } from "./input";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "./input-otp";
 import { Label } from "./label";
 
 const Form = FormProvider;
@@ -137,6 +139,7 @@ const FormFieldWrapper = ({
 	className = "",
 	defaultValue,
 	type,
+	children,
 	...props
 }) => {
 	return (
@@ -147,14 +150,35 @@ const FormFieldWrapper = ({
 			{...props}
 			render={({ field }) => (
 				<FormItem className={className}>
-					{label ? <FormLabel>{label}</FormLabel> : <></>}
+					{label || children ? (
+						<FormLabel>{label || children}</FormLabel>
+					) : (
+						<></>
+					)}
 					<FormControl className="max-w-full">
-						<Input
-							placeholder={placeholder}
-							type={type ?? "text"}
-							disabled={disabled}
-							{...field}
-						/>
+						{type === "otp" ? (
+							<InputOTP
+								maxLength={6}
+								pattern={REGEXP_ONLY_DIGITS}
+								className="w-full sm:text-sm"
+								{...field}>
+								<InputOTPGroup>
+									<InputOTPSlot index={0} />
+									<InputOTPSlot index={1} />
+									<InputOTPSlot index={2} />
+									<InputOTPSlot index={3} />
+									<InputOTPSlot index={4} />
+									<InputOTPSlot index={5} />
+								</InputOTPGroup>
+							</InputOTP>
+						) : (
+							<Input
+								placeholder={placeholder}
+								type={type ?? "text"}
+								disabled={disabled}
+								{...field}
+							/>
+						)}
 					</FormControl>
 					<FormDescription>{description}</FormDescription>
 					<FormMessage />

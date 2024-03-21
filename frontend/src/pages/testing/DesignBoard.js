@@ -2,6 +2,12 @@ import { Spacer } from "@geist-ui/core";
 import { Settings } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "../../components/ui/accordion";
 import { Button } from "../../components/ui/button";
 import {
 	Card,
@@ -19,11 +25,18 @@ function Box({ children, className }) {
 
 export default function DesignBoard() {
 	const form = useForm();
+	const otpForm = useForm();
 	const [formData, setFormData] = useState({});
+	const [otpFormData, setOtpFormData] = useState({});
 
 	const onSubmit = (data) => {
 		setFormData(data);
 		console.log("SUBMITTED : ", data);
+	};
+
+	const onOtpSubmit = (data) => {
+		setOtpFormData(data);
+		console.log("OTP SUBMITTED : ", data);
 	};
 
 	const onReset = (e) => {
@@ -234,13 +247,26 @@ export default function DesignBoard() {
 							<Settings />
 						</Button>
 					</div>
+					<Spacer y={1} />
+					<div className="flex lg:flex-row flex-col gap-2">
+						<Button variant="dark">dark (default)</Button>
+						<Button variant="dark" size="lg">
+							dark (lg)
+						</Button>
+						<Button variant="dark" size="sm">
+							dark (sm)
+						</Button>
+						<Button variant="dark" size="icon">
+							<Settings />
+						</Button>
+					</div>
 				</Box>
 
 				{/* card */}
 				<Box className="">
-					<Card>
+					<Card variant="primary">
 						<CardHeader>
-							<CardTitle>Card Title</CardTitle>
+							<CardTitle>primary Card</CardTitle>
 							<CardDescription>Card Description</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -248,16 +274,7 @@ export default function DesignBoard() {
 								Lorem Ipsum is simply dummy text of the printing
 								and typesetting industry. Lorem Ipsum has been
 								the industry's standard dummy text ever since
-								the 1500s, when an unknown printer took a galley
-								of type and scrambled it to make a type specimen
-								book. It has survived not only five centuries,
-								but also the leap into electronic typesetting,
-								remaining essentially unchanged. It was
-								popularised in the 1960s with the release of
-								Letraset sheets containing Lorem Ipsum passages,
-								and more recently with desktop publishing
-								software like Aldus PageMaker including versions
-								of Lorem Ipsum.
+								the 1500s.
 							</p>
 						</CardContent>
 						<CardFooter>
@@ -269,6 +286,116 @@ export default function DesignBoard() {
 							</Button>
 							<Button
 								variant="ghost"
+								className="w-full"
+								size="sm">
+								Cancel
+							</Button>
+						</CardFooter>
+					</Card>
+					<Spacer y={1} />
+					<Card variant="secondary">
+						<CardHeader>
+							<CardTitle>secondary Card</CardTitle>
+							<CardDescription>Card Description</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<p>
+								Lorem Ipsum is simply dummy text of the printing
+								and typesetting industry. Lorem Ipsum has been
+								the industry's standard dummy text ever since
+								the 1500s.
+							</p>
+						</CardContent>
+						<CardFooter>
+							<Button
+								variant="experiment"
+								className="w-full"
+								size="sm">
+								Buy
+							</Button>
+							<Button
+								variant="ghost"
+								className="w-full"
+								size="sm">
+								Cancel
+							</Button>
+						</CardFooter>
+					</Card>
+					<Spacer y={1} />
+					<Card variant="success">
+						<CardHeader>
+							<CardTitle>success Card</CardTitle>
+							<CardDescription>Card Description</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<p>
+								Lorem Ipsum is simply dummy text of the printing
+								and typesetting industry. Lorem Ipsum has been
+								the industry's standard dummy text ever since
+								the 1500s.
+							</p>
+						</CardContent>
+						<CardFooter>
+							<Button
+								variant="experiment"
+								className="w-full"
+								size="sm">
+								Buy
+							</Button>
+							<Button
+								variant="destructive"
+								className="w-full"
+								size="sm">
+								Cancel
+							</Button>
+						</CardFooter>
+					</Card>
+					<Spacer y={1} />
+					<Card variant="success-alt">
+						<CardHeader>
+							<CardTitle>success-alt Card</CardTitle>
+							<CardDescription>Card Description</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<p>
+								Lorem Ipsum is simply dummy text of the printing
+								and typesetting industry. Lorem Ipsum has been
+								the industry's standard dummy text ever since
+								the 1500s.
+							</p>
+						</CardContent>
+						<CardFooter>
+							<Button variant="dark" className="w-full" size="sm">
+								Buy
+							</Button>
+							<Button
+								variant="destructive"
+								className="w-full"
+								size="sm">
+								Cancel
+							</Button>
+						</CardFooter>
+					</Card>
+					<Spacer y={1} />
+					<Card variant="destructive">
+						<CardHeader>
+							<CardTitle>destructive Card</CardTitle>
+							<CardDescription>Card Description</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<p>
+								Lorem Ipsum is simply dummy text of the printing
+								and typesetting industry. Lorem Ipsum has been
+								the industry's standard dummy text ever since
+								the 1500s.
+							</p>
+						</CardContent>
+						<CardFooter>
+							<Button variant="dark" className="w-full" size="sm">
+								Buy
+							</Button>
+							<Button
+								variant="destructive"
 								className="w-full"
 								size="sm">
 								Cancel
@@ -350,7 +477,98 @@ export default function DesignBoard() {
 					</Form>
 				</Box>
 
-				<Box></Box>
+				<Box>
+					<Accordion collapsible type="single">
+						<AccordionItem value="item-1">
+							<AccordionTrigger>Item 1</AccordionTrigger>
+							<AccordionContent>
+								Lorem Ipsum is simply dummy text of the printing
+								and typesetting industry. Lorem Ipsum has been
+								the industry's standard dummy text ever since
+								the 1500s, when an unknown printer took a galley
+								of type and scrambled it to make a type specimen
+								book. It has survived not only five centuries,
+								but also the leap into electronic typesetting,
+								remaining essentially unchanged. It was
+								popularised in the 1960s with the release of
+								Letraset sheets containing Lorem Ipsum passages,
+								and more recently with desktop publishing
+								software like Aldus PageMaker including versions
+								of Lorem Ipsum.
+							</AccordionContent>
+						</AccordionItem>
+						<AccordionItem value="item-2">
+							<AccordionTrigger>Item 2</AccordionTrigger>
+							<AccordionContent>
+								Lorem Ipsum is simply dummy text of the printing
+								and typesetting industry. Lorem Ipsum has been
+								the industry's standard dummy text ever since
+								the 1500s, when an unknown printer took a galley
+								of type and scrambled it to make a type specimen
+								book. It has survived not only five centuries,
+								but also the leap into electronic typesetting,
+								remaining essentially unchanged. It was
+								popularised in the 1960s with the release of
+								Letraset sheets containing Lorem Ipsum passages,
+								and more recently with desktop publishing
+								software like Aldus PageMaker including versions
+								of Lorem Ipsum.
+							</AccordionContent>
+						</AccordionItem>
+						<AccordionItem value="item-3">
+							<AccordionTrigger>Item 3</AccordionTrigger>
+							<AccordionContent>
+								Lorem Ipsum is simply dummy text of the printing
+								and typesetting industry. Lorem Ipsum has been
+								the industry's standard dummy text ever since
+								the 1500s, when an unknown printer took a galley
+								of type and scrambled it to make a type specimen
+								book. It has survived not only five centuries,
+								but also the leap into electronic typesetting,
+								remaining essentially unchanged. It was
+								popularised in the 1960s with the release of
+								Letraset sheets containing Lorem Ipsum passages,
+								and more recently with desktop publishing
+								software like Aldus PageMaker including versions
+								of Lorem Ipsum.
+							</AccordionContent>
+						</AccordionItem>
+					</Accordion>
+				</Box>
+
+				<Box>
+					<Card>
+						<CardHeader>
+							<CardTitle>Phone Auth</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<Form {...otpForm}>
+								<form className="py-4 w-full flex flex-col gap-4">
+									<FormFieldWrapper
+										label="Enter OTP sent to +91 9999999999"
+										name="otp"
+										type="otp"
+										className="w-full"
+									/>
+									<Button
+										variant="experiment"
+										onClick={otpForm.handleSubmit(
+											onOtpSubmit
+										)}>
+										Submit
+									</Button>
+								</form>
+							</Form>
+							<Button
+								variant="ghost"
+								htmlType="submit"
+								className="w-full"
+								onClick={() => {}}>
+								Resend OTP
+							</Button>
+						</CardContent>
+					</Card>
+				</Box>
 			</div>
 		</div>
 	);

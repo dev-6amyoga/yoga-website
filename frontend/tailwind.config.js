@@ -62,8 +62,8 @@ module.exports = {
 			},
 			fontFamily: {
 				// sans: ["var(--font-sans)", ...fontFamily.sans],
-				heading: ["Trykker", "serif"],
-				content: ["Jost", "sans-serif"],
+				heading: ["Space Mono", "monospace"],
+				content: ["Bitter", "serif"],
 			},
 			fontSize: {
 				"step--2": "clamp(0.99rem, 1.12rem + -0.68vw, 0.64rem)",
@@ -91,10 +91,15 @@ module.exports = {
 					from: { height: "var(--radix-accordion-content-height)" },
 					to: { height: "0" },
 				},
+				"caret-blink": {
+					"0%,70%,100%": { opacity: "1" },
+					"20%,50%": { opacity: "0" },
+				},
 			},
 			animation: {
 				"accordion-down": "accordion-down 0.2s ease-out",
 				"accordion-up": "accordion-up 0.2s ease-out",
+				"caret-blink": "caret-blink 1.25s ease-out infinite",
 			},
 		},
 	},
