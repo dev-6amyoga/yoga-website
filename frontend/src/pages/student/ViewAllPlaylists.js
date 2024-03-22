@@ -25,8 +25,28 @@ import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
 
 export default function ViewAllPlaylists() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [transitions, setTransitions] = useState([]);
+  const [delState, setDelState] = useState(false);
+  const [delPlaylistId, setDelPlaylistId] = useState("");
+  const [modalState, setModalState] = useState(false);
+  const [unmodifiedData, setUnmodifiedData] = useState({
+    playlist_id: "",
+    playlist_name: "",
+    asana_ids: [],
+  });
+  const [modalData, setModalData] = useState({
+    playlist_id: "",
+    playlist_name: "",
+    asana_ids: [],
+  });
+  let user = useUserStore((state) => state.user);
+  const [userPlaylists, setUserPlaylists] = useState([]);
+  const [playlistEditLimit, setPlaylistEditLimit] = useState(0);
+  const [monthlyPlaylistLimit, setMonthlyPlaylistLimit] = useState(0);
+  const [playlistAsanas, setPlaylistAsanas] = useState([]);
+  const [newAsana, setNewAsana] = useState({ id: "", asana_name: "" });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -41,17 +61,7 @@ export default function ViewAllPlaylists() {
     };
     fetchData();
   }, []);
-  const [delState, setDelState] = useState(false);
-  const [delPlaylistId, setDelPlaylistId] = useState("");
-  const [modalState, setModalState] = useState(false);
-  const [modalData, setModalData] = useState({
-    playlist_id: "",
-    playlist_name: "",
-    asana_ids: [],
-  });
-  let user = useUserStore((state) => state.user);
-  const [userPlaylists, setUserPlaylists] = useState([]);
-  const [playlistEditLimit, setPlaylistEditLimit] = useState(0);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -61,14 +71,19 @@ export default function ViewAllPlaylists() {
         const playlistEditCount = data.find(
           (config) => config.playlist_config_name === "PLAYLIST_EDIT_LIMIT"
         );
-        console.log(playlistEditCount);
         setPlaylistEditLimit(playlistEditCount.playlist_config_value);
+        const monthlyLimit = data.find(
+          (config) => config.playlist_config_name === "MONTHLY_PLAYLIST_LIMIT"
+        );
+        setPlaylistEditLimit(playlistEditCount.playlist_config_value);
+        setMonthlyPlaylistLimit(monthlyLimit.playlist_config_value);
       } catch (err) {
         console.log(err);
       }
     };
     fetchData();
   }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -86,7 +101,7 @@ export default function ViewAllPlaylists() {
       fetchData();
     }
   }, [user]);
-  const [playlistAsanas, setPlaylistAsanas] = useState([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -113,6 +128,7 @@ export default function ViewAllPlaylists() {
     };
     const handleUpdate = async () => {
       setModalData(rowData);
+      setUnmodifiedData(rowData);
       setModalState(true);
     };
     const disabledUpdate =
@@ -149,6 +165,7 @@ export default function ViewAllPlaylists() {
       </Grid.Container>
     );
   };
+
   const deletePlaylist = async () => {
     try {
       const playlistId = delPlaylistId;
@@ -156,45 +173,52 @@ export default function ViewAllPlaylists() {
         url: `/user-playlists/deleteUserPlaylist/${playlistId}`,
         method: "DELETE",
       });
-      console.log(response);
       if (response?.status === 200) {
         toast("Deleted Successfully!");
         setUserPlaylists((prev) =>
           prev.filter((playlist) => playlist.playlist_id !== playlistId)
         );
       } else {
-        console.log("Error deleting playlist:", response.status);
+        toast("Error deleting playlist:", response.status);
       }
       setDelState(false);
     } catch (error) {
       console.log(error);
     }
   };
+
   const updateData = async () => {
     try {
-      const playlistId = modalData.playlist_id;
-      modalData.current_edit_count = modalData.current_edit_count + 1;
-      const response = await Fetch({
-        url: `/user-playlists/updateUserPlaylist/${playlistId}`,
-        method: "PUT",
-        data: modalData,
-      });
-      if (response?.status === 200) {
-        toast("Updated Successfully!");
-        setUserPlaylists((prev) =>
-          prev.map((p1) => (p1.playlist_id === playlistId ? modalData : p1))
-        );
-        // setFilteredTransitions((prev) =>
-        //   prev.map((p1) => (p1.playlist_id === playlistId ? modalData : p1))
-        // );
-        setModalState(false);
+      console.log(modalData, unmodifiedData);
+      if (modalData === unmodifiedData) {
+        toast("There are no changes to be updated.");
       } else {
-        console.log("Error updating playlist:", response.status);
+        if (modalData.current_edit_count === playlistEditLimit) {
+          toast("Maximum edit count has been attained.");
+        } else {
+          const playlistId = modalData.playlist_id;
+          modalData.current_edit_count = modalData.current_edit_count + 1;
+          const response = await Fetch({
+            url: `/user-playlists/updateUserPlaylist/${playlistId}`,
+            method: "PUT",
+            data: modalData,
+          });
+          if (response?.status === 200) {
+            toast("Updated Successfully!");
+            setUserPlaylists((prev) =>
+              prev.map((p1) => (p1.playlist_id === playlistId ? modalData : p1))
+            );
+            setModalState(false);
+          } else {
+            toast("Error updating playlist:", response.status);
+          }
+        }
       }
     } catch (error) {
       console.error(error);
     }
   };
+
   const handleAsanaNameChange = (value, index) => {
     const updatedAsanaIds = [...modalData.asana_ids];
     const selectedAsana = playlistAsanas.find(
@@ -206,6 +230,7 @@ export default function ViewAllPlaylists() {
       asana_ids: updatedAsanaIds,
     }));
   };
+
   const handleAsanaReorder = (index, direction) => {
     let asanas_before = [];
     let asanas_after = [];
@@ -305,6 +330,7 @@ export default function ViewAllPlaylists() {
       };
     });
   };
+
   const handleDownload = (data1) => {
     const csv = Papa.unparse(data1);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -319,17 +345,19 @@ export default function ViewAllPlaylists() {
       document.body.removeChild(link);
     }
   };
+
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setModalData({ ...modalData, [id]: value });
   };
-  const [newAsana, setNewAsana] = useState({ id: "", asana_name: "" });
+
   const handleAddNewAsana = () => {
     setModalData((prevData) => ({
       ...prevData,
       asana_ids: [...prevData.asana_ids, newAsana.id],
     }));
   };
+
   return (
     <div>
       <div>

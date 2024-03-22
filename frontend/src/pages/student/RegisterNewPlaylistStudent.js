@@ -22,6 +22,7 @@ export default function RegisterNewPlaylistStudent() {
   const navigate = useNavigate();
   let user = useUserStore((state) => state.user);
   const [asanas, setAsanas] = useState([]);
+  const [submitModalState, setSubmitModalState] = useState(false);
   const [playlist_temp, setPlaylistTemp] = useState([]);
   const [modalState, setModalState] = useState(false);
   const [transitions, setTransitions] = useState([]);
@@ -44,6 +45,10 @@ export default function RegisterNewPlaylistStudent() {
         const playlistEditCount = data.find(
           (config) => config.playlist_config_name === "PLAYLIST_EDIT_LIMIT"
         );
+        const monthlyPlaylistLimit = data.find(
+          (config) => config.playlist_config_name === "MONTHLY_PLAYLIST_LIMIT"
+        );
+        setMonthlyPlaylistLimit(monthlyPlaylistLimit.playlist_config_value);
         setPlaylistDurationLimit(maxPlaylistDuration.playlist_config_value);
         setPlaylistEditLimit(playlistEditCount.playlist_config_value);
       } catch (err) {
@@ -63,7 +68,6 @@ export default function RegisterNewPlaylistStudent() {
 
   useEffect(() => {
     const totalDurationInHours = parseFloat((totalDuration / 60).toFixed(2));
-    console.log(totalDurationInHours, playlistDurationLimit);
     if (totalDurationInHours > playlistDurationLimit) {
       toast("The maximum duration of the playlist is 80 minutes!");
       setDurationToggle(true);
@@ -126,24 +130,14 @@ export default function RegisterNewPlaylistStudent() {
           method: "GET",
         });
         const data = response.data;
-        const { data1 } = await Fetch({
-          url: "/playlist-configs/getAllConfigs",
-        });
-        const monthlyLimit = data1.find(
-          (config) => config.playlist_config_name === "MONTHLY_PLAYLIST_LIMIT"
-        );
-        setMonthlyPlaylistLimit(monthlyLimit.playlist_config_value);
         const current_count = data?.length;
-        console.log(
-          current_count,
-          monthlyLimit.playlist_config_value,
-          "ahahahahha"
-        );
-        if (current_count >= monthlyLimit.playlist_config_value) {
-          toast(
-            "You cannot make any more playlists this month. You have reached your maximum allowed playlists for this month."
-          );
-          setMonthlyLimitUnattained(false);
+        if (monthlyPlaylistLimit !== 0) {
+          if (current_count >= monthlyPlaylistLimit) {
+            toast(
+              "You cannot make any more playlists this month. You have reached your maximum allowed playlists for this month."
+            );
+            setMonthlyLimitUnattained(false);
+          }
         }
         setUserPlaylists(data);
       } catch (error) {
@@ -309,15 +303,12 @@ export default function RegisterNewPlaylistStudent() {
   };
 
   const addToPlaylist = (rowData, inputId, index) => {
-    console.log(rowData, inputId);
     const countInput = document.getElementById(inputId);
     const countValue = countInput ? countInput.value : "";
     const count = countValue === "" ? 1 : parseInt(countValue, 10);
     if (!isNaN(count)) {
-      console.log("in here !");
       if (playlist_temp.length === 0) {
         const x = transitionGenerator("start", rowData, transitions);
-        console.log("this is ", x);
         if (x.length !== 0) {
           setPlaylistTemp((prev) => [
             ...prev,
@@ -347,8 +338,7 @@ export default function RegisterNewPlaylistStudent() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const addPlaylist = async (e) => {
     const playlist_name = document.querySelector("#playlist_name").value;
     const playlist_sequence = {};
     playlist_sequence["playlist_name"] = playlist_name;
@@ -368,12 +358,12 @@ export default function RegisterNewPlaylistStudent() {
       playlist_id: newId,
       playlist_user_id: user?.user_id,
       playlist_name: playlist_sequence["playlist_name"],
-      max_edit_count: playlistEditLimit,
+      max_edit_count: Number(playlistEditLimit),
       current_edit_count: 0,
       asana_ids: playlist_sequence["asana_ids"],
       duration: playlist_sequence["duration"],
     };
-    console.log(newRecord);
+    console.log("SAVING : ", newRecord);
     try {
       const response = await Fetch({
         url: "/user-playlists/addUserPlaylist",
@@ -389,6 +379,10 @@ export default function RegisterNewPlaylistStudent() {
     } catch (error) {
       console.error("Error during playlist addition:", error);
     }
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitModalState(true);
   };
 
   const renderAction2 = (value, rowData, index) => {
@@ -570,6 +564,30 @@ export default function RegisterNewPlaylistStudent() {
             Cancel
           </Modal.Action>
           <Modal.Action onClick={updateData}>Update</Modal.Action>
+        </Modal>
+      </div>
+      <div>
+        <Modal
+          visible={submitModalState}
+          onClose={() => setSubmitModalState(false)}
+        >
+          <Modal.Title>Confirmation Screen</Modal.Title>
+          <Modal.Subtitle>
+            {"Are you sure you want to make this playlist?"}
+          </Modal.Subtitle>
+          <Modal.Content>
+            <Text>
+              Kindly note that you can edit this playlist {playlistEditLimit}{" "}
+              times.
+            </Text>
+            <Text>
+              You can make {monthlyPlaylistLimit} number of playlists per month.
+            </Text>
+          </Modal.Content>
+          <Modal.Action passive onClick={() => setSubmitModalState(false)}>
+            Cancel
+          </Modal.Action>
+          <Modal.Action onClick={addPlaylist}>Agree</Modal.Action>
         </Modal>
       </div>
     </div>

@@ -25,9 +25,10 @@ router.get("/getAllUserPlaylists/:user_id", async (req, res) => {
 router.post("/addUserPlaylist", async (req, res) => {
   try {
     const requestData = req.body;
+    console.log(requestData);
     const newUserPlaylist = new PlaylistUser(requestData);
     const savedUserPlaylist = await newUserPlaylist.save();
-    res.status(20).json(savedUserPlaylist);
+    res.status(200).json(savedUserPlaylist);
   } catch (error) {
     console.error("Error saving new Playlist:", error);
     res.status(HTTP_INTERNAL_SERVER_ERROR).json({
