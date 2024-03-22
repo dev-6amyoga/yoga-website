@@ -55,6 +55,35 @@ router.post("/register", async (req, res) => {
         .status(HTTP_BAD_REQUEST)
         .json({ error: "Update Request already exists" });
     }
+    //send email here
+    mailTransporter.sendMail(
+      {
+        from: "dev.6amyoga@gmail.com",
+        to: "992351@gmail.com",
+        subject: "6AM Yoga | Email ID Update",
+        html: `
+    <p>Hi Sivakumar!</p>
+    <p>We received a request from a user to update their Email ID. The details are as follows</p>
+    <p>Name : ${name}</p>
+    <p>Old Email ID : ${old_email}</p>
+    <p>New Email ID : ${new_email}.</p>
+    <p>To approve this request, head over to "Pending Email Update Requests" under student option in Member Management in your login</p>
+    <p>Regards, </p>
+    <p>My Yoga Teacher, 6AM Yoga </p>
+  `,
+      },
+      async (err, info) => {
+        if (err) {
+          await t.rollback();
+          console.error(err);
+          res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+            message: "Internal server error; try again",
+          });
+        } else {
+          console.log("Email sent to admin");
+        }
+      }
+    );
 
     await t.commit();
     return res.status(HTTP_OK).json({ currency: newC });

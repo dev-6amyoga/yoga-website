@@ -22,7 +22,7 @@ function RegisterPlaylistForm() {
   const predefinedOrder = [
     "Prayer Standing",
     "Prayer Sitting",
-    // 'Warm Up',
+    "Warm Up",
     "Surayanamaskara With Prefix-Suffix",
     "Surayanamaskara Without Prefix-Suffix",
     "Standing",
