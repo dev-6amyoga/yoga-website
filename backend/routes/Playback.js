@@ -27,4 +27,22 @@ router.post("/get-playready-token", async (req, res) => {
 	}
 });
 
+router.post("/get-widevine-token", async (req, res) => {
+	// call the playback service to get the token
+	try {
+		console.log("get-widevine-token");
+		const r = await fetch(
+			`https://wv-gen.service.expressplay.com/hms/wv/token?customerAuthenticator=${process.env.EXPRESSPLAY_API_KEY}&errorFormat=json&kid=${process.env.EXPRESSPLAY_KID}&contentKey=${process.env.EXPRESSPLAY_CONTENT_KEY}&useHttps=true`
+		);
+		const data = await r.text();
+		console.log(r, data);
+		res.status(HTTP_OK).json({ licenseAcquisitionUrl: data });
+	} catch (error) {
+		console.error("Error fetching token:", error);
+		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+			error: "Error fetching token",
+		});
+	}
+});
+
 module.exports = router;
