@@ -23,7 +23,9 @@ import useUserStore from "../../store/UserStore";
 import { STATE_VIDEO_PAUSED } from "../../store/VideoStore";
 import useWatchHistoryStore from "../../store/WatchHistoryStore";
 import { Fetch } from "../../utils/Fetch";
+import { isMobileTablet } from "../../utils/isMobileOrTablet";
 
+import { toast } from "react-toastify";
 import shaka from "shaka-player/dist/shaka-player.ui";
 
 // -----
@@ -694,6 +696,15 @@ function StreamStackItem({
 		setMetadataLoaded(true);
 	}, []);
 
+	const playerOnError = useCallback(
+		(e) => {
+			console.log("[StreamStackItem:error] Error playing video", e);
+			setVideoState(STATE_VIDEO_ERROR);
+			alert(JSON.stringify({ err: e }));
+		},
+		[setVideoState]
+	);
+
 	const handleNextVideo = useCallback(() => {
 		popFromQueue(0);
 	}, [popFromQueue]);
@@ -713,6 +724,11 @@ function StreamStackItem({
 	const playerInit = useCallback(
 		(ref) => {
 			if (ref !== null) {
+				const check = isMobileTablet();
+				console.log("IS MOBILE : ", check);
+				const isMobile = { done: true, check: check };
+
+				toast("IS MOBILE : " + check);
 				// console.log(ref);
 				setVideoState(STATE_VIDEO_LOADING);
 				playerRef.current = ref;
@@ -771,6 +787,12 @@ function StreamStackItem({
 				}
 
 				if (ref.player) {
+					// events
+					playerRef.current.player.addEventListener(
+						"error",
+						playerOnError
+					);
+
 					playerRef.current.player.configure(
 						"manifest.dash.ignoreMinBufferTime",
 						true
@@ -797,47 +819,90 @@ function StreamStackItem({
 
 					// get the playready license acquisition url
 					console.log("Fetching DRM Info");
-					Fetch({
-						url: "/playback/get-playready-token",
-						method: "POST",
-						token: false,
-					})
-						.then((res) => {
-							const data = res.data;
-							console.log(data);
-
-							if (
-								data &&
-								data.licenseAcquisitionUrl &&
-								data.token
-							) {
-								console.log("DRM Info Received");
-								playerRef.current.player.configure({
-									drm: {
-										servers: {
-											"com.microsoft.playready":
-												data.licenseAcquisitionUrl +
-												"?ExpressPlayToken=" +
-												data.token,
-										},
-									},
-								});
-
-								console.log("Trying to load video");
-								playerRef.current.player
-									.load(videoUrl)
-									.then((res) => {
-										console.log("Video Loaded", video);
-									})
-									.catch((err) => {
-										console.log("Error loading video", err);
-										setVideoState(STATE_VIDEO_ERROR);
-									});
-							}
+					if (isMobile.check) {
+						Fetch({
+							url: "/playback/get-widevine-token",
+							method: "POST",
+							token: false,
 						})
-						.catch((err) => {
-							console.log("Error fetching DRM info :", err);
-						});
+							.then((res) => {
+								const data = res.data;
+								console.log(data);
+
+								if (data && data.licenseAcquisitionUrl) {
+									console.log("DRM Info Received");
+									toast("DRM Info Received");
+
+									alert(JSON.stringify(data));
+
+									// Mobile
+									playerRef.current.player.configure({
+										drm: {
+											servers: {
+												"com.widevine.alpha":
+													data.licenseAcquisitionUrl,
+											},
+										},
+									});
+
+									console.log("Trying to load video");
+									playerRef.current.player
+										.load(videoUrl)
+										.then((res) => {
+											console.log("Video Loaded", video);
+										})
+										.catch((err) => {
+											playerOnError(err);
+										});
+								}
+							})
+							.catch((err) => {
+								console.log("Error fetching DRM info :", err);
+							});
+					} else {
+						Fetch({
+							url: "/playback/get-playready-token",
+							method: "POST",
+							token: false,
+						})
+							.then((res) => {
+								const data = res.data;
+								console.log(data);
+
+								if (
+									data &&
+									data.licenseAcquisitionUrl &&
+									data.token
+								) {
+									console.log("DRM Info Received");
+
+									// Non Mobile
+									playerRef.current.player.configure({
+										drm: {
+											servers: {
+												"com.microsoft.playready":
+													data.licenseAcquisitionUrl +
+													"?ExpressPlayToken=" +
+													data.token,
+											},
+										},
+									});
+
+									console.log("Trying to load video");
+									playerRef.current.player
+										.load(videoUrl)
+										.then((res) => {
+											console.log("Video Loaded", video);
+										})
+										.catch((err) => {
+											playerOnError(err);
+										});
+								}
+							})
+							.catch((err) => {
+								console.log("Error fetching DRM info :", err);
+							});
+					}
 				}
 			}
 		},
@@ -849,6 +914,7 @@ function StreamStackItem({
 			handleSeekFoward,
 			handleSeekBackward,
 			setVideoState,
+			playerOnError,
 		]
 	);
 
