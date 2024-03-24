@@ -26,11 +26,11 @@ const { mailTransporter } = require("./init.nodemailer");
 var glob = require("glob");
 
 glob.sync("./models/sql/*.js").forEach(function (file) {
-	require(path.resolve(file));
+  require(path.resolve(file));
 });
 
 glob.sync("./models/mongo/*.js").forEach(function (file) {
-	require(path.resolve(file));
+  require(path.resolve(file));
 });
 
 // routers
@@ -68,14 +68,15 @@ const getFrontendDomain = require("./utils/getFrontendDomain");
 // const helloWorld = require("./defer/helloWorld");
 
 const corsOptions = {
-	origin: [
-		"https://my-yogateacher.6amyoga.com",
-		`${getFrontendDomain()}`,
-		"https://www.my-yogateacher.6amyoga.com",
-		"https://yoga-website-orcin.vercel.app",
-		"http://localhost:3000",
-	],
-	optionSuccessStatus: 200,
+  origin: [
+    "https://my-yogateacher.6amyoga.com",
+    `${getFrontendDomain()}`,
+    "https://www.my-yogateacher.6amyoga.com",
+    "https://yoga-website-orcin.vercel.app",
+    "http://localhost:3000",
+    "http://192.168.0.100:4000:3000",
+  ],
+  optionSuccessStatus: 200,
 };
 
 // allow everything
@@ -92,18 +93,18 @@ app.use(express.json());
 
 // logging
 app.use(
-	morgan(function (tokens, req, res) {
-		return [
-			tokens.date(req, res, "iso"),
-			tokens.method(req, res),
-			tokens.url(req, res),
-			tokens.status(req, res),
-			tokens.res(req, res, "content-length"),
-			"-",
-			tokens["response-time"](req, res),
-			"ms",
-		].join(" ");
-	})
+  morgan(function (tokens, req, res) {
+    return [
+      tokens.date(req, res, "iso"),
+      tokens.method(req, res),
+      tokens.url(req, res),
+      tokens.status(req, res),
+      tokens.res(req, res, "content-length"),
+      "-",
+      tokens["response-time"](req, res),
+      "ms",
+    ].join(" ");
+  })
 );
 
 // parsing user agent
@@ -117,17 +118,17 @@ app.use(requestIp.mw());
 
 // securing the app with CSP policy
 app.use(
-	helmet.contentSecurityPolicy({
-		directives: {
-			"script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
-		},
-	})
+  helmet.contentSecurityPolicy({
+    directives: {
+      "script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
+    },
+  })
 );
 
 // Apply rate limiter to all requests
 const limiter = RateLimit({
-	windowMs: 30 * 1000, // 30s
-	max: process.env.NODE_ENV === "production" ? 50 : 1000,
+  windowMs: 30 * 1000, // 30s
+  max: process.env.NODE_ENV === "production" ? 50 : 1000,
 });
 
 //   app.use(limiter);
@@ -138,33 +139,33 @@ app.use("/static", express.static(path.join(__dirname, "public")));
 // initialize databases
 const mongoURI = process.env.MONGO_SRV_URL;
 mongoose
-	.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-	.then(() => console.log("Connected to MongoDB Atlas"))
-	.catch((err) => console.log(err));
+  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("Connected to MongoDB Atlas"))
+  .catch((err) => console.log(err));
 
 initializeSequelize()
-	.then(() => {
-		console.log("Sequelize initialized");
-		// bulkCreateSampleData()
-		// 	.then(() => {
-		// 		console.log("Sample data created!");
-		// 	})
-		// 	.catch((err) => {
-		// 		console.log(err);
-		// 	});
-	})
-	.catch((err) => {
-		console.error(err);
-	});
+  .then(() => {
+    console.log("Sequelize initialized");
+    // bulkCreateSampleData()
+    // 	.then(() => {
+    // 		console.log("Sample data created!");
+    // 	})
+    // 	.catch((err) => {
+    // 		console.log(err);
+    // 	});
+  })
+  .catch((err) => {
+    console.error(err);
+  });
 
 app.get("/info", async (req, res) => {
-	return res.status(200).json({
-		message: "Running.",
-	});
+  return res.status(200).json({
+    message: "Running.",
+  });
 });
 
 app.get("/", (req, res) => {
-	return res.send(`Hello!`);
+  return res.send(`Hello!`);
 });
 
 app.use("/content", asanaRouter);
@@ -198,5 +199,5 @@ app.use("/playback", playbackRouter);
 const port = parseInt(process.env.SERVER_PORT);
 
 app.listen(port || 4000, () => {
-	console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 });

@@ -16,7 +16,6 @@ import { transitionGenerator } from "../../components/transition-generator/Trans
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
 import { MonthlyPlaylistChecker } from "../../utils/MonthlyPlaylistChecker";
-import Papa from "papaparse";
 
 export default function RegisterNewPlaylistStudent() {
   const navigate = useNavigate();
@@ -32,6 +31,9 @@ export default function RegisterNewPlaylistStudent() {
   const [playlistEditLimit, setPlaylistEditLimit] = useState(0);
   const [monthlyPlaylistLimit, setMonthlyPlaylistLimit] = useState(0);
   const [durationToggle, setDurationToggle] = useState(false);
+  const [filterCategory, setFilterCategory] = useState("");
+  const [sortedAsanas, setSortedAsanas] = useState([]);
+  const [userPlaylists, setUserPlaylists] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -94,8 +96,6 @@ export default function RegisterNewPlaylistStudent() {
     "Pranayama",
   ];
 
-  const [sortedAsanas, setSortedAsanas] = useState([]);
-
   useEffect(() => {
     const s1 = asanas.sort((a, b) => {
       return (
@@ -105,7 +105,6 @@ export default function RegisterNewPlaylistStudent() {
     });
     setSortedAsanas(s1);
   }, [asanas]);
-  const [userPlaylists, setUserPlaylists] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -380,6 +379,7 @@ export default function RegisterNewPlaylistStudent() {
       console.error("Error during playlist addition:", error);
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitModalState(true);
@@ -403,8 +403,6 @@ export default function RegisterNewPlaylistStudent() {
     );
   };
 
-  const [filterCategory, setFilterCategory] = useState("");
-
   const uniqueCategories = [
     ...new Set(sortedAsanas.map((asana) => asana.asana_category)),
   ];
@@ -421,20 +419,7 @@ export default function RegisterNewPlaylistStudent() {
       ),
     };
   });
-  const handleDownload = (data1) => {
-    const csv = Papa.unparse(data1);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", "data.csv");
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
+
   return (
     <div className="flex-col justify-center">
       <StudentNavbar />
