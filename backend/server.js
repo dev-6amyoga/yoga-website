@@ -74,6 +74,7 @@ const corsOptions = {
 		"https://www.my-yogateacher.6amyoga.com",
 		"https://yoga-website-orcin.vercel.app",
 		"http://localhost:3000",
+		"http://192.168.0.100:4000:3000",
 	],
 	optionSuccessStatus: 200,
 };

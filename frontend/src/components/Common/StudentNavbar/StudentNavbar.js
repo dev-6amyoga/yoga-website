@@ -1,13 +1,19 @@
-import { Button, ButtonDropdown, Drawer } from "@geist-ui/core";
-import { Menu, User } from "@geist-ui/icons";
-import { memo, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Menu } from "@geist-ui/icons";
+import { memo, useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import useUserStore from "../../../store/UserStore";
 // import StudentPlan from "../../../pages/student/StudentPlan";
-import { Divider } from "@geist-ui/core";
 import { USER_PLAN_ACTIVE } from "../../../enums/user_plan_status";
 import { Fetch } from "../../../utils/Fetch";
-import RoleShifter from "../RoleShifter";
+import { Button } from "../../ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "../../ui/dropdown-menu";
 
 function StudentNavbar() {
 	const [open, setOpen] = useState(false);
@@ -94,94 +100,147 @@ function StudentNavbar() {
 		}
 	}, [user]);
 
+	const paths = useMemo(() => {
+		return [
+			{
+				path: "/student/purchase-a-plan",
+				title: "Purchase a plan",
+			},
+			{
+				path: "/student/free-videos",
+				title: "Free Videos",
+			},
+			{
+				path: "/student/playlist-view",
+				title: "6AM Yoga Playlists",
+				props: {
+					disabled: disabled,
+				},
+			},
+			{
+				type: "group",
+				path: "/student/playlist-view",
+				title: "My Playlists",
+				props: {
+					disabled: disabledTailorMade,
+				},
+				subPaths: [
+					{
+						path: "",
+						title: "Register New Playlist",
+					},
+					{
+						path: "/student/view-all-playlists",
+						title: "View All Playlists",
+					},
+				],
+			},
+			{
+				path: "/student/about-us",
+				title: "About Us",
+			},
+			{
+				path: "/student/contact-us",
+				title: "Contact Us",
+			},
+			{
+				path: "/student/transactions",
+				title: "Transaction History",
+			},
+			{
+				path: "/student/watch-history",
+				title: "Watch History",
+			},
+			{
+				path: "/student/my-profile",
+				title: user ? user?.name : "",
+			},
+			{
+				title: "Logout",
+				handler: handleLogout,
+			},
+		];
+	}, [handleLogout, user, disabledTailorMade, disabled]);
+
 	return (
 		<>
-			<div className="fixed z-[1000] flex w-full items-center gap-4 bg-zinc-900 px-8 py-4 text-white">
+			<div className="fixed z-[998] flex w-full items-center gap-4 bg-zinc-900 px-8 py-4 text-white pointer-events-auto">
 				<button onClick={() => setOpen(true)}>
 					<Menu />
 				</button>
 				<h1 className="text-xl font-bold">6AM Yoga</h1>
 			</div>
-			<Drawer
-				visible={open}
-				onClose={() => setOpen(false)}
-				placement="left">
-				<Drawer.Title>
-					<p className="text-xl font-bold">6AM Yoga</p>
-				</Drawer.Title>
-				<Drawer.Subtitle>Student Dashboard</Drawer.Subtitle>
-				<hr />
-				<Drawer.Content>
-					<RoleShifter />
-					<h5 className="rounded-lg bg-zinc-800 p-2 text-white">
-						{userPlan
-							? "Plan : " + userPlan?.plan?.name
-							: "No active plan"}
-					</h5>
-					<Divider />
-					<div className="flex flex-col gap-4">
-						<Button
-							onClick={() =>
-								navigate("/student/purchase-a-plan")
-							}>
-							Purchase a plan
-						</Button>
-						<Button
-							onClick={() => navigate("/student/free-videos")}>
-							Free Videos
-						</Button>
-						<Button
-							onClick={() => navigate("/student/playlist-view")}
-							disabled={disabled}>
-							6AM Yoga Playlists
-						</Button>
-						<ButtonDropdown
-							className="w-full"
-							disabled={disabledTailorMade}>
-							<ButtonDropdown.Item main>
-								My Playlists
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item
-								onClick={() => {
-									navigate("/student/register-new-playlist");
-								}}>
-								Register New Playlist
-							</ButtonDropdown.Item>
-							<ButtonDropdown.Item
-								onClick={() => {
-									navigate("/student/view-all-playlists");
-								}}>
-								View All Playlists
-							</ButtonDropdown.Item>
-						</ButtonDropdown>
-						<Button onClick={() => navigate("/student/about-us")}>
-							About Us
-						</Button>
-						<Button onClick={() => navigate("/student/contact-us")}>
-							Contact Us
-						</Button>
-						<Button
-							onClick={() => navigate("/student/transactions")}>
-							Transaction History
-						</Button>
-						<Button
-							onClick={() => navigate("/student/watch-history")}>
-							Watch History
-						</Button>
-						<hr />
-						<Button
-							onClick={() => navigate("/student/my-profile")}
-							icon={<User />}
-							type="success"
-							ghost>
-							{user ? user?.name : ""}
-						</Button>
-						<Button type="error" onClick={handleLogout}>
-							Logout
-						</Button>
-					</div>
-				</Drawer.Content>
-			</Drawer>
+			<div
+				className={`fixed w-screen h-screen bg-black z-[997] ${open ? "bg-opacity-50" : "bg-opacity-0"} transition-opacity delay-300 duration-200 pointer-events-auto`}
+				onClick={() => {
+					setOpen(false);
+				}}></div>
+			<div
+				className={`z-[1500] fixed w-96 h-full p-4 ${open ? "translate-x-0" : "-translate-x-[600px]"} transition-transform duration-500 pointer-events-auto`}>
+				<div className="w-full h-full border-4 border-y-green rounded-2xl bg-white overflow-y-auto p-4 flex flex-col gap-4">
+					{paths.map((path, index) => {
+						if (path?.type === "group") {
+							return (
+								<DropdownMenu className="w-full">
+									<DropdownMenuTrigger asChild>
+										<Button variant="ghost">
+											{path.title}
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent side="bottom">
+										<DropdownMenuLabel>
+											{path.title}
+										</DropdownMenuLabel>
+										<DropdownMenuSeparator />
+										{path.subPaths.map((subPath, index) => (
+											<DropdownMenuItem
+												key={
+													"subPath" +
+													subPath.path +
+													index
+												}
+												onClick={() =>
+													navigate(subPath.path)
+												}>
+												{subPath.title}
+											</DropdownMenuItem>
+										))}
+									</DropdownMenuContent>
+								</DropdownMenu>
+							);
+						} else {
+							return (
+								<Button
+									variant="ghost"
+									key={"nav_path" + path.title}
+									onClick={() => {
+										navigate(path.path);
+									}}>
+									{path.title}
+								</Button>
+							);
+						}
+					})}
+					<hr />
+					<hr />
+					{user ? (
+						<>
+							<h2 className="text-center text-sm">
+								Logged in as {user?.name}
+							</h2>
+							<Button type="error" onClick={handleLogout}>
+								Logout
+							</Button>
+						</>
+					) : (
+						<Link to={"/auth"} className="w-full">
+							<Button type="primary" width="100%">
+								Login
+							</Button>
+						</Link>
+					)}
+				</div>
+			</div>
 		</>
 	);
 }

@@ -1,16 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import useVideoStore, {
-	STATE_VIDEO_ERROR,
-	STATE_VIDEO_LOADING,
-	STATE_VIDEO_PLAY,
-} from "../../store/VideoStore";
-// import asanas from "../../data/asanas.json";
-
-import ShakaPlayer from "./ShakaPlayer";
-
+import { toast } from "react-toastify";
 import "shaka-player/dist/controls.css";
-
-// import { toast } from "react-toastify";
 import {
 	SEEK_TYPE_MARKER,
 	SEEK_TYPE_MOVE,
@@ -18,14 +8,6 @@ import {
 } from "../../enums/seek_types";
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
-import usePlaylistStore from "../../store/PlaylistStore";
-import useUserStore from "../../store/UserStore";
-import { STATE_VIDEO_PAUSED } from "../../store/VideoStore";
-import useWatchHistoryStore from "../../store/WatchHistoryStore";
-import { Fetch } from "../../utils/Fetch";
-import { isMobileTablet } from "../../utils/isMobileOrTablet";
-
-import { toast } from "react-toastify";
 import {
 	ShakaPlayerGoNext,
 	ShakaPlayerGoPrev,
@@ -35,6 +17,18 @@ import {
 	ShakaPlayerPrevMarker,
 	ShakaPlayerToggleMode,
 } from "../../lib/shaka-controls";
+import usePlaylistStore from "../../store/PlaylistStore";
+import useUserStore from "../../store/UserStore";
+import useVideoStore, {
+	STATE_VIDEO_ERROR,
+	STATE_VIDEO_LOADING,
+	STATE_VIDEO_PAUSED,
+	STATE_VIDEO_PLAY,
+} from "../../store/VideoStore";
+import useWatchHistoryStore from "../../store/WatchHistoryStore";
+import { Fetch } from "../../utils/Fetch";
+import { isMobileTablet } from "../../utils/isMobileOrTablet";
+import ShakaPlayer from "./ShakaPlayer";
 
 import shaka from "shaka-player/dist/shaka-player.ui";
 

@@ -363,6 +363,15 @@ export default function ViewAllPlaylists() {
       <div>
         <StudentNavbar />
       </div>
+      <div>
+        <Button
+          onClick={() => {
+            handleDownload(userPlaylists);
+          }}
+        >
+          Download CSV
+        </Button>
+      </div>
       <div className="flex flex-col items-center justify-center py-20">
         <Table width={100} data={userPlaylists} className="bg-white ">
           <Table.Column prop="playlist_id" label="Playlist ID" />
