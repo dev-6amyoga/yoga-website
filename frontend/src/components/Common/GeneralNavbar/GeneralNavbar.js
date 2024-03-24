@@ -109,27 +109,27 @@ export default function GeneralNavbar() {
 			<div className="flex flex-col items-center gap-8 md:gap-12 justify-center font-mono md:text-5xl text-2xl w-full min-h-screen">
 				<Link
 					to="/"
-					className="text-white hover:text-black transition-colors">
+					className="text-black font-bold hover:text-black transition-colors">
 					HOME
 				</Link>
 				<Link
 					to="/about-us"
-					className="text-white hover:text-black transition-colors">
+					className="text-black font-bold hover:text-black transition-colors">
 					ABOUT
 				</Link>
 				<Link
 					to="/pricing"
-					className="text-white hover:text-black transition-colors">
+					className="text-black font-bold hover:text-black transition-colors">
 					PLANS & PRICING
 				</Link>
 				<Link
 					to="/contact-us"
-					className="text-white hover:text-black transition-colors">
+					className="text-black font-bold hover:text-black transition-colors">
 					CONTACT
 				</Link>
 				<Link
 					to="/auth"
-					className="text-white hover:text-black transition-colors">
+					className="text-black font-bold hover:text-black transition-colors">
 					LOGIN/REGISTER
 				</Link>
 			</div>
