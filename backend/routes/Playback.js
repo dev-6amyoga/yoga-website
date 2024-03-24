@@ -35,7 +35,7 @@ router.post("/get-widevine-token", async (req, res) => {
 			`https://wv-gen.service.expressplay.com/hms/wv/token?customerAuthenticator=${process.env.EXPRESSPLAY_API_KEY}&errorFormat=json&kid=${process.env.EXPRESSPLAY_KID}&contentKey=${process.env.EXPRESSPLAY_CONTENT_KEY}&useHttps=true`
 		);
 		const data = await r.text();
-		console.log(r, data);
+		// console.log(r, data);
 		res.status(HTTP_OK).json({ licenseAcquisitionUrl: data });
 	} catch (error) {
 		console.error("Error fetching token:", error);
