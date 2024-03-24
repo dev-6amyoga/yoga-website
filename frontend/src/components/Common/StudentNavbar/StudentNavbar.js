@@ -7,13 +7,11 @@ import { USER_PLAN_ACTIVE } from "../../../enums/user_plan_status";
 import { Fetch } from "../../../utils/Fetch";
 import { Button } from "../../ui/button";
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
+	CustomDropdown,
+	CustomDropdownContent,
+	CustomDropdownItem,
+	CustomDropdownTrigger,
+} from "../../ui/custom-dropdown";
 
 function StudentNavbar() {
 	const [open, setOpen] = useState(false);
@@ -155,12 +153,8 @@ function StudentNavbar() {
 				path: "/student/my-profile",
 				title: user ? user?.name : "",
 			},
-			{
-				title: "Logout",
-				handler: handleLogout,
-			},
 		];
-	}, [handleLogout, user, disabledTailorMade, disabled]);
+	}, [user, disabledTailorMade, disabled]);
 
 	return (
 		<>
@@ -171,42 +165,45 @@ function StudentNavbar() {
 				<h1 className="text-xl font-bold">6AM Yoga</h1>
 			</div>
 			<div
-				className={`fixed w-screen h-screen bg-black z-[997] ${open ? "bg-opacity-50" : "bg-opacity-0"} transition-opacity delay-300 duration-200 pointer-events-auto`}
+				className={`fixed w-screen h-screen bg-black z-[997] ${open ? "bg-opacity-30" : "bg-opacity-0"} transition-opacity delay-300 duration-200 pointer-events-auto`}
 				onClick={() => {
 					setOpen(false);
 				}}></div>
 			<div
 				className={`z-[1500] fixed w-96 h-full p-4 ${open ? "translate-x-0" : "-translate-x-[600px]"} transition-transform duration-500 pointer-events-auto`}>
 				<div className="w-full h-full border-4 border-y-green rounded-2xl bg-white overflow-y-auto p-4 flex flex-col gap-4">
+					<div>
+						<img src="/logo_6am.png" />
+					</div>
 					{paths.map((path, index) => {
 						if (path?.type === "group") {
 							return (
-								<DropdownMenu className="w-full">
-									<DropdownMenuTrigger asChild>
-										<Button variant="ghost">
+								<CustomDropdown type="single" collapsible>
+									<CustomDropdownItem value="item-1">
+										<CustomDropdownTrigger>
 											{path.title}
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent side="bottom">
-										<DropdownMenuLabel>
-											{path.title}
-										</DropdownMenuLabel>
-										<DropdownMenuSeparator />
-										{path.subPaths.map((subPath, index) => (
-											<DropdownMenuItem
-												key={
-													"subPath" +
-													subPath.path +
-													index
-												}
-												onClick={() =>
-													navigate(subPath.path)
-												}>
-												{subPath.title}
-											</DropdownMenuItem>
-										))}
-									</DropdownMenuContent>
-								</DropdownMenu>
+										</CustomDropdownTrigger>
+										<CustomDropdownContent>
+											{path.subPaths.map(
+												(subPath, index) => (
+													<Button
+														key={
+															"subPath" +
+															subPath.path +
+															index
+														}
+														onClick={() =>
+															navigate(
+																subPath.path
+															)
+														}>
+														{subPath.title}
+													</Button>
+												)
+											)}
+										</CustomDropdownContent>
+									</CustomDropdownItem>
+								</CustomDropdown>
 							);
 						} else {
 							return (
@@ -222,21 +219,20 @@ function StudentNavbar() {
 						}
 					})}
 					<hr />
-					<hr />
 					{user ? (
 						<>
 							<h2 className="text-center text-sm">
 								Logged in as {user?.name}
 							</h2>
-							<Button type="error" onClick={handleLogout}>
+							<Button
+								variant="destructive"
+								onClick={handleLogout}>
 								Logout
 							</Button>
 						</>
 					) : (
 						<Link to={"/auth"} className="w-full">
-							<Button type="primary" width="100%">
-								Login
-							</Button>
+							<Button className="w-full">Login</Button>
 						</Link>
 					)}
 				</div>
