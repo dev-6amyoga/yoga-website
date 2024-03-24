@@ -233,7 +233,7 @@ export default function Login({ switchForm }) {
 	}, [user, type]);
 
 	return (
-		<Card variant="primary">
+		<Card variant="primary" className="w-80 sm:w-96 lg:w-[440px]">
 			<CardContent>
 				<div className="mb-4">
 					<img
@@ -241,7 +241,7 @@ export default function Login({ switchForm }) {
 						alt="6AM Yoga"
 						className="mx-auto my-4 max-h-24"
 					/>
-					<h3 className="text-center text-2xl">Login</h3>
+					<h3 className="text-center">Login</h3>
 				</div>
 				<hr />
 				{mainVisible && (
@@ -269,18 +269,22 @@ export default function Login({ switchForm }) {
 							</form>
 						</Form>
 						<p>{"( or )"}</p>
-						<div className="flex flex-col md:flex-row">
-							<LoginGoogle />
-							<div className="mt-2 md:mt-0 md:ml-2 md:bg-transparent">
-								<Button onClick={phoneSignInFunction}>
-									Login with Phone Number
-								</Button>
+						<div className="flex flex-col gap-2 items-center w-full">
+							<div>
+								<LoginGoogle />
 							</div>
+							<Button
+								onClick={phoneSignInFunction}
+								className="w-full">
+								Login with Phone Number
+							</Button>
 						</div>
 
-						<br />
+						<hr />
+
 						<Button
 							variant="ghost"
+							className="w-full"
 							onClick={() => switchForm((s) => !s)}>
 							Register Account
 						</Button>
@@ -290,6 +294,8 @@ export default function Login({ switchForm }) {
 					<div>
 						<Otp onSuccessCallback={func1} />
 						<Button
+							className="w-full"
+							variant="ghost"
 							onClick={() => {
 								setPhoneSignInVisible(false);
 								setForgotPasswordVisible(false);

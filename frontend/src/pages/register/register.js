@@ -1,5 +1,4 @@
 import {
-	Button,
 	Checkbox,
 	Divider,
 	Input,
@@ -7,6 +6,7 @@ import {
 	Progress,
 	Spacer,
 } from "@geist-ui/core";
+
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight } from "react-feather";
@@ -16,7 +16,8 @@ import InstituteDetailsForm from "../../components/auth/register/InstituteDetail
 import PhoneNumberForm from "../../components/auth/register/PhoneNumberForm";
 import PickRegistationMode from "../../components/auth/register/PickRegistrationMode";
 import RoleSelectorForm from "../../components/auth/register/RoleSelectorForm";
-import { Card, CardContent } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent, CardHeader } from "../../components/ui/card";
 import { Fetch } from "../../utils/Fetch";
 
 import getFormData from "../../utils/getFormData";
@@ -451,20 +452,21 @@ export default function Register({ switchForm }) {
 
 	return (
 		<GoogleOAuthProvider clientId={clientID}>
-			<Card>
-				<CardContent>
+			<Card className="w-80 sm:w-96 lg:w-[440px]">
+				<CardHeader>
 					<div className="mb-4">
 						<img
 							src="/logo_6am.png"
 							alt="6AM Yoga"
 							className="mx-auto max-h-24 my-4"
 						/>
-						<h3 className="text-center text-2xl">Register</h3>
+						<h3 className="text-center">Register</h3>
 					</div>
-
-					<br />
+					<hr />
+				</CardHeader>
+				<CardContent>
 					<Progress
-						type="success"
+						className="accent-y-darkgreen"
 						value={step}
 						max={role === "STUDENT" ? maxSteps : maxSteps + 1}
 					/>
@@ -473,19 +475,22 @@ export default function Register({ switchForm }) {
 					<div className="flex flex-row justify-between my-10 sm:flex flex-col py-2 gap-y-2">
 						{(role === "STUDENT" && step < maxSteps) ||
 						(role === "INSTITUTE_OWNER" && step < maxSteps + 1) ? (
-							<Button
-								onClick={handleNextStep}
-								loading={loading}
-								width={step === 1 ? "100%" : null}
-								iconRight={<ArrowRight />}
-								disabled={
-									loading ||
-									blockStep ||
-									blockPhoneStep ||
-									blockBusinessPhoneStep
-								}>
-								Next
-							</Button>
+							step === 1 ? (
+								<Button
+									onClick={handleNextStep}
+									loading={loading}
+									iconRight={<ArrowRight />}
+									disabled={
+										loading ||
+										blockStep ||
+										blockPhoneStep ||
+										blockBusinessPhoneStep
+									}>
+									Next
+								</Button>
+							) : (
+								<></>
+							)
 						) : (
 							<Button
 								onClick={() => {
@@ -514,12 +519,12 @@ export default function Register({ switchForm }) {
 					<hr />
 
 					<div className="flex flex-col gap-1 items-center w-full mt-4">
-						<h5
+						<Button
+							variant="ghost"
 							onClick={() => switchForm((s) => !s)}
-							className="hover:pointer">
-							Already have an account?{" "}
-							<span className="text-blue-500">Click Here</span>
-						</h5>
+							className="w-full">
+							Login
+						</Button>
 					</div>
 				</CardContent>
 			</Card>

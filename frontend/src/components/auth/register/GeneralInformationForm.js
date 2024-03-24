@@ -1,10 +1,11 @@
 // import { useEffect, useState } from "react";
-import { Button, Input } from "@geist-ui/core";
+import { Input } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
 import { validateEmail, validatePassword } from "../../../utils/formValidation";
 import getFormData from "../../../utils/getFormData";
+import { Button } from "../../ui/button";
 
 export default function GeneralInformationForm({
 	generalInfo,
@@ -75,7 +76,7 @@ export default function GeneralInformationForm({
 		}
 	}, [usernameError, passwordError, setBlockStep]);
 
-	const handleUsernameCheck = () => {
+	const handleUsernameCheck = (username) => {
 		setLoading(true);
 		if (username) {
 			Fetch({
@@ -104,7 +105,7 @@ export default function GeneralInformationForm({
 		<form
 			className="flex flex-col gap-4 w-full"
 			onSubmit={handleGeneralInfoChange}>
-			<h4 className="text-center">General Information</h4>
+			<h6 className="text-center">General Information</h6>
 			<Input
 				width="100%"
 				name="name"
@@ -138,10 +139,10 @@ export default function GeneralInformationForm({
 					name="username"
 					placeholder="johnDoe123"
 					initialValue={generalInfo?.username}
-					onChange={(e) => setUsername(e.target.value)}
-					onFocus={handleUsernameCheck}
-					onMouseLeave={handleUsernameCheck}
-					onKeyUp={handleUsernameCheck}
+					onChange={(e) => {
+						setUsername(e.target.value);
+						handleUsernameCheck(e.target.value);
+					}}
 					required>
 					Username
 				</Input>
@@ -179,9 +180,7 @@ export default function GeneralInformationForm({
 				)}
 			</>
 			{/* )} */}
-			<Button htmlType="submit" type="success">
-				Save Changes
-			</Button>
+			<Button>Save Changes</Button>
 		</form>
 	);
 }

@@ -3,7 +3,7 @@ import { Briefcase, UserCheck } from "@geist-ui/icons";
 export default function RoleSelectorForm({ role, setRole, handleNextStep }) {
 	return (
 		<form className="flex flex-col gap-4 w-full" onSubmit={() => {}}>
-			<h4 className="text-center">Select Role</h4>
+			<h6 className="text-center">Select Role</h6>
 
 			<div className="flex gap-4 items-center justify-center">
 				<div
