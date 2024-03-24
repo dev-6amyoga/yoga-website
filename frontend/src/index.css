@@ -199,6 +199,21 @@ h6 {
 	@apply text-step-0 font-bold;
 }
 
+p,
+small,
+label,
+a,
+span,
+li,
+td,
+th,
+input,
+textarea,
+select,
+button {
+	font-size: text-step--2;
+}
+
 h1,
 h2,
 h3,

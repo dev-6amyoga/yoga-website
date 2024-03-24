@@ -17,7 +17,7 @@ const buttonVariants = cva(
 					"border border-input bg-background hover:bg-y-white border-2 border-y-gray hover:border-y-black",
 				secondary:
 					"bg-y-white text-y-black border-2 border-transparent hover:border-y-black hover:bg-y-white/90",
-				ghost: "hover:bg-y-white text-y-green btn-move-base transition-all hover:solid-shadow-darkgreen",
+				ghost: "bg-y-white text-y-green btn-move-base transition-all hover:solid-shadow-darkgreen",
 				link: "text-primary underline-offset-4 hover:underline",
 				experiment:
 					"z-10 relative bg-y-darkgreen btn-move-base transition-all text-y-white hover:solid-shadow-black",

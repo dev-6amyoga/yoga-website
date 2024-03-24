@@ -61,6 +61,30 @@
 	font-family: "Roboto", sans-serif;
 }
 
+.shaka-video-container .fa-icons {
+	font-family: "Font Awesome 6 Free";
+}
+
+.custom-shaka-toggle-mode-label {
+	@apply flex gap-1 items-center;
+}
+
+.custom-shaka-toggle-mode-teacher {
+	display: none;
+}
+
+.custom-shaka-toggle-mode-student {
+	display: inline;
+}
+
+.custom-shaka-toggle-mode-label input:checked ~ span span:first-of-type {
+	display: inline;
+}
+
+.custom-shaka-toggle-mode-label input:checked ~ span span:last-of-type {
+	display: none;
+}
+
 .custom-shaka .shaka-bottom-controls {
 	width: 100%;
 	padding: 0;

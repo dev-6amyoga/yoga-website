@@ -26,122 +26,17 @@ import { Fetch } from "../../utils/Fetch";
 import { isMobileTablet } from "../../utils/isMobileOrTablet";
 
 import { toast } from "react-toastify";
+import {
+	ShakaPlayerGoNext,
+	ShakaPlayerGoPrev,
+	ShakaPlayerGoSeekBackward,
+	ShakaPlayerGoSeekForward,
+	ShakaPlayerNextMarker,
+	ShakaPlayerPrevMarker,
+	ShakaPlayerToggleMode,
+} from "../../lib/shaka-controls";
+
 import shaka from "shaka-player/dist/shaka-player.ui";
-
-// -----
-class ShakaPlayerGoNext extends shaka.ui.Element {
-	constructor(parent, controls, eventHandler) {
-		super(parent, controls);
-
-		// The actual button that will be displayed
-		this.button_ = document.createElement("button");
-		this.button_.innerHTML = `<i class="fa-solid fa-forward-step"></i>`;
-
-		this.parent.appendChild(this.button_);
-
-		// Listen for clicks on the button to start the next playback
-		this.eventManager.listen(this.button_, "click", eventHandler);
-	}
-}
-
-ShakaPlayerGoNext.Factory = class {
-	constructor(eventHandler) {
-		this.eventHandler = eventHandler;
-	}
-
-	create(rootElement, controls) {
-		return new ShakaPlayerGoNext(rootElement, controls, this.eventHandler);
-	}
-};
-
-// -----
-
-class ShakaPlayerGoPrev extends shaka.ui.Element {
-	constructor(parent, controls, eventHandler) {
-		super(parent, controls);
-
-		// The actual button that will be displayed
-		this.button_ = document.createElement("button");
-		this.button_.innerHTML = `<i class="fa-solid fa-backward-step"></i>`;
-
-		this.parent.appendChild(this.button_);
-
-		// Listen for clicks on the button to start the next playback
-		this.eventManager.listen(this.button_, "click", eventHandler);
-	}
-}
-
-ShakaPlayerGoPrev.Factory = class {
-	constructor(eventHandler) {
-		this.eventHandler = eventHandler;
-	}
-
-	create(rootElement, controls) {
-		return new ShakaPlayerGoPrev(rootElement, controls, this.eventHandler);
-	}
-};
-
-// -----
-
-class ShakaPlayerGoSeekBackward extends shaka.ui.Element {
-	constructor(parent, controls, eventHandler) {
-		super(parent, controls);
-
-		// The actual button that will be displayed
-		this.button_ = document.createElement("button");
-		this.button_.innerHTML = `< 5`;
-
-		this.parent.appendChild(this.button_);
-
-		// Listen for clicks on the button to start the next playback
-		this.eventManager.listen(this.button_, "click", eventHandler);
-	}
-}
-
-ShakaPlayerGoSeekBackward.Factory = class {
-	constructor(eventHandler) {
-		this.eventHandler = eventHandler;
-	}
-
-	create(rootElement, controls) {
-		return new ShakaPlayerGoSeekBackward(
-			rootElement,
-			controls,
-			this.eventHandler
-		);
-	}
-};
-
-// -----
-
-class ShakaPlayerGoSeekForward extends shaka.ui.Element {
-	constructor(parent, controls, eventHandler) {
-		super(parent, controls);
-
-		// The actual button that will be displayed
-		this.button_ = document.createElement("button");
-		this.button_.innerHTML = `5 >`;
-
-		this.parent.appendChild(this.button_);
-
-		// Listen for clicks on the button to start the next playback
-		this.eventManager.listen(this.button_, "click", eventHandler);
-	}
-}
-
-ShakaPlayerGoSeekForward.Factory = class {
-	constructor(eventHandler) {
-		this.eventHandler = eventHandler;
-	}
-
-	create(rootElement, controls) {
-		return new ShakaPlayerGoSeekForward(
-			rootElement,
-			controls,
-			this.eventHandler
-		);
-	}
-};
 
 function StreamStackItem({
 	video,
@@ -157,6 +52,7 @@ function StreamStackItem({
 	const commitTimeInterval = useRef(null);
 	const flushTimeInterval = useRef(null);
 	const [metadataLoaded, setMetadataLoaded] = useState(false);
+	const [autoplayInitialized, setAutoplayInitialized] = useState(false);
 
 	const [
 		// seek queue
@@ -174,8 +70,8 @@ function StreamStackItem({
 		volume,
 		setVolume,
 		// autoplay initialized
-		autoplayInitialized,
-		setAutoplayInitialized,
+		// autoplayInitialized,
+		// setAutoplayInitialized,
 		// video event
 		videoEvent,
 		setVideoEvent,
@@ -186,6 +82,7 @@ function StreamStackItem({
 		markers,
 		// view mode
 		viewMode,
+		setViewMode,
 		// pause reason
 		pauseReason,
 		setPauseReason,
@@ -208,8 +105,8 @@ function StreamStackItem({
 		state.volume,
 		state.setVolume,
 		//
-		state.autoplayInitialized,
-		state.setAutoplayInitialized,
+		// state.autoplayInitialized,
+		// state.setAutoplayInitialized,
 		//
 		state.videoEvent,
 		state.setVideoEvent,
@@ -220,6 +117,7 @@ function StreamStackItem({
 		state.markers,
 		//
 		state.viewMode,
+		state.setViewMode,
 		//
 		state.pauseReason,
 		state.setPauseReason,
@@ -256,11 +154,11 @@ function StreamStackItem({
 	// if its active, set the duration
 	useEffect(() => {
 		if (isActive && metadataLoaded) {
-			console.log(
-				"PLAYING ----------------------------->",
-				video.queue_id,
-				playerRef?.current.videoElement
-			);
+			// console.log(
+			// 	"PLAYING ----------------------------->",
+			// 	video.queue_id,
+			// 	playerRef?.current.videoElement
+			// );
 			setDuration(playerRef?.current?.videoElement?.duration || 0);
 		}
 	}, [isActive, setDuration, metadataLoaded, video.queue_id]);
@@ -269,20 +167,20 @@ function StreamStackItem({
 	useEffect(() => {
 		const pr = playerRef.current.videoElement;
 		if (!isActive && pr && pr.currentTime > 0) {
-			// console.log(
-			// 	"PAUSE AND RESET ----------------------------->",
-			// 	video.queue_id
-			// );
+			console.log(
+				"PAUSE AND RESET ----------------------------->",
+				video.idx
+			);
 			pr.muted = true;
 			setVolume(0);
 			pr?.pause();
-			pr.currentTime = 0;
+			// pr.currentTime = 0;
 		}
 
 		return () => {
 			if (pr) {
 				pr?.pause();
-				pr.currentTime = 0;
+				// pr.currentTime = 0;
 			}
 		};
 	}, [isActive, video.queue_id, setVolume]);
@@ -381,8 +279,17 @@ function StreamStackItem({
 
 	// change play/pause based on video state
 	useEffect(() => {
+		console.log("change play/pause based on video state", {
+			isActive,
+			metadataLoaded,
+			autoplayInitialized,
+			idx: video.idx,
+			videoState,
+		});
 		if (
 			isActive &&
+			metadataLoaded &&
+			!autoplayInitialized &&
 			playerRef.current !== null &&
 			playerRef.current !== undefined
 		) {
@@ -390,21 +297,28 @@ function StreamStackItem({
 			if (videoState === STATE_VIDEO_PAUSED) {
 				playerRef.current?.videoElement?.pause();
 			} else {
+				console.log("Trying to play", video.idx);
 				playerRef.current.videoElement
 					.play()
 					.then((res) => {
+						console.log("Autoplay initialized", video.idx);
 						if (volume === 0 && !autoplayInitialized) {
+							console.log("Setting volume to 0.5");
 							setVolume(0.5);
 							setAutoplayInitialized(true);
 						}
 					})
 					.catch((err) => {
-						console.error("Error autoplay : ", err);
+						console.error("Error autoplay : ", err, video.idx);
 						// toast("Error playing video", { type: "error" });
 						playerRef.current.videoElement.muted = true;
 						playerRef.current.videoElement
 							.play()
 							.then((res) => {
+								console.log(
+									"Autoplay initialized after muting",
+									video.idx
+								);
 								playerRef.current.videoElement.muted = false;
 								if (volume === 0 && !autoplayInitialized) {
 									setVolume(0.5);
@@ -412,12 +326,18 @@ function StreamStackItem({
 								}
 							})
 							.catch((err) => {
-								console.error(err);
+								console.error(
+									"Error autoplay (with mute)",
+									err,
+									video.idx
+								);
 							});
 					});
 			}
 		}
 	}, [
+		video,
+		metadataLoaded,
 		videoState,
 		isActive,
 		autoplayInitialized,
@@ -725,10 +645,10 @@ function StreamStackItem({
 		(ref) => {
 			if (ref !== null) {
 				const check = isMobileTablet();
-				console.log("IS MOBILE : ", check);
+				// console.log("IS MOBILE : ", check);
 				const isMobile = { done: true, check: check };
 
-				toast("IS MOBILE : " + check);
+				// toast("IS MOBILE : " + check);
 				// console.log(ref);
 				setVideoState(STATE_VIDEO_LOADING);
 				playerRef.current = ref;
@@ -756,6 +676,21 @@ function StreamStackItem({
 						)
 					);
 
+					shaka.ui.Controls.registerElement(
+						"toggle_mode",
+						new ShakaPlayerToggleMode.Factory()
+					);
+
+					shaka.ui.Controls.registerElement(
+						"prev_marker",
+						new ShakaPlayerPrevMarker.Factory()
+					);
+
+					shaka.ui.Controls.registerElement(
+						"next_marker",
+						new ShakaPlayerNextMarker.Factory()
+					);
+
 					playerRef.current.ui.configure({
 						enableTooltips: true,
 						doubleClickForFullscreen: true,
@@ -766,14 +701,17 @@ function StreamStackItem({
 						keyboardSeekDistance: 5,
 						controlPanelElements: [
 							"prev",
+							"prev_marker",
 							"seek_backward",
 							"play_pause",
 							"seek_forward",
+							"next_marker",
 							"next",
 							"spacer",
 							"mute",
 							"volume",
 							"time_and_duration",
+							"toggle_mode",
 							"fullscreen",
 						],
 						seekBarColors: {
@@ -792,12 +730,19 @@ function StreamStackItem({
 						"error",
 						playerOnError
 					);
+					playerRef.current.player.addEventListener(
+						"statechanged",
+						(e) => {
+							console.log(e.newstate);
+						}
+					);
 
 					playerRef.current.player.configure(
 						"manifest.dash.ignoreMinBufferTime",
 						true
 					);
 
+					// stream settings
 					playerRef.current.player.configure({
 						streaming: {
 							maxDisabledTime: 0,
@@ -827,7 +772,7 @@ function StreamStackItem({
 						})
 							.then((res) => {
 								const data = res.data;
-								console.log(data);
+								// console.log(data);
 
 								if (data && data.licenseAcquisitionUrl) {
 									console.log("DRM Info Received");
@@ -849,7 +794,8 @@ function StreamStackItem({
 									playerRef.current.player
 										.load(videoUrl)
 										.then((res) => {
-											console.log("Video Loaded", video);
+											console.log("Video Loaded");
+											setMetadataLoaded(true);
 										})
 										.catch((err) => {
 											playerOnError(err);
@@ -867,7 +813,7 @@ function StreamStackItem({
 						})
 							.then((res) => {
 								const data = res.data;
-								console.log(data);
+								// console.log(data);
 
 								if (
 									data &&
@@ -892,7 +838,8 @@ function StreamStackItem({
 									playerRef.current.player
 										.load(videoUrl)
 										.then((res) => {
-											console.log("Video Loaded", video);
+											console.log("Video Loaded");
+											setMetadataLoaded(true);
 										})
 										.catch((err) => {
 											playerOnError(err);

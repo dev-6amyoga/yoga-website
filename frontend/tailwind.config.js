@@ -10,6 +10,7 @@ module.exports = {
 			padding: "2rem",
 			screens: {
 				"2xl": "1400px",
+				xs: "384px",
 			},
 		},
 		extend: {
@@ -66,7 +67,7 @@ module.exports = {
 				content: ["Bitter", "serif"],
 			},
 			fontSize: {
-				"step--2": "clamp(0.99rem, 1.12rem + -0.68vw, 0.64rem)",
+				"step--2": "clamp(0.85rem, 1rem + -0.4vw, 0.64rem)",
 				"step--1": "clamp(1.05rem, 1.15rem + -0.5vw, 0.8rem)",
 				"step-0": "clamp(1.13rem, 1.17rem + -0.24vw, 1rem)",
 				"step-1": "clamp(1.2rem, 1.18rem + 0.1vw, 1.25rem)",
