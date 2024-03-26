@@ -14,8 +14,10 @@ function AllTransitions() {
   const navigate = useNavigate();
   const [modalState, setModalState] = useState(false);
   const [modalData, setModalData] = useState({
-    transition_video_ID: 0,
+    transition_video_ID: "",
     transition_video_name: "",
+    transition_dash_url: "",
+    transition_hls_url: "",
   });
   const [delId, setDelId] = useState("");
   const closeDelHandler = (event) => {
@@ -123,6 +125,8 @@ function AllTransitions() {
   };
   const updateData = async () => {
     console.log(modalData);
+    setModalState(false);
+    toast("Updating changes");
     const response = await Fetch({
       url: `/content/video/updateTransition/${modalData.transition_id}`,
       method: "PUT",
@@ -130,7 +134,6 @@ function AllTransitions() {
     });
     if (response.status === 200) {
       toast("Success!");
-      setModalState(false);
     }
   };
   const handleDownload = (data1) => {
@@ -181,6 +184,7 @@ function AllTransitions() {
           <Table.Column prop="transition_id" label="ID" />
           <Table.Column prop="transition_video_name" label="Transition Name" />
           <Table.Column prop="transition_video_ID" label="Cloudflare ID" />
+          <Table.Column prop="transition_dash_url" label="DASH URL" />
           <Table.Column prop="duration" label="Transition Duration" />
           <Table.Column
             prop="operation"
@@ -221,6 +225,24 @@ function AllTransitions() {
                 onChange={handleInputChange}
               >
                 Transition Cloudflare ID
+              </Input>
+              <br />
+              <Input
+                width="100%"
+                id="transition_hls_url"
+                placeholder={modalData.transition_hls_url}
+                onChange={handleInputChange}
+              >
+                Transition HLS URL
+              </Input>
+              <br />
+              <Input
+                width="100%"
+                id="transition_dash_url"
+                placeholder={modalData.transition_dash_url}
+                onChange={handleInputChange}
+              >
+                Transition DASH URL
               </Input>
               <br />
               <br />
