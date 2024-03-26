@@ -1,196 +1,201 @@
 import shaka from "shaka-player/dist/shaka-player.ui";
 import { SEEK_TYPE_MOVE } from "../enums/seek_types";
 import {
-	VIDEO_VIEW_STUDENT_MODE,
-	VIDEO_VIEW_TEACHING_MODE,
+  VIDEO_VIEW_STUDENT_MODE,
+  VIDEO_VIEW_TEACHING_MODE,
 } from "../enums/video_view_modes";
 import useVideoStore from "../store/VideoStore";
+import usePlaylistStore from "../store/PlaylistStore";
 
 const globalVideoStore = useVideoStore.getState();
 const setCurrentMarkerIdx = globalVideoStore.setCurrentMarkerIdx;
 const addToSeekQueue = globalVideoStore.addToSeekQueue;
 const setViewMode = globalVideoStore.setViewMode;
-
 export const handleToggleMode = () => {
-	const videoStore = useVideoStore.getState();
-	console.log("Switching modes ==> Current mode: ", videoStore.viewMode);
+  const videoStore = useVideoStore.getState();
+  console.log("Switching modes ==> Current mode: ", videoStore.viewMode);
 
-	setViewMode(
-		videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE
-			? VIDEO_VIEW_TEACHING_MODE
-			: VIDEO_VIEW_STUDENT_MODE
-	);
+  setViewMode(
+    videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE
+      ? VIDEO_VIEW_TEACHING_MODE
+      : VIDEO_VIEW_STUDENT_MODE
+  );
 };
 
 export const handlePrevMarker = () => {
-	// console.log("Prev Marker Clicked");
-	const videoStore = useVideoStore.getState();
-	const markers = videoStore.markers;
-	const currentMarkerIdx = videoStore.currentMarkerIdx;
+  // console.log("Prev Marker Clicked");
+  const videoStore = useVideoStore.getState();
+  const markers = videoStore.markers;
+  const currentMarkerIdx = videoStore.currentMarkerIdx;
 
-	console.log("Prev Marker", markers.length);
-	if (markers.length > 0) {
-		if (currentMarkerIdx === 0) {
-			addToSeekQueue({ t: 0, type: SEEK_TYPE_MOVE });
-			return;
-		}
-		const idx =
-			((currentMarkerIdx || 0) - 1 + markers.length) % markers.length;
-		console.log("SETTING MARKER ID :", idx);
-		setCurrentMarkerIdx(idx);
-		// seek to prev marker
-		addToSeekQueue({
-			t: markers[idx].timestamp,
-			type: SEEK_TYPE_MOVE,
-		});
-	}
+  console.log("Prev Marker", markers.length);
+  if (markers.length > 0) {
+    if (currentMarkerIdx === 0) {
+      addToSeekQueue({ t: 0, type: SEEK_TYPE_MOVE });
+      return;
+    }
+    const idx = ((currentMarkerIdx || 0) - 1 + markers.length) % markers.length;
+    console.log("SETTING MARKER ID :", idx);
+    setCurrentMarkerIdx(idx);
+    if (idx === 0) {
+      //   popFromArchive(-1);
+      console.log("end reached");
+    }
+    // seek to prev marker
+    else {
+      addToSeekQueue({
+        t: markers[idx].timestamp,
+        type: SEEK_TYPE_MOVE,
+      });
+    }
+  }
 };
 
 export const handleNextMarker = () => {
-	console.log("Next Marker Clicked");
-	const videoStore = useVideoStore.getState();
-	const markers = videoStore.markers;
-	const currentMarkerIdx = videoStore.currentMarkerIdx;
+  console.log("Next Marker Clicked");
+  const videoStore = useVideoStore.getState();
+  const markers = videoStore.markers;
+  const currentMarkerIdx = videoStore.currentMarkerIdx;
 
-	console.log("Next Marker", markers.length);
-	if (markers.length > 0) {
-		const idx = ((currentMarkerIdx || 0) + 1) % markers.length;
-		console.log("SETTING MARKER ID :", idx);
-		setCurrentMarkerIdx(idx);
-		// seek to next marker
-		addToSeekQueue({
-			t: markers[idx].timestamp,
-			type: SEEK_TYPE_MOVE,
-		});
-	}
+  console.log("Next Marker", markers.length);
+  if (markers.length > 0) {
+    const idx = ((currentMarkerIdx || 0) + 1) % markers.length;
+    console.log("SETTING MARKER ID :", idx);
+    setCurrentMarkerIdx(idx);
+    // seek to next marker
+    addToSeekQueue({
+      t: markers[idx].timestamp,
+      type: SEEK_TYPE_MOVE,
+    });
+  }
 };
 
 // -----
 class ShakaPlayerGoNext extends shaka.ui.Element {
-	constructor(parent, controls, eventHandler) {
-		super(parent, controls);
+  constructor(parent, controls, eventHandler) {
+    super(parent, controls);
 
-		// The actual button that will be displayed
-		this.button_ = document.createElement("button");
-		this.button_.innerHTML = `<i class="fa-icons fa-solid fa-forward-step"></i>`;
-		this.button_.title = "Next Video";
+    // The actual button that will be displayed
+    this.button_ = document.createElement("button");
+    this.button_.innerHTML = `<i class="fa-icons fa-solid fa-forward-step"></i>`;
+    this.button_.title = "Next Video";
 
-		this.parent.appendChild(this.button_);
+    this.parent.appendChild(this.button_);
 
-		// Listen for clicks on the button to start the next playback
-		this.eventManager.listen(this.button_, "click", eventHandler);
-	}
+    // Listen for clicks on the button to start the next playback
+    this.eventManager.listen(this.button_, "click", eventHandler);
+  }
 }
 
 ShakaPlayerGoNext.Factory = class {
-	constructor(eventHandler) {
-		this.eventHandler = eventHandler;
-	}
+  constructor(eventHandler) {
+    this.eventHandler = eventHandler;
+  }
 
-	create(rootElement, controls) {
-		return new ShakaPlayerGoNext(rootElement, controls, this.eventHandler);
-	}
+  create(rootElement, controls) {
+    return new ShakaPlayerGoNext(rootElement, controls, this.eventHandler);
+  }
 };
 
 // -----
 
 class ShakaPlayerGoPrev extends shaka.ui.Element {
-	constructor(parent, controls, eventHandler) {
-		super(parent, controls);
+  constructor(parent, controls, eventHandler) {
+    super(parent, controls);
 
-		// The actual button that will be displayed
-		this.button_ = document.createElement("button");
-		this.button_.innerHTML = `<i class="fa-icons fa-solid fa-backward-step"></i>`;
-		this.button_.title = "Previous Video";
+    // The actual button that will be displayed
+    this.button_ = document.createElement("button");
+    this.button_.innerHTML = `<i class="fa-icons fa-solid fa-backward-step"></i>`;
+    this.button_.title = "Previous Video";
 
-		this.parent.appendChild(this.button_);
+    this.parent.appendChild(this.button_);
 
-		// Listen for clicks on the button to start the next playback
-		this.eventManager.listen(this.button_, "click", eventHandler);
-	}
+    // Listen for clicks on the button to start the next playback
+    this.eventManager.listen(this.button_, "click", eventHandler);
+  }
 }
 
 ShakaPlayerGoPrev.Factory = class {
-	constructor(eventHandler) {
-		this.eventHandler = eventHandler;
-	}
+  constructor(eventHandler) {
+    this.eventHandler = eventHandler;
+  }
 
-	create(rootElement, controls) {
-		return new ShakaPlayerGoPrev(rootElement, controls, this.eventHandler);
-	}
+  create(rootElement, controls) {
+    return new ShakaPlayerGoPrev(rootElement, controls, this.eventHandler);
+  }
 };
 
 // -----
 
 class ShakaPlayerGoSeekBackward extends shaka.ui.Element {
-	constructor(parent, controls, eventHandler) {
-		super(parent, controls);
+  constructor(parent, controls, eventHandler) {
+    super(parent, controls);
 
-		// The actual button that will be displayed
-		this.button_ = document.createElement("button");
-		this.button_.innerHTML = `<span><i class="fa-icons fa-solid fa-chevron-left"></i>5</span>`;
-		this.button_.title = "Seek Backward 5s";
+    // The actual button that will be displayed
+    this.button_ = document.createElement("button");
+    this.button_.innerHTML = `<span><i class="fa-icons fa-solid fa-chevron-left"></i>5</span>`;
+    this.button_.title = "Seek Backward 5s";
 
-		this.parent.appendChild(this.button_);
+    this.parent.appendChild(this.button_);
 
-		// Listen for clicks on the button to start the next playback
-		this.eventManager.listen(this.button_, "click", eventHandler);
-	}
+    // Listen for clicks on the button to start the next playback
+    this.eventManager.listen(this.button_, "click", eventHandler);
+  }
 }
 
 ShakaPlayerGoSeekBackward.Factory = class {
-	constructor(eventHandler) {
-		this.eventHandler = eventHandler;
-	}
+  constructor(eventHandler) {
+    this.eventHandler = eventHandler;
+  }
 
-	create(rootElement, controls) {
-		return new ShakaPlayerGoSeekBackward(
-			rootElement,
-			controls,
-			this.eventHandler
-		);
-	}
+  create(rootElement, controls) {
+    return new ShakaPlayerGoSeekBackward(
+      rootElement,
+      controls,
+      this.eventHandler
+    );
+  }
 };
 
 // -----
 
 class ShakaPlayerGoSeekForward extends shaka.ui.Element {
-	constructor(parent, controls, eventHandler) {
-		super(parent, controls);
+  constructor(parent, controls, eventHandler) {
+    super(parent, controls);
 
-		// The actual button that will be displayed
-		this.button_ = document.createElement("button");
-		this.button_.innerHTML = `<span>5<i class="fa-icons fa-solid fa-chevron-right"></i></span>`;
-		this.button_.title = "Seek Forward 5s";
+    // The actual button that will be displayed
+    this.button_ = document.createElement("button");
+    this.button_.innerHTML = `<span>5<i class="fa-icons fa-solid fa-chevron-right"></i></span>`;
+    this.button_.title = "Seek Forward 5s";
 
-		this.parent.appendChild(this.button_);
+    this.parent.appendChild(this.button_);
 
-		// Listen for clicks on the button to start the next playback
-		this.eventManager.listen(this.button_, "click", eventHandler);
-	}
+    // Listen for clicks on the button to start the next playback
+    this.eventManager.listen(this.button_, "click", eventHandler);
+  }
 }
 
 ShakaPlayerGoSeekForward.Factory = class {
-	constructor(eventHandler) {
-		this.eventHandler = eventHandler;
-	}
+  constructor(eventHandler) {
+    this.eventHandler = eventHandler;
+  }
 
-	create(rootElement, controls) {
-		return new ShakaPlayerGoSeekForward(
-			rootElement,
-			controls,
-			this.eventHandler
-		);
-	}
+  create(rootElement, controls) {
+    return new ShakaPlayerGoSeekForward(
+      rootElement,
+      controls,
+      this.eventHandler
+    );
+  }
 };
 
 class ShakaPlayerToggleMode extends shaka.ui.Element {
-	constructor(parent, controls, eventHandler) {
-		super(parent, controls);
+  constructor(parent, controls, eventHandler) {
+    super(parent, controls);
 
-		// The actual button that will be displayed
-		this.button_ = document.createElement("button");
-		this.button_.innerHTML = `
+    // The actual button that will be displayed
+    this.button_ = document.createElement("button");
+    this.button_.innerHTML = `
    <label class="custom-shaka-toggle-mode-label">
     <input type="checkbox" class="custom-shaka-toggle-mode"/>
     <span>
@@ -203,188 +208,186 @@ class ShakaPlayerToggleMode extends shaka.ui.Element {
     </span>
    </label>
   `;
-		this.button_.title = "Toggle Mode";
+    this.button_.title = "Toggle Mode";
 
-		this.parent.appendChild(this.button_);
+    this.parent.appendChild(this.button_);
 
-		// Listen for clicks on the button to start the next playback
-		this.eventManager.listen(this.button_, "click", eventHandler);
+    // Listen for clicks on the button to start the next playback
+    this.eventManager.listen(this.button_, "click", eventHandler);
 
-		this.unsub = useVideoStore.subscribe(
-			(state) => state.viewMode,
-			(viewMode, prevMode) => {
-				console.log("View Mode Change : ", prevMode, "=>", viewMode);
-				this.handleViewModeChange();
-			}
-		);
-	}
+    this.unsub = useVideoStore.subscribe(
+      (state) => state.viewMode,
+      (viewMode, prevMode) => {
+        console.log("View Mode Change : ", prevMode, "=>", viewMode);
+        this.handleViewModeChange();
+      }
+    );
+  }
 
-	handleViewModeChange(viewMode) {
-		if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
-			this.button_.querySelector(".custom-shaka-toggle-mode").checked =
-				false;
-		} else {
-			this.button_.querySelector(".custom-shaka-toggle-mode").checked =
-				true;
-		}
-	}
+  handleViewModeChange(viewMode) {
+    if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+      this.button_.querySelector(".custom-shaka-toggle-mode").checked = false;
+    } else {
+      this.button_.querySelector(".custom-shaka-toggle-mode").checked = true;
+    }
+  }
 
-	enable() {
-		this.button_.style.display = "block";
-	}
+  enable() {
+    this.button_.style.display = "block";
+  }
 
-	disable() {
-		this.button_.style.display = "none";
-	}
+  disable() {
+    this.button_.style.display = "none";
+  }
 }
 
 ShakaPlayerToggleMode.Factory = class {
-	constructor() {
-		this.eventHandler = handleToggleMode;
-		this.element = null;
-		this.enableElement = true;
-	}
+  constructor() {
+    this.eventHandler = handleToggleMode;
+    this.element = null;
+    this.enableElement = true;
+  }
 
-	enable() {
-		if (this.element) {
-			this.enableElement = true;
-			this.element.enable();
-		}
-	}
+  enable() {
+    if (this.element) {
+      this.enableElement = true;
+      this.element.enable();
+    }
+  }
 
-	disable() {
-		if (this.element) {
-			this.enableElement = false;
-			this.element.disable();
-		}
-	}
+  disable() {
+    if (this.element) {
+      this.enableElement = false;
+      this.element.disable();
+    }
+  }
 
-	create(rootElement, controls) {
-		this.element = new ShakaPlayerToggleMode(
-			rootElement,
-			controls,
-			this.eventHandler
-		);
-		return this.element;
-	}
+  create(rootElement, controls) {
+    this.element = new ShakaPlayerToggleMode(
+      rootElement,
+      controls,
+      this.eventHandler
+    );
+    return this.element;
+  }
 };
 
 // ----------------------
 
 class ShakaPlayerNextMarker extends shaka.ui.Element {
-	constructor(parent, controls, eventHandler) {
-		super(parent, controls);
+  constructor(parent, controls, eventHandler) {
+    super(parent, controls);
 
-		// The actual button that will be displayed
-		this.button_ = document.createElement("button");
-		this.button_.innerHTML = `
+    // The actual button that will be displayed
+    this.button_ = document.createElement("button");
+    this.button_.innerHTML = `
    <i class="fa-icons fa-solid fa-arrow-right-to-bracket"></i>
   `;
-		this.button_.title = "Next Marker";
+    this.button_.title = "Next Marker";
 
-		this.parent.appendChild(this.button_);
+    this.parent.appendChild(this.button_);
 
-		// Listen for clicks on the button to start the next playback
-		this.eventManager.listen(this.button_, "click", eventHandler);
-	}
+    // Listen for clicks on the button to start the next playback
+    this.eventManager.listen(this.button_, "click", eventHandler);
+  }
 
-	enable() {
-		this.button_.style.display = "block";
-	}
+  enable() {
+    this.button_.style.display = "block";
+  }
 
-	disable() {
-		this.button_.style.display = "none";
-	}
+  disable() {
+    this.button_.style.display = "none";
+  }
 }
 
 ShakaPlayerNextMarker.Factory = class {
-	constructor() {
-		this.eventHandler = handleNextMarker;
-		this.element = null;
-		this.enableElement = true;
-	}
+  constructor() {
+    this.eventHandler = handleNextMarker;
+    this.element = null;
+    this.enableElement = true;
+  }
 
-	enable() {
-		if (this.element) {
-			this.enableElement = true;
-			this.element.enable();
-		}
-	}
+  enable() {
+    if (this.element) {
+      this.enableElement = true;
+      this.element.enable();
+    }
+  }
 
-	disable() {
-		if (this.element) {
-			this.enableElement = false;
-			this.element.disable();
-		}
-	}
+  disable() {
+    if (this.element) {
+      this.enableElement = false;
+      this.element.disable();
+    }
+  }
 
-	create(rootElement, controls) {
-		this.element = new ShakaPlayerNextMarker(
-			rootElement,
-			controls,
-			this.eventHandler
-		);
-		return this.element;
-	}
+  create(rootElement, controls) {
+    this.element = new ShakaPlayerNextMarker(
+      rootElement,
+      controls,
+      this.eventHandler
+    );
+    return this.element;
+  }
 };
 
 // ------------------------------
 
 class ShakaPlayerPrevMarker extends shaka.ui.Element {
-	constructor(parent, controls, eventHandler) {
-		super(parent, controls);
+  constructor(parent, controls, eventHandler) {
+    super(parent, controls);
 
-		// The actual button that will be displayed
-		this.button_ = document.createElement("button");
-		this.button_.innerHTML = `
+    // The actual button that will be displayed
+    this.button_ = document.createElement("button");
+    this.button_.innerHTML = `
    <i class="fa-icons fa-solid fa-arrow-right-to-bracket rotate-180"></i>
   `;
-		this.button_.title = "Previous Marker";
+    this.button_.title = "Previous Marker";
 
-		this.parent.appendChild(this.button_);
+    this.parent.appendChild(this.button_);
 
-		// Listen for clicks on the button to start the next playback
-		this.eventManager.listen(this.button_, "click", eventHandler);
-	}
+    // Listen for clicks on the button to start the next playback
+    this.eventManager.listen(this.button_, "click", eventHandler);
+  }
 
-	enable() {
-		this.button_.style.display = "block";
-	}
+  enable() {
+    this.button_.style.display = "block";
+  }
 
-	disable() {
-		this.button_.style.display = "none";
-	}
+  disable() {
+    this.button_.style.display = "none";
+  }
 }
 
 ShakaPlayerPrevMarker.Factory = class {
-	constructor() {
-		this.eventHandler = handlePrevMarker;
-		this.element = null;
-		this.enableElement = true;
-	}
+  constructor() {
+    this.eventHandler = handlePrevMarker;
+    this.element = null;
+    this.enableElement = true;
+  }
 
-	enable() {
-		if (this.element) {
-			this.enableElement = true;
-			this.element.enable();
-		}
-	}
+  enable() {
+    if (this.element) {
+      this.enableElement = true;
+      this.element.enable();
+    }
+  }
 
-	disable() {
-		if (this.element) {
-			this.enableElement = false;
-			this.element.disable();
-		}
-	}
+  disable() {
+    if (this.element) {
+      this.enableElement = false;
+      this.element.disable();
+    }
+  }
 
-	create(rootElement, controls) {
-		this.element = new ShakaPlayerPrevMarker(
-			rootElement,
-			controls,
-			this.eventHandler
-		);
-		return this.element;
-	}
+  create(rootElement, controls) {
+    this.element = new ShakaPlayerPrevMarker(
+      rootElement,
+      controls,
+      this.eventHandler
+    );
+    return this.element;
+  }
 };
 
 // ------------------------------
@@ -392,12 +395,12 @@ ShakaPlayerPrevMarker.Factory = class {
 const shakaPlayerToggleModeInstance = new ShakaPlayerToggleMode.Factory();
 
 export {
-	ShakaPlayerGoNext,
-	ShakaPlayerGoPrev,
-	ShakaPlayerGoSeekBackward,
-	ShakaPlayerGoSeekForward,
-	ShakaPlayerNextMarker,
-	ShakaPlayerPrevMarker,
-	ShakaPlayerToggleMode,
-	shakaPlayerToggleModeInstance,
+  ShakaPlayerGoNext,
+  ShakaPlayerGoPrev,
+  ShakaPlayerGoSeekBackward,
+  ShakaPlayerGoSeekForward,
+  ShakaPlayerNextMarker,
+  ShakaPlayerPrevMarker,
+  ShakaPlayerToggleMode,
+  shakaPlayerToggleModeInstance,
 };
