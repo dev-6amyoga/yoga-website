@@ -32,6 +32,7 @@ import { isMobileTablet } from "../../utils/isMobileOrTablet";
 import ShakaPlayer from "./ShakaPlayer";
 
 import shaka from "shaka-player/dist/shaka-player.ui";
+import { FaDAndD } from "react-icons/fa6";
 
 function StreamStackItem({
   video,
@@ -163,7 +164,7 @@ function StreamStackItem({
   useEffect(() => {
     const pr = playerRef.current.videoElement;
     if (!isActive && pr && pr.currentTime > 0) {
-      console.log("PAUSE AND RESET ----------------------------->", video.idx);
+      //console.log("PAUSE AND RESET ----------------------------->", video.idx);
       pr.muted = true;
       setVolume(0);
       pr?.pause();
@@ -192,7 +193,7 @@ function StreamStackItem({
   useEffect(() => {
     if (isActive && seekQueue.length > 0) {
       const seekEvent = seekQueue[0];
-      console.log("SEEKING --->", seekEvent);
+      //console.log("SEEKING --->", seekEvent);
       // setVideoState(STATE_VIDEO_PLAY)
       // setPauseReason(null)
       if (seekEvent && playerRef.current) {
@@ -207,10 +208,10 @@ function StreamStackItem({
             if (ct < 0) ct = 0;
 
             playerRef.current.videoElement.currentTime = ct;
-            console.log(
-              "SEEKING ----------------------------->",
-              playerRef.current.videoElement.currentTime
-            );
+            // console.log(
+            //   "SEEKING ----------------------------->",
+            //   playerRef.current.videoElement.currentTime
+            // );
             setCommitSeekTime(ct);
             // autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
             // popFromSeekQueue(0)
@@ -224,10 +225,10 @@ function StreamStackItem({
             }
 
             playerRef.current.videoElement.currentTime = st;
-            console.log(
-              "SEEKING ----------------------------->",
-              playerRef.current.videoElement.currentTime
-            );
+            // console.log(
+            //   "SEEKING ----------------------------->",
+            //   playerRef.current.videoElement.currentTime
+            // );
             setCommitSeekTime(st);
             // autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
             // popFromSeekQueue(0)
@@ -266,30 +267,30 @@ function StreamStackItem({
 
   // change play/pause based on video state
   useEffect(() => {
-    console.log("change play/pause based on video state", {
-      isActive,
-      metadataLoaded,
-      autoplayInitialized,
-      idx: video.idx,
-      videoState,
-    });
+    // console.log("change play/pause based on video state", {
+    //   isActive,
+    //   metadataLoaded,
+    //   autoplayInitialized,
+    //   idx: video.idx,
+    //   videoState,
+    // });
     if (isActive && metadataLoaded) {
       setPauseReason(null);
       if (videoState === STATE_VIDEO_PAUSED) {
-        console.log("Changing to pause", video.idx);
+        //console.log("Changing to pause", video.idx);
         playerRef.current?.videoElement?.pause();
       } else if (
         !autoplayInitialized &&
         playerRef.current !== null &&
         playerRef.current !== undefined
       ) {
-        console.log("Trying to play", video.idx);
+        //console.log("Trying to play", video.idx);
         playerRef.current.videoElement
           .play()
           .then((res) => {
-            console.log("Autoplay initialized", video.idx);
+            //console.log("Autoplay initialized", video.idx);
             if (volume === 0 && !autoplayInitialized) {
-              console.log("Setting volume to 0.5");
+              //console.log("Setting volume to 0.5");
               setVolume(0.5);
               setAutoplayInitialized(true);
             }
@@ -301,7 +302,7 @@ function StreamStackItem({
             playerRef.current.videoElement
               .play()
               .then((res) => {
-                console.log("Autoplay initialized after muting", video.idx);
+                //console.log("Autoplay initialized after muting", video.idx);
                 playerRef.current.videoElement.muted = false;
                 if (volume === 0 && !autoplayInitialized) {
                   setVolume(0.5);
@@ -380,7 +381,7 @@ function StreamStackItem({
 
     const int = setInterval(() => {
       if (playerRef.current?.videoElement?.currentTime && isActive) {
-        console.log(videoState, viewMode);
+        //console.log(videoState, viewMode);
         // check if the marker has been reached
         if (checkSeek(playerRef.current?.videoElement?.currentTime)) {
           // popping from queue
@@ -473,7 +474,7 @@ function StreamStackItem({
         }
       })
       .catch((err) => {
-        console.log(err);
+        //console.log(err);
         // localStorage.setItem(
         // 	"6amyoga_watch_time_logs",
         // 	JSON.stringify(watch_time_logs)
@@ -591,9 +592,9 @@ function StreamStackItem({
 
   const playerOnError = useCallback(
     (e) => {
-      console.log("[StreamStackItem:error] Error playing video", e);
+      //console.log("[StreamStackItem:error] Error playing video", e);
       setVideoState(STATE_VIDEO_ERROR);
-      alert(JSON.stringify({ err: e }));
+      // alert(JSON.stringify({ err: e }));
     },
     [setVideoState]
   );
@@ -616,7 +617,6 @@ function StreamStackItem({
 
   const handleVideoStateChange = useCallback(
     (e) => {
-      console.log(e.newstate);
       if (e.newstate === "playing") {
         if (useVideoStore.getState().pauseReason === VIDEO_PAUSE_MARKER) {
           setPauseReason(null);
@@ -641,7 +641,7 @@ function StreamStackItem({
         // console.log(ref);
         setVideoState(STATE_VIDEO_LOADING);
         playerRef.current = ref;
-        console.log("VIDEO IS : ", video);
+        //console.log("VIDEO IS : ", video);
         if (ref.ui) {
           shaka.ui.Controls.registerElement(
             "next",
@@ -745,7 +745,7 @@ function StreamStackItem({
           });
 
           // get the playready license acquisition url
-          console.log("Fetching DRM Info");
+          //console.log("Fetching DRM Info");
           //fetch only if it is not a transition video
 
           if (!isNaN(video.video.id) && typeof video.video.id === "number") {
@@ -761,10 +761,10 @@ function StreamStackItem({
                   // console.log(data);
 
                   if (data && data.licenseAcquisitionUrl) {
-                    console.log("DRM Info Received");
+                    //console.log("DRM Info Received");
                     toast("DRM Info Received");
 
-                    alert(JSON.stringify(data));
+                    // alert(JSON.stringify(data));
 
                     // Mobile
                     playerRef.current.player.configure({
@@ -775,11 +775,11 @@ function StreamStackItem({
                       },
                     });
 
-                    console.log("Trying to load video");
+                    //console.log("Trying to load video");
                     playerRef.current.player
                       .load(videoUrl)
                       .then((res) => {
-                        console.log("Video Loaded");
+                        //console.log("Video Loaded");
                         setMetadataLoaded(true);
                       })
                       .catch((err) => {
@@ -798,10 +798,10 @@ function StreamStackItem({
               })
                 .then((res) => {
                   const data = res.data;
-                  // console.log(data);
+                  // // console.log(data);
 
                   if (data && data.licenseAcquisitionUrl && data.token) {
-                    console.log("DRM Info Received");
+                    // console.log("DRM Info Received");
 
                     // Non Mobile
                     playerRef.current.player.configure({
@@ -815,11 +815,11 @@ function StreamStackItem({
                       },
                     });
 
-                    console.log("Trying to load video");
+                    // console.log("Trying to load video");
                     playerRef.current.player
                       .load(videoUrl)
                       .then((res) => {
-                        console.log("Video Loaded");
+                        // console.log("Video Loaded");
                         setMetadataLoaded(true);
                       })
                       .catch((err) => {
@@ -832,11 +832,11 @@ function StreamStackItem({
                 });
             }
           } else {
-            console.log("no drm");
+            //console.log("no drm");
             playerRef.current.player
               .load(videoUrl)
               .then(() => {
-                console.log("Video Loaded");
+                //console.log("Video Loaded");
                 // setMetadataLoaded(true);
               })
               .catch(playerOnError);
