@@ -11,7 +11,7 @@ const setCurrentMarkerIdx = globalVideoStore.setCurrentMarkerIdx;
 const addToSeekQueue = globalVideoStore.addToSeekQueue;
 const setViewMode = globalVideoStore.setViewMode;
 
-const handleToggleMode = () => {
+export const handleToggleMode = () => {
 	const videoStore = useVideoStore.getState();
 	console.log("Switching modes ==> Current mode: ", videoStore.viewMode);
 
@@ -22,7 +22,8 @@ const handleToggleMode = () => {
 	);
 };
 
-const handlePrevMarker = () => {
+export const handlePrevMarker = () => {
+	// console.log("Prev Marker Clicked");
 	const videoStore = useVideoStore.getState();
 	const markers = videoStore.markers;
 	const currentMarkerIdx = videoStore.currentMarkerIdx;
@@ -45,10 +46,11 @@ const handlePrevMarker = () => {
 	}
 };
 
-const handleNextMarker = () => {
+export const handleNextMarker = () => {
+	console.log("Next Marker Clicked");
 	const videoStore = useVideoStore.getState();
 	const markers = videoStore.markers;
-	const currentMarkerIdx = globalVideoStore.currentMarkerIdx;
+	const currentMarkerIdx = videoStore.currentMarkerIdx;
 
 	console.log("Next Marker", markers.length);
 	if (markers.length > 0) {
@@ -186,22 +188,6 @@ class ShakaPlayerToggleMode extends shaka.ui.Element {
 	constructor(parent, controls, eventHandler) {
 		super(parent, controls);
 
-		this.unsub = useVideoStore.subscribe(
-			(state) => state.viewMode,
-			(viewMode, prevMode) => {
-				console.log("View Mode Change : ", prevMode, "=>", viewMode);
-				if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
-					this.button_.querySelector(
-						".custom-shaka-toggle-mode"
-					).checked = false;
-				} else {
-					this.button_.querySelector(
-						".custom-shaka-toggle-mode"
-					).checked = true;
-				}
-			}
-		);
-
 		// The actual button that will be displayed
 		this.button_ = document.createElement("button");
 		this.button_.innerHTML = `
@@ -223,6 +209,24 @@ class ShakaPlayerToggleMode extends shaka.ui.Element {
 
 		// Listen for clicks on the button to start the next playback
 		this.eventManager.listen(this.button_, "click", eventHandler);
+
+		this.unsub = useVideoStore.subscribe(
+			(state) => state.viewMode,
+			(viewMode, prevMode) => {
+				console.log("View Mode Change : ", prevMode, "=>", viewMode);
+				this.handleViewModeChange();
+			}
+		);
+	}
+
+	handleViewModeChange(viewMode) {
+		if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+			this.button_.querySelector(".custom-shaka-toggle-mode").checked =
+				false;
+		} else {
+			this.button_.querySelector(".custom-shaka-toggle-mode").checked =
+				true;
+		}
 	}
 
 	enable() {
