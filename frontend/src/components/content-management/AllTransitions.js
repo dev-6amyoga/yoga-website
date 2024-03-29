@@ -126,6 +126,11 @@ function AllTransitions() {
   const updateData = async () => {
     console.log(modalData);
     setModalState(false);
+    if (modalData.teacher_mode == "false") {
+      modalData.teacher_mode = false;
+    } else {
+      modalData.teacher_mode = true;
+    }
     toast("Updating changes");
     const response = await Fetch({
       url: `/content/video/updateTransition/${modalData.transition_id}`,
@@ -183,6 +188,11 @@ function AllTransitions() {
         <Table data={filteredTransitions} className="bg-white ">
           <Table.Column prop="transition_id" label="ID" />
           <Table.Column prop="transition_video_name" label="Transition Name" />
+          <Table.Column
+            prop="teacher_mode"
+            label="Teacher Mode"
+            render={(teacherMode) => (teacherMode ? "Yes" : "No")}
+          />{" "}
           <Table.Column prop="transition_video_ID" label="Cloudflare ID" />
           <Table.Column prop="transition_dash_url" label="DASH URL" />
           <Table.Column prop="duration" label="Transition Duration" />
@@ -244,6 +254,15 @@ function AllTransitions() {
               >
                 Transition DASH URL
               </Input>
+              <Input
+                width="100%"
+                id="teacher_mode"
+                placeholder={modalData.teacher_mode}
+                onChange={handleInputChange}
+              >
+                Teacher Mode
+              </Input>
+
               <br />
               <br />
             </form>

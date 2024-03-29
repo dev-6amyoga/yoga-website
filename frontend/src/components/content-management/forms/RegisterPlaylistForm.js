@@ -18,23 +18,25 @@ import Papa from "papaparse";
 function RegisterPlaylistForm() {
   const navigate = useNavigate();
   const [asanas, setAsanas] = useState([]);
+  const [showTeacherMode, setShowTeacherMode] = useState(false);
   const [transitions, setTransitions] = useState([]);
   const predefinedOrder = [
     "Prayer Standing",
     "Prayer Sitting",
-    "Warm Up",
-    "Surayanamaskara With Prefix-Suffix",
-    "Surayanamaskara Without Prefix-Suffix",
+    "Surynamaskara With Prefix-Suffix",
+    "Suryanamaskara Without Prefix-Suffix",
     "Standing",
     "Sitting",
     "Supine",
     "Prone",
     "Vajrasana",
     "Pranayama",
+    "Special",
   ];
   const [sortedAsanas, setSortedAsanas] = useState([]);
   const [playlist_temp, setPlaylistTemp] = useState([]);
   const [modalState, setModalState] = useState(false);
+
   const [modalData, setModalData] = useState({
     rowData: {
       asana_name: "",
@@ -44,18 +46,31 @@ function RegisterPlaylistForm() {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const response = await Fetch({
-          url: "/content/video/getAllAsanas",
-        });
-        const data = response.data;
-        setAsanas(data);
-      } catch (error) {
-        toast(error);
+      if (showTeacherMode == true) {
+        try {
+          const response = await Fetch({
+            url: "/content/video/getTeacherAsanas",
+          });
+          console.log(response.data);
+          setAsanas(response.data);
+        } catch (error) {
+          toast(error);
+        }
+      } else {
+        try {
+          const response = await Fetch({
+            url: "/content/video/getTeacherAsanas",
+          });
+          console.log(response.data);
+          setAsanas(response.data);
+        } catch (error) {
+          toast(error);
+        }
       }
     };
     fetchData();
-  }, []);
+  }, [showTeacherMode]);
+
   useEffect(() => {
     const s1 = asanas.sort((a, b) => {
       return (
@@ -65,6 +80,7 @@ function RegisterPlaylistForm() {
     });
     setSortedAsanas(s1);
   }, [asanas]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -95,7 +111,12 @@ function RegisterPlaylistForm() {
       count = Number(count);
     }
     if (playlist_temp.length === 0) {
-      const x = transitionGenerator("start", rowData, transitions);
+      const x = transitionGenerator(
+        "start",
+        rowData,
+        transitions,
+        showTeacherMode
+      );
       if (x.length !== 0) {
         setPlaylistTemp((prev) => [
           ...prev,
@@ -105,7 +126,12 @@ function RegisterPlaylistForm() {
     } else {
       let startVideo = playlist_temp[playlist_temp.length - 1].rowData;
       let endVideo = rowData;
-      const x = transitionGenerator(startVideo, endVideo, transitions);
+      const x = transitionGenerator(
+        startVideo,
+        endVideo,
+        transitions,
+        showTeacherMode
+      );
       if (x.length !== 0) {
         setPlaylistTemp((prev) => [
           ...prev,
@@ -121,6 +147,7 @@ function RegisterPlaylistForm() {
       },
     ]);
   };
+
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setModalData({ ...modalData, [id]: value });
@@ -322,28 +349,15 @@ function RegisterPlaylistForm() {
     );
   };
 
-  const [filterCategory, setFilterCategory] = useState("");
-  const handleFilterChange = (e) => {
-    setFilterCategory(e.target.value);
-  };
-  const uniqueCategories = [
-    ...new Set(sortedAsanas.map((asana) => asana.asana_category)),
-  ];
-
-  const filteredAsanas = sortedAsanas.filter((asana) =>
-    asana.asana_category.toLowerCase().includes(filterCategory.toLowerCase())
-  );
-
-  const filteredAsanasByCategory = uniqueCategories.map((category) => {
+  const filteredAsanasByCategory = predefinedOrder.map((category) => {
     return {
       category: category,
-      asanas: filteredAsanas.filter(
-        (asana) => asana.asana_category === category
-      ),
+      asanas: sortedAsanas.filter((asana) => asana.asana_category === category),
     };
   });
 
   const [totalDuration, setTotalDuration] = useState(0);
+
   useEffect(() => {
     const newTotalDuration = playlist_temp.reduce(
       (sum, asana) => sum + (asana.rowData.duration || 0) * asana.count,
@@ -351,43 +365,20 @@ function RegisterPlaylistForm() {
     );
     setTotalDuration(newTotalDuration);
   }, [playlist_temp, playlist_temp.map((asana) => asana.count)]);
-  const customerCode = "eyxw0l155flsxhz3";
-  const handleDownload = (data1) => {
-    const csv = Papa.unparse(data1);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", "data.csv");
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
+
   return (
     <div className="">
       <div className="grid grid-cols-3 gap-4">
+        <Button
+          type="warning"
+          onClick={() => setShowTeacherMode((prevMode) => !prevMode)}
+        >
+          {showTeacherMode ? "Normal Mode" : "Teacher Mode"}
+        </Button>
         <Collapse.Group className="col-span-2 col-start-1">
           {filteredAsanasByCategory.map((categoryData, index) => (
             <Collapse title={categoryData.category} key={index}>
               <Table data={categoryData.asanas} className="bg-white">
-                <Table.Column
-                  label="Image"
-                  render={(_, rowData) => (
-                    <img
-                      src={`https://customer-${customerCode}.cloudflarestream.com/${
-                        rowData.asana_videoID ?? rowData.transition_video_ID
-                      }/thumbnails/thumbnail.jpg?time=${
-                        rowData.asana_thumbnailTs || 1
-                      }s?height=150?`}
-                      alt={rowData.asana_name ?? rowData.transition_name}
-                      className="h-24 rounded-xl"
-                    />
-                  )}
-                />
-
                 <Table.Column prop="asana_name" label="Asana Name" />
                 <Table.Column
                   prop="language"
@@ -445,12 +436,21 @@ function RegisterPlaylistForm() {
               }}
             />
             <Table.Column
+              prop="rowData.teacher_mode"
+              label="Mode"
+              render={(_, rowData) => {
+                return (
+                  <p>{rowData.rowData.teacher_mode ? "Teacher" : "Normal"}</p>
+                );
+              }}
+            />
+            {/* <Table.Column
               prop="rowData.language"
               label="Language"
               render={(_, rowData) => {
                 return <p>{rowData.rowData.language}</p>;
               }}
-            />
+            /> */}
             <Table.Column prop="count" label="Count" />
             <Table.Column
               prop="operations"

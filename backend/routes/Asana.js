@@ -135,6 +135,28 @@ router.get("/video/getAllTransitions", async (req, res) => {
   }
 });
 
+router.get("/video/updateTransitionsTeacher", async (req, res) => {
+  try {
+    let output = [];
+    const transitions = await Asana.find();
+    for (const transition of transitions) {
+      if (!transition.hasOwnProperty("teacher_mode")) {
+        output.push(transition);
+        await Asana.findByIdAndUpdate(transition._id, {
+          $set: { teacher_mode: false },
+        });
+        transition.teacher_mode = false;
+      }
+    }
+    res.status(200).json(output);
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to fetch videos",
+    });
+  }
+});
+
 router.post("/get-transition-by-id", async (req, res) => {
   const asana_id = req.body.asana_id;
   try {
@@ -222,7 +244,31 @@ router.delete("/video/deleteAsana/:asanaId", async (req, res) => {
 router.get("/video/getAllAsanas", async (req, res) => {
   try {
     const asanas = await Asana.find();
-    res.json(asanas);
+    res.status(200).json(asanas);
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to fetch videos",
+    });
+  }
+});
+
+router.get("/video/getNonTeacherAsanas", async (req, res) => {
+  try {
+    const asanas = await Asana.find({ teacher_mode: false });
+    res.status(200).json(asanas);
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to fetch videos",
+    });
+  }
+});
+
+router.get("/video/getTeacherAsanas", async (req, res) => {
+  try {
+    const asanas = await Asana.find({ teacher_mode: true });
+    res.status(200).json(asanas);
   } catch (error) {
     console.error(error);
     res.status(HTTP_INTERNAL_SERVER_ERROR).json({

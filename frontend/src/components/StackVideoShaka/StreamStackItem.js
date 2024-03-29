@@ -297,6 +297,7 @@ function StreamStackItem({
           })
           .catch((err) => {
             console.error("Error autoplay : ", err, video.idx);
+            console.log(playerRef.current.videoElement);
             // toast("Error playing video", { type: "error" });
             playerRef.current.videoElement.muted = true;
             playerRef.current.videoElement

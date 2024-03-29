@@ -327,40 +327,8 @@ function AllPlaylists() {
     };
 
     const handleUpdate = async () => {
-      // try {
-      //   setAsanaDetailsArray([]);
-      //   const filteredAsanaIds = rowData.asana_ids.filter((asanaId) => {
-      //     return typeof asanaId !== "string" || !asanaId.startsWith("T_");
-      //   });
-      //   for (const asanaId of filteredAsanaIds) {
-      //     const response = await fetch(
-      //       "http://localhost:4000/content/playlists/addPlaylist",
-      //       {
-      //         method: "POST",
-      //         headers: {
-      //           "Content-Type": "application/json",
-      //         },
-      //         body: JSON.stringify({ asana_id: asanaId }),
-      //       }
-      //     );
-      //     if (response.ok) {
-      //       const asanaDetails = await response.json();
-      //       setAsanaDetailsArray((prevArray) => [
-      //         ...prevArray,
-      //         { id: asanaId, data: asanaDetails },
-      //       ]);
-      //     } else {
-      //       console.error(
-      //         "Error fetching asana details. Status:",
-      //         response.status
-      //       );
-      //     }
-      //   }
       setModalData(rowData);
       setModalState(true);
-      // } catch (error) {
-      //   console.error("Error fetching asana details:", error);
-      // }
     };
 
     return (
@@ -563,11 +531,11 @@ function AllPlaylists() {
                       );
                     return (
                       <Tag key={index}>
-                        {asana
+                        {asana && asana.asana_name
                           ? asana.asana_name
-                          : asana.transition_video_name
+                          : asana && asana.transition_video_name
                             ? asana.transition_video_name
-                            : " "}
+                            : "Undefined"}
                       </Tag>
                     );
                   })}
@@ -614,9 +582,14 @@ function AllPlaylists() {
                     transitions.find(
                       (transition) => transition.transition_id === asanaId
                     );
-                  isAsana = asana.asana_name ? true : false;
+                  isAsana = asana && asana.asana_name ? true : false;
+                  // asanaName = asana.asana_name || " ";
                   asanaName =
-                    asana.asana_name || asana.transition_video_name || " ";
+                    asana && asana.asana_name
+                      ? asana.asana_name
+                      : asana && asana.transition_video_name
+                        ? asana.transition_video_name
+                        : "Undefined";
                 }
                 return (
                   <div>

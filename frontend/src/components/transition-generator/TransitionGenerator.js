@@ -1,4 +1,9 @@
-export const transitionGenerator = (startVideo, endVideo, transitions) => {
+export const transitionGenerator = (
+  startVideo,
+  endVideo,
+  transitions,
+  teacher_mode
+) => {
   const transitionFinder1 = (
     transition_video_name,
     ai_transition,
@@ -13,8 +18,6 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
     going_to_relax,
     coming_from_relax
   ) => {
-    console.log(transition_video_name);
-    console.log(language);
     const matchingTransition1 = transitions.find((transition) => {
       return (
         (transition_video_name === "" ||
@@ -37,7 +40,9 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
           transition.mat_ending_position === mat_ending_position) &&
         (coming_from_relax === "" ||
           transition.coming_from_relax === coming_from_relax) &&
-        (going_to_relax === "" || transition.going_to_relax === going_to_relax)
+        (going_to_relax === "" ||
+          transition.going_to_relax === going_to_relax) &&
+        (teacher_mode === "" || transition.teacher_mode === teacher_mode)
       );
     });
     console.log(matchingTransition1);
@@ -48,12 +53,12 @@ export const transitionGenerator = (startVideo, endVideo, transitions) => {
       return (
         (transition_video_name === "" ||
           transition.transition_video_name === transition_video_name) &&
-        (language === "" || transition.language === language)
+        (language === "" || transition.language === language) &&
+        (teacher_mode === "" || transition.teacher_mode === teacher_mode)
       );
     });
     return matchingTransition1;
   };
-  console.log(startVideo, endVideo);
   if (startVideo === "start") {
     if (endVideo.asana_category === "Standing") {
       if (endVideo.nobreak_asana === true) {

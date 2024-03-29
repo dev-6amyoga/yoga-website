@@ -164,6 +164,11 @@ function AllAsanas() {
     try {
       setModalState(false);
       toast("Updating changes");
+      if (modalData.teacher_mode == "false") {
+        modalData.teacher_mode = false;
+      } else {
+        modalData.teacher_mode = true;
+      }
       const asanaId = Number(modalData.id);
       const response = await Fetch({
         url: `/content/video/updateAsana/${asanaId}`,
@@ -301,7 +306,12 @@ function AllAsanas() {
           <Table data={filteredTransitions} className="bg-white ">
             {/* <Table.Column prop="id" label="Asana ID" /> */}
             <Table.Column prop="asana_name" label="Asana Name" />
-            <Table.Column prop="asana_desc" label="Description" />
+            <Table.Column
+              prop="teacher_mode"
+              label="Teacher Mode"
+              render={(teacherMode) => (teacherMode ? "Yes" : "No")}
+            />{" "}
+            {/* <Table.Column prop="asana_desc" label="Description" /> */}
             <Table.Column prop="asana_category" label="Category" />
             <Table.Column prop="language" label="Language" />
             <Table.Column prop="asana_type" label="Type" />
@@ -416,6 +426,14 @@ function AllAsanas() {
                     </Select.Option>
                   ))}
               </Select>
+              <Input
+                width="100%"
+                id="teacher_mode"
+                placeholder={modalData.teacher_mode}
+                onChange={handleInputChange}
+              >
+                Teacher Mode
+              </Input>
 
               <Text h6>Video Type</Text>
               <Select
