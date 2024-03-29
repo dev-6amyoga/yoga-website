@@ -201,15 +201,15 @@
 .custom-shaka
 	.shaka-seek-bar-container
 	input[type="range"]::-webkit-slider-thumb {
-	background: #ff0000;
+	background: #ffbf00;
 	cursor: pointer;
 }
 .custom-shaka .shaka-seek-bar-container input[type="range"]::-moz-range-thumb {
-	background: #ff0000;
+	background: #ffbf00;
 	cursor: pointer;
 }
 .custom-shaka .shaka-seek-bar-container input[type="range"]::-ms-thumb {
-	background: #ff0000;
+	background: #ffbf00;
 	cursor: pointer;
 }
 .custom-shaka .shaka-video-container * {
