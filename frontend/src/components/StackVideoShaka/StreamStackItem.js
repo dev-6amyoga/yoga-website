@@ -347,7 +347,7 @@ function StreamStackItem({
 		const checkSeek = (ct) => {
 			// check if seekQueue length is greater than 0,
 			// check if the current time is === to the marker time
-			console.log("Checking seek", ct, commitSeekTime, seekQueue.length);
+			// console.log("Checking seek", ct, commitSeekTime, seekQueue.length);
 			if (
 				seekQueue.length > 0 &&
 				commitSeekTime.toFixed(0) === ct.toFixed(0)
@@ -361,7 +361,7 @@ function StreamStackItem({
 		};
 
 		const checkPauseOrLoop = (ct) => {
-			console.log("checkPauseOrLoop : ", ct, viewMode);
+			// console.log("checkPauseOrLoop : ", ct, viewMode);
 			if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
 				// console.log("STUDENT --------->");
 				return false;
@@ -752,6 +752,11 @@ function StreamStackItem({
 							setVideoState(STATE_VIDEO_PLAY);
 						}
 					);
+
+					playerRef.current.videoElement.addEventListener(
+						"ended",
+						handleEnd
+					);
 				}
 
 				if (ref.player) {
@@ -771,11 +776,6 @@ function StreamStackItem({
 					playerRef.current.player.addEventListener("loaded", () => {
 						handleLoading(false);
 					});
-
-					playerRef.current.player.addEventListener(
-						"complete",
-						handleEnd
-					);
 
 					playerRef.current.player.configure(
 						"manifest.dash.ignoreMinBufferTime",
