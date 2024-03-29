@@ -142,7 +142,7 @@
 
 /* Scrollbar settings */
 * {
-	@apply scroll-smooth scrollbar-thin scrollbar-track-slate-300 scrollbar-thumb-slate-700 font-content;
+	@apply scroll-smooth scrollbar-thin scrollbar-track-y-white scrollbar-thumb-y-brown font-content;
 }
 
 body {

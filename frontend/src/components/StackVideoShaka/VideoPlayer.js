@@ -98,6 +98,7 @@ function VideoPlayer() {
 		} else {
 			setCurrentVideo(null);
 			setVideoState(STATE_VIDEO_PAUSED);
+			setPlaylistState(false);
 		}
 	}, [queue, playlistState, setCurrentVideo, setVideoState]);
 
@@ -144,43 +145,57 @@ function VideoPlayer() {
 		}
 	}, [popFromQueue, viewMode, addToSeekQueue, currentMarker, handleReset]);
 
-	const handleSetPlay = useCallback(() => {
-		console.log("SETTING VIDEO STATE TO PLAY ------------>");
+	const handleSetPlay = useCallback(
+		(isActive) => {
+			console.log("SETTING VIDEO STATE TO PLAY ------------>");
 
-		if (videoState === STATE_VIDEO_PAUSED) {
-			if (pauseReason === VIDEO_PAUSE_MARKER) {
-				console.log("VIDEO PLAY : PAUSE REASON MARKER");
-				// autoSetCurrentMarkerIdx()
-				// set next marker
-				setCurrentMarkerIdx((currentMarkerIdx + 1) % markersLength);
-				setPauseReason(null);
+			if (isActive) {
+				if (videoState === STATE_VIDEO_PAUSED) {
+					if (pauseReason === VIDEO_PAUSE_MARKER) {
+						console.log("VIDEO PLAY : PAUSE REASON MARKER");
+						// autoSetCurrentMarkerIdx()
+						// set next marker
+						setCurrentMarkerIdx(
+							(currentMarkerIdx + 1) % markersLength
+						);
+						setPauseReason(null);
+					}
+				}
+
+				if (videoState !== STATE_VIDEO_PLAY) {
+					setVideoState(STATE_VIDEO_PLAY);
+				}
 			}
-		}
+		},
+		[
+			viewMode,
+			setVideoState,
+			videoState,
+			pauseReason,
+			currentMarkerIdx,
+			markersLength,
+			setCurrentMarkerIdx,
+			setPauseReason,
+		]
+	);
 
-		if (videoState !== STATE_VIDEO_PLAY) {
-			setVideoState(STATE_VIDEO_PLAY);
-		}
-	}, [
-		viewMode,
-		setVideoState,
-		videoState,
-		pauseReason,
-		currentMarkerIdx,
-		markersLength,
-		setCurrentMarkerIdx,
-		setPauseReason,
-	]);
-
-	const handleSetPause = useCallback(() => {
-		console.log("SETTING VIDEO STATE TO PAUSE ------------>");
-		setVideoState(STATE_VIDEO_PAUSED);
-	}, [setVideoState]);
+	const handleSetPause = useCallback(
+		(isActive) => {
+			console.log("SETTING VIDEO STATE TO PAUSE ------------>");
+			if (isActive) {
+				setVideoState(STATE_VIDEO_PAUSED);
+			}
+		},
+		[setVideoState]
+	);
 
 	const handleLoading = useCallback(
 		(loading) => {
-			if (loading) setVideoState(STATE_VIDEO_LOADING);
-			else {
-				handleSetPlay();
+			if (useVideoStore.getState().isActive) {
+				if (loading) setVideoState(STATE_VIDEO_LOADING);
+				else {
+					handleSetPlay();
+				}
 			}
 		},
 		[handleSetPlay, setVideoState]
@@ -188,7 +203,9 @@ function VideoPlayer() {
 
 	const handlePlaybackError = useCallback(() => {
 		console.log("Error playing video ------------------->");
-		setVideoState(STATE_VIDEO_ERROR);
+		if (useVideoStore.getState().isActive) {
+			setVideoState(STATE_VIDEO_ERROR);
+		}
 	}, [setVideoState]);
 
 	const handleStartPlaylist = useCallback(() => {
@@ -197,23 +214,23 @@ function VideoPlayer() {
 		}
 	}, [currentVideo, queue, setPlaylistState]);
 
-	const handleAlternatePlayPause = useCallback(() => {
-		if (videoState === STATE_VIDEO_PLAY) {
-			handleSetPause();
-		} else if (videoState === STATE_VIDEO_PAUSED) {
-			handleSetPlay();
-		}
-	}, [videoState, handleSetPlay, handleSetPause]);
+	// const handleAlternatePlayPause = useCallback(() => {
+	// 	if (videoState === STATE_VIDEO_PLAY) {
+	// 		handleSetPause();
+	// 	} else if (videoState === STATE_VIDEO_PAUSED) {
+	// 		handleSetPlay();
+	// 	}
+	// }, [videoState, handleSetPlay, handleSetPause]);
 
 	const handleFullScreen = useFullScreenHandle();
 
-	const toTimeString = useCallback((seconds) => {
-		const s = seconds > 0 ? seconds : 0;
+	// const toTimeString = useCallback((seconds) => {
+	// 	const s = seconds > 0 ? seconds : 0;
 
-		return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(
-			Math.ceil(s) % 60
-		).padStart(2, "0")}`;
-	}, []);
+	// 	return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(
+	// 		Math.ceil(s) % 60
+	// 	).padStart(2, "0")}`;
+	// }, []);
 
 	return (
 		<FullScreen handle={handleFullScreen}>

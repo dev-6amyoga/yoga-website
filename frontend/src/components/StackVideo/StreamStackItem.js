@@ -342,6 +342,7 @@ function StreamStackItem({
 						});
 						return true;
 					} else {
+						console.log("Paused cuz of seek");
 						setVideoState(STATE_VIDEO_PAUSED);
 						setPauseReason(VIDEO_PAUSE_MARKER);
 						return true;
