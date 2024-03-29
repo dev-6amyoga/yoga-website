@@ -23,6 +23,7 @@ import ViewAllSchedules from "../pages/admin/schedule-management/ViewAllSchedule
 import LogPayment from "../pages/admin/transactions/LogPayment";
 import RefundManagement from "../pages/admin/transactions/Refund";
 import AllPlaylistConfigs from "../components/content-management/AllPlaylistConfigs";
+import PlayerPage from "../pages/admin/PlayerPage";
 export const AdminRoutes = [
   {
     path: "/admin",
@@ -53,6 +54,10 @@ export const AdminRoutes = [
   {
     path: "/admin/video/transition/all",
     element: <AllTransitions />,
+  },
+  {
+    path: "/admin/player-page",
+    element: <PlayerPage />,
   },
   // schedule
   {
