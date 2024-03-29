@@ -47,6 +47,13 @@ function StreamStackItem({
 	const flushTimeInterval = useRef(null);
 	const [metadataLoaded, setMetadataLoaded] = useState(false);
 	const [autoplayInitialized, setAutoplayInitialized] = useState(false);
+	const [playerLoaded, setPlayerLoaded] = useState(false);
+
+	const isActiveRef = useRef(isActive);
+
+	useEffect(() => {
+		isActiveRef.current = isActive;
+	}, [isActive]);
 
 	const [
 		// seek queue
@@ -147,16 +154,15 @@ function StreamStackItem({
 
 	// if its active, set the duration
 	useEffect(() => {
-		if (isActive && metadataLoaded) {
+		if (isActive && metadataLoaded && playerLoaded) {
 			console.log(
 				"PLAYING ----------------------------->",
 				video,
 				video.video.id,
 				playerRef?.current.videoElement
 			);
-			setDuration(playerRef?.current?.videoElement?.duration || 0);
 		}
-	}, [isActive, setDuration, metadataLoaded, video.queue_id]);
+	}, [isActive, setDuration, metadataLoaded, video, playerLoaded]);
 
 	// pause and reset the video when its not active
 	useEffect(() => {
@@ -269,6 +275,58 @@ function StreamStackItem({
 		handleEnd,
 	]);
 
+	const tryToPlay = useCallback(() => {
+		console.log("Try to play called");
+		playerRef.current.videoElement
+			.play()
+			.then((res) => {
+				console.log("Autoplay initialized", video.idx);
+				if (volume === 0 && !autoplayInitialized) {
+					//console.log("Setting volume to 0.5");
+					setVolume(0.5);
+					setAutoplayInitialized(true);
+				}
+			})
+			.catch((err) => {
+				console.error("Error autoplay : ", err, video.idx);
+				// toast("Error playing video", { type: "error" });
+				playerRef.current.videoElement.muted = true;
+				playerRef.current.videoElement
+					.play()
+					.then((res) => {
+						console.log(
+							"Autoplay initialized after muting",
+							video.idx
+						);
+						playerRef.current.videoElement.muted = false;
+						if (volume === 0 && !autoplayInitialized) {
+							setVolume(0.5);
+							setAutoplayInitialized(true);
+						}
+					})
+					.catch((err) => {
+						console.error(
+							"Error autoplay (with mute)",
+							err,
+							video.idx
+						);
+					});
+			});
+	}, [
+		autoplayInitialized,
+		isActive,
+		setAutoplayInitialized,
+		setVolume,
+		video,
+		volume,
+	]);
+
+	useEffect(() => {
+		if (isActive && metadataLoaded && playerLoaded) {
+			tryToPlay();
+		}
+	}, [isActive, metadataLoaded, videoState, tryToPlay, playerLoaded]);
+
 	// change play/pause based on video state
 	useEffect(() => {
 		// console.log("change play/pause based on video state", {
@@ -288,7 +346,7 @@ function StreamStackItem({
 		if (isActive && metadataLoaded) {
 			setPauseReason(null);
 			if (videoState === STATE_VIDEO_PAUSED) {
-				//console.log("Changing to pause", video.idx);
+				console.log("Changing to pause", video.idx);
 				playerRef.current?.videoElement?.pause();
 			} else if (
 				!autoplayInitialized &&
@@ -296,39 +354,8 @@ function StreamStackItem({
 				playerRef.current !== undefined &&
 				videoState === STATE_VIDEO_PLAY
 			) {
-				//console.log("Trying to play", video.idx);
-				playerRef.current.videoElement
-					.play()
-					.then((res) => {
-						//console.log("Autoplay initialized", video.idx);
-						if (volume === 0 && !autoplayInitialized) {
-							//console.log("Setting volume to 0.5");
-							setVolume(0.5);
-							setAutoplayInitialized(true);
-						}
-					})
-					.catch((err) => {
-						console.error("Error autoplay : ", err, video.idx);
-						// toast("Error playing video", { type: "error" });
-						playerRef.current.videoElement.muted = true;
-						playerRef.current.videoElement
-							.play()
-							.then((res) => {
-								//console.log("Autoplay initialized after muting", video.idx);
-								playerRef.current.videoElement.muted = false;
-								if (volume === 0 && !autoplayInitialized) {
-									setVolume(0.5);
-									setAutoplayInitialized(true);
-								}
-							})
-							.catch((err) => {
-								console.error(
-									"Error autoplay (with mute)",
-									err,
-									video.idx
-								);
-							});
-					});
+				console.log("Trying to play", video.idx);
+				tryToPlay();
 			}
 		}
 	}, [
@@ -374,13 +401,14 @@ function StreamStackItem({
 					return false;
 				} else if (ct > markers[currentMarkerIdx + 1]?.timestamp) {
 					if (currentMarker.loop) {
-						// console.log('LOOPING ----------------------------->')
+						console.log("LOOPING CUZ OF MARKER");
 						addToSeekQueue({
 							type: SEEK_TYPE_MARKER,
 							t: currentMarker.timestamp,
 						});
 						return true;
 					} else {
+						console.log("PAUSING CUZ OF MARKER");
 						setVideoState(STATE_VIDEO_PAUSED);
 						setPauseReason(VIDEO_PAUSE_MARKER);
 						return true;
@@ -496,16 +524,17 @@ function StreamStackItem({
 		setWatchTimeBuffer([]);
 	}, []);
 
-	/* when video changes
-					- flush 
-					- reset committedTs
-					- clear previous interval to flush 
-					- start interval timer to flush	watch duration buffer  [10s]
-					- clear previous interval to commit time
-					- start interval timer to commit time [5s]
-	
+	/* 
+		when video changes
+		- flush 
+		- reset committedTs
+		- clear previous interval to flush 
+		- start interval timer to flush	watch duration buffer  [10s]
+		- clear previous interval to commit time
+		- start interval timer to commit time [5s]
+
 	useEffect(() => {
-		if (isActive && enableWatchHistory) {
+		if (isActive && enableWatchHistory && user && video) {
 			// console.log('CURRENT VIDEO', video)
 			// flushing
 			flushWatchTimeBuffer(user?.user_id);
@@ -631,26 +660,35 @@ function StreamStackItem({
 
 	const handleVideoStateChange = useCallback(
 		(e) => {
-			if (e.newstate === "playing") {
-				if (
-					useVideoStore.getState().pauseReason === VIDEO_PAUSE_MARKER
-				) {
-					setPauseReason(null);
-					handleNextMarker();
-				}
-				console.log(
-					"SET VIDEO STATE PLAY : handleVideoStateChange",
-					useVideoStore.getState()?.currentVideo
-				);
-				if (useVideoStore.getState().isActive) {
+			console.log(
+				e.newstate,
+				isActiveRef.current,
+				useVideoStore.getState()?.currentVideo?.idx
+			);
+			if (isActiveRef.current) {
+				if (e.newstate === "buffering") {
+					console.log(
+						"SET VIDEO STATE LOADING : handleVideoStateChange"
+					);
+					setVideoState(STATE_VIDEO_LOADING);
+				} else if (e.newstate === "playing") {
+					if (
+						useVideoStore.getState().pauseReason ===
+						VIDEO_PAUSE_MARKER
+					) {
+						setPauseReason(null);
+						handleNextMarker();
+					}
+					console.log(
+						"SET VIDEO STATE PLAY : handleVideoStateChange",
+						useVideoStore.getState()?.currentVideo
+					);
 					setVideoState(STATE_VIDEO_PLAY);
-				}
-			} else if (e.newstate === "paused") {
-				console.log(
-					"SET VIDEO STATE PAUSE : handleVideoStateChange",
-					useVideoStore.getState()?.currentVideo
-				);
-				if (useVideoStore.getState().isActive) {
+				} else if (e.newstate === "paused") {
+					console.log(
+						"SET VIDEO STATE PAUSE : handleVideoStateChange",
+						useVideoStore.getState()?.currentVideo
+					);
 					setVideoState(STATE_VIDEO_PAUSED);
 				}
 			}
@@ -904,6 +942,8 @@ function StreamStackItem({
 					}
 				}
 			}
+
+			setPlayerLoaded(true);
 		},
 		[
 			video,
