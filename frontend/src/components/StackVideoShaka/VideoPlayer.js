@@ -161,6 +161,7 @@ function VideoPlayer() {
 			setVideoState(STATE_VIDEO_PLAY);
 		}
 	}, [
+		viewMode,
 		setVideoState,
 		videoState,
 		pauseReason,
