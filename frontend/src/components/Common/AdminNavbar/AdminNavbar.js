@@ -18,6 +18,10 @@ const paths = [
     title: "Watch Analysis",
   },
   {
+    path: "/admin/player-page",
+    title: "Video Player",
+  },
+  {
     title: "Member Management",
     type: "group",
     subPaths: [
