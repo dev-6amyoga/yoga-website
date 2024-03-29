@@ -583,7 +583,6 @@ function AllPlaylists() {
                       (transition) => transition.transition_id === asanaId
                     );
                   isAsana = asana && asana.asana_name ? true : false;
-                  // asanaName = asana.asana_name || " ";
                   asanaName =
                     asana && asana.asana_name
                       ? asana.asana_name

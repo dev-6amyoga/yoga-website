@@ -1,3 +1,5 @@
+import { toast } from "react-toastify";
+
 export const transitionGenerator = (
   startVideo,
   endVideo,
@@ -49,6 +51,7 @@ export const transitionGenerator = (
     return matchingTransition1;
   };
   const transitionFinder2 = (transition_video_name, language) => {
+    console.log(teacher_mode);
     const matchingTransition1 = transitions.find((transition) => {
       return (
         (transition_video_name === "" ||
@@ -57,6 +60,7 @@ export const transitionGenerator = (
         (teacher_mode === "" || transition.teacher_mode === teacher_mode)
       );
     });
+    console.log(matchingTransition1);
     return matchingTransition1;
   };
   if (startVideo === "start") {
