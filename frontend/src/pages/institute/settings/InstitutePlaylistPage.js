@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import InstituteNavbar from "../../../components/Common/InstituteNavbar/InstituteNavbar";
 import Playlist from "../../../components/Sidebar/Playlist";
-import VideoPlayerWrapper from "../../../components/Video/VideoPlayerWrapper";
-import VideoQueue from "../../../components/Video/VideoQueue";
+import VideoPlayerWrapper from "../../../components/StackVideoShaka/VideoPlayerWrapper";
+import VideoQueue from "../../../components/StackVideoShaka/VideoQueue";
 import { ROLE_INSTITUTE_OWNER } from "../../../enums/roles";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
