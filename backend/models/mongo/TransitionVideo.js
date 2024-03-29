@@ -18,6 +18,7 @@ const transitionVideoSchema = new mongoose.Schema({
   mat_ending_position: String,
   going_to_relax: Boolean,
   coming_from_relax: Boolean,
+  teacher_mode: Boolean,
 });
 
 const TransitionVideo = mongoose.model(

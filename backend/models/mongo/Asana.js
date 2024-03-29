@@ -28,6 +28,7 @@ const asanaSchema = new mongoose.Schema({
   asana_dash_url: String,
   ai_asana: Boolean,
   non_ai_asana: Boolean,
+  teacher_mode: Boolean,
   asana_withAudio: String,
   asana_audioLag: Number,
   asana_type: String,
