@@ -106,15 +106,9 @@ function VideoPlayer() {
 		setCurrentMarkerIdx(null);
 		setDuration(0);
 		setPauseReason(null);
-		setVideoState(STATE_VIDEO_LOADING);
+		// setVideoState(STATE_VIDEO_LOADING);
 		setCurrentTime(0);
-	}, [
-		setCurrentMarkerIdx,
-		setDuration,
-		setPauseReason,
-		setVideoState,
-		setCurrentTime,
-	]);
+	}, [setCurrentMarkerIdx, setDuration, setPauseReason, setCurrentTime]);
 
 	const handleEnd = useCallback(() => {
 		console.log("Video ended ------------------>");
