@@ -1,13 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "shaka-player/dist/controls.css";
 import {
-	SEEK_TYPE_MARKER,
-	SEEK_TYPE_MOVE,
-	SEEK_TYPE_SEEK,
-} from "../../enums/seek_types";
-import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
-import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
-import {
 	ShakaPlayerGoNext,
 	ShakaPlayerGoPrev,
 	ShakaPlayerGoSeekBackward,
@@ -15,13 +8,11 @@ import {
 	ShakaPlayerNextMarker,
 	ShakaPlayerPrevMarker,
 	ShakaPlayerToggleMode,
-	handleNextMarker,
 } from "../../lib/shaka-controls";
 import usePlaylistStore from "../../store/PlaylistStore";
 import useUserStore from "../../store/UserStore";
 import useVideoStore, {
 	STATE_VIDEO_ERROR,
-	STATE_VIDEO_LOADING,
 	STATE_VIDEO_PAUSED,
 	STATE_VIDEO_PLAY,
 } from "../../store/VideoStore";
@@ -157,133 +148,43 @@ function StreamStackItem({
 		state.flushWatchTimeBuffer,
 	]);
 
-	// if its active, set the duration
-	useEffect(() => {
-		if (isActive && metadataLoaded && playerLoaded) {
-			console.log(
-				"PLAYING ----------------------------->",
-				video,
-				video.video.id,
-				playerRef?.current.videoElement
-			);
-		}
-	}, [isActive, setDuration, metadataLoaded, video, playerLoaded]);
+	const handleNextVideo = useCallback(() => {
+		popFromQueue(0);
+	}, [popFromQueue]);
 
-	// pause and reset the video when its not active
-	useEffect(() => {
-		const pr = playerRef.current.videoElement;
-		if (!isActive && pr && pr.currentTime > 0) {
-			//console.log("PAUSE AND RESET ----------------------------->", video.idx);
-			pr.muted = true;
-			setVolume(0);
-			pr?.pause();
-			// pr.currentTime = 0;
-		}
+	const handlePrevVideo = useCallback(() => {
+		popFromArchive(-1);
+	}, [popFromArchive]);
 
-		return () => {
-			if (pr) {
-				pr?.pause();
-				// pr.currentTime = 0;
-			}
-		};
-	}, [isActive, video.queue_id, setVolume]);
+	const handleSeekFoward = useCallback(() => {
+		addToSeekQueue({ t: 5, type: "seek" });
+	}, [addToSeekQueue]);
 
-	// set the volume
-	useEffect(() => {
-		if (playerRef.current) {
-			if (volume > 0) {
-				playerRef.current.videoElement.muted = false;
-			}
-			playerRef.current.videoElement.volume = volume;
-		}
-	}, [volume]);
+	const handleSeekBackward = useCallback(() => {
+		addToSeekQueue({ t: -5, type: "seek" });
+	}, [addToSeekQueue]);
 
-	// pop from seek queue and update the time
-	useEffect(() => {
-		if (isActive && seekQueue.length > 0) {
-			const seekEvent = seekQueue[0];
-			console.log("SEEKING --->", seekEvent);
-			// setVideoState(STATE_VIDEO_PLAY)
-			// setPauseReason(null)
-			if (seekEvent && playerRef.current) {
-				switch (seekEvent.type) {
-					case SEEK_TYPE_SEEK:
-						let ct =
-							playerRef.current.videoElement.currentTime +
-							seekEvent.t;
-						if (ct > playerRef.current.videoElement.duration) {
-							handleEnd();
-							popFromSeekQueue(0);
-							return;
-						}
-						if (ct < 0) ct = 0;
+	const videoUrl = useMemo(() => {
+		return (
+			(video?.video?.asana_dash_url ||
+				video?.video?.transition_dash_url) ??
+			""
+		);
+	}, [video]);
 
-						playerRef.current.videoElement.currentTime = ct;
-						// console.log(
-						//   "SEEKING ----------------------------->",
-						//   playerRef.current.videoElement.currentTime
-						// );
-						setCommitSeekTime(ct);
-						// autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
-						// popFromSeekQueue(0)
-						break;
-					case SEEK_TYPE_MOVE:
-						let st = seekEvent.t < 0 ? 0 : seekEvent.t;
-						if (st > playerRef.current.videoElement.duration) {
-							handleEnd();
-							popFromSeekQueue(0);
-							return;
-						}
-
-						playerRef.current.videoElement.currentTime = st;
-						// console.log(
-						//   "SEEKING ----------------------------->",
-						//   playerRef.current.videoElement.currentTime
-						// );
-						setCommitSeekTime(st);
-						// autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
-						// popFromSeekQueue(0)
-						break;
-					case SEEK_TYPE_MARKER:
-						if (
-							seekEvent.t >
-							playerRef.current.videoElement.duration
-						) {
-							handleEnd();
-							popFromSeekQueue(0);
-							return;
-						}
-
-						playerRef.current.videoElement.currentTime =
-							seekEvent.t;
-						// popFromSeekQueue(0)
-						setCommitSeekTime(seekEvent.t);
-						break;
-					default:
-						break;
-				}
-				addToCommittedTs(playerRef.current?.videoElement.currentTime);
-			}
-		}
-	}, [
-		isActive,
-		seekQueue,
-		popFromSeekQueue,
-		addToCommittedTs,
-		setVideoEvent,
-		setCurrentMarkerIdx,
-		autoSetCurrentMarkerIdx,
-		setCommitSeekTime,
-		setVideoState,
-		setPauseReason,
-		popFromQueue,
-		handleEnd,
-	]);
+	const playerOnError = useCallback(
+		(e) => {
+			//console.log("[StreamStackItem:error] Error playing video", e);
+			setVideoState(STATE_VIDEO_ERROR);
+			// alert(JSON.stringify({ err: e }));
+		},
+		[setVideoState]
+	);
 
 	const tryToPlay = useCallback(() => {
-		if (!isActive) return;
+		if (!isActiveRef.current) return;
 
-		console.log("Try to play called");
+		console.log("Try to play called", video.idx);
 		playerRef.current.videoElement
 			.play()
 			.then((res) => {
@@ -301,6 +202,7 @@ function StreamStackItem({
 					playerRef.current.videoElement !== null &&
 					playerRef.current.videoElement !== undefined
 				) {
+					console.log("Trying to play using mute", video.idx);
 					playerRef.current.videoElement.muted = true;
 					playerRef.current.videoElement
 						.play()
@@ -324,30 +226,41 @@ function StreamStackItem({
 						});
 				}
 			});
-	}, [
-		autoplayInitialized,
-		isActive,
-		setAutoplayInitialized,
-		setVolume,
-		video,
-		volume,
-	]);
+	}, [autoplayInitialized, setAutoplayInitialized, setVolume, video, volume]);
 
+	// pause and reset the video when its not active
+	useEffect(() => {
+		const pr = playerRef.current.videoElement;
+		if (!isActive && pr && pr.currentTime > 0) {
+			//console.log("PAUSE AND RESET ----------------------------->", video.idx);
+			pr.muted = true;
+			setVolume(0);
+			pr?.pause();
+			pr.currentTime = 0;
+		}
+
+		return () => {
+			if (pr) {
+				pr?.pause();
+				pr.currentTime = 0;
+			}
+		};
+	}, [isActive, video.queue_id, setVolume]);
+
+	// if its active, set the duration
 	useEffect(() => {
 		if (isActive && metadataLoaded && playerLoaded) {
-			tryToPlay();
+			console.log(
+				"PLAYING ----------------------------->",
+				video,
+				video.video.id,
+				playerRef?.current.videoElement
+			);
 		}
-	}, [isActive, metadataLoaded, videoState, tryToPlay, playerLoaded]);
+	}, [isActive, setDuration, metadataLoaded, video, playerLoaded]);
 
 	// change play/pause based on video state
 	useEffect(() => {
-		// console.log("change play/pause based on video state", {
-		//   isActive,
-		//   metadataLoaded,
-		//   autoplayInitialized,
-		//   idx: video.idx,
-		//   videoState,
-		// });
 		console.log("VIDEO_STATE_CHANGE", {
 			videoState,
 			isActive,
@@ -355,18 +268,19 @@ function StreamStackItem({
 			autoplayInitialized,
 			idx: video.idx,
 		});
-		if (isActive && metadataLoaded) {
+		console.trace();
+		if (
+			isActive &&
+			metadataLoaded &&
+			playerRef.current !== null &&
+			playerRef.current !== undefined
+		) {
 			setPauseReason(null);
 			if (videoState === STATE_VIDEO_PAUSED) {
-				console.log("Changing to pause", video.idx);
-				playerRef.current?.videoElement?.pause();
-			} else if (
-				!autoplayInitialized &&
-				playerRef.current !== null &&
-				playerRef.current !== undefined &&
-				videoState === STATE_VIDEO_PLAY
-			) {
-				console.log("Trying to play", video.idx);
+				console.log("useEffect : changing to pause", video.idx);
+				playerRef.current.videoElement.pause();
+			} else if (videoState === STATE_VIDEO_PLAY) {
+				console.log("useEffect : changing to play", video.idx);
 				tryToPlay();
 			}
 		}
@@ -379,341 +293,16 @@ function StreamStackItem({
 		setAutoplayInitialized,
 		setPauseReason,
 		setVolume,
+		tryToPlay,
 	]);
-
-	// poll to update the current time, every 20ms, clear the timeout on unmount
-	useEffect(() => {
-		const checkSeek = (ct) => {
-			// check if seekQueue length is greater than 0,
-			// check if the current time is === to the marker time
-			// console.log("Checking seek", ct, commitSeekTime, seekQueue.length);
-			if (
-				seekQueue.length > 0 &&
-				commitSeekTime.toFixed(0) === ct.toFixed(0)
-			) {
-				if (isActive) handleLoading(false);
-				autoSetCurrentMarkerIdx(commitSeekTime);
-				return true;
-			} else {
-				return false;
-			}
-		};
-
-		const checkPauseOrLoop = (ct) => {
-			// console.log("checkPauseOrLoop : ", ct, viewMode);
-			if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
-				// console.log("STUDENT --------->");
-				return false;
-			} else {
-				// console.log("TEACHER --------->");
-				// either pause or loop
-				let currentMarker = markers[currentMarkerIdx];
-
-				if (currentMarkerIdx === markers.length - 1) {
-					return false;
-				} else if (ct > markers[currentMarkerIdx + 1]?.timestamp) {
-					if (currentMarker.loop) {
-						console.log("LOOPING CUZ OF MARKER");
-						addToSeekQueue({
-							type: SEEK_TYPE_MARKER,
-							t: currentMarker.timestamp,
-						});
-						return true;
-					} else {
-						console.log("PAUSING CUZ OF MARKER");
-						setVideoState(STATE_VIDEO_PAUSED);
-						setPauseReason(VIDEO_PAUSE_MARKER);
-						return true;
-					}
-				}
-			}
-		};
-
-		const int = setInterval(() => {
-			if (playerRef.current?.videoElement?.currentTime && isActive) {
-				if (checkSeek(playerRef.current?.videoElement?.currentTime)) {
-					popFromSeekQueue(0);
-					setVideoState(STATE_VIDEO_PLAY);
-					return;
-				}
-
-				// pause if currenttime is greater than the timestamp of next?
-				if (
-					videoState !== STATE_VIDEO_LOADING &&
-					checkPauseOrLoop(
-						playerRef.current?.videoElement?.currentTime
-					)
-				) {
-					return;
-				}
-
-				if (
-					videoState !== STATE_VIDEO_LOADING ||
-					videoState !== STATE_VIDEO_ERROR ||
-					videoState !== STATE_VIDEO_PAUSED
-				) {
-					autoSetCurrentMarkerIdx(
-						playerRef.current?.videoElement?.currentTime
-					);
-				}
-				setCurrentTime(playerRef.current?.videoElement?.currentTime);
-				setVolume(playerRef.current?.videoElement?.volume);
-			}
-		}, 250);
-
-		return () => {
-			// console.log('CLEANING INTERVAL --------------------------------------->')
-			clearInterval(int);
-		};
-	}, [
-		currentVideo,
-		isActive,
-		setCurrentTime,
-		videoState,
-		popFromSeekQueue,
-		autoSetCurrentMarkerIdx,
-		seekQueue,
-		setVideoEvent,
-		setCurrentMarkerIdx,
-		markers,
-		viewMode,
-		currentMarkerIdx,
-		setVideoState,
-		addToSeekQueue,
-		commitSeekTime,
-		setPauseReason,
-		handleLoading,
-		setVolume,
-	]);
-
-	// clear timeouts before unmount
-	useEffect(() => {
-		return () => {
-			// clearing previous interval to flush
-			if (flushTimeInterval.current) {
-				clearInterval(flushTimeInterval.current);
-			}
-
-			// clearing previous commitTimeInterval
-			if (commitTimeInterval.current) {
-				clearInterval(commitTimeInterval.current);
-			}
-		};
-	}, [commitTimeInterval, flushTimeInterval]);
-
-	const flushWatchTimeBufferE = useCallback(
-		(user_id) => {
-			const watch_time_logs = [...watchTimeBuffer];
-
-			// console.log({ watch_time_logs });
-			if (watch_time_logs.length === 0) {
-				return;
-			}
-
-			Fetch({
-				url: "/watch-time/update",
-				method: "POST",
-				token: true,
-				data: {
-					user_id: user_id,
-					watch_time_logs,
-					institute_id: null,
-				},
-			})
-				.then((res) => {
-					if (res.status === 200) {
-						console.log("watch time buffer flushed");
-					}
-				})
-				.catch((err) => {
-					//console.log(err);
-					// localStorage.setItem(
-					// 	"6amyoga_watch_time_logs",
-					// 	JSON.stringify(watch_time_logs)
-					// );
-					appendToWatchTimeBuffer(watch_time_logs);
-				});
-
-			setWatchTimeBuffer([]);
-		},
-		[appendToWatchTimeBuffer, watchTimeBuffer, setWatchTimeBuffer]
-	);
-
-	/* 
-		when video changes
-		- flush 
-		- reset committedTs
-		- clear previous interval to flush 
-		- start interval timer to flush	watch duration buffer  [10s]
-		- clear previous interval to commit time
-		- start interval timer to commit time [5s]
-
-	useEffect(() => {
-		if (isActive && enableWatchHistory && user && video) {
-			// console.log('CURRENT VIDEO', video)
-			// flushing
-			flushWatchTimeBuffer(user?.user_id);
-
-			// resetting committedTs
-			setCommittedTs(0);
-
-			// clearing previous interval to flush
-			if (flushTimeInterval.current) {
-				clearInterval(flushTimeInterval.current);
-			}
-
-			// clearing previous commitTimeInterval
-			if (commitTimeInterval.current) {
-				clearInterval(commitTimeInterval.current);
-			}
-
-			// TODO : send to watch history
-			Fetch({
-				url: "/watch-history/create",
-				method: "POST",
-				// TODO : fix thiss
-				data: {
-					user_id: user?.user_id,
-					asana_id: video?.video?.id,
-					playlist_id: null,
-				},
-			})
-				.then((res) => {
-					console.log("watch history created", res.data);
-				})
-				.catch((err) => {
-					console.log(err);
-				});
-
-			// starting interval timer to flush watch duration buffer
-			flushTimeInterval.current = setInterval(() => {
-				flushWatchTimeBuffer(user?.user_id);
-			}, 10000);
-
-			// starting interval timer to commit time
-			commitTimeInterval.current = setInterval(() => {
-				// TODO : fix this
-				updateWatchTimeBuffer({
-					user_id: user?.user_id,
-					asana_id: video?.video?.id,
-					playlist_id: null,
-					currentTime: playerRef.current.currentTime,
-				});
-				addToCommittedTs(playerRef.current?.currentTime);
-			}, 5000);
-		} else {
-			if (flushTimeInterval.current) {
-				clearInterval(flushTimeInterval.current);
-			}
-
-			if (commitTimeInterval.current) {
-				clearInterval(commitTimeInterval.current);
-			}
-		}
-	}, [isActive, enableWatchHistory]);
-	*/
-
-	// when theres a pause or play, the state is shown for 300ms
-	useEffect(() => {
-		let t;
-
-		if (
-			(videoState === STATE_VIDEO_PLAY ||
-				videoState === STATE_VIDEO_PAUSED) &&
-			playerRef?.current?.currentTime > 1
-		) {
-			setVideoStateVisible(true);
-
-			t = setTimeout(() => {
-				setVideoStateVisible(false);
-			}, 300);
-		}
-
-		return () => {
-			if (t) {
-				clearTimeout(t);
-			}
-		};
-	}, [videoState, setVideoStateVisible]);
-
-	const videoUrl = useMemo(() => {
-		return (
-			(video?.video?.asana_dash_url ||
-				video?.video?.transition_dash_url) ??
-			""
-		);
-	}, [video]);
-
-	const playerOnError = useCallback(
-		(e) => {
-			//console.log("[StreamStackItem:error] Error playing video", e);
-			setVideoState(STATE_VIDEO_ERROR);
-			// alert(JSON.stringify({ err: e }));
-		},
-		[setVideoState]
-	);
-
-	const handleNextVideo = useCallback(() => {
-		popFromQueue(0);
-	}, [popFromQueue]);
-
-	const handlePrevVideo = useCallback(() => {
-		popFromArchive(-1);
-	}, [popFromArchive]);
-
-	const handleSeekFoward = useCallback(() => {
-		addToSeekQueue({ t: 5, type: "seek" });
-	}, [addToSeekQueue]);
-
-	const handleSeekBackward = useCallback(() => {
-		addToSeekQueue({ t: -5, type: "seek" });
-	}, [addToSeekQueue]);
-
-	const handleVideoStateChange = useCallback(
-		(e) => {
-			console.log(
-				e.newstate,
-				isActiveRef.current,
-				useVideoStore.getState()?.currentVideo?.idx
-			);
-			if (isActiveRef.current) {
-				if (e.newstate === "buffering") {
-					console.log(
-						"SET VIDEO STATE LOADING : handleVideoStateChange"
-					);
-					setVideoState(STATE_VIDEO_LOADING);
-				} else if (e.newstate === "playing") {
-					if (
-						useVideoStore.getState().pauseReason ===
-						VIDEO_PAUSE_MARKER
-					) {
-						setPauseReason(null);
-						handleNextMarker();
-					}
-					console.log(
-						"SET VIDEO STATE PLAY : handleVideoStateChange",
-						useVideoStore.getState()?.currentVideo
-					);
-					setVideoState(STATE_VIDEO_PLAY);
-				} else if (e.newstate === "paused") {
-					console.log(
-						"SET VIDEO STATE PAUSE : handleVideoStateChange",
-						useVideoStore.getState()?.currentVideo
-					);
-					setVideoState(STATE_VIDEO_PAUSED);
-				}
-			}
-		},
-		[setPauseReason, setVideoState]
-	);
 
 	const playerInit = useCallback(
 		(ref) => {
 			if (ref !== null) {
 				const check = isMobileTablet();
 				const isMobile = { done: true, check: check };
-
-				setVideoState(STATE_VIDEO_LOADING);
+				// console.log("Player init, setting loading to true", video?.idx);
+				// setVideoState(STATE_VIDEO_LOADING);
 				playerRef.current = ref;
 				if (ref.ui) {
 					shaka.ui.Controls.registerElement(
@@ -791,7 +380,7 @@ function StreamStackItem({
 						"seeking",
 						(e) => {
 							console.log("Seeking...");
-							setVideoState(STATE_VIDEO_LOADING);
+							handleLoading(true);
 						}
 					);
 					playerRef.current.videoElement.addEventListener(
@@ -805,7 +394,11 @@ function StreamStackItem({
 					playerRef.current.videoElement.addEventListener(
 						"canplaythrough",
 						(e) => {
-							console.log("Can play through...");
+							const state = useVideoStore.getState();
+							console.log(
+								"Can play through...",
+								state.videoState
+							);
 							tryToPlay();
 						}
 					);
@@ -818,14 +411,14 @@ function StreamStackItem({
 
 				if (ref.player) {
 					// events
-					playerRef.current.player.addEventListener(
-						"error",
-						playerOnError
-					);
-					playerRef.current.player.addEventListener(
-						"statechanged",
-						handleVideoStateChange
-					);
+					// playerRef.current.player.addEventListener(
+					// 	"error",
+					// 	playerOnError
+					// );
+					// playerRef.current.player.addEventListener(
+					// 	"statechanged",
+					// 	handleVideoStateChange
+					// );
 					playerRef.current.player.addEventListener("loading", () => {
 						handleLoading(true);
 					});
