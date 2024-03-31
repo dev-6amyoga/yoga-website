@@ -47,14 +47,11 @@ function StudentHome() {
       {/* <div>Welcome {user.name}!</div> */}
       <br />
       <br />
-      <div className="moving-text-bar py-2">
-        <div
-          className="moving-text"
-          style={{ transform: `translateX($-position - 5}%)` }}
-        >
+      <div class="moving-text-bar py-2">
+        <div class="moving-text">
           This video is for personal self-practice only and not to be used by
           teachers for taking classes. Any unauthorized use may kindly be
-          notified to : +91-9980802351
+          notified to: +91-9980802351
         </div>
       </div>
 

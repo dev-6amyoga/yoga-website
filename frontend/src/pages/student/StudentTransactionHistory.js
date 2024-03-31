@@ -5,7 +5,10 @@ import { toast } from "react-toastify";
 import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
+import { useMemo } from "react";
+import { DataTable } from "../../components/Common/DataTable/DataTable";
 
+import SortableColumn from "../../components/Common/DataTable/SortableColumn";
 export default function StudentTransactionHistory() {
   let user = useUserStore((state) => state.user);
   const [transactions, setTransactions] = useState([]);
@@ -29,6 +32,7 @@ export default function StudentTransactionHistory() {
       fetchData();
     }
   }, [user]);
+
   const handleDownload = (data1) => {
     const csv = Papa.unparse(data1);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -41,7 +45,7 @@ export default function StudentTransactionHistory() {
       downloadATag.current.click();
     }
   };
-  // here req sent
+
   const subscribePlan = async (rowData, setLoading) => {
     console.log(rowData.user_id, rowData.transaction_order_id);
     try {
@@ -77,9 +81,10 @@ export default function StudentTransactionHistory() {
     }
     // setLoading(false)
   };
+
   const RenderAction = (value, rowData, index) => {
     const [loading, setLoading] = useState(false);
-    console.log(rowData?.payment_status !== "success");
+    console.log(rowData);
     return (
       <Grid.Container gap={0.1}>
         <Grid>
@@ -100,6 +105,60 @@ export default function StudentTransactionHistory() {
       </Grid.Container>
     );
   };
+
+  const columnsDataTable = useMemo(
+    () => [
+      {
+        accessorKey: "payment_date",
+        header: ({ column }) => (
+          <SortableColumn column={column}>Payment Date</SortableColumn>
+        ),
+      },
+      {
+        accessorKey: "transaction_order_id",
+        header: ({ column }) => (
+          <SortableColumn column={column}>Transaction Order ID</SortableColumn>
+        ),
+      },
+      {
+        accessorKey: "transaction_payment_id",
+        header: ({ column }) => (
+          <SortableColumn column={column}>
+            Transaction Payment ID
+          </SortableColumn>
+        ),
+      },
+      {
+        accessorKey: "amount",
+        header: ({ column }) => (
+          <SortableColumn column={column}>Amount</SortableColumn>
+        ),
+      },
+      {
+        accessorKey: "payment_method",
+        header: ({ column }) => (
+          <SortableColumn column={column}>Payment Method</SortableColumn>
+        ),
+      },
+      {
+        accessorKey: "payment_status",
+        header: ({ column }) => (
+          <SortableColumn column={column}>Payment Status</SortableColumn>
+        ),
+      },
+      {
+        accessorKey: "operation",
+        header: "Actions",
+        cell: ({ row }) => {
+          return (
+            RenderAction(null, row, null)
+          );
+        },
+      },
+    ],
+    []
+  );
+
   return (
     <div>
       <div>
@@ -112,9 +171,7 @@ export default function StudentTransactionHistory() {
           ref={downloadATag}
           target="_blank"
           rel="noreferer"
-        >
-          {/* TAGGGGGG */}
-        </a>
+        ></a>
         <div className="elements">
           <Button
             onClick={() => {
@@ -124,6 +181,20 @@ export default function StudentTransactionHistory() {
             Download CSV
           </Button>
           <br />
+          <div className="max-w-7xl">
+            <DataTable
+              columns={columnsDataTable}
+              data={transactions || []}
+            ></DataTable>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+{
+  /* 
           <Table width={100} data={transactions} className="bg-white ">
             <Table.Column
               prop="payment_date"
@@ -161,8 +232,5 @@ export default function StudentTransactionHistory() {
               render={RenderAction}
             />
           </Table>
-        </div>
-      </div>
-    </div>
-  );
+           */
 }
