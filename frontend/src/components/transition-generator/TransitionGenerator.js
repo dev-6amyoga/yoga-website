@@ -6644,8 +6644,11 @@ export const transitionGenerator = (
       startVideo.asana_category === "Suryanamaskara Without Prefix-Suffix" &&
       endVideo.asana_category === "Standing"
     ) {
+      console.log("hello");
+      console.log(endVideo);
       if (endVideo.nobreak_asana === true) {
         if (endVideo.person_starting_position === "Front") {
+          console.log("FINDING transition");
           const m0 = transitionFinder2(
             "Inhale Arms Up Exhale Sideway Down Thigh Suryanamaskara Prefix",
             endVideo.language
@@ -6654,7 +6657,6 @@ export const transitionGenerator = (
             "Feet Apart Hands Loose Standing Transition Front Non AI",
             endVideo.language
           );
-
           const m2 = transitionFinder2(
             "Feet Together Hands Tight Standing Transition Front Non AI",
             endVideo.language
@@ -6699,6 +6701,7 @@ export const transitionGenerator = (
         }
       }
       if (endVideo.nobreak_asana === false) {
+        console.log(" in no break is false");
         if (endVideo.person_starting_position === "Front") {
           const m0 = transitionFinder2(
             "Inhale Arms Up Exhale Sideway Down Thigh Suryanamaskara Prefix",
