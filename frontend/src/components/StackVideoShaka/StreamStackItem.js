@@ -53,7 +53,12 @@ function StreamStackItem({
 
 	useEffect(() => {
 		isActiveRef.current = isActive;
-	}, [isActive]);
+		console.log({
+			isActive,
+			videoidx: video?.idx,
+			isActiveRef: isActiveRef.current,
+		});
+	}, [isActive, video]);
 
 	const [
 		// seek queue
@@ -276,6 +281,8 @@ function StreamStackItem({
 	]);
 
 	const tryToPlay = useCallback(() => {
+		if (!isActive) return;
+
 		console.log("Try to play called");
 		playerRef.current.videoElement
 			.play()
@@ -283,34 +290,39 @@ function StreamStackItem({
 				console.log("Autoplay initialized", video.idx);
 				if (volume === 0 && !autoplayInitialized) {
 					//console.log("Setting volume to 0.5");
-					setVolume(0.5);
+					setVolume(1);
 					setAutoplayInitialized(true);
 				}
 			})
 			.catch((err) => {
 				console.error("Error autoplay : ", err, video.idx);
 				// toast("Error playing video", { type: "error" });
-				playerRef.current.videoElement.muted = true;
-				playerRef.current.videoElement
-					.play()
-					.then((res) => {
-						console.log(
-							"Autoplay initialized after muting",
-							video.idx
-						);
-						playerRef.current.videoElement.muted = false;
-						if (volume === 0 && !autoplayInitialized) {
-							setVolume(0.5);
-							setAutoplayInitialized(true);
-						}
-					})
-					.catch((err) => {
-						console.error(
-							"Error autoplay (with mute)",
-							err,
-							video.idx
-						);
-					});
+				if (
+					playerRef.current.videoElement !== null &&
+					playerRef.current.videoElement !== undefined
+				) {
+					playerRef.current.videoElement.muted = true;
+					playerRef.current.videoElement
+						.play()
+						.then((res) => {
+							console.log(
+								"Autoplay initialized after muting",
+								video.idx
+							);
+							playerRef.current.videoElement.muted = false;
+							if (volume === 0 && !autoplayInitialized) {
+								setVolume(1);
+								setAutoplayInitialized(true);
+							}
+						})
+						.catch((err) => {
+							console.error(
+								"Error autoplay (with mute)",
+								err,
+								video.idx
+							);
+						});
+				}
 			});
 	}, [
 		autoplayInitialized,
@@ -489,40 +501,43 @@ function StreamStackItem({
 		};
 	}, [commitTimeInterval, flushTimeInterval]);
 
-	const flushWatchTimeBufferE = useCallback((user_id) => {
-		const watch_time_logs = [...watchTimeBuffer];
+	const flushWatchTimeBufferE = useCallback(
+		(user_id) => {
+			const watch_time_logs = [...watchTimeBuffer];
 
-		// console.log({ watch_time_logs });
-		if (watch_time_logs.length === 0) {
-			return;
-		}
+			// console.log({ watch_time_logs });
+			if (watch_time_logs.length === 0) {
+				return;
+			}
 
-		Fetch({
-			url: "/watch-time/update",
-			method: "POST",
-			token: true,
-			data: {
-				user_id: user_id,
-				watch_time_logs,
-				institute_id: null,
-			},
-		})
-			.then((res) => {
-				if (res.status === 200) {
-					console.log("watch time buffer flushed");
-				}
+			Fetch({
+				url: "/watch-time/update",
+				method: "POST",
+				token: true,
+				data: {
+					user_id: user_id,
+					watch_time_logs,
+					institute_id: null,
+				},
 			})
-			.catch((err) => {
-				//console.log(err);
-				// localStorage.setItem(
-				// 	"6amyoga_watch_time_logs",
-				// 	JSON.stringify(watch_time_logs)
-				// );
-				appendToWatchTimeBuffer(watch_time_logs);
-			});
+				.then((res) => {
+					if (res.status === 200) {
+						console.log("watch time buffer flushed");
+					}
+				})
+				.catch((err) => {
+					//console.log(err);
+					// localStorage.setItem(
+					// 	"6amyoga_watch_time_logs",
+					// 	JSON.stringify(watch_time_logs)
+					// );
+					appendToWatchTimeBuffer(watch_time_logs);
+				});
 
-		setWatchTimeBuffer([]);
-	}, []);
+			setWatchTimeBuffer([]);
+		},
+		[appendToWatchTimeBuffer, watchTimeBuffer, setWatchTimeBuffer]
+	);
 
 	/* 
 		when video changes
@@ -628,10 +643,6 @@ function StreamStackItem({
 			""
 		);
 	}, [video]);
-
-	const playerOnMetadataLoaded = useCallback(() => {
-		setMetadataLoaded(true);
-	}, []);
 
 	const playerOnError = useCallback(
 		(e) => {
@@ -792,6 +803,14 @@ function StreamStackItem({
 					);
 
 					playerRef.current.videoElement.addEventListener(
+						"canplaythrough",
+						(e) => {
+							console.log("Can play through...");
+							tryToPlay();
+						}
+					);
+
+					playerRef.current.videoElement.addEventListener(
 						"ended",
 						handleEnd
 					);
@@ -826,8 +845,9 @@ function StreamStackItem({
 							maxDisabledTime: 0,
 							inaccurateManifestTolerance: 0,
 							lowLatencyMode: true,
-							bufferingGoal: 16,
-							bufferBehind: 8,
+							bufferingGoal: 10,
+							bufferBehind: 20,
+							rebufferingGoal: 4,
 							ignoreTextStreamFailures: true,
 							stallThreshold: 3,
 							segmentPrefetchLimit: 3,
