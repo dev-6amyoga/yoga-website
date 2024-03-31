@@ -52,6 +52,8 @@ export const transitionGenerator = (
   };
   const transitionFinder2 = (transition_video_name, language) => {
     console.log(teacher_mode);
+    console.log(transition_video_name);
+
     const matchingTransition1 = transitions.find((transition) => {
       return (
         (transition_video_name === "" ||
@@ -60,7 +62,8 @@ export const transitionGenerator = (
         (teacher_mode === "" || transition.teacher_mode === teacher_mode)
       );
     });
-    console.log(matchingTransition1);
+
+    console.log(matchingTransition1, "RECEIVED");
     return matchingTransition1;
   };
   if (startVideo === "start") {
@@ -272,18 +275,27 @@ export const transitionGenerator = (
       }
     }
     if (endVideo.asana_category === "Vajrasana") {
+      console.log("hihihi");
       const m1 = transitionFinder2(
         "Vajrasana Position Front Non AI",
         endVideo.language
       );
-      if (endVideo.asana_stithi_start === "stithi") {
+      console.log("m1 is", m1);
+      console.log(endVideo.asana_stithi_start);
+      if (
+        endVideo.asana_stithi_start === "stithi" ||
+        endVideo.asana_stithi_start === "Stithi"
+      ) {
+        console.log("in stithi");
         const m2 = transitionFinder2(
           "Vajrasana Relax To Dyanmudra Position Non AI",
           endVideo.language
         );
+        console.log("m2 is", m2);
         if (m1 && m2) return [m1, m2];
         else return [];
       } else if (endVideo.asana_stithi_start === "relax") {
+        console.log("in relax");
         if (m1) return [m1];
         else return [];
       }
@@ -345,6 +357,7 @@ export const transitionGenerator = (
       startVideo.asana_category === "Standing" &&
       endVideo.asana_category === "Standing"
     ) {
+      console.log(startVideo.nobreak_asana, endVideo.nobreak_asana);
       if (
         startVideo.nobreak_asana === true &&
         endVideo.nobreak_asana === true
@@ -403,6 +416,7 @@ export const transitionGenerator = (
             if (m1) return [m1];
             else return [];
           } else if (endVideo.person_starting_position === "Left") {
+            console.log("in heree");
             const m1 = transitionFinder2(
               "Feet Apart Hands Loose Standing Transition Front Non AI",
               endVideo.language
@@ -450,6 +464,7 @@ export const transitionGenerator = (
             if (m1) return [m1];
             else return [];
           } else if (endVideo.person_starting_position === "Left") {
+            console.log("opopopopo");
             const m1 = transitionFinder2(
               "Person Transit Front To Left Non AI",
               endVideo.language
@@ -458,6 +473,8 @@ export const transitionGenerator = (
               "Feet Together Hands Tight Standing Side Transition Non AI",
               endVideo.language
             );
+
+            console.log(m1, m2);
             if (m1 && m2) return [m1, m2];
             else return [];
           }
@@ -644,8 +661,14 @@ export const transitionGenerator = (
       startVideo.asana_category === "Vajrasana" &&
       endVideo.asana_category === "Vajrasana"
     ) {
-      if (startVideo.asana_stithi_start === "stithi") {
-        if (endVideo.asana_stithi_start === "stithi") {
+      if (
+        startVideo.asana_stithi_start === "stithi" ||
+        startVideo.asana_stithi_start === "Stithi"
+      ) {
+        if (
+          endVideo.asana_stithi_start === "stithi" ||
+          endVideo.asana_stithi_start === "Stithi"
+        ) {
           return [];
         }
         if (endVideo.asana_stithi_start === "relax") {
@@ -707,6 +730,7 @@ export const transitionGenerator = (
       startVideo.asana_category === "Standing" &&
       endVideo.asana_category === "Sitting"
     ) {
+      console.log(startVideo.nobreak_asana, endVideo.nobreak_asana);
       if (
         startVideo.nobreak_asana === true &&
         endVideo.nobreak_asana === true
@@ -1892,7 +1916,20 @@ export const transitionGenerator = (
           if (m1 && m2) {
             return [m1, m2];
           } else {
-            return [];
+            const m4 = transitionFinder2(
+              "Suryanamaskara Preparation And Mantra All Non Stithi",
+              endVideo.language
+            );
+            const m5 = transitionFinder2(
+              "Inhale Arms Up Non Stithi Namaskara",
+              endVideo.language
+            );
+
+            if (m4 && m5) {
+              return [m4, m5];
+            } else {
+              return [];
+            }
           }
         } else if (startVideo.person_starting_position === "Left") {
           const m1 = transitionFinder2(
@@ -2135,6 +2172,7 @@ export const transitionGenerator = (
       startVideo.asana_category === "Sitting" &&
       endVideo.asana_category === "Supine"
     ) {
+      console.log(startVideo.nobreak_asana, endVideo.nobreak_asana);
       if (
         startVideo.nobreak_asana === true &&
         endVideo.nobreak_asana === true
@@ -2605,7 +2643,20 @@ export const transitionGenerator = (
         if (m1 && m2 && m3) {
           return [m1, m2, m3];
         } else {
-          return [];
+          const m4 = transitionFinder2(
+            "Suryanamaskara Preparation And Mantra All Non Stithi",
+            endVideo.language
+          );
+          const m5 = transitionFinder2(
+            "Inhale Arms Up Non Stithi Namaskara",
+            endVideo.language
+          );
+
+          if (m4 && m5) {
+            return [m4, m5];
+          } else {
+            return [];
+          }
         }
       }
       if (startVideo.nobreak_asana === false) {
@@ -2622,7 +2673,20 @@ export const transitionGenerator = (
         if (m1 && m2) {
           return [m1, m2];
         } else {
-          return [];
+          const m4 = transitionFinder2(
+            "Suryanamaskara Preparation And Mantra All Non Stithi",
+            endVideo.language
+          );
+          const m5 = transitionFinder2(
+            "Inhale Arms Up Non Stithi Namaskara",
+            endVideo.language
+          );
+
+          if (m4 && m5) {
+            return [m4, m5];
+          } else {
+            return [];
+          }
         }
       }
     }
@@ -4512,7 +4576,11 @@ export const transitionGenerator = (
       startVideo.asana_category === "Vajrasana" &&
       endVideo.asana_category === "Supine"
     ) {
-      if (startVideo.asana_stithi_start === "stithi") {
+      console.log("supine vajra");
+      if (
+        startVideo.asana_stithi_start === "stithi" ||
+        startVideo.asana_stithi_start === "Stithi"
+      ) {
         if (endVideo.nobreak_asana === true) {
           const m1 = transitionFinder2(
             "Vajrasana Dyanmudra To Relax Transition Non AI",
@@ -4572,7 +4640,10 @@ export const transitionGenerator = (
           }
         }
       }
-      if (startVideo.asana_stithi_start === "relax") {
+      if (
+        startVideo.asana_stithi_start === "relax" ||
+        startVideo.asana_stithi_start === "Relax"
+      ) {
         if (endVideo.nobreak_asana === true) {
           const m1 = transitionFinder2(
             "Vajra To Sitting Transition Non AI",
@@ -5811,7 +5882,15 @@ export const transitionGenerator = (
         if (m1 && m2 && m3) {
           return [m1, m2, m3];
         } else {
-          return [];
+          const m4 = transitionFinder2(
+            "Prayer Sitting Full Unlock",
+            endVideo.language
+          );
+          if (m4) {
+            return [m4];
+          } else {
+            return [];
+          }
         }
       }
       if (endVideo.nobreak_asana === false) {
@@ -5828,7 +5907,15 @@ export const transitionGenerator = (
         if (m1 && m2) {
           return [m1, m2];
         } else {
-          return [];
+          const m4 = transitionFinder2(
+            "Prayer Sitting Full Unlock",
+            endVideo.language
+          );
+          if (m4) {
+            return [m4];
+          } else {
+            return [];
+          }
         }
       }
     }
@@ -6559,6 +6646,10 @@ export const transitionGenerator = (
     ) {
       if (endVideo.nobreak_asana === true) {
         if (endVideo.person_starting_position === "Front") {
+          const m0 = transitionFinder2(
+            "Inhale Arms Up Exhale Sideway Down Thigh Suryanamaskara Prefix",
+            endVideo.language
+          );
           const m1 = transitionFinder2(
             "Feet Apart Hands Loose Standing Transition Front Non AI",
             endVideo.language
@@ -6569,13 +6660,17 @@ export const transitionGenerator = (
             endVideo.language
           );
 
-          if (m1 && m2) {
-            return [m1, m2];
+          if (m0 && m1 && m2) {
+            return [m0, m1, m2];
           } else {
             return [];
           }
         }
         if (endVideo.person_starting_position === "Left") {
+          const m0 = transitionFinder2(
+            "Inhale Arms Up Exhale Sideway Down Thigh Suryanamaskara Prefix",
+            endVideo.language
+          );
           const m1 = transitionFinder2(
             "Feet Apart Hands Loose Standing Transition Front Non AI",
             endVideo.language
@@ -6596,8 +6691,8 @@ export const transitionGenerator = (
             endVideo.language
           );
 
-          if (m1 && m2 && m3 && m4) {
-            return [m1, m2, m3, m4];
+          if (m0 && m1 && m2 && m3 && m4) {
+            return [m0, m1, m2, m3, m4];
           } else {
             return [];
           }
@@ -6605,18 +6700,26 @@ export const transitionGenerator = (
       }
       if (endVideo.nobreak_asana === false) {
         if (endVideo.person_starting_position === "Front") {
+          const m0 = transitionFinder2(
+            "Inhale Arms Up Exhale Sideway Down Thigh Suryanamaskara Prefix",
+            endVideo.language
+          );
           const m1 = transitionFinder2(
             "Feet Apart Hands Loose Standing Transition Front Non AI",
             endVideo.language
           );
 
-          if (m1) {
-            return [m1];
+          if (m0 && m1) {
+            return [m0, m1];
           } else {
             return [];
           }
         }
         if (endVideo.person_starting_position === "Left") {
+          const m0 = transitionFinder2(
+            "Inhale Arms Up Exhale Sideway Down Thigh Suryanamaskara Prefix",
+            endVideo.language
+          );
           const m1 = transitionFinder2(
             "Feet Apart Hands Loose Standing Transition Front Non AI",
             endVideo.language
@@ -6627,8 +6730,8 @@ export const transitionGenerator = (
             endVideo.language
           );
 
-          if (m1 && m2) {
-            return [m1, m2];
+          if (m0 && m1 && m2) {
+            return [m0, m1, m2];
           } else {
             return [];
           }
