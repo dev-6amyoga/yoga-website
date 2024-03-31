@@ -47,6 +47,7 @@ function RegisterPlaylistForm() {
   useEffect(() => {
     const fetchData = async () => {
       if (showTeacherMode == true) {
+        console.log("in true");
         try {
           const response = await Fetch({
             url: "/content/video/getTeacherAsanas",
@@ -58,8 +59,9 @@ function RegisterPlaylistForm() {
         }
       } else {
         try {
+          console.log("in false");
           const response = await Fetch({
-            url: "/content/video/getTeacherAsanas",
+            url: "/content/video/getNonTeacherAsanas",
           });
           console.log(response.data);
           setAsanas(response.data);
@@ -132,6 +134,7 @@ function RegisterPlaylistForm() {
         transitions,
         showTeacherMode
       );
+      console.log(x, "obtained!!");
       if (x.length !== 0) {
         setPlaylistTemp((prev) => [
           ...prev,

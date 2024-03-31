@@ -8,6 +8,9 @@ import { ROLE_ROOT } from "../../enums/roles";
 import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
 import AdminPageWrapper from "../Common/AdminPageWrapper";
+import { useMemo } from "react";
+import SortableColumn from "../Common/DataTable/SortableColumn";
+import { DataTable } from "../Common/DataTable/DataTable";
 
 function AllTransitions() {
   const [delState, setDelState] = useState(false);
@@ -39,11 +42,14 @@ function AllTransitions() {
       setFilteredTransitions(transitions);
     }
   }, [searchTerm]);
+
   const [transitions, setTransitions] = useState([]);
+
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setModalData({ ...modalData, [id]: value });
   };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -59,6 +65,7 @@ function AllTransitions() {
     };
     fetchData();
   }, []);
+
   const deleteCategory = async () => {
     try {
       const del_id = delId;
@@ -79,6 +86,7 @@ function AllTransitions() {
       console.log(error);
     }
   };
+
   const renderAction = (value, rowData, index) => {
     const handleDelete = async () => {
       try {
@@ -123,6 +131,7 @@ function AllTransitions() {
       </Grid.Container>
     );
   };
+
   const updateData = async () => {
     console.log(modalData);
     setModalState(false);
@@ -141,6 +150,7 @@ function AllTransitions() {
       toast("Success!");
     }
   };
+
   const handleDownload = (data1) => {
     const csv = Papa.unparse(data1);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -155,6 +165,44 @@ function AllTransitions() {
       document.body.removeChild(link);
     }
   };
+
+  const columnsDataTable = useMemo(
+    () => [
+      {
+        accessorKey: "transition_id",
+        header: ({ column }) => (
+          <SortableColumn column={column}>Transition ID</SortableColumn>
+        ),
+      },
+      {
+        accessorKey: "transition_video_name",
+        header: ({ column }) => (
+          <SortableColumn column={column}>Transition Name</SortableColumn>
+        ),
+      },
+      {
+        accessorKey: "teacher_mode",
+        header: ({ column }) => (
+          <SortableColumn column={column}>Teacher Mode</SortableColumn>
+        ),
+      },
+      {
+        accessorKey: "transition_dash_url",
+        header: ({ column }) => (
+          <SortableColumn column={column}>DASH URL</SortableColumn>
+        ),
+      },
+      {
+        accessorKey: "actions",
+        header: "Actions",
+        cell: ({ row }) => {
+          return renderAction;
+        },
+      },
+    ],
+    []
+  );
+
   return (
     <AdminPageWrapper heading="Content Management - View All Transitions">
       <div>
@@ -203,6 +251,12 @@ function AllTransitions() {
             render={renderAction}
           />
         </Table>
+
+        {/* <DataTable
+          columns={columnsDataTable}
+          data={filteredTransitions || []}
+          // refetch={getTransactions}
+        ></DataTable> */}
       </div>
       <div>
         <Modal visible={delState} onClose={closeDelHandler}>
