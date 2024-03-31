@@ -17,10 +17,10 @@
 
 @keyframes moveText {
     from {
-        transform: translateX(-100%);
+        transform: translateX(90%);
     }
 
     to {
-        transform: translateX(90%);
+        transform: translateX(-100%);
     }
 }
