@@ -61,17 +61,6 @@ function VideoPlayer() {
 		state?.markers?.length || 0,
 	]);
 
-	const currentMarker = useVideoStore((state) => {
-		if (
-			state.currentMarkerIdx === null ||
-			!state.markers ||
-			state.markers.length === 0
-		) {
-			return null;
-		}
-		return state.markers[state.currentMarkerIdx];
-	});
-
 	// watch history store
 	// let [addToCommittedTs] = useWatchHistoryStore((state) => [
 	// 	state.addToCommittedTs,
@@ -100,7 +89,13 @@ function VideoPlayer() {
 			setVideoState(STATE_VIDEO_PAUSED);
 			setPlaylistState(false);
 		}
-	}, [queue, playlistState, setCurrentVideo, setVideoState]);
+	}, [
+		queue,
+		playlistState,
+		setCurrentVideo,
+		setVideoState,
+		setPlaylistState,
+	]);
 
 	const handleReset = useCallback(() => {
 		setCurrentMarkerIdx(null);
@@ -111,9 +106,23 @@ function VideoPlayer() {
 	}, [setCurrentMarkerIdx, setDuration, setPauseReason, setCurrentTime]);
 
 	const handleEnd = useCallback(() => {
-		console.log("Video ended ------------------>");
+		// console.log("Video ended ------------------>");
+		const state = useVideoStore.getState();
+
+		let currentMarker = null;
+
+		if (
+			state.currentMarkerIdx === null ||
+			!state.markers ||
+			state.markers.length === 0
+		) {
+			currentMarker = null;
+		} else {
+			currentMarker = state.markers[state.currentMarkerIdx];
+		}
+
 		// check if teaching mode, loopback to previous marker
-		if (viewMode === VIDEO_VIEW_TEACHING_MODE) {
+		if (state.viewMode === VIDEO_VIEW_TEACHING_MODE) {
 			if (currentMarker && currentMarker?.loop) {
 				console.log(
 					"VIDEO END : TEACHING MODE: moving to ",
@@ -137,13 +146,19 @@ function VideoPlayer() {
 			handleReset();
 			popFromQueue(0);
 		}
-	}, [popFromQueue, viewMode, addToSeekQueue, currentMarker, handleReset]);
+	}, [popFromQueue, addToSeekQueue, handleReset]);
 
 	const handleSetPlay = useCallback(
 		(isActive) => {
 			console.log("SETTING VIDEO STATE TO PLAY ------------>");
 
 			if (isActive) {
+				let state = useVideoStore.getState();
+				let videoState = state.videoState;
+				let markersLength = state?.markers?.length || 0;
+				let currentMarkerIdx = state.currentMarkerIdx;
+				let pauseReason = state.pauseReason;
+
 				if (videoState === STATE_VIDEO_PAUSED) {
 					if (pauseReason === VIDEO_PAUSE_MARKER) {
 						console.log("VIDEO PLAY : PAUSE REASON MARKER");
@@ -161,16 +176,7 @@ function VideoPlayer() {
 				}
 			}
 		},
-		[
-			viewMode,
-			setVideoState,
-			videoState,
-			pauseReason,
-			currentMarkerIdx,
-			markersLength,
-			setCurrentMarkerIdx,
-			setPauseReason,
-		]
+		[setVideoState, setCurrentMarkerIdx, setPauseReason]
 	);
 
 	const handleSetPause = useCallback(
@@ -184,11 +190,11 @@ function VideoPlayer() {
 	);
 
 	const handleLoading = useCallback(
-		(loading) => {
-			if (useVideoStore.getState().isActive) {
+		(loading, isActive) => {
+			if (isActive) {
 				if (loading) setVideoState(STATE_VIDEO_LOADING);
 				else {
-					handleSetPlay();
+					handleSetPlay(isActive);
 				}
 			}
 		},

@@ -36,12 +36,18 @@ export default function TestingVideo() {
 	useEffect(() => {
 		// for hand held pointer
 		const handleKeyDown = (event) => {
-			console.log({
-				playlistState,
-				videoState,
-				viewMode,
-				key: event.key,
-			});
+			// console.log({
+			// 	playlistState,
+			// 	videoState,
+			// 	viewMode,
+			// 	key: event.key,
+			// });
+			const state = useVideoStore.getState();
+			const viewMode = state.viewMode;
+			const videoState = state.videoState;
+			const markers = state.markers;
+			const currentMarkerIdx = state.currentMarkerIdx;
+
 			// TODO : fix plalist state when start is clicked
 			if (
 				videoState === null ||
@@ -87,7 +93,7 @@ export default function TestingVideo() {
 		return () => {
 			document.removeEventListener("keydown", handleKeyDown);
 		};
-	}, [viewMode, videoState, playlistState, popFromArchive, popFromQueue]);
+	}, [popFromArchive, popFromQueue]);
 
 	useEffect(() => {
 		setEnableWatchHistory(false);

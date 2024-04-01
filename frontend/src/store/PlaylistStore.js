@@ -54,7 +54,7 @@ const usePlaylistStore = create((set) => ({
 							video: i,
 							idx: state.queue.length + idx + 1,
 							queue_id: uuidV5(
-								vi_id + Math.floor(Math.random() * 1000),
+								vi_id + Math.floor(Math.random() * 100000),
 								"ed46bc72-c770-4478-a8af-6183469acb64"
 							),
 						};

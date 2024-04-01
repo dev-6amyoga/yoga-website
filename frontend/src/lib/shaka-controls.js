@@ -409,6 +409,60 @@ ShakaPlayerPrevMarker.Factory = class {
 
 const shakaPlayerToggleModeInstance = new ShakaPlayerToggleMode.Factory();
 
+// ------------------------------
+
+const shakaUIConfig = {
+	enableTooltips: true,
+	doubleClickForFullscreen: true,
+	seekOnTaps: true,
+	tapSeekDistance: 5,
+	enableKeyboardPlaybackControls: true,
+	enableFullscreenOnRotation: true,
+	keyboardSeekDistance: 5,
+	controlPanelElements: [
+		"prev",
+		"prev_marker",
+		"seek_backward",
+		"play_pause",
+		"seek_forward",
+		"next_marker",
+		"next",
+		"spacer",
+		"mute",
+		"volume",
+		"time_and_duration",
+		"toggle_mode",
+		"fullscreen",
+	],
+	seekBarColors: {
+		base: "#FFFFFF",
+		buffered: "#DDDDDD",
+		played: "#FFBF00",
+	},
+	fastForwardRates: [2, 4, 8, 1],
+	rewindRates: [-1, -2, -4, -8],
+};
+
+const shakaStreamConfig = {
+	streaming: {
+		maxDisabledTime: 0,
+		inaccurateManifestTolerance: 0,
+		lowLatencyMode: true,
+		bufferingGoal: 10,
+		bufferBehind: 20,
+		rebufferingGoal: 4,
+		ignoreTextStreamFailures: true,
+		stallThreshold: 3,
+		segmentPrefetchLimit: 3,
+		retryParameters: {
+			maxAttempts: 3,
+			timeout: 30000,
+			connectionTimeout: 30000,
+			stallTimeout: 15000,
+		},
+	},
+};
+
 export {
 	ShakaPlayerGoNext,
 	ShakaPlayerGoPrev,
@@ -418,4 +472,6 @@ export {
 	ShakaPlayerPrevMarker,
 	ShakaPlayerToggleMode,
 	shakaPlayerToggleModeInstance,
+	shakaUIConfig,
+	shakaStreamConfig,
 };
