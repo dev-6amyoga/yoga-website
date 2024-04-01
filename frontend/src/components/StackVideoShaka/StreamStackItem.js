@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "shaka-player/dist/controls.css";
 import {
+	SEEK_TYPE_MARKER,
+	SEEK_TYPE_MOVE,
+	SEEK_TYPE_SEEK,
+} from "../../enums/seek_types";
+import {
 	ShakaPlayerGoNext,
 	ShakaPlayerGoPrev,
 	ShakaPlayerGoSeekBackward,
@@ -8,11 +13,14 @@ import {
 	ShakaPlayerNextMarker,
 	ShakaPlayerPrevMarker,
 	ShakaPlayerToggleMode,
+	shakaStreamConfig,
+	shakaUIConfig,
 } from "../../lib/shaka-controls";
 import usePlaylistStore from "../../store/PlaylistStore";
 import useUserStore from "../../store/UserStore";
 import useVideoStore, {
 	STATE_VIDEO_ERROR,
+	STATE_VIDEO_LOADING,
 	STATE_VIDEO_PAUSED,
 	STATE_VIDEO_PLAY,
 } from "../../store/VideoStore";
@@ -22,6 +30,8 @@ import { isMobileTablet } from "../../utils/isMobileOrTablet";
 import ShakaPlayer from "./ShakaPlayer";
 
 import shaka from "shaka-player/dist/shaka-player.ui";
+import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
+import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
 
 function StreamStackItem({
 	video,
@@ -40,8 +50,18 @@ function StreamStackItem({
 	const [autoplayInitialized, setAutoplayInitialized] = useState(false);
 	const [playerLoaded, setPlayerLoaded] = useState(false);
 
+	// parse the video url from video object
+	const videoUrl = useMemo(() => {
+		return (
+			(video?.video?.asana_dash_url ||
+				video?.video?.transition_dash_url) ??
+			""
+		);
+	}, [video]);
+
 	const isActiveRef = useRef(isActive);
 
+	// keep the isActiveRef updated
 	useEffect(() => {
 		isActiveRef.current = isActive;
 		console.log({
@@ -164,14 +184,6 @@ function StreamStackItem({
 		addToSeekQueue({ t: -5, type: "seek" });
 	}, [addToSeekQueue]);
 
-	const videoUrl = useMemo(() => {
-		return (
-			(video?.video?.asana_dash_url ||
-				video?.video?.transition_dash_url) ??
-			""
-		);
-	}, [video]);
-
 	const playerOnError = useCallback(
 		(e) => {
 			//console.log("[StreamStackItem:error] Error playing video", e);
@@ -191,7 +203,7 @@ function StreamStackItem({
 				console.log("Autoplay initialized", video.idx);
 				if (volume === 0 && !autoplayInitialized) {
 					//console.log("Setting volume to 0.5");
-					setVolume(1);
+					playerRef.current.videoElement.volume = 1;
 					setAutoplayInitialized(true);
 				}
 			})
@@ -213,7 +225,7 @@ function StreamStackItem({
 							);
 							playerRef.current.videoElement.muted = false;
 							if (volume === 0 && !autoplayInitialized) {
-								setVolume(1);
+								playerRef.current.videoElement.volume = 1;
 								setAutoplayInitialized(true);
 							}
 						})
@@ -226,7 +238,7 @@ function StreamStackItem({
 						});
 				}
 			});
-	}, [autoplayInitialized, setAutoplayInitialized, setVolume, video, volume]);
+	}, [autoplayInitialized, setAutoplayInitialized, video]);
 
 	// pause and reset the video when its not active
 	useEffect(() => {
@@ -236,14 +248,14 @@ function StreamStackItem({
 			pr.muted = true;
 			setVolume(0);
 			pr?.pause();
-			pr.currentTime = 0;
+			// pr.currentTime = 0;
 		}
 
 		return () => {
-			if (pr) {
-				pr?.pause();
+			if (pr && !isActive) {
 				pr.currentTime = 0;
 			}
+			pr?.pause();
 		};
 	}, [isActive, video.queue_id, setVolume]);
 
@@ -296,111 +308,467 @@ function StreamStackItem({
 		tryToPlay,
 	]);
 
+	// setup the player
+	// useEffect(
+	// 	() => {
+	// 		console.log("Setting up player", video.idx, playerRefSet);
+	// 		if (!playerRefSet?.done) return;
+
+	// 		if (video === undefined || video === null) return;
+
+	// 		if (videoUrl === undefined || videoUrl === null || videoUrl === "")
+	// 			return;
+
+	// 		setPlayerLoaded(true);
+	// 	},
+	// 	[
+	// 		playerRefSet,
+	// 		video,
+	// 		videoUrl,
+	// 		// handleNextVideo,
+	// 		// handlePrevVideo,
+	// 		// handleSeekFoward,
+	// 		// handleSeekBackward,
+	// 		// setVideoState,
+	// 		// playerOnError,
+	// 		// handleEnd,
+	// 		// handleLoading,
+	// 		// setVolume,
+	// 		// tryToPlay,
+	// 	]
+	// );
+
+	// pop from seek queue and update the time
+	useEffect(() => {
+		if (isActive && seekQueue.length > 0) {
+			const seekEvent = seekQueue[0];
+			console.log("SEEKING --->", seekEvent);
+			// setVideoState(STATE_VIDEO_PLAY)
+			// setPauseReason(null)
+			if (seekEvent && playerRef.current) {
+				switch (seekEvent.type) {
+					case SEEK_TYPE_SEEK:
+						let ct =
+							playerRef.current.videoElement.currentTime +
+							seekEvent.t;
+						if (ct > playerRef.current.videoElement.duration) {
+							handleEnd();
+							popFromSeekQueue(0);
+							return;
+						}
+						if (ct < 0) ct = 0;
+
+						playerRef.current.videoElement.currentTime = ct;
+						// console.log(
+						//   "SEEKING ----------------------------->",
+						//   playerRef.current.videoElement.currentTime
+						// );
+						setCommitSeekTime(ct);
+						// autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
+						// popFromSeekQueue(0)
+						break;
+					case SEEK_TYPE_MOVE:
+						let st = seekEvent.t < 0 ? 0 : seekEvent.t;
+						if (st > playerRef.current.videoElement.duration) {
+							handleEnd();
+							popFromSeekQueue(0);
+							return;
+						}
+
+						playerRef.current.videoElement.currentTime = st;
+						// console.log(
+						//   "SEEKING ----------------------------->",
+						//   playerRef.current.videoElement.currentTime
+						// );
+						setCommitSeekTime(st);
+						// autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
+						// popFromSeekQueue(0)
+						break;
+					case SEEK_TYPE_MARKER:
+						if (
+							seekEvent.t >
+							playerRef.current.videoElement.duration
+						) {
+							handleEnd();
+							popFromSeekQueue(0);
+							return;
+						}
+
+						playerRef.current.videoElement.currentTime =
+							seekEvent.t;
+						// popFromSeekQueue(0)
+						setCommitSeekTime(seekEvent.t);
+						break;
+					default:
+						break;
+				}
+				addToCommittedTs(playerRef.current?.videoElement.currentTime);
+			}
+		}
+	}, [
+		isActive,
+		seekQueue,
+		popFromSeekQueue,
+		addToCommittedTs,
+		setVideoEvent,
+		setCurrentMarkerIdx,
+		autoSetCurrentMarkerIdx,
+		setCommitSeekTime,
+		setVideoState,
+		setPauseReason,
+		popFromQueue,
+		handleEnd,
+	]);
+
+	// poll to update the current time, every 20ms, clear the timeout on unmount
+	useEffect(() => {
+		const checkSeek = (ct) => {
+			// check if seekQueue length is greater than 0,
+			// check if the current time is === to the marker time
+			// console.log("Checking seek", ct, commitSeekTime, seekQueue.length);
+			if (
+				seekQueue.length > 0 &&
+				commitSeekTime.toFixed(0) === ct.toFixed(0)
+			) {
+				if (isActive) handleLoading(false, isActive);
+				autoSetCurrentMarkerIdx(commitSeekTime);
+				return true;
+			} else {
+				return false;
+			}
+		};
+
+		const checkPauseOrLoop = (ct) => {
+			// console.log("checkPauseOrLoop : ", ct, viewMode);
+			if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+				// console.log("STUDENT --------->");
+				return false;
+			} else {
+				// console.log("TEACHER --------->");
+				// either pause or loop
+				let currentMarker = markers[currentMarkerIdx];
+
+				if (currentMarkerIdx === markers.length - 1) {
+					return false;
+				} else if (ct > markers[currentMarkerIdx + 1]?.timestamp) {
+					if (currentMarker.loop) {
+						console.log("LOOPING CUZ OF MARKER");
+						addToSeekQueue({
+							type: SEEK_TYPE_MARKER,
+							t: currentMarker.timestamp,
+						});
+						return true;
+					} else {
+						console.log("PAUSING CUZ OF MARKER");
+						setVideoState(STATE_VIDEO_PAUSED);
+						setPauseReason(VIDEO_PAUSE_MARKER);
+						return true;
+					}
+				}
+			}
+		};
+
+		const int = setInterval(() => {
+			if (playerRef.current?.videoElement?.currentTime && isActive) {
+				if (checkSeek(playerRef.current?.videoElement?.currentTime)) {
+					popFromSeekQueue(0);
+					setVideoState(STATE_VIDEO_PLAY);
+					return;
+				}
+
+				// pause if currenttime is greater than the timestamp of next?
+				if (
+					videoState !== STATE_VIDEO_LOADING &&
+					checkPauseOrLoop(
+						playerRef.current?.videoElement?.currentTime
+					)
+				) {
+					return;
+				}
+
+				if (
+					videoState !== STATE_VIDEO_LOADING ||
+					videoState !== STATE_VIDEO_ERROR ||
+					videoState !== STATE_VIDEO_PAUSED
+				) {
+					autoSetCurrentMarkerIdx(
+						playerRef.current?.videoElement?.currentTime
+					);
+				}
+				setCurrentTime(playerRef.current?.videoElement?.currentTime);
+				setVolume(playerRef.current?.videoElement?.volume);
+			}
+		}, 250);
+
+		return () => {
+			// console.log('CLEANING INTERVAL --------------------------------------->')
+			clearInterval(int);
+		};
+	}, [
+		currentVideo,
+		isActive,
+		setCurrentTime,
+		videoState,
+		popFromSeekQueue,
+		autoSetCurrentMarkerIdx,
+		seekQueue,
+		setVideoEvent,
+		setCurrentMarkerIdx,
+		markers,
+		viewMode,
+		currentMarkerIdx,
+		setVideoState,
+		addToSeekQueue,
+		commitSeekTime,
+		setPauseReason,
+		handleLoading,
+		setVolume,
+	]);
+
+	const flushWatchTimeBufferE = useCallback(
+		(user_id) => {
+			const watch_time_logs = [...watchTimeBuffer];
+
+			// console.log({ watch_time_logs });
+			if (watch_time_logs.length === 0) {
+				return;
+			}
+
+			Fetch({
+				url: "/watch-time/update",
+				method: "POST",
+				token: true,
+				data: {
+					user_id: user_id,
+					watch_time_logs,
+					institute_id: null,
+				},
+			})
+				.then((res) => {
+					if (res.status === 200) {
+						console.log("watch time buffer flushed");
+					}
+				})
+				.catch((err) => {
+					//console.log(err);
+					// localStorage.setItem(
+					// 	"6amyoga_watch_time_logs",
+					// 	JSON.stringify(watch_time_logs)
+					// );
+					appendToWatchTimeBuffer(watch_time_logs);
+				});
+
+			setWatchTimeBuffer([]);
+		},
+		[appendToWatchTimeBuffer, watchTimeBuffer, setWatchTimeBuffer]
+	);
+
+	/* 
+		when video changes
+		- flush 
+		- reset committedTs
+		- clear previous interval to flush 
+		- start interval timer to flush	watch duration buffer  [10s]
+		- clear previous interval to commit time
+		- start interval timer to commit time [5s]
+	*/
+
+	/*
+	useEffect(() => {
+		console.log("Watch time useEffect : ", enableWatchHistory);
+		if (isActive && enableWatchHistory && user && video) {
+			console.log("setting up stuff");
+			// console.log('CURRENT VIDEO', video)
+			// flushing
+			flushWatchTimeBuffer(user?.user_id);
+
+			// resetting committedTs
+			setCommittedTs(0);
+
+			// clearing previous interval to flush
+			if (flushTimeInterval.current) {
+				clearInterval(flushTimeInterval.current);
+			}
+
+			// clearing previous commitTimeInterval
+			if (commitTimeInterval.current) {
+				clearInterval(commitTimeInterval.current);
+			}
+
+			// TODO : send to watch history
+			Fetch({
+				url: "/watch-history/create",
+				method: "POST",
+				// TODO : fix thiss
+				data: {
+					user_id: user?.user_id,
+					asana_id: video?.video?.id,
+					playlist_id: null,
+				},
+			})
+				.then((res) => {
+					console.log("watch history created", res.data);
+				})
+				.catch((err) => {
+					console.log(err);
+				});
+
+			// starting interval timer to flush watch duration buffer
+			flushTimeInterval.current = setInterval(() => {
+				// flushWatchTimeBuffer(user?.user_id);
+				flushWatchTimeBufferE(user?.user_id);
+			}, 10000);
+
+			// starting interval timer to commit time
+			commitTimeInterval.current = setInterval(() => {
+				// TODO : fix this
+				updateWatchTimeBuffer({
+					user_id: user?.user_id,
+					asana_id: video?.video?.id,
+					playlist_id: null,
+					currentTime: playerRef.current.currentTime,
+				});
+				addToCommittedTs(playerRef.current?.currentTime);
+			}, 5000);
+		} else {
+			if (flushTimeInterval.current) {
+				clearInterval(flushTimeInterval.current);
+			}
+
+			if (commitTimeInterval.current) {
+				clearInterval(commitTimeInterval.current);
+			}
+		}
+	}, [
+		isActive,
+		enableWatchHistory,
+		user,
+		video,
+		flushWatchTimeBufferE,
+		updateWatchTimeBuffer,
+		addToCommittedTs,
+		setCommittedTs,
+		flushWatchTimeBuffer,
+	]);
+	*/
+
+	const handlePlayerLoading = useCallback(
+		(e) => {
+			handleLoading(true, isActiveRef.current);
+		},
+		[handleLoading]
+	);
+
+	const handlePlayerLoaded = useCallback(
+		(e) => {
+			handleLoading(false, isActiveRef.current);
+		},
+		[handleLoading]
+	);
+
+	// video events
+	const handleVideoSeeking = useCallback(
+		(e) => {
+			console.log("Seeking...");
+			handleLoading(true, isActiveRef.current);
+		},
+		[handleLoading]
+	);
+
+	const handleVideoSeeked = useCallback(
+		(e) => {
+			console.log("Seeked...");
+			setVideoState(STATE_VIDEO_PLAY);
+		},
+		[setVideoState]
+	);
+
+	const handleVideoCanPlayThrough = useCallback(
+		(e) => {
+			const state = useVideoStore.getState();
+			console.log("Can play through...", state.videoState);
+			tryToPlay();
+		},
+		[tryToPlay]
+	);
+
+	// set the volume
+	const handleVideoVolumeChange = useCallback(() => {
+		if (playerRef.current !== null && playerRef.current.videoElement) {
+			setVolume(playerRef.current.videoElement.volume || 0);
+		}
+	}, [setVolume]);
+
 	const playerInit = useCallback(
 		(ref) => {
-			if (ref !== null) {
-				const check = isMobileTablet();
-				const isMobile = { done: true, check: check };
+			console.log("player init called", ref);
+			if (ref != null) {
 				// console.log("Player init, setting loading to true", video?.idx);
 				// setVideoState(STATE_VIDEO_LOADING);
 				playerRef.current = ref;
-				if (ref.ui) {
+
+				// setPlayerRefSet({ done: true, ts: Date.now() });
+				// player events
+
+				const check = isMobileTablet();
+				const isMobile = { done: true, check: check };
+				console.log("Checking for isMobile", isMobile);
+
+				if (playerRef.current.ui) {
+					console.log("Setting up UI");
 					shaka.ui.Controls.registerElement(
 						"next",
 						new ShakaPlayerGoNext.Factory(handleNextVideo)
 					);
-
 					shaka.ui.Controls.registerElement(
 						"prev",
 						new ShakaPlayerGoPrev.Factory(handlePrevVideo)
 					);
-
 					shaka.ui.Controls.registerElement(
 						"seek_forward",
 						new ShakaPlayerGoSeekForward.Factory(handleSeekFoward)
 					);
-
 					shaka.ui.Controls.registerElement(
 						"seek_backward",
 						new ShakaPlayerGoSeekBackward.Factory(
 							handleSeekBackward
 						)
 					);
-
 					shaka.ui.Controls.registerElement(
 						"toggle_mode",
 						new ShakaPlayerToggleMode.Factory()
 					);
-
 					shaka.ui.Controls.registerElement(
 						"prev_marker",
 						new ShakaPlayerPrevMarker.Factory()
 					);
-
 					shaka.ui.Controls.registerElement(
 						"next_marker",
 						new ShakaPlayerNextMarker.Factory()
 					);
 
-					playerRef.current.ui.configure({
-						enableTooltips: true,
-						doubleClickForFullscreen: true,
-						seekOnTaps: true,
-						tapSeekDistance: 5,
-						enableKeyboardPlaybackControls: true,
-						enableFullscreenOnRotation: true,
-						keyboardSeekDistance: 5,
-						controlPanelElements: [
-							"prev",
-							"prev_marker",
-							"seek_backward",
-							"play_pause",
-							"seek_forward",
-							"next_marker",
-							"next",
-							"spacer",
-							"mute",
-							"volume",
-							"time_and_duration",
-							"toggle_mode",
-							"fullscreen",
-						],
-						seekBarColors: {
-							base: "#FFFFFF",
-							buffered: "#DDDDDD",
-							played: "#FFBF00",
-						},
-						fastForwardRates: [2, 4, 8, 1],
-						rewindRates: [-1, -2, -4, -8],
-					});
+					playerRef.current.ui.configure(shakaUIConfig);
 				}
 
-				if (ref.videoElement) {
+				if (playerRef.current.videoElement) {
+					console.log("Setting up videoElement events");
 					playerRef.current.videoElement.addEventListener(
 						"seeking",
-						(e) => {
-							console.log("Seeking...");
-							handleLoading(true);
-						}
+						handleVideoSeeking
 					);
 					playerRef.current.videoElement.addEventListener(
 						"seeked",
-						(e) => {
-							console.log("Seeked...");
-							setVideoState(STATE_VIDEO_PLAY);
-						}
+						handleVideoSeeked
+					);
+
+					playerRef.current.videoElement.addEventListener(
+						"volumechange",
+						handleVideoVolumeChange
 					);
 
 					playerRef.current.videoElement.addEventListener(
 						"canplaythrough",
-						(e) => {
-							const state = useVideoStore.getState();
-							console.log(
-								"Can play through...",
-								state.videoState
-							);
-							tryToPlay();
-						}
+						handleVideoCanPlayThrough
 					);
 
 					playerRef.current.videoElement.addEventListener(
@@ -409,23 +777,48 @@ function StreamStackItem({
 					);
 				}
 
-				if (ref.player) {
-					// events
-					// playerRef.current.player.addEventListener(
-					// 	"error",
-					// 	playerOnError
-					// );
-					// playerRef.current.player.addEventListener(
-					// 	"statechanged",
-					// 	handleVideoStateChange
-					// );
-					playerRef.current.player.addEventListener("loading", () => {
-						handleLoading(true);
-					});
+				if (playerRef.current.player) {
+					console.log("Setting up player events");
+					playerRef.current.player.addEventListener(
+						"loading",
+						handlePlayerLoading
+					);
 
-					playerRef.current.player.addEventListener("loaded", () => {
-						handleLoading(false);
-					});
+					playerRef.current.player.addEventListener(
+						"loaded",
+						handlePlayerLoaded
+					);
+
+					playerRef.current.player.addEventListener(
+						"statechange",
+						(e) => {
+							if (isActiveRef.current) {
+								console.log("State Change", e.newstate);
+								switch (e.newstate) {
+									case "buffering":
+										handleLoading(
+											true,
+											isActiveRef.current
+										);
+										break;
+
+									case "playing":
+										// if (useVideoStore.getState().pauseReason === VIDEO_PAUSE_MARKER) {
+										// 	setPauseReason(null);
+										// }
+										setVideoState(STATE_VIDEO_PLAY);
+										break;
+
+									case "paused":
+										setVideoState(STATE_VIDEO_PAUSED);
+										break;
+
+									default:
+										break;
+								}
+							}
+						}
+					);
 
 					playerRef.current.player.configure(
 						"manifest.dash.ignoreMinBufferTime",
@@ -433,25 +826,7 @@ function StreamStackItem({
 					);
 
 					// stream settings
-					playerRef.current.player.configure({
-						streaming: {
-							maxDisabledTime: 0,
-							inaccurateManifestTolerance: 0,
-							lowLatencyMode: true,
-							bufferingGoal: 10,
-							bufferBehind: 20,
-							rebufferingGoal: 4,
-							ignoreTextStreamFailures: true,
-							stallThreshold: 3,
-							segmentPrefetchLimit: 3,
-							retryParameters: {
-								maxAttempts: 3,
-								timeout: 30000,
-								connectionTimeout: 30000,
-								stallTimeout: 15000,
-							},
-						},
-					});
+					playerRef.current.player.configure(shakaStreamConfig);
 
 					//console.log("Fetching DRM Info");
 					//fetch only if it is not a transition video
@@ -471,8 +846,6 @@ function StreamStackItem({
 									// console.log(data);
 
 									if (data && data.licenseAcquisitionUrl) {
-										//console.log("DRM Info Received");
-										// toast("DRM Info Received");
 										// Mobile
 										playerRef.current.player.configure({
 											drm: {
@@ -554,9 +927,8 @@ function StreamStackItem({
 							.catch(playerOnError);
 					}
 				}
+				setPlayerLoaded(true);
 			}
-
-			setPlayerLoaded(true);
 		},
 		[
 			video,
@@ -565,8 +937,13 @@ function StreamStackItem({
 			handlePrevVideo,
 			handleSeekFoward,
 			handleSeekBackward,
-			setVideoState,
 			playerOnError,
+			handlePlayerLoaded,
+			handlePlayerLoading,
+			handleVideoSeeking,
+			handleVideoSeeked,
+			handleVideoVolumeChange,
+			handleVideoCanPlayThrough,
 		]
 	);
 
