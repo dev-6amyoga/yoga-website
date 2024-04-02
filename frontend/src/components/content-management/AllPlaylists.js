@@ -256,7 +256,6 @@ function AllPlaylists() {
       (asana) => asana.asana_name === value
     );
     updatedAsanaIds[index] = selectedAsana ? selectedAsana.id : value;
-    console.log(updatedAsanaIds);
     const filteredAsanaIds = updatedAsanaIds.filter((asanaId) => {
       return typeof asanaId !== "string" || !asanaId.startsWith("T_");
     });
@@ -447,14 +446,12 @@ function AllPlaylists() {
   };
 
   const handleRemoveAsana = (indexToRemove) => {
-    console.log(modalData.asana_ids);
     const newAsanaIds = modalData.asana_ids.filter(
       (_, index) => index !== indexToRemove
     );
     const filteredList = newAsanaIds.filter(
       (item) => !(typeof item === "string" && item.startsWith("T_"))
     );
-    console.log(filteredList);
     let resultArray = [];
     const asanaData1 = playlistAsanas.find(
       (asana) => asana.id === filteredList[0]
@@ -524,19 +521,26 @@ function AllPlaylists() {
               render={(value, rowData) => (
                 <div className="flex flex-row flex-wrap gap-2 p-2">
                   {value.map((asanaId, index) => {
-                    const asana =
-                      playlistAsanas.find((asana) => asana.id === asanaId) ||
-                      transitions.find(
-                        (transition) => transition.transition_id === asanaId
-                      );
+                    const asana = playlistAsanas.find(
+                      (asana) => asana.id === asanaId
+                    );
                     return (
-                      <Tag key={index}>
-                        {asana && asana.asana_name
-                          ? asana.asana_name
-                          : asana && asana.transition_video_name
-                            ? asana.transition_video_name
-                            : "Undefined"}
-                      </Tag>
+                      <div>
+                        {asana && (
+                          <div className="flex flex-col align-center">
+                            <div className="w-24 h-12 bg-gray-200 rounded-lg overflow-hidden transition-transform hover:scale-110">
+                              <div className="flex items-center justify-center h-full">
+                                <span>{asana.asana_name}</span>
+                              </div>
+                            </div>
+                            {/* <div className="absolute inset-0 bg-gray-800 bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                              <span className="text-white">
+                                {asana.asana_name}
+                              </span>
+                            </div> */}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
