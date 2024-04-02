@@ -47,23 +47,19 @@ function RegisterPlaylistForm() {
   useEffect(() => {
     const fetchData = async () => {
       if (showTeacherMode == true) {
-        console.log("in true");
         try {
           const response = await Fetch({
             url: "/content/video/getTeacherAsanas",
           });
-          console.log(response.data);
           setAsanas(response.data);
         } catch (error) {
           toast(error);
         }
       } else {
         try {
-          console.log("in false");
           const response = await Fetch({
             url: "/content/video/getNonTeacherAsanas",
           });
-          console.log(response.data);
           setAsanas(response.data);
         } catch (error) {
           toast(error);
@@ -134,7 +130,6 @@ function RegisterPlaylistForm() {
         transitions,
         showTeacherMode
       );
-      console.log(x, "obtained!!");
       if (x.length !== 0) {
         setPlaylistTemp((prev) => [
           ...prev,
@@ -214,21 +209,17 @@ function RegisterPlaylistForm() {
     });
     if (response1?.status === 200) {
       if (response1.data.asana_category === "Prayer Sitting") {
-        console.log(transitions);
         const matchingTransition1 = transitions.find((transition) => {
           return (
             transition.transition_video_name === "Prayer Sitting Full Unlock"
           );
         });
-        console.log("gonna insert", matchingTransition1);
         playlist_sequence["asana_ids"].push(matchingTransition1.transition_id);
       }
       if (response1.data.asana_category === "Prayer Standing") {
         const matchingTransition1 = transitions.find((transition) => {
           return transition.transition_video_name === "Prayer Standing End";
         });
-        console.log("gonna insert", matchingTransition1);
-
         playlist_sequence["asana_ids"].push(matchingTransition1.transition_id);
       }
     }

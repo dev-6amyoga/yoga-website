@@ -54,7 +54,6 @@ export default function ViewAllPlaylists() {
           url: "/content/video/getAllTransitions",
         });
         const data = response.data;
-        console.log(data);
         setTransitions(data);
       } catch (error) {
         toast(error);
@@ -79,7 +78,7 @@ export default function ViewAllPlaylists() {
         setPlaylistEditLimit(playlistEditCount.playlist_config_value);
         setMonthlyPlaylistLimit(monthlyLimit.playlist_config_value);
       } catch (err) {
-        console.log(err);
+        toast(err);
       }
     };
     fetchData();
@@ -112,7 +111,7 @@ export default function ViewAllPlaylists() {
         const data = response.data;
         setPlaylistAsanas(data);
       } catch (error) {
-        console.log(error);
+        toast(error);
       }
     };
     fetchData();
@@ -184,13 +183,12 @@ export default function ViewAllPlaylists() {
       }
       setDelState(false);
     } catch (error) {
-      console.log(error);
+      toast(error);
     }
   };
 
   const updateData = async () => {
     try {
-      console.log(modalData, unmodifiedData);
       if (modalData === unmodifiedData) {
         toast("There are no changes to be updated.");
       } else {
@@ -287,7 +285,6 @@ export default function ViewAllPlaylists() {
     const asanaData1 = playlistAsanas.find(
       (asana) => asana.id === nowOrderAsanaIds[0]
     );
-    console.log(transitions);
     const transitionResult = transitionGenerator(
       "start",
       asanaData1,
@@ -305,7 +302,6 @@ export default function ViewAllPlaylists() {
         (asana) => asana.id === nowOrderAsanaIds[i + 1]
       );
       if (asanaData2 && asanaData3) {
-        console.log(transitions);
         const result = transitionGenerator(asanaData2, asanaData3, transitions);
         result?.forEach((element) => {
           resultArray.push(element.transition_id);

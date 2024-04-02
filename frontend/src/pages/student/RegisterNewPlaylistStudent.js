@@ -54,7 +54,7 @@ export default function RegisterNewPlaylistStudent() {
         setPlaylistDurationLimit(maxPlaylistDuration.playlist_config_value);
         setPlaylistEditLimit(playlistEditCount.playlist_config_value);
       } catch (err) {
-        console.log(err);
+        toast(err);
       }
     };
     fetchData();
@@ -362,7 +362,6 @@ export default function RegisterNewPlaylistStudent() {
       asana_ids: playlist_sequence["asana_ids"],
       duration: playlist_sequence["duration"],
     };
-    console.log("SAVING : ", newRecord);
     try {
       const response = await Fetch({
         url: "/user-playlists/addUserPlaylist",

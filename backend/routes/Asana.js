@@ -135,6 +135,34 @@ router.get("/video/getAllTransitions", async (req, res) => {
   }
 });
 
+// router.get("/video/getAllTransitions", async (req, res) => {
+//   try {
+//     const asanas = await TransitionVideo.find();
+//     for (let i = 0; i < asanas.length; i++) {
+//       let asana = asanas[i];
+//       if (
+//         asana.transition_dash_url.includes(
+//           "https://videos.6amyoga.com"
+//           // "https://pub-0f821d8aa0b0446cae0613788ad21abc.r2.dev"
+//         )
+//       ) {
+//         asana.transition_dash_url = asana.transition_dash_url.replace(
+//           "https://videos.6amyoga.com",
+//           "https://pub-0f821d8aa0b0446cae0613788ad21abc.r2.dev"
+//           // "https://videos.6amyoga.com"
+//         );
+//         await asana.save();
+//       }
+//     }
+//     res.json(asanas);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+//       error: "Failed to fetch videos",
+//     });
+//   }
+// });
+
 router.get("/video/updateTransitionsTeacher", async (req, res) => {
   try {
     let output = [];
@@ -252,6 +280,34 @@ router.get("/video/getAllAsanas", async (req, res) => {
     });
   }
 });
+
+// router.get("/video/getAllAsanas", async (req, res) => {
+//   try {
+//     const asanas = await Asana.find();
+//     for (let i = 0; i < asanas.length; i++) {
+//       let asana = asanas[i];
+//       if (
+//         asana.asana_dash_url.includes(
+//           // "https://pub-0f821d8aa0b0446cae0613788ad21abc.r2.dev"
+//           "https://videos.6amyoga.com"
+//         )
+//       ) {
+//         asana.asana_dash_url = asana.asana_dash_url.replace(
+//           "https://videos.6amyoga.com",
+//           "https://pub-0f821d8aa0b0446cae0613788ad21abc.r2.dev"
+//           // "https://videos.6amyoga.com"
+//         );
+//         await asana.save();
+//       }
+//     }
+//     res.status(200).json(asanas);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+//       error: "Failed to fetch videos",
+//     });
+//   }
+// });
 
 router.get("/video/getNonTeacherAsanas", async (req, res) => {
   try {

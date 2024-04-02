@@ -52,7 +52,7 @@ export default function VideoInfo() {
   // }, [currentMarkerIdx, addToSeekQueue, markers, videoEvent])
 
   return (
-    <div className="">
+    <div className="bg-slate-700">
       {/* <div className="flex w-full gap-4">
         <pre className="flex-1">{JSON.stringify({ seekQueue }, null, 4)}</pre>
         <pre className="flex-1">
