@@ -5,21 +5,23 @@ import {
   Divider,
   Input,
   Modal,
+  Spacer,
   Table,
   Text,
+  Toggle,
 } from "@geist-ui/core";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
 import { transitionGenerator } from "../../transition-generator/TransitionGenerator";
-import Papa from "papaparse";
 
 function RegisterPlaylistForm() {
   const navigate = useNavigate();
   const [asanas, setAsanas] = useState([]);
   const [showTeacherMode, setShowTeacherMode] = useState(false);
   const [transitions, setTransitions] = useState([]);
+  const [playlistMode, setPlaylistMode] = useState("");
   const predefinedOrder = [
     "Prayer Standing",
     "Prayer Sitting",
@@ -95,6 +97,35 @@ function RegisterPlaylistForm() {
   }, []);
 
   const addToPlaylist = (rowData) => {
+    let manifestURL = rowData.asana_dash_url;
+    let asana_mode = rowData.teacher_mode;
+    console.log(asana_mode);
+    if (playlist_temp.length > 0) {
+      console.log(playlist_temp[playlist_temp.length - 1].rowData.teacher_mode);
+      if (
+        playlist_temp[playlist_temp.length - 1].rowData.teacher_mode === true
+      ) {
+        setPlaylistMode("Teacher");
+        if (asana_mode === false) {
+          toast(
+            "You cannot insert Normal Mode Asanas in a Teacher Mode Playlist"
+          );
+          return;
+        }
+      }
+      if (
+        playlist_temp[playlist_temp.length - 1].rowData.teacher_mode === false
+      ) {
+        setPlaylistMode("Normal");
+        if (asana_mode === true) {
+          toast(
+            "You cannot insert Teacher Mode Asanas in a Normal Mode Playlist"
+          );
+          return;
+        }
+      }
+    }
+
     var count = document.getElementById(`asana_count_${rowData.id}`).value;
     if (count === "") {
       count = 1;
@@ -223,6 +254,7 @@ function RegisterPlaylistForm() {
         playlist_sequence["asana_ids"].push(matchingTransition1.transition_id);
       }
     }
+    playlist_sequence["playlist_mode"] = playlistMode;
     //insert modal here
     try {
       const response = await Fetch({
@@ -363,12 +395,20 @@ function RegisterPlaylistForm() {
   return (
     <div className="">
       <div className="grid grid-cols-3 gap-4">
-        <Button
+        {/* <Button
           type="warning"
           onClick={() => setShowTeacherMode((prevMode) => !prevMode)}
         >
           {showTeacherMode ? "Normal Mode" : "Teacher Mode"}
-        </Button>
+        </Button> */}
+        <div className="flex flex-row">
+          <Toggle
+            initialChecked={showTeacherMode}
+            onChange={() => setShowTeacherMode((prevMode) => !prevMode)}
+          />
+          <Text h6>{showTeacherMode ? "Teacher Mode" : "Normal Mode"}</Text>
+        </div>
+        <Spacer />
         <Collapse.Group className="col-span-2 col-start-1">
           {filteredAsanasByCategory.map((categoryData, index) => (
             <Collapse title={categoryData.category} key={index}>
