@@ -5,6 +5,7 @@ const PlaylistSchema6am = new mongoose.Schema({
   playlist_name: String,
   asana_ids: [mongoose.Schema.Types.Mixed],
   duration: Number,
+  playist_mode: String,
 });
 
 const Playlist = mongoose.model(
