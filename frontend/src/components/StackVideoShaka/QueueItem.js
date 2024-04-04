@@ -29,7 +29,7 @@ function QueueItem({ item, idx, pop, moveUp, moveDown, customerCode }) {
 	// 	[customerCode, hovered, item]
 	// );
 
-	console.log(item?.video?.asana_name, item?.video?.asana_thumbnailTs);
+	// console.log(item?.video?.asana_name, item?.video?.asana_thumbnailTs);
 
 	return (
 		<div className="bg-yblue-900 flex flex-shrink-0 flex-col items-center gap-2 rounded-xl bg-black px-1 py-2 text-white">

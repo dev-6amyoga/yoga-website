@@ -10,7 +10,6 @@ import useVideoStore, {
 
 import { Button } from "@geist-ui/core";
 import { useState } from "react";
-import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import { SEEK_TYPE_MOVE } from "../../enums/seek_types";
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_TEACHING_MODE } from "../../enums/video_view_modes";
@@ -19,6 +18,10 @@ import StreamStackItem from "./StreamStackItem";
 
 function VideoPlayer() {
 	const playerVideo = useRef(null);
+	const [fullScreen, setFullScreen] = useVideoStore((state) => [
+		state.fullScreen,
+		state.setFullScreen,
+	]);
 
 	const [queue, popFromQueue] = usePlaylistStore((state) => [
 		state.queue,
@@ -222,7 +225,7 @@ function VideoPlayer() {
 	// 	}
 	// }, [videoState, handleSetPlay, handleSetPause]);
 
-	const handleFullScreen = useFullScreenHandle();
+	// const handleFullScreen = useFullScreenHandle();
 
 	// const toTimeString = useCallback((seconds) => {
 	// 	const s = seconds > 0 ? seconds : 0;
@@ -233,58 +236,60 @@ function VideoPlayer() {
 	// }, []);
 
 	return (
-		<FullScreen handle={handleFullScreen}>
-			<div className="hover:cursor-pointer">
-				<div className="grid aspect-video place-items-center overflow-hidden rounded-xl bg-black ">
-					{currentVideo ? (
-						<>
-							{videoState === STATE_VIDEO_ERROR ? (
-								<div className="flex flex-col items-center justify-center gap-4 text-lg">
-									<p>Error : Video playback error</p>
-									<Button onClick={handleSetPlay}>
-										Refresh
-									</Button>
-								</div>
-							) : (
-								<div className="relative h-full w-full">
-									{queue.length > 0 ? (
-										<div className="">
-											{queue
-												.slice(0, 2)
-												.map((queueItem) => {
-													return (
-														<StreamStackItem
-															key={
-																queueItem.queue_id
-															}
-															video={queueItem}
-															handleEnd={
-																handleEnd
-															}
-															handleLoading={
-																handleLoading
-															}
-															handlePlaybackError={
-																handlePlaybackError
-															}
-															setDuration={
-																setDuration
-															}
-															isActive={
-																currentVideo?.queue_id ===
-																queueItem?.queue_id
-															}
-															setVideoStateVisible={
-																setVideoStateVisible
-															}
-														/>
-													);
-												})}
-										</div>
-									) : (
-										<></>
-									)}
-									{/* <div className="absolute bottom-0 z-20 h-40 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0">
+		<div
+			className={`hover:cursor-pointer bg-black w-full ${fullScreen ? "h-screen" : "rounded-xl overflow-hidden"}`}>
+			<div
+				className={`mx-auto aspect-video ${fullScreen ? "h-full" : ""}`}>
+				{currentVideo ? (
+					<>
+						{videoState === STATE_VIDEO_ERROR ? (
+							<div className="flex flex-col items-center justify-center gap-4 text-lg w-full h-full border border-red-500">
+								<p>Error : Video playback error</p>
+								<Button onClick={handleSetPlay}>Refresh</Button>
+							</div>
+						) : (
+							<div className="relative h-full w-full">
+								{queue.length > 0 ? (
+									<div className="">
+										{queue.slice(0, 2).map((queueItem) => {
+											return (
+												<StreamStackItem
+													key={queueItem.queue_id}
+													video={queueItem}
+													handleEnd={handleEnd}
+													handleLoading={
+														handleLoading
+													}
+													handlePlaybackError={
+														handlePlaybackError
+													}
+													setDuration={setDuration}
+													isActive={
+														currentVideo?.queue_id ===
+														queueItem?.queue_id
+													}
+													setVideoStateVisible={
+														setVideoStateVisible
+													}
+													handleFullScreen={async () => {
+														console.log(
+															"FULL SCREEN"
+														);
+														setFullScreen(
+															(p) => !p
+														);
+														window.scrollTo({
+															top: 0,
+														});
+													}}
+												/>
+											);
+										})}
+									</div>
+								) : (
+									<></>
+								)}
+								{/* <div className="absolute bottom-0 z-20 h-40 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0">
                                         <div className="absolute bottom-0 w-full ">
                                             <VideoPlaybar
                                                 duration={duration}
@@ -300,7 +305,7 @@ function VideoPlayer() {
                                             />
                                         </div>
                                     </div> */}
-									{/* <div
+								{/* <div
 										className={`pointer-events absolute bottom-0 left-0 right-0 top-0 z-10 h-full w-full bg-zinc-800 transition-all ${
 											videoState ===
 												STATE_VIDEO_LOADING ||
@@ -328,19 +333,18 @@ function VideoPlayer() {
 											<></>
 										)}
 									</div> */}
-								</div>
-							)}
-						</>
-					) : queue.length > 0 ? (
-						<div className="text-lg">
-							<Button onClick={handleStartPlaylist}>Start</Button>
-						</div>
-					) : (
-						<div className="text-lg"> </div>
-					)}
-				</div>
+							</div>
+						)}
+					</>
+				) : queue.length > 0 ? (
+					<div className="flex flex-col items-center justify-center gap-4 text-lg w-full h-full border border-red-500">
+						<Button onClick={handleStartPlaylist}>Start</Button>
+					</div>
+				) : (
+					<div className="text-lg"> </div>
+				)}
 			</div>
-		</FullScreen>
+		</div>
 	);
 }
 export default VideoPlayer;

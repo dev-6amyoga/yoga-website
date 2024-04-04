@@ -68,6 +68,9 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
 			get ui() {
 				return ui;
 			},
+			get uiContainer() {
+				return uiContainerRef.current;
+			},
 			get videoElement() {
 				return videoRef.current;
 			},
