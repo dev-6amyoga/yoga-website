@@ -3,149 +3,162 @@ import { subscribeWithSelector } from "zustand/middleware";
 import { VIDEO_VIEW_STUDENT_MODE } from "../enums/video_view_modes";
 
 export const STATE_VIDEO_PLAY = "PLAY",
-  STATE_VIDEO_PAUSED = "PAUSED",
-  STATE_VIDEO_LOADING = "LOADING",
-  STATE_VIDEO_ERROR = "ERROR";
+	STATE_VIDEO_PAUSED = "PAUSED",
+	STATE_VIDEO_LOADING = "LOADING",
+	STATE_VIDEO_ERROR = "ERROR";
 
 export const useVideoStore = create(
-  subscribeWithSelector((set) => ({
-    playlistState: false,
-    setPlaylistState: (ps) =>
-      set(() => {
-        return { playlistState: ps };
-      }),
+	subscribeWithSelector((set) => ({
+		devMode: false,
+		setDevMode: (dm) =>
+			set(() => {
+				return { devMode: dm };
+			}),
 
-    // currentVideo is the video object that is currently playing
-    currentVideo: null,
-    setCurrentVideo: (item) =>
-      set(() => {
-        return { currentVideo: item };
-      }),
+		fullScreen: false,
+		setFullScreen: (fs) =>
+			set(() => {
+				return { fullScreen: fs };
+			}),
 
-    markers: [],
-    setMarkers: (markers) =>
-      set(() => {
-        return { markers };
-      }),
-    currentMarkerIdx: null,
-    setCurrentMarkerIdx: (idx) =>
-      set(() => {
-        return { currentMarkerIdx: idx };
-      }),
-    autoSetCurrentMarkerIdx: (currentTime = undefined) => {
-      set((state) => {
-        let ct = currentTime ?? state.currentTime;
-        // console.log('autoSetCurrentMarkerIdx :', currentTime, '==>', ct)
-        // let prevIdx = state.currentMarkerIdx
+		playlistState: false,
+		setPlaylistState: (ps) =>
+			set(() => {
+				return { playlistState: ps };
+			}),
 
-        // if no markers, dont bother
-        if (state.markers.length === 0) {
-          return { currentMarkerIdx: null };
-        }
+		// currentVideo is the video object that is currently playing
+		currentVideo: null,
+		setCurrentVideo: (item) =>
+			set(() => {
+				return { currentVideo: item };
+			}),
 
-        // if the current time is less than the first marker, set to null
-        if (ct < state.markers[0].timestamp) {
-          return { currentMarkerIdx: null };
-        }
+		markers: [],
+		setMarkers: (markers) =>
+			set(() => {
+				return { markers };
+			}),
+		currentMarkerIdx: null,
+		setCurrentMarkerIdx: (idx) =>
+			set(() => {
+				return { currentMarkerIdx: idx };
+			}),
+		autoSetCurrentMarkerIdx: (currentTime = undefined) => {
+			set((state) => {
+				let ct = currentTime ?? state.currentTime;
+				// console.log('autoSetCurrentMarkerIdx :', currentTime, '==>', ct)
+				// let prevIdx = state.currentMarkerIdx
 
-        // find the first marker that is greater than the current time
-        const idx = state.markers.findIndex((m) => m.timestamp > ct) - 1;
-        // console.log("autoSetCurrentMarkerIdx :", idx, ct);
+				// if no markers, dont bother
+				if (state.markers.length === 0) {
+					return { currentMarkerIdx: null };
+				}
 
-        // if the current time is greater than the last marker, set to last marker
-        if (idx === -2) {
-          return { currentMarkerIdx: state.markers.length - 1 };
-        }
+				// if the current time is less than the first marker, set to null
+				if (ct < state.markers[0].timestamp) {
+					return { currentMarkerIdx: null };
+				}
 
-        return { currentMarkerIdx: idx };
-      });
-    },
+				// find the first marker that is greater than the current time
+				const idx =
+					state.markers.findIndex((m) => m.timestamp > ct) - 1;
+				// console.log("autoSetCurrentMarkerIdx :", idx, ct);
 
-    videoEvent: null,
-    setVideoEvent: (videoEvent) =>
-      set(() => {
-        return { videoEvent };
-      }),
+				// if the current time is greater than the last marker, set to last marker
+				if (idx === -2) {
+					return { currentMarkerIdx: state.markers.length - 1 };
+				}
 
-    // videoState is one of the STATE_VIDEO_* constants
-    videoState: STATE_VIDEO_PAUSED,
-    setVideoState: (vs) =>
-      set(() => {
-        return { videoState: vs };
-      }),
+				return { currentMarkerIdx: idx };
+			});
+		},
 
-    // pauseReason : if the pause is cause by a marker or a normal pause
-    pauseReason: null,
-    setPauseReason: (pauseReason) => {
-      set(() => {
-        return { pauseReason };
-      });
-    },
+		videoEvent: null,
+		setVideoEvent: (videoEvent) =>
+			set(() => {
+				return { videoEvent };
+			}),
 
-    //
-    playbackRate: 1.0,
-    setPlaybackRate: (rate) =>
-      set(() => {
-        return {
-          playbackRate: rate,
-        };
-      }),
+		// videoState is one of the STATE_VIDEO_* constants
+		videoState: STATE_VIDEO_PAUSED,
+		setVideoState: (vs) =>
+			set(() => {
+				return { videoState: vs };
+			}),
 
-    autoplayInitialized: false,
-    setAutoplayInitialized: (autoplayInitialized) => {
-      set(() => {
-        return { autoplayInitialized };
-      });
-    },
-    volume: 0.0,
-    setVolume: (volume) => {
-      set(() => {
-        return { volume };
-      });
-    },
+		// pauseReason : if the pause is cause by a marker or a normal pause
+		pauseReason: null,
+		setPauseReason: (pauseReason) => {
+			set(() => {
+				return { pauseReason };
+			});
+		},
 
-    // seekQueue holds the seek times that the user has clicked on
-    seekQueue: [],
-    addToSeekQueue: (seekEvent) =>
-      set((state) => {
-        // console.log(state.seekQueue, seekTime)
-        // {type: move | seek, time: number}
-        return {
-          seekQueue: [...state.seekQueue, seekEvent],
-          pauseReason: null,
-        };
-      }),
-    popFromSeekQueue: (index) =>
-      set((state) => {
-        if (state.seekQueue.length > index) {
-          const sq = [...state.seekQueue];
-          sq.splice(index, 1);
-          // console.log(q, "in func after splice");
-          return {
-            seekQueue: sq,
-          };
-        }
-        return {};
-      }),
+		//
+		playbackRate: 1.0,
+		setPlaybackRate: (rate) =>
+			set(() => {
+				return {
+					playbackRate: rate,
+				};
+			}),
 
-    currentTime: 0,
-    setCurrentTime: (time) =>
-      set(() => {
-        return { currentTime: time };
-      }),
+		autoplayInitialized: false,
+		setAutoplayInitialized: (autoplayInitialized) => {
+			set(() => {
+				return { autoplayInitialized };
+			});
+		},
+		volume: 0.0,
+		setVolume: (volume) => {
+			set(() => {
+				return { volume };
+			});
+		},
 
-    viewMode: VIDEO_VIEW_STUDENT_MODE,
-    setViewMode: (mode) =>
-      set(() => {
-        return { viewMode: mode };
-      }),
+		// seekQueue holds the seek times that the user has clicked on
+		seekQueue: [],
+		addToSeekQueue: (seekEvent) =>
+			set((state) => {
+				// console.log(state.seekQueue, seekTime)
+				// {type: move | seek, time: number}
+				return {
+					seekQueue: [...state.seekQueue, seekEvent],
+					pauseReason: null,
+				};
+			}),
+		popFromSeekQueue: (index) =>
+			set((state) => {
+				if (state.seekQueue.length > index) {
+					const sq = [...state.seekQueue];
+					sq.splice(index, 1);
+					// console.log(q, "in func after splice");
+					return {
+						seekQueue: sq,
+					};
+				}
+				return {};
+			}),
 
-    commitSeekTime: -1,
-    setCommitSeekTime: (time) =>
-      set(() => {
-        return { commitSeekTime: time };
-      }),
-  }))
+		currentTime: 0,
+		setCurrentTime: (time) =>
+			set(() => {
+				return { currentTime: time };
+			}),
+
+		viewMode: VIDEO_VIEW_STUDENT_MODE,
+		setViewMode: (mode) =>
+			set(() => {
+				return { viewMode: mode };
+			}),
+
+		commitSeekTime: -1,
+		setCommitSeekTime: (time) =>
+			set(() => {
+				return { commitSeekTime: time };
+			}),
+	}))
 );
 
 export default useVideoStore;

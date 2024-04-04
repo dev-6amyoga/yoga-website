@@ -19,14 +19,25 @@ export default function TestingVideo() {
 		(state) => state.setEnableWatchHistory
 	);
 
-	const [playlistState, viewMode, videoState, markers, currentMarkerIdx] =
-		useVideoStore((state) => [
-			state.playlistState,
-			state.viewMode,
-			state.videoState,
-			state.markers,
-			state.currentMarkerIdx,
-		]);
+	const [
+		playlistState,
+		viewMode,
+		videoState,
+		markers,
+		currentMarkerIdx,
+		devMode,
+		setDevMode,
+		fullScreen,
+	] = useVideoStore((state) => [
+		state.playlistState,
+		state.viewMode,
+		state.videoState,
+		state.markers,
+		state.currentMarkerIdx,
+		state.devMode,
+		state.setDevMode,
+		state.fullScreen,
+	]);
 
 	const [popFromArchive, popFromQueue] = usePlaylistStore((state) => [
 		state.popFromArchive,
@@ -100,9 +111,15 @@ export default function TestingVideo() {
 	}, [setEnableWatchHistory]);
 
 	return (
-		<div className="mx-auto my-20 max-w-7xl p-4 xl:p-0">
+		<div
+			className={`relative mx-auto ${fullScreen ? "" : "my-20 max-w-7xl p-4 xl:p-0"}`}>
 			<VideoPlayerWrapper />
 			<Playlist />
+			<button
+				className={`fixed bottom-4 right-4 p-4 ${devMode ? "bg-y-green" : "bg-y-white text-black"} rounded-full shadow-lg`}
+				onClick={() => setDevMode(!devMode)}>
+				Dev Mode : {devMode ? "ON" : "OFF"}
+			</button>
 		</div>
 	);
 }
