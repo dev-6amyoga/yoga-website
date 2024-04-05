@@ -409,6 +409,11 @@ ShakaPlayerPrevMarker.Factory = class {
 const handleFullscreen = () => {
 	const videoStore = useVideoStore.getState();
 	console.log("Current Fullscreen State: ", videoStore.fullScreen);
+	if (videoStore.fullScreen) {
+		document.exitFullscreen();
+	} else {
+		document.querySelector(".toplvlpage").requestFullscreen();
+	}
 	useVideoStore.setState({ fullScreen: !videoStore.fullScreen });
 };
 
@@ -505,8 +510,8 @@ const shakaStreamConfig = {
 		maxDisabledTime: 0,
 		inaccurateManifestTolerance: 0,
 		lowLatencyMode: true,
-		bufferingGoal: 10,
-		bufferBehind: 20,
+		bufferingGoal: 20,
+		bufferBehind: 10,
 		rebufferingGoal: 4,
 		ignoreTextStreamFailures: true,
 		stallThreshold: 3,
