@@ -40,8 +40,10 @@ export default function VideoInfo() {
 
 	useEffect(() => {
 		if (currentVideo) {
-			setCurrentMarkerIdx(0);
 			setMarkers(currentVideo?.video?.markers || []);
+			if (currentVideo?.video?.markers?.length > 0) {
+				setCurrentMarkerIdx(0);
+			}
 		}
 	}, [currentVideo, setCurrentMarkerIdx, setMarkers]);
 

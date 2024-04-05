@@ -145,6 +145,13 @@
 	@apply scroll-smooth scrollbar-thin scrollbar-track-y-white scrollbar-thumb-y-brown font-content;
 }
 
+.toplvlpage:fullscreen,
+.toplvlpage:-ms-fullscreen,
+.toplvlpage:-moz-full-screen,
+.toplvlpage:-webkit-full-screen {
+	@apply h-screen w-screen;
+}
+
 body {
 	margin: 0;
 	/* background-color: #283044;

@@ -235,11 +235,53 @@ function VideoPlayer() {
 	// 	).padStart(2, "0")}`;
 	// }, []);
 
+	const [videos, setVideos] = useState([]);
+
+	useEffect(() => {
+		let timeout = null;
+
+		if (timeout) {
+			clearTimeout(timeout);
+		}
+
+		if (queue.length > 0) {
+			console.log("VIDEOPLAYER.js : Setting first video");
+			setVideos((prevVideos) => {
+				if (queue.length > 0) {
+					const firstVideo = queue[0];
+					prevVideos.splice(0, 2, firstVideo);
+					return prevVideos;
+				} else {
+					return prevVideos;
+				}
+			});
+			timeout = setTimeout(() => {
+				console.log("VIDEOPLAYER.js : Setting second video");
+				setVideos((prevVideos) => {
+					if (queue.length > 1) {
+						const secondVideo = queue[1];
+						prevVideos.splice(1, 1, secondVideo);
+						return prevVideos;
+					} else {
+						return prevVideos;
+					}
+				});
+			}, 2000);
+		} else {
+			setVideos([]);
+		}
+
+		return () => {
+			if (timeout) {
+				clearTimeout(timeout);
+			}
+		};
+	}, [queue]);
+
 	return (
 		<div
-			className={`hover:cursor-pointer bg-black w-full ${fullScreen ? "h-screen" : "rounded-xl overflow-hidden"}`}>
-			<div
-				className={`mx-auto aspect-video ${fullScreen ? "h-full" : ""}`}>
+			clasme={`hover:cursor-pointer bg-black w-full ${fullScreen ? "h-screen" : "rounded-xl overflow-hidden"}`}>
+			<div clasme={`mx-auto aspect-video ${fullScreen ? "h-full" : ""}`}>
 				{currentVideo ? (
 					<>
 						{videoState === STATE_VIDEO_ERROR ? (
@@ -248,43 +290,37 @@ function VideoPlayer() {
 								<Button onClick={handleSetPlay}>Refresh</Button>
 							</div>
 						) : (
-							<div className="relative h-full w-full">
+							<div className="relative h-full w-full flex flex-col">
 								{queue.length > 0 ? (
 									<div className="">
-										{queue.slice(0, 2).map((queueItem) => {
-											return (
-												<StreamStackItem
-													key={queueItem.queue_id}
-													video={queueItem}
-													handleEnd={handleEnd}
-													handleLoading={
-														handleLoading
-													}
-													handlePlaybackError={
-														handlePlaybackError
-													}
-													setDuration={setDuration}
-													isActive={
-														currentVideo?.queue_id ===
-														queueItem?.queue_id
-													}
-													setVideoStateVisible={
-														setVideoStateVisible
-													}
-													handleFullScreen={async () => {
-														console.log(
-															"FULL SCREEN"
-														);
-														setFullScreen(
-															(p) => !p
-														);
-														window.scrollTo({
-															top: 0,
-														});
-													}}
-												/>
-											);
-										})}
+										{videos
+											.slice(0, 2)
+											.map((queueItem, idx) => {
+												return (
+													<StreamStackItem
+														key={queueItem.queue_id}
+														video={queueItem}
+														handleEnd={handleEnd}
+														handleLoading={
+															handleLoading
+														}
+														handlePlaybackError={
+															handlePlaybackError
+														}
+														setDuration={
+															setDuration
+														}
+														isActive={
+															currentVideo?.queue_id ===
+															queueItem?.queue_id
+														}
+														setVideoStateVisible={
+															setVideoStateVisible
+														}
+														handleFullScreen={() => {}}
+													/>
+												);
+											})}
 									</div>
 								) : (
 									<></>

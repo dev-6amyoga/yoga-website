@@ -112,7 +112,7 @@ export default function TestingVideo() {
 
 	return (
 		<div
-			className={`relative mx-auto ${fullScreen ? "" : "my-20 max-w-7xl p-4 xl:p-0"}`}>
+			className={`toplvlpage relative mx-auto ${fullScreen ? "" : "my-20 max-w-7xl p-4 xl:p-0"}`}>
 			<VideoPlayerWrapper />
 			<Playlist />
 			<button

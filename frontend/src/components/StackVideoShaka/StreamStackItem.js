@@ -30,9 +30,14 @@ import { Fetch } from "../../utils/Fetch";
 import { isMobileTablet } from "../../utils/isMobileOrTablet";
 import ShakaPlayer from "./ShakaPlayer";
 
+// import shakaL from "shaka-player/dist/shaka-player.compiled.debug";
 import shaka from "shaka-player/dist/shaka-player.ui";
+
+// import shakaLog from "shaka-player/dist/shaka-player"
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
+
+// shakaL.log.setLogLevel(shaka.log.Level.V1);
 
 function StreamStackItem({
 	video,
@@ -66,12 +71,28 @@ function StreamStackItem({
 	// keep the isActiveRef updated
 	useEffect(() => {
 		isActiveRef.current = isActive;
+		if (isActive) {
+			console.log(
+				"IS ACTIVE",
+				video?.idx,
+				playerRef.current.videoElement.currentTime
+			);
+		}
 		console.log({
 			isActive,
 			videoidx: video?.idx,
 			isActiveRef: isActiveRef.current,
 		});
 	}, [isActive, video]);
+
+	useEffect(() => {
+		return () => {
+			if (playerRef.current.player) {
+				console.log("Unloading video");
+				playerRef.current.player.unload();
+			}
+		};
+	}, []);
 
 	const [
 		// seek queue
@@ -992,7 +1013,7 @@ function StreamStackItem({
 
 	return (
 		<div
-			className={`relative h-full w-full ${isActive ? "block" : "hidden"}`}>
+			className={`relative h-full w-full ${isActive ? "block" : "block"}`}>
 			<ShakaPlayer
 				ref={playerInit}
 				className="custom-shaka w-full h-full"
@@ -1003,6 +1024,7 @@ function StreamStackItem({
 						isActive: {String(isActive)} ||{" "}
 						{String(isActiveRef.current)}
 					</p>
+					<p>Video IDX : {video?.idx}</p>
 					<p>videoState: {videoState}</p>
 					<p>pauseReason: {pauseReason}</p>
 					<p>viewMode: {viewMode}</p>

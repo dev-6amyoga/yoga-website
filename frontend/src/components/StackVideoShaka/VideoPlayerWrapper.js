@@ -9,7 +9,7 @@ export default function VideoPlayerWrapper() {
 
 	return (
 		<>
-			<div
+			{/* <div
 				className={
 					fullScreen
 						? "relative w-full h-screen"
@@ -30,14 +30,17 @@ export default function VideoPlayerWrapper() {
 				) : (
 					<></>
 				)}
-			</div>
+			</div> */}
+			<VideoPlayer />
 
 			{fullScreen ? (
 				<div className="queue-area">
 					<VideoQueue />
 				</div>
 			) : (
-				<></>
+				<>
+					<VideoQueue />
+				</>
 			)}
 			<div className="flex flex-col gap-4">
 				<VideoInfo />
