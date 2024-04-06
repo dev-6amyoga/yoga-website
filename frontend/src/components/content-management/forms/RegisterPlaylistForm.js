@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
 import { transitionGenerator } from "../../transition-generator/TransitionGenerator";
-
+import { ArrowDown, ArrowUp } from "@geist-ui/icons";
 function RegisterPlaylistForm() {
   const navigate = useNavigate();
   const [asanas, setAsanas] = useState([]);
@@ -95,6 +95,25 @@ function RegisterPlaylistForm() {
     };
     fetchData();
   }, []);
+
+  async function getRowDataById(asana_id) {
+    try {
+      const response = await Fetch({
+        url: "/content/get-asana-by-id",
+        method: "POST",
+        data: {
+          asana_id: asana_id,
+        },
+      });
+
+      if (response?.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
 
   const addToPlaylist = (rowData) => {
     let manifestURL = rowData.asana_dash_url;
@@ -375,6 +394,162 @@ function RegisterPlaylistForm() {
     );
   };
 
+  // const asanaIcons = (value, rowData, index) => {
+  //   const upClicked = () => {
+  //     console.log(playlist_temp);
+  //     let x = "Up clicked!" + rowData.rowData.asana_name;
+  //     toast(x);
+  //   };
+  //   const downClicked = () => {
+  //     console.log(playlist_temp);
+  //     let x = "Down clicked!" + rowData.rowData.asana_name;
+  //     toast(x);
+  //   };
+  //   return (
+  //     <div>
+  //       <Button type="success" scale={1 / 8} onClick={upClicked}>
+  //         <ArrowUp />
+  //       </Button>
+  //       <Button type="success" scale={1 / 8} onClick={downClicked}>
+  //         <ArrowDown />
+  //       </Button>
+  //     </div>
+  //   );
+  // };
+
+  const asanaIcons = (value, rowData, index) => {
+    const upClicked = async () => {
+      let updated_sequence = [];
+      const idsArray = playlist_temp.map((rowData) => {
+        const id = rowData.rowData.transition_id || rowData.rowData.id;
+        return id;
+      });
+      const filteredArray = idsArray.filter((element) =>
+        Number.isInteger(element)
+      );
+      const currentIndex = filteredArray.indexOf(rowData.rowData.id);
+      if (currentIndex > 0) {
+        const temp = filteredArray[currentIndex - 1];
+        filteredArray[currentIndex - 1] = filteredArray[currentIndex];
+        filteredArray[currentIndex] = temp;
+      }
+      console.log(filteredArray);
+      for (let i = 0; i < filteredArray.length; i++) {
+        let prevAsanaId;
+        if (i === 0) {
+          prevAsanaId = "start";
+        } else {
+          prevAsanaId = filteredArray[i - 1];
+        }
+        const nextAsanaId = filteredArray[i];
+        try {
+          let prevAsanaRowData;
+          if (prevAsanaId === "start") {
+            prevAsanaRowData = "start";
+          } else {
+            prevAsanaRowData = await getRowDataById(prevAsanaId);
+          }
+          const nextAsanaRowData = await getRowDataById(nextAsanaId);
+          const x = transitionGenerator(
+            prevAsanaRowData,
+            nextAsanaRowData,
+            transitions
+          );
+          if (prevAsanaId === "start") {
+            if (x.length > 0) {
+              updated_sequence.push(...x);
+            }
+            updated_sequence.push(nextAsanaId);
+          } else {
+            // updated_sequence.push(prevAsanaId);
+            if (x.length > 0) {
+              updated_sequence.push(...x);
+            }
+
+            updated_sequence.push(nextAsanaId);
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      console.log("UPDATED : ", updated_sequence, playlist_temp);
+      setPlaylistTemp(updated_sequence);
+      let x = "Up clicked!" + rowData.rowData.asana_name;
+      toast(x);
+    };
+
+    const downClicked = async () => {
+      let updated_sequence = [];
+      const idsArray = playlist_temp.map((rowData) => {
+        const id = rowData.rowData.transition_id || rowData.rowData.id;
+        return id;
+      });
+      const filteredArray = idsArray.filter((element) =>
+        Number.isInteger(element)
+      );
+      const currentIndex = filteredArray.indexOf(rowData.rowData.id);
+      if (currentIndex < filteredArray.length - 1 && currentIndex !== -1) {
+        const temp = filteredArray[currentIndex + 1];
+        filteredArray[currentIndex + 1] = filteredArray[currentIndex];
+        filteredArray[currentIndex] = temp;
+      }
+      console.log(filteredArray);
+      for (let i = 0; i < filteredArray.length; i++) {
+        let prevAsanaId;
+        if (i === 0) {
+          prevAsanaId = "start";
+        } else {
+          prevAsanaId = filteredArray[i - 1];
+        }
+        const nextAsanaId = filteredArray[i];
+        try {
+          let prevAsanaRowData;
+          if (prevAsanaId === "start") {
+            prevAsanaRowData = "start";
+          } else {
+            prevAsanaRowData = await getRowDataById(prevAsanaId);
+          }
+          const nextAsanaRowData = await getRowDataById(nextAsanaId);
+          const x = transitionGenerator(
+            prevAsanaRowData,
+            nextAsanaRowData,
+            transitions
+          );
+          if (prevAsanaId === "start") {
+            if (x.length > 0) {
+              updated_sequence.push(...x);
+            }
+            updated_sequence.push(nextAsanaId);
+          } else {
+            // updated_sequence.push(prevAsanaId);
+            if (x.length > 0) {
+              updated_sequence.push(...x);
+            }
+            updated_sequence.push(nextAsanaId);
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      }
+
+      console.log("UPDATED : ", updated_sequence, playlist_temp);
+      setPlaylistTemp(updated_sequence);
+      let x = "Down clicked!" + rowData.rowData.asana_name;
+      toast(x);
+    };
+
+    return (
+      <div>
+        <Button type="success" scale={1 / 8} onClick={upClicked}>
+          <ArrowUp />
+        </Button>
+        <Button type="success" scale={1 / 8} onClick={downClicked}>
+          <ArrowDown />
+        </Button>
+      </div>
+    );
+  };
+
   const filteredAsanasByCategory = predefinedOrder.map((category) => {
     return {
       category: category,
@@ -395,12 +570,6 @@ function RegisterPlaylistForm() {
   return (
     <div className="">
       <div className="grid grid-cols-3 gap-4">
-        {/* <Button
-          type="warning"
-          onClick={() => setShowTeacherMode((prevMode) => !prevMode)}
-        >
-          {showTeacherMode ? "Normal Mode" : "Teacher Mode"}
-        </Button> */}
         <div className="flex flex-row">
           <Toggle
             initialChecked={showTeacherMode}
@@ -447,7 +616,7 @@ function RegisterPlaylistForm() {
           ))}
         </Collapse.Group>
 
-        <Card>
+        <Card width={40}>
           <Table data={playlist_temp}>
             <Table.Column
               prop="rowData.asana_name"
@@ -478,14 +647,20 @@ function RegisterPlaylistForm() {
                 );
               }}
             />
-            {/* <Table.Column
-              prop="rowData.language"
-              label="Language"
-              render={(_, rowData) => {
-                return <p>{rowData.rowData.language}</p>;
-              }}
-            /> */}
             <Table.Column prop="count" label="Count" />
+            <Table.Column
+              prop="reorder"
+              label="Reorder"
+              width={150}
+              render={(value, rowData, index) => {
+                if (rowData.rowData?.asana_name) {
+                  return asanaIcons(value, rowData, index);
+                } else {
+                  return null;
+                }
+              }}
+            />
+
             <Table.Column
               prop="operations"
               label="ACTIONS"
