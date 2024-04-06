@@ -8,6 +8,7 @@ import {
   SEEK_TYPE_MOVE,
   SEEK_TYPE_SEEK,
 } from "../../enums/seek_types";
+import DashPlayer from "./DashPlayer";
 import {
   ShakaPlayerFullscreen,
   ShakaPlayerGoNext,
@@ -955,31 +956,6 @@ function StreamStackItem({
       handleVideoCanPlayThrough,
     ]
   );
-
-  const DashPlayer = forwardRef((src, ref) => {
-    const videoRef = useRef(null);
-    const [player, setPlayer] = useState(null);
-    useEffect(() => {
-      const player = dashjs.MediaPlayer().create();
-      player.initialize(videoRef.current, null, true);
-      setPlayer(player);
-      return () => {
-        player.reset();
-      };
-    }, []);
-
-    useEffect(() => {
-      if (player && src) {
-        player.load(src);
-      }
-    }, [player, src]);
-
-    useImperativeHandle(ref, () => ({
-      videoElement: videoRef.current,
-    }));
-
-    return <video ref={videoRef} className="custom-dash-video w-full h-full" />;
-  });
 
   return (
     <div className={`relative h-full w-full ${isActive ? "block" : "block"}`}>
