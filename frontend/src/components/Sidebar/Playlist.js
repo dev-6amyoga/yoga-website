@@ -325,7 +325,7 @@ function Playlist() {
 
   return (
     <div className="rounded-xl">
-      <Modal visible={modalState} onClose={closeModal}>
+      {/* <Modal visible={modalState} onClose={closeModal}>
         <Modal.Title>Playlist Details</Modal.Title>
         <Modal.Subtitle>
           {modalData.playlist_name || modalData.schedule_name}
@@ -348,7 +348,54 @@ function Playlist() {
         <Modal.Action passive onClick={closeModal}>
           Close
         </Modal.Action>
+      </Modal> */}
+      <Modal visible={modalState} onClose={closeModal} width={30}>
+        <Modal.Title>Playlist Details</Modal.Title>
+        <Modal.Subtitle>
+          {modalData.playlist_name || modalData.schedule_name}
+        </Modal.Subtitle>
+        <Modal.Subtitle>
+          Playlist Type: {modalData.playlist_mode} Mode
+        </Modal.Subtitle>
+        <h5>
+          Playlist Duration: {(modalData.duration / 60).toFixed(2)} minutes
+        </h5>
+        {asana_details && asana_details.length > 0 ? (
+          <>
+            {asana_details
+              .reduce((acc, current) => {
+                const lastIndex = acc.length - 1;
+                if (
+                  lastIndex >= 0 &&
+                  acc[lastIndex].asana_name === current.asana_name
+                ) {
+                  acc[lastIndex].count++;
+                } else {
+                  acc.push({ ...current, count: 1 });
+                }
+                return acc;
+              }, [])
+              .map((asanaDetail) => (
+                <div key={asanaDetail.asana_name}>
+                  <p>
+                    {asanaDetail.asana_name}
+                    {asanaDetail.language
+                      ? ` - ${asanaDetail.language}`
+                      : ""}{" "}
+                    (x{asanaDetail.count})
+                  </p>
+                </div>
+              ))}
+          </>
+        ) : (
+          <p>No asanas found</p>
+        )}
+
+        <Modal.Action passive onClick={closeModal}>
+          Close
+        </Modal.Action>
       </Modal>
+
       {isInstitute && (
         <div>
           <h4>Institutes Playlists</h4>
