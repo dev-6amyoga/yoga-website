@@ -806,137 +806,138 @@ function StreamStackItem({
           playerRef.current.videoElement.addEventListener("ended", handleEnd);
         }
 
-        // if (playerRef.current.player) {
-        //   console.log("Setting up player events");
-        //   playerRef.current.player.addEventListener(
-        //     "loading",
-        //     handlePlayerLoading
-        //   );
+        if (playerRef.current.player) {
+          console.log("Setting up player events");
+          //   playerRef.current.player.addEventListener(
+          //     "loading",
+          //     handlePlayerLoading
+          //   );
 
-        //   playerRef.current.player.addEventListener(
-        //     "loaded",
-        //     handlePlayerLoaded
-        //   );
+          //   playerRef.current.player.addEventListener(
+          //     "loaded",
+          //     handlePlayerLoaded
+          //   );
 
-        //   playerRef.current.player.addEventListener("statechange", (e) => {
-        //     console.log(
-        //       "State Change",
-        //       e.newstate,
-        //       isActiveRef.current === null ? "null" : isActiveRef.current
-        //     );
-        //     if (isActiveRef.current) {
-        //       switch (e.newstate) {
-        //         case "buffering":
-        //           handleLoading(true, isActiveRef.current);
-        //           break;
+          //   playerRef.current.player.addEventListener("statechange", (e) => {
+          //     console.log(
+          //       "State Change",
+          //       e.newstate,
+          //       isActiveRef.current === null ? "null" : isActiveRef.current
+          //     );
+          //     if (isActiveRef.current) {
+          //       switch (e.newstate) {
+          //         case "buffering":
+          //           handleLoading(true, isActiveRef.current);
+          //           break;
 
-        //         case "playing":
-        //           setVideoState(STATE_VIDEO_PLAY);
-        //           break;
+          //         case "playing":
+          //           setVideoState(STATE_VIDEO_PLAY);
+          //           break;
 
-        //         case "paused":
-        //           break;
+          //         case "paused":
+          //           break;
 
-        //         default:
-        //           break;
-        //       }
-        //     }
-        //   });
+          //         default:
+          //           break;
+          //       }
+          //     }
+          //   });
 
-        //   playerRef.current.player.configure(
-        //     "manifest.dash.ignoreMinBufferTime",
-        //     true
-        //   );
+          //   playerRef.current.player.configure(
+          //     "manifest.dash.ignoreMinBufferTime",
+          //     true
+          //   );
 
-        //   // stream settings
-        //   playerRef.current.player.configure(shakaStreamConfig);
+          // stream settings
+          //   playerRef.current.player.configure(shakaStreamConfig);
 
-        //   //console.log("Fetching DRM Info");
-        //   //fetch only if it is not a transition video
-        //   if (
-        //     !isNaN(video?.video?.id) &&
-        //     typeof video?.video?.id === "number"
-        //   ) {
-        //     //   if (!isNaN(video.video.id) && typeof video.video.id !== "number") {
-        //     if (isMobile.check) {
-        //       Fetch({
-        //         url: "/playback/get-widevine-token",
-        //         method: "POST",
-        //         token: false,
-        //       })
-        //         .then((res) => {
-        //           const data = res.data;
-        //           // console.log(data);
+          //console.log("Fetching DRM Info");
+          //fetch only if it is not a transition video
+          //   if (
+          //     !isNaN(video?.video?.id) &&
+          //     typeof video?.video?.id === "number"
+          //   ) {
+          //     //   if (!isNaN(video.video.id) && typeof video.video.id !== "number") {
+          //     if (isMobile.check) {
+          //       Fetch({
+          //         url: "/playback/get-widevine-token",
+          //         method: "POST",
+          //         token: false,
+          //       })
+          //         .then((res) => {
+          //           const data = res.data;
+          //           // console.log(data);
 
-        //           if (data && data.licenseAcquisitionUrl) {
-        //             // Mobile
-        //             playerRef.current.player.configure({
-        //               drm: {
-        //                 servers: {
-        //                   "com.widevine.alpha": data.licenseAcquisitionUrl,
-        //                 },
-        //               },
-        //             });
+          //           if (data && data.licenseAcquisitionUrl) {
+          //             // Mobile
+          //             playerRef.current.player.configure({
+          //               drm: {
+          //                 servers: {
+          //                   "com.widevine.alpha": data.licenseAcquisitionUrl,
+          //                 },
+          //               },
+          //             });
 
-        //             //console.log("Trying to load video");
-        //             playerRef.current.player
-        //               .load(videoUrl)
-        //               .then((res) => {
-        //                 //console.log("Video Loaded");
-        //                 setMetadataLoaded(true);
-        //               })
-        //               .catch((err) => {
-        //                 playerOnError(err);
-        //               });
-        //           }
-        //         })
-        //         .catch((err) => {
-        //           console.log("Error fetching DRM info :", err);
-        //         });
-        //     } else {
-        //       Fetch({
-        //         url: "/playback/get-playready-token",
-        //         method: "POST",
-        //         token: false,
-        //       })
-        //         .then((res) => {
-        //           const data = res.data;
-        //           if (data && data.licenseAcquisitionUrl && data.token) {
-        //             // Non Mobile
-        //             playerRef.current.player.configure({
-        //               drm: {
-        //                 servers: {
-        //                   "com.microsoft.playready":
-        //                     data.licenseAcquisitionUrl +
-        //                     "?ExpressPlayToken=" +
-        //                     data.token,
-        //                 },
-        //               },
-        //             });
+          //             //console.log("Trying to load video");
+          //             playerRef.current.player
+          //               .load(videoUrl)
+          //               .then((res) => {
+          //                 //console.log("Video Loaded");
+          //                 setMetadataLoaded(true);
+          //               })
+          //               .catch((err) => {
+          //                 playerOnError(err);
+          //               });
+          //           }
+          //         })
+          //         .catch((err) => {
+          //           console.log("Error fetching DRM info :", err);
+          //         });
+          //     } else {
+          //       Fetch({
+          //         url: "/playback/get-playready-token",
+          //         method: "POST",
+          //         token: false,
+          //       })
+          //         .then((res) => {
+          //           const data = res.data;
+          //           if (data && data.licenseAcquisitionUrl && data.token) {
+          //             // Non Mobile
+          //             playerRef.current.player.configure({
+          //               drm: {
+          //                 servers: {
+          //                   "com.microsoft.playready":
+          //                     data.licenseAcquisitionUrl +
+          //                     "?ExpressPlayToken=" +
+          //                     data.token,
+          //                 },
+          //               },
+          //             });
 
-        //             playerRef.current.player
-        //               .load(videoUrl)
-        //               .then((res) => {
-        //                 setMetadataLoaded(true);
-        //               })
-        //               .catch((err) => {
-        //                 playerOnError(err);
-        //               });
-        //           }
-        //         })
-        //         .catch((err) => {
-        //           console.log("Error fetching DRM info :", err);
-        //         });
-        //     }
-        //   } else {
-        //     playerRef.current.player
-        //       .load(videoUrl)
-        //       .then(() => {
-        //         setMetadataLoaded(true);
-        //       })
-        //       .catch(playerOnError);
-        //   }
-        // }
+          //             playerRef.current.player
+          //               .load(videoUrl)
+          //               .then((res) => {
+          //                 setMetadataLoaded(true);
+          //               })
+          //               .catch((err) => {
+          //                 playerOnError(err);
+          //               });
+          //           }
+          //         })
+          //         .catch((err) => {
+          //           console.log("Error fetching DRM info :", err);
+          //         });
+          //     }
+          //   } else {
+          console.log(videoUrl, "TO BE SET!!");
+          playerRef.current.player
+            .load(videoUrl)
+            .then(() => {
+              setMetadataLoaded(true);
+            })
+            .catch(playerOnError);
+          //   }
+        }
         setPlayerLoaded(true);
       }
     },
