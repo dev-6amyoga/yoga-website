@@ -14,7 +14,7 @@ function DashPlayer({ src, config, className, ...rest }, ref) {
   useEffect(() => {
     const player = dashjs.MediaPlayer().create();
     setPlayer(player);
-
+    console.log("SRC IS : ", src);
     player.initialize(videoRef.current, src, true, config);
 
     return () => {
@@ -33,7 +33,7 @@ function DashPlayer({ src, config, className, ...rest }, ref) {
 
   return (
     <div className={className}>
-      <video ref={videoRef} {...rest}></video>
+      <video ref={videoRef} {...rest} controls></video>
     </div>
   );
 }
