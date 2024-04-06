@@ -1,7 +1,6 @@
 import React, {
   useEffect,
   useRef,
-  useState,
   forwardRef,
   useImperativeHandle,
 } from "react";
@@ -9,31 +8,34 @@ import dashjs from "dashjs";
 
 function DashPlayer({ src, config, className, ...rest }, ref) {
   const videoRef = useRef(null);
-  const [player, setPlayer] = useState(null);
+  const playerRef = useRef(null);
 
   useEffect(() => {
     const player = dashjs.MediaPlayer().create();
-    setPlayer(player);
-    console.log("SRC IS : ", src);
-    player.initialize(videoRef.current, src, true, config);
+    playerRef.current = player;
 
+    player.initialize(videoRef.current, src, true, config);
+    if (player && src) {
+      player.load(src);
+    }
     return () => {
       player.reset();
+      console.log(src);
     };
   }, [src, config]);
 
   useImperativeHandle(
     ref,
     () => ({
-      player: player,
+      player: playerRef.current,
       videoElement: videoRef.current,
     }),
-    [player]
+    []
   );
 
   return (
     <div className={className}>
-      <video ref={videoRef} {...rest} controls></video>
+      <video ref={videoRef} {...rest}></video>
     </div>
   );
 }
