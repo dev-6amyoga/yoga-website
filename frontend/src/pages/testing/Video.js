@@ -14,136 +14,136 @@ import {
   VIDEO_VIEW_TEACHING_MODE,
 } from "../../enums/video_view_modes";
 import { handleNextMarker, handlePrevMarker } from "../../lib/shaka-controls";
-// export default function TestingVideo() {
-//   const setEnableWatchHistory = useWatchHistoryStore(
-//     (state) => state.setEnableWatchHistory
-//   );
-
-//   const [
-//     playlistState,
-//     viewMode,
-//     videoState,
-//     markers,
-//     currentMarkerIdx,
-//     devMode,
-//     setDevMode,
-//     fullScreen,
-//   ] = useVideoStore((state) => [
-//     state.playlistState,
-//     state.viewMode,
-//     state.videoState,
-//     state.markers,
-//     state.currentMarkerIdx,
-//     state.devMode,
-//     state.setDevMode,
-//     state.fullScreen,
-//   ]);
-
-//   const [popFromArchive, popFromQueue] = usePlaylistStore((state) => [
-//     state.popFromArchive,
-//     state.popFromQueue,
-//   ]);
-
-//   useEffect(() => {
-//     // for hand held pointer
-//     const handleKeyDown = (event) => {
-//       // console.log({
-//       // 	playlistState,
-//       // 	videoState,
-//       // 	viewMode,
-//       // 	key: event.key,
-//       // });
-//       const state = useVideoStore.getState();
-//       const viewMode = state.viewMode;
-//       const videoState = state.videoState;
-//       const markers = state.markers;
-//       const currentMarkerIdx = state.currentMarkerIdx;
-
-//       // TODO : fix plalist state when start is clicked
-//       if (
-//         videoState === null ||
-//         videoState === STATE_VIDEO_ERROR ||
-//         videoState === STATE_VIDEO_LOADING
-//       ) {
-//         return;
-//       }
-//       switch (event.key) {
-//         case "PageUp":
-//           event.preventDefault();
-
-//           if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
-//             console.log("Move to prev video");
-//             popFromArchive(-1);
-//           } else if (viewMode === VIDEO_VIEW_TEACHING_MODE) {
-//             //
-//             console.log("Move to prev marker");
-//             console.log(markers, currentMarkerIdx);
-//             handlePrevMarker();
-//           }
-//           break;
-//         case "PageDown":
-//           event.preventDefault();
-
-//           if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
-//             console.log("Move to next video");
-//             popFromQueue(0);
-//           } else if (viewMode === VIDEO_VIEW_TEACHING_MODE) {
-//             console.log("Move to next marker");
-//             console.log(markers, currentMarkerIdx);
-//             handleNextMarker();
-//           }
-//           break;
-//         default:
-//           break;
-//       }
-//       // console.log("keyDown", event);
-//     };
-
-//     document.addEventListener("keydown", handleKeyDown);
-
-//     return () => {
-//       document.removeEventListener("keydown", handleKeyDown);
-//     };
-//   }, [popFromArchive, popFromQueue]);
-
-//   useEffect(() => {
-//     setEnableWatchHistory(false);
-//   }, [setEnableWatchHistory]);
-
-//   return (
-//     <div
-//       className={`toplvlpage relative mx-auto ${fullScreen ? "" : "my-20 max-w-7xl p-4 xl:p-0"}`}
-//     >
-//       <VideoPlayerWrapper />
-//       <Playlist />
-//       <button
-//         className={`fixed bottom-4 right-4 p-4 ${devMode ? "bg-y-green" : "bg-y-white text-black"} rounded-full shadow-lg`}
-//         onClick={() => setDevMode(!devMode)}
-//       >
-//         Dev Mode : {devMode ? "ON" : "OFF"}
-//       </button>
-//     </div>
-//   );
-// }
-
 export default function TestingVideo() {
-  const DashPlayer = ({ src }) => {
-    const videoRef = useRef(null);
+  const setEnableWatchHistory = useWatchHistoryStore(
+    (state) => state.setEnableWatchHistory
+  );
 
-    useEffect(() => {
-      const player = dashjs.MediaPlayer().create();
-      player.initialize(videoRef.current, src, true);
+  const [
+    playlistState,
+    viewMode,
+    videoState,
+    markers,
+    currentMarkerIdx,
+    devMode,
+    setDevMode,
+    fullScreen,
+  ] = useVideoStore((state) => [
+    state.playlistState,
+    state.viewMode,
+    state.videoState,
+    state.markers,
+    state.currentMarkerIdx,
+    state.devMode,
+    state.setDevMode,
+    state.fullScreen,
+  ]);
 
-      return () => {
-        player.reset();
-      };
-    }, [src]);
+  const [popFromArchive, popFromQueue] = usePlaylistStore((state) => [
+    state.popFromArchive,
+    state.popFromQueue,
+  ]);
 
-    return <video ref={videoRef} controls />;
-  };
+  useEffect(() => {
+    // for hand held pointer
+    const handleKeyDown = (event) => {
+      // console.log({
+      // 	playlistState,
+      // 	videoState,
+      // 	viewMode,
+      // 	key: event.key,
+      // });
+      const state = useVideoStore.getState();
+      const viewMode = state.viewMode;
+      const videoState = state.videoState;
+      const markers = state.markers;
+      const currentMarkerIdx = state.currentMarkerIdx;
+
+      // TODO : fix plalist state when start is clicked
+      if (
+        videoState === null ||
+        videoState === STATE_VIDEO_ERROR ||
+        videoState === STATE_VIDEO_LOADING
+      ) {
+        return;
+      }
+      switch (event.key) {
+        case "PageUp":
+          event.preventDefault();
+
+          if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+            console.log("Move to prev video");
+            popFromArchive(-1);
+          } else if (viewMode === VIDEO_VIEW_TEACHING_MODE) {
+            //
+            console.log("Move to prev marker");
+            console.log(markers, currentMarkerIdx);
+            handlePrevMarker();
+          }
+          break;
+        case "PageDown":
+          event.preventDefault();
+
+          if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+            console.log("Move to next video");
+            popFromQueue(0);
+          } else if (viewMode === VIDEO_VIEW_TEACHING_MODE) {
+            console.log("Move to next marker");
+            console.log(markers, currentMarkerIdx);
+            handleNextMarker();
+          }
+          break;
+        default:
+          break;
+      }
+      // console.log("keyDown", event);
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [popFromArchive, popFromQueue]);
+
+  useEffect(() => {
+    setEnableWatchHistory(false);
+  }, [setEnableWatchHistory]);
+
   return (
-    <div className="toplvlpage relative mx-auto my-20 max-w-7xl p-4 xl:p-0">
-      <DashPlayer src="https://pub-0f821d8aa0b0446cae0613788ad21abc.r2.dev/arms_fold_below_head_feet_apart_teacher_mode_eng/stream.mpd" />
+    <div
+      className={`toplvlpage relative mx-auto ${fullScreen ? "" : "my-20 max-w-7xl p-4 xl:p-0"}`}
+    >
+      <VideoPlayerWrapper />
+      <Playlist />
+      <button
+        className={`fixed bottom-4 right-4 p-4 ${devMode ? "bg-y-green" : "bg-y-white text-black"} rounded-full shadow-lg`}
+        onClick={() => setDevMode(!devMode)}
+      >
+        Dev Mode : {devMode ? "ON" : "OFF"}
+      </button>
     </div>
   );
 }
+
+// export default function TestingVideo() {
+//   const DashPlayer = ({ src }) => {
+//     const videoRef = useRef(null);
+
+//     useEffect(() => {
+//       const player = dashjs.MediaPlayer().create();
+//       player.initialize(videoRef.current, src, true);
+
+//       return () => {
+//         player.reset();
+//       };
+//     }, [src]);
+
+//     return <video ref={videoRef} controls />;
+//   };
+//   return (
+//     <div className="toplvlpage relative mx-auto my-20 max-w-7xl p-4 xl:p-0">
+//       <DashPlayer src="https://pub-0f821d8aa0b0446cae0613788ad21abc.r2.dev/arms_fold_below_head_feet_apart_teacher_mode_eng/stream.mpd" />
+//     </div>
+//   );
+// }
