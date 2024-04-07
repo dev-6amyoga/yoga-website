@@ -40,6 +40,7 @@ function StreamStackItem({
 
 	// parse the video url from video object
 	const videoUrl = useMemo(() => {
+		console.log("VIDEO URL", video);
 		return (
 			(video?.video?.asana_dash_url ||
 				video?.video?.transition_dash_url) ??
@@ -175,18 +176,6 @@ function StreamStackItem({
 		popFromQueue(0);
 	}, [popFromQueue]);
 
-	const handlePrevVideo = useCallback(() => {
-		popFromArchive(-1);
-	}, [popFromArchive]);
-
-	const handleSeekFoward = useCallback(() => {
-		addToSeekQueue({ t: 5, type: "seek" });
-	}, [addToSeekQueue]);
-
-	const handleSeekBackward = useCallback(() => {
-		addToSeekQueue({ t: -5, type: "seek" });
-	}, [addToSeekQueue]);
-
 	const playerOnError = useCallback(
 		(e) => {
 			//console.log("[StreamStackItem:error] Error playing video", e);
@@ -201,65 +190,21 @@ function StreamStackItem({
 		if (!isActiveRef.current) return;
 
 		console.log("Try to play called", video.idx, Date.now());
-		playerRef.current.videoElement
-			.play()
-			.then((res) => {
-				console.log("Autoplay initialized", video.idx);
-				if (volume === 0 && !autoplayInitialized) {
-					console.log("Setting volume to 0.5");
-					playerRef.current.videoElement.muted = false;
-					playerRef.current.videoElement.volume = 1;
-					setAutoplayInitialized(true);
-				} else {
-					console.log("Setting volume to ", volume);
-					playerRef.current.videoElement.muted = false;
-					// playerRef.current.videoElement.volume = volume;
-				}
-			})
-			.catch((err) => {
-				console.error("Error autoplay : ", err, video.idx);
-				// toast("Error playing video", { type: "error" });
-				if (
-					playerRef.current.videoElement !== null &&
-					playerRef.current.videoElement !== undefined
-				) {
-					console.log("Trying to play using mute", video.idx);
-					playerRef.current.videoElement.muted = true;
-					playerRef.current.videoElement
-						.play()
-						.then((res) => {
-							console.log(
-								"Autoplay initialized after muting",
-								video.idx
-							);
-							playerRef.current.videoElement.muted = false;
-							if (volume === 0 && !autoplayInitialized) {
-								console.log("Setting volume to 1");
-								playerRef.current.videoElement.muted = false;
-								playerRef.current.videoElement.volume = 1;
-								setAutoplayInitialized(true);
-							} else {
-								console.log("Setting volume to ", volume);
-								playerRef.current.videoElement.muted = false;
-								// playerRef.current.videoElement.volume = volume;
-							}
-						})
-						.catch((err) => {
-							console.error(
-								"Error autoplay (with mute)",
-								err,
-								video.idx
-							);
-						});
-				}
-			});
+		playerRef.current.player.play();
+
+		if (!autoplayInitialized) {
+			setAutoplayInitialized(true);
+		}
 	}, [autoplayInitialized, setAutoplayInitialized, video]);
 
 	// pause and reset the video when its not active
 	useEffect(() => {
 		const pr = playerRef.current.videoElement;
 		if (!isActive && pr && pr.currentTime > 0) {
-			//console.log("PAUSE AND RESET ----------------------------->", video.idx);
+			console.log(
+				"PAUSE AND RESET ----------------------------->",
+				video.idx
+			);
 			pr.muted = true;
 			setVolume(0);
 			pr.pause();
@@ -316,10 +261,14 @@ function StreamStackItem({
 			setPauseReason(null);
 			if (videoState === STATE_VIDEO_PAUSED) {
 				console.log("useEffect : changing to pause", video.idx);
-				playerRef.current.player.pause();
+				if (isActiveRef.current) {
+					playerRef.current.player.pause();
+				}
 			} else if (videoState === STATE_VIDEO_PLAY) {
 				console.log("useEffect : changing to play", video.idx);
-				tryToPlay();
+				if (isActiveRef.current) {
+					playerRef.current.player.play();
+				}
 			}
 		}
 	}, [
@@ -333,36 +282,6 @@ function StreamStackItem({
 		setVolume,
 		tryToPlay,
 	]);
-
-	// setup the player
-	// useEffect(
-	// 	() => {
-	// 		console.log("Setting up player", video.idx, playerRefSet);
-	// 		if (!playerRefSet?.done) return;
-
-	// 		if (video === undefined || video === null) return;
-
-	// 		if (videoUrl === undefined || videoUrl === null || videoUrl === "")
-	// 			return;
-
-	// 		setPlayerLoaded(true);
-	// 	},
-	// 	[
-	// 		playerRefSet,
-	// 		video,
-	// 		videoUrl,
-	// 		// handleNextVideo,
-	// 		// handlePrevVideo,
-	// 		// handleSeekFoward,
-	// 		// handleSeekBackward,
-	// 		// setVideoState,
-	// 		// playerOnError,
-	// 		// handleEnd,
-	// 		// handleLoading,
-	// 		// setVolume,
-	// 		// tryToPlay,
-	// 	]
-	// );
 
 	// pop from seek queue and update the time
 	useEffect(() => {
@@ -711,11 +630,13 @@ function StreamStackItem({
 
 	const handleVideoCanPlayThrough = useCallback(
 		(e) => {
+			setMetadataLoaded(true);
 			const state = useVideoStore.getState();
 			console.log("Can play through...", state.videoState);
-			tryToPlay();
+			// tryToPlay();
+			setVideoState(STATE_VIDEO_PLAY);
 		},
-		[tryToPlay]
+		[setVideoState]
 	);
 
 	// set the volume
@@ -725,143 +646,39 @@ function StreamStackItem({
 		}
 	}, [setVolume]);
 
-	const playerInit = useCallback(
-		(ref) => {
-			console.log("player init called", ref);
-			if (ref != null) {
-				playerRef.current = ref;
-				// const check = isMobileTablet();
-				// const isMobile = { done: true, check: check };
-				// console.log("Checking for isMobile", isMobile);
-
-				// if (playerRef.current.player) {
-				// 	console.log("Setting up events");
-				// 	playerRef.current.player.on("", handleVideoSeeking);
-				// 	playerRef.current.player.on("seeked", handleVideoSeeked);
-
-				// 	playerRef.current.player.on(
-				// 		"volumechange",
-				// 		handleVideoVolumeChange
-				// 	);
-
-				// 	playerRef.current.player.on(
-				// 		"canplaythrough",
-				// 		handleVideoCanPlayThrough
-				// 	);
-
-				// 	playerRef.current.player.on("ended", handleEnd);
-				// }
-
-				//   // stream settings
-				//   playerRef.current.player.configure(shakaStreamConfig);
-
-				//   //console.log("Fetching DRM Info");
-				//   //fetch only if it is not a transition video
-				//   if (
-				//     !isNaN(video?.video?.id) &&
-				//     typeof video?.video?.id === "number"
-				//   ) {
-				//     //   if (!isNaN(video.video.id) && typeof video.video.id !== "number") {
-				//     if (isMobile.check) {
-				//       Fetch({
-				//         url: "/playback/get-widevine-token",
-				//         method: "POST",
-				//         token: false,
-				//       })
-				//         .then((res) => {
-				//           const data = res.data;
-				//           // console.log(data);
-
-				//           if (data && data.licenseAcquisitionUrl) {
-				//             // Mobile
-				//             playerRef.current.player.configure({
-				//               drm: {
-				//                 servers: {
-				//                   "com.widevine.alpha": data.licenseAcquisitionUrl,
-				//                 },
-				//               },
-				//             });
-
-				//             //console.log("Trying to load video");
-				//             playerRef.current.player
-				//               .load(videoUrl)
-				//               .then((res) => {
-				//                 //console.log("Video Loaded");
-				//                 setMetadataLoaded(true);
-				//               })
-				//               .catch((err) => {
-				//                 playerOnError(err);
-				//               });
-				//           }
-				//         })
-				//         .catch((err) => {
-				//           console.log("Error fetching DRM info :", err);
-				//         });
-				//     } else {
-				//       Fetch({
-				//         url: "/playback/get-playready-token",
-				//         method: "POST",
-				//         token: false,
-				//       })
-				//         .then((res) => {
-				//           const data = res.data;
-				//           if (data && data.licenseAcquisitionUrl && data.token) {
-				//             // Non Mobile
-				//             playerRef.current.player.configure({
-				//               drm: {
-				//                 servers: {
-				//                   "com.microsoft.playready":
-				//                     data.licenseAcquisitionUrl +
-				//                     "?ExpressPlayToken=" +
-				//                     data.token,
-				//                 },
-				//               },
-				//             });
-
-				//             playerRef.current.player
-				//               .load(videoUrl)
-				//               .then((res) => {
-				//                 setMetadataLoaded(true);
-				//               })
-				//               .catch((err) => {
-				//                 playerOnError(err);
-				//               });
-				//           }
-				//         })
-				//         .catch((err) => {
-				//           console.log("Error fetching DRM info :", err);
-				//         });
-				//     }
-				//   } else {
-				//     playerRef.current.player
-				//       .load(videoUrl)
-				//       .then(() => {
-				//         setMetadataLoaded(true);
-				//       })
-				//       .catch(playerOnError);
-				//   }
-				// }
-				// playerRef.current.videoUrl = videoUrl;
-
-				setPlayerLoaded(true);
+	const handlePlay = useCallback(() => {
+		if (isActive) {
+			const state = useVideoStore.getState();
+			if (state.videoState !== STATE_VIDEO_PLAY) {
+				console.log(
+					"PLAYING ----------------------------->",
+					video.idx
+				);
+				// setVideoState(STATE_VIDEO_PLAY);
 			}
-		},
-		[
-			video,
-			videoUrl,
-			handleNextVideo,
-			handlePrevVideo,
-			handleSeekFoward,
-			handleSeekBackward,
-			playerOnError,
-			handlePlayerLoaded,
-			handlePlayerLoading,
-			handleVideoSeeking,
-			handleVideoSeeked,
-			handleVideoVolumeChange,
-			handleVideoCanPlayThrough,
-		]
-	);
+		}
+	}, [setVideoState, video, isActive]);
+
+	const handlePause = useCallback(() => {
+		if (isActive) {
+			const state = useVideoStore.getState();
+			if (state.videoState !== STATE_VIDEO_PAUSED) {
+				console.log(
+					"PAUSING ----------------------------->",
+					video.idx
+				);
+				// setVideoState(STATE_VIDEO_PAUSED);
+			}
+		}
+	}, [setVideoState, video, isActive]);
+
+	const playerInit = useCallback((ref) => {
+		console.log("player init called", ref);
+		if (ref != null) {
+			playerRef.current = ref;
+			setPlayerLoaded(true);
+		}
+	}, []);
 
 	return (
 		<div
@@ -869,10 +686,23 @@ function StreamStackItem({
 			<DashPlayer
 				ref={playerInit}
 				src={videoUrl}
-				onMetadataLoaded={() => {
-					setMetadataLoaded(true);
-				}}
-				className="custom-shaka w-full h-full"
+				isAsanaVideo={
+					!isNaN(video?.video?.id) &&
+					typeof video?.video?.id === "number"
+				}
+				isActive={isActive}
+				onError={playerOnError}
+				onCanPlayThrough={handleVideoCanPlayThrough}
+				onVolumeChange={handleVideoVolumeChange}
+				onEnded={handleEnd}
+				onPlay={handlePlay}
+				onPause={handlePause}
+				onLoading={handlePlayerLoading}
+				onLoaded={handlePlayerLoaded}
+				onSeeking={handleVideoSeeking}
+				onSeeked={handleVideoSeeked}
+				setDuration={setDuration}
+				className="dashjs-player w-full h-full"
 			/>
 
 			{devMode ? (
