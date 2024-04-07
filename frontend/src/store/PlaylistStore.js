@@ -49,7 +49,7 @@ const usePlaylistStore = create((set) => ({
 					...items.map((i, idx) => {
 						const vi_id = i?._id || i?.id;
 						// console.log('vi_id', vi_id)
-						console.log({ video: i });
+						// console.log({ video: i });
 						return {
 							video: i,
 							idx: state.queue.length + idx + 1,
