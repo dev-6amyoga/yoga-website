@@ -57,6 +57,7 @@ function StreamStackItem({
 	const [autoplayInitialized, setAutoplayInitialized] = useState(false);
 	const [playerLoaded, setPlayerLoaded] = useState(false);
 
+<<<<<<< Updated upstream
 	// parse the video url from video object
 	const videoUrl = useMemo(() => {
 		return (
@@ -65,6 +66,15 @@ function StreamStackItem({
 			""
 		);
 	}, [video]);
+=======
+  // parse the video url from video object
+  const videoUrl = useMemo(() => {
+    console.log(video?.video, "IS VIDDD");
+    return (
+      (video?.video?.asana_dash_url || video?.video?.transition_dash_url) ?? ""
+    );
+  }, [video]);
+>>>>>>> Stashed changes
 
 	const isActiveRef = useRef(isActive);
 
@@ -828,8 +838,26 @@ function StreamStackItem({
 						handleEnd
 					);
 
+<<<<<<< Updated upstream
 					// console.log("Setting up player events");
 					// playerRef.current.player.on(dashjs.MediaPlayer.events.PLAY, handlePlayerLoading);
+=======
+        if (playerRef.current.player) {
+          console.log("Setting up player events");
+          playerRef.current.player
+            .load(videoUrl)
+            .then((res) => {
+              console.log("Video Loaded");
+              setMetadataLoaded(true);
+            })
+            .catch((err) => {
+              playerOnError(err);
+            });
+          //   playerRef.current.player.addEventListener(
+          //     "loading",
+          //     handlePlayerLoading
+          //   );
+>>>>>>> Stashed changes
 
 					// playerRef.current.player.on("loaded", handlePlayerLoaded);
 
@@ -942,6 +970,7 @@ function StreamStackItem({
 					// 						},
 					// 					});
 
+<<<<<<< Updated upstream
 					// 					playerRef.current.player
 					// 						.load(videoUrl)
 					// 						.then((res) => {
@@ -997,6 +1026,86 @@ function StreamStackItem({
 				ref={playerInit}
 				className="custom-shaka w-full h-full"
 			/>
+=======
+          //             //console.log("Trying to load video");
+          //   playerRef.current.player
+          //     .load(videoUrl)
+          //     .then((res) => {
+          //       //console.log("Video Loaded");
+          //       setMetadataLoaded(true);
+          //     })
+          //     .catch((err) => {
+          //       playerOnError(err);
+          //     });
+          //           }
+          //         })
+          //         .catch((err) => {
+          //           console.log("Error fetching DRM info :", err);
+          //         });
+          //     } else {
+          //       Fetch({
+          //         url: "/playback/get-playready-token",
+          //         method: "POST",
+          //         token: false,
+          //       })
+          //         .then((res) => {
+          //           const data = res.data;
+          //           if (data && data.licenseAcquisitionUrl && data.token) {
+          //             // Non Mobile
+          //             playerRef.current.player.configure({
+          //               drm: {
+          //                 servers: {
+          //                   "com.microsoft.playready":
+          //                     data.licenseAcquisitionUrl +
+          //                     "?ExpressPlayToken=" +
+          //                     data.token,
+          //                 },
+          //               },
+          //             });
+
+          //             playerRef.current.player
+          //               .load(videoUrl)
+          //               .then((res) => {
+          //                 setMetadataLoaded(true);
+          //               })
+          //               .catch((err) => {
+          //                 playerOnError(err);
+          //               });
+          //           }
+          //         })
+          //         .catch((err) => {
+          //           console.log("Error fetching DRM info :", err);
+          //         });
+          //     }
+          //   } else {
+          //   playerRef.current.player
+          //     .load(videoUrl)
+          //     .then(() => {
+          //       setMetadataLoaded(true);
+          //     })
+          //     .catch(playerOnError);
+          //   }
+        }
+        setPlayerLoaded(true);
+      }
+    },
+    [
+      video,
+      videoUrl,
+      handleNextVideo,
+      handlePrevVideo,
+      handleSeekFoward,
+      handleSeekBackward,
+      playerOnError,
+      handlePlayerLoaded,
+      handlePlayerLoading,
+      handleVideoSeeking,
+      handleVideoSeeked,
+      handleVideoVolumeChange,
+      handleVideoCanPlayThrough,
+    ]
+  );
+>>>>>>> Stashed changes
 
 			{devMode ? (
 				<div className="absolute bg-white left-4 top-4 p-2 text-sm flex flex-col">
