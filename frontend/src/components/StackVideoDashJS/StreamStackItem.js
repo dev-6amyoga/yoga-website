@@ -682,7 +682,7 @@ function StreamStackItem({
 
 	return (
 		<div
-			className={`relative h-full w-full ${isActive ? "block" : "block"}`}>
+			className={`relative h-full w-full ${isActive ? "block" : "hidden"}`}>
 			<DashPlayer
 				ref={playerInit}
 				src={videoUrl}

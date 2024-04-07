@@ -284,9 +284,9 @@ function VideoPlayer() {
 	}, [currentVideo, queue]);
 	return (
 		<div
-			clasName={`hover:cursor-pointer bg-black w-full ${fullScreen ? "h-screen" : "rounded-xl overflow-hidden"}`}>
+			className={`hover:cursor-pointer bg-black w-full ${fullScreen ? "h-screen" : "rounded-xl overflow-hidden"}`}>
 			<div
-				clasName={`mx-auto aspect-video ${fullScreen ? "h-full" : ""}`}>
+				className={`mx-auto aspect-video ${fullScreen ? "h-full" : ""}`}>
 				{currentVideo ? (
 					<>
 						{videoState === STATE_VIDEO_ERROR ? (
@@ -295,7 +295,7 @@ function VideoPlayer() {
 								<Button onClick={handleSetPlay}>Refresh</Button>
 							</div>
 						) : (
-							<div className="relative h-full w-full flex flex-col">
+							<div className="relative h-full w-full">
 								{queue.length > 0 ? (
 									<div className="">
 										{queue
