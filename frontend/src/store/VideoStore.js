@@ -81,7 +81,7 @@ export const useVideoStore = create(
 			}),
 
 		// videoState is one of the STATE_VIDEO_* constants
-		videoState: STATE_VIDEO_PAUSED,
+		videoState: STATE_VIDEO_LOADING,
 		setVideoState: (vs) =>
 			set(() => {
 				return { videoState: vs };

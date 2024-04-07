@@ -91,7 +91,7 @@ function VideoPlayer() {
 			setCurrentVideo(queue[0]);
 		} else {
 			setCurrentVideo(null);
-			setVideoState(STATE_VIDEO_PAUSED);
+			setVideoState(STATE_VIDEO_LOADING);
 			setPlaylistState(false);
 		}
 	}, [
@@ -277,10 +277,16 @@ function VideoPlayer() {
 		// };
 	}, [queue]);
 
+	useEffect(() => {
+		if (currentVideo) {
+			console.log(currentVideo.queue_id);
+		}
+	}, [currentVideo, queue]);
 	return (
 		<div
-			clasme={`hover:cursor-pointer bg-black w-full ${fullScreen ? "h-screen" : "rounded-xl overflow-hidden"}`}>
-			<div clasme={`mx-auto aspect-video ${fullScreen ? "h-full" : ""}`}>
+			clasName={`hover:cursor-pointer bg-black w-full ${fullScreen ? "h-screen" : "rounded-xl overflow-hidden"}`}>
+			<div
+				clasName={`mx-auto aspect-video ${fullScreen ? "h-full" : ""}`}>
 				{currentVideo ? (
 					<>
 						{videoState === STATE_VIDEO_ERROR ? (
@@ -293,7 +299,7 @@ function VideoPlayer() {
 								{queue.length > 0 ? (
 									<div className="">
 										{queue
-											.slice(0, 1)
+											.slice(0, 2)
 											.map((queueItem, idx) => {
 												return (
 													<StreamStackItem

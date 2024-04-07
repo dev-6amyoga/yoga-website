@@ -307,7 +307,7 @@ export default function VideoPlaybar({
 							videoState === STATE_VIDEO_ERROR
 								? "opacity-0"
 								: "opacity-100"
-						} mt-4 w-3 h-3 hover:w-5 hover:h-5  ${
+						} mt-[18px] w-3 h-3 hover:w-5 hover:h-5  ${
 							mouseDown
 								? "w-5 h-5"
 								: "duration-300 transition-all ease-linear"
@@ -319,7 +319,7 @@ export default function VideoPlaybar({
 								: mouseDown
 									? "-top-[calc(50%-0.2rem)]"
 									: "-top-[calc(50%-0.225rem)] hover:-top-[calc(50%+0.1rem)]"
-						} bg-y-darkgreen border border-white rounded-full absolute z-[100]`}
+						} bg-y-darkgreen rounded-full absolute z-[100]`}
 						ref={draggableHandle}
 						style={{
 							left: `${((currentBoopPosition - 2) / barBound.width) * 100}%`,

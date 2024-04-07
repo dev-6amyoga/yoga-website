@@ -1,17 +1,42 @@
 import dashjs from "dashjs";
 import {
 	forwardRef,
+	memo,
 	useCallback,
 	useEffect,
 	useImperativeHandle,
 	useRef,
 	useState,
 } from "react";
+import { dashSettings } from "../../lib/dashjs-settings";
+import { Fetch } from "../../utils/Fetch";
+import { isMobileTablet } from "../../utils/isMobileOrTablet";
 
-function DashPlayer({ src, onMetadataLoaded, className, ...rest }, ref) {
+function DashPlayer(
+	{
+		src,
+		isActive,
+		isAsanaVideo,
+		setDuration,
+		onCanPlayThrough,
+		onEnded,
+		onPlay,
+		onPause,
+		onError,
+		onVolumeChange,
+		onLoading,
+		onLoaded,
+		onSeeking,
+		onSeeked,
+		className,
+		...rest
+	},
+	ref
+) {
 	const videoRef = useRef(null);
 	const [playerRefSet, setPlayerRefSet] = useState(false);
 	const playerRef = useRef(null);
+	const [metadataLoaded, setMetadataLoaded] = useState(false);
 
 	useEffect(() => {
 		console.log("[DASH PLAYER] : setup");
@@ -25,6 +50,19 @@ function DashPlayer({ src, onMetadataLoaded, className, ...rest }, ref) {
 		};
 	}, [setPlayerRefSet]);
 
+	const onMetadataLoaded = useCallback(() => {
+		setMetadataLoaded(true);
+	}, []);
+
+	const onPlaybackNotAllowed = useCallback(() => {
+		if (playerRef.current && isActive) {
+			console.log("[DASH PLAYER] : playback not allowed");
+			playerRef.current.setMute(true);
+			playerRef.current.initialize(videoRef.current, src, true);
+			playerRef.current.setMute(false);
+		}
+	}, [isActive, src]);
+
 	useEffect(() => {
 		console.log(
 			"[DASH PLAYER] : playerRef",
@@ -33,14 +71,240 @@ function DashPlayer({ src, onMetadataLoaded, className, ...rest }, ref) {
 		);
 
 		if (playerRefSet && src && videoRef.current) {
+			const check = isMobileTablet();
+			const isMobile = { done: true, check: check };
+			console.log("Checking for isMobile", isMobile);
+
+			//console.log("Fetching DRM Info");
+			//fetch only if it is not a transition video
+			playerRef.current.updateSettings(dashSettings);
+			playerRef.current.initialize(videoRef.current, src, false);
+			console.log("[DASH PLAYER] : isAsanaVideo", isAsanaVideo);
+			if (isAsanaVideo) {
+				if (isMobile.check) {
+					// Mobile
+					Fetch({
+						url: "/playback/get-widevine-token",
+						method: "POST",
+						token: false,
+					})
+						.then((res) => {
+							const data = res.data;
+							console.log("[DASH PLAYER] : widevine token");
+
+							if (data && data.licenseAcquisitionUrl) {
+								playerRef.current.setProtectionData({
+									"com.widevine.alpha": {
+										serverURL: data.licenseAcquisitionUrl,
+									},
+								});
+							}
+						})
+						.catch((err) => {
+							console.log("Error fetching DRM info :", err);
+							onError();
+						});
+				} else {
+					// Non Mobile
+					Fetch({
+						url: "/playback/get-playready-token",
+						method: "POST",
+						token: false,
+					})
+						.then((res) => {
+							const data = res.data;
+							console.log("[DASH PLAYER] : playready token");
+							if (
+								data &&
+								data.licenseAcquisitionUrl &&
+								data.token
+							) {
+								playerRef.current.setProtectionData({
+									"com.microsoft.playready": {
+										serverURL:
+											data.licenseAcquisitionUrl +
+											"?ExpressPlayToken=" +
+											data.token,
+									},
+								});
+							}
+						})
+						.catch((err) => {
+							console.log("Error fetching DRM info :", err);
+							onError();
+						});
+				}
+			} else {
+			}
+		}
+	}, [playerRefSet, src, isAsanaVideo, onError]);
+
+	useEffect(() => {
+		console.log(isActive, "FROM DASH PLAYER\n");
+		if (playerRefSet && isActive) {
+			console.log("[DASH PLAYER] : playing [isActive]");
+			playerRef.current.play();
+		} else if (playerRefSet && !isActive) {
+			console.log("[DASH PLAYER] : pausing [!isActive]");
+			playerRef.current.pause();
+		}
+	}, [isActive, playerRefSet]);
+
+	useEffect(() => {
+		if (playerRefSet && isActive && metadataLoaded) {
+			console.log("[DASH PLAYER] : setting duration");
+			setDuration(playerRef.current.duration());
+		}
+	}, [playerRefSet, isActive, setDuration, metadataLoaded]);
+
+	// events
+	useEffect(() => {
+		if (playerRefSet && src && videoRef.current) {
+			console.log("[DASH PLAYER] : setting up event listeners");
+			// CAN_PLAY_THROUGH
 			playerRef.current.on(
 				dashjs.MediaPlayer.events.CAN_PLAY_THROUGH,
+				onCanPlayThrough
+			);
+
+			// FRAGMENT_LOADING_STARTED
+			// FRAGMENT_LOADING_COMPLETED
+			// FRAGMENT_LOADING_ABANDONED
+
+			// MANIFEST_LOADING_STARTED
+			// MANIFEST_LOADING_FINISHED
+
+			// ERROR
+			playerRef.current.on(dashjs.MediaPlayer.events.ERROR, onError);
+
+			// PLAYBACK_ERROR
+
+			// PLAYBACK_ENDED
+			playerRef.current.on(
+				dashjs.MediaPlayer.events.PLAYBACK_ENDED,
+				onEnded
+			);
+			// PLAYBACK_SEEKED
+			playerRef.current.on(
+				dashjs.MediaPlayer.events.PLAYBACK_SEEKED,
+				onSeeked
+			);
+			// PLAYBACK_SEEKING
+			playerRef.current.on(
+				dashjs.MediaPlayer.events.PLAYBACK_SEEKING,
+				onSeeking
+			);
+			// PLAYBACK_NOT_ALLOWED
+			playerRef.current.on(
+				dashjs.MediaPlayer.events.PLAYBACK_NOT_ALLOWED,
+				onPlaybackNotAllowed
+			);
+
+			// PLAYBACK_PAUSED
+			playerRef.current.on(
+				dashjs.MediaPlayer.events.PLAYBACK_PAUSED,
+				onPause
+			);
+			// PLAYBACK_PLAYING
+			playerRef.current.on(
+				dashjs.MediaPlayer.events.PLAYBACK_PLAYING,
+				onPlay
+			);
+			// PLAYBACK_STALLED
+
+			// PLAYBACK_VOLUME_CHANGED
+			playerRef.current.on(
+				dashjs.MediaPlayer.events.PLAYBACK_VOLUME_CHANGED,
+				onVolumeChange
+			);
+			// PLAYBACK_METADATA_LOADED
+			playerRef.current.on(
+				dashjs.MediaPlayer.events.PLAYBACK_METADATA_LOADED,
 				onMetadataLoaded
 			);
-			playerRef.current.initialize(videoRef.current, src, true);
 		}
-	}, [playerRefSet, src]);
 
+		return () => {
+			console.log("[DASH PLAYER] switching off event listeners");
+			// CAN_PLAY_THROUGH
+			playerRef.current.off(
+				dashjs.MediaPlayer.events.CAN_PLAY_THROUGH,
+				onCanPlayThrough
+			);
+
+			// FRAGMENT_LOADING_STARTED
+			// FRAGMENT_LOADING_COMPLETED
+			// FRAGMENT_LOADING_ABANDONED
+
+			// MANIFEST_LOADING_STARTED
+			// MANIFEST_LOADING_FINISHED
+
+			// ERROR
+			playerRef.current.off(dashjs.MediaPlayer.events.ERROR, onError);
+
+			// PLAYBACK_ERROR
+
+			// PLAYBACK_ENDED
+			playerRef.current.off(
+				dashjs.MediaPlayer.events.PLAYBACK_ENDED,
+				onEnded
+			);
+			// PLAYBACK_SEEKED
+			playerRef.current.off(
+				dashjs.MediaPlayer.events.PLAYBACK_SEEKED,
+				onSeeked
+			);
+			// PLAYBACK_SEEKING
+			playerRef.current.off(
+				dashjs.MediaPlayer.events.PLAYBACK_SEEKING,
+				onSeeking
+			);
+			// PLAYBACK_NOT_ALLOWED
+			playerRef.current.off(
+				dashjs.MediaPlayer.events.PLAYBACK_NOT_ALLOWED,
+				onPlaybackNotAllowed
+			);
+
+			// PLAYBACK_PAUSED
+			playerRef.current.off(
+				dashjs.MediaPlayer.events.PLAYBACK_PAUSED,
+				onPause
+			);
+			// PLAYBACK_PLAYING
+			playerRef.current.off(
+				dashjs.MediaPlayer.events.PLAYBACK_PLAYING,
+				onPlay
+			);
+			// PLAYBACK_STALLED
+
+			// PLAYBACK_VOLUME_CHANGED
+			playerRef.current.off(
+				dashjs.MediaPlayer.events.PLAYBACK_VOLUME_CHANGED,
+				onVolumeChange
+			);
+			// PLAYBACK_METADATA_LOADED
+			playerRef.current.off(
+				dashjs.MediaPlayer.events.PLAYBACK_METADATA_LOADED,
+				onMetadataLoaded
+			);
+		};
+	}, [
+		playerRefSet,
+		src,
+		onMetadataLoaded,
+		setDuration,
+		onCanPlayThrough,
+		onEnded,
+		onPlaybackNotAllowed,
+		onError,
+		onPause,
+		onPlay,
+		onVolumeChange,
+		onSeeked,
+		onSeeking,
+	]);
+
+	// set ref
 	useImperativeHandle(
 		ref,
 		() => {
@@ -92,4 +356,4 @@ function DashPlayer({ src, onMetadataLoaded, className, ...rest }, ref) {
 	);
 }
 
-export default forwardRef(DashPlayer);
+export default memo(forwardRef(DashPlayer));
