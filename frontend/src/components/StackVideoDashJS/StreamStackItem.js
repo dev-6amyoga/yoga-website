@@ -1,21 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import "shaka-player/dist/controls.css";
+
 import {
 	SEEK_TYPE_MARKER,
 	SEEK_TYPE_MOVE,
 	SEEK_TYPE_SEEK,
 } from "../../enums/seek_types";
-import {
-	ShakaPlayerFullscreen,
-	ShakaPlayerGoNext,
-	ShakaPlayerGoPrev,
-	ShakaPlayerGoSeekBackward,
-	ShakaPlayerGoSeekForward,
-	ShakaPlayerNextMarker,
-	ShakaPlayerPrevMarker,
-	ShakaPlayerToggleMode,
-	shakaUIConfig,
-} from "../../lib/shaka-controls";
 import usePlaylistStore from "../../store/PlaylistStore";
 import useUserStore from "../../store/UserStore";
 import useVideoStore, {
@@ -26,18 +15,10 @@ import useVideoStore, {
 } from "../../store/VideoStore";
 import useWatchHistoryStore from "../../store/WatchHistoryStore";
 import { Fetch } from "../../utils/Fetch";
-import { isMobileTablet } from "../../utils/isMobileOrTablet";
 
-// import shakaL from "shaka-player/dist/shaka-player.compiled.debug";
-import shaka from "shaka-player/dist/shaka-player.ui";
-
-// import shakaLog from "shaka-player/dist/shaka-player"
-import dashjs from "dashjs";
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
-import ShakaPlayer from "./ShakaPlayer";
-
-// shakaL.log.setLogLevel(shaka.log.Level.V1);
+import DashPlayer from "./DashPlayer";
 
 function StreamStackItem({
 	video,
@@ -84,15 +65,6 @@ function StreamStackItem({
 			isActiveRef: isActiveRef.current,
 		});
 	}, [isActive, video]);
-
-	useEffect(() => {
-		return () => {
-			if (playerRef.current.player) {
-				console.log("Unloading video");
-				playerRef.current.player.unload();
-			}
-		};
-	}, []);
 
 	const [
 		// seek queue
@@ -344,7 +316,7 @@ function StreamStackItem({
 			setPauseReason(null);
 			if (videoState === STATE_VIDEO_PAUSED) {
 				console.log("useEffect : changing to pause", video.idx);
-				playerRef.current.videoElement.pause();
+				playerRef.current.player.pause();
 			} else if (videoState === STATE_VIDEO_PLAY) {
 				console.log("useEffect : changing to play", video.idx);
 				tryToPlay();
@@ -758,219 +730,120 @@ function StreamStackItem({
 			console.log("player init called", ref);
 			if (ref != null) {
 				playerRef.current = ref;
-				const check = isMobileTablet();
-				const isMobile = { done: true, check: check };
-				console.log("Checking for isMobile", isMobile);
+				// const check = isMobileTablet();
+				// const isMobile = { done: true, check: check };
+				// console.log("Checking for isMobile", isMobile);
 
-				if (playerRef.current.ui) {
-					console.log("Setting up UI");
-					shaka.ui.Controls.registerElement(
-						"next",
-						new ShakaPlayerGoNext.Factory(handleNextVideo)
-					);
-					shaka.ui.Controls.registerElement(
-						"prev",
-						new ShakaPlayerGoPrev.Factory(handlePrevVideo)
-					);
-					shaka.ui.Controls.registerElement(
-						"seek_forward",
-						new ShakaPlayerGoSeekForward.Factory(handleSeekFoward)
-					);
-					shaka.ui.Controls.registerElement(
-						"seek_backward",
-						new ShakaPlayerGoSeekBackward.Factory(
-							handleSeekBackward
-						)
-					);
-					shaka.ui.Controls.registerElement(
-						"toggle_mode",
-						new ShakaPlayerToggleMode.Factory()
-					);
-					shaka.ui.Controls.registerElement(
-						"prev_marker",
-						new ShakaPlayerPrevMarker.Factory()
-					);
-					shaka.ui.Controls.registerElement(
-						"next_marker",
-						new ShakaPlayerNextMarker.Factory()
-					);
-					shaka.ui.Controls.registerElement(
-						"custom_fullscreen",
-						new ShakaPlayerFullscreen.Factory(handleFullscreen)
-					);
+				// if (playerRef.current.player) {
+				// 	console.log("Setting up events");
+				// 	playerRef.current.player.on("", handleVideoSeeking);
+				// 	playerRef.current.player.on("seeked", handleVideoSeeked);
 
-					playerRef.current.ui.configure(shakaUIConfig);
-				}
+				// 	playerRef.current.player.on(
+				// 		"volumechange",
+				// 		handleVideoVolumeChange
+				// 	);
 
-				if (playerRef.current.videoElement) {
-					console.log("Setting up videoElement events");
-					playerRef.current.videoElement.addEventListener(
-						dashjs.MediaPlayer.events.PLAYBACK_SEEKING,
-						handleVideoSeeking
-					);
-					playerRef.current.videoElement.addEventListener(
-						dashjs.MediaPlayer.events.PLAYBACK_SEEKED,
-						handleVideoSeeked
-					);
+				// 	playerRef.current.player.on(
+				// 		"canplaythrough",
+				// 		handleVideoCanPlayThrough
+				// 	);
 
-					playerRef.current.videoElement.addEventListener(
-						dashjs.MediaPlayer.events.PLAYBACK_VOLUME_CHANGED,
-						handleVideoVolumeChange
-					);
+				// 	playerRef.current.player.on("ended", handleEnd);
+				// }
 
-					playerRef.current.videoElement.addEventListener(
-						dashjs.MediaPlayer.events.CAN_PLAY_THROUGH,
-						handleVideoCanPlayThrough
-					);
+				//   // stream settings
+				//   playerRef.current.player.configure(shakaStreamConfig);
 
-					playerRef.current.videoElement.addEventListener(
-						dashjs.MediaPlayer.events.PLAYBACK_ENDED,
-						handleEnd
-					);
+				//   //console.log("Fetching DRM Info");
+				//   //fetch only if it is not a transition video
+				//   if (
+				//     !isNaN(video?.video?.id) &&
+				//     typeof video?.video?.id === "number"
+				//   ) {
+				//     //   if (!isNaN(video.video.id) && typeof video.video.id !== "number") {
+				//     if (isMobile.check) {
+				//       Fetch({
+				//         url: "/playback/get-widevine-token",
+				//         method: "POST",
+				//         token: false,
+				//       })
+				//         .then((res) => {
+				//           const data = res.data;
+				//           // console.log(data);
 
-					// console.log("Setting up player events");
-					// playerRef.current.player.on(dashjs.MediaPlayer.events.PLAY, handlePlayerLoading);
+				//           if (data && data.licenseAcquisitionUrl) {
+				//             // Mobile
+				//             playerRef.current.player.configure({
+				//               drm: {
+				//                 servers: {
+				//                   "com.widevine.alpha": data.licenseAcquisitionUrl,
+				//                 },
+				//               },
+				//             });
 
-					// playerRef.current.player.on("loaded", handlePlayerLoaded);
+				//             //console.log("Trying to load video");
+				//             playerRef.current.player
+				//               .load(videoUrl)
+				//               .then((res) => {
+				//                 //console.log("Video Loaded");
+				//                 setMetadataLoaded(true);
+				//               })
+				//               .catch((err) => {
+				//                 playerOnError(err);
+				//               });
+				//           }
+				//         })
+				//         .catch((err) => {
+				//           console.log("Error fetching DRM info :", err);
+				//         });
+				//     } else {
+				//       Fetch({
+				//         url: "/playback/get-playready-token",
+				//         method: "POST",
+				//         token: false,
+				//       })
+				//         .then((res) => {
+				//           const data = res.data;
+				//           if (data && data.licenseAcquisitionUrl && data.token) {
+				//             // Non Mobile
+				//             playerRef.current.player.configure({
+				//               drm: {
+				//                 servers: {
+				//                   "com.microsoft.playready":
+				//                     data.licenseAcquisitionUrl +
+				//                     "?ExpressPlayToken=" +
+				//                     data.token,
+				//                 },
+				//               },
+				//             });
 
-					// playerRef.current.player.on(
-					// 	"statechange",
-					// 	(e) => {
-					// 		console.log(
-					// 			"State Change",
-					// 			e.newstate,
-					// 			isActiveRef.current === null
-					// 				? "null"
-					// 				: isActiveRef.current
-					// 		);
-					// 		if (isActiveRef.current) {
-					// 			switch (e.newstate) {
-					// 				case "buffering":
-					// 					handleLoading(
-					// 						true,
-					// 						isActiveRef.current
-					// 					);
-					// 					break;
+				//             playerRef.current.player
+				//               .load(videoUrl)
+				//               .then((res) => {
+				//                 setMetadataLoaded(true);
+				//               })
+				//               .catch((err) => {
+				//                 playerOnError(err);
+				//               });
+				//           }
+				//         })
+				//         .catch((err) => {
+				//           console.log("Error fetching DRM info :", err);
+				//         });
+				//     }
+				//   } else {
+				//     playerRef.current.player
+				//       .load(videoUrl)
+				//       .then(() => {
+				//         setMetadataLoaded(true);
+				//       })
+				//       .catch(playerOnError);
+				//   }
+				// }
+				// playerRef.current.videoUrl = videoUrl;
 
-					// 				case "playing":
-					// 					setVideoState(STATE_VIDEO_PLAY);
-					// 					break;
-
-					// 				case "paused":
-					// 					break;
-
-					// 				default:
-					// 					break;
-					// 			}
-					// 		}
-					// 	}
-					// );
-
-					// playerRef.current.player.setConfig(
-					// 	"manifest.dash.ignoreMinBufferTime",
-					// 	true
-					// );
-
-					//   console.log("Fetching DRM Info");
-					//   fetch only if it is not a transition video
-					// if (
-					// 	!isNaN(video?.video?.id) &&
-					// 	typeof video?.video?.id === "number"
-					// ) {
-					// 	//   if (!isNaN(video.video.id) && typeof video.video.id !== "number") {
-					// 	if (isMobile.check) {
-					// 		Fetch({
-					// 			url: "/playback/get-widevine-token",
-					// 			method: "POST",
-					// 			token: false,
-					// 		})
-					// 			.then((res) => {
-					// 				const data = res.data;
-					// 				// console.log(data);
-
-					// 				if (data && data.licenseAcquisitionUrl) {
-					// 					// Mobile
-					// 					playerRef.current.player.configure({
-					// 						drm: {
-					// 							servers: {
-					// 								"com.widevine.alpha":
-					// 									data.licenseAcquisitionUrl,
-					// 							},
-					// 						},
-					// 					});
-
-					// 					//console.log("Trying to load video");
-					// 					playerRef.current.player
-					// 						.load(videoUrl)
-					// 						.then((res) => {
-					// 							//console.log("Video Loaded");
-					// 							setMetadataLoaded(true);
-					// 						})
-					// 						.catch((err) => {
-					// 							playerOnError(err);
-					// 						});
-					// 				}
-					// 			})
-					// 			.catch((err) => {
-					// 				console.log(
-					// 					"Error fetching DRM info :",
-					// 					err
-					// 				);
-					// 			});
-					// 	} else {
-					// 		Fetch({
-					// 			url: "/playback/get-playready-token",
-					// 			method: "POST",
-					// 			token: false,
-					// 		})
-					// 			.then((res) => {
-					// 				const data = res.data;
-					// 				if (
-					// 					data &&
-					// 					data.licenseAcquisitionUrl &&
-					// 					data.token
-					// 				) {
-					// 					// Non Mobile
-					// 					playerRef.current.player.configure({
-					// 						drm: {
-					// 							servers: {
-					// 								"com.microsoft.playready":
-					// 									data.licenseAcquisitionUrl +
-					// 									"?ExpressPlayToken=" +
-					// 									data.token,
-					// 							},
-					// 						},
-					// 					});
-
-					// 					playerRef.current.player
-					// 						.load(videoUrl)
-					// 						.then((res) => {
-					// 							setMetadataLoaded(true);
-					// 						})
-					// 						.catch((err) => {
-					// 							playerOnError(err);
-					// 						});
-					// 				}
-					// 			})
-					// 			.catch((err) => {
-					// 				console.log(
-					// 					"Error fetching DRM info :",
-					// 					err
-					// 				);
-					// 			});
-					// 	}
-					// } else {
-					// 	console.log(videoUrl, "TO BE SET!!");
-					// 	playerRef.current.player
-					// 		.load(videoUrl)
-					// 		.then(() => {
-					// 			setMetadataLoaded(true);
-					// 		})
-					// 		.catch(playerOnError);
-					// 	//   }
-					// }
-					setPlayerLoaded(true);
-				}
+				setPlayerLoaded(true);
 			}
 		},
 		[
@@ -993,8 +866,12 @@ function StreamStackItem({
 	return (
 		<div
 			className={`relative h-full w-full ${isActive ? "block" : "block"}`}>
-			<ShakaPlayer
+			<DashPlayer
 				ref={playerInit}
+				src={videoUrl}
+				onMetadataLoaded={() => {
+					setMetadataLoaded(true);
+				}}
 				className="custom-shaka w-full h-full"
 			/>
 
