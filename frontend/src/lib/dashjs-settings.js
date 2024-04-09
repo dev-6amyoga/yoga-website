@@ -4,7 +4,6 @@ export const dashSettings = {
 	},
 	error: {},
 	streaming: {
-		lowLatencyEnabled: true,
 		cacheInitSegments: true,
 		buffer: {
 			initialBufferLevel: 4,

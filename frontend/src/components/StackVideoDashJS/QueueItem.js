@@ -46,6 +46,7 @@ function QueueItem({ item, idx, pop, moveUp, moveDown, customerCode }) {
 			<div className="flex w-full justify-between gap-2 xl:grid xl:grid-cols-4">
 				<div className="flex-1 xl:col-span-3 xl:col-start-1">
 					<p className="m-0 max-w-[15ch] text-ellipsis break-normal break-words text-xs xl:max-w-full">
+						{idx}
 						{item?.idx}{" "}
 						{item?.video?.asana_name ??
 							item?.video?.transition_video_name}
