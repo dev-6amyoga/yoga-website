@@ -158,6 +158,12 @@ export const useVideoStore = create(
 			set(() => {
 				return { commitSeekTime: time };
 			}),
+
+		playreadyKeyUrl: null,
+		setPlayreadyKeyUrl: (url) =>
+			set(() => {
+				return { playreadyKeyUrl: url };
+			}),
 	}))
 );
 

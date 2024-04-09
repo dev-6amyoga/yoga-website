@@ -229,8 +229,9 @@ function StreamStackItem({
 				playerRef?.current.videoElement
 			);
 			if (playerRef.current.videoElement.currentTime > 0.0) {
-				playerRef.current.videoElement.currentTime = 0.0;
-				setCommitSeekTime(0.0);
+				// console.log("SEEKING TO 0", video.idx);
+				// playerRef.current.videoElement.currentTime = 0.0;
+				// setCommitSeekTime(0.0);
 			}
 		}
 	}, [
@@ -443,7 +444,7 @@ function StreamStackItem({
 				setCurrentTime(playerRef.current?.videoElement?.currentTime);
 				setVolume(playerRef.current?.videoElement?.volume);
 			}
-		}, 250);
+		}, 16.67);
 
 		return () => {
 			// console.log('CLEANING INTERVAL --------------------------------------->')
