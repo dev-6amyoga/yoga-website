@@ -240,41 +240,41 @@ function VideoPlayer() {
 	const [videos, setVideos] = useState([]);
 
 	useEffect(() => {
-		// let timeout = null;
-		// if (timeout) {
-		//   clearTimeout(timeout);
-		// }
-		// if (queue.length > 0) {
-		//   console.log("VIDEOPLAYER.js : Setting first video");
-		//   setVideos((prevVideos) => {
-		//     if (queue.length > 0) {
-		//       const firstVideo = queue[0];
-		//       prevVideos.splice(0, 2, firstVideo);
-		//       return prevVideos;
-		//     } else {
-		//       return prevVideos;
-		//     }
-		//   });
-		//   timeout = setTimeout(() => {
-		//     console.log("VIDEOPLAYER.js : Setting second video");
-		//     setVideos((prevVideos) => {
-		//       if (queue.length > 1) {
-		//         const secondVideo = queue[1];
-		//         prevVideos.splice(1, 1, secondVideo);
-		//         return prevVideos;
-		//       } else {
-		//         return prevVideos;
-		//       }
-		//     });
-		//   }, 2000);
-		// } else {
-		//   setVideos([]);
-		// }
-		// return () => {
-		//   if (timeout) {
-		//     clearTimeout(timeout);
-		//   }
-		// };
+		let timeout = null;
+		if (timeout) {
+			clearTimeout(timeout);
+		}
+		if (queue.length > 0) {
+			console.log("VIDEOPLAYER.js : Setting first video");
+			setVideos((prevVideos) => {
+				if (queue.length > 0) {
+					const firstVideo = queue[0];
+					prevVideos.splice(0, 2, firstVideo);
+					return prevVideos;
+				} else {
+					return prevVideos;
+				}
+			});
+			timeout = setTimeout(() => {
+				console.log("VIDEOPLAYER.js : Setting second video");
+				setVideos((prevVideos) => {
+					if (queue.length > 1) {
+						const secondVideo = queue[1];
+						prevVideos.splice(1, 1, secondVideo);
+						return prevVideos;
+					} else {
+						return prevVideos;
+					}
+				});
+			}, 2000);
+		} else {
+			setVideos([]);
+		}
+		return () => {
+			if (timeout) {
+				clearTimeout(timeout);
+			}
+		};
 	}, [queue]);
 
 	useEffect(() => {
@@ -298,7 +298,7 @@ function VideoPlayer() {
 							<div className="relative h-full w-full">
 								{queue.length > 0 ? (
 									<div className="">
-										{queue
+										{videos
 											.slice(0, 2)
 											.map((queueItem, idx) => {
 												return (
