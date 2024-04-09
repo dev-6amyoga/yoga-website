@@ -1,6 +1,6 @@
 export const dashSettings = {
 	debug: {
-		logLevel: 3,
+		logLevel: 4,
 	},
 	error: {},
 	streaming: {

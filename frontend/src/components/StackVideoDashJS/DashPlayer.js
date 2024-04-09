@@ -11,6 +11,7 @@ import {
 import { dashSettings } from "../../lib/dashjs-settings";
 import { Fetch } from "../../utils/Fetch";
 import { isMobileTablet } from "../../utils/isMobileOrTablet";
+import useVideoStore from "../../store/VideoStore";
 
 function DashPlayer(
 	{
@@ -74,12 +75,16 @@ function DashPlayer(
 			const check = isMobileTablet();
 			const isMobile = { done: true, check: check };
 			console.log("Checking for isMobile", isMobile);
+			const store = useVideoStore.getState();
+			const playreadyKeyUrl = store.playreadyKeyUrl;
+			const setPlayreadyKeyUrl = store.setPlayreadyKeyUrl;
 
 			//console.log("Fetching DRM Info");
 			//fetch only if it is not a transition video
 			playerRef.current.updateSettings(dashSettings);
 			playerRef.current.initialize(videoRef.current, src, false);
 			console.log("[DASH PLAYER] : isAsanaVideo", isAsanaVideo);
+
 			if (isAsanaVideo) {
 				if (isMobile.check) {
 					// Mobile
@@ -106,33 +111,50 @@ function DashPlayer(
 						});
 				} else {
 					// Non Mobile
-					Fetch({
-						url: "/playback/get-playready-token",
-						method: "POST",
-						token: false,
-					})
-						.then((res) => {
-							const data = res.data;
-							console.log("[DASH PLAYER] : playready token");
-							if (
-								data &&
-								data.licenseAcquisitionUrl &&
-								data.token
-							) {
-								playerRef.current.setProtectionData({
-									"com.microsoft.playready": {
-										serverURL:
-											data.licenseAcquisitionUrl +
-											"?ExpressPlayToken=" +
-											data.token,
-									},
-								});
-							}
-						})
-						.catch((err) => {
-							console.log("Error fetching DRM info :", err);
-							onError();
+					if (playreadyKeyUrl) {
+						console.log("[DASH PLAYER] : playready token cached");
+						playerRef.current.setProtectionData({
+							"com.microsoft.playready": {
+								serverURL: playreadyKeyUrl,
+							},
 						});
+					} else {
+						Fetch({
+							url: "/playback/get-playready-token",
+							method: "POST",
+							token: false,
+						})
+							.then((res) => {
+								const data = res.data;
+								console.log("[DASH PLAYER] : playready token");
+								if (
+									data &&
+									data.licenseAcquisitionUrl &&
+									data.token
+								) {
+									playerRef.current.setProtectionData({
+										"com.microsoft.playready": {
+											serverURL:
+												data.licenseAcquisitionUrl +
+												"?ExpressPlayToken=" +
+												data.token,
+										},
+									});
+									console.log(
+										"[DASH PLAYER] : playready token caching now!"
+									);
+									setPlayreadyKeyUrl(
+										data.licenseAcquisitionUrl +
+											"?ExpressPlayToken=" +
+											data.token
+									);
+								}
+							})
+							.catch((err) => {
+								console.log("Error fetching DRM info :", err);
+								onError();
+							});
+					}
 				}
 			} else {
 			}
