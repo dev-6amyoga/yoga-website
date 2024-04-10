@@ -1,12 +1,13 @@
 export const dashSettings = {
 	debug: {
-		logLevel: 4,
+		logLevel: 5,
 	},
-	error: {},
 	streaming: {
 		cacheInitSegments: true,
 		buffer: {
 			initialBufferLevel: 4,
+			bufferTimeAtTopQuality: 15,
+			bufferToKeep: 10,
 		},
 	},
 };
