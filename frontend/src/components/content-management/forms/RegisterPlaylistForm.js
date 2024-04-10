@@ -461,7 +461,6 @@ function RegisterPlaylistForm() {
             }
             updated_sequence.push(nextAsanaId);
           } else {
-            // updated_sequence.push(prevAsanaId);
             if (x.length > 0) {
               updated_sequence.push(...x);
             }
