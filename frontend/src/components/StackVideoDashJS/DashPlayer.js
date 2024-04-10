@@ -47,14 +47,14 @@ function DashPlayer(
     if (src && videoRef.current) {
       console.log("[DASH PLAYER] : Attaching source and preloading");
       p.initialize(videoRef.current, src, true);
+      p.attachSource(src);
       p.preload();
     }
-
     return () => {
       console.log("[DASH PLAYER] Cleanup, player reset");
       p.reset();
     };
-  }, [setPlayerRefSet]);
+  }, [setPlayerRefSet, src]);
 
   const onMetadataLoaded = useCallback(() => {
     setMetadataLoaded(true);
@@ -159,6 +159,9 @@ function DashPlayer(
   useEffect(() => {
     console.log(isActive, "FROM DASH PLAYER\n");
     if (playerRefSet && isActive) {
+      if (isActive) {
+        playerRef.current.attachView(videoRef.current);
+      }
       console.log("[DASH PLAYER] : playing [isActive]");
       playerRef.current.play();
     } else if (playerRefSet && !isActive) {
