@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DraggableCore } from "react-draggable";
-import { SEEK_TYPE_MOVE } from "../enums/seek_types";
-import usePlaylistStore from "../store/PlaylistStore";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { DraggableCore } from "react-draggable"
+import { SEEK_TYPE_MOVE } from "../enums/seek_types"
+import usePlaylistStore from "../store/PlaylistStore"
 import useVideoStore, {
 	STATE_VIDEO_ERROR,
 	STATE_VIDEO_LOADING,
-} from "../store/VideoStore";
-import VideoControls from "./VideoControls";
+} from "../store/VideoStore"
+import VideoControls from "./VideoControls"
 
 export default function VideoPlaybar({
 	playbarVisible,
@@ -23,9 +23,9 @@ export default function VideoPlaybar({
 		setCurrentTime,
 		currentVideo,
 		markers,
-		currentMarkerIdx,
+		currentMarkerIdx.value,
 		setCurrentMarkerIdx,
-		viewMode,
+		viewMode.value,
 		setVideoState,
 		setPauseReason,
 		videoEvent,
@@ -36,9 +36,9 @@ export default function VideoPlaybar({
 		state.setCurrentTime,
 		state.currentVideo,
 		state.markers,
-		state.currentMarkerIdx,
+		state.currentMarkerIdx.value,
 		state.setCurrentMarkerIdx,
-		state.viewMode,
+		state.viewMode.value,
 		state.setVideoState,
 		state.setPauseReason,
 		state.videoEvent,
@@ -56,18 +56,18 @@ export default function VideoPlaybar({
 	const prevNextMarkers = useMemo(() => {
 		console.log(
 			"CURRENT IDX CHANGED, SETTING PREV NEXT MARKERS",
-			currentMarkerIdx
+			currentMarkerIdx.value
 		);
-		if (currentMarkerIdx === null || !markers || markers.length === 0) {
+		if (currentMarkerIdx.value === null || !markers || markers.length === 0) {
 			return [null, null];
 		}
 
-		if (currentMarkerIdx === markers.length - 1) {
-			return [markers[currentMarkerIdx], null];
+		if (currentMarkerIdx.value === markers.length - 1) {
+			return [markers[currentMarkerIdx.value], null];
 		}
 
-		return [markers[currentMarkerIdx], markers[currentMarkerIdx + 1]];
-	}, [currentMarkerIdx, markers]);
+		return [markers[currentMarkerIdx.value], markers[currentMarkerIdx.value + 1]];
+	}, [currentMarkerIdx.value, markers]);
 
 	// jugaad : if the video is less than 10 seconds, pop it from queue after 7.5 seconds
 	// check if the current time is past the marker, set the current marker index / go back to start of marker
@@ -85,7 +85,7 @@ export default function VideoPlaybar({
 			}, 60);
 		}
 
-		// console.log(viewMode, currentTime, prevNextMarkers);
+		// console.log(viewMode.value, currentTime, prevNextMarkers);
 		// 0 : cur marker, 1 : next marker
 		return () => {
 			if (popTimeout.current) {
@@ -118,11 +118,11 @@ export default function VideoPlaybar({
 			//         prevNextMarkers[1] &&
 			//         currentTime >= prevNextMarkers[1].timestamp
 			//     ) {
-			//         if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+			//         if (viewMode.value === VIDEO_VIEW_STUDENT_MODE) {
 			//             setCurrentMarkerIdx(
-			//                 currentMarkerIdx + 1 > markers.length - 1
+			//                 currentMarkerIdx.value + 1 > markers.length - 1
 			//                     ? 0
-			//                     : currentMarkerIdx + 1
+			//                     : currentMarkerIdx.value + 1
 			//             )
 			//         } else {
 			//             // if in teaching mode, then go to start of current marker
@@ -151,9 +151,9 @@ export default function VideoPlaybar({
 			// currentTime,
 			// setVideoState,
 			// prevNextMarkers,
-			// viewMode,
+			// viewMode.value,
 			// markers,
-			// currentMarkerIdx,
+			// currentMarkerIdx.value,
 			// setCurrentMarkerIdx,
 			// addToSeekQueue,
 			// setPauseReason,
@@ -171,7 +171,7 @@ export default function VideoPlaybar({
 		height: 0,
 	});
 	const [currentBoopPosition, setCurrentBoopPosition] = useState(0);
-	const videoState = useVideoStore((state) => state.videoState);
+	const videoState.value = useVideoStore((state) => state.videoState.value);
 
 	const handleSetBarBounds = () => {
 		if (barRef.current) {
@@ -281,8 +281,8 @@ export default function VideoPlaybar({
 						class={`mt-3 bg-y-green ${
 							mouseDown ? "h-[50%]" : "h-[30%]"
 						} relative transition-all duration-300 ease-linear ${
-							videoState === STATE_VIDEO_ERROR ||
-							videoState === STATE_VIDEO_LOADING
+							videoState.value === STATE_VIDEO_ERROR ||
+							videoState.value === STATE_VIDEO_LOADING
 								? "opacity-0"
 								: "opacity-100"
 						}`}
@@ -304,7 +304,7 @@ export default function VideoPlaybar({
 					nodeRef={draggableHandle}>
 					<div
 						class={`timeboop ${
-							videoState === STATE_VIDEO_ERROR
+							videoState.value === STATE_VIDEO_ERROR
 								? "opacity-0"
 								: "opacity-100"
 						} mt-[18px] w-3 h-3 hover:w-5 hover:h-5  ${
@@ -334,7 +334,7 @@ export default function VideoPlaybar({
 										? "-left-[calc(50%+3.5rem)]"
 										: "-left-[calc(50%+1rem)]"
 								} -top-[calc(50%+1.5rem)] border border-white`}>
-								{videoState === STATE_VIDEO_LOADING
+								{videoState.value === STATE_VIDEO_LOADING
 									? "--:--"
 									: toTimeString(draggedDuration)}
 							</div>
@@ -347,11 +347,11 @@ export default function VideoPlaybar({
 				{/* time */}
 				<p
 					class={`bg-black bg-opacity-40 text-white text-xs absolute right-0 -top-6 border rounded-full px-1`}>
-					{videoState === STATE_VIDEO_LOADING
+					{videoState.value === STATE_VIDEO_LOADING
 						? "--:--"
 						: toTimeString(currentTime.toFixed(0))}
 					/
-					{videoState === STATE_VIDEO_LOADING
+					{videoState.value === STATE_VIDEO_LOADING
 						? "--:--"
 						: toTimeString(duration.toFixed(0))}
 				</p>

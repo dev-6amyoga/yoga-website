@@ -25,21 +25,21 @@ export default function Video() {
 	// 	const handleKeyDown = (event) => {
 	// 		// console.log({
 	// 		// 	playlistState,
-	// 		// 	videoState,
-	// 		// 	viewMode,
+	// 		// 	videoState.value,
+	// 		// 	viewMode.value,
 	// 		// 	key: event.key,
 	// 		// });
 	// 		const state = useVideoStore.getState();
-	// 		const viewMode = state.viewMode;
-	// 		const videoState = state.videoState;
+	// 		const viewMode.value = state.viewMode.value;
+	// 		const videoState.value = state.videoState.value;
 	// 		const markers = state.markers;
-	// 		const currentMarkerIdx = state.currentMarkerIdx;
+	// 		const currentMarkerIdx.value = state.currentMarkerIdx.value;
 
 	// 		// TODO : fix plalist state when start is clicked
 	// 		if (
-	// 			videoState === null ||
-	// 			videoState === STATE_VIDEO_ERROR ||
-	// 			videoState === STATE_VIDEO_LOADING
+	// 			videoState.value === null ||
+	// 			videoState.value === STATE_VIDEO_ERROR ||
+	// 			videoState.value === STATE_VIDEO_LOADING
 	// 		) {
 	// 			return;
 	// 		}
@@ -47,25 +47,25 @@ export default function Video() {
 	// 			case "PageUp":
 	// 				event.preventDefault();
 
-	// 				if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+	// 				if (viewMode.value === VIDEO_VIEW_STUDENT_MODE) {
 	// 					console.log("Move to prev video");
 	// 					popFromArchive(-1);
-	// 				} else if (viewMode === VIDEO_VIEW_TEACHING_MODE) {
+	// 				} else if (viewMode.value === VIDEO_VIEW_TEACHING_MODE) {
 	// 					//
 	// 					console.log("Move to prev marker");
-	// 					console.log(markers, currentMarkerIdx);
+	// 					console.log(markers, currentMarkerIdx.value);
 	// 					handlePrevMarker();
 	// 				}
 	// 				break;
 	// 			case "PageDown":
 	// 				event.preventDefault();
 
-	// 				if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+	// 				if (viewMode.value === VIDEO_VIEW_STUDENT_MODE) {
 	// 					console.log("Move to next video");
 	// 					popFromQueue(0);
-	// 				} else if (viewMode === VIDEO_VIEW_TEACHING_MODE) {
+	// 				} else if (viewMode.value === VIDEO_VIEW_TEACHING_MODE) {
 	// 					console.log("Move to next marker");
-	// 					console.log(markers, currentMarkerIdx);
+	// 					console.log(markers, currentMarkerIdx.value);
 	// 					handleNextMarker();
 	// 				}
 	// 				break;
@@ -88,7 +88,7 @@ export default function Video() {
 	});
 
 	return (
-		<div class={`toplvlpage relative mx-auto`}>
+		<div class={`toplvlpage relative max-w-7xl mx-auto`}>
 			<VideoPlayerWrapper />
 			<Playlist />
 			{/* <button

@@ -4,21 +4,37 @@ import { Show } from "solid-js";
 import useVideoStore from "../../store/VideoStore";
 
 export default function VideoInfo() {
-	const videoStore = useVideoStore.getState();
-	const markers = videoStore.markers;
-	const setMarkers = videoStore.setMarkers;
-	const currentMarkerIdx = videoStore.currentMarkerIdx;
-	const setCurrentMarkerIdx = videoStore.setCurrentMarkerIdx;
-	const addToSeekQueue = videoStore.addToSeekQueue;
-	const videoEvent = videoStore.videoEvent;
-	const setVideoEvent = videoStore.setVideoEvent;
-	const seekQueue = videoStore.seekQueue;
-	const videoState = videoStore.videoState;
-	const viewMode = videoStore.viewMode;
-	const pauseReason = videoStore.pauseReason;
-	const currentVideo = videoStore.currentVideo;
-	const currentTime = videoStore.currentTime;
-	const devMode = videoStore.devMode;
+	const [
+		markers,
+		setMarkers,
+		currentMarkerIdx,
+		setCurrentMarkerIdx,
+		addToSeekQueue,
+		videoEvent,
+		setVideoEvent,
+		seekQueue,
+		videoState,
+		viewMode,
+		pauseReason,
+		currentVideo,
+		currentTime,
+		devMode,
+	] = useVideoStore((state) => [
+		state.markers,
+		state.setMarkers,
+		state.currentMarkerIdx,
+		state.setCurrentMarkerIdx,
+		state.addToSeekQueue,
+		state.videoEvent,
+		state.setVideoEvent,
+		state.seekQueue,
+		state.videoState,
+		state.viewMode,
+		state.pauseReason,
+		state.currentVideo,
+		state.currentTime,
+		state.devMode,
+	]);
 
 	// useEffect(() => {
 	// 	if (currentVideo) {
@@ -31,19 +47,19 @@ export default function VideoInfo() {
 
 	// useEffect(() => {
 	//     if (
-	//         currentMarkerIdx !== null &&
+	//         currentMarkerIdx.value !== null &&
 	//         videoEvent === VIDEO_EVENT_MOVING_MARKER
 	//     ) {
 	//         addToSeekQueue({
-	//             t: markers[currentMarkerIdx].timestamp,
+	//             t: markers[currentMarkerIdx.value].timestamp,
 	//             type: 'move',
 	//         })
 	//     }
-	// }, [currentMarkerIdx, addToSeekQueue, markers, videoEvent])
+	// }, [currentMarkerIdx.value, addToSeekQueue, markers, videoEvent])
 
 	return (
 		<div class="">
-			<Show when={devMode}>
+			<Show when={devMode.value}>
 				<div class="flex w-full gap-4 border my-5">
 					<pre class="flex-1">
 						{JSON.stringify({ seekQueue }, null, 4)}
@@ -51,11 +67,11 @@ export default function VideoInfo() {
 					<pre class="flex-1">
 						{JSON.stringify(
 							{
-								currentMarkerIdx,
-								videoState,
+								currentMarkerIdx: currentMarkerIdx.value,
+								videoState: videoState.value,
 								pauseReason,
-								viewMode,
-								currentTime,
+								viewMode: viewMode.value,
+								currentTime: currentTime.value,
 							},
 							null,
 							4
@@ -76,9 +92,9 @@ export default function VideoInfo() {
 						markers.map((k, idx) => {
 							return (
 								<p
-									key={k.timestamp + String(currentMarkerIdx)}
+									key={k.timestamp + String(currentMarkerIdx.value)}
 									class={`m-0 rounded-full border-2 px-2 py-1 text-sm hover:cursor-pointer ${
-										currentMarkerIdx === idx
+										currentMarkerIdx.value === idx
 											? "border-y-green"
 											: ""
 									}`}

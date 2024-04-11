@@ -66,7 +66,7 @@ function VideoPlayer() {
 		shallow
 	);
 
-	console.log({ setPlaylistState, playlistState: playlistState });
+	// console.log({ setPlaylistState, playlistState: playlistState });
 
 	// watch history store
 	// let [addToCommittedTs] = useWatchHistoryStore((state) => [
@@ -77,25 +77,6 @@ function VideoPlayer() {
 	const [duration, setDuration] = createSignal(0);
 
 	// const draggableHandle = useRef(null);
-
-	createEffect(
-		on(
-			// dependencies
-			[() => queue, () => playlistState],
-			(v) => {
-				console.log("Queue or playlistState changed : ", {
-					v,
-				});
-				// if (queue && queue.length > 0 && playlistState) {
-				// 	setCurrentVideo(queue[0]);
-				// } else {
-				// 	setCurrentVideo(null);
-				// 	setVideoState(STATE_VIDEO_LOADING);
-				// 	setPlaylistState(false);
-				// }
-			}
-		)
-	);
 
 	const handleReset = () => {
 		setCurrentMarkerIdx(null);
@@ -112,17 +93,17 @@ function VideoPlayer() {
 		let currentMarker = null;
 
 		if (
-			state.currentMarkerIdx === null ||
+			state.currentMarkerIdx.value === null ||
 			!state.markers ||
 			state.markers.length === 0
 		) {
 			currentMarker = null;
 		} else {
-			currentMarker = state.markers[state.currentMarkerIdx];
+			currentMarker = state.markers[state.currentMarkerIdx.value];
 		}
 
 		// check if teaching mode, loopback to previous marker
-		if (state.viewMode === VIDEO_VIEW_TEACHING_MODE) {
+		if (state.viewMode.value === VIDEO_VIEW_TEACHING_MODE) {
 			if (currentMarker && currentMarker?.loop) {
 				console.log(
 					"VIDEO END : TEACHING MODE: moving to ",
@@ -153,22 +134,24 @@ function VideoPlayer() {
 
 		if (isActive) {
 			let state = useVideoStore.getState();
-			let videoState = state.videoState;
+			let videoState = state.videoState.value;
 			let markersLength = state?.markers?.length || 0;
-			let currentMarkerIdx = state.currentMarkerIdx;
+			let currentMarkerIdx = state.currentMarkerIdx.value;
 			let pauseReason = state.pauseReason;
 
-			if (videoState === STATE_VIDEO_PAUSED) {
+			if (videoState.value === STATE_VIDEO_PAUSED) {
 				if (pauseReason === VIDEO_PAUSE_MARKER) {
 					console.log("VIDEO PLAY : PAUSE REASON MARKER");
 					// autoSetCurrentMarkerIdx()
 					// set next marker
-					setCurrentMarkerIdx((currentMarkerIdx + 1) % markersLength);
+					setCurrentMarkerIdx(
+						(currentMarkerIdx.value + 1) % markersLength
+					);
 					setPauseReason(null);
 				}
 			}
 
-			if (videoState !== STATE_VIDEO_PLAY) {
+			if (videoState.value !== STATE_VIDEO_PLAY) {
 				setVideoState(STATE_VIDEO_PLAY);
 			}
 		}
@@ -197,19 +180,19 @@ function VideoPlayer() {
 	};
 
 	const handleStartPlaylist = () => {
-		if (currentVideo === null && queue.length > 0) {
+		if (currentVideo.value === null && queue.length > 0) {
 			console.log("Playlist start --------------------->");
 			setPlaylistState(true);
 		}
 	};
 
 	// const handleAlternatePlayPause = useCallback(() => {
-	// 	if (videoState === STATE_VIDEO_PLAY) {
+	// 	if (videoState.value === STATE_VIDEO_PLAY) {
 	// 		handleSetPause();
-	// 	} else if (videoState === STATE_VIDEO_PAUSED) {
+	// 	} else if (videoState.value === STATE_VIDEO_PAUSED) {
 	// 		handleSetPlay();
 	// 	}
-	// }, [videoState, handleSetPlay, handleSetPause]);
+	// }, [videoState.value, handleSetPlay, handleSetPause]);
 
 	// const handleFullScreen = useFullScreenHandle();
 
@@ -225,16 +208,33 @@ function VideoPlayer() {
 
 	createEffect(
 		on(
-			() => queue,
-			() => {
+			// dependencies
+			[() => queue.length, () => playlistState.value],
+			(v) => {
+				console.log("Queue or playlistState changed : ", {
+					v,
+				});
+				if (queue && queue.length > 0 && playlistState.value) {
+					setCurrentVideo(queue[0]);
+				} else {
+					setCurrentVideo(null);
+					setVideoState(STATE_VIDEO_LOADING);
+					setPlaylistState(false);
+				}
+			}
+		)
+	);
+
+	createEffect(
+		on(
+			() => queue.length,
+			(q) => {
 				console.log("Queue changed : called");
 				let timeout = null;
 
 				if (timeout) {
 					clearTimeout(timeout);
 				}
-
-				let q = queue;
 
 				if (q.length > 0) {
 					console.log("VIDEOPLAYER.js : Setting first video");
@@ -273,15 +273,14 @@ function VideoPlayer() {
 	);
 
 	createEffect(
-		on(
-			() => currentVideo,
-			() => queue,
-			() => {
-				if (currentVideo) {
-					console.log(currentVideo.queue_id);
-				}
+		on([() => currentVideo.value, () => queue], (v) => {
+			const currentVideo = v[0];
+			const queue = v[1];
+
+			if (currentVideo && currentVideo.value) {
+				console.log(currentVideo.value.queue_id);
 			}
-		)
+		})
 	);
 
 	return (
@@ -290,8 +289,8 @@ function VideoPlayer() {
 				fullScreen ? "h-screen" : "rounded-xl overflow-hidden"
 			}`}>
 			<div>
-				{String(playlistState)}
-				{queue.length}
+				{String(playlistState.value)}|{queue.length}
+				{/* {JSON.stringify(currentVideo)} */}|{videos().length}
 				<button
 					onClick={() => {
 						console.log("setting ...");
@@ -303,7 +302,11 @@ function VideoPlayer() {
 			</div>
 			<div class={`mx-auto aspect-video ${fullScreen ? "h-full" : ""}`}>
 				<Show
-					when={currentVideo !== null && currentVideo !== undefined}
+					when={
+						currentVideo &&
+						currentVideo.value !== null &&
+						currentVideo.value !== undefined
+					}
 					fallback={
 						<Show when={queue.length > 0} fallback={<p></p>}>
 							<div class="flex flex-col items-center justify-center gap-4 text-lg w-full h-full border border-red-500">
@@ -314,7 +317,7 @@ function VideoPlayer() {
 						</Show>
 					}>
 					<Show
-						when={videoState !== STATE_VIDEO_ERROR}
+						when={videoState.value !== STATE_VIDEO_ERROR}
 						fallback={
 							<div class="flex flex-col items-center justify-center gap-4 text-lg w-full h-full border border-red-500">
 								<p>Error : Video playback error</p>
@@ -350,7 +353,7 @@ function VideoPlayer() {
 													// 	}
 													// 	handleFullScreen={() => {}}
 													// />
-													<pre class="">
+													<pre class="text-black border border-purple-600">
 														{JSON.stringify(
 															queueItem
 														)}

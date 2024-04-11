@@ -17,10 +17,13 @@ const popFromQueue = globalPlaylistStore.popFromQueue;
 
 export const handleToggleMode = () => {
 	const videoStore = useVideoStore.getState();
-	console.log("Switching modes ==> Current mode: ", videoStore.viewMode);
+	console.log(
+		"Switching modes ==> Current mode: ",
+		videoStore.viewMode.value
+	);
 
 	setViewMode(
-		videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE
+		videoStore.viewMode.value === VIDEO_VIEW_STUDENT_MODE
 			? VIDEO_VIEW_TEACHING_MODE
 			: VIDEO_VIEW_STUDENT_MODE
 	);
@@ -30,7 +33,7 @@ export const handlePrevMarker = () => {
 	// console.log("Prev Marker Clicked");
 	const videoStore = useVideoStore.getState();
 	const markers = videoStore.markers;
-	const currentMarkerIdx = videoStore.currentMarkerIdx;
+	const currentMarkerIdx = videoStore.currentMarkerIdx.value;
 
 	console.log("Prev Marker", markers.length);
 	if (markers.length > 0) {
@@ -58,11 +61,11 @@ export const handleNextMarker = () => {
 	console.log("Next Marker Clicked");
 	const videoStore = useVideoStore.getState();
 	const markers = videoStore.markers;
-	const currentMarkerIdx = videoStore.currentMarkerIdx;
+	const currentMarkerIdx = videoStore.currentMarkerIdx.value;
 
 	console.log("Next Marker", markers.length);
 	if (markers.length > 0) {
-		const idx = (currentMarkerIdx || 0) + 1;
+		const idx = (currentMarkerIdx.value || 0) + 1;
 
 		if (idx >= markers.length) {
 			popFromQueue(0);

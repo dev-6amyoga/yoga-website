@@ -26,10 +26,10 @@ const useVideoStore = createWithStore((set) => ({
 		}),
 
 	// currentVideo is the video object that is currently playing
-	currentVideo: null,
+	currentVideo: { value: null },
 	setCurrentVideo: (item) =>
 		set(() => {
-			return { currentVideo: item };
+			return { currentVideo: { value: item } };
 		}),
 
 	markers: [],
@@ -37,11 +37,13 @@ const useVideoStore = createWithStore((set) => ({
 		set(() => {
 			return { markers };
 		}),
-	currentMarkerIdx: null,
+
+	currentMarkerIdx: { value: null },
 	setCurrentMarkerIdx: (idx) =>
 		set(() => {
-			return { currentMarkerIdx: idx };
+			return { currentMarkerIdx: { value: idx } };
 		}),
+
 	autoSetCurrentMarkerIdx: (currentTime = undefined) => {
 		set((state) => {
 			let ct = currentTime ?? state.currentTime;
@@ -50,12 +52,12 @@ const useVideoStore = createWithStore((set) => ({
 
 			// if no markers, dont bother
 			if (state.markers.length === 0) {
-				return { currentMarkerIdx: null };
+				return { currentMarkerIdx: { value: null } };
 			}
 
 			// if the current time is less than the first marker, set to null
 			if (ct < state.markers[0].timestamp) {
-				return { currentMarkerIdx: null };
+				return { currentMarkerIdx: { value: null } };
 			}
 
 			// find the first marker that is greater than the current time
@@ -64,40 +66,36 @@ const useVideoStore = createWithStore((set) => ({
 
 			// if the current time is greater than the last marker, set to last marker
 			if (idx === -2) {
-				return { currentMarkerIdx: state.markers.length - 1 };
+				return {
+					currentMarkerIdx: { value: state.markers.length - 1 },
+				};
 			}
 
-			return { currentMarkerIdx: idx };
+			return { currentMarkerIdx: { value: idx } };
 		});
 	},
 
-	videoEvent: null,
-	setVideoEvent: (videoEvent) =>
-		set(() => {
-			return { videoEvent };
-		}),
-
 	// videoState is one of the STATE_VIDEO_* constants
-	videoState: STATE_VIDEO_LOADING,
+	videoState: { value: STATE_VIDEO_LOADING },
 	setVideoState: (vs) =>
 		set(() => {
-			return { videoState: vs };
+			return { videoState: { value: vs } };
 		}),
 
 	// pauseReason : if the pause is cause by a marker or a normal pause
-	pauseReason: null,
+	pauseReason: { value: null },
 	setPauseReason: (pauseReason) => {
 		set(() => {
-			return { pauseReason };
+			return { pauseReason: { value: pauseReason } };
 		});
 	},
 
 	//
-	playbackRate: 1.0,
+	playbackRate: { value: 1.0 },
 	setPlaybackRate: (rate) =>
 		set(() => {
 			return {
-				playbackRate: rate,
+				playbackRate: { value: rate },
 			};
 		}),
 
@@ -107,10 +105,11 @@ const useVideoStore = createWithStore((set) => ({
 			return { autoplayInitialized: { value: autoplayInitialized } };
 		});
 	},
-	volume: 0.0,
+
+	volume: { value: 0.0 },
 	setVolume: (volume) => {
 		set(() => {
-			return { volume };
+			return { volume: { value: volume } };
 		});
 	},
 
@@ -125,6 +124,7 @@ const useVideoStore = createWithStore((set) => ({
 				pauseReason: null,
 			};
 		}),
+
 	popFromSeekQueue: (index) =>
 		set((state) => {
 			if (state.seekQueue.length > index) {
@@ -138,82 +138,29 @@ const useVideoStore = createWithStore((set) => ({
 			return {};
 		}),
 
-	currentTime: 0,
+	currentTime: { value: 0 },
 	setCurrentTime: (time) =>
 		set(() => {
-			return { currentTime: time };
+			return { currentTime: { value: time } };
 		}),
 
-	viewMode: VIDEO_VIEW_STUDENT_MODE,
+	viewMode: { value: VIDEO_VIEW_STUDENT_MODE },
 	setViewMode: (mode) =>
 		set(() => {
-			return { viewMode: mode };
+			return { viewMode: { value: mode } };
 		}),
 
-	commitSeekTime: -1,
+	commitSeekTime: { value: -1 },
 	setCommitSeekTime: (time) =>
 		set(() => {
-			return { commitSeekTime: time };
+			return { commitSeekTime: { value: time } };
 		}),
 
-	playreadyKeyUrl: null,
+	playreadyKeyUrl: { value: null },
 	setPlayreadyKeyUrl: (url) =>
 		set(() => {
-			return { playreadyKeyUrl: url };
+			return { playreadyKeyUrl: { value: url } };
 		}),
 }));
-
-// const [videoStore, setVideoStore] = createStore({
-// 	devMode: false,
-// 	fullScreen: false,
-// 	playlistState: false,
-// 	currentVideo: null,
-// 	markers: [],
-// 	currentMarkerIdx: null,
-// 	videoEvent: null,
-// 	videoState: STATE_VIDEO_LOADING,
-// 	pauseReason: null,
-// 	playbackRate: 1.0,
-// 	autoplayInitialized: false,
-// 	volume: 0.0,
-// 	seekQueue: [],
-// 	currentTime: 0,
-// 	viewMode: VIDEO_VIEW_STUDENT_MODE,
-// 	commitSeekTime: -1,
-// 	playreadyKeyUrl: null,
-// });
-
-// const setDevMode = (dm) => setVideoStore("devMode", dm);
-// const setFullScreen = (fs) => setVideoStore("fullScreen", fs);
-// const setPlaylistState = (ps) => setVideoStore("playlistState", ps);
-// const setCurrentVideo = (item) => setVideoStore("currentVideo", item);
-// const setMarkers = (markers) => setVideoStore("markers", markers);
-// const setCurrentMarkerIdx = (idx) => setVideoStore("currentMarkerIdx", idx);
-// const setVideoEvent = (videoEvent) => setVideoStore("videoEvent", videoEvent);
-// const setVideoState = (vs) => setVideoStore("videoState", vs);
-// const setPauseReason = (pauseReason) =>
-// 	setVideoStore("pauseReason", pauseReason);
-// const setPlaybackRate = (rate) => setVideoStore("playbackRate", rate);
-// const setAutoplayInitialized = (autoplayInitialized) =>
-// 	setVideoStore("autoplayInitialized", autoplayInitialized);
-// const setVolume = (volume) => setVideoStore("volume", volume);
-// const addToSeekQueue = (seekEvent) =>
-// 	setVideoStore("seekQueue", (sq) => [...sq, seekEvent]);
-// const popFromSeekQueue = (index) =>
-// 	setVideoStore("seekQueue", (sq) => {
-// 		if (sq.length > index) {
-// 			sq.splice(index, 1);
-// 		}
-// 		return sq;
-// 	});
-
-// const autoSetCurrentMarkerIdx = (currentTime) => {
-// 	const state = videoStore();
-// 	let ct = currentTime ?? state.currentTime;
-// };
-// const setCurrentTime = (time) => setVideoStore("currentTime", time);
-// const setViewMode = (mode) => setVideoStore("viewMode", mode);
-// const setCommitSeekTime = (time) => setVideoStore("commitSeekTime", time);
-// const setPlayreadyKeyUrl = (url) => setVideoStore("playreadyKeyUrl", url);
 
 export default useVideoStore;
