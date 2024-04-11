@@ -1,12 +1,12 @@
 import dashjs from "dashjs";
 import {
-	forwardRef,
-	memo,
-	useCallback,
-	useEffect,
-	useImperativeHandle,
-	useRef,
-	useState,
+    forwardRef,
+    memo,
+    useCallback,
+    useEffect,
+    useImperativeHandle,
+    useRef,
+    useState,
 } from "react";
 import { dashSettings } from "../lib/dashjs-settings";
 import useVideoStore from "../store/VideoStore";
@@ -92,7 +92,7 @@ function DashPlayer(
 			const isMobile = { done: true, check: check };
 			console.log("Checking for isMobile", isMobile);
 			const store = useVideoStore.getState();
-			const playreadyKeyUrl = store.playreadyKeyUrl;
+			const playreadyKeyUrl.value = store.playreadyKeyUrl.value;
 			const setPlayreadyKeyUrl = store.setPlayreadyKeyUrl;
 
 			//console.log("Fetching DRM Info");
@@ -127,11 +127,11 @@ function DashPlayer(
 						});
 				} else {
 					// Non Mobile
-					if (playreadyKeyUrl) {
+					if (playreadyKeyUrl.value) {
 						console.log("[DASH PLAYER] : playready token cached");
 						playerRef.current.setProtectionData({
 							"com.microsoft.playready": {
-								serverURL: playreadyKeyUrl,
+								serverURL: playreadyKeyUrl.value,
 							},
 						});
 						setDrmSet(true);

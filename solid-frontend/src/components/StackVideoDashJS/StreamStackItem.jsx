@@ -114,7 +114,7 @@ function StreamStackItem({
 		//
 		state.currentVideo,
 		//
-		state.videoState,
+		state.videoState.value,
 		state.setVideoState,
 		//
 		state.setCurrentTime,
@@ -128,18 +128,18 @@ function StreamStackItem({
 		state.videoEvent,
 		state.setVideoEvent,
 		//
-		state.currentMarkerIdx,
+		state.currentMarkerIdx.value,
 		state.setCurrentMarkerIdx,
 		state.autoSetCurrentMarkerIdx,
 		state.markers,
 		//
-		state.viewMode,
+		state.viewMode.value,
 		state.setViewMode,
 		//
 		state.pauseReason,
 		state.setPauseReason,
 		//
-		state.commitSeekTime,
+		state.commitSeekTime.value,
 		state.setCommitSeekTime,
 		//
 		state.devMode,
@@ -246,7 +246,7 @@ function StreamStackItem({
 	// change play/pause based on video state
 	useEffect(() => {
 		console.log("VIDEO_STATE_CHANGE", {
-			videoState,
+			videoState: videoState.value,
 			isActive,
 			metadataLoaded,
 			autoplayInitialized,
@@ -260,12 +260,12 @@ function StreamStackItem({
 			playerRef.current !== undefined
 		) {
 			setPauseReason(null);
-			if (videoState === STATE_VIDEO_PAUSED) {
+			if (videoState.value === STATE_VIDEO_PAUSED) {
 				console.log("useEffect : changing to pause", video.idx);
 				if (isActiveRef.current) {
 					playerRef.current.player.pause();
 				}
-			} else if (videoState === STATE_VIDEO_PLAY) {
+			} else if (videoState.value === STATE_VIDEO_PLAY) {
 				console.log("useEffect : changing to play", video.idx);
 				if (isActiveRef.current) {
 					playerRef.current.player.play();
@@ -275,7 +275,7 @@ function StreamStackItem({
 	}, [
 		video,
 		metadataLoaded,
-		videoState,
+		videoState.value,
 		isActive,
 		autoplayInitialized,
 		setAutoplayInitialized,
@@ -371,13 +371,13 @@ function StreamStackItem({
 		const checkSeek = (ct) => {
 			// check if seekQueue length is greater than 0,
 			// check if the current time is === to the marker time
-			// console.log("Checking seek", ct, commitSeekTime, seekQueue.length);
+			// console.log("Checking seek", ct, commitSeekTime.value, seekQueue.length);
 			if (
 				seekQueue.length > 0 &&
-				commitSeekTime.toFixed(0) === ct.toFixed(0)
+				commitSeekTime.value.toFixed(0) === ct.toFixed(0)
 			) {
 				if (isActive) handleLoading(false, isActive);
-				autoSetCurrentMarkerIdx(commitSeekTime);
+				autoSetCurrentMarkerIdx(commitSeekTime.value);
 				return true;
 			} else {
 				return false;
@@ -385,18 +385,20 @@ function StreamStackItem({
 		};
 
 		const checkPauseOrLoop = (ct) => {
-			// console.log("checkPauseOrLoop : ", ct, viewMode);
-			if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+			// console.log("checkPauseOrLoop : ", ct, viewMode.value);
+			if (viewMode.value === VIDEO_VIEW_STUDENT_MODE) {
 				// console.log("STUDENT --------->");
 				return false;
 			} else {
 				// console.log("TEACHER --------->");
 				// either pause or loop
-				let currentMarker = markers[currentMarkerIdx];
+				let currentMarker = markers[currentMarkerIdx.value];
 
-				if (currentMarkerIdx === markers.length - 1) {
+				if (currentMarkerIdx.value === markers.length - 1) {
 					return false;
-				} else if (ct > markers[currentMarkerIdx + 1]?.timestamp) {
+				} else if (
+					ct > markers[currentMarkerIdx.value + 1]?.timestamp
+				) {
 					if (currentMarker.loop) {
 						console.log("LOOPING CUZ OF MARKER");
 						addToSeekQueue({
@@ -424,7 +426,7 @@ function StreamStackItem({
 
 				// pause if currenttime is greater than the timestamp of next?
 				if (
-					videoState !== STATE_VIDEO_LOADING &&
+					videoState.value !== STATE_VIDEO_LOADING &&
 					checkPauseOrLoop(
 						playerRef.current?.videoElement?.currentTime
 					)
@@ -433,9 +435,9 @@ function StreamStackItem({
 				}
 
 				if (
-					videoState !== STATE_VIDEO_LOADING ||
-					videoState !== STATE_VIDEO_ERROR ||
-					videoState !== STATE_VIDEO_PAUSED
+					videoState.value !== STATE_VIDEO_LOADING ||
+					videoState.value !== STATE_VIDEO_ERROR ||
+					videoState.value !== STATE_VIDEO_PAUSED
 				) {
 					autoSetCurrentMarkerIdx(
 						playerRef.current?.videoElement?.currentTime
@@ -454,18 +456,18 @@ function StreamStackItem({
 		currentVideo,
 		isActive,
 		setCurrentTime,
-		videoState,
+		videoState.value,
 		popFromSeekQueue,
 		autoSetCurrentMarkerIdx,
 		seekQueue,
 		setVideoEvent,
 		setCurrentMarkerIdx,
 		markers,
-		viewMode,
-		currentMarkerIdx,
+		viewMode.value,
+		currentMarkerIdx.value,
 		setVideoState,
 		addToSeekQueue,
-		commitSeekTime,
+		commitSeekTime.value,
 		setPauseReason,
 		handleLoading,
 		setVolume,
@@ -633,7 +635,7 @@ function StreamStackItem({
 		(e) => {
 			setMetadataLoaded(true);
 			const state = useVideoStore.getState();
-			console.log("Can play through...", state.videoState);
+			console.log("Can play through...", state.videoState.value);
 			// tryToPlay();
 			setVideoState(STATE_VIDEO_PLAY);
 		},
@@ -650,7 +652,7 @@ function StreamStackItem({
 	const handlePlay = useCallback(() => {
 		if (isActive) {
 			const state = useVideoStore.getState();
-			if (state.videoState !== STATE_VIDEO_PLAY) {
+			if (state.videoState.value !== STATE_VIDEO_PLAY) {
 				console.log(
 					"PLAYING ----------------------------->",
 					video.idx
@@ -665,7 +667,7 @@ function StreamStackItem({
 	const handlePause = useCallback(() => {
 		if (isActive) {
 			const state = useVideoStore.getState();
-			if (state.videoState !== STATE_VIDEO_PAUSED) {
+			if (state.videoState.value !== STATE_VIDEO_PAUSED) {
 				console.log(
 					"PAUSING ----------------------------->",
 					video.idx
@@ -714,14 +716,14 @@ function StreamStackItem({
 						{String(isActiveRef.current)}
 					</p>
 					<p>Video IDX : {video?.idx}</p>
-					<p>videoState: {videoState}</p>
+					<p>videoState.value: {videoState.value}</p>
 					<p>pauseReason: {pauseReason}</p>
-					<p>viewMode: {viewMode}</p>
-					<p>currentMarkerIdx: {currentMarkerIdx}</p>
+					<p>viewMode.value: {viewMode.value}</p>
+					<p>currentMarkerIdx.value: {currentMarkerIdx.value}</p>
 					<p>metadataLoaded: {String(metadataLoaded)}</p>
 					<p>autoplayInitialized: {String(autoplayInitialized)}</p>
 					<p>playerLoaded: {String(playerLoaded)}</p>
-					<p>commitSeekTime: {commitSeekTime}</p>
+					<p>commitSeekTime.value: {commitSeekTime.value}</p>
 					<p>volume: {volume}</p>
 					<p>fullScreen: {String(fullScreen)}</p>
 					<div>
