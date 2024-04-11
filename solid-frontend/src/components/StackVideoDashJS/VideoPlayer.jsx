@@ -28,6 +28,7 @@ function VideoPlayer() {
 		shallow
 	);
 
+	// zustand store
 	const [
 		currentVideo,
 		setCurrentVideo,
@@ -65,7 +66,7 @@ function VideoPlayer() {
 		shallow
 	);
 
-	console.log({ setPlaylistState, playlistState: playlistState.enabled });
+	console.log({ setPlaylistState, playlistState: playlistState });
 
 	// watch history store
 	// let [addToCommittedTs] = useWatchHistoryStore((state) => [
@@ -80,20 +81,18 @@ function VideoPlayer() {
 	createEffect(
 		on(
 			// dependencies
-			() => queue,
-			() => playlistState,
-			() => {
+			[() => queue, () => playlistState],
+			(v) => {
 				console.log("Queue or playlistState changed : ", {
-					queue,
-					playlistState,
+					v,
 				});
-				if (queue && queue.length > 0 && playlistState) {
-					setCurrentVideo(queue[0]);
-				} else {
-					setCurrentVideo(null);
-					setVideoState(STATE_VIDEO_LOADING);
-					setPlaylistState(false);
-				}
+				// if (queue && queue.length > 0 && playlistState) {
+				// 	setCurrentVideo(queue[0]);
+				// } else {
+				// 	setCurrentVideo(null);
+				// 	setVideoState(STATE_VIDEO_LOADING);
+				// 	setPlaylistState(false);
+				// }
 			}
 		)
 	);
@@ -291,7 +290,7 @@ function VideoPlayer() {
 				fullScreen ? "h-screen" : "rounded-xl overflow-hidden"
 			}`}>
 			<div>
-				{String(playlistState.enabled)}
+				{String(playlistState)}
 				{queue.length}
 				<button
 					onClick={() => {
