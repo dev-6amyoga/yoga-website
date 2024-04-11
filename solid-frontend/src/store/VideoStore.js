@@ -7,22 +7,22 @@ export const STATE_VIDEO_PLAY = "PLAY",
 	STATE_VIDEO_ERROR = "ERROR";
 
 const useVideoStore = createWithStore((set) => ({
-	devMode: false,
+	devMode: { value: false },
 	setDevMode: (dm) =>
 		set(() => {
-			return { devMode: dm };
+			return { devMode: { value: dm } };
 		}),
 
-	fullScreen: false,
+	fullScreen: { value: false },
 	setFullScreen: (fs) =>
 		set(() => {
-			return { fullScreen: fs };
+			return { fullScreen: { value: fs } };
 		}),
 
-	playlistState: { enabled: false },
+	playlistState: { value: false },
 	setPlaylistState: (ps) =>
 		set(() => {
-			return { playlistState: { enabled: ps } };
+			return { playlistState: { value: ps } };
 		}),
 
 	// currentVideo is the video object that is currently playing
@@ -101,10 +101,10 @@ const useVideoStore = createWithStore((set) => ({
 			};
 		}),
 
-	autoplayInitialized: false,
+	autoplayInitialized: { value: false },
 	setAutoplayInitialized: (autoplayInitialized) => {
 		set(() => {
-			return { autoplayInitialized };
+			return { autoplayInitialized: { value: autoplayInitialized } };
 		});
 	},
 	volume: 0.0,
