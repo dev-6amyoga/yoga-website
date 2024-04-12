@@ -1,5 +1,8 @@
-import { createWithStore } from "solid-zustand";
+import { createContext } from "solid-js";
+import { produce } from "solid-js/store";
 import { v5 as uuidV5 } from "uuid";
+import { createStore } from "zustand";
+import createWithStore from "../utils/createWithStore";
 
 const usePlaylistStore = createWithStore((set) => ({
 	// playlist metadata state
@@ -105,5 +108,107 @@ const usePlaylistStore = createWithStore((set) => ({
 			return {};
 		}),
 }));
+
+export const PlaylistStoreContext = createContext([
+	{
+		queueMetadata: {},
+		queue: [],
+		archive: [],
+	},
+	{},
+]);
+
+export const PlaylistStoreProvider = (props) => {
+	const [store, setStore] = createStore({
+		queueMetadata: {},
+		queue: [],
+		archive: [],
+	});
+
+	const playlistStore = [
+		store,
+		{
+			setQueueMetadata: (videoId, metadata, value) =>
+				setStore(
+					produce((state) => {
+						const qm = { ...state.queueMetadata };
+						if (!qm[videoId]) {
+							qm[videoId] = {};
+						}
+						qm[videoId][metadata] = value;
+
+						state.queueMetadata = qm;
+					})
+				),
+
+			addToQueue: (items) =>
+				setStore(
+					produce((state) => {
+						items.forEach((i, idx) => {
+							const vi_id = i?._id || i?.id;
+							// console.log('vi_id', vi_id)
+							// console.log({ video: i });
+							state.queue.push({
+								video: i,
+								idx: state.queue.length + idx + 1,
+								queue_id: uuidV5(
+									vi_id + Math.floor(Math.random() * 100000),
+									"ed46bc72-c770-4478-a8af-6183469acb64"
+								),
+							});
+						});
+					})
+				),
+
+			popFromQueue: (index) =>
+				set((state) => {
+					if (state.queue.length > index) {
+						const removed = state.queue.splice(index, 1);
+						state.archive.splice(
+							state.archive.length - 1,
+							0,
+							removed[0]
+						);
+					}
+				}),
+
+			clearQueue: () =>
+				setStore(
+					produce((state) => {
+						state.queue = [];
+					})
+				),
+
+			clearArchive: () =>
+				setStore(
+					produce((state) => {
+						state.archive = [];
+					})
+				),
+
+			popFromArchive: (index) =>
+				setStore(
+					produce((state) => {
+						if (state.archive.length > index + 1) {
+							let i = index;
+							if (index === -1) {
+								i = state.archive.length - 1;
+							}
+							// const a = [...];
+							const removed = state.archive.splice(i, 1);
+
+							state.queue.splice(0, 0, removed[0]);
+						}
+					})
+				),
+		},
+	];
+
+	return (
+		<PlaylistStoreContext.Provider value={playlistStore}>
+			{props.children}
+		</PlaylistStoreContext.Provider>
+	);
+};
 
 export default usePlaylistStore;
