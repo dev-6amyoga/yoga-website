@@ -18,11 +18,6 @@ import { VIDEO_VIEW_TEACHING_MODE } from "../../enums/video_view_modes";
 import { STATE_VIDEO_PAUSED } from "../../store/VideoStore";
 
 function VideoPlayer() {
-	const [fullScreen, setFullScreen] = useVideoStore(
-		(state) => [state.fullScreen, state.setFullScreen],
-		shallow
-	);
-
 	const [queue, popFromQueue] = usePlaylistStore(
 		(state) => [state.queue, state.popFromQueue],
 		shallow
@@ -45,6 +40,8 @@ function VideoPlayer() {
 		// autoSetCurrentMarkerIdx,
 		setCurrentTime,
 		markersLength,
+		fullScreen,
+		setFullScreen,
 	] = useVideoStore(
 		(state) => [
 			state.currentVideo,
@@ -62,8 +59,13 @@ function VideoPlayer() {
 			state.setCurrentTime,
 			// state.autoSetCurrentMarkerIdx,
 			state?.markers?.length || 0,
+			state.fullScreen,
+			state.setFullScreen,
 		],
-		shallow
+		(a, b) => {
+			console.log("shallow compare : ", { a, b });
+			return shallow(a, b);
+		}
 	);
 
 	// console.log({ setPlaylistState, playlistState: playlistState });
@@ -209,7 +211,7 @@ function VideoPlayer() {
 	createEffect(
 		on(
 			// dependencies
-			[() => queue.length, () => playlistState.value],
+			[() => queue, () => playlistState.value],
 			(v) => {
 				console.log("Queue or playlistState changed : ", {
 					v,
@@ -227,9 +229,9 @@ function VideoPlayer() {
 
 	createEffect(
 		on(
-			() => queue.length,
+			() => queue,
 			(q) => {
-				console.log("Queue changed : called");
+				console.log("Queue changed : called", q);
 				let timeout = null;
 
 				if (timeout) {
