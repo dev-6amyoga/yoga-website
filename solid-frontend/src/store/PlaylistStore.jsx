@@ -1,7 +1,7 @@
-import { createContext } from "solid-js";
-import { produce } from "solid-js/store";
+import { children, createContext, useContext } from "solid-js";
+import { createStore, produce } from "solid-js/store";
 import { v5 as uuidV5 } from "uuid";
-import { createStore } from "zustand";
+// import {  } from "zustand";
 import createWithStore from "../utils/createWithStore";
 
 const usePlaylistStore = createWithStore((set) => ({
@@ -21,7 +21,6 @@ const usePlaylistStore = createWithStore((set) => ({
 		}),
 
 	queue: [],
-
 	moveUpQueue: (index) =>
 		set((state) => {
 			if (index > 0) {
@@ -204,11 +203,27 @@ export const PlaylistStoreProvider = (props) => {
 		},
 	];
 
+	console.log("Hello PlaylistStore!");
+
+	const resolvedChildren = children(() => props.children);
+
 	return (
 		<PlaylistStoreContext.Provider value={playlistStore}>
-			{props.children}
+			{resolvedChildren()}
 		</PlaylistStoreContext.Provider>
 	);
+};
+
+export const usePlaylistStoreContext = () => {
+	const c = useContext(PlaylistStoreContext);
+
+	if (!c) {
+		throw new Error(
+			"usePlaylistStoreContext must be used within a PlaylistStoreProvider"
+		);
+	}
+
+	return c;
 };
 
 export default usePlaylistStore;

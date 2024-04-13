@@ -1,6 +1,6 @@
 // import { useEffect, useState } from "react";
 import { For, createResource } from "solid-js";
-import usePlaylistStore from "../../store/PlaylistStore";
+import { usePlaylistStoreContext } from "../../store/PlaylistStore";
 import { Fetch } from "../../utils/Fetch";
 import PlaylistItem from "./PlaylistItem";
 
@@ -30,8 +30,8 @@ function Playlist() {
 			return [];
 		}
 	});
-	const queue = usePlaylistStore((state) => state.queue);
-	const addToQueue = usePlaylistStore((state) => state.addToQueue);
+	// const queue = usePlaylistStore((state) => state.queue);
+	// const addToQueue = usePlaylistStore((state) => state.addToQueue);
 
 	const [playlists] = createResource(async (source, {}) => {
 		try {
@@ -70,6 +70,8 @@ function Playlist() {
 		return allAsanasData;
 	};
 
+	const [playlistStore, { addToQueue }] = usePlaylistStoreContext();
+
 	const handleAddToQueue = (asana_ids) => {
 		getAllAsanas(asana_ids)
 			.then((asanas) => {
@@ -95,8 +97,8 @@ function Playlist() {
 						<PlaylistItem
 							key={item.playlist_name}
 							type={
-								queue
-									? queue.includes(item)
+								playlistStore.queue
+									? playlistStore.queue.includes(item)
 										? "success"
 										: "secondary"
 									: "secondary"

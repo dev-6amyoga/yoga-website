@@ -1,5 +1,7 @@
-import { createContext } from "solid-js";
-import { createStore } from "zustand";
+import { children, createContext, useContext } from "solid-js";
+
+// import {} from "zustand";
+import { createStore, produce } from "solid-js/store";
 import { VIDEO_VIEW_STUDENT_MODE } from "../enums/video_view_modes";
 import createWithStore from "../utils/createWithStore";
 
@@ -372,11 +374,27 @@ export const VideoStoreProvider = (props) => {
 		},
 	];
 
+	console.log("Hello, videoStore");
+
+	const resolvedChildren = children(() => props.children);
+
 	return (
 		<VideoStoreContext.Provider value={videoStore}>
-			{props.children}
+			{resolvedChildren()}
 		</VideoStoreContext.Provider>
 	);
+};
+
+export const useVideoStoreContext = () => {
+	const c = useContext(VideoStoreContext);
+
+	if (!c) {
+		throw new Error(
+			"useVideoStoreContext must be used within a VideoStoreProvider"
+		);
+	}
+
+	return c;
 };
 
 export default useVideoStore;

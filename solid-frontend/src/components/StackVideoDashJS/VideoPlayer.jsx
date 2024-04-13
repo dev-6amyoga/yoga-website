@@ -1,79 +1,43 @@
 import "./StackVideo.css";
 
 // import { useCallback } from "react";
-import usePlaylistStore from "../../store/PlaylistStore";
-import useVideoStore, {
+import { usePlaylistStoreContext } from "../../store/PlaylistStore.jsx";
+import {
 	STATE_VIDEO_ERROR,
 	STATE_VIDEO_LOADING,
 	STATE_VIDEO_PLAY,
-} from "../../store/VideoStore";
+	useVideoStoreContext,
+} from "../../store/VideoStore.jsx";
 
 // import { Button } from "@geist-ui/core";
 // import { FaPause, FaPlay } from "react-icons/fa6";
 import { For, Show, createEffect, createSignal, on, onCleanup } from "solid-js";
-import { shallow } from "zustand/shallow";
 import { SEEK_TYPE_MOVE } from "../../enums/seek_types";
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_TEACHING_MODE } from "../../enums/video_view_modes";
-import { STATE_VIDEO_PAUSED } from "../../store/VideoStore";
+import { STATE_VIDEO_PAUSED } from "../../store/VideoStore.jsx";
+import { useWatchHistoryContext } from "../../store/WatchHistoryStore.jsx";
+import StreamStackItem from "./StreamStackItem";
 
 function VideoPlayer() {
-	const [queue, popFromQueue] = usePlaylistStore(
-		(state) => [state.queue, state.popFromQueue],
-		shallow
-	);
+	const [playlistStore, { popFromQueue }] = usePlaylistStoreContext();
 
-	// zustand store
 	const [
-		currentVideo,
-		setCurrentVideo,
-		videoState,
-		setVideoState,
-		playlistState,
-		setPlaylistState,
-		viewMode,
-		addToSeekQueue,
-		pauseReason,
-		setPauseReason,
-		currentMarkerIdx,
-		setCurrentMarkerIdx,
-		// autoSetCurrentMarkerIdx,
-		setCurrentTime,
-		markersLength,
-		fullScreen,
-		setFullScreen,
-	] = useVideoStore(
-		(state) => [
-			state.currentVideo,
-			state.setCurrentVideo,
-			state.videoState,
-			state.setVideoState,
-			state.playlistState,
-			state.setPlaylistState,
-			state.viewMode,
-			state.addToSeekQueue,
-			state.pauseReason,
-			state.setPauseReason,
-			state.currentMarkerIdx,
-			state.setCurrentMarkerIdx,
-			state.setCurrentTime,
-			// state.autoSetCurrentMarkerIdx,
-			state?.markers?.length || 0,
-			state.fullScreen,
-			state.setFullScreen,
-		],
-		(a, b) => {
-			console.log("shallow compare : ", { a, b });
-			return shallow(a, b);
-		}
-	);
-
-	// console.log({ setPlaylistState, playlistState: playlistState });
+		videoStore,
+		{
+			setCurrentVideo,
+			setVideoState,
+			setPlaylistState,
+			addToSeekQueue,
+			setPauseReason,
+			setCurrentMarkerIdx,
+			setCurrentTime,
+			setFullScreen,
+		},
+	] = useVideoStoreContext();
 
 	// watch history store
-	// let [addToCommittedTs] = useWatchHistoryStore((state) => [
-	// 	state.addToCommittedTs,
-	// ]);
+	let [watchHistoryStore, { addToCommittedTs }] = useWatchHistoryContext();
 
 	// const [videoStateVisible, setVideoStateVisible] = useState(false);
 	const [duration, setDuration] = createSignal(0);
@@ -90,22 +54,20 @@ function VideoPlayer() {
 
 	const handleEnd = () => {
 		// console.log("Video ended ------------------>");
-		const state = useVideoStore.getState();
-
 		let currentMarker = null;
 
 		if (
-			state.currentMarkerIdx.value === null ||
-			!state.markers ||
-			state.markers.length === 0
+			videoStore.currentMarkerIdx === null ||
+			!videoStore.markers ||
+			videoStore.markers.length === 0
 		) {
 			currentMarker = null;
 		} else {
-			currentMarker = state.markers[state.currentMarkerIdx.value];
+			currentMarker = videoStore.markers[videoStore.currentMarkerIdx];
 		}
 
 		// check if teaching mode, loopback to previous marker
-		if (state.viewMode.value === VIDEO_VIEW_TEACHING_MODE) {
+		if (videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE) {
 			if (currentMarker && currentMarker?.loop) {
 				console.log(
 					"VIDEO END : TEACHING MODE: moving to ",
@@ -135,25 +97,22 @@ function VideoPlayer() {
 		console.log("SETTING VIDEO STATE TO PLAY ------------>");
 
 		if (isActive) {
-			let state = useVideoStore.getState();
-			let videoState = state.videoState.value;
-			let markersLength = state?.markers?.length || 0;
-			let currentMarkerIdx = state.currentMarkerIdx.value;
-			let pauseReason = state.pauseReason;
+			let videoState = videoStore.videoState;
+			let markersLength = videoStore.markers?.length || 0;
+			let currentMarkerIdx = videoStore.currentMarkerIdx;
+			let pauseReason = videoStore.pauseReason;
 
-			if (videoState.value === STATE_VIDEO_PAUSED) {
+			if (videoState === STATE_VIDEO_PAUSED) {
 				if (pauseReason === VIDEO_PAUSE_MARKER) {
 					console.log("VIDEO PLAY : PAUSE REASON MARKER");
 					// autoSetCurrentMarkerIdx()
 					// set next marker
-					setCurrentMarkerIdx(
-						(currentMarkerIdx.value + 1) % markersLength
-					);
+					setCurrentMarkerIdx((currentMarkerIdx + 1) % markersLength);
 					setPauseReason(null);
 				}
 			}
 
-			if (videoState.value !== STATE_VIDEO_PLAY) {
+			if (videoState !== STATE_VIDEO_PLAY) {
 				setVideoState(STATE_VIDEO_PLAY);
 			}
 		}
@@ -174,27 +133,30 @@ function VideoPlayer() {
 		}
 	};
 
-	const handlePlaybackError = () => {
+	const handlePlaybackError = (isActive) => {
 		console.log("Error playing video ------------------->");
-		if (useVideoStore.getState().isActive) {
+		if (isActive) {
 			setVideoState(STATE_VIDEO_ERROR);
 		}
 	};
 
 	const handleStartPlaylist = () => {
-		if (currentVideo.value === null && queue.length > 0) {
+		if (
+			videoStore.currentVideo === null &&
+			playlistStore.queue.length > 0
+		) {
 			console.log("Playlist start --------------------->");
 			setPlaylistState(true);
 		}
 	};
 
 	// const handleAlternatePlayPause = useCallback(() => {
-	// 	if (videoState.value === STATE_VIDEO_PLAY) {
+	// 	if (videoState === STATE_VIDEO_PLAY) {
 	// 		handleSetPause();
-	// 	} else if (videoState.value === STATE_VIDEO_PAUSED) {
+	// 	} else if (videoState === STATE_VIDEO_PAUSED) {
 	// 		handleSetPlay();
 	// 	}
-	// }, [videoState.value, handleSetPlay, handleSetPause]);
+	// }, [videoState, handleSetPlay, handleSetPause]);
 
 	// const handleFullScreen = useFullScreenHandle();
 
@@ -211,13 +173,17 @@ function VideoPlayer() {
 	createEffect(
 		on(
 			// dependencies
-			[() => queue, () => playlistState.value],
+			[() => playlistStore.queue, () => videoStore.playlistState],
 			(v) => {
 				console.log("Queue or playlistState changed : ", {
 					v,
 				});
-				if (queue && queue.length > 0 && playlistState.value) {
-					setCurrentVideo(queue[0]);
+				if (
+					playlistStore.queue &&
+					playlistStore.queue.length > 0 &&
+					videoStore.playlistState
+				) {
+					setCurrentVideo(playlistStore.queue[0]);
 				} else {
 					setCurrentVideo(null);
 					setVideoState(STATE_VIDEO_LOADING);
@@ -229,7 +195,7 @@ function VideoPlayer() {
 
 	createEffect(
 		on(
-			() => queue,
+			() => playlistStore.queue,
 			(q) => {
 				console.log("Queue changed : called", q);
 				let timeout = null;
@@ -244,9 +210,9 @@ function VideoPlayer() {
 						if (q.length > 0) {
 							const firstVideo = q[0];
 							prevVideos.splice(0, 2, firstVideo);
-							return prevVideos;
+							return [...prevVideos];
 						} else {
-							return prevVideos;
+							return [...prevVideos];
 						}
 					});
 					timeout = setTimeout(() => {
@@ -255,9 +221,9 @@ function VideoPlayer() {
 							if (q.length > 1) {
 								const secondVideo = q[1];
 								prevVideos.splice(1, 1, secondVideo);
-								return prevVideos;
+								return [...prevVideos];
 							} else {
-								return prevVideos;
+								return [...prevVideos];
 							}
 						});
 					}, 2000);
@@ -275,12 +241,11 @@ function VideoPlayer() {
 	);
 
 	createEffect(
-		on([() => currentVideo.value, () => queue], (v) => {
+		on([() => videoStore.currentVideo], (v) => {
 			const currentVideo = v[0];
-			const queue = v[1];
 
-			if (currentVideo && currentVideo.value) {
-				console.log(currentVideo.value.queue_id);
+			if (currentVideo && currentVideo) {
+				console.log(currentVideo.queue_id);
 			}
 		})
 	);
@@ -288,10 +253,12 @@ function VideoPlayer() {
 	return (
 		<div
 			class={`hover:cursor-pointer bg-white border w-full ${
-				fullScreen ? "h-screen" : "rounded-xl overflow-hidden"
+				videoStore.fullScreen
+					? "h-screen"
+					: "rounded-xl overflow-hidden"
 			}`}>
 			<div>
-				{String(playlistState.value)}|{queue.length}
+				{String(videoStore.playlistState)}|{playlistStore.queue.length}
 				{/* {JSON.stringify(currentVideo)} */}|{videos().length}
 				<button
 					onClick={() => {
@@ -302,15 +269,20 @@ function VideoPlayer() {
 					Alt
 				</button>
 			</div>
-			<div class={`mx-auto aspect-video ${fullScreen ? "h-full" : ""}`}>
+			<div
+				class={`mx-auto aspect-video ${
+					videoStore.fullScreen ? "h-full" : ""
+				}`}>
 				<Show
 					when={
-						currentVideo &&
-						currentVideo.value !== null &&
-						currentVideo.value !== undefined
+						videoStore.currentVideo &&
+						videoStore.currentVideo !== null &&
+						videoStore.currentVideo !== undefined
 					}
 					fallback={
-						<Show when={queue.length > 0} fallback={<p></p>}>
+						<Show
+							when={playlistStore.queue.length > 0}
+							fallback={<p></p>}>
 							<div class="flex flex-col items-center justify-center gap-4 text-lg w-full h-full border border-red-500">
 								<button onClick={handleStartPlaylist}>
 									Start
@@ -319,7 +291,7 @@ function VideoPlayer() {
 						</Show>
 					}>
 					<Show
-						when={videoState.value !== STATE_VIDEO_ERROR}
+						when={videoStore.videoState !== STATE_VIDEO_ERROR}
 						fallback={
 							<div class="flex flex-col items-center justify-center gap-4 text-lg w-full h-full border border-red-500">
 								<p>Error : Video playback error</p>
@@ -328,38 +300,33 @@ function VideoPlayer() {
 						}>
 						<div>
 							<div class="relative h-full w-full flex flex-col">
-								<Show when={queue.length > 0}>
+								<Show when={playlistStore.queue.length > 0}>
 									<div class="">
 										<For each={videos()}>
 											{(queueItem) => {
 												return (
-													// <StreamStackItem
-													// 	key={queueItem.queue_id}
-													// 	video={queueItem}
-													// 	handleEnd={handleEnd}
-													// 	handleLoading={
-													// 		handleLoading
-													// 	}
-													// 	handlePlaybackError={
-													// 		handlePlaybackError
-													// 	}
-													// 	setDuration={
-													// 		setDuration
-													// 	}
-													// 	isActive={
-													// 		currentVideo?.queue_id ===
-													// 		queueItem?.queue_id
-													// 	}
-													// 	setVideoStateVisible={
-													// 		setVideoStateVisible
-													// 	}
-													// 	handleFullScreen={() => {}}
-													// />
-													<pre class="text-black border border-purple-600">
-														{JSON.stringify(
-															queueItem
-														)}
-													</pre>
+													<StreamStackItem
+														key={queueItem.queue_id}
+														video={queueItem}
+														handleEnd={handleEnd}
+														handleLoading={
+															handleLoading
+														}
+														handlePlaybackError={
+															handlePlaybackError
+														}
+														setDuration={
+															setDuration
+														}
+														isActive={
+															currentVideo?.queue_id ===
+															queueItem?.queue_id
+														}
+														setVideoStateVisible={
+															setVideoStateVisible
+														}
+														handleFullScreen={() => {}}
+													/>
 												);
 											}}
 										</For>
