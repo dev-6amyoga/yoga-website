@@ -1,7 +1,7 @@
-import { createContext } from "solid-js";
-import { produce } from "solid-js/store";
+import { children, createContext, useContext } from "solid-js";
+import { createStore, produce } from "solid-js/store";
 import { createWithSignal } from "solid-zustand";
-import { createStore } from "zustand";
+// import {  } from "zustand";
 import { Fetch } from "../utils/Fetch";
 
 const useWatchHistoryStore = createWithSignal((set, get) => ({
@@ -150,40 +150,50 @@ export const WatchHistoryContext = createContext([
 ]);
 
 export const WatchHistoryProvider = (props) => {
-	const [store, setStore] = createStore({});
+	const [store, setStore] = createStore({
+		enableWatchHistory: true,
+		watchHistory: false,
+		committedTs: 0,
+		watchTimeBuffer: [],
+		watchTimeArchive: [],
+	});
 
-	const userStore = [
+	const watchHistoryStore = [
 		store,
 		{
-			setEnableWatchHistory: (enable) =>
+			setEnableWatchHistory(enable) {
 				setStore(
 					produce((state) => {
 						state.enableWatchHistory = enable;
 					})
-				),
+				);
+			},
 
-			updateWatchHistory: (wh) =>
+			updateWatchHistory(wh) {
 				setStore(
 					produce((state) => {
 						state.watchHistory.push(wh);
 					})
-				),
+				);
+			},
 
-			setCommittedTs: (ts) =>
+			setCommittedTs(ts) {
 				setStore(
 					produce((state) => {
 						state.committedTs = ts;
 					})
-				),
+				);
+			},
 
-			addToCommittedTs: (ts) =>
+			addToCommittedTs(ts) {
 				setStore(
 					produce((state) => {
 						state.committedTs = ts;
 					})
-				),
+				);
+			},
 
-			appendToWatchTimeBuffer: (watchTimeLogs) => {
+			appendToWatchTimeBuffer(watchTimeLogs) {
 				setStore(
 					produce((state) => {
 						state.watchTimeBuffer = [
@@ -194,7 +204,7 @@ export const WatchHistoryProvider = (props) => {
 				);
 			},
 
-			updateWatchTimeBuffer: (wh) =>
+			updateWatchTimeBuffer(wh) {
 				setStore(
 					produce((state) => {
 						const timedelta = wh.currentTime - state.committedTs;
@@ -211,9 +221,10 @@ export const WatchHistoryProvider = (props) => {
 							});
 						}
 					})
-				),
+				);
+			},
 
-			updateWatchTimeArchive: (wds) => {
+			updateWatchTimeArchive(wds) {
 				setStore(
 					produce((state) => {
 						state.watchTimeArchive = [
@@ -224,7 +235,7 @@ export const WatchHistoryProvider = (props) => {
 				);
 			},
 
-			flushWatchTimeBuffer: async (user_id) => {
+			async flushWatchTimeBuffer(user_id) {
 				const watch_time_logs = state.watchTimeBuffer;
 
 				// console.log({ watch_time_logs });
@@ -270,7 +281,7 @@ export const WatchHistoryProvider = (props) => {
 				}));
 			},
 
-			flushLocalStorageWatchTimeBuffer: async (user_id) => {
+			async flushLocalStorageWatchTimeBuffer(user_id) {
 				const watch_time_logs = JSON.parse(
 					localStorage.getItem("6amyoga_watch_time_logs")
 				);
@@ -300,6 +311,28 @@ export const WatchHistoryProvider = (props) => {
 			},
 		},
 	];
+
+	console.log("Hello WatchHistoryStore!");
+
+	const resolvedChildren = children(() => props.children);
+
+	return (
+		<WatchHistoryContext.Provider value={watchHistoryStore}>
+			{resolvedChildren()}
+		</WatchHistoryContext.Provider>
+	);
+};
+
+export const useWatchHistoryContext = () => {
+	const c = useContext(WatchHistoryContext);
+
+	if (!c) {
+		throw new Error(
+			"useWatchHistoryContext must be used within a WatchHistoryProvider"
+		);
+	}
+
+	return c;
 };
 
 export default useWatchHistoryStore;

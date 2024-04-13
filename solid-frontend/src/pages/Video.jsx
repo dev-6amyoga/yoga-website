@@ -1,13 +1,10 @@
-import { createEffect } from "solid-js";
+import { createEffect, useContext } from "solid-js";
 import Playlist from "../components/Sidebar/Playlist";
 import VideoPlayerWrapper from "../components/StackVideoDashJS/VideoPlayerWrapper";
-import usePlaylistStore from "../store/PlaylistStore";
-import useWatchHistoryStore from "../store/WatchHistoryStore";
+import { WatchHistoryContext } from "../store/WatchHistoryStore";
 
 export default function Video() {
-	const setEnableWatchHistory = useWatchHistoryStore(
-		(state) => state.setEnableWatchHistory
-	);
+	const [store, { setEnableWatchHistory }] = useContext(WatchHistoryContext);
 
 	// const [devMode, setDevMode, fullScreen] = useVideoStore((state) => [
 	// 	state.devMode,
@@ -15,10 +12,10 @@ export default function Video() {
 	// 	state.fullScreen,
 	// ]);
 
-	const [popFromArchive, popFromQueue] = usePlaylistStore((state) => [
-		state.popFromArchive,
-		state.popFromQueue,
-	]);
+	// const [popFromArchive, popFromQueue] = usePlaylistStore((state) => [
+	// 	state.popFromArchive,
+	// 	state.popFromQueue,
+	// ]);
 
 	// onMount(() => {
 	// 	// for hand held pointer
@@ -91,6 +88,7 @@ export default function Video() {
 		<div class={`toplvlpage relative max-w-7xl mx-auto`}>
 			<VideoPlayerWrapper />
 			<Playlist />
+
 			{/* <button
 				class={`fixed bottom-4 right-4 p-4 ${
 					devMode ? "bg-y-green" : "bg-y-white text-black"
