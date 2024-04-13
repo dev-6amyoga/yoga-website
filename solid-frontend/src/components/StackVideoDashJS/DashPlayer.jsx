@@ -1,9 +1,9 @@
 import dashjs from "dashjs";
-import { createEffect, createSignal, on } from "solid-js";
+import { createEffect, createSignal, on, onCleanup } from "solid-js";
+import { dashSettings } from "../../lib/dashjs-settings";
 import { useVideoStoreContext } from "../../store/VideoStore";
-import { dashSettings } from "../lib/dashjs-settings";
-import { Fetch } from "../utils/Fetch";
-import { isMobileTablet } from "../utils/isMobileOrTablet";
+import { Fetch } from "../../utils/Fetch";
+import { isMobileTablet } from "../../utils/isMobileOrTablet";
 
 // {
 // 		src,
@@ -27,10 +27,12 @@ import { isMobileTablet } from "../utils/isMobileOrTablet";
 
 function DashPlayer(props) {
 	const videoRef = { current: null };
-	const playerRef = { current: null };
+	const [playerRef, setPlayerRef] = createSignal(null);
 	const [playerRefSet, setPlayerRefSet] = createSignal(false);
 	const [metadataLoaded, setMetadataLoaded] = createSignal(false);
 	const [streamInitialized, setStreamInitialized] = createSignal(false);
+	const [drmSet, setDrmSet] = createSignal(false);
+	console.log("dashplayer! >>>>");
 
 	const [videoStore, { setPlayreadyKeyUrl }] = useVideoStoreContext();
 
@@ -40,11 +42,11 @@ function DashPlayer(props) {
 	};
 
 	const onPlaybackNotAllowed = () => {
-		if (playerRef.current && isActive) {
+		if (playerRef() && isActive) {
 			console.log("[DASH PLAYER] : playback not allowed");
-			playerRef.current.setMute(true);
-			playerRef.current.initialize(videoRef.current, src, true);
-			playerRef.current.setMute(false);
+			playerRef().setMute(true);
+			playerRef().initialize(videoRef.current, props.src, true);
+			playerRef().setMute(false);
 		}
 	};
 
@@ -55,44 +57,51 @@ function DashPlayer(props) {
 
 	createEffect(
 		on([() => props.src], () => {
-			console.log("[DASH PLAYER] : setup");
-			const p = dashjs.MediaPlayer().create();
-			playerRef.current = p;
-			playerRef.current.updateSettings(dashSettings);
-			playerRef.current.initialize(null, src, true);
-			setPlayerRefSet(true);
-			return () => {
+			//is it not picking up src? for some reason??
+			// no wait one sec
+			console.log("[DASH PLAYER] : setup", { src: props.src });
+			let p = null;
+			if (props.src) {
+				p = dashjs.MediaPlayer().create();
+				setPlayerRef(p);
+				p.updateSettings(dashSettings);
+				p.initialize(null, props.src, true);
+				p.attachView(videoRef.current);
+				setPlayerRefSet(true);
+				console.log("[DASH PLAYER] : player created");
+			}
+
+			onCleanup(() => {
 				console.log("[DASH PLAYER] Cleanup, player reset");
-				p.reset();
-			};
+			});
 		})
 	);
 
 	createEffect(
-		on([() => playerRefSet, () => props.src, () => drmSet], () => {
-			if (playerRefSet && drmSet && src) {
+		on([playerRefSet, () => props.src, drmSet], () => {
+			if (playerRefSet && drmSet() && props.src) {
 				console.log("[DASH PLAYER] : preloading");
-				playerRef.current.attachView(videoRef.current);
-				playerRef.current.preload();
+
+				// playerRef().preload();
 			}
 		})
 	);
 
 	createEffect(
 		on([playerRefSet, () => props.src, () => props.isAsanaVideo], () => {
-			if (playerRefSet && src && videoRef.current) {
+			if (playerRefSet && props.src && videoRef.current) {
 				console.log("[DASH PLAYER] : setting DRM Info");
 				const check = isMobileTablet();
 				const isMobile = { done: true, check: check };
 				console.log("Checking for isMobile", isMobile);
 				// const store = useVideoStore.getState();
 				var playreadyKeyUrl;
-				playreadyKeyUrl = videoStore.playreadyKeyUrl;
+				playreadyKeyUrl = undefined;
 				// const setPlayreadyKeyUrl = videoStore.setPlayreadyKeyUrl;
 				//console.log("Fetching DRM Info");
-				console.log("[DASH PLAYER] : isAsanaVideo", isAsanaVideo);
+				console.log("[DASH PLAYER] : isAsanaVideo", props.isAsanaVideo);
 
-				if (isAsanaVideo) {
+				if (props.isAsanaVideo) {
 					if (isMobile.check) {
 						// Mobile
 						Fetch({
@@ -105,7 +114,7 @@ function DashPlayer(props) {
 								console.log("[DASH PLAYER] : widevine token");
 
 								if (data && data.licenseAcquisitionUrl) {
-									playerRef.current.setProtectionData({
+									playerRef().setProtectionData({
 										"com.widevine.alpha": {
 											serverURL:
 												data.licenseAcquisitionUrl,
@@ -124,7 +133,7 @@ function DashPlayer(props) {
 							console.log(
 								"[DASH PLAYER] : playready token cached"
 							);
-							playerRef.current.setProtectionData({
+							playerRef().setProtectionData({
 								"com.microsoft.playready": {
 									serverURL: playreadyKeyUrl,
 								},
@@ -146,7 +155,7 @@ function DashPlayer(props) {
 										data.licenseAcquisitionUrl &&
 										data.token
 									) {
-										playerRef.current.setProtectionData({
+										playerRef().setProtectionData({
 											"com.microsoft.playready": {
 												serverURL:
 													data.licenseAcquisitionUrl +
@@ -187,63 +196,63 @@ function DashPlayer(props) {
 			[
 				playerRefSet,
 				() => props.src,
-				onMetadataLoaded,
-				props.setDuration,
-				props.onCanPlayThrough,
-				props.onEnded,
-				onPlaybackNotAllowed,
-				props.onError,
-				props.onPause,
-				props.onPlay,
-				props.onVolumeChange,
-				props.onSeeked,
-				props.onSeeking,
+				() => onMetadataLoaded,
+				() => props.setDuration,
+				() => props.onCanPlayThrough,
+				() => props.onEnded,
+				() => onPlaybackNotAllowed,
+				() => props.onError,
+				() => props.onPause,
+				() => props.onPlay,
+				() => props.onVolumeChange,
+				() => props.onSeeked,
+				() => props.onSeeking,
 			],
 			() => {
-				if (playerRefSet() && src() && videoRef.current) {
+				if (playerRefSet() && props.src && videoRef.current) {
 					console.log("[DASH PLAYER] : setting up event listeners");
-					playerRef.current.on(
+					playerRef().on(
 						dashjs.MediaPlayer.events.CAN_PLAY_THROUGH,
 						props.onCanPlayThrough
 					);
-					playerRef.current.on(
+					playerRef().on(
 						dashjs.MediaPlayer.events.ERROR,
 						props.onError
 					);
-					playerRef.current.on(
+					playerRef().on(
 						dashjs.MediaPlayer.events.PLAYBACK_ENDED,
 						props.onEnded
 					);
-					playerRef.current.on(
+					playerRef().on(
 						dashjs.MediaPlayer.events.PLAYBACK_SEEKED,
 						props.onSeeked
 					);
-					playerRef.current.on(
+					playerRef().on(
 						dashjs.MediaPlayer.events.PLAYBACK_SEEKING,
 						props.onSeeking
 					);
-					playerRef.current.on(
+					playerRef().on(
 						dashjs.MediaPlayer.events.PLAYBACK_NOT_ALLOWED,
 						onPlaybackNotAllowed
 					);
 
-					playerRef.current.on(
+					playerRef().on(
 						dashjs.MediaPlayer.events.PLAYBACK_PAUSED,
 						props.onPause
 					);
-					playerRef.current.on(
+					playerRef().on(
 						dashjs.MediaPlayer.events.PLAYBACK_PLAYING,
 						props.onPlay
 					);
-					playerRef.current.on(
+					playerRef().on(
 						dashjs.MediaPlayer.events.PLAYBACK_VOLUME_CHANGED,
 						props.onVolumeChange
 					);
-					playerRef.current.on(
+					playerRef().on(
 						dashjs.MediaPlayer.events.PLAYBACK_METADATA_LOADED,
 						onMetadataLoaded
 					);
-					playerRef.current.on(
+					playerRef().on(
 						dashjs.MediaPlayer.events.STREAM_INITIALIZED,
 						onStreamInitialized
 					);
@@ -251,47 +260,47 @@ function DashPlayer(props) {
 
 				return () => {
 					console.log("[DASH PLAYER] switching off event listeners");
-					playerRef.current.off(
+					playerRef().off(
 						dashjs.MediaPlayer.events.CAN_PLAY_THROUGH,
 						props.onCanPlayThrough
 					);
-					playerRef.current.off(
+					playerRef().off(
 						dashjs.MediaPlayer.events.ERROR,
 						props.onError
 					);
-					playerRef.current.off(
+					playerRef().off(
 						dashjs.MediaPlayer.events.PLAYBACK_ENDED,
 						props.onEnded
 					);
-					playerRef.current.off(
+					playerRef().off(
 						dashjs.MediaPlayer.events.PLAYBACK_SEEKED,
 						props.onSeeked
 					);
-					playerRef.current.off(
+					playerRef().off(
 						dashjs.MediaPlayer.events.PLAYBACK_SEEKING,
 						props.onSeeking
 					);
-					playerRef.current.off(
+					playerRef().off(
 						dashjs.MediaPlayer.events.PLAYBACK_NOT_ALLOWED,
 						onPlaybackNotAllowed
 					);
-					playerRef.current.off(
+					playerRef().off(
 						dashjs.MediaPlayer.events.PLAYBACK_PAUSED,
 						props.onPause
 					);
-					playerRef.current.off(
+					playerRef().off(
 						dashjs.MediaPlayer.events.PLAYBACK_PLAYING,
 						props.onPlay
 					);
-					playerRef.current.off(
+					playerRef().off(
 						dashjs.MediaPlayer.events.PLAYBACK_VOLUME_CHANGED,
 						props.onVolumeChange
 					);
-					playerRef.current.off(
+					playerRef().off(
 						dashjs.MediaPlayer.events.PLAYBACK_METADATA_LOADED,
 						onMetadataLoaded
 					);
-					playerRef.current.off(
+					playerRef().off(
 						dashjs.MediaPlayer.events.STREAM_INITIALIZED,
 						onStreamInitialized
 					);
@@ -307,25 +316,25 @@ function DashPlayer(props) {
 	// 		console.log("[DASH PLAYER] : ref");
 	// 		return {
 	// 			get player() {
-	// 				return playerRef.current;
+	// 				return playerRef();
 	// 			},
 	// 			get videoElement() {
 	// 				return videoRef.current;
 	// 			},
 	// 			get videoUrl() {
 	// 				try {
-	// 					return playerRef.current.getSource();
+	// 					return playerRef().getSource();
 	// 				} catch (error) {
 	// 					return null;
 	// 				}
 	// 			},
 	// 			set videoUrl(url) {
-	// 				if (playerRef.current === null) {
+	// 				if (playerRef() === null) {
 	// 					return;
 	// 				}
 
-	// 				// playerRef.current.setSource(url);
-	// 				// playerRef.current.player.initialize();
+	// 				// playerRef().setSource(url);
+	// 				// playerRef().player.initialize();
 	// 			},
 	// 		};
 	// 	},
@@ -338,7 +347,7 @@ function DashPlayer(props) {
 	// 		if (element !== null) {
 	// 			videoRef.current = element;
 	// 			if (playerRefSet) {
-	// 				// playerRef.current.attachView(element);
+	// 				// playerRef().attachView(element);
 	// 			}
 	// 		}
 	// 	},
@@ -346,14 +355,16 @@ function DashPlayer(props) {
 	// );
 
 	const setVideoRef = (element) => {
+		console.log("[DASH PLAYER] SETTING REF >>>>>>>>>>>>>");
 		videoRef.current = element;
 	};
 
 	createEffect(
-		on([playerRefSet], () => {
-			if (playerRefSet) {
+		on([playerRefSet, playerRef], () => {
+			console.log("[DASH PLAYER] : platyerRefChanged", playerRefSet());
+			if (playerRefSet()) {
 				props.ref({
-					player: playerRef.current,
+					player: playerRef(),
 					videoElement: videoRef.current,
 				});
 			}
@@ -361,8 +372,8 @@ function DashPlayer(props) {
 	);
 
 	return (
-		<div class={className + " relative"}>
-			<video ref={setVideoRef} {...rest}></video>
+		<div class={props.className + " relative"}>
+			<video ref={setVideoRef} controls></video>
 		</div>
 	);
 }

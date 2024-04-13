@@ -6,13 +6,18 @@ import {
 import { usePlaylistStoreContext } from "../../store/PlaylistStore";
 import useVideoStore, {
 	STATE_VIDEO_ERROR,
-	STATE_VIDEO_LOADING,
 	STATE_VIDEO_PAUSED,
 	STATE_VIDEO_PLAY,
 	useVideoStoreContext,
 } from "../../store/VideoStore";
 
-import { createMemo, createSignal } from "solid-js";
+import {
+	createEffect,
+	createMemo,
+	createSignal,
+	on,
+	onCleanup,
+} from "solid-js";
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
 import DashPlayer from "./DashPlayer";
@@ -45,8 +50,8 @@ function StreamStackItem(props) {
 		on([() => props.video], () => {
 			console.log("VIDEO URL", props.video);
 			return (
-				(props.video?.asana_dash_url ||
-					props.video?.transition_dash_url) ??
+				(props.video?.video?.asana_dash_url ||
+					props.video?.video?.transition_dash_url) ??
 				""
 			);
 		})
@@ -54,6 +59,7 @@ function StreamStackItem(props) {
 
 	// const isActiveRef = useRef(props.isActive);
 
+	//
 	// keep the isActiveRef updated
 	// useEffect(() => {
 	// 	isActive = props.isActive;
@@ -61,7 +67,7 @@ function StreamStackItem(props) {
 	// 		console.log(
 	// 			"IS ACTIVE",
 	// 			props.video?.idx,
-	// 			playerRef.current.videoElement.currentTime
+	// 			playerRef().current.videoElement.currentTime
 	// 		);
 	// 	}
 	// 	console.log({
@@ -73,18 +79,18 @@ function StreamStackItem(props) {
 
 	createEffect(
 		on([() => props.isActive, () => props.video], () => {
-			isActive = props.isActive();
-			if (props.isActive()) {
-				console.log(
-					"IS ACTIVE",
-					props.video()?.idx,
-					playerRef.current.videoElement.currentTime
-				);
+			console.log(props.video, props.isActive);
+			if (props.isActive) {
+				console.log(playerRef());
+				// console.log(
+				// 	"IS ACTIVE",
+				// 	props.video?.idx,
+				// 	playerRef().current.videoElement.currentTime
+				// );
 			}
 			console.log({
-				propsIsActive: props.isActive(),
-				videoidx: props.video()?.idx,
-				isActiveRef: isActive,
+				propsIsActive: props.isActive,
+				videoidx: props.video?.idx,
 			});
 		})
 	);
@@ -144,7 +150,7 @@ function StreamStackItem(props) {
 		if (!isActive) return;
 
 		console.log("Try to play called", props.video.idx, Date.now());
-		playerRef.current.player.play();
+		playerRef().current.player.play();
 
 		if (!autoplayInitialized()) {
 			setAutoplayInitialized(true);
@@ -153,7 +159,7 @@ function StreamStackItem(props) {
 
 	// pause and reset the props.video when its not active
 	// useEffect(() => {
-	// 	const pr = playerRef.current.videoElement;
+	// 	const pr = playerRef().current.videoElement;
 	// 	if (!props.isActive && pr && pr.currentTime > 0) {
 	// 		console.log(
 	// 			"PAUSE AND RESET ----------------------------->",
@@ -174,9 +180,9 @@ function StreamStackItem(props) {
 	// }, [props.isActive, props.video.queue_id, setVolume]);
 
 	createEffect(
-		on([props.isActive, props.video.queue_id, setVolume], () => {
-			const pr = playerRef.current.videoElement;
-			if (!props.isActive() && pr && pr.currentTime > 0) {
+		on([() => props.isActive, () => props.video.queue_id], () => {
+			const pr = playerRef().current.videoElement;
+			if (!props.isActive && pr && pr.currentTime > 0) {
 				console.log(
 					"PAUSE AND RESET ----------------------------->",
 					props.video.idx
@@ -187,7 +193,7 @@ function StreamStackItem(props) {
 				// pr.currentTime = 0;
 			}
 			onCleanup(() => {
-				if (pr && !props.isActive()) {
+				if (pr && !props.isActive) {
 					// pr.currentTime = 0;
 				}
 				pr?.pause();
@@ -202,11 +208,11 @@ function StreamStackItem(props) {
 	// 			"PLAYING ----------------------------->",
 	// 			props.video,
 	// 			props.video.props.video.id,
-	// 			playerRef?.current.videoElement
+	// 			playerRef()?.current.videoElement
 	// 		);
-	// 		if (playerRef.current.videoElement.currentTime > 0.0) {
+	// 		if (playerRef().current.videoElement.currentTime > 0.0) {
 	// 			// console.log("SEEKING TO 0", props.video.idx);
-	// 			// playerRef.current.videoElement.currentTime = 0.0;
+	// 			// playerRef().current.videoElement.currentTime = 0.0;
 	// 			// setCommitSeekTime(0.0);
 	// 		}
 	// 	}
@@ -222,25 +228,23 @@ function StreamStackItem(props) {
 	createEffect(
 		on(
 			[
-				props.isActive,
-				setDuration,
+				() => props.isActive,
 				metadataLoaded,
-				props.video,
+				() => props.video,
 				playerLoaded,
-				setCommitSeekTime,
 			],
 			() => {
-				if (props.isActive() && metadataLoaded() && playerLoaded()) {
+				if (props.isActive && metadataLoaded() && playerLoaded()) {
 					console.log(
 						"PLAYING ----------------------------->",
 						props.video,
-						props.video.props.video.id,
-						playerRef?.current.videoElement
+						props.video.video.id,
+						playerRef()?.current.videoElement
 					);
 
-					if (playerRef.current.videoElement.currentTime > 0.0) {
+					if (playerRef().current.videoElement.currentTime > 0.0) {
 						// console.log("SEEKING TO 0", props.video.idx);
-						// playerRef.current.videoElement.currentTime = 0.0;
+						// playerRef().current.videoElement.currentTime = 0.0;
 						// setCommitSeekTime(0.0);
 					}
 				}
@@ -254,26 +258,26 @@ function StreamStackItem(props) {
 	// 	if (
 	// 		props.isActive &&
 	// 		metadataLoaded() &&
-	// 		playerRef.current !== null &&
-	// 		playerRef.current !== undefined
+	// 		playerRef().current !== null &&
+	// 		playerRef().current !== undefined
 	// 	) {
 	// 		setPauseReason(null);
-	// 		if (videoStore.videoState.value === STATE_VIDEO_PAUSED) {
+	// 		if (videoStore.videoState === STATE_VIDEO_PAUSED) {
 	// 			console.log("useEffect : changing to pause", props.video.idx);
 	// 			if (isActive) {
-	// 				playerRef.current.player.pause();
+	// 				playerRef().current.player.pause();
 	// 			}
-	// 		} else if (videoStore.videoState.value === STATE_VIDEO_PLAY) {
+	// 		} else if (videoStore.videoState === STATE_VIDEO_PLAY) {
 	// 			console.log("useEffect : changing to play", props.video.idx);
 	// 			if (isActive) {
-	// 				playerRef.current.player.play();
+	// 				playerRef().current.player.play();
 	// 			}
 	// 		}
 	// 	}
 	// }, [
 	// 	props.video,
 	// 	metadataLoaded(),
-	// 	videoStore.videoState.value,
+	// 	videoStore.videoState,
 	// 	props.isActive,
 	// 	autoplayInitialized(),
 	// 	setAutoplayInitialized,
@@ -285,42 +289,36 @@ function StreamStackItem(props) {
 	createEffect(
 		on(
 			[
-				props.video,
+				() => props.video,
 				metadataLoaded,
-				videoStore.videoState.value,
-				props.isActive,
+				() => videoStore.videoState,
+				() => props.isActive,
 				autoplayInitialized,
-				setAutoplayInitialized,
-				setPauseReason,
-				setVolume,
-				tryToPlay,
 			],
 			() => {
 				if (
-					props.isActive() &&
+					props.isActive &&
 					metadataLoaded() &&
-					playerRef.current !== null &&
-					playerRef.current !== undefined
+					playerRef().current !== null &&
+					playerRef().current !== undefined
 				) {
 					setPauseReason(null);
 
-					if (videoStore.videoState.value === STATE_VIDEO_PAUSED) {
+					if (videoStore.videoState === STATE_VIDEO_PAUSED) {
 						console.log(
 							"createEffect : changing to pause",
 							props.video.idx
 						);
 						if (isActive) {
-							playerRef.current.player.pause();
+							playerRef().current.player.pause();
 						}
-					} else if (
-						videoStore.videoState.value === STATE_VIDEO_PLAY
-					) {
+					} else if (videoStore.videoState === STATE_VIDEO_PLAY) {
 						console.log(
 							"createEffect : changing to play",
 							props.video.idx
 						);
 						if (isActive) {
-							playerRef.current.player.play();
+							playerRef().current.player.play();
 						}
 					}
 				}
@@ -333,45 +331,45 @@ function StreamStackItem(props) {
 	// 	if (props.isActive && videoStore.seekQueue.length > 0) {
 	// 		const seekEvent = videoStore.seekQueue[0];
 	// 		console.log("SEEKING --->", seekEvent);
-	// 		if (seekEvent && playerRef.current) {
+	// 		if (seekEvent && playerRef().current) {
 	// 			switch (seekEvent.type) {
 	// 				case SEEK_TYPE_SEEK:
 	// 					let ct =
-	// 						playerRef.current.videoElement.currentTime +
+	// 						playerRef().current.videoElement.currentTime +
 	// 						seekEvent.t;
-	// 					if (ct > playerRef.current.videoElement.duration) {
+	// 					if (ct > playerRef().current.videoElement.duration) {
 	// 						handleEnd();
 	// 						popFromSeekQueue(0);
 	// 						return;
 	// 					}
 	// 					if (ct < 0) ct = 0;
 
-	// 					playerRef.current.videoElement.currentTime = ct;
+	// 					playerRef().current.videoElement.currentTime = ct;
 	// 					setCommitSeekTime(ct);
-	// 					// autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
+	// 					// autoSetCurrentMarkerIdx(playerRef().current?.currentTime)
 	// 					// popFromSeekQueue(0)
 	// 					break;
 	// 				case SEEK_TYPE_MOVE:
 	// 					let st = seekEvent.t < 0 ? 0 : seekEvent.t;
-	// 					if (st > playerRef.current.videoElement.duration) {
+	// 					if (st > playerRef().current.videoElement.duration) {
 	// 						handleEnd();
 	// 						popFromSeekQueue(0);
 	// 						return;
 	// 					}
-	// 					playerRef.current.videoElement.currentTime = st;
+	// 					playerRef().current.videoElement.currentTime = st;
 	// 					setCommitSeekTime(st);
 	// 					break;
 	// 				case SEEK_TYPE_MARKER:
 	// 					if (
 	// 						seekEvent.t >
-	// 						playerRef.current.videoElement.duration
+	// 						playerRef().current.videoElement.duration
 	// 					) {
 	// 						handleEnd();
 	// 						popFromSeekQueue(0);
 	// 						return;
 	// 					}
 
-	// 					playerRef.current.videoElement.currentTime =
+	// 					playerRef().current.videoElement.currentTime =
 	// 						seekEvent.t;
 	// 					// popFromSeekQueue(0)
 	// 					setCommitSeekTime(seekEvent.t);
@@ -379,7 +377,7 @@ function StreamStackItem(props) {
 	// 				default:
 	// 					break;
 	// 			}
-	// 			addToCommittedTs(playerRef.current?.videoElement.currentTime);
+	// 			addToCommittedTs(playerRef().current?.videoElement.currentTime);
 	// 		}
 	// 	}
 	// }, [
@@ -398,82 +396,66 @@ function StreamStackItem(props) {
 	// ]);
 
 	createEffect(
-		on(
-			[
-				props.isActive,
-				videoStore.seekQueue,
-				popFromSeekQueue,
-				addToCommittedTs,
-				setVideoEvent,
-				setCurrentMarkerIdx,
-				autoSetCurrentMarkerIdx,
-				setCommitSeekTime,
-				setVideoState,
-				setPauseReason,
-				popFromQueue,
-				handleEnd,
-			],
-			() => {
-				if (props.isActive() && videoStore.seekQueue.length > 0) {
-					const seekEvent = videoStore.seekQueue[0];
-					console.log("SEEKING --->", seekEvent);
-					if (seekEvent && playerRef.current) {
-						switch (seekEvent.type) {
-							case SEEK_TYPE_SEEK: {
-								let ct =
-									playerRef.current.videoElement.currentTime +
-									seekEvent.t;
-								if (
-									ct > playerRef.current.videoElement.duration
-								) {
-									handleEnd();
-									popFromSeekQueue(0);
-									return;
-								}
-								if (ct < 0) ct = 0;
+		on([() => props.isActive, () => videoStore.seekQueue], () => {
+			if (props.isActive && videoStore.seekQueue.length > 0) {
+				const seekEvent = videoStore.seekQueue[0];
+				console.log("SEEKING --->", seekEvent);
+				if (seekEvent && playerRef().current) {
+					switch (seekEvent.type) {
+						case SEEK_TYPE_SEEK: {
+							let ct =
+								playerRef().current.videoElement.currentTime +
+								seekEvent.t;
+							if (
+								ct > playerRef().current.videoElement.duration
+							) {
+								props.handleEnd();
+								popFromSeekQueue(0);
+								return;
+							}
+							if (ct < 0) ct = 0;
 
-								playerRef.current.videoElement.currentTime = ct;
-								setCommitSeekTime(ct);
-								break;
-							}
-							case SEEK_TYPE_MOVE: {
-								let st = seekEvent.t < 0 ? 0 : seekEvent.t;
-								if (
-									st > playerRef.current.videoElement.duration
-								) {
-									handleEnd();
-									popFromSeekQueue(0);
-									return;
-								}
-								playerRef.current.videoElement.currentTime = st;
-								setCommitSeekTime(st);
-								break;
-							}
-							case SEEK_TYPE_MARKER: {
-								if (
-									seekEvent.t >
-									playerRef.current.videoElement.duration
-								) {
-									handleEnd();
-									popFromSeekQueue(0);
-									return;
-								}
-								playerRef.current.videoElement.currentTime =
-									seekEvent.t;
-								setCommitSeekTime(seekEvent.t);
-								break;
-							}
-							default:
-								break;
+							playerRef().current.videoElement.currentTime = ct;
+							setCommitSeekTime(ct);
+							break;
 						}
-
-						// addToCommittedTs(
-						// 	playerRef.current?.videoElement.currentTime
-						// );
+						case SEEK_TYPE_MOVE: {
+							let st = seekEvent.t < 0 ? 0 : seekEvent.t;
+							if (
+								st > playerRef().current.videoElement.duration
+							) {
+								props.handleEnd();
+								popFromSeekQueue(0);
+								return;
+							}
+							playerRef().current.videoElement.currentTime = st;
+							setCommitSeekTime(st);
+							break;
+						}
+						case SEEK_TYPE_MARKER: {
+							if (
+								seekEvent.t >
+								playerRef().current.videoElement.duration
+							) {
+								props.handleEnd();
+								popFromSeekQueue(0);
+								return;
+							}
+							playerRef().current.videoElement.currentTime =
+								seekEvent.t;
+							setCommitSeekTime(seekEvent.t);
+							break;
+						}
+						default:
+							break;
 					}
+
+					// addToCommittedTs(
+					// 	playerRef().current?.videoElement.currentTime
+					// );
 				}
 			}
-		)
+		})
 	);
 
 	// poll to update the current time, every 20ms, clear the timeout on unmount
@@ -481,24 +463,24 @@ function StreamStackItem(props) {
 	// 	const checkSeek = (ct) => {
 	// 		if (
 	// 			videoStore.seekQueue.length > 0 &&
-	// 			videoStore.commitSeekTime.value.toFixed(0) === ct.toFixed(0)
+	// 			videoStore.commitSeekTime.toFixed(0) === ct.toFixed(0)
 	// 		) {
 	// 			if (props.isActive) handleLoading(false, props.isActive);
-	// 			autoSetCurrentMarkerIdx(videoStore.commitSeekTime.value);
+	// 			autoSetCurrentMarkerIdx(videoStore.commitSeekTime);
 	// 			return true;
 	// 		} else {
 	// 			return false;
 	// 		}
 	// 	};
 	// 	const checkPauseOrLoop = (ct) => {
-	// 		if (videoStore.viewMode.value === VIDEO_VIEW_STUDENT_MODE) {
+	// 		if (videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE) {
 	// 			return false;
 	// 		} else {
-	// 			let currentMarker = videoStore.markers[videoStore.currentMarkerIdx.value];
-	// 			if (videoStore.currentMarkerIdx.value === videoStore.markers.length - 1) {
+	// 			let currentMarker = videoStore.markers[videoStore.currentMarkerIdx];
+	// 			if (videoStore.currentMarkerIdx === videoStore.markers.length - 1) {
 	// 				return false;
 	// 			} else if (
-	// 				ct > videoStore.markers[videoStore.currentMarkerIdx.value + 1]?.timestamp
+	// 				ct > videoStore.markers[videoStore.currentMarkerIdx + 1]?.timestamp
 	// 			) {
 	// 				if (currentMarker.loop) {
 	// 					console.log("LOOPING CUZ OF MARKER");
@@ -518,32 +500,32 @@ function StreamStackItem(props) {
 	// 	};
 
 	// 	const int = setInterval(() => {
-	// 		if (playerRef.current?.videoElement?.currentTime && props.isActive) {
-	// 			if (checkSeek(playerRef.current?.videoElement?.currentTime)) {
+	// 		if (playerRef().current?.videoElement?.currentTime && props.isActive) {
+	// 			if (checkSeek(playerRef().current?.videoElement?.currentTime)) {
 	// 				popFromSeekQueue(0);
 	// 				setVideoState(STATE_VIDEO_PLAY);
 	// 				return;
 	// 			}
 	// 			if (
-	// 				videoStore.videoState.value !== STATE_VIDEO_LOADING &&
+	// 				videoStore.videoState !== STATE_VIDEO_LOADING &&
 	// 				checkPauseOrLoop(
-	// 					playerRef.current?.videoElement?.currentTime
+	// 					playerRef().current?.videoElement?.currentTime
 	// 				)
 	// 			) {
 	// 				return;
 	// 			}
 
 	// 			if (
-	// 				videoStore.videoState.value !== STATE_VIDEO_LOADING ||
-	// 				videoStore.videoState.value !== STATE_VIDEO_ERROR ||
-	// 				videoStore.videoState.value !== STATE_VIDEO_PAUSED
+	// 				videoStore.videoState !== STATE_VIDEO_LOADING ||
+	// 				videoStore.videoState !== STATE_VIDEO_ERROR ||
+	// 				videoStore.videoState !== STATE_VIDEO_PAUSED
 	// 			) {
 	// 				autoSetCurrentMarkerIdx(
-	// 					playerRef.current?.videoElement?.currentTime
+	// 					playerRef().current?.videoElement?.currentTime
 	// 				);
 	// 			}
-	// 			setCurrentTime(playerRef.current?.videoElement?.currentTime);
-	// 			setVolume(playerRef.current?.videoElement?.videoStore.volume);
+	// 			setCurrentTime(playerRef().current?.videoElement?.currentTime);
+	// 			setVolume(playerRef().current?.videoElement?.videoStore.volume);
 	// 		}
 	// 	}, 16.67);
 
@@ -554,18 +536,18 @@ function StreamStackItem(props) {
 	// 	videoStore.currentVideo,
 	// 	props.isActive,
 	// 	setCurrentTime,
-	// 	videoStore.videoState.value,
+	// 	videoStore.videoState,
 	// 	popFromSeekQueue,
 	// 	autoSetCurrentMarkerIdx,
 	// 	videoStore.seekQueue,
 	// 	setVideoEvent,
 	// 	setCurrentMarkerIdx,
 	// 	videoStore.markers,
-	// 	videoStore.viewMode.value,
-	// 	videoStore.currentMarkerIdx.value,
+	// 	videoStore.viewMode,
+	// 	videoStore.currentMarkerIdx,
 	// 	setVideoState,
 	// 	addToSeekQueue,
-	// 	videoStore.commitSeekTime.value,
+	// 	videoStore.commitSeekTime,
 	// 	setPauseReason,
 	// 	handleLoading,
 	// 	setVolume,
@@ -574,37 +556,24 @@ function StreamStackItem(props) {
 	createEffect(
 		on(
 			[
-				props.isActive,
-				videoStore.seekQueue,
-				videoStore.commitSeekTime,
-				autoSetCurrentMarkerIdx,
-				handleLoading,
-				videoStore.viewMode,
-				videoStore.markers,
-				videoStore.currentMarkerIdx,
-				setCurrentMarkerIdx,
-				addToSeekQueue,
-				popFromSeekQueue,
-				setVideoEvent,
-				videoStore.currentVideo,
-				setVideoState,
-				setPauseReason,
-				videoStore.videoState,
-				setCurrentTime,
-				setVolume,
+				() => props.isActive,
+				() => videoStore.seekQueue,
+				() => videoStore.commitSeekTime,
+				() => videoStore.viewMode,
+				() => videoStore.markers,
+				() => videoStore.currentMarkerIdx,
+				() => videoStore.currentVideo,
+				() => videoStore.videoState,
 			],
 			() => {
 				const checkSeek = (ct) => {
 					if (
 						videoStore.seekQueue.length > 0 &&
-						videoStore.commitSeekTime.value.toFixed(0) ===
-							ct.toFixed(0)
+						videoStore.commitSeekTime.toFixed(0) === ct.toFixed(0)
 					) {
 						if (props.isActive)
 							handleLoading(false, props.isActive);
-						autoSetCurrentMarkerIdx(
-							videoStore.commitSeekTime.value
-						);
+						autoSetCurrentMarkerIdx(videoStore.commitSeekTime);
 						return true;
 					} else {
 						return false;
@@ -612,23 +581,20 @@ function StreamStackItem(props) {
 				};
 
 				const checkPauseOrLoop = (ct) => {
-					if (videoStore.viewMode.value === VIDEO_VIEW_STUDENT_MODE) {
+					if (videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE) {
 						return false;
 					} else {
 						let currentMarker =
-							videoStore.markers[
-								videoStore.currentMarkerIdx.value
-							];
+							videoStore.markers[videoStore.currentMarkerIdx];
 						if (
-							videoStore.currentMarkerIdx.value ===
+							videoStore.currentMarkerIdx ===
 							videoStore.markers.length - 1
 						) {
 							return false;
 						} else if (
 							ct >
-							videoStore.markers[
-								videoStore.currentMarkerIdx.value + 1
-							]?.timestamp
+							videoStore.markers[videoStore.currentMarkerIdx + 1]
+								?.timestamp
 						) {
 							if (currentMarker.loop) {
 								console.log("LOOPING CUZ OF MARKER");
@@ -647,46 +613,46 @@ function StreamStackItem(props) {
 					}
 				};
 
-				const int = setInterval(() => {
-					if (playerRef.current?.videoElement && props.isActive()) {
-						if (
-							checkSeek(
-								playerRef.current?.videoElement?.currentTime
-							)
-						) {
-							popFromSeekQueue(0);
-							setVideoState(STATE_VIDEO_PLAY);
-							return;
-						}
-						if (
-							videoStore.videoState.value !==
-								STATE_VIDEO_LOADING &&
-							checkPauseOrLoop(
-								playerRef.current?.videoElement?.currentTime
-							)
-						) {
-							return;
-						}
-						if (
-							videoStore.videoState.value !==
-								STATE_VIDEO_LOADING ||
-							videoStore.videoState.value !== STATE_VIDEO_ERROR ||
-							videoStore.videoState.value !== STATE_VIDEO_PAUSED
-						) {
-							autoSetCurrentMarkerIdx(
-								playerRef.current?.videoElement?.currentTime
-							);
-						}
-						setCurrentTime(
-							playerRef.current?.videoElement?.currentTime
-						);
-						setVolume(
-							playerRef.current?.videoElement?.videoStore.volume
-						);
-					}
-				}, 16.67);
+				// const int = setInterval(() => {
+				// 	if (playerRef().current?.videoElement && props.isActive) {
+				// 		if (
+				// 			checkSeek(
+				// 				playerRef().current?.videoElement?.currentTime
+				// 			)
+				// 		) {
+				// 			popFromSeekQueue(0);
+				// 			setVideoState(STATE_VIDEO_PLAY);
+				// 			return;
+				// 		}
+				// 		if (
+				// 			videoStore.videoState !== STATE_VIDEO_LOADING &&
+				// 			checkPauseOrLoop(
+				// 				playerRef().current?.videoElement?.currentTime
+				// 			)
+				// 		) {
+				// 			return;
+				// 		}
+				// 		if (
+				// 			videoStore.videoState !== STATE_VIDEO_LOADING ||
+				// 			videoStore.videoState !== STATE_VIDEO_ERROR ||
+				// 			videoStore.videoState !== STATE_VIDEO_PAUSED
+				// 		) {
+				// 			autoSetCurrentMarkerIdx(
+				// 				playerRef().current?.videoElement?.currentTime
+				// 			);
+				// 		}
+				// 		setCurrentTime(
+				// 			playerRef().current?.videoElement?.currentTime
+				// 		);
+				// 		setVolume(
+				// 			playerRef().current?.videoElement?.videoStore.volume
+				// 		);
+				// 	}
+				// }, 16.67);
 
-				onCleanup(() => clearInterval(int));
+				// onCleanup(() => {
+				// 	if (int) clearInterval(int);
+				// });
 			}
 		)
 	);
@@ -790,9 +756,9 @@ function StreamStackItem(props) {
 					user_id: user?.user_id,
 					asana_id: props.video?.props.video?.id,
 					playlist_id: null,
-					currentTime: playerRef.current.currentTime,
+					currentTime: playerRef().current.currentTime,
 				});
-				addToCommittedTs(playerRef.current?.currentTime);
+				addToCommittedTs(playerRef().current?.currentTime);
 			}, 5000);
 		} else {
 			if (flushTimeInterval.current) {
@@ -838,22 +804,22 @@ function StreamStackItem(props) {
 	const handleVideoCanPlayThrough = (e) => {
 		setMetadataLoaded(true);
 		const state = useVideoStore.getState();
-		console.log("Can play through...", state.videoStore.videoState.value);
+		console.log("Can play through...", state.videoStore.videoState);
 		// tryToPlay();
 		setVideoState(STATE_VIDEO_PLAY);
 	};
 
 	// set the videoStore.volume
 	const handleVideoVolumeChange = () => {
-		if (playerRef.current !== null && playerRef.current.videoElement) {
-			setVolume(playerRef.current.videoElement.videoStore.volume || 0);
+		if (playerRef().current !== null && playerRef().current.videoElement) {
+			setVolume(playerRef().current.videoElement.videoStore.volume || 0);
 		}
 	};
 
 	const handlePlay = () => {
 		if (props.isActive) {
 			const state = useVideoStore.getState();
-			if (state.videoStore.videoState.value !== STATE_VIDEO_PLAY) {
+			if (state.videoStore.videoState !== STATE_VIDEO_PLAY) {
 				console.log(
 					"PLAYING ----------------------------->",
 					props.video.idx
@@ -861,14 +827,14 @@ function StreamStackItem(props) {
 				// setVideoState(STATE_VIDEO_PLAY);
 			}
 		} else {
-			playerRef.current.player.pause();
+			playerRef().current.player.pause();
 		}
 	};
 
 	const handlePause = () => {
 		if (props.isActive) {
 			const state = useVideoStore.getState();
-			if (state.videoStore.videoState.value !== STATE_VIDEO_PAUSED) {
+			if (state.videoStore.videoState !== STATE_VIDEO_PAUSED) {
 				console.log(
 					"PAUSING ----------------------------->",
 					props.video.idx
@@ -893,24 +859,24 @@ function StreamStackItem(props) {
 			}`}>
 			<DashPlayer
 				ref={playerInit}
-				src={videoUrl}
+				src={videoUrl()}
 				isAsanaVideo={
-					!isNaN(props.video?.props.video?.id) &&
-					typeof props.video?.props.video?.id === "number"
+					!isNaN(props.video?.video?.id) &&
+					typeof props.video?.video?.id === "number"
 				}
 				isActive={props.isActive}
 				onError={playerOnError}
 				onCanPlayThrough={handleVideoCanPlayThrough}
 				onVolumeChange={handleVideoVolumeChange}
-				onEnded={handleEnd}
+				onEnded={props.handleEnd}
 				onPlay={handlePlay}
 				onPause={handlePause}
 				onLoading={handlePlayerLoading}
 				onLoaded={handlePlayerLoaded}
 				onSeeking={handleVideoSeeking}
 				onSeeked={handleVideoSeeked}
-				setDuration={setDuration}
-				class="dashjs-player w-full h-full"
+				setDuration={props.setDuration}
+				className="dashjs-player w-full h-full"
 			/>
 
 			{videoStore.devMode ? (
@@ -920,17 +886,12 @@ function StreamStackItem(props) {
 						{String(isActive)}
 					</p>
 					<p>Video IDX : {props.video?.idx}</p>
-					<p>
-						videoStore.videoState.value:{" "}
-						{videoStore.videoState.value}
-					</p>
+					<p>videoStore.videoState: {videoStore.videoState}</p>
 					<p>videoStore.pauseReason: {videoStore.pauseReason}</p>
+					<p>videoStore.viewMode: {videoStore.viewMode}</p>
 					<p>
-						videoStore.viewMode.value: {videoStore.viewMode.value}
-					</p>
-					<p>
-						videoStore.currentMarkerIdx.value:{" "}
-						{videoStore.currentMarkerIdx.value}
+						videoStore.currentMarkerIdx:{" "}
+						{videoStore.currentMarkerIdx}
 					</p>
 					<p>metadataLoaded(): {String(metadataLoaded())}</p>
 					<p>
@@ -938,8 +899,7 @@ function StreamStackItem(props) {
 					</p>
 					<p>playerLoaded(): {String(playerLoaded())}</p>
 					<p>
-						videoStore.commitSeekTime.value:{" "}
-						{videoStore.commitSeekTime.value}
+						videoStore.commitSeekTime: {videoStore.commitSeekTime}
 					</p>
 					<p>videoStore.volume: {videoStore.volume}</p>
 					<p>
@@ -947,32 +907,33 @@ function StreamStackItem(props) {
 					</p>
 					<div>
 						Buffer :{" "}
-						{playerRef.current && playerRef.current.videoElement ? (
+						{playerRef().current &&
+						playerRef().current.videoElement ? (
 							<>
 								{Array.from(
 									Array(
-										playerRef.current.videoElement.buffered
-											.length
+										playerRef().current.videoElement
+											.buffered.length
 									).keys()
 								).map((i) => {
 									return (
 										<span>
-											{playerRef.current.videoElement.buffered.start(
+											{playerRef().current.videoElement.buffered.start(
 												i
 											)}{" "}
 											-{" "}
-											{playerRef.current.videoElement.buffered.end(
+											{playerRef().current.videoElement.buffered.end(
 												i
 											)}
 										</span>
 									);
 								})}{" "}
 								| props.video :{" "}
-								{playerRef.current.player.getBufferLength(
+								{playerRef().current.player.getBufferLength(
 									"props.video"
 								)}{" "}
 								| audio :{" "}
-								{playerRef.current.player.getBufferLength(
+								{playerRef().current.player.getBufferLength(
 									"audio"
 								)}
 							</>
