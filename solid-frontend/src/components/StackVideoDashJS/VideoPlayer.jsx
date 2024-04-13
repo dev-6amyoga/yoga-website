@@ -39,7 +39,7 @@ function VideoPlayer() {
 	// watch history store
 	let [watchHistoryStore, { addToCommittedTs }] = useWatchHistoryContext();
 
-	// const [videoStateVisible, setVideoStateVisible] = useState(false);
+	const [videoStateVisible, setVideoStateVisible] = createSignal(false);
 	const [duration, setDuration] = createSignal(0);
 
 	// const draggableHandle = useRef(null);
@@ -141,6 +141,7 @@ function VideoPlayer() {
 	};
 
 	const handleStartPlaylist = () => {
+		console.log(videoStore.currentVideo, playlistStore.queue.length);
 		if (
 			videoStore.currentVideo === null &&
 			playlistStore.queue.length > 0
@@ -252,14 +253,14 @@ function VideoPlayer() {
 
 	return (
 		<div
-			class={`hover:cursor-pointer bg-white border w-full ${
+			clas={`hover:cursor-pointer bg-black border w-full ${
 				videoStore.fullScreen
 					? "h-screen"
 					: "rounded-xl overflow-hidden"
 			}`}>
-			<div>
+			{/* <div>
 				{String(videoStore.playlistState)}|{playlistStore.queue.length}
-				{/* {JSON.stringify(currentVideo)} */}|{videos().length}
+				{JSON.stringify(videoStore.currentVideo)}|{videos().length}
 				<button
 					onClick={() => {
 						console.log("setting ...");
@@ -268,9 +269,10 @@ function VideoPlayer() {
 					}}>
 					Alt
 				</button>
-			</div>
+			</div> */}
+			<pre>{JSON.stringify(videos())}</pre>
 			<div
-				class={`mx-auto aspect-video ${
+				clas={`mx-auto aspect-video ${
 					videoStore.fullScreen ? "h-full" : ""
 				}`}>
 				<Show
@@ -304,6 +306,10 @@ function VideoPlayer() {
 									<div class="">
 										<For each={videos()}>
 											{(queueItem) => {
+												console.log(
+													"VIDEOS : ",
+													queueItem.queue_id
+												);
 												return (
 													<StreamStackItem
 														key={queueItem.queue_id}
@@ -319,7 +325,9 @@ function VideoPlayer() {
 															setDuration
 														}
 														isActive={
-															currentVideo?.queue_id ===
+															videoStore
+																.currentVideo
+																?.queue_id ===
 															queueItem?.queue_id
 														}
 														setVideoStateVisible={
@@ -332,8 +340,8 @@ function VideoPlayer() {
 										</For>
 									</div>
 								</Show>
-								{/* <div class="absolute bottom-0 z-20 h-40 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0">
-									<div class="absolute bottom-0 w-full ">
+								<div class="absolute bottom-0 z-20 h-40 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0">
+									{/* <div class="absolute bottom-0 w-full ">
 										<VideoPlaybar
 											duration={duration}
 											draggableHandle={draggableHandle}
@@ -342,8 +350,8 @@ function VideoPlayer() {
 											handleSetPlay={handleSetPlay}
 											handleFullScreen={() => {}}
 										/>
-									</div>
-								</div> */}
+									</div> */}
+								</div>
 							</div>
 						</div>
 					</Show>

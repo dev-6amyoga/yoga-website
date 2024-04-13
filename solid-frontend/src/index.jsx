@@ -69,12 +69,10 @@ function VideoPage() {
 				setPlaylistStore(
 					produce((state) => {
 						if (state.queue.length > index) {
-							const removed = state.queue.splice(index, 1);
-							state.archive.splice(
-								state.archive.length - 1,
-								0,
-								removed[0]
-							);
+							const q = [...state.queue];
+							const removed = q.splice(index, 1);
+							state.queue = [...q];
+							state.archive = [...state.archive, removed[0]];
 						}
 					})
 				),
@@ -112,7 +110,7 @@ function VideoPage() {
 	];
 
 	const [videoStore, setVideoStore] = createStore({
-		devMode: false,
+		devMode: true,
 		fullScreen: false,
 		playlistState: false,
 		currentVideo: null,
