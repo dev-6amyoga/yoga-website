@@ -66,6 +66,7 @@ function DashPlayer(props) {
 				setPlayerRef(p);
 				p.updateSettings(dashSettings);
 				p.initialize(null, props.src, true);
+				// p.initialize(null, props.src, true, { autoplay: true, muted: true });
 				p.attachView(videoRef.current);
 				setPlayerRefSet(true);
 				console.log("[DASH PLAYER] : player created");
@@ -81,11 +82,21 @@ function DashPlayer(props) {
 		on([playerRefSet, () => props.src, drmSet], () => {
 			if (playerRefSet && drmSet() && props.src) {
 				console.log("[DASH PLAYER] : preloading");
-
-				// playerRef().preload();
+				playerRef().preload();
 			}
 		})
 	);
+
+// 	createEffect(on([playerRefSet, ()=> props.src, metadataLoaded, streamInitialized], () => {
+//   if (playerRefSet() && props.src && metadataLoaded() && streamInitialized()) { 
+//      if (props.isActive) {
+//        playerRef().play().catch((error) => {
+//          console.error("Autoplay failed");
+//        });
+//      }
+//    }
+// }));
+
 
 	createEffect(
 		on([playerRefSet, () => props.src, () => props.isAsanaVideo], () => {
