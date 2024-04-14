@@ -68,6 +68,10 @@ function DashPlayer(props) {
 				p.initialize(null, props.src, true);
 				// p.initialize(null, props.src, true, { autoplay: true, muted: true });
 				p.attachView(videoRef.current);
+				p.preload();
+
+				p.play();
+
 				setPlayerRefSet(true);
 				console.log("[DASH PLAYER] : player created");
 			}
@@ -78,14 +82,14 @@ function DashPlayer(props) {
 		})
 	);
 
-	createEffect(
-		on([playerRefSet, () => props.src, drmSet], () => {
-			if (playerRefSet() && drmSet() && props.src) {
-				console.log("[DASH PLAYER] : preloading");
-				playerRef().preload();
-			}
-		})
-	);
+	// createEffect(
+	// 	on([playerRefSet, () => props.src, drmSet], () => {
+	// 		if (playerRefSet() && drmSet() && props.src) {
+	// 			console.log("[DASH PLAYER] : preloading");
+	// 			playerRef().preload();
+	// 		}
+	// 	})
+	// );
 
 	// 	createEffect(on([playerRefSet, ()=> props.src, metadataLoaded, streamInitialized], () => {
 	//   if (playerRefSet() && props.src && metadataLoaded() && streamInitialized()) {
@@ -318,51 +322,6 @@ function DashPlayer(props) {
 			}
 		)
 	);
-
-	// set ref
-	// useImperativeHandle(
-	// 	ref,
-	// 	() => {
-	// 		console.log("[DASH PLAYER] : ref");
-	// 		return {
-	// 			get player() {
-	// 				return playerRef();
-	// 			},
-	// 			get videoElement() {
-	// 				return videoRef.current;
-	// 			},
-	// 			get videoUrl() {
-	// 				try {
-	// 					return playerRef().getSource();
-	// 				} catch (error) {
-	// 					return null;
-	// 				}
-	// 			},
-	// 			set videoUrl(url) {
-	// 				if (playerRef() === null) {
-	// 					return;
-	// 				}
-
-	// 				// playerRef().setSource(url);
-	// 				// playerRef().player.initialize();
-	// 			},
-	// 		};
-	// 	},
-	// 	[playerRefSet]
-	// );
-
-	// const setVideoRef =
-	// 	(element) => {
-	// 		// console.log("[DASH PLAYER] : setVideoRef", element);
-	// 		if (element !== null) {
-	// 			videoRef.current = element;
-	// 			if (playerRefSet) {
-	// 				// playerRef().attachView(element);
-	// 			}
-	// 		}
-	// 	},
-	// 	[playerRefSet]
-	// );
 
 	const setVideoRef = (element) => {
 		console.log("[DASH PLAYER] SETTING REF >>>>>>>>>>>>>");
