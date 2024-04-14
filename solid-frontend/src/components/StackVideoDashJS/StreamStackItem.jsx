@@ -558,7 +558,7 @@ function StreamStackItem(props) {
 	return (
 		<div
 			class={`relative h-full w-full ${
-				props.isActive ? "block" : "block"
+				props.isActive ? "block" : "hidden"
 			}`}>
 			<DashPlayer
 				ref={playerInit}
