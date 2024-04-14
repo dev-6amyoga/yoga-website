@@ -80,23 +80,22 @@ function DashPlayer(props) {
 
 	createEffect(
 		on([playerRefSet, () => props.src, drmSet], () => {
-			if (playerRefSet && drmSet() && props.src) {
+			if (playerRefSet() && drmSet() && props.src) {
 				console.log("[DASH PLAYER] : preloading");
 				playerRef().preload();
 			}
 		})
 	);
 
-// 	createEffect(on([playerRefSet, ()=> props.src, metadataLoaded, streamInitialized], () => {
-//   if (playerRefSet() && props.src && metadataLoaded() && streamInitialized()) { 
-//      if (props.isActive) {
-//        playerRef().play().catch((error) => {
-//          console.error("Autoplay failed");
-//        });
-//      }
-//    }
-// }));
-
+	// 	createEffect(on([playerRefSet, ()=> props.src, metadataLoaded, streamInitialized], () => {
+	//   if (playerRefSet() && props.src && metadataLoaded() && streamInitialized()) {
+	//      if (props.isActive) {
+	//        playerRef().play().catch((error) => {
+	//          console.error("Autoplay failed");
+	//        });
+	//      }
+	//    }
+	// }));
 
 	createEffect(
 		on([playerRefSet, () => props.src, () => props.isAsanaVideo], () => {

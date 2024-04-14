@@ -186,13 +186,13 @@ function VideoPage() {
 						}
 
 						// if the current time is less than the first marker, set to null
-						if (ct < state.markers[0].timestamp) {
+						if (ct < state.markers[0]?.timestamp) {
 							state.currentMarkerIdx = null;
 						}
 
 						// find the first marker that is greater than the current time
 						const idx =
-							state.markers.findIndex((m) => m.timestamp > ct) -
+							state.markers.findIndex((m) => m?.timestamp > ct) -
 							1;
 						// console.log("autoSetCurrentMarkerIdx :", idx, ct);
 

@@ -4,8 +4,9 @@ import {
 	SEEK_TYPE_SEEK,
 } from "../../enums/seek_types";
 import { usePlaylistStoreContext } from "../../store/PlaylistStore";
-import useVideoStore, {
+import {
 	STATE_VIDEO_ERROR,
+	STATE_VIDEO_LOADING,
 	STATE_VIDEO_PAUSED,
 	STATE_VIDEO_PLAY,
 	useVideoStoreContext,
@@ -22,6 +23,8 @@ import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
 import DashPlayer from "./DashPlayer";
 
+console.log(STATE_VIDEO_LOADING);
+
 function StreamStackItem(props) {
 	// const user = useUserStore((state) => state.user);
 	const [playerRef, setPlayerRef] = createSignal({
@@ -29,6 +32,7 @@ function StreamStackItem(props) {
 	});
 	const commitTimeInterval = null;
 	const flushTimeInterval = null;
+	let intervalTimer = null;
 
 	const [metadataLoaded, setMetadataLoaded] = createSignal(false);
 	const [autoplayInitialized, setAutoplayInitialized] = createSignal(false);
@@ -172,7 +176,7 @@ function StreamStackItem(props) {
 							"createEffect : changing to pause",
 							props.video.idx
 						);
-						if (isActive) {
+						if (props.isActive) {
 							playerRef().current.player.pause();
 						}
 					} else if (videoStore.videoState === STATE_VIDEO_PLAY) {
@@ -180,7 +184,7 @@ function StreamStackItem(props) {
 							"createEffect : changing to play",
 							props.video.idx
 						);
-						if (isActive) {
+						if (props.isActive) {
 							playerRef().current.player.play();
 						}
 					}
@@ -299,7 +303,7 @@ function StreamStackItem(props) {
 								console.log("LOOPING CUZ OF MARKER");
 								addToSeekQueue({
 									type: SEEK_TYPE_MARKER,
-									t: currentMarker.timestamp,
+									t: currentMarker?.timestamp,
 								});
 								return true;
 							} else {
@@ -312,7 +316,8 @@ function StreamStackItem(props) {
 					}
 				};
 
-				// const int = setInterval(() => {
+				console.log("createEffect : initializing interval timer");
+				// intervalTimer = setInterval(() => {
 				// 	if (playerRef().current?.videoElement && props.isActive) {
 				// 		if (
 				// 			checkSeek(
@@ -343,15 +348,14 @@ function StreamStackItem(props) {
 				// 		setCurrentTime(
 				// 			playerRef().current?.videoElement?.currentTime
 				// 		);
-				// 		setVolume(
-				// 			playerRef().current?.videoElement?.videoStore.volume
-				// 		);
+				// 		setVolume(playerRef().current?.videoElement?.volume);
 				// 	}
 				// }, 16.67);
 
-				// onCleanup(() => {
-				// 	if (int) clearInterval(int);
-				// });
+				onCleanup(() => {
+					console.log("createEffect : cleaning up interval timer");
+					if (intervalTimer) clearInterval(intervalTimer);
+				});
 			}
 		)
 	);
@@ -502,8 +506,8 @@ function StreamStackItem(props) {
 
 	const handleVideoCanPlayThrough = (e) => {
 		setMetadataLoaded(true);
-		const state = useVideoStore.getState();
-		console.log("Can play through...", state.videoStore.videoState);
+		// const state = useVideoStore.getState();
+		console.log("Can play through...", videoStore.videoState);
 		// tryToPlay();
 		setVideoState(STATE_VIDEO_PLAY);
 	};
@@ -517,8 +521,8 @@ function StreamStackItem(props) {
 
 	const handlePlay = () => {
 		if (props.isActive) {
-			const state = useVideoStore.getState();
-			if (state.videoStore.videoState !== STATE_VIDEO_PLAY) {
+			// const state = useVideoStore.getState();
+			if (videoStore.videoState !== STATE_VIDEO_PLAY) {
 				console.log(
 					"PLAYING ----------------------------->",
 					props.video.idx
@@ -532,8 +536,8 @@ function StreamStackItem(props) {
 
 	const handlePause = () => {
 		if (props.isActive) {
-			const state = useVideoStore.getState();
-			if (state.videoStore.videoState !== STATE_VIDEO_PAUSED) {
+			// const state = useVideoStore.getState();
+			if (videoStore.videoState !== STATE_VIDEO_PAUSED) {
 				console.log(
 					"PAUSING ----------------------------->",
 					props.video.idx
