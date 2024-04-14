@@ -78,14 +78,30 @@ function DashPlayer(props) {
 		})
 	);
 
-	createEffect(
-		on([playerRefSet, () => props.src, drmSet], () => {
-			if (playerRefSet() && drmSet() && props.src) {
-				console.log("[DASH PLAYER] : preloading");
-				playerRef().preload();
-			}
-		})
-	);
+	// createEffect(
+	// 	on([playerRefSet, () => props.src, drmSet], () => {
+	// 		if (playerRefSet() && drmSet() && props.src) {
+	// 			console.log("[DASH PLAYER] : preloading");
+	// 			playerRef().preload();
+	// 			playerRef().play().catch((error) => {
+	// 				console.error("Play failed");
+	// 			});
+	// 		}
+	// 	})
+	// );
+
+	createEffect(on([playerRefSet, () => props.src, drmSet], () => {
+  if (playerRefSet() && drmSet() && props.src) {
+    console.log("[DASH PLAYER] : preloading");
+    playerRef().preload();
+    const playPromise = playerRef().play().catch((error) => {
+      console.error("Play failed:", error);
+    });
+    playPromise.then(() => {
+        playerRef().pause(); 
+    });
+  }
+}));
 
 	// 	createEffect(on([playerRefSet, ()=> props.src, metadataLoaded, streamInitialized], () => {
 	//   if (playerRefSet() && props.src && metadataLoaded() && streamInitialized()) {
