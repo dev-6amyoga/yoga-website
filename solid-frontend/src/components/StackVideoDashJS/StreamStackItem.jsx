@@ -558,7 +558,7 @@ function StreamStackItem(props) {
 	return (
 		<div
 			class={`relative h-full w-full ${
-				props.isActive ? "block" : "hidden"
+				props.isActive ? "block" : "block"
 			}`}>
 			<DashPlayer
 				ref={playerInit}
@@ -633,7 +633,7 @@ function StreamStackItem(props) {
 								})}{" "}
 								| props.video :{" "}
 								{playerRef().current.player.getBufferLength(
-									"props.video"
+									"video"
 								)}{" "}
 								| audio :{" "}
 								{playerRef().current.player.getBufferLength(
