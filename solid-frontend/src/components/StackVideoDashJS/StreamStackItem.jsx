@@ -47,23 +47,40 @@ function StreamStackItem(props) {
 			);
 		})
 	);
-	createEffect(
-		on([() => props.isActive, () => props.video], () => {
-			console.log(props.video, props.isActive);
-			if (props.isActive) {
-				console.log(playerRef());
-				// console.log(
-				// 	"IS ACTIVE",
-				// 	props.video?.idx,
-				// 	playerRef().current.videoElement.currentTime
-				// );
+	// createEffect(
+	// 	on([() => props.isActive, () => props.video], () => {
+	// 		console.log(props.video, props.isActive);
+	// 		if (props.isActive) {
+	// 			console.log(playerRef());
+	// 		}
+	// 		console.log({
+	// 			propsIsActive: props.isActive,
+	// 			videoidx: props.video?.idx,
+	// 		});
+	// 	})
+	// );
+
+	createEffect( 
+    on([() => props.isActive, () => props.video], () => {
+        console.log(props.video, props.isActive);
+
+        if (props.isActive) { 
+            console.log(playerRef(), "IS REF!"); // If needed for debugging 
+			if(playerRef().current.player !== null){
+				playerRef().current.player.preload();
 			}
-			console.log({
-				propsIsActive: props.isActive,
-				videoidx: props.video?.idx,
-			});
-		})
-	);
+            // playerRef().current.player.preload(); // Initiate preloading when props.isActive is true
+        } 
+		else{
+			console.log(playerRef(), "IS REF NON ACTIVE");
+		}
+
+        console.log({
+            propsIsActive: props.isActive,
+            videoidx: props.video?.idx,
+        });
+    })
+);
 
 	const [
 		videoStore,
@@ -530,6 +547,7 @@ function StreamStackItem(props) {
 				// setVideoState(STATE_VIDEO_PLAY);
 			}
 		} else {
+			playerRef().current.player.preload()
 			playerRef().current.player.pause();
 		}
 	};
@@ -556,10 +574,18 @@ function StreamStackItem(props) {
 	};
 
 	return (
-		<div
-			class={`relative h-full w-full ${
-				props.isActive ? "block" : "block"
-			}`}>
+		// <div
+		// 	class={`relative h-full w-full ${
+		// 		props.isActive ? "block" : "block"
+		// 	}`}>
+			// 	<div
+			// class="relative h-full w-full block">
+
+			<div
+  class={`relative h-full w-full ${
+    props.isActive ? "block" : "visibility:hidden" 
+  }`}
+>
 			<DashPlayer
 				ref={playerInit}
 				src={videoUrl()}
