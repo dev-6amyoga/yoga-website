@@ -57,8 +57,6 @@ function DashPlayer(props) {
 
 	createEffect(
 		on([() => props.src], () => {
-			//is it not picking up src? for some reason??
-			// no wait one sec
 			console.log("[DASH PLAYER] : setup", { src: props.src });
 			let p = null;
 			if (props.src) {
@@ -69,13 +67,10 @@ function DashPlayer(props) {
 				// p.initialize(null, props.src, true, { autoplay: true, muted: true });
 				p.attachView(videoRef.current);
 				p.preload();
-
 				p.play();
-
 				setPlayerRefSet(true);
 				console.log("[DASH PLAYER] : player created");
 			}
-
 			onCleanup(() => {
 				console.log("[DASH PLAYER] Cleanup, player reset");
 			});
