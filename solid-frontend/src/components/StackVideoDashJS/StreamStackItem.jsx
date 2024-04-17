@@ -47,18 +47,6 @@ function StreamStackItem(props) {
 			);
 		})
 	);
-	// createEffect(
-	// 	on([() => props.isActive, () => props.video], () => {
-	// 		console.log(props.video, props.isActive);
-	// 		if (props.isActive) {
-	// 			console.log(playerRef());
-	// 		}
-	// 		console.log({
-	// 			propsIsActive: props.isActive,
-	// 			videoidx: props.video?.idx,
-	// 		});
-	// 	})
-	// );
 
 	createEffect( 
     on([() => props.isActive, () => props.video], () => {
@@ -69,12 +57,10 @@ function StreamStackItem(props) {
 			if(playerRef().current.player !== null){
 				playerRef().current.player.preload();
 			}
-            // playerRef().current.player.preload(); // Initiate preloading when props.isActive is true
         } 
 		else{
 			console.log(playerRef(), "IS REF NON ACTIVE");
 		}
-
         console.log({
             propsIsActive: props.isActive,
             videoidx: props.video?.idx,
@@ -413,95 +399,6 @@ function StreamStackItem(props) {
 	// 		setWatchTimeBuffer([]);
 	// 	}
 
-	/* 
-		when props.video changes
-		- flush 
-		- reset committedTs
-		- clear previous interval to flush 
-		- start interval timer to flush	watch duration buffer  [10s]
-		- clear previous interval to commit time
-		- start interval timer to commit time [5s]
-	*/
-
-	/*
-	useEffect(() => {
-		console.log("Watch time useEffect : ", enableWatchHistory);
-		if (props.isActive && enableWatchHistory && user && props.video) {
-			console.log("setting up stuff");
-			// console.log('CURRENT VIDEO', props.video)
-			// flushing
-			flushWatchTimeBuffer(user?.user_id);
-
-			// resetting committedTs
-			setCommittedTs(0);
-
-			// clearing previous interval to flush
-			if (flushTimeInterval.current) {
-				clearInterval(flushTimeInterval.current);
-			}
-
-			// clearing previous commitTimeInterval
-			if (commitTimeInterval.current) {
-				clearInterval(commitTimeInterval.current);
-			}
-
-			// TODO : send to watch history
-			Fetch({
-				url: "/watch-history/create",
-				method: "POST",
-				// TODO : fix thiss
-				data: {
-					user_id: user?.user_id,
-					asana_id: props.video?.props.video?.id,
-					playlist_id: null,
-				},
-			})
-				.then((res) => {
-					console.log("watch history created", res.data);
-				})
-				.catch((err) => {
-					console.log(err);
-				});
-
-			// starting interval timer to flush watch duration buffer
-			flushTimeInterval.current = setInterval(() => {
-				// flushWatchTimeBuffer(user?.user_id);
-				flushWatchTimeBufferE(user?.user_id);
-			}, 10000);
-
-			// starting interval timer to commit time
-			commitTimeInterval.current = setInterval(() => {
-				// TODO : fix this
-				updateWatchTimeBuffer({
-					user_id: user?.user_id,
-					asana_id: props.video?.props.video?.id,
-					playlist_id: null,
-					currentTime: playerRef().current.currentTime,
-				});
-				addToCommittedTs(playerRef().current?.currentTime);
-			}, 5000);
-		} else {
-			if (flushTimeInterval.current) {
-				clearInterval(flushTimeInterval.current);
-			}
-
-			if (commitTimeInterval.current) {
-				clearInterval(commitTimeInterval.current);
-			}
-		}
-	}, [
-		props.isActive,
-		enableWatchHistory,
-		user,
-		props.video,
-		flushWatchTimeBufferE,
-		updateWatchTimeBuffer,
-		addToCommittedTs,
-		setCommittedTs,
-		flushWatchTimeBuffer,
-	]);
-	*/
-
 	const handlePlayerLoading = (e) => {
 		handleLoading(true, isActive);
 	};
@@ -537,18 +434,22 @@ function StreamStackItem(props) {
 	};
 
 	const handlePlay = () => {
+		const inactiveVideoStartTime = playerRef().current.videoElement.duration - 0.5;
+		console.log("TIME IS :", inactiveVideoStartTime)
 		if (props.isActive) {
-			// const state = useVideoStore.getState();
 			if (videoStore.videoState !== STATE_VIDEO_PLAY) {
 				console.log(
 					"PLAYING ----------------------------->",
 					props.video.idx
 				);
-				// setVideoState(STATE_VIDEO_PLAY);
 			}
 		} else {
-			playerRef().current.player.preload()
+			playerRef().current.player.preload();
 			playerRef().current.player.pause();
+			setTimeout(() => {
+				console.log("TIME IS jojojojojo")
+				playerRef().current.player.play();
+			}, inactiveVideoStartTime * 1000); 
 		}
 	};
 
@@ -582,10 +483,10 @@ function StreamStackItem(props) {
 			// class="relative h-full w-full block">
 
 			<div
-  class={`relative h-full w-full ${
-    props.isActive ? "block" : "visibility:hidden" 
-  }`}
->
+				class={`relative h-full w-full ${
+					props.isActive ? "block" : "hidden" 
+				}`}
+			>
 			<DashPlayer
 				ref={playerInit}
 				src={videoUrl()}
