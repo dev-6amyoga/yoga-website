@@ -250,7 +250,6 @@ function VideoPlayer() {
 		})
 	);
 
-
 	return (
 		<div
 			clas={`hover:cursor-pointer bg-black border w-full ${
@@ -301,40 +300,35 @@ function VideoPlayer() {
 							</div>
 						}>
 						<div>
-							<div class="flex flex-row">
+							<div class="flex flex-row items-end gap-4">
 								<Show when={playlistStore.queue.length > 0}>
-									<div>
-										<For each={videos()}>
-											{(queueItem) => {
-												return (
-													<StreamStackItem
-														key={queueItem.queue_id}
-														video={queueItem}
-														handleEnd={handleEnd}
-														handleLoading={
-															handleLoading
-														}
-														handlePlaybackError={
-															handlePlaybackError
-														}
-														setDuration={
-															setDuration
-														}
-														isActive={
-															videoStore
-																.currentVideo
-																?.queue_id ===
-															queueItem?.queue_id
-														}
-														setVideoStateVisible={
-															setVideoStateVisible
-														}
-														handleFullScreen={() => {}}
-													/>
-												);
-											}}
-										</For>
-									</div>
+									<For each={videos()}>
+										{(queueItem) => {
+											return (
+												<StreamStackItem
+													key={queueItem.queue_id}
+													video={queueItem}
+													handleEnd={handleEnd}
+													handleLoading={
+														handleLoading
+													}
+													handlePlaybackError={
+														handlePlaybackError
+													}
+													setDuration={setDuration}
+													isActive={
+														videoStore.currentVideo
+															?.queue_id ===
+														queueItem?.queue_id
+													}
+													setVideoStateVisible={
+														setVideoStateVisible
+													}
+													handleFullScreen={() => {}}
+												/>
+											);
+										}}
+									</For>
 								</Show>
 								<div class="absolute bottom-0 z-20 h-40 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0">
 									{/* <div class="absolute bottom-0 w-full ">

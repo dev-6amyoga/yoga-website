@@ -48,25 +48,24 @@ function StreamStackItem(props) {
 		})
 	);
 
-	createEffect( 
-    on([() => props.isActive, () => props.video], () => {
-        console.log(props.video, props.isActive);
+	createEffect(
+		on([() => props.isActive, () => props.video], () => {
+			console.log(props.video, props.isActive);
 
-        if (props.isActive) { 
-            console.log(playerRef(), "IS REF!"); // If needed for debugging 
-			if(playerRef().current.player !== null){
-				playerRef().current.player.preload();
+			if (props.isActive) {
+				console.log(playerRef(), "IS REF!"); // If needed for debugging
+				if (playerRef().current.player !== null) {
+					playerRef().current.player.preload();
+				}
+			} else {
+				console.log(playerRef(), "IS REF NON ACTIVE");
 			}
-        } 
-		else{
-			console.log(playerRef(), "IS REF NON ACTIVE");
-		}
-        console.log({
-            propsIsActive: props.isActive,
-            videoidx: props.video?.idx,
-        });
-    })
-);
+			console.log({
+				propsIsActive: props.isActive,
+				videoidx: props.video?.idx,
+			});
+		})
+	);
 
 	const [
 		videoStore,
@@ -437,9 +436,9 @@ function StreamStackItem(props) {
 		// const inactiveVideoStartTime = playerRef().current.videoElement.duration - 0.7;
 		const currentTime = playerRef().current.player.time();
 		const duration = playerRef().current.player.duration();
-		const remainingTime = duration - currentTime; 
+		const remainingTime = duration - currentTime;
 		const inactiveVideoStartTime = remainingTime - 0.7;
-		console.log("TIME IS :", inactiveVideoStartTime)
+		console.log("TIME IS :", inactiveVideoStartTime);
 		if (props.isActive) {
 			if (videoStore.videoState !== STATE_VIDEO_PLAY) {
 				console.log(
@@ -451,9 +450,9 @@ function StreamStackItem(props) {
 			playerRef().current.player.preload();
 			playerRef().current.player.pause();
 			setTimeout(() => {
-				console.log("TIME IS jojojojojo")
+				console.log("TIME IS jojojojojo");
 				playerRef().current.player.play();
-			}, inactiveVideoStartTime * 1000); 
+			}, inactiveVideoStartTime * 1000);
 		}
 	};
 
@@ -483,14 +482,14 @@ function StreamStackItem(props) {
 		// 	class={`relative h-full w-full ${
 		// 		props.isActive ? "block" : "block"
 		// 	}`}>
-			// 	<div
-			// class="relative h-full w-full block">
+		// 	<div
+		// class="relative h-full w-full block">
 
-			<div
-				// class={`${
-				// 	props.isActive ? "block" : "block" 
-				// }`}
-			>
+		<div
+			// class={`${
+			// 	props.isActive ? "block" : "block"
+			// }`}
+			class={props.isActive ? "flex-1" : "w-60"}>
 			<DashPlayer
 				ref={playerInit}
 				src={videoUrl()}
@@ -510,7 +509,7 @@ function StreamStackItem(props) {
 				onSeeking={handleVideoSeeking}
 				onSeeked={handleVideoSeeked}
 				setDuration={props.setDuration}
-				className="dashjs-player w-full h-full"
+				className="dashjs-player"
 			/>
 
 			{videoStore.devMode ? (
