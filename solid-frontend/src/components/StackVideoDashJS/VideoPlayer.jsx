@@ -40,7 +40,6 @@ function VideoPlayer() {
 	let [watchHistoryStore, { addToCommittedTs }] = useWatchHistoryContext();
 
 	const [videoStateVisible, setVideoStateVisible] = createSignal(false);
-	const [containerClass, setContainerClass] = createSignal("");
 	const [duration, setDuration] = createSignal(0);
 
 	// const draggableHandle = useRef(null);
@@ -232,7 +231,6 @@ function VideoPlayer() {
 				} else {
 					setVideos([]);
 				}
-				setContainerClass(p=> p==="flex-col"? "flex-col-reverse":"flex-col")
 				onCleanup(() => {
 					if (timeout) {
 						clearTimeout(timeout);
@@ -252,11 +250,6 @@ function VideoPlayer() {
 		})
 	);
 
-		createEffect(
-		on([() => containerClass()], (v) => {
-			console.log(containerClass())
-		})
-	);
 
 	return (
 		<div
@@ -308,15 +301,11 @@ function VideoPlayer() {
 							</div>
 						}>
 						<div>
-							<div class={`relative h-full w-full flex ${containerClass()}`}>
+							<div class="flex flex-row">
 								<Show when={playlistStore.queue.length > 0}>
-									<div class="">
+									<div>
 										<For each={videos()}>
 											{(queueItem) => {
-												console.log(
-													"VIDEOS : ",
-													queueItem.queue_id
-												);
 												return (
 													<StreamStackItem
 														key={queueItem.queue_id}
