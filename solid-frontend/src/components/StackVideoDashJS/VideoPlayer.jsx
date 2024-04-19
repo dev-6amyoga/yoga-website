@@ -300,7 +300,9 @@ function VideoPlayer() {
 							</div>
 						}>
 						<div>
-							<div class="flex flex-row items-end gap-4">
+							<div class="flex flex-row">
+
+							{/* <div class="flex flex-row items-end gap-4"> */}
 								<Show when={playlistStore.queue.length > 0}>
 									<For each={videos()}>
 										{(queueItem) => {
