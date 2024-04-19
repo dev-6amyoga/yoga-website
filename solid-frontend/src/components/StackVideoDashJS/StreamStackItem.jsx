@@ -433,12 +433,11 @@ function StreamStackItem(props) {
 	};
 
 	const handlePlay = () => {
-		// const inactiveVideoStartTime = playerRef().current.videoElement.duration - 0.7;
-		const currentTime = playerRef().current.player.time();
-		const duration = playerRef().current.player.duration();
-		const remainingTime = duration - currentTime;
-		const inactiveVideoStartTime = remainingTime - 0.7;
-		console.log("TIME IS :", inactiveVideoStartTime);
+		console.log("Handle Play called!!!!")
+		// const currentTime = playerRef().current.player.time();
+		// const duration = playerRef().current.player.duration();
+		// const remainingTime = duration - currentTime;
+		// const inactiveVideoStartTime = remainingTime - 0.7;
 		if (props.isActive) {
 			if (videoStore.videoState !== STATE_VIDEO_PLAY) {
 				console.log(
@@ -449,10 +448,11 @@ function StreamStackItem(props) {
 		} else {
 			playerRef().current.player.preload();
 			playerRef().current.player.pause();
-			setTimeout(() => {
-				console.log("TIME IS jojojojojo");
-				playerRef().current.player.play();
-			}, inactiveVideoStartTime * 1000);
+			playerRef().current.player.play();
+			// setTimeout(() => {
+			// 	console.log("TIME IS jojojojojo");
+			// 	playerRef().current.player.play();
+			// }, inactiveVideoStartTime * 1000);
 		}
 	};
 
