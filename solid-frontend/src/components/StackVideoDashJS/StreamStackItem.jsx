@@ -434,10 +434,10 @@ function StreamStackItem(props) {
 
 	const handlePlay = () => {
 		console.log("Handle Play called!!!!")
-		// const currentTime = playerRef().current.player.time();
-		// const duration = playerRef().current.player.duration();
-		// const remainingTime = duration - currentTime;
-		// const inactiveVideoStartTime = remainingTime - 0.7;
+		const currentTime = playerRef().current.player.time();
+		const duration = playerRef().current.player.duration();
+		const remainingTime = duration - currentTime;
+		const inactiveVideoStartTime = remainingTime - 0.7;
 		if (props.isActive) {
 			if (videoStore.videoState !== STATE_VIDEO_PLAY) {
 				console.log(
@@ -448,7 +448,17 @@ function StreamStackItem(props) {
 		} else {
 			playerRef().current.player.preload();
 			playerRef().current.player.pause();
-			playerRef().current.player.play();
+			let secondsRemaining = inactiveVideoStartTime;
+			const countdownInterval = setInterval(() => {
+				console.log("time is")
+				secondsRemaining--;
+				console.log("Seconds remaining time is:", secondsRemaining);
+				if (secondsRemaining <= 0) {
+					clearInterval(countdownInterval); 
+					playerRef().current.player.play(); 
+				}
+			}, 1000); 
+
 			// setTimeout(() => {
 			// 	console.log("TIME IS jojojojojo");
 			// 	playerRef().current.player.play();
@@ -486,10 +496,11 @@ function StreamStackItem(props) {
 		// class="relative h-full w-full block">
 
 		<div
-			// class={`${
-			// 	props.isActive ? "block" : "block"
-			// }`}
-			class={props.isActive ? "flex-1" : "w-60"}>
+			class={`${
+				props.isActive ? "block" : "block"
+			}`}>
+
+			{/* class={props.isActive ? "flex-1" : "w-60"}> */}
 			<DashPlayer
 				ref={playerInit}
 				src={videoUrl()}
