@@ -269,7 +269,7 @@ function VideoPlayer() {
 					Alt
 				</button>
 			</div> */}
-			<pre>{JSON.stringify(videos())}</pre>
+			{/* <pre>{JSON.stringify(videos())}</pre> */}
 			<div
 				clas={`mx-auto aspect-video ${
 					videoStore.fullScreen ? "h-full" : ""
@@ -300,11 +300,10 @@ function VideoPlayer() {
 							</div>
 						}>
 						<div>
-							<div class="flex flex-row">
-
-							{/* <div class="flex flex-row items-end gap-4"> */}
+							<div class="relative">
+								{/* <div class="flex flex-row items-end gap-4"> */}
 								<Show when={playlistStore.queue.length > 0}>
-									<For each={videos()}>
+									<For each={playlistStore.queue.slice(0, 2)}>
 										{(queueItem) => {
 											return (
 												<StreamStackItem

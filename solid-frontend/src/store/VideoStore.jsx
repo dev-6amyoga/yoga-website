@@ -185,6 +185,7 @@ export const VideoStoreContext = createContext([
 		viewMode: VIDEO_VIEW_STUDENT_MODE,
 		commitSeekTime: -1,
 		playreadyKeyUrl: null,
+		videoEvents: [],
 	},
 	{},
 ]);

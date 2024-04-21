@@ -13,15 +13,15 @@
 // };
 
 export const dashSettings = {
-  debug: {
-    logLevel: 5,
-  },
-  streaming: {
-    cacheInitSegments: true,
-    buffer: {
-      initialBufferLevel: 8,
-      bufferTimeAtTopQuality: 25,
-      bufferToKeep: 18,
-    },
-  },
+	debug: {
+		logLevel: 2,
+	},
+	streaming: {
+		cacheInitSegments: true,
+		buffer: {
+			initialBufferLevel: 8,
+			bufferTimeAtTopQuality: 25,
+			bufferToKeep: 18,
+		},
+	},
 };
