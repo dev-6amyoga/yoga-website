@@ -436,6 +436,25 @@ function StreamStackItem(props) {
 		}
 	};
 
+	const [inactiveVideoDuration, setInactiveVideoDuration] = createSignal(null); 
+	createEffect(() => {
+			console.log("TIME IS : ", inactiveVideoDuration());
+			if (inactiveVideoDuration()) { 
+				console.log("INACTIVE DURATION NOT NULL TIME IS")
+				console.log(props.isActive, "TIME IS TIME IS")
+				if(!props.isActive){
+					console.log("IN NOT IS ACTIVE TIME IS")
+					playInActiveTimer = setTimeout(() => {
+					console.log("TIME IS jojojojojo");
+					addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
+					setInactiveVideoDuration(null); 
+					}, inactiveVideoDuration() * 1000); 
+				}
+			} else {
+				console.log("Duration not set yet!time is");
+			}
+	});
+
 	const handlePlay = () => {
 		console.log("Handle Play called!!!!", props.isActive);
 		if (props.isActive) {
@@ -449,48 +468,61 @@ function StreamStackItem(props) {
 			if (playInActiveTimer) {
 				clearTimeout(playInActiveTimer);
 			}
-
 			clearVideoEvents();
 
 			const currentTime = playerRef().current.player.time();
 			const duration = playerRef().current.player.duration();
 			const remainingTime = duration - currentTime;
-			const inactiveVideoStartTime = remainingTime - 1;
+			console.log("Setting time is to : ", remainingTime-30)
+			setInactiveVideoDuration(remainingTime -30); 
 
-			console.log("[ACTIVE] Setting timer at:", remainingTime);
+			// console.log("[ACTIVE] Setting timer at:", inactiveVideoStartTime);
 
-			playInActiveTimer = setTimeout(() => {
-				console.log("TIME IS jojojojojo");
-				addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
-			}, inactiveVideoStartTime * 1000);
-		} else {
-			// playerRef().current.player.preload();
-			playerRef().current.player.pause();
-			console.log(
-				"PAUSING ----------------------------->",
-				props.video.idx
-			);
-
-			// let secondsRemaining = inactiveVideoStartTime;
-			// const countdownInterval = setInterval(() => {
-			// 	console.log("time is");
-			// 	secondsRemaining--;
-			// 	console.log("Seconds remaining time is:", secondsRemaining);
-			// 	if (secondsRemaining <= 0) {
-			// 		clearInterval(countdownInterval);
-			// 		playerRef().current.player.play();
-			// 	}
-			// }, 1000);
-			// const currentTime = playerRef().current.player.time();
-			// const duration = playerRef().current.player.duration();
-			// const remainingTime = duration - currentTime;
-			// const inactiveVideoStartTime = remainingTime - 0.7;
-			// console.log("Remaining time is:", remainingTime);
-			// setTimeout(() => {
+			// playInActiveTimer = setTimeout(() => {
 			// 	console.log("TIME IS jojojojojo");
-			// 	playerRef().current.player.play();
+			// 	addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
 			// }, inactiveVideoStartTime * 1000);
-		}
+		} 
+		// else {
+		// 	playerRef().current.player.preload();
+		// 	playerRef().current.player.pause();
+		// 	console.log(
+		// 		"PAUSING ----------------------------->",
+		// 		props.video.idx
+		// 	);
+		// 	    if (inactiveVideoDuration()) {
+		// 			console.log("TIME IS : ", inactiveVideoDuration())
+		// 			playInActiveTimer = setTimeout(() => {
+		// 				console.log("TIME IS jojojojojo");
+		// 				addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
+		// 				setInactiveVideoDuration(null);
+		// 			}, inactiveVideoDuration * 1000);
+		// 		} else {
+		// 			console.log("Duration not set yet!")
+				
+		// 		}
+		// 	// playerRef().current.player.play();
+
+		// 	// let secondsRemaining = inactiveVideoStartTime;
+		// 	// const countdownInterval = setInterval(() => {
+		// 	// 	console.log("time is");
+		// 	// 	secondsRemaining--;
+		// 	// 	console.log("Seconds remaining time is:", secondsRemaining);
+		// 	// 	if (secondsRemaining <= 0) {
+		// 	// 		clearInterval(countdownInterval);
+		// 	// 		playerRef().current.player.play();
+		// 	// 	}
+		// 	// }, 1000);
+		// 	// const currentTime = playerRef().current.player.time();
+		// 	// const duration = playerRef().current.player.duration();
+		// 	// const remainingTime = duration - currentTime;
+		// 	// const inactiveVideoStartTime = remainingTime - 0.7;
+		// 	// console.log("Remaining time is:", remainingTime);
+		// 	// setTimeout(() => {
+		// 	// 	console.log("TIME IS jojojojojo");
+		// 	// 	playerRef().current.player.play();
+		// 	// }, inactiveVideoStartTime * 1000);
+		// }
 	};
 
 	const handlePause = () => {
