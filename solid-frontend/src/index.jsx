@@ -126,6 +126,7 @@ function VideoPage() {
 		viewMode: VIDEO_VIEW_STUDENT_MODE,
 		commitSeekTime: -1,
 		playreadyKeyUrl: null,
+		videoEvents: [],
 	});
 
 	const videoStoreActions = [
@@ -290,6 +291,21 @@ function VideoPage() {
 						state.playreadyKeyUrl = url;
 					})
 				),
+
+			addVideoEvent: (event) =>
+				setVideoStore(
+					produce((state) => {
+						state.videoEvents = [...state.videoEvents, event];
+					})
+				),
+
+			clearVideoEvents: () => {
+				setVideoStore(
+					produce((state) => {
+						state.videoEvents = [];
+					})
+				);
+			},
 		},
 	];
 

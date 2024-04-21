@@ -19,6 +19,7 @@ import {
 	on,
 	onCleanup,
 } from "solid-js";
+import { VIDEO_EVENT_PLAY_INACTIVE } from "../../enums/video_event";
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
 import DashPlayer from "./DashPlayer";
@@ -33,6 +34,7 @@ function StreamStackItem(props) {
 	const commitTimeInterval = null;
 	const flushTimeInterval = null;
 	let intervalTimer = null;
+	let playInActiveTimer = null;
 
 	const [metadataLoaded, setMetadataLoaded] = createSignal(false);
 	const [autoplayInitialized, setAutoplayInitialized] = createSignal(false);
@@ -48,24 +50,24 @@ function StreamStackItem(props) {
 		})
 	);
 
-	createEffect(
-		on([() => props.isActive, () => props.video], () => {
-			console.log(props.video, props.isActive);
+	// createEffect(
+	// 	on([() => props.isActive, () => props.video], () => {
+	// 		console.log(props.video, props.isActive);
 
-			if (props.isActive) {
-				console.log(playerRef(), "IS REF!"); // If needed for debugging
-				if (playerRef().current.player !== null) {
-					playerRef().current.player.preload();
-				}
-			} else {
-				console.log(playerRef(), "IS REF NON ACTIVE");
-			}
-			console.log({
-				propsIsActive: props.isActive,
-				videoidx: props.video?.idx,
-			});
-		})
-	);
+	// 		if (props.isActive) {
+	// 			console.log(playerRef(), "IS REF!"); // If needed for debugging
+	// 			if (playerRef().current.player !== null) {
+	// 				playerRef().current.player.preload();
+	// 			}
+	// 		} else {
+	// 			console.log(playerRef(), "IS REF NON ACTIVE");
+	// 		}
+	// 		console.log({
+	// 			propsIsActive: props.isActive,
+	// 			videoidx: props.video?.idx,
+	// 		});
+	// 	})
+	// );
 
 	const [
 		videoStore,
@@ -81,18 +83,13 @@ function StreamStackItem(props) {
 			setViewMode,
 			setPauseReason,
 			setCommitSeekTime,
+			addVideoEvent,
+			clearVideoEvents,
 		},
 	] = useVideoStoreContext();
 
 	const [playlistStore, { popFromQueue, popFromArchive }] =
 		usePlaylistStoreContext();
-	const handleNextVideo = () => {
-		popFromQueue(0);
-	};
-
-	const playerOnError = (e) => {
-		setVideoState(STATE_VIDEO_ERROR);
-	};
 
 	const tryToPlay = () => {
 		console.log(`Try to play called : ${isActive}`);
@@ -119,6 +116,7 @@ function StreamStackItem(props) {
 				pr.pause();
 				// pr.currentTime = 0;
 			}
+
 			onCleanup(() => {
 				if (pr && !props.isActive) {
 					// pr.currentTime = 0;
@@ -155,46 +153,47 @@ function StreamStackItem(props) {
 		)
 	);
 
-	createEffect(
-		on(
-			[
-				() => props.video,
-				metadataLoaded,
-				() => videoStore.videoState,
-				() => props.isActive,
-				autoplayInitialized,
-			],
-			() => {
-				if (
-					props.isActive &&
-					metadataLoaded() &&
-					playerRef().current !== null &&
-					playerRef().current !== undefined
-				) {
-					setPauseReason(null);
+	// createEffect(
+	// 	on(
+	// 		[
+	// 			() => props.video,
+	// 			metadataLoaded,
+	// 			() => videoStore.videoState,
+	// 			() => props.isActive,
+	// 			autoplayInitialized,
+	// 		],
+	// 		() => {
+	// 			if (
+	// 				props.isActive &&
+	// 				metadataLoaded() &&
+	// 				playerRef().current !== null &&
+	// 				playerRef().current !== undefined
+	// 			) {
+	// 				setPauseReason(null);
 
-					if (videoStore.videoState === STATE_VIDEO_PAUSED) {
-						console.log(
-							"createEffect : changing to pause",
-							props.video.idx
-						);
-						if (props.isActive) {
-							playerRef().current.player.pause();
-						}
-					} else if (videoStore.videoState === STATE_VIDEO_PLAY) {
-						console.log(
-							"createEffect : changing to play",
-							props.video.idx
-						);
-						if (props.isActive) {
-							playerRef().current.player.play();
-						}
-					}
-				}
-			}
-		)
-	);
+	// 				if (videoStore.videoState === STATE_VIDEO_PAUSED) {
+	// 					console.log(
+	// 						"createEffect : changing to pause",
+	// 						props.video.idx
+	// 					);
+	// 					if (props.isActive) {
+	// 						playerRef().current.player.pause();
+	// 					}
+	// 				} else if (videoStore.videoState === STATE_VIDEO_PLAY) {
+	// 					console.log(
+	// 						"createEffect : changing to play",
+	// 						props.video.idx
+	// 					);
+	// 					if (props.isActive) {
+	// 						playerRef().current.player.play();
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	)
+	// );
 
+	// seeking
 	createEffect(
 		on([() => props.isActive, () => videoStore.seekQueue], () => {
 			if (props.isActive && videoStore.seekQueue.length > 0) {
@@ -258,6 +257,7 @@ function StreamStackItem(props) {
 		})
 	);
 
+	// current time loop
 	createEffect(
 		on(
 			[
@@ -398,18 +398,22 @@ function StreamStackItem(props) {
 	// 		setWatchTimeBuffer([]);
 	// 	}
 
+	const handlePlayerError = () => {
+		setVideoState(STATE_VIDEO_ERROR);
+	};
+
 	const handlePlayerLoading = (e) => {
-		handleLoading(true, isActive);
+		props.handleLoading(true, props.isActive);
 	};
 
 	const handlePlayerLoaded = (e) => {
-		handleLoading(false, isActive);
+		props.handleLoading(false, props.isActive);
 	};
 
 	// props.video events
 	const handleVideoSeeking = (e) => {
 		console.log("Seeking...");
-		handleLoading(true, isActive);
+		props.handleLoading(true, props.isActive);
 	};
 
 	const handleVideoSeeked = (e) => {
@@ -422,7 +426,7 @@ function StreamStackItem(props) {
 		// const state = useVideoStore.getState();
 		console.log("Can play through...", videoStore.videoState);
 		// tryToPlay();
-		setVideoState(STATE_VIDEO_PLAY);
+		// setVideoState(STATE_VIDEO_PLAY);
 	};
 
 	// set the videoStore.volume
@@ -433,11 +437,7 @@ function StreamStackItem(props) {
 	};
 
 	const handlePlay = () => {
-		console.log("Handle Play called!!!!")
-		const currentTime = playerRef().current.player.time();
-		const duration = playerRef().current.player.duration();
-		const remainingTime = duration - currentTime;
-		const inactiveVideoStartTime = remainingTime - 0.7;
+		console.log("Handle Play called!!!!", props.isActive);
 		if (props.isActive) {
 			if (videoStore.videoState !== STATE_VIDEO_PLAY) {
 				console.log(
@@ -445,20 +445,47 @@ function StreamStackItem(props) {
 					props.video.idx
 				);
 			}
-		} else {
-			playerRef().current.player.preload();
-			playerRef().current.player.pause();
-			let secondsRemaining = inactiveVideoStartTime;
-			const countdownInterval = setInterval(() => {
-				console.log("time is")
-				secondsRemaining--;
-				console.log("Seconds remaining time is:", secondsRemaining);
-				if (secondsRemaining <= 0) {
-					clearInterval(countdownInterval); 
-					playerRef().current.player.play(); 
-				}
-			}, 1000); 
+			// playerRef().current.player.play();
+			if (playInActiveTimer) {
+				clearTimeout(playInActiveTimer);
+			}
 
+			clearVideoEvents();
+
+			const currentTime = playerRef().current.player.time();
+			const duration = playerRef().current.player.duration();
+			const remainingTime = duration - currentTime;
+			const inactiveVideoStartTime = remainingTime - 1;
+
+			console.log("[ACTIVE] Setting timer at:", remainingTime);
+
+			playInActiveTimer = setTimeout(() => {
+				console.log("TIME IS jojojojojo");
+				addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
+			}, inactiveVideoStartTime * 1000);
+		} else {
+			// playerRef().current.player.preload();
+			playerRef().current.player.pause();
+			console.log(
+				"PAUSING ----------------------------->",
+				props.video.idx
+			);
+
+			// let secondsRemaining = inactiveVideoStartTime;
+			// const countdownInterval = setInterval(() => {
+			// 	console.log("time is");
+			// 	secondsRemaining--;
+			// 	console.log("Seconds remaining time is:", secondsRemaining);
+			// 	if (secondsRemaining <= 0) {
+			// 		clearInterval(countdownInterval);
+			// 		playerRef().current.player.play();
+			// 	}
+			// }, 1000);
+			// const currentTime = playerRef().current.player.time();
+			// const duration = playerRef().current.player.duration();
+			// const remainingTime = duration - currentTime;
+			// const inactiveVideoStartTime = remainingTime - 0.7;
+			// console.log("Remaining time is:", remainingTime);
 			// setTimeout(() => {
 			// 	console.log("TIME IS jojojojojo");
 			// 	playerRef().current.player.play();
@@ -475,6 +502,11 @@ function StreamStackItem(props) {
 					props.video.idx
 				);
 				// setVideoState(STATE_VIDEO_PAUSED);
+			}
+
+			clearVideoEvents();
+			if (playInActiveTimer) {
+				clearTimeout(playInActiveTimer);
 			}
 		}
 	};
@@ -495,11 +527,7 @@ function StreamStackItem(props) {
 		// 	<div
 		// class="relative h-full w-full block">
 
-		<div
-			class={`${
-				props.isActive ? "block" : "block"
-			}`}>
-
+		<div class={`relative ${props.isActive ? "block" : "block"}`}>
 			{/* class={props.isActive ? "flex-1" : "w-60"}> */}
 			<DashPlayer
 				ref={playerInit}
@@ -509,7 +537,7 @@ function StreamStackItem(props) {
 					typeof props.video?.video?.id === "number"
 				}
 				isActive={props.isActive}
-				onError={playerOnError}
+				onError={handlePlayerError}
 				onCanPlayThrough={handleVideoCanPlayThrough}
 				onVolumeChange={handleVideoVolumeChange}
 				onEnded={props.handleEnd}
@@ -520,15 +548,15 @@ function StreamStackItem(props) {
 				onSeeking={handleVideoSeeking}
 				onSeeked={handleVideoSeeked}
 				setDuration={props.setDuration}
-				className="dashjs-player"
+				className="dashjs-player w-full h-full"
 			/>
 
 			{videoStore.devMode ? (
 				<div class="absolute bg-white left-4 top-4 p-2 text-sm flex flex-col">
-					{/* <p>
+					<p>
 						props.isActive: {String(props.isActive)} ||{" "}
-						{String(isActive)}
-					</p> */}
+						{String(props.isActive)}
+					</p>
 					<p>Video IDX : {props.video?.idx}</p>
 					<p>videoStore.videoState: {videoStore.videoState}</p>
 					<p>videoStore.pauseReason: {videoStore.pauseReason}</p>
