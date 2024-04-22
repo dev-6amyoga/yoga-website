@@ -40,28 +40,9 @@ function DashPlayer(props) {
 	const [videoStore, { setPlayreadyKeyUrl, clearVideoEvents }] =
 		useVideoStoreContext();
 
-	const onMetadataLoaded = () => {
-		console.log("[DASH PLAYER] : metadata loaded");
-		setMetadataLoaded(true);
-	};
-
-	const onPlaybackNotAllowed = () => {
-		if (playerRef() && isActive) {
-			console.log("[DASH PLAYER] : playback not allowed");
-			playerRef().setMute(true);
-			playerRef().initialize(videoRef.current, props.src, true);
-			playerRef().setMute(false);
-		}
-	};
-
-	const onStreamInitialized = () => {
-		console.log("[DASH PLAYER] : stream initialized");
-		setStreamInitialized(true);
-	};
-
 	createEffect(
-		on([() => videoStore.videoEvents], () => {
-			if (videoStore.videoEvents.length > 0) {
+		on([() => videoStore.videoEvents, () => props.isActive], () => {
+			if (videoStore.videoEvents.length > 0 && !props.isActive) {
 				const event = videoStore.videoEvents[0];
 				if (event?.t === VIDEO_EVENT_PLAY_INACTIVE) {
 					console.log(
@@ -141,14 +122,19 @@ function DashPlayer(props) {
 					props.src &&
 					metadataLoaded() &&
 					streamInitialized() &&
-					(props.isActive || playInActive)
+					(props.isActive || playInActive())
 				) {
 					console.log(
-						"[DASH PLAYER] : trying to play video",
-						props.src
+						"[DASH PLAYER] : play video effect event",
+						props.src, props.isActive, playInActive()
 					);
-					playerRef().play();
-				}
+					// playerRef().play();
+					videoRef.current.play().then(() => {
+						console.log("[DASH PLAYER] : Video play event success from create hahahah");
+					}).catch(err => {
+						console.log("[DASH PLAYER] : Video play event failed", err)
+					})
+				} 
 			}
 		)
 	);
@@ -258,6 +244,33 @@ function DashPlayer(props) {
 		})
 	);
 
+	
+	const onMetadataLoaded = () => {
+		console.log("[DASH PLAYER] : metadata loaded");
+		setMetadataLoaded(true);
+	};
+
+	const onPlaybackNotAllowed = () => {
+		if (playerRef() && isActive) {
+			console.log("[DASH PLAYER] : playback not allowed");
+			playerRef().setMute(true);
+			playerRef().initialize(videoRef.current, props.src, true);
+			playerRef().setMute(false);
+		}
+	};
+
+	const onStreamInitialized = () => {
+		console.log("[DASH PLAYER] : stream initialized");
+		setStreamInitialized(true);
+	};
+
+	const onCanPlay = () => {
+		if (!props.isActive) {
+			console.log("[DASH PLAYER] : onCanPlay event");
+			playerRef().pause();
+		}
+	}
+
 	// Setting event listeners
 	createEffect(
 		on(
@@ -282,6 +295,10 @@ function DashPlayer(props) {
 					playerRef().on(
 						dashjs.MediaPlayer.events.CAN_PLAY_THROUGH,
 						props.onCanPlayThrough
+					);
+					playerRef().on(
+						dashjs.MediaPlayer.events.CAN_PLAY,
+						onCanPlay
 					);
 					playerRef().on(
 						dashjs.MediaPlayer.events.ERROR,
@@ -331,6 +348,10 @@ function DashPlayer(props) {
 					playerRef().off(
 						dashjs.MediaPlayer.events.CAN_PLAY_THROUGH,
 						props.onCanPlayThrough
+					);
+					playerRef().off(
+						dashjs.MediaPlayer.events.CAN_PLAY,
+						onCanPlay
 					);
 					playerRef().off(
 						dashjs.MediaPlayer.events.ERROR,

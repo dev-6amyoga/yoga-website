@@ -36,9 +36,10 @@ function StreamStackItem(props) {
 	let intervalTimer = null;
 	let playInActiveTimer = null;
 
-	const [metadataLoaded, setMetadataLoaded] = createSignal(false);
-	const [autoplayInitialized, setAutoplayInitialized] = createSignal(false);
+	// const [metadataLoaded, setMetadataLoaded] = createSignal(false);
+	// const [autoplayInitialized, setAutoplayInitialized] = createSignal(false);
 	const [playerLoaded, setPlayerLoaded] = createSignal(false);
+	
 	const videoUrl = createMemo(
 		on([() => props.video], () => {
 			console.log("VIDEO URL", props.video);
@@ -98,60 +99,33 @@ function StreamStackItem(props) {
 		console.log("Try to play called", props.video.idx, Date.now());
 		playerRef().current.player.play();
 
-		if (!autoplayInitialized()) {
-			setAutoplayInitialized(true);
-		}
+		// if (!autoplayInitialized()) {
+		// 	setAutoplayInitialized(true);
+		// }
 	};
 
-	createEffect(
-		on([() => props.isActive, () => props.video], () => {
-			const pr = playerRef().current.videoElement;
-			if (!props.isActive && pr && pr.currentTime > 0) {
-				console.log(
-					"PAUSE AND RESET ----------------------------->",
-					props.video.idx
-				);
-				pr.muted = true;
-				setVolume(0);
-				pr.pause();
-				// pr.currentTime = 0;
-			}
+	// createEffect(
+	// 	on([() => props.isActive, () => props.video], () => {
+	// 		const pr = playerRef().current.videoElement;
+	// 		if (!props.isActive && pr && pr.currentTime > 0) {
+	// 			console.log(
+	// 				"PAUSE AND RESET ----------------------------->",
+	// 				props.video.idx
+	// 			);
+	// 			pr.muted = true;
+	// 			setVolume(0);
+	// 			pr.pause();
+	// 			// pr.currentTime = 0;
+	// 		}
 
-			onCleanup(() => {
-				if (pr && !props.isActive) {
-					// pr.currentTime = 0;
-				}
-				pr?.pause();
-			});
-		})
-	);
-
-	createEffect(
-		on(
-			[
-				() => props.isActive,
-				metadataLoaded,
-				() => props.video,
-				playerLoaded,
-			],
-			() => {
-				if (props.isActive && metadataLoaded() && playerLoaded()) {
-					console.log(
-						"PLAYING ----------------------------->",
-						props.video,
-						props.video.video.id,
-						playerRef()?.current.videoElement
-					);
-
-					if (playerRef().current.videoElement.currentTime > 0.0) {
-						// console.log("SEEKING TO 0", props.video.idx);
-						// playerRef().current.videoElement.currentTime = 0.0;
-						// setCommitSeekTime(0.0);
-					}
-				}
-			}
-		)
-	);
+	// 		onCleanup(() => {
+	// 			if (pr && !props.isActive) {
+	// 				// pr.currentTime = 0;
+	// 			}
+	// 			pr?.pause();
+	// 		});
+	// 	})
+	// );
 
 	// createEffect(
 	// 	on(
@@ -422,7 +396,7 @@ function StreamStackItem(props) {
 	};
 
 	const handleVideoCanPlayThrough = (e) => {
-		setMetadataLoaded(true);
+		// setMetadataLoaded(true);
 		// const state = useVideoStore.getState();
 		console.log("Can play through...", videoStore.videoState);
 		// tryToPlay();
@@ -436,27 +410,34 @@ function StreamStackItem(props) {
 		}
 	};
 
-	const [inactiveVideoDuration, setInactiveVideoDuration] = createSignal(null); 
-	createEffect(() => {
-			console.log("TIME IS : ", inactiveVideoDuration());
-			if (inactiveVideoDuration()) { 
-				console.log("INACTIVE DURATION NOT NULL TIME IS")
-				console.log(props.isActive, "TIME IS TIME IS")
-				if(!props.isActive){
-					console.log("IN NOT IS ACTIVE TIME IS")
-					playInActiveTimer = setTimeout(() => {
-					console.log("TIME IS jojojojojo");
-					addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
-					setInactiveVideoDuration(null); 
-					}, inactiveVideoDuration() * 1000); 
-				}
-			} else {
-				console.log("Duration not set yet!time is");
-			}
-	});
+	// sooo
+	// i thought the mistake was the setTimeout was being used in if(isActive) block
+	// so i wrote that for the inactiveVideoDuration to be set in if(isActive) block and used by the if(!isActive) block when not null
+	// idt its needed now cuz my logic was wrong
+	// ill put it back?
+
+
+	
+	// [ISACTIVE] playing 
+	// > clearTimeout(previous timer) 
+	// > clearVideoEvents 
+	// > setTimeout to send videoEvent 0.5s before video ends
+	// [!ISACTIVE] waits for videoEvent, plays video
+	//yesss
+	// sori continue, wait is it showing error stuff for you as well?
+	// ?? wasnt doi
+
+	// 				setInactiveVideoDuration(null); 
+	// 				}, inactiveVideoDuration() * 1000); 
+	// 			}
+	// 		} else {
+	// 			console.log("Duration not set yet!time is");
+	// 		}
+	// });
 
 	const handlePlay = () => {
-		console.log("Handle Play called!!!!", props.isActive);
+		// console.log("Handle Play called!!!!", props.isActive);
+		console.log("[StreamStackItem] handlePlay event called", props.isActive, props.video.idx);
 		if (props.isActive) {
 			if (videoStore.videoState !== STATE_VIDEO_PLAY) {
 				console.log(
@@ -468,61 +449,18 @@ function StreamStackItem(props) {
 			if (playInActiveTimer) {
 				clearTimeout(playInActiveTimer);
 			}
-			clearVideoEvents();
 
 			const currentTime = playerRef().current.player.time();
 			const duration = playerRef().current.player.duration();
 			const remainingTime = duration - currentTime;
-			console.log("Setting time is to : ", remainingTime-30)
-			setInactiveVideoDuration(remainingTime -30); 
-
-			// console.log("[ACTIVE] Setting timer at:", inactiveVideoStartTime);
-
-			// playInActiveTimer = setTimeout(() => {
-			// 	console.log("TIME IS jojojojojo");
-			// 	addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
-			// }, inactiveVideoStartTime * 1000);
+			const inactiveVideoDuration = remainingTime - 0.5;
+			console.log("[StreamStackItem] starting event timer for playing inactive @ ", inactiveVideoDuration,props.isActive, props.video.idx);
+			playInActiveTimer = setTimeout(() => {
+					console.log("sending video event!");
+					addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
+			}, inactiveVideoDuration * 1000);
+			// can we test now??!? 
 		} 
-		// else {
-		// 	playerRef().current.player.preload();
-		// 	playerRef().current.player.pause();
-		// 	console.log(
-		// 		"PAUSING ----------------------------->",
-		// 		props.video.idx
-		// 	);
-		// 	    if (inactiveVideoDuration()) {
-		// 			console.log("TIME IS : ", inactiveVideoDuration())
-		// 			playInActiveTimer = setTimeout(() => {
-		// 				console.log("TIME IS jojojojojo");
-		// 				addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
-		// 				setInactiveVideoDuration(null);
-		// 			}, inactiveVideoDuration * 1000);
-		// 		} else {
-		// 			console.log("Duration not set yet!")
-				
-		// 		}
-		// 	// playerRef().current.player.play();
-
-		// 	// let secondsRemaining = inactiveVideoStartTime;
-		// 	// const countdownInterval = setInterval(() => {
-		// 	// 	console.log("time is");
-		// 	// 	secondsRemaining--;
-		// 	// 	console.log("Seconds remaining time is:", secondsRemaining);
-		// 	// 	if (secondsRemaining <= 0) {
-		// 	// 		clearInterval(countdownInterval);
-		// 	// 		playerRef().current.player.play();
-		// 	// 	}
-		// 	// }, 1000);
-		// 	// const currentTime = playerRef().current.player.time();
-		// 	// const duration = playerRef().current.player.duration();
-		// 	// const remainingTime = duration - currentTime;
-		// 	// const inactiveVideoStartTime = remainingTime - 0.7;
-		// 	// console.log("Remaining time is:", remainingTime);
-		// 	// setTimeout(() => {
-		// 	// 	console.log("TIME IS jojojojojo");
-		// 	// 	playerRef().current.player.play();
-		// 	// }, inactiveVideoStartTime * 1000);
-		// }
 	};
 
 	const handlePause = () => {
@@ -548,7 +486,7 @@ function StreamStackItem(props) {
 		if (ref != null) {
 			setPlayerRef({ current: ref });
 			setPlayerLoaded(true);
-		}
+		}  
 	};
 
 	return (
@@ -597,10 +535,10 @@ function StreamStackItem(props) {
 						videoStore.currentMarkerIdx:{" "}
 						{videoStore.currentMarkerIdx}
 					</p>
-					<p>metadataLoaded(): {String(metadataLoaded())}</p>
-					<p>
+					{/* <p>metadataLoaded(): {String(metadataLoaded())}</p> */}
+					{/* <p>
 						autoplayInitialized(): {String(autoplayInitialized())}
-					</p>
+					</p> */}
 					<p>playerLoaded(): {String(playerLoaded())}</p>
 					<p>
 						videoStore.commitSeekTime: {videoStore.commitSeekTime}
