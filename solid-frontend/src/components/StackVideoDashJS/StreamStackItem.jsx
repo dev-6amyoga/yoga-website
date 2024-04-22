@@ -435,51 +435,10 @@ function StreamStackItem(props) {
 	// 		}
 	// });
 
-	const handlePlay = () => {
-		// console.log("Handle Play called!!!!", props.isActive);
-		console.log("[StreamStackItem] handlePlay event called", props.isActive, props.video.idx);
-		if (props.isActive) {
-			if (videoStore.videoState !== STATE_VIDEO_PLAY) {
-				console.log(
-					"PLAYING ----------------------------->",
-					props.video.idx
-				);
-			}
-			// playerRef().current.player.play();
-			if (playInActiveTimer) {
-				clearTimeout(playInActiveTimer);
-			}
 
-			const currentTime = playerRef().current.player.time();
-			const duration = playerRef().current.player.duration();
-			const remainingTime = duration - currentTime;
-			const inactiveVideoDuration = remainingTime - 0.5;
-			console.log("[StreamStackItem] starting event timer for playing inactive @ ", inactiveVideoDuration,props.isActive, props.video.idx);
-			playInActiveTimer = setTimeout(() => {
-					console.log("sending video event!");
-					addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
-			}, inactiveVideoDuration * 1000);
-			// can we test now??!? 
-		} 
-	};
 
-	const handlePause = () => {
-		if (props.isActive) {
-			// const state = useVideoStore.getState();
-			if (videoStore.videoState !== STATE_VIDEO_PAUSED) {
-				console.log(
-					"PAUSING ----------------------------->",
-					props.video.idx
-				);
-				// setVideoState(STATE_VIDEO_PAUSED);
-			}
+	
 
-			clearVideoEvents();
-			if (playInActiveTimer) {
-				clearTimeout(playInActiveTimer);
-			}
-		}
-	};
 
 	const playerInit = (ref) => {
 		console.log("player init called", ref);
@@ -506,13 +465,12 @@ function StreamStackItem(props) {
 					!isNaN(props.video?.video?.id) &&
 					typeof props.video?.video?.id === "number"
 				}
+				video={props.video}
 				isActive={props.isActive}
 				onError={handlePlayerError}
 				onCanPlayThrough={handleVideoCanPlayThrough}
 				onVolumeChange={handleVideoVolumeChange}
 				onEnded={props.handleEnd}
-				onPlay={handlePlay}
-				onPause={handlePause}
 				onLoading={handlePlayerLoading}
 				onLoaded={handlePlayerLoaded}
 				onSeeking={handleVideoSeeking}
