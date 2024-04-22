@@ -286,7 +286,6 @@ function DashPlayer(props) {
   };
 
   const onPlay = () => {
-    // console.log("Handle Play called!!!!", props.isActive);
     console.log(
       "[DASH PLAYER] handlePlay event called",
       props.isActive,
@@ -303,7 +302,7 @@ function DashPlayer(props) {
       const currentTime = playerRef().time();
       const duration = playerRef().duration();
       const remainingTime = duration - currentTime;
-      const inactiveVideoDuration = remainingTime - 0.3;
+      const inactiveVideoDuration = remainingTime - 0.28;
       console.log(
         "[DASH PLAYER] starting event timer for playing inactive @ ",
         inactiveVideoDuration,
