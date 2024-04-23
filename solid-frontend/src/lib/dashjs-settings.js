@@ -23,5 +23,14 @@ export const dashSettings = {
       bufferTimeAtTopQuality: 25,
       bufferToKeep: 18,
     },
+    gaps: {
+      jumpGaps: false,
+      jumpLargeGaps: false,
+      smallGapLimit: 1.5,
+      threshold: 0.3,
+      enableSeekFix: false,
+      enableStallFix: false,
+      stallSeek: 0.1,
+    },
   },
 };
