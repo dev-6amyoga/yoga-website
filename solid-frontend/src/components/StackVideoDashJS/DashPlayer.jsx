@@ -68,7 +68,7 @@ function DashPlayer(props) {
         p = dashjs.MediaPlayer().create();
         setPlayerRef(p);
         p.updateSettings(dashSettings);
-        p.initialize(null, props.src, true);
+        p.initialize(null, props.src, true, 0.000);
         // p.initialize(null, props.src, true, { autoplay: true, muted: true });
         p.attachView(videoRef.current);
         p.preload();
@@ -151,7 +151,17 @@ function DashPlayer(props) {
             const currentTime = playerRef().time();
             const duration = playerRef().duration();
             const remainingTime = duration - currentTime;
-            const inactiveVideoDuration = remainingTime - 0.5;
+			const inactiveVideoDuration = remainingTime - 0.5;
+			console.log(
+				"[DASH PLAYER IS NOT ACTIVE] starting event timer for playing inactive : currentTime = ",
+				currentTime,
+				"duration",
+				duration,
+				"remainingTime",
+				remainingTime,
+				"inactiveVideoDuration",
+				inactiveVideoDuration
+			);
             console.log(
               "[DASH PLAYER] starting event timer for playing inactive @ ",
               inactiveVideoDuration,
@@ -268,7 +278,7 @@ function DashPlayer(props) {
     if (playerRef() && isActive) {
       console.log("[DASH PLAYER] : playback not allowed");
       playerRef().setMute(true);
-      playerRef().initialize(videoRef.current, props.src, true);
+      playerRef().initialize(videoRef.current, props.src, true, 0.000);
       playerRef().setMute(false);
     }
   };
@@ -291,6 +301,7 @@ function DashPlayer(props) {
       props.isActive,
       props.video.idx
     );
+	
     if (props.isActive) {
       if (videoStore.videoState !== STATE_VIDEO_PLAY) {
         console.log("PLAYING ----------------------------->", props.video.idx);
@@ -299,10 +310,22 @@ function DashPlayer(props) {
       if (playInActiveTimer) {
         clearTimeout(playInActiveTimer);
       }
-      const currentTime = playerRef().time();
+	//   playerRef().current.currentTime = 0; 
+
+	  const currentTime = playerRef().time();
       const duration = playerRef().duration();
       const remainingTime = duration - currentTime;
-      const inactiveVideoDuration = remainingTime - 0.28;
+      const inactiveVideoDuration = remainingTime - 0.5;
+	  console.log(
+        "[DASH PLAYER IS ACTIVE] starting event timer for playing inactive : currentTime = ",
+        currentTime,
+		"duration",
+		duration,
+		"remainingTime",
+		remainingTime,
+        "inactiveVideoDuration",
+        inactiveVideoDuration
+      );
       console.log(
         "[DASH PLAYER] starting event timer for playing inactive @ ",
         inactiveVideoDuration,
@@ -322,9 +345,9 @@ function DashPlayer(props) {
         console.log("PAUSING ----------------------------->", props.video.idx);
         // setVideoState(STATE_VIDEO_PAUSED);
       }
+	  clearVideoEvents();
 
-      clearVideoEvents();
-      if (playInActiveTimer) {
+	  if (playInActiveTimer) {
         clearTimeout(playInActiveTimer);
       }
     }
@@ -349,12 +372,16 @@ function DashPlayer(props) {
         () => props.onSeeking,
       ],
       () => {
+
         if (playerRefSet() && props.src && videoRef.current) {
           console.log("[DASH PLAYER] : setting up event listeners");
           playerRef().on(
             dashjs.MediaPlayer.events.CAN_PLAY_THROUGH,
             props.onCanPlayThrough
           );
+          playerRef().on(dashjs.MediaPlayer.events.PLAYBACK_LOADED_DATA, () => {
+            videoRef.current.currentTime = 0;
+          });
           playerRef().on(dashjs.MediaPlayer.events.CAN_PLAY, onCanPlay);
           playerRef().on(dashjs.MediaPlayer.events.ERROR, props.onError);
           playerRef().on(

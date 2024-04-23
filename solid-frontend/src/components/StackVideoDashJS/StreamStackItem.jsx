@@ -410,22 +410,12 @@ function StreamStackItem(props) {
 		}
 	};
 
-	// sooo
-	// i thought the mistake was the setTimeout was being used in if(isActive) block
-	// so i wrote that for the inactiveVideoDuration to be set in if(isActive) block and used by the if(!isActive) block when not null
-	// idt its needed now cuz my logic was wrong
-	// ill put it back?
-
-
 	
 	// [ISACTIVE] playing 
 	// > clearTimeout(previous timer) 
 	// > clearVideoEvents 
 	// > setTimeout to send videoEvent 0.5s before video ends
 	// [!ISACTIVE] waits for videoEvent, plays video
-	//yesss
-	// sori continue, wait is it showing error stuff for you as well?
-	// ?? wasnt doi
 
 	// 				setInactiveVideoDuration(null); 
 	// 				}, inactiveVideoDuration() * 1000); 
