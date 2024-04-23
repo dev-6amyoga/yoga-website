@@ -151,7 +151,7 @@ function DashPlayer(props) {
             const currentTime = playerRef().time();
             const duration = playerRef().duration();
             const remainingTime = duration - currentTime;
-			const inactiveVideoDuration = remainingTime - 0.5;
+			const inactiveVideoDuration = remainingTime - 0.1;
 			console.log(
 				"[DASH PLAYER IS NOT ACTIVE] starting event timer for playing inactive : currentTime = ",
 				currentTime,
@@ -315,16 +315,16 @@ function DashPlayer(props) {
 	  const currentTime = playerRef().time();
       const duration = playerRef().duration();
       const remainingTime = duration - currentTime;
-      const inactiveVideoDuration = remainingTime - 0.5;
+      const inactiveVideoDuration = remainingTime - 0.1;
 	  console.log(
         "[DASH PLAYER IS ACTIVE] starting event timer for playing inactive : currentTime = ",
-        currentTime,
-		"duration",
-		duration,
-		"remainingTime",
-		remainingTime,
-        "inactiveVideoDuration",
-        inactiveVideoDuration
+         currentTime,
+         "duration",
+         duration,
+         "remainingTime",
+         remainingTime,
+         "inactiveVideoDuration",
+         inactiveVideoDuration
       );
       console.log(
         "[DASH PLAYER] starting event timer for playing inactive @ ",
