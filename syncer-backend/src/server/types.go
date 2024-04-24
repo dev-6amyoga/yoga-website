@@ -1,16 +1,16 @@
 package server
 
 import (
-    "go.uber.org/zap"
-    "go.mongodb.org/mongo-driver/mongo"
-    "net" 
-)
+	"net"
 
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.uber.org/zap"
+)
 
 type Server struct {
 	// socker server instance
-	socketGroups map[string][]net.Conn 
-	
+	socketGroups map[string][]net.Conn
+
 	// db
 	dbClient *mongo.Client
 
