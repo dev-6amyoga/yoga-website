@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"net"
 	"os"
-
+	"time"
+	"context"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
 )
 
@@ -13,11 +16,32 @@ func NewServer() *Server {
 
 	prependedLogger := l.Sugar()
 
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb+srv://smriti030202:pass,123@yogawebsite.lxvodui.mongodb.net/YogaWebsite"))
+
 	if err != nil {
 		panic(err)
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	err = client.Connect(ctx)
+	if err != nil {
+		prependedLogger.Errorf("Error connecting to MongoDB: %s", err)
+		panic(err) 
+	}
+
+	// Check if the connection was successful
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		prependedLogger.Errorf("Error pinging MongoDB: %s", err)
+		panic(err) 
+	}
+
+	prependedLogger.Info("Successfully connected to MongoDB")
+
 	return &Server{
+		dbClient: client,
 		logger: prependedLogger,
 	}
 }
