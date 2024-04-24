@@ -21,12 +21,8 @@ func NewServer() *Server {
 
 	client, err := mongo.Connect(
 		context.Background(),
-		options.Client().ApplyURI("mongodb+srv://smriti030202:pass,123@yogawebsite.lxvodui.mongodb.net/YogaWebsite"),
+		options.Client().ApplyURI("mongodb://localhost:27017"),
 	)
-
-	if err != nil {
-		panic(err)
-	}
 
 	if err != nil {
 		prependedLogger.Errorf("Error connecting to MongoDB: %s", err)
