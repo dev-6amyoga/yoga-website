@@ -252,21 +252,24 @@ function RegisterNewSchedule() {
       }
     });
     to_be_inserted["applicable_ids"] = applicableUsers;
-
-    try {
-      const response = await Fetch({
-        url: "/schedule/addSchedule",
-        method: "POST",
-        data: to_be_inserted,
-      });
-      if (response?.status === 200) {
-        toast("Schedule added successfully");
-        // navigate("/admin/playlist/view-all");
-      } else {
-        console.error("Failed to add schedule");
+    if (to_be_inserted["asana_ids"].length === 0) {
+      toast("Please add 1 or more asanas to the schedule!");
+    } else {
+      try {
+        const response = await Fetch({
+          url: "/schedule/addSchedule",
+          method: "POST",
+          data: to_be_inserted,
+        });
+        if (response?.status === 200) {
+          toast("Schedule added successfully");
+          // navigate("/admin/playlist/view-all");
+        } else {
+          console.error("Failed to add schedule");
+        }
+      } catch (error) {
+        console.error("Error during schedule addition:", error);
       }
-    } catch (error) {
-      console.error("Error during schedule addition:", error);
     }
   };
 

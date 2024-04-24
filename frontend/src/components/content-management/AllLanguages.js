@@ -1,5 +1,5 @@
-import { Button, Grid, Input, Modal, Table } from "@geist-ui/core";
-import { Search } from "@geist-ui/icons";
+import { Button, Input, Modal, Table, Tooltip } from "@geist-ui/core";
+import { Search, Delete } from "@geist-ui/icons";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import { ROLE_ROOT } from "../../enums/roles";
@@ -89,19 +89,17 @@ function AllLanguages() {
     };
 
     return (
-      <Grid.Container gap={0.1}>
-        <Grid>
-          <Button
-            type="error"
-            auto
-            scale={1 / 3}
-            font="12px"
-            onClick={handleDelete}
+      <div className="flex flex-row gap-4">
+        <Tooltip text={"Remove"}>
+          <div
+            onClick={() => {
+              handleDelete();
+            }}
           >
-            Remove
-          </Button>
-        </Grid>
-      </Grid.Container>
+            <Delete className="w-6 h-6" />
+          </div>
+        </Tooltip>
+      </div>
     );
   };
 

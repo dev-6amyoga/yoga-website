@@ -1,9 +1,22 @@
-import { Button, Dot, Input, Modal, Select, Table, Text } from "@geist-ui/core";
+import {
+  Button,
+  Dot,
+  Input,
+  Modal,
+  Select,
+  Table,
+  Text,
+  Tooltip,
+  Grid,
+  Card,
+} from "@geist-ui/core";
 import { Search } from "@geist-ui/icons";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { Edit, Delete, PenTool } from "@geist-ui/icons";
+
 import { ROLE_ROOT } from "../../enums/roles";
 import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
@@ -250,23 +263,35 @@ function AllAsanas() {
 
     return (
       <div className="flex flex-col gap-2">
-        <Button type="error" auto scale={1 / 3} onClick={handleDelete}>
-          Remove
-        </Button>
-        <Button
-          type="warning"
-          auto
-          scale={1 / 3}
-          onClick={() => handleUpdate(Number(rowData.id))}
-        >
-          Update
-        </Button>
-        <Button
-          scale={1 / 3}
-          onClick={() => navigate(`/admin/video/edit/${rowData?.id}`)}
-        >
-          Edit
-        </Button>
+        <div className="flex flex-row gap-4">
+          <Tooltip text={"Remove"}>
+            <div
+              onClick={() => {
+                handleDelete();
+              }}
+            >
+              <Delete className="w-6 h-6" />
+            </div>
+          </Tooltip>
+          <Tooltip text={"Update"}>
+            <div
+              onClick={() => {
+                handleUpdate(Number(rowData.id));
+              }}
+            >
+              <Edit className="w-6 h-6" />
+            </div>
+          </Tooltip>
+          <Tooltip text={"Edit"}>
+            <div
+              onClick={() => {
+                navigate(`/admin/video/edit/${rowData?.id}`);
+              }}
+            >
+              <PenTool className="w-6 h-6" />
+            </div>
+          </Tooltip>
+        </div>
       </div>
     );
   };
