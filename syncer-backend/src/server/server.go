@@ -9,6 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
+    "github.com/gorilla/websocket"
+    "github.com/google/uuid"  
 )
 
 func NewServer() *Server {
@@ -69,4 +71,45 @@ func (s *Server) Start() {
 
 		go s.handleConnection(connection)
 	}
+
+	http.HandleFunc("/ws", s.handleWebSocket) 
+    go http.ListenAndServe(":8080", nil) // Example: Port 8080
+    s.logger.Info("HTTP server for WebSocket started at port 8080")  
+
+}
+
+var upgrader = websocket.Upgrader{} 
+
+func (s *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
+    conn, err := upgrader.Upgrade(w, r, nil) 
+    if err != nil {
+        s.logger.Error("Error upgrading to WebSocket:", err)
+        return
+    }
+    defer conn.Close() 
+
+    urlID := r.URL.Query().Get("url") 
+    if urlID == "" {
+        return
+    }
+    s.socketGroups[urlID] = append(s.socketGroups[urlID], conn) 
+    s.logger.Infof("Client joined URL group: %s", urlID)
+
+	for {
+        _, message, err := conn.ReadMessage()
+        if err != nil {
+            break 
+        }
+        s.broadcastToGroup(urlID, message)
+    }
+
+}
+
+func (s *Server) broadcastToGroup(urlID string, message []byte) {
+    group := s.socketGroups[urlID]
+    for _, conn := range group {
+        if err := conn.WriteMessage(websocket.TextMessage, message); err != nil {
+            panic(err)
+        }
+    }
 }
