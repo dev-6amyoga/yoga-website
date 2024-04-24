@@ -525,17 +525,14 @@ function AllPlaylists() {
                     return (
                       <div>
                         {asana && (
-                          <div className="flex flex-col align-center">
-                            <div className="w-24 h-12 bg-gray-200 rounded-lg overflow-hidden transition-transform hover:scale-110">
-                              <div className="flex items-center justify-center h-full">
-                                <span>{asana.asana_name}</span>
+                          <div className="flex flex-col items-start gap-1 p-1">
+                            <div className="w-fit p-1 rounded-lg bg-gray-200 hover:scale-110 transition-transform">
+                              <div className="flex items-center justify-center h-12">
+                                <span className="whitespace-nowrap overflow-hidden text-ellipsis">
+                                  {asana.asana_name}
+                                </span>
                               </div>
                             </div>
-                            {/* <div className="absolute inset-0 bg-gray-800 bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                              <span className="text-white">
-                                {asana.asana_name}
-                              </span>
-                            </div> */}
                           </div>
                         )}
                       </div>
@@ -543,6 +540,53 @@ function AllPlaylists() {
                   })}
                 </div>
               )}
+
+              // render={(value, rowData) => (
+              //   <div className="flex flex-row flex-wrap gap-2 p-2">
+              //     {value.map((asanaId, index) => {
+              //       const asana = playlistAsanas.find(
+              //         (asana) => asana.id === asanaId
+              //       );
+
+              //       if (!asana) return null; // Handle potential errors
+
+              //       // Consecutive name logic
+              //       let displayCount = 1;
+              //       const nextAsanaId = value[index + 1];
+              //       const nextAsana = playlistAsanas.find(
+              //         (asana) => asana.id === nextAsanaId
+              //       );
+              //       while (
+              //         nextAsana &&
+              //         nextAsana.asana_name === asana.asana_name
+              //       ) {
+              //         displayCount++;
+              //         index++;
+              //         const nextAsanaId = value[index + 1];
+              //         const nextAsana = playlistAsanas.find(
+              //           (asana) => asana.id === nextAsanaId
+              //         );
+              //       }
+
+              //       return (
+              //         <div key={asanaId}>
+              //           {asana && (
+              //             <div className="flex flex-col items-start gap-1 p-1">
+              //               <div className="w-fit p-1 rounded-lg bg-gray-200 hover:scale-110 transition-transform">
+              //                 <div className="flex items-center justify-center h-12">
+              //                   <span className="whitespace-nowrap overflow-hidden text-ellipsis">
+              //                     {asana.asana_name}{" "}
+              //                     {displayCount > 1 && `(x${displayCount})`}
+              //                   </span>
+              //                 </div>
+              //               </div>
+              //             </div>
+              //           )}
+              //         </div>
+              //       );
+              //     })}
+              //   </div>
+              // )}
             />
 
             <Table.Column
