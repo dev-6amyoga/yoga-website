@@ -23,18 +23,23 @@ function RegisterPlaylistForm() {
   const [transitions, setTransitions] = useState([]);
   const [playlistMode, setPlaylistMode] = useState("");
   const predefinedOrder = [
-    "Prayer Standing",
-    "Prayer Sitting",
+    "Starting Prayer Standing",
+    "Starting Prayer Sitting",
     "Surynamaskara With Prefix-Suffix",
     "Suryanamaskara Without Prefix-Suffix",
     "Standing",
     "Sitting",
     "Supine",
     "Prone",
-    "Vajrasana",
-    "Pranayama",
+    "Inversion",
     "Special",
+    "Vajrasana",
+    "Pranayama Prayer",
+    "Pranayama",
+    "Closing Prayer Standing",
+    "Closing Prayer Sitting",
   ];
+
   const [sortedAsanas, setSortedAsanas] = useState([]);
   const [playlist_temp, setPlaylistTemp] = useState([]);
   const [modalState, setModalState] = useState(false);

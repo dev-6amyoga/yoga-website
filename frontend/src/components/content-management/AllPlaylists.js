@@ -14,6 +14,8 @@ import {
   ArrowUpCircle,
   PlusCircle,
   Search,
+  Delete,
+  Edit,
   XCircle,
 } from "@geist-ui/icons";
 import Papa from "papaparse";
@@ -331,30 +333,26 @@ function AllPlaylists() {
     };
 
     return (
-      <Grid.Container gap={0.1}>
-        <Grid>
-          <Button
-            type="error"
-            auto
-            scale={1 / 3}
-            font="12px"
-            onClick={handleDelete}
+      <div className="flex flex-row gap-4">
+        <Tooltip text={"Remove"}>
+          <div
+            onClick={() => {
+              handleDelete();
+            }}
           >
-            Remove
-          </Button>
-        </Grid>
-        <Grid>
-          <Button
-            type="warning"
-            auto
-            scale={1 / 3}
-            font="12px"
-            onClick={() => handleUpdate(Number(rowData.playlist_id))}
+            <Delete className="w-6 h-6" />
+          </div>
+        </Tooltip>
+        <Tooltip text={"Update"}>
+          <div
+            onClick={() => {
+              handleUpdate(Number(rowData.playlist_id));
+            }}
           >
-            Update
-          </Button>
-        </Grid>
-      </Grid.Container>
+            <Edit className="w-6 h-6" />
+          </div>
+        </Tooltip>
+      </div>
     );
   };
 

@@ -1,5 +1,13 @@
-import { Button, Grid, Input, Modal, Table, Text } from "@geist-ui/core";
-import { Search } from "@geist-ui/icons";
+import {
+  Button,
+  Grid,
+  Input,
+  Modal,
+  Table,
+  Text,
+  Tooltip,
+} from "@geist-ui/core";
+import { Search, Edit, Delete } from "@geist-ui/icons";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -105,30 +113,26 @@ function AllTransitions() {
     };
 
     return (
-      <Grid.Container gap={0.1}>
-        <Grid>
-          <Button
-            type="warning"
-            auto
-            scale={1 / 3}
-            font="12px"
-            onClick={handleUpdate}
+      <div className="flex flex-row gap-4">
+        <Tooltip text={"Remove"}>
+          <div
+            onClick={() => {
+              handleDelete();
+            }}
           >
-            Update
-          </Button>
-        </Grid>
-        <Grid>
-          <Button
-            type="error"
-            auto
-            scale={1 / 3}
-            font="12px"
-            onClick={handleDelete}
+            <Delete className="w-6 h-6" />
+          </div>
+        </Tooltip>
+        <Tooltip text={"Update"}>
+          <div
+            onClick={() => {
+              handleUpdate();
+            }}
           >
-            Remove
-          </Button>
-        </Grid>
-      </Grid.Container>
+            <Edit className="w-6 h-6" />
+          </div>
+        </Tooltip>
+      </div>
     );
   };
 
