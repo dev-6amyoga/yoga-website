@@ -1,28 +1,31 @@
-import {
-	SEEK_TYPE_MARKER,
-	SEEK_TYPE_MOVE,
-	SEEK_TYPE_SEEK,
-} from "../../enums/seek_types";
-import { usePlaylistStoreContext } from "../../store/PlaylistStore";
-import {
-	STATE_VIDEO_ERROR,
-	STATE_VIDEO_LOADING,
-	STATE_VIDEO_PAUSED,
-	STATE_VIDEO_PLAY,
-	useVideoStoreContext,
-} from "../../store/VideoStore";
+import
+	{
+		SEEK_TYPE_MARKER,
+		SEEK_TYPE_MOVE,
+		SEEK_TYPE_SEEK,
+	} from "../../enums/seek_types"
+import { usePlaylistStoreContext } from "../../store/PlaylistStore"
+import
+	{
+		STATE_VIDEO_ERROR,
+		STATE_VIDEO_LOADING,
+		STATE_VIDEO_PAUSED,
+		STATE_VIDEO_PLAY,
+		useVideoStoreContext,
+	} from "../../store/VideoStore"
 
-import {
-	createEffect,
-	createMemo,
-	createSignal,
-	on,
-	onCleanup,
-} from "solid-js";
-import { VIDEO_EVENT_PLAY_INACTIVE } from "../../enums/video_event";
-import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
-import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
-import DashPlayer from "./DashPlayer";
+import
+	{
+		createEffect,
+		createMemo,
+		createSignal,
+		on,
+		onCleanup,
+	} from "solid-js"
+import { VIDEO_EVENT_PLAY_INACTIVE } from "../../enums/video_event"
+import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons"
+import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes"
+import DashPlayer from "./DashPlayer"
 
 console.log(STATE_VIDEO_LOADING);
 
@@ -237,12 +240,12 @@ function StreamStackItem(props) {
 			[
 				() => props.isActive,
 				() => videoStore.seekQueue,
-				() => videoStore.commitSeekTime,
-				() => videoStore.viewMode,
-				() => videoStore.markers,
-				() => videoStore.currentMarkerIdx,
-				() => videoStore.currentVideo,
-				() => videoStore.videoState,
+				// () => videoStore.commitSeekTime,
+				// () => videoStore.viewMode,
+				// () => videoStore.markers,
+				// () => videoStore.currentMarkerIdx,
+				// () => videoStore.currentVideo,
+				// () => videoStore.videoState,
 			],
 			() => {
 				const checkSeek = (ct) => {
@@ -293,40 +296,49 @@ function StreamStackItem(props) {
 				};
 
 				console.log("createEffect : initializing interval timer");
-				// intervalTimer = setInterval(() => {
-				// 	if (playerRef().current?.videoElement && props.isActive) {
-				// 		if (
-				// 			checkSeek(
-				// 				playerRef().current?.videoElement?.currentTime
-				// 			)
-				// 		) {
-				// 			popFromSeekQueue(0);
-				// 			setVideoState(STATE_VIDEO_PLAY);
-				// 			return;
-				// 		}
-				// 		if (
-				// 			videoStore.videoState !== STATE_VIDEO_LOADING &&
-				// 			checkPauseOrLoop(
-				// 				playerRef().current?.videoElement?.currentTime
-				// 			)
-				// 		) {
-				// 			return;
-				// 		}
-				// 		if (
-				// 			videoStore.videoState !== STATE_VIDEO_LOADING ||
-				// 			videoStore.videoState !== STATE_VIDEO_ERROR ||
-				// 			videoStore.videoState !== STATE_VIDEO_PAUSED
-				// 		) {
-				// 			autoSetCurrentMarkerIdx(
-				// 				playerRef().current?.videoElement?.currentTime
-				// 			);
-				// 		}
-				// 		setCurrentTime(
-				// 			playerRef().current?.videoElement?.currentTime
-				// 		);
-				// 		setVolume(playerRef().current?.videoElement?.volume);
-				// 	}
-				// }, 16.67);
+
+				intervalTimer = setInterval(() => {
+					if (playerRef().current?.videoElement && props.isActive) {
+						if (
+							checkSeek(
+								playerRef().current?.videoElement?.currentTime
+							)
+						) {
+							popFromSeekQueue(0);
+							setVideoState(STATE_VIDEO_PLAY);
+							return;
+						}
+						if (
+							videoStore.videoState !== STATE_VIDEO_LOADING &&
+							checkPauseOrLoop(
+								playerRef().current?.videoElement?.currentTime
+							)
+						) {
+							return;
+						}
+						if (
+							videoStore.videoState !== STATE_VIDEO_LOADING ||
+							videoStore.videoState !== STATE_VIDEO_ERROR ||
+							videoStore.videoState !== STATE_VIDEO_PAUSED
+						) {
+							autoSetCurrentMarkerIdx(
+								playerRef().current?.videoElement?.currentTime
+							);
+						}
+
+						if (playerRef().current?.videoElement?.currentTime - playerRef().current?.videoElement?.duration > -0.5) {
+							if (videoStore.videoEvents.length === 0) {
+								console.log("[StreamStackItem] Video event play inactive", { currentTime: playerRef().current?.videoElement?.currentTime, duration: playerRef().current?.videoElement?.duration });
+								addVideoEvent({t: VIDEO_EVENT_PLAY_INACTIVE})
+							}
+						}
+
+						setCurrentTime(
+							playerRef().current?.videoElement?.currentTime
+						);
+						// setVolume(playerRef().current?.videoElement?.volume);
+					}
+				}, 16.67);
 
 				onCleanup(() => {
 					console.log("createEffect : cleaning up interval timer");
