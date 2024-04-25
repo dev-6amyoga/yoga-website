@@ -1,16 +1,14 @@
-import dashjs from "dashjs";
-import { createEffect, createSignal, on, onCleanup } from "solid-js";
-import { VIDEO_EVENT_PLAY_INACTIVE } from "../../enums/video_event";
-import { dashSettings } from "../../lib/dashjs-settings";
-import { useVideoStoreContext } from "../../store/VideoStore";
-import { Fetch } from "../../utils/Fetch";
-import { isMobileTablet } from "../../utils/isMobileOrTablet";
-import {
-  STATE_VIDEO_LOADING,
-  STATE_VIDEO_ERROR,
-  STATE_VIDEO_PAUSED,
-  STATE_VIDEO_PLAY,
-} from "../../store/VideoStore";
+import dashjs from "dashjs"
+import { createEffect, createSignal, on, onCleanup } from "solid-js"
+import { VIDEO_EVENT_PLAY_INACTIVE } from "../../enums/video_event"
+import { dashSettings } from "../../lib/dashjs-settings"
+import
+  {
+    STATE_VIDEO_PAUSED,
+    STATE_VIDEO_PLAY, useVideoStoreContext
+  } from "../../store/VideoStore"
+import { Fetch } from "../../utils/Fetch"
+import { isMobileTablet } from "../../utils/isMobileOrTablet"
 
 // {
 // 		src,
@@ -168,10 +166,10 @@ function DashPlayer(props) {
               props.isActive,
               props.video.idx
             );
-            playInActiveTimer = setTimeout(() => {
-              console.log("sending video event!");
-              addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
-            }, inactiveVideoDuration * 1000);
+            // playInActiveTimer = setTimeout(() => {
+            //   console.log("sending video event!");
+            //   addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
+            // }, inactiveVideoDuration * 1000);
           }
         }
       }
@@ -307,24 +305,25 @@ function DashPlayer(props) {
         console.log("PLAYING ----------------------------->", props.video.idx);
       }
       // playerRef().current.player.play();
-      if (playInActiveTimer) {
-        clearTimeout(playInActiveTimer);
-      }
+      // if (playInActiveTimer) {
+      //   clearTimeout(playInActiveTimer);
+      // }
 	//   playerRef().current.currentTime = 0; 
 
 	  const currentTime = playerRef().time();
-      const duration = playerRef().duration();
-      const remainingTime = duration - currentTime;
-      const inactiveVideoDuration = remainingTime - 0.1;
+    const duration = playerRef().duration();
+    const remainingTime = duration - currentTime;
+    const inactiveVideoDuration = remainingTime - 0.1;
+    
 	  console.log(
         "[DASH PLAYER IS ACTIVE] starting event timer for playing inactive : currentTime = ",
-         currentTime,
-         "duration",
-         duration,
-         "remainingTime",
-         remainingTime,
-         "inactiveVideoDuration",
-         inactiveVideoDuration
+          currentTime,
+          "duration",
+          duration,
+          "remainingTime",
+          remainingTime,
+          "inactiveVideoDuration",
+          inactiveVideoDuration
       );
       console.log(
         "[DASH PLAYER] starting event timer for playing inactive @ ",
@@ -332,10 +331,10 @@ function DashPlayer(props) {
         props.isActive,
         props.video.idx
       );
-      playInActiveTimer = setTimeout(() => {
-        console.log("sending video event!");
-        addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
-      }, inactiveVideoDuration * 1000);
+      // playInActiveTimer = setTimeout(() => {
+      //   console.log("sending video event!");
+      //   addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
+      // }, inactiveVideoDuration * 1000);
     }
   };
 
@@ -347,9 +346,9 @@ function DashPlayer(props) {
       }
 	  clearVideoEvents();
 
-	  if (playInActiveTimer) {
-        clearTimeout(playInActiveTimer);
-      }
+	  // if (playInActiveTimer) {
+    //     clearTimeout(playInActiveTimer);
+    //   }
     }
   };
 
