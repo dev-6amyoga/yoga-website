@@ -112,21 +112,20 @@ function VideoControls({ handleFullScreen }) {
 	// ]);
 
 	const handlePlay = () => {
-    console.log("SETTING VIDEO STATE TO PLAY ------------>");
-    if (videoState() === STATE_VIDEO_PAUSED) {
-        if (pauseReason() === VIDEO_PAUSE_MARKER) {
-            console.log("VIDEO PLAY : PAUSE REASON MARKER");
-            setCurrentMarkerIdx(prevIdx => 
-                prevIdx + 1 > markers.length - 1 ? 0 : prevIdx + 1
-            );
-            setPauseReason(null);
-        }
-    }
-    if (videoState() !== STATE_VIDEO_PLAY) {
-        setVideoState(STATE_VIDEO_PLAY);
-    }
-};
-
+		console.log("SETTING VIDEO STATE TO PLAY ------------>");
+		if (videoState() === STATE_VIDEO_PAUSED) {
+			if (pauseReason() === VIDEO_PAUSE_MARKER) {
+				console.log("VIDEO PLAY : PAUSE REASON MARKER");
+				setCurrentMarkerIdx(prevIdx => 
+					prevIdx + 1 > markers.length - 1 ? 0 : prevIdx + 1
+				);
+				setPauseReason(null);
+			}
+		}
+		if (videoState() !== STATE_VIDEO_PLAY) {
+			setVideoState(STATE_VIDEO_PLAY);
+		}
+	};
 
 	createEffect(
 		on([() => volume], () => {
@@ -136,28 +135,24 @@ function VideoControls({ handleFullScreen }) {
 		})
 	);
 
-	const handlePause = useCallback(() => {
-		/*
-        -- if playing pause it
-      */
+	const handlePause = () => {
 		console.log("SETTING VIDEO STATE TO PAUSE ------------>");
 		setVideoState(STATE_VIDEO_PAUSED);
-	}, [setVideoState]);
+	};
 
-	const handleNextVideo = useCallback(() => {
-		// remove from queue add to archive
+	const handleNextVideo = () => {
 		popFromQueue(0);
-	}, [popFromQueue]);
+	};
 
-	const handleSeekFoward = useCallback(() => {
+	const handleSeekFoward = () => {
 		addToSeekQueue({ t: 5, type: SEEK_TYPE_SEEK });
-	}, [addToSeekQueue]);
+	};
 
-	const handleSeekBackward = useCallback(() => {
+	const handleSeekBackward = () => {
 		addToSeekQueue({ t: -5, type: SEEK_TYPE_SEEK });
-	}, [addToSeekQueue]);
+	};
 
-	const handlePrevMarker = useCallback(() => {
+	const handlePrevMarker = () => {
 		console.log("Prev Marker");
 		if (markers.length > 0) {
 			if (currentMarkerIdx.value === 0) {
@@ -167,12 +162,11 @@ function VideoControls({ handleFullScreen }) {
 			const idx =
 				((currentMarkerIdx.value || 0) - 1 + markers.length) % markers.length;
 			setCurrentMarkerIdx(idx);
-			// seek to prev marker
 			addToSeekQueue({ t: markers[idx].timestamp, type: SEEK_TYPE_MOVE });
 		}
-	}, [markers, currentMarkerIdx.value, setCurrentMarkerIdx, addToSeekQueue]);
+	};
 
-	const handleNextMarker = useCallback(() => {
+	const handleNextMarker = () => {
 		console.log("Next Marker");
 		if (markers.length > 0) {
 			const idx = ((currentMarkerIdx.value || 0) + 1) % markers.length;
@@ -180,7 +174,7 @@ function VideoControls({ handleFullScreen }) {
 			// seek to next marker
 			addToSeekQueue({ t: markers[idx].timestamp, type: SEEK_TYPE_MOVE });
 		}
-	}, [markers, currentMarkerIdx.value, setCurrentMarkerIdx, addToSeekQueue]);
+	};
 
 	const handleViewModeToggle = useCallback(
 		(e) => {
@@ -195,13 +189,12 @@ function VideoControls({ handleFullScreen }) {
 		[setViewMode]
 	);
 
-	const handleReplayMarkerAfterPause = useCallback(() => {
-		// setPauseReason(null)
+	const handleReplayMarkerAfterPause = () => {
 		addToSeekQueue({
 			t: markers[currentMarkerIdx.value].timestamp,
 			type: SEEK_TYPE_MARKER,
 		});
-	}, [currentMarkerIdx.value, markers, addToSeekQueue]);
+	};
 
 	const iconButtonClass = useMemo(() => {
 		return handleFullScreen.active
