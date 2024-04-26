@@ -23,7 +23,7 @@ import {
 import { TbArrowBadgeLeft, TbArrowBadgeRight } from "react-icons/tb";
 import { IoMdVolumeHigh, IoMdVolumeLow, IoMdVolumeOff } from "react-icons/io";
 import { BsArrowsAngleContract } from "react-icons/bs";
-import { useRef } from "react";
+// import { useRef } from "react";
 import { toast } from "react-toastify";
 import {
     SEEK_TYPE_MARKER,
@@ -127,11 +127,14 @@ function VideoControls({ handleFullScreen }) {
     }
 };
 
-	useEffect(() => {
-		if (volumeSliderRef.current) {
-			volumeSliderRef.current.value = volume * 100;
-		}
-	}, [volume]);
+
+	createEffect(
+		on([() => volume], () => {
+			if (volumeSliderRef.current) {
+				volumeSliderRef.current.value = volume * 100;
+			}
+		})
+	);
 
 	const handlePause = useCallback(() => {
 		/*
