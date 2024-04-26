@@ -196,11 +196,13 @@ function VideoControls({ handleFullScreen }) {
 		});
 	};
 
-	const iconButtonClass = useMemo(() => {
+	const iconButtonClass = createMemo(() => 
+		on([() => handleFullScreen.active], () => {
 		return handleFullScreen.active
 			? "video_controls__ctrl__button_fs "
 			: "video_controls__ctrl__button ";
-	}, [handleFullScreen.active]);
+		}) 
+	);
 
 	return (
 		<div class="flex items-center justify-between px-4 pb-1">
