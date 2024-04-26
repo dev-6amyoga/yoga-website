@@ -1,8 +1,17 @@
-import usePlaylistStore from "../store/PlaylistStore";
-import useVideoStore, { STATE_VIDEO_LOADING } from "../store/VideoStore";
-// import asanas from "../data/asanas.json";
+import {usePlaylistStore, usePlaylistStoreContext} from "../store/PlaylistStore";
+import useVideoStore, { STATE_VIDEO_LOADING, STATE_VIDEO_PAUSED, STATE_VIDEO_PLAY, useVideoStoreContext } from "../store/VideoStore";
 import { Loading, Toggle } from "@geist-ui/core";
 import { memo, useCallback, useEffect, useMemo } from "react";
+import
+	{
+		createEffect,
+		createMemo,
+		createSignal,
+		on,
+		createRef,
+		onCleanup,
+	} from "solid-js"
+
 import {
     FaBackward,
     FaExpand,
@@ -11,14 +20,9 @@ import {
     FaStepBackward,
     FaStepForward,
 } from "react-icons/fa";
-
 import { TbArrowBadgeLeft, TbArrowBadgeRight } from "react-icons/tb";
-
 import { IoMdVolumeHigh, IoMdVolumeLow, IoMdVolumeOff } from "react-icons/io";
-
 import { BsArrowsAngleContract } from "react-icons/bs";
-
-// import { toast } from "react-toastify";
 import { useRef } from "react";
 import { toast } from "react-toastify";
 import {
@@ -31,83 +35,97 @@ import {
     VIDEO_VIEW_STUDENT_MODE,
     VIDEO_VIEW_TEACHING_MODE,
 } from "../enums/video_view_modes";
-import { STATE_VIDEO_PAUSED, STATE_VIDEO_PLAY } from "../store/VideoStore";
 
 function VideoControls({ handleFullScreen }) {
-	let popFromQueue = usePlaylistStore((state) => state.popFromQueue);
-	let popFromArchive = usePlaylistStore((state) => state.popFromArchive);
-	let volumeSliderRef = useRef(null);
+	const [playlistStore, { popFromQueue, popFromArchive }] =
+		usePlaylistStoreContext();	
+		let volumeSliderRef = createRef(null);
 
-	let [
-		videoState.value,
+	// let [
+	// 	// videoState.value,
+	// 	setVideoState,
+	// 	addToSeekQueue,
+	// 	volume,
+	// 	setVolume,
+	// 	// viewMode.value,
+	// 	setViewMode,
+	// 	markers,
+	// 	// currentMarkerIdx.value,
+	// 	setCurrentMarkerIdx,
+	// 	pauseReason,
+	// 	setPauseReason,
+	// ] = useVideoStore((state) => [
+	// 	state.videoState.value,
+	// 	state.setVideoState,
+	// 	state.addToSeekQueue,
+	// 	state.volume,
+	// 	state.setVolume,
+	// 	state.viewMode.value,
+	// 	state.setViewMode,
+	// 	state.markers,
+	// 	state.currentMarkerIdx.value,
+	// 	state.setCurrentMarkerIdx,
+	// 	state.pauseReason,
+	// 	state.setPauseReason,
+	// ]);
+
+		const [videoStore, { 		
+		videoState,
 		setVideoState,
 		addToSeekQueue,
 		volume,
 		setVolume,
-		viewMode.value,
+		viewMode,
 		setViewMode,
 		markers,
-		currentMarkerIdx.value,
+		currentMarkerIdx,
 		setCurrentMarkerIdx,
 		pauseReason,
-		setPauseReason,
-	] = useVideoStore((state) => [
-		state.videoState.value,
-		state.setVideoState,
-		state.addToSeekQueue,
-		state.volume,
-		state.setVolume,
-		state.viewMode.value,
-		state.setViewMode,
-		state.markers,
-		state.currentMarkerIdx.value,
-		state.setCurrentMarkerIdx,
-		state.pauseReason,
-		state.setPauseReason,
-	]);
+		setPauseReason, }] =
+		useVideoStoreContext();
 
-	const handlePlay = useCallback(() => {
-		/*
-			-- if currentVideo is null then play (video starts)
-			-- else if video is running, pause. if video not running(paused), play
-		*/
-		// if (currentVideo === null && queue.length > 0) {
-		// 	setPlaylistState(true);
-		// 	setCurrentVideo(queue[0]);
-		// } else if (currentVideo === null && queue.length === 0) {
-		// 	setPlaylistState(false);
-		// 	toast("Please add videos to queue!", { type: "warning" });
-		// 	return;
-		// } else {
-		// }
-		// setVideoState(STATE_VIDEO_PLAY)
 
-		console.log("SETTING VIDEO STATE TO PLAY ------------>");
+	// const handlePlay = useCallback(() => {
+	// 	console.log("SETTING VIDEO STATE TO PLAY ------------>");
+	// 	if (videoState.value === STATE_VIDEO_PAUSED) {
+	// 		if (pauseReason === VIDEO_PAUSE_MARKER) {
+	// 			console.log("VIDEO PLAY : PAUSE REASON MARKER");
+	// 			setCurrentMarkerIdx(
+	// 				currentMarkerIdx.value + 1 > markers.length - 1
+	// 					? 0
+	// 					: currentMarkerIdx.value + 1
+	// 			);
+	// 			setPauseReason(null);
+	// 		}
+	// 	}
+	// 	if (videoState.value !== STATE_VIDEO_PLAY) {
+	// 		setVideoState(STATE_VIDEO_PLAY);
+	// 	}
+	// }, [
+	// 	videoState.value,
+	// 	pauseReason,
+	// 	markers,
+	// 	currentMarkerIdx.value,
+	// 	setPauseReason,
+	// 	setCurrentMarkerIdx,
+	// 	setVideoState,
+	// ]);
 
-		if (videoState.value === STATE_VIDEO_PAUSED) {
-			if (pauseReason === VIDEO_PAUSE_MARKER) {
-				console.log("VIDEO PLAY : PAUSE REASON MARKER");
-				setCurrentMarkerIdx(
-					currentMarkerIdx.value + 1 > markers.length - 1
-						? 0
-						: currentMarkerIdx.value + 1
-				);
-				setPauseReason(null);
-			}
-		}
-
-		if (videoState.value !== STATE_VIDEO_PLAY) {
-			setVideoState(STATE_VIDEO_PLAY);
-		}
-	}, [
-		videoState.value,
-		pauseReason,
-		markers,
-		currentMarkerIdx.value,
-		setPauseReason,
-		setCurrentMarkerIdx,
-		setVideoState,
-	]);
+	const handlePlay = () => {
+    console.log("SETTING VIDEO STATE TO PLAY ------------>");
+    if (videoState() === STATE_VIDEO_PAUSED) {
+        if (pauseReason() === VIDEO_PAUSE_MARKER) {
+            console.log("VIDEO PLAY : PAUSE REASON MARKER");
+            setCurrentMarkerIdx(prevIdx => 
+                prevIdx + 1 > markers.length - 1 ? 0 : prevIdx + 1
+            );
+            setPauseReason(null);
+        }
+    }
+    if (videoState() !== STATE_VIDEO_PLAY) {
+        setVideoState(STATE_VIDEO_PLAY);
+    }
+};
 
 	useEffect(() => {
 		if (volumeSliderRef.current) {
