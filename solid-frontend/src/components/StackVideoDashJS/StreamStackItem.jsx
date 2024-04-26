@@ -326,7 +326,7 @@ function StreamStackItem(props) {
 							);
 						}
 
-						if (playerRef().current?.videoElement?.currentTime - playerRef().current?.videoElement?.duration > - 0.2) {
+						if (playerRef().current?.videoElement?.currentTime - playerRef().current?.videoElement?.duration > -0.15) {
 							if (videoStore.videoEvents.length === 0) {
 								console.log("[StreamStackItem] Video event play inactive", { currentTime: playerRef().current?.videoElement?.currentTime, duration: playerRef().current?.videoElement?.duration });
 								addVideoEvent({t: VIDEO_EVENT_PLAY_INACTIVE })
