@@ -40,20 +40,18 @@ function VideoPlayer() {
 	let [watchHistoryStore, { addToCommittedTs }] = useWatchHistoryContext();
 
 	const [videoStateVisible, setVideoStateVisible] = createSignal(false);
-	const [duration, setDuration] = createSignal(0);
+	// const [duration, setDuration] = createSignal(0);
 
 	// const draggableHandle = useRef(null);
 
 	const handleReset = () => {
 		setCurrentMarkerIdx(null);
-		setDuration(0);
 		setPauseReason(null);
-		// setVideoState(STATE_VIDEO_LOADING);
 		setCurrentTime(0);
 	};
 
 	const handleEnd = () => {
-		// console.log("Video ended ------------------>");
+		console.log("Video ended ------------------>");
 		let currentMarker = null;
 
 		if (
@@ -68,6 +66,7 @@ function VideoPlayer() {
 
 		// check if teaching mode, loopback to previous marker
 		if (videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE) {
+			console.log("VIDEO ENDED : TEACHING MODE: ", currentMarker);
 			if (currentMarker && currentMarker?.loop) {
 				console.log(
 					"VIDEO END : TEACHING MODE: moving to ",
@@ -86,7 +85,7 @@ function VideoPlayer() {
 			handleReset();
 			popFromQueue(0);
 		} else {
-			console.log("VIDEO END : STUDENT MODE: popping video");
+			console.log("VIDEO ENDED : STUDENT MODE: popping video");
 			// if student mode, pop from queue
 			handleReset();
 			popFromQueue(0);
@@ -316,7 +315,7 @@ function VideoPlayer() {
 													handlePlaybackError={
 														handlePlaybackError
 													}
-													setDuration={setDuration}
+													// setDuration={setDuration}
 													isActive={
 														videoStore.currentVideo
 															?.queue_id ===
@@ -331,8 +330,8 @@ function VideoPlayer() {
 										}}
 									</For>
 								</Show>
-								<div class="absolute bottom-0 z-20 h-40 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0">
-									{/* <div class="absolute bottom-0 w-full ">
+								{/* <div class="absolute bottom-0 z-20 h-40 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0">
+									<div class="absolute bottom-0 w-full ">
 										<VideoPlaybar
 											duration={duration}
 											draggableHandle={draggableHandle}
@@ -341,8 +340,8 @@ function VideoPlayer() {
 											handleSetPlay={handleSetPlay}
 											handleFullScreen={() => {}}
 										/>
-									</div> */}
-								</div>
+									</div>
+								</div> */}
 							</div>
 						</div>
 					</Show>

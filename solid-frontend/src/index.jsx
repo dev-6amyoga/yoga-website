@@ -94,15 +94,17 @@ function VideoPage() {
 			popFromArchive: (index) =>
 				setPlaylistStore(
 					produce((state) => {
-						if (state.archive.length > index + 1) {
+						const a = [...state.archive];
+						if (a.length > index + 1) {
 							let i = index;
 							if (index === -1) {
-								i = state.archive.length - 1;
+								i = a.length - 1;
 							}
 							// const a = [...];
-							const removed = state.archive.splice(i, 1);
+							const removed = a.splice(i, 1);
+							state.archive = [...a];
 
-							state.queue.splice(0, 0, removed[0]);
+							state.queue = [removed[0], ...state.queue];
 						}
 					})
 				),
@@ -163,7 +165,7 @@ function VideoPage() {
 			setMarkers: (markers) =>
 				setVideoStore(
 					produce((state) => {
-						state.markers = markers;
+						state.markers = [...markers];
 					})
 				),
 
@@ -184,11 +186,13 @@ function VideoPage() {
 						// if no markers, dont bother
 						if (state.markers.length === 0) {
 							state.currentMarkerIdx = null;
+							return;
 						}
 
 						// if the current time is less than the first marker, set to null
 						if (ct < state.markers[0]?.timestamp) {
 							state.currentMarkerIdx = null;
+							return;
 						}
 
 						// find the first marker that is greater than the current time
@@ -250,7 +254,7 @@ function VideoPage() {
 					produce((state) => {
 						// console.log(state.seekQueue, seekTime)
 						// {type: move | seek, time: number}
-						state.seekQueue.push(seekEvent);
+						state.seekQueue = [...state.seekQueue, seekEvent];
 						state.pauseReason = null;
 					})
 				),
@@ -258,9 +262,19 @@ function VideoPage() {
 			popFromSeekQueue: (index) =>
 				setVideoStore(
 					produce((state) => {
-						if (state.seekQueue.length > index) {
-							state.seekQueue.splice(index, 1);
+						const sq = [...state.seekQueue];
+						if (sq.length > index) {
+							sq.splice(index, 1);
 						}
+
+						return sq;
+					})
+				),
+
+			clearSeekQueue: () =>
+				setVideoStore(
+					produce((state) => {
+						state.seekQueue = [];
 					})
 				),
 

@@ -1,111 +1,78 @@
-import {usePlaylistStore, usePlaylistStoreContext} from "../store/PlaylistStore";
-import useVideoStore, { STATE_VIDEO_LOADING, STATE_VIDEO_PAUSED, STATE_VIDEO_PLAY, useVideoStoreContext } from "../store/VideoStore";
-import { Loading, Toggle } from "@geist-ui/core";
-import { memo, useCallback, useEffect, useMemo } from "react";
-import
-	{
-		createEffect,
-		createMemo,
-		createSignal,
-		on,
-		createRef,
-		onCleanup,
-	} from "solid-js"
+import { Match, Show, Switch, createEffect, createMemo, on } from "solid-js";
+import { usePlaylistStoreContext } from "../../store/PlaylistStore";
+import {
+	STATE_VIDEO_LOADING,
+	STATE_VIDEO_PAUSED,
+	STATE_VIDEO_PLAY,
+	useVideoStoreContext,
+} from "../../store/VideoStore";
 
 import {
-    FaBackward,
-    FaExpand,
-    FaPause,
-    FaPlay,
-    FaStepBackward,
-    FaStepForward,
-} from "react-icons/fa";
-import { TbArrowBadgeLeft, TbArrowBadgeRight } from "react-icons/tb";
-import { IoMdVolumeHigh, IoMdVolumeLow, IoMdVolumeOff } from "react-icons/io";
-import { BsArrowsAngleContract } from "react-icons/bs";
-// import { useRef } from "react";
-import { toast } from "react-toastify";
+	FaSolidBackward as FaBackward,
+	FaSolidForward as FaForward,
+	FaSolidPause as FaPause,
+	FaSolidPlay as FaPlay,
+	FaSolidExpand,
+} from "solid-icons/fa";
+
 import {
-    SEEK_TYPE_MARKER,
-    SEEK_TYPE_MOVE,
-    SEEK_TYPE_SEEK,
-} from "../enums/seek_types";
-import { VIDEO_PAUSE_MARKER } from "../enums/video_pause_reasons";
+	AiFillStepBackward as FaStepBackward,
+	AiFillStepForward as FaStepForward,
+} from "solid-icons/ai";
+import { IoVolumeHigh, IoVolumeLow, IoVolumeOff } from "solid-icons/io";
+import { TbArrowBadgeLeft, TbArrowBadgeRight } from "solid-icons/tb";
+
 import {
-    VIDEO_VIEW_STUDENT_MODE,
-    VIDEO_VIEW_TEACHING_MODE,
-} from "../enums/video_view_modes";
+	SEEK_TYPE_MARKER,
+	SEEK_TYPE_MOVE,
+	SEEK_TYPE_SEEK,
+} from "../../enums/seek_types";
+
+import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
+import {
+	VIDEO_VIEW_STUDENT_MODE,
+	VIDEO_VIEW_TEACHING_MODE,
+} from "../../enums/video_view_modes";
 
 function VideoControls({ handleFullScreen }) {
 	const [playlistStore, { popFromQueue, popFromArchive }] =
-		usePlaylistStoreContext();	
-		let volumeSliderRef = createRef(null);
+		usePlaylistStoreContext();
 
-	// let [
-	// 	// videoState.value,
-	// 	setVideoState,
-	// 	addToSeekQueue,
-	// 	volume,
-	// 	setVolume,
-	// 	// viewMode.value,
-	// 	setViewMode,
-	// 	markers,
-	// 	// currentMarkerIdx.value,
-	// 	setCurrentMarkerIdx,
-	// 	pauseReason,
-	// 	setPauseReason,
-	// ] = useVideoStore((state) => [
-	// 	state.videoState.value,
-	// 	state.setVideoState,
-	// 	state.addToSeekQueue,
-	// 	state.volume,
-	// 	state.setVolume,
-	// 	state.viewMode.value,
-	// 	state.setViewMode,
-	// 	state.markers,
-	// 	state.currentMarkerIdx.value,
-	// 	state.setCurrentMarkerIdx,
-	// 	state.pauseReason,
-	// 	state.setPauseReason,
-	// ]);
+	let volumeSliderRef = null;
 
-		const [videoStore, { 		
-		videoState,
-		setVideoState,
-		addToSeekQueue,
-		volume,
-		setVolume,
-		viewMode,
-		setViewMode,
-		markers,
-		currentMarkerIdx,
-		setCurrentMarkerIdx,
-		pauseReason,
-		setPauseReason, }] =
-		useVideoStoreContext();
-
+	const [
+		videoStore,
+		{
+			setVideoState,
+			addToSeekQueue,
+			setVolume,
+			setViewMode,
+			setCurrentMarkerIdx,
+			setPauseReason,
+		},
+	] = useVideoStoreContext();
 
 	// const handlePlay = useCallback(() => {
 	// 	console.log("SETTING VIDEO STATE TO PLAY ------------>");
-	// 	if (videoState.value === STATE_VIDEO_PAUSED) {
+	// 	if (videoStore.videoState === STATE_VIDEO_PAUSED) {
 	// 		if (pauseReason === VIDEO_PAUSE_MARKER) {
 	// 			console.log("VIDEO PLAY : PAUSE REASON MARKER");
 	// 			setCurrentMarkerIdx(
-	// 				currentMarkerIdx.value + 1 > markers.length - 1
+	// 				videoStore.currentMarkerIdx + 1 > markers.length - 1
 	// 					? 0
-	// 					: currentMarkerIdx.value + 1
+	// 					: videoStore.currentMarkerIdx + 1
 	// 			);
 	// 			setPauseReason(null);
 	// 		}
 	// 	}
-	// 	if (videoState.value !== STATE_VIDEO_PLAY) {
+	// 	if (videoStore.videoState !== STATE_VIDEO_PLAY) {
 	// 		setVideoState(STATE_VIDEO_PLAY);
 	// 	}
 	// }, [
-	// 	videoState.value,
+	// 	videoStore.videoState,
 	// 	pauseReason,
 	// 	markers,
-	// 	currentMarkerIdx.value,
+	// 	videoStore.currentMarkerIdx,
 	// 	setPauseReason,
 	// 	setCurrentMarkerIdx,
 	// 	setVideoState,
@@ -113,24 +80,26 @@ function VideoControls({ handleFullScreen }) {
 
 	const handlePlay = () => {
 		console.log("SETTING VIDEO STATE TO PLAY ------------>");
-		if (videoState() === STATE_VIDEO_PAUSED) {
-			if (pauseReason() === VIDEO_PAUSE_MARKER) {
+		if (videoStore.videoState === STATE_VIDEO_PAUSED) {
+			if (videoStore.pauseReason === VIDEO_PAUSE_MARKER) {
 				console.log("VIDEO PLAY : PAUSE REASON MARKER");
-				setCurrentMarkerIdx(prevIdx => 
-					prevIdx + 1 > markers.length - 1 ? 0 : prevIdx + 1
+				setCurrentMarkerIdx((prevIdx) =>
+					prevIdx + 1 > videoStore.markers.length - 1
+						? 0
+						: prevIdx + 1
 				);
 				setPauseReason(null);
 			}
 		}
-		if (videoState() !== STATE_VIDEO_PLAY) {
+		if (videoStore.videoState !== STATE_VIDEO_PLAY) {
 			setVideoState(STATE_VIDEO_PLAY);
 		}
 	};
 
 	createEffect(
-		on([() => volume], () => {
-			if (volumeSliderRef.current) {
-				volumeSliderRef.current.value = volume * 100;
+		on([() => videoStore.volume], () => {
+			if (volumeSliderRef) {
+				volumeSliderRef.value = videoStore.volume * 100;
 			}
 		})
 	);
@@ -154,54 +123,64 @@ function VideoControls({ handleFullScreen }) {
 
 	const handlePrevMarker = () => {
 		console.log("Prev Marker");
-		if (markers.length > 0) {
-			if (currentMarkerIdx.value === 0) {
+		if (videoStore.markers.length > 0) {
+			if (videoStore.currentMarkerIdx === 0) {
 				addToSeekQueue({ t: 0, type: SEEK_TYPE_MOVE });
 				return;
 			}
 			const idx =
-				((currentMarkerIdx.value || 0) - 1 + markers.length) % markers.length;
+				((videoStore.currentMarkerIdx || 0) -
+					1 +
+					videoStore.markers.length) %
+				videoStore.markers.length;
 			setCurrentMarkerIdx(idx);
-			addToSeekQueue({ t: markers[idx].timestamp, type: SEEK_TYPE_MOVE });
+			addToSeekQueue({
+				t: videoStore.markers[idx].timestamp,
+				type: SEEK_TYPE_MOVE,
+			});
 		}
 	};
 
 	const handleNextMarker = () => {
 		console.log("Next Marker");
-		if (markers.length > 0) {
-			const idx = ((currentMarkerIdx.value || 0) + 1) % markers.length;
+		if (videoStore.markers.length > 0) {
+			const idx =
+				((videoStore.currentMarkerIdx || 0) + 1) %
+				videoStore.markers.length;
 			setCurrentMarkerIdx(idx);
 			// seek to next marker
-			addToSeekQueue({ t: markers[idx].timestamp, type: SEEK_TYPE_MOVE });
+			addToSeekQueue({
+				t: videoStore.markers[idx].timestamp,
+				type: SEEK_TYPE_MOVE,
+			});
 		}
 	};
 
-	const handleViewModeToggle = useCallback(
-		(e) => {
-			if (e.target.checked) {
-				toast("View Mode: teacher", { type: "success" });
-				setViewMode(VIDEO_VIEW_TEACHING_MODE);
-			} else {
-				toast("View Mode: student", { type: "success" });
-				setViewMode(VIDEO_VIEW_STUDENT_MODE);
-			}
-		},
-		[setViewMode]
-	);
+	const handleViewModeToggle = (e) => {
+		if (e.target.checked) {
+			// toast("View Mode: teacher", { type: "success" });
+			setViewMode(VIDEO_VIEW_TEACHING_MODE);
+		} else {
+			// toast("View Mode: student", { type: "success" });
+			setViewMode(VIDEO_VIEW_STUDENT_MODE);
+		}
+	};
 
 	const handleReplayMarkerAfterPause = () => {
 		addToSeekQueue({
-			t: markers[currentMarkerIdx.value].timestamp,
+			t: videoStore.markers[videoStore.currentMarkerIdx].timestamp,
 			type: SEEK_TYPE_MARKER,
 		});
 	};
 
-	const iconButtonClass = createMemo(() => 
-		on([() => handleFullScreen.active], () => {
-		return handleFullScreen.active
-			? "video_controls__ctrl__button_fs "
-			: "video_controls__ctrl__button ";
-		}) 
+	const iconButtonClass = createMemo(
+		on([() => ""], () => {
+			// return handleFullScreen.active
+			// 	? "video_controls__ctrl__button_fs "
+			// 	: "video_controls__ctrl__button ";
+
+			return "video_controls__ctrl__button";
+		})
 	);
 
 	return (
@@ -210,7 +189,7 @@ function VideoControls({ handleFullScreen }) {
 				{/* {String(handleFullScreen.active)} */}
 				{/* previous video */}
 				<button
-					class={iconButtonClass}
+					class={iconButtonClass()}
 					onClick={() => {
 						popFromArchive(-1);
 					}}
@@ -221,44 +200,60 @@ function VideoControls({ handleFullScreen }) {
 				<button
 					onClick={handleSeekBackward}
 					title="Rewind 5s"
-					class={iconButtonClass + " hidden md:block"}>
+					class={iconButtonClass() + " hidden md:block"}>
 					<FaBackward class="video_controls__ctrl__button__icon" />
 				</button>
 				{/* previous marker */}
-				{viewMode.value === VIDEO_VIEW_TEACHING_MODE && (
+				<Show when={videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE}>
 					<button
-						class={iconButtonClass}
+						class={iconButtonClass()}
 						onClick={handlePrevMarker}
 						title="Prev Marker">
 						<TbArrowBadgeLeft class="video_controls__ctrl__button__icon" />
 					</button>
-				)}
+				</Show>
+
 				{/* play/pause video */}
 				<button
-					class={`${iconButtonClass} ${
-						videoState.value === STATE_VIDEO_LOADING ? "opacity-30" : ""
+					class={`${iconButtonClass()} ${
+						videoStore.videoState === STATE_VIDEO_LOADING
+							? "opacity-30"
+							: ""
 					}`}
 					onClick={() => {
-						if (videoState.value === STATE_VIDEO_PLAY) {
+						if (videoStore.videoState === STATE_VIDEO_PLAY) {
 							handlePause();
-						} else if (videoState.value === STATE_VIDEO_PAUSED) {
+						} else if (
+							videoStore.videoState === STATE_VIDEO_PAUSED
+						) {
 							handlePlay();
 						}
 					}}
-					disabled={videoState.value === STATE_VIDEO_LOADING}
+					disabled={videoStore.videoState === STATE_VIDEO_LOADING}
 					title="Play/Pause">
-					{videoState.value === STATE_VIDEO_PLAY ? (
-						<FaPause class="video_controls__ctrl__button__icon" />
-					) : videoState.value === STATE_VIDEO_PAUSED ? (
-						<FaPlay class="video_controls__ctrl__button__icon" />
-					) : (
-						<Loading color="#fff" />
-					)}
+					<Switch>
+						<Match
+							when={videoStore.videoState === STATE_VIDEO_PLAY}>
+							<FaPause class="video_controls__ctrl__button__icon" />
+						</Match>
+
+						<Match
+							when={videoStore.videoState === STATE_VIDEO_PAUSED}>
+							<FaPlay class="video_controls__ctrl__button__icon" />
+						</Match>
+
+						<Match
+							when={
+								videoStore.videoState === STATE_VIDEO_LOADING
+							}>
+							<p>...</p>
+						</Match>
+					</Switch>
 				</button>
 				{/* next marker */}
-				{viewMode.value === VIDEO_VIEW_TEACHING_MODE && (
+				{videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE && (
 					<button
-						class={iconButtonClass}
+						class={iconButtonClass()}
 						onClick={handleNextMarker}
 						title="Next Marker">
 						<TbArrowBadgeRight class="video_controls__ctrl__button__icon" />
@@ -268,58 +263,73 @@ function VideoControls({ handleFullScreen }) {
 				<button
 					onClick={handleSeekFoward}
 					title="Fast Forward 5s"
-					class={iconButtonClass + " hidden md:block"}>
-					<FaStepForward class="video_controls__ctrl__button__icon" />
+					class={iconButtonClass() + " hidden md:block"}>
+					<FaForward class="video_controls__ctrl__button__icon" />
 				</button>
 
 				{/* next video */}
 				<button
-					class={iconButtonClass}
+					class={iconButtonClass()}
 					onClick={handleNextVideo}
 					title="Next Video">
 					<FaStepForward class="video_controls__ctrl__button__icon" />
 				</button>
-				{pauseReason === VIDEO_PAUSE_MARKER && (
+
+				<Show when={videoStore.pauseReason === VIDEO_PAUSE_MARKER}>
 					<button
 						class="rounded-full border bg-white text-xs text-black lg:px-2 lg:py-1"
 						onClick={handleReplayMarkerAfterPause}>
 						Replay
 					</button>
-				)}
-				{currentMarkerIdx.value !== null && markers.length > 0 ? (
+				</Show>
+
+				<Show
+					when={
+						videoStore.currentMarkerIdx !== null &&
+						videoStore.markers.length > 0
+					}>
 					<span
 						class="mx-2 hidden h-auto max-w-[200px] break-normal break-words text-xs text-white xl:block"
-						title={markers[currentMarkerIdx.value].title}>
-						{String(markers[currentMarkerIdx.value].title).substring(
-							0,
-							80
-						) + "..." ?? ""}
+						title={
+							videoStore.markers[videoStore.currentMarkerIdx]
+								?.title
+						}>
+						{String(
+							videoStore.markers[videoStore.currentMarkerIdx]
+								?.title
+						).substring(0, 80) + "..." ?? ""}
 					</span>
-				) : (
-					<></>
-				)}
+				</Show>
 			</div>
 
-			{/* volume control */}
+			{/* videoStore.volume control */}
 			<div class="flex items-center justify-center gap-4 text-white">
 				<div class="group flex items-center gap-1">
-					<div class={iconButtonClass + ""}>
-						{volume === 0 ? (
-							<IoMdVolumeOff
-								onClick={() => setVolume(0.3)}
-								class="h-7 w-7"
-							/>
-						) : volume > 0.5 ? (
-							<IoMdVolumeHigh
-								onClick={() => setVolume(0)}
-								class="h-7 w-7"
-							/>
-						) : (
-							<IoMdVolumeLow
-								onClick={() => setVolume(0.0)}
-								class="h-7 w-7"
-							/>
-						)}
+					<div class={iconButtonClass() + ""}>
+						<Switch>
+							<Match when={videoStore.volume === 0}>
+								<IoVolumeOff
+									onClick={() => setVolume(0.3)}
+									class="h-7 w-7"
+								/>
+							</Match>
+							<Match when={videoStore.volume > 0.5}>
+								<IoVolumeHigh
+									onClick={() => setVolume(0)}
+									class="h-7 w-7"
+								/>
+							</Match>
+							<Match
+								when={
+									videoStore.volume <= 0.5 &&
+									videoStore.volume > 0
+								}>
+								<IoVolumeLow
+									onClick={() => setVolume(0.0)}
+									class="h-7 w-7"
+								/>
+							</Match>
+						</Switch>
 					</div>
 					<input
 						type="range"
@@ -337,16 +347,18 @@ function VideoControls({ handleFullScreen }) {
 					<span
 						class="clip-rect-left-0 group-hover:clip-rect-full w-0 text-sm capitalize transition-all duration-300 group-hover:w-16"
 						title="Current View Mode">
-						{viewMode.value}
+						{videoStore.viewMode}
 					</span>
 					<div
 						class={handleFullScreen.active ? "-mt-3" : "-mt-1"}
 						title="View Mode">
-						<Toggle
-							checked={viewMode.value === VIDEO_VIEW_TEACHING_MODE}
-							type="secondary"
+						<input
+							checked={
+								videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE
+							}
+							type="checkbox"
 							// class={+handleFullScreen.active ? 'scale-150' : ''}
-							scale={handleFullScreen.active ? 2 : 1.3}
+							// scale={handleFullScreen.active ? 2 : 1.3}
 							onChange={handleViewModeToggle}
 						/>
 					</div>
@@ -365,9 +377,9 @@ function VideoControls({ handleFullScreen }) {
 					}}
 					title="Full Screen">
 					{handleFullScreen.active ? (
-						<BsArrowsAngleContract class="video_controls__ctrl__button__icon" />
+						<FaSolidExpand class="video_controls__ctrl__button__icon" />
 					) : (
-						<FaExpand class="video_controls__ctrl__button__icon" />
+						<FaSolidExpand class="video_controls__ctrl__button__icon" />
 					)}
 				</button>
 			</div>
@@ -375,4 +387,4 @@ function VideoControls({ handleFullScreen }) {
 	);
 }
 
-export default memo(VideoControls);
+export default VideoControls;
