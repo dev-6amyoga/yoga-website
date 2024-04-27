@@ -1,4 +1,5 @@
 import "./StackVideo.css";
+import VideoInfo from "./VideoInfo";
 import VideoPlayer from "./VideoPlayer";
 import VideoQueue from "./VideoQueue";
 
@@ -32,7 +33,9 @@ export default function VideoPlayerWrapper() {
 			<VideoPlayer />
 
 			<VideoQueue />
-			<div class="flex flex-col gap-4">{/* <VideoInfo /> */}</div>
+			<div class="flex flex-col gap-4">
+				<VideoInfo />
+			</div>
 		</>
 	);
 }

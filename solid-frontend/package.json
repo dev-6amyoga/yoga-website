@@ -20,8 +20,10 @@
 	"dependencies": {
 		"@geist-ui/core": "^2.3.8",
 		"@solidjs/router": "^0.13.2",
+		"@thisbeyond/solid-dnd": "^0.7.5",
 		"axios": "^1.6.8",
 		"dashjs": "^4.7.4",
+		"solid-icons": "^1.1.0",
 		"solid-js": "^1.8.11",
 		"solid-zustand": "^1.8.0",
 		"uuid": "^9.0.1",

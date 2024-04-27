@@ -1,5 +1,5 @@
 .video_controls__ctrl__button {
-	@apply flex h-9 w-11 items-center justify-center px-1 py-2;
+	@apply flex h-9 w-11 items-center justify-center px-1 py-2 bg-transparent;
 }
 
 .video_controls__ctrl__button_fs {

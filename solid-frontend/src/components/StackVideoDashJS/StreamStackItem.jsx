@@ -1,31 +1,31 @@
-import
-	{
-		SEEK_TYPE_MARKER,
-		SEEK_TYPE_MOVE,
-		SEEK_TYPE_SEEK,
-	} from "../../enums/seek_types"
-import { usePlaylistStoreContext } from "../../store/PlaylistStore"
-import
-	{
-		STATE_VIDEO_ERROR,
-		STATE_VIDEO_LOADING,
-		STATE_VIDEO_PAUSED,
-		STATE_VIDEO_PLAY,
-		useVideoStoreContext,
-	} from "../../store/VideoStore"
+import {
+	SEEK_TYPE_MARKER,
+	SEEK_TYPE_MOVE,
+	SEEK_TYPE_SEEK,
+} from "../../enums/seek_types";
+import { usePlaylistStoreContext } from "../../store/PlaylistStore";
+import {
+	STATE_VIDEO_ERROR,
+	STATE_VIDEO_LOADING,
+	STATE_VIDEO_PAUSED,
+	STATE_VIDEO_PLAY,
+	useVideoStoreContext,
+} from "../../store/VideoStore";
 
-import
-	{
-		createEffect,
-		createMemo,
-		createSignal,
-		on,
-		onCleanup,
-	} from "solid-js"
-import { VIDEO_EVENT_PLAY_INACTIVE } from "../../enums/video_event"
-import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons"
-import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes"
-import DashPlayer from "./DashPlayer"
+import { DragDropProvider } from "@thisbeyond/solid-dnd";
+import {
+	createEffect,
+	createMemo,
+	createSignal,
+	on,
+	onCleanup,
+} from "solid-js";
+import { VIDEO_EVENT_PLAY_INACTIVE } from "../../enums/video_event";
+import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
+import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
+import { toTimeString } from "../../utils/toTimeString";
+import DashPlayer from "./DashPlayer";
+import VideoPlaybar from "./VideoPlaybar";
 
 console.log(STATE_VIDEO_LOADING);
 
@@ -39,10 +39,12 @@ function StreamStackItem(props) {
 	let intervalTimer = null;
 	let playInActiveTimer = null;
 
+	let [duration, setDuration] = createSignal(0);
+
 	// const [metadataLoaded, setMetadataLoaded] = createSignal(false);
 	// const [autoplayInitialized, setAutoplayInitialized] = createSignal(false);
 	const [playerLoaded, setPlayerLoaded] = createSignal(false);
-	
+
 	const videoUrl = createMemo(
 		on([() => props.video], () => {
 			console.log("VIDEO URL", props.video);
@@ -76,6 +78,7 @@ function StreamStackItem(props) {
 	const [
 		videoStore,
 		{
+			clearSeekQueue,
 			popFromSeekQueue,
 			addToSeekQueue,
 			setVideoState,
@@ -240,21 +243,21 @@ function StreamStackItem(props) {
 			[
 				() => props.isActive,
 				() => videoStore.seekQueue,
-				// () => videoStore.commitSeekTime,
-				// () => videoStore.viewMode,
-				// () => videoStore.markers,
-				// () => videoStore.currentMarkerIdx,
-				// () => videoStore.currentVideo,
-				// () => videoStore.videoState,
+				() => videoStore.commitSeekTime,
+				() => videoStore.viewMode,
+				() => videoStore.markers,
+				() => videoStore.currentMarkerIdx,
+				() => videoStore.currentVideo,
+				() => videoStore.videoState,
 			],
 			() => {
 				const checkSeek = (ct) => {
 					if (
 						videoStore.seekQueue.length > 0 &&
-						videoStore.commitSeekTime.toFixed(0) === ct.toFixed(0)
+						videoStore.commitSeekTime.toFixed(1) === ct.toFixed(1)
 					) {
 						if (props.isActive)
-							handleLoading(false, props.isActive);
+							props.handleLoading(false, props.isActive);
 						autoSetCurrentMarkerIdx(videoStore.commitSeekTime);
 						return true;
 					} else {
@@ -286,59 +289,89 @@ function StreamStackItem(props) {
 								});
 								return true;
 							} else {
-								console.log("PAUSING CUZ OF MARKER");
-								setVideoState(STATE_VIDEO_PAUSED);
-								setPauseReason(VIDEO_PAUSE_MARKER);
+								if (
+									videoStore.videoState !== STATE_VIDEO_PAUSED
+								) {
+									console.log("PAUSING CUZ OF MARKER");
+									setVideoState(STATE_VIDEO_PAUSED);
+									setPauseReason(VIDEO_PAUSE_MARKER);
+								}
 								return true;
 							}
 						}
 					}
 				};
 
-				console.log("createEffect : initializing interval timer");
+				if (
+					props.isActive &&
+					videoStore.videoState !== STATE_VIDEO_ERROR &&
+					videoStore.videoState !== STATE_VIDEO_LOADING
+				) {
+					console.log("createEffect : initializing interval timer");
+					intervalTimer = setInterval(() => {
+						if (playerRef().current?.videoElement) {
+							if (
+								checkSeek(
+									playerRef().current?.videoElement
+										?.currentTime
+								)
+							) {
+								// popFromSeekQueue(0);
+								clearSeekQueue();
+								setVideoState(STATE_VIDEO_PLAY);
+								return;
+							}
+							if (
+								videoStore.videoState !== STATE_VIDEO_LOADING &&
+								checkPauseOrLoop(
+									playerRef().current?.videoElement
+										?.currentTime
+								)
+							) {
+								return;
+							}
+							if (
+								videoStore.videoState !== STATE_VIDEO_LOADING ||
+								videoStore.videoState !== STATE_VIDEO_ERROR ||
+								videoStore.videoState !== STATE_VIDEO_PAUSED
+							) {
+								autoSetCurrentMarkerIdx(
+									playerRef().current?.videoElement
+										?.currentTime
+								);
+							}
 
-				intervalTimer = setInterval(() => {
-					if (playerRef().current?.videoElement && props.isActive) {
-						if (
-							checkSeek(
-								playerRef().current?.videoElement?.currentTime
-							)
-						) {
-							popFromSeekQueue(0);
-							setVideoState(STATE_VIDEO_PLAY);
-							return;
-						}
-						if (
-							videoStore.videoState !== STATE_VIDEO_LOADING &&
-							checkPauseOrLoop(
-								playerRef().current?.videoElement?.currentTime
-							)
-						) {
-							return;
-						}
-						if (
-							videoStore.videoState !== STATE_VIDEO_LOADING ||
-							videoStore.videoState !== STATE_VIDEO_ERROR ||
-							videoStore.videoState !== STATE_VIDEO_PAUSED
-						) {
-							autoSetCurrentMarkerIdx(
+							if (
+								playerRef().current?.videoElement?.currentTime -
+									playerRef().current?.videoElement
+										?.duration >
+								-0.05
+							) {
+								if (videoStore.videoEvents.length === 0) {
+									console.log(
+										"[StreamStackItem] Video event play inactive",
+										{
+											currentTime:
+												playerRef().current
+													?.videoElement?.currentTime,
+											duration:
+												playerRef().current
+													?.videoElement?.duration,
+										}
+									);
+									addVideoEvent({
+										t: VIDEO_EVENT_PLAY_INACTIVE,
+									});
+								}
+							}
+
+							setCurrentTime(
 								playerRef().current?.videoElement?.currentTime
 							);
+							// setVolume(playerRef().current?.videoElement?.volume);
 						}
-
-						if (playerRef().current?.videoElement?.currentTime - playerRef().current?.videoElement?.duration > -0.15) {
-							if (videoStore.videoEvents.length === 0) {
-								console.log("[StreamStackItem] Video event play inactive", { currentTime: playerRef().current?.videoElement?.currentTime, duration: playerRef().current?.videoElement?.duration });
-								addVideoEvent({t: VIDEO_EVENT_PLAY_INACTIVE })
-							}
-						}
-
-						setCurrentTime(
-							playerRef().current?.videoElement?.currentTime
-						);
-						// setVolume(playerRef().current?.videoElement?.volume);
-					}
-				}, 16.67);
+					}, 33.33);
+				}
 
 				onCleanup(() => {
 					console.log("createEffect : cleaning up interval timer");
@@ -410,7 +443,11 @@ function StreamStackItem(props) {
 	const handleVideoCanPlayThrough = (e) => {
 		// setMetadataLoaded(true);
 		// const state = useVideoStore.getState();
-		console.log("Can play through...", videoStore.videoState);
+		console.log(
+			"Can play through...",
+			videoStore.videoState,
+			playerRef().current.videoElement.currentTime
+		);
 		// tryToPlay();
 		// setVideoState(STATE_VIDEO_PLAY);
 	};
@@ -422,32 +459,26 @@ function StreamStackItem(props) {
 		}
 	};
 
-	
-	// [ISACTIVE] playing 
-	// > clearTimeout(previous timer) 
-	// > clearVideoEvents 
+	// [ISACTIVE] playing
+	// > clearTimeout(previous timer)
+	// > clearVideoEvents
 	// > setTimeout to send videoEvent 0.5s before video ends
 	// [!ISACTIVE] waits for videoEvent, plays video
 
-	// 				setInactiveVideoDuration(null); 
-	// 				}, inactiveVideoDuration() * 1000); 
+	// 				setInactiveVideoDuration(null);
+	// 				}, inactiveVideoDuration() * 1000);
 	// 			}
 	// 		} else {
 	// 			console.log("Duration not set yet!time is");
 	// 		}
 	// });
 
-
-
-	
-
-
 	const playerInit = (ref) => {
 		console.log("player init called", ref);
 		if (ref != null) {
 			setPlayerRef({ current: ref });
 			setPlayerLoaded(true);
-		}  
+		}
 	};
 
 	return (
@@ -457,96 +488,126 @@ function StreamStackItem(props) {
 		// 	}`}>
 		// 	<div
 		// class="relative h-full w-full block">
+		<div class="">
+			<DragDropProvider>
+				<div
+					class={`relative stream-stack-item border-2 border-red-600 ${
+						props.isActive ? "block" : "block"
+					}`}>
+					{/* class={props.isActive ? "flex-1" : "w-60"}> */}
+					<DashPlayer
+						ref={playerInit}
+						src={videoUrl()}
+						queueItemId={props.video.idx}
+						isAsanaVideo={
+							!isNaN(props.video?.video?.id) &&
+							typeof props.video?.video?.id === "number"
+						}
+						video={props.video}
+						isActive={props.isActive}
+						onError={handlePlayerError}
+						onCanPlayThrough={handleVideoCanPlayThrough}
+						onVolumeChange={handleVideoVolumeChange}
+						onEnded={props.handleEnd}
+						onLoading={handlePlayerLoading}
+						onLoaded={handlePlayerLoaded}
+						onSeeking={handleVideoSeeking}
+						onSeeked={handleVideoSeeked}
+						setDuration={setDuration}
+						className="dashjs-player w-full h-full"
+					/>
 
-		<div class={`relative ${props.isActive ? "block" : "block"}`}>
-			{/* class={props.isActive ? "flex-1" : "w-60"}> */}
-			<DashPlayer
-				ref={playerInit}
-				src={videoUrl()}
-				isAsanaVideo={
-					!isNaN(props.video?.video?.id) &&
-					typeof props.video?.video?.id === "number"
-				}
-				video={props.video}
-				isActive={props.isActive}
-				onError={handlePlayerError}
-				onCanPlayThrough={handleVideoCanPlayThrough}
-				onVolumeChange={handleVideoVolumeChange}
-				onEnded={props.handleEnd}
-				onLoading={handlePlayerLoading}
-				onLoaded={handlePlayerLoaded}
-				onSeeking={handleVideoSeeking}
-				onSeeked={handleVideoSeeked}
-				setDuration={props.setDuration}
-				className="dashjs-player w-full h-full"
-			/>
+					<div className="absolute bottom-0 z-20 h-40 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0 border-green-500">
+						<div className="absolute bottom-0 w-full">
+							<VideoPlaybar
+								playbarVisible={true}
+								duration={duration}
+								toTimeString={toTimeString}
+								handleSetPlay={() => {}}
+								handleSetPause={() => {}}
+								handleFullScreen={{
+									enter: () => {},
+									exit: () => {},
+									active: false,
+								}}
+							/>
+						</div>
+					</div>
 
-			{videoStore.devMode ? (
-				<div class="absolute bg-white left-4 top-4 p-2 text-sm flex flex-col">
-					<p>
-						props.isActive: {String(props.isActive)} ||{" "}
-						{String(props.isActive)}
-					</p>
-					<p>Video IDX : {props.video?.idx}</p>
-					<p>videoStore.videoState: {videoStore.videoState}</p>
-					<p>videoStore.pauseReason: {videoStore.pauseReason}</p>
-					<p>videoStore.viewMode: {videoStore.viewMode}</p>
-					<p>
-						videoStore.currentMarkerIdx:{" "}
-						{videoStore.currentMarkerIdx}
-					</p>
-					{/* <p>metadataLoaded(): {String(metadataLoaded())}</p> */}
-					{/* <p>
+					{videoStore.devMode ? (
+						<div class="absolute bg-white left-4 top-4 p-2 text-sm flex flex-col">
+							<p>
+								props.isActive: {String(props.isActive)} ||{" "}
+								{String(props.isActive)}
+							</p>
+							<p>Video IDX : {props.video?.idx}</p>
+							<p>
+								videoStore.videoState: {videoStore.videoState}
+							</p>
+							<p>
+								videoStore.pauseReason: {videoStore.pauseReason}
+							</p>
+							<p>videoStore.viewMode: {videoStore.viewMode}</p>
+							<p>
+								videoStore.currentMarkerIdx:{" "}
+								{videoStore.currentMarkerIdx}
+							</p>
+							{/* <p>metadataLoaded(): {String(metadataLoaded())}</p> */}
+							{/* <p>
 						autoplayInitialized(): {String(autoplayInitialized())}
 					</p> */}
-					<p>playerLoaded(): {String(playerLoaded())}</p>
-					<p>
-						videoStore.commitSeekTime: {videoStore.commitSeekTime}
-					</p>
-					<p>videoStore.volume: {videoStore.volume}</p>
-					<p>
-						videoStore.fullScreen: {String(videoStore.fullScreen)}
-					</p>
-					<div>
-						Buffer :{" "}
-						{playerRef().current &&
-						playerRef().current.videoElement ? (
-							<>
-								{Array.from(
-									Array(
-										playerRef().current.videoElement
-											.buffered.length
-									).keys()
-								).map((i) => {
-									return (
-										<span>
-											{playerRef().current.videoElement.buffered.start(
-												i
-											)}{" "}
-											-{" "}
-											{playerRef().current.videoElement.buffered.end(
-												i
-											)}
-										</span>
-									);
-								})}{" "}
-								| props.video :{" "}
-								{playerRef().current.player.getBufferLength(
-									"video"
-								)}{" "}
-								| audio :{" "}
-								{playerRef().current.player.getBufferLength(
-									"audio"
+							<p>playerLoaded(): {String(playerLoaded())}</p>
+							<p>
+								videoStore.commitSeekTime:{" "}
+								{videoStore.commitSeekTime}
+							</p>
+							<p>videoStore.volume: {videoStore.volume}</p>
+							<p>
+								videoStore.fullScreen:{" "}
+								{String(videoStore.fullScreen)}
+							</p>
+							<div>
+								Buffer :{" "}
+								{playerRef().current &&
+								playerRef().current.videoElement ? (
+									<>
+										{Array.from(
+											Array(
+												playerRef().current.videoElement
+													.buffered.length
+											).keys()
+										).map((i) => {
+											return (
+												<span>
+													{playerRef().current.videoElement.buffered.start(
+														i
+													)}{" "}
+													-{" "}
+													{playerRef().current.videoElement.buffered.end(
+														i
+													)}
+												</span>
+											);
+										})}{" "}
+										| props.video :{" "}
+										{playerRef().current.player.getBufferLength(
+											"video"
+										)}{" "}
+										| audio :{" "}
+										{playerRef().current.player.getBufferLength(
+											"audio"
+										)}
+									</>
+								) : (
+									"nil"
 								)}
-							</>
-						) : (
-							"nil"
-						)}
-					</div>
+							</div>
+						</div>
+					) : (
+						<></>
+					)}
 				</div>
-			) : (
-				<></>
-			)}
+			</DragDropProvider>
 		</div>
 	);
 }
