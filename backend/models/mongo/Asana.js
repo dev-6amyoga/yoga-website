@@ -22,6 +22,7 @@ const asanaSchema = new mongoose.Schema({
     type: Number,
     default: 1,
   },
+  drm_video: Boolean,
   asana_imageID: String,
   asana_videoID: String,
   asana_hls_url: String,

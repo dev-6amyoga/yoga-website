@@ -453,4 +453,48 @@ router.delete("/asana/deleteAsanaCategory/:catId", async (req, res) => {
   }
 });
 
+router.get("/video/deleteField", async (req, res) => {
+  try {
+    const asanas = await Asana.find();
+    for (let i = 0; i < asanas.length; i++) {
+      let asana = asanas[i];
+      if (asana.asana_hls_url) {
+        delete asana.asana_hls_url;
+        console.log(asana);
+        await asana.save();
+      } else {
+        console.log("ahoy");
+      }
+    }
+    res.json(asanas);
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to delete field",
+    });
+  }
+});
+
+router.get("/video/updateAsanaDrm", async (req, res) => {
+  try {
+    let output = [];
+    const transitions = await Asana.find();
+    for (const transition of transitions) {
+      if (transition.hasOwnProperty("asana_hls_url")) {
+        output.push(transition);
+        await Asana.findByIdAndUpdate(transition._id, {
+          $set: { asana_hls_url: "" },
+        });
+        transition.asana_hls_url = "";
+      }
+    }
+    res.status(200).json(output);
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to fetch videos",
+    });
+  }
+});
+
 module.exports = router;
