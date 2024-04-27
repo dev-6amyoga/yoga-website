@@ -1,4 +1,12 @@
-import { Button, Checkbox, Divider, Input, Select, Text } from "@geist-ui/core";
+import {
+  Button,
+  Checkbox,
+  Divider,
+  Input,
+  Select,
+  Text,
+  ButtonGroup,
+} from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -21,6 +29,14 @@ function RegisterVideoForm() {
   const [categories, setCategories] = useState([]);
   const [aiTransition, setAiTransition] = useState(false);
   const [nonAiTransition, setNonAiTransition] = useState(false);
+  const [drmVideo, setDrmVideo] = useState(null);
+  const [personStart, setPersonStart] = useState(null);
+  const [personEnd, setPersonEnd] = useState(null);
+  const [matStart, setMatStart] = useState(null);
+  const [matEnd, setMatEnd] = useState(null);
+  const [asanaStithiStart, setAsanaStithiStart] = useState("");
+  const [asanaStithiEnd, setAsanaStithiEnd] = useState("");
+  const [teacherMode, setTeacherMode] = useState(null);
   const hello1 = (value) => {
     console.log(value);
     if (value.includes("true")) {
@@ -28,6 +44,10 @@ function RegisterVideoForm() {
     }
   };
 
+  useEffect(() => {
+    console.log("drm video set : ", drmVideo);
+    console.log("teacherMode set : ", teacherMode);
+  }, [drmVideo, teacherMode]);
   const hello = (value) => {
     if (value.length === 0) {
       setWithAudio(false);
@@ -49,13 +69,6 @@ function RegisterVideoForm() {
   const handleDifficulty = (val) => {
     setAsanaDifficulty(val);
   };
-
-  const [personStart, setPersonStart] = useState(null);
-  const [personEnd, setPersonEnd] = useState(null);
-  const [matStart, setMatStart] = useState(null);
-  const [matEnd, setMatEnd] = useState(null);
-  const [asanaStithiStart, setAsanaStithiStart] = useState("");
-  const [asanaStithiEnd, setAsanaStithiEnd] = useState("");
 
   const handleAsanaStithiStart = (val) => {
     setAsanaStithiStart(val);
@@ -184,6 +197,8 @@ function RegisterVideoForm() {
       asana_stithi_end: asanaStithiEnd,
       ai_asana: aiTransition,
       non_ai_asana: nonAiTransition,
+      drm_video: drmVideo,
+      teacher_mode: teacherMode,
     };
     const combinedData = {
       ...formData,
@@ -245,7 +260,7 @@ function RegisterVideoForm() {
   };
   return (
     <form
-      className="flex flex-col gap-1 border-2 w-full p-4 rounded-md mx-auto bg-white"
+      className="flex flex-col gap-1 border-2 p-4 rounded-md mx-auto bg-white"
       onSubmit={handleSubmit}
     >
       <Text h3>Register New Video</Text>
@@ -278,7 +293,6 @@ function RegisterVideoForm() {
         <Select.Option value="Single">Single</Select.Option>
         <Select.Option value="Combination">Combination</Select.Option>
       </Select>
-
       <Text h6>Asana Difficulty</Text>
       <Select
         multiple
@@ -321,27 +335,59 @@ function RegisterVideoForm() {
           ))}
       </Select>
       <br />
-
       <Text h5>AI Asana </Text>
       <Checkbox.Group value={[]} onChange={aiSetter} name="ai">
         <Checkbox value="ai_transition">AI</Checkbox>
         <Checkbox value="non_ai_transition">Non AI</Checkbox>
         <Checkbox value="both">Both</Checkbox>
       </Checkbox.Group>
-
       <Text h5>Audio Settings </Text>
       <Checkbox.Group value={[]} onChange={hello} name="audio_settings">
         <Checkbox value="with_audio">With Audio?</Checkbox>
         <Checkbox value="muted">Muted?</Checkbox>
         <Checkbox value="with_timer">With Timer?</Checkbox>
       </Checkbox.Group>
+      <Text h5>DRM Video</Text>
+      <ButtonGroup type="warning" ghost>
+        <Button
+          onClick={() => {
+            setDrmVideo(true);
+          }}
+        >
+          Yes
+        </Button>
+        <Button
+          onClick={() => {
+            setDrmVideo(false);
+          }}
+        >
+          No
+        </Button>
+      </ButtonGroup>
+
+      <Text h5>Teacher Mode</Text>
+      <ButtonGroup type="warning" ghost>
+        <Button
+          onClick={() => {
+            setTeacherMode(true);
+          }}
+        >
+          Yes
+        </Button>
+        <Button
+          onClick={() => {
+            setTeacherMode(false);
+          }}
+        >
+          No
+        </Button>
+      </ButtonGroup>
 
       <Divider />
       <Text h5>No Break Asana</Text>
       <Checkbox.Group value={[]} onChange={hello1} name="nobreak_asana">
         <Checkbox value="true">No break asana?</Checkbox>
       </Checkbox.Group>
-
       <Text h5>Asana Stithi Start</Text>
       <Select
         placeholder="Choose Asana Starting Stithi"
@@ -368,7 +414,6 @@ function RegisterVideoForm() {
         </Select.Option>
       </Select>
       <br />
-
       <Text h5>Person Starting Position</Text>
       <Select
         placeholder="Choose Person Starting Position"
@@ -391,7 +436,6 @@ function RegisterVideoForm() {
         </Select.Option>
       </Select>
       <br />
-
       <Text h5>Person Ending Position</Text>
       <Select
         placeholder="Choose Person Starting Position"
@@ -414,7 +458,6 @@ function RegisterVideoForm() {
         </Select.Option>
       </Select>
       <br />
-
       <Text h5>Mat Starting Position</Text>
       <Select
         placeholder="Choose Mat Starting Position"
@@ -431,7 +474,6 @@ function RegisterVideoForm() {
         </Select.Option>
       </Select>
       <br />
-
       <Text h5>Mat Ending Position</Text>
       <Select
         placeholder="Choose Mat Starting Position"
@@ -448,7 +490,6 @@ function RegisterVideoForm() {
         </Select.Option>
       </Select>
       <br />
-
       {/* <Button onClick={markerNavigate}>Add Markers</Button> */}
       <Button htmlType="submit">Submit</Button>
     </form>

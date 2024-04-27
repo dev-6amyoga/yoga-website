@@ -329,7 +329,7 @@ function AllAsanas() {
           <Text>Loading</Text>
         ) : (
           <Table data={filteredTransitions} className="bg-white ">
-            {/* <Table.Column prop="id" label="Asana ID" /> */}
+            <Table.Column prop="id" label="Asana ID" />
             <Table.Column prop="asana_name" label="Asana Name" />
             <Table.Column
               prop="teacher_mode"
