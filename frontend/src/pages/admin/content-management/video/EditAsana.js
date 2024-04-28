@@ -9,7 +9,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBlocker, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import VideoPlayer from "../../../../components/StackVideoShaka/VideoPlayer";
+import VideoPlayer from "../../../../components/StackVideoDashJS/VideoPlayer";
 import { Fetch } from "../../../../utils/Fetch";
 
 import { ArrowLeft, ArrowRight } from "@geist-ui/icons";
@@ -40,10 +40,13 @@ function EditAsana() {
 	);
 	const [unloadBlock, setUnloadBlock] = useState(false);
 
-	const [currentTime, addToSeekQueue] = useVideoStore((state) => [
-		state.currentTime,
-		state.addToSeekQueue,
-	]);
+	const [currentTime, addToSeekQueue, setPlaylistState] = useVideoStore(
+		(state) => [
+			state.currentTime,
+			state.addToSeekQueue,
+			state.setPlaylistState,
+		]
+	);
 
 	const [addToQueue, clearQueue] = usePlaylistStore((state) => [
 		state.addToQueue,
@@ -438,6 +441,18 @@ function EditAsana() {
 						<div className="w-full">
 							<VideoPlayer />
 						</div>
+						<Spacer y={4} />
+						<Button
+							w={"100%"}
+							className="my-4 mx-auto"
+							onClick={() => {
+								clearQueue();
+								addToQueue([asana]);
+								setPlaylistState(false);
+								setPlaylistState(true);
+							}}>
+							Reset Player
+						</Button>
 					</div>
 
 					{/* markers list */}
