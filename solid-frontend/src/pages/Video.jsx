@@ -1,10 +1,27 @@
-import { createEffect, useContext } from "solid-js";
+import { createEffect, on, onCleanup, useContext } from "solid-js";
 import Playlist from "../components/Sidebar/Playlist";
 import VideoPlayerWrapper from "../components/StackVideoDashJS/VideoPlayerWrapper";
+import { SEEK_TYPE_MOVE } from "../enums/seek_types";
+import {
+	VIDEO_VIEW_STUDENT_MODE,
+	VIDEO_VIEW_TEACHING_MODE,
+} from "../enums/video_view_modes";
+import { usePlaylistStoreContext } from "../store/PlaylistStore";
+import {
+	STATE_VIDEO_ERROR,
+	STATE_VIDEO_LOADING,
+	useVideoStoreContext,
+} from "../store/VideoStore";
 import { WatchHistoryContext } from "../store/WatchHistoryStore";
 
 export default function Video() {
 	const [store, { setEnableWatchHistory }] = useContext(WatchHistoryContext);
+
+	const [videoStore, { setCurrentMarkerIdx, addToSeekQueue }] =
+		useVideoStoreContext();
+
+	const [playlistStore, { popFromArchive, popFromQueue }] =
+		usePlaylistStoreContext();
 
 	// const [devMode, setDevMode, fullScreen] = useVideoStore((state) => [
 	// 	state.devMode,
@@ -17,71 +34,137 @@ export default function Video() {
 	// 	state.popFromQueue,
 	// ]);
 
-	// onMount(() => {
-	// 	// for hand held pointer
-	// 	const handleKeyDown = (event) => {
-	// 		// console.log({
-	// 		// 	playlistState,
-	// 		// 	videoState.value,
-	// 		// 	viewMode.value,
-	// 		// 	key: event.key,
-	// 		// });
-	// 		const state = useVideoStore.getState();
-	// 		const viewMode.value = state.viewMode.value;
-	// 		const videoState.value = state.videoState.value;
-	// 		const markers = state.markers;
-	// 		const currentMarkerIdx.value = state.currentMarkerIdx.value;
+	createEffect(
+		on(
+			[
+				() => videoStore.currentMarkerIdx,
+				() => videoStore.markers,
+				() => videoStore.viewMode,
+				() => videoStore.videoState,
+			],
+			() => {
+				const handlePrevMarker = () => {
+					console.log("Prev Marker Clicked");
+					const markers = videoStore.markers;
+					const currentMarkerIdx = videoStore.currentMarkerIdx;
 
-	// 		// TODO : fix plalist state when start is clicked
-	// 		if (
-	// 			videoState.value === null ||
-	// 			videoState.value === STATE_VIDEO_ERROR ||
-	// 			videoState.value === STATE_VIDEO_LOADING
-	// 		) {
-	// 			return;
-	// 		}
-	// 		switch (event.key) {
-	// 			case "PageUp":
-	// 				event.preventDefault();
+					console.log("Prev Marker", markers.length);
+					if (markers.length > 0) {
+						const idx = (currentMarkerIdx || 0) - 1;
+						console.log("SETTING MARKER ID :", idx);
+						if (idx <= 0) {
+							setCurrentMarkerIdx(null);
+							popFromArchive(-1);
+							// console.log("end reached");
+							return;
+						}
+						// seek to prev marker
+						else {
+							setCurrentMarkerIdx(idx);
+							addToSeekQueue({
+								t: markers[idx].timestamp,
+								type: SEEK_TYPE_MOVE,
+							});
+							return;
+						}
+					}
+				};
 
-	// 				if (viewMode.value === VIDEO_VIEW_STUDENT_MODE) {
-	// 					console.log("Move to prev video");
-	// 					popFromArchive(-1);
-	// 				} else if (viewMode.value === VIDEO_VIEW_TEACHING_MODE) {
-	// 					//
-	// 					console.log("Move to prev marker");
-	// 					console.log(markers, currentMarkerIdx.value);
-	// 					handlePrevMarker();
-	// 				}
-	// 				break;
-	// 			case "PageDown":
-	// 				event.preventDefault();
+				const handleNextMarker = () => {
+					console.log("Next Marker Clicked");
+					const markers = videoStore.markers;
+					const currentMarkerIdx = videoStore.currentMarkerIdx;
 
-	// 				if (viewMode.value === VIDEO_VIEW_STUDENT_MODE) {
-	// 					console.log("Move to next video");
-	// 					popFromQueue(0);
-	// 				} else if (viewMode.value === VIDEO_VIEW_TEACHING_MODE) {
-	// 					console.log("Move to next marker");
-	// 					console.log(markers, currentMarkerIdx.value);
-	// 					handleNextMarker();
-	// 				}
-	// 				break;
-	// 			default:
-	// 				break;
-	// 		}
-	// 		// console.log("keyDown", event);
-	// 	};
+					console.log("Next Marker", markers.length);
+					if (markers.length > 0) {
+						const idx = (currentMarkerIdx || 0) + 1;
 
-	// 	document.addEventListener("keydown", handleKeyDown);
+						if (idx >= markers.length) {
+							popFromQueue(0);
+							// console.log("end reached");
+							return;
+						}
 
- 
+						console.log("SETTING MARKER ID :", idx);
+						setCurrentMarkerIdx(idx);
+						// seek to next marker
+						addToSeekQueue({
+							t: markers[idx].timestamp,
+							type: SEEK_TYPE_MOVE,
+						});
+					}
+				};
 
+				// for hand held pointer
+				const handleKeyDown = (event) => {
+					// console.log({
+					// 	playlistState,
+					// 	videoState.value,
+					// 	viewMode.value,
+					// 	key: event.key,
+					// });
 
-	// });
+					// TODO : fix plalist state when start is clicked
+					if (
+						videoStore.videoState === null ||
+						videoStore.videoState === STATE_VIDEO_ERROR ||
+						videoStore.videoState === STATE_VIDEO_LOADING
+					) {
+						return;
+					}
+					switch (event.key) {
+						case "PageUp":
+							event.preventDefault();
 
-	// onCleanup(() => {
-	// 	document.removeEventListener("keydown", handleKeyDown);
-	// });
+							if (
+								videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE
+							) {
+								console.log("Move to prev video");
+								popFromArchive(-1);
+							} else if (
+								videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE
+							) {
+								//
+								console.log("Move to prev marker");
+								// console.log(
+								// 	videoStore.markers,
+								// 	videoStore.currentMarkerIdx
+								// );
+								handlePrevMarker();
+							}
+							break;
+						case "PageDown":
+							event.preventDefault();
+
+							if (
+								videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE
+							) {
+								console.log("Move to next video");
+								popFromQueue(0);
+							} else if (
+								videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE
+							) {
+								console.log("Move to next marker");
+								// console.log(
+								// 	videoStore.markers,
+								// 	videoStore.currentMarkerIdx
+								// );
+								handleNextMarker();
+							}
+							break;
+						default:
+							break;
+					}
+					// console.log("keyDown", event);
+				};
+
+				document.addEventListener("keydown", handleKeyDown);
+				onCleanup(() => {
+					document.removeEventListener("keydown", handleKeyDown);
+				});
+			}
+		)
+	);
 
 	createEffect(() => {
 		console.log("Disable watch history");
