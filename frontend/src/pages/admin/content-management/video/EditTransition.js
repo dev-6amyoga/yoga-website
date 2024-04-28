@@ -23,21 +23,13 @@ import useWatchHistoryStore from "../../../../store/WatchHistoryStore";
 import getFormData from "../../../../utils/getFormData";
 import { toTimeString } from "../../../../utils/toTimeString";
 
-function EditAsana() {
-  const { asana_id } = useParams();
+function EditTransition() {
+  const { transition_id } = useParams();
   const [modalData, setModalData] = useState({});
-  const [tableLanguages, setTableLanguages] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [dirty, setDirty] = useState(false);
-
-  const [customerCode, setCustomerCode] = useState("");
   const editAsanaFormRef = useRef(null);
   const addMarkerTimestampInputRef = useRef(null);
 
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      dirty && currentLocation.pathname !== nextLocation.pathname
-  );
   const [unloadBlock, setUnloadBlock] = useState(false);
 
   const [currentTime, addToSeekQueue, setPlaylistState] = useVideoStore(
@@ -53,59 +45,11 @@ function EditAsana() {
     state.setEnableWatchHistory,
   ]);
 
-  const [nextThumbnailTimestamp, setNextThumbnailTimestamp] = useState(0);
-
   const [loading, setLoading] = useState(false);
 
-  /*
-  id: Number,
-	asana_name: String,
+  const [transition_video, setTransitionVideo] = useState({});
 
-	asana_desc: String,
-	asana_category: String,
-
-	asana_thumbnailTs: type: Number
-	asana_imageID: String,
-	asana_videoID: String,
-	asana_hls_url: String,
-	asana_dash_url: String,
-
-	asana_withAudio: String,
-	asana_audioLag: Number,
-
-	asana_type: String,
-
-	duration: Number,
-	asana_difficulty: [String],
-
-	markers: type: [MarkerSchema],
-	muted: String,
-	language: String,
-	nobreak_asana: Boolean,
-	person_starting_position: String,
-	person_ending_position: String,
-	mat_starting_position: String,
-	mat_ending_position: String,
-
-	counter: String,
- */
-  const [asana, setAsana] = useState({});
-
-  /*
-	{
-		timestamp: Number,
-		title: String,
-		loop: bool
-	}
-	*/
   const [markers, setMarkers] = useState([]);
-
-  const handleThumbnailTimestampChange = useCallback(
-    (e) => {
-      setNextThumbnailTimestamp(currentTime.toFixed(2));
-    },
-    [currentTime]
-  );
 
   const moveToTimestamp = useCallback(
     (time) => {
@@ -120,13 +64,14 @@ function EditAsana() {
   const updateData = useCallback(async () => {
     setLoading(true);
     Fetch({
-      url: `/content/video/updateAsana/${asana.id}`,
+      url: `/content/video/updateTransition/${transition_video.transition_id}`,
       method: "PUT",
       data: { ...modalData, markers: markers },
     })
       .then((res) => {
         console.log(res.data);
-        setAsana(res.data);
+        toast("Added successfully!!");
+        setTransitionVideo(res.data);
         setMarkers(res.data?.markers ?? []);
         setModalData(res.data);
         setDirty(false);
@@ -139,32 +84,7 @@ function EditAsana() {
         toast(error, { type: "error" });
         setLoading(false);
       });
-  }, [asana, modalData, markers]);
-
-  const resetChanges = useCallback(() => {
-    setModalData(asana);
-    if (editAsanaFormRef.current) {
-      editAsanaFormRef.current.reset();
-    }
-    setDirty(false);
-  }, [asana]);
-
-  const handleInputChange = useCallback(
-    (e) => {
-      const { id, value } = e.target;
-      setDirty(true);
-      setModalData({ ...modalData, [id]: value });
-    },
-    [modalData]
-  );
-
-  const handleSelect = useCallback(
-    (val, key) => {
-      setDirty(true);
-      setModalData({ ...modalData, [key]: val });
-    },
-    [modalData]
-  );
+  }, [transition_video, modalData, markers]);
 
   const handleSaveMarker = useCallback((marker, prevIdx) => {
     setDirty(true);
@@ -220,25 +140,20 @@ function EditAsana() {
   const addMarker = useCallback(
     (m) => {
       setDirty(true);
-      // validate
       if (!m?.timestamp || !m?.title) {
         toast("Invalid marker", { type: "error" });
         return;
       }
-
       if (parseFloat(m.timestamp) < 0) {
         toast("Invalid timestamp", { type: "error" });
         return;
       }
-
       if (m.title.length < 3) {
         toast("Title too short", { type: "error" });
         return;
       }
-
       let idx = -1;
       let found = false;
-
       for (let i = 0; i < markers.length; i++) {
         if (markers[i].timestamp === m.timestamp) {
           found = true;
@@ -258,7 +173,6 @@ function EditAsana() {
       m.loop = m.loop === "on" ? true : false;
 
       setMarkers((p) => {
-        // add marker in place
         const ms = [...p];
         ms.splice(idx === -1 ? ms.length : idx, 0, m);
         return ms;
@@ -322,113 +236,49 @@ function EditAsana() {
     };
   }, [handleUnloadToggle]);
 
-  // set customer code
-  // disable watch history
-  useEffect(() => {
-    setCustomerCode(process.env.REACT_APP_CLOUDFLARE_CUSTOMER_CODE);
-    setEnableWatchHistory(false);
-  }, [setEnableWatchHistory]);
-
   // set current video
   useEffect(() => {
     clearQueue();
-    // set current video
-    if (asana?.id) {
-      addToQueue([asana]);
+    if (transition_video?.transition_id) {
+      addToQueue([transition_video]);
     }
     return () => {
       clearQueue();
     };
-  }, [asana, addToQueue, clearQueue]);
+  }, [transition_video, addToQueue, clearQueue]);
 
-  // get asana by id
+  // get transition by id
   useEffect(() => {
-    // get asana by id
-    if (asana_id) {
+    if (transition_id) {
       setLoading(true);
       Fetch({
-        url: "/content/get-asana-by-id",
+        url: "/content/get-transition-by-id",
         method: "POST",
         data: {
-          asana_id: asana_id,
+          asana_id: transition_id,
         },
       })
         .then((res) => {
-          setAsana(res.data);
+          setTransitionVideo(res.data);
           setMarkers(res.data?.markers ?? []);
           setModalData(res.data);
           setLoading(false);
         })
         .catch((error) => {
           console.error(error);
-          toast("Error fetching asana", { type: "error" });
+          toast("Error fetching transition video", { type: "error" });
           setLoading(false);
         });
     }
-  }, [asana_id]);
-
-  // get all languages
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await Fetch({
-          url: "/content/language/getAllLanguages",
-        });
-        setTableLanguages(response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  // get all categories
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await Fetch({
-          url: "/content/asana/getAllAsanaCategories",
-        });
-        setCategories(response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
-  }, []);
+  }, [transition_id]);
 
   return (
-    <AdminPageWrapper heading="Edit Asana">
-      {/* Alert for saving changes before unload / unmount */}
-      <SaveChangesAlert
-        unloadBlock={unloadBlock}
-        handleUnloadToggle={handleUnloadToggle}
-        blocker={blocker}
-        updateData={updateData}
-        dirty={dirty}
-      />
-
-      <EditVideoForm
-        asana={asana}
-        modalData={modalData}
-        setModalData={setModalData}
-        categories={categories}
-        dirty={dirty}
-        editAsanaFormRef={editAsanaFormRef}
-        handleInputChange={handleInputChange}
-        handleSelect={handleSelect}
-        loading={loading}
-        resetChanges={resetChanges}
-        setDirty={setDirty}
-        tableLanguages={tableLanguages}
-        updateData={updateData}
-      />
-
+    <AdminPageWrapper heading="Edit Transition Video">
       <Spacer h={4} />
 
       <div className="rounded-lg border p-4">
         <div className="flex flex-col gap-4">
-          <Description title="Asana Markers" />
+          <Description title="Transition Video Markers" />
 
           {/* video player */}
           <div className="max-w-3xl mx-auto w-full">
@@ -441,7 +291,7 @@ function EditAsana() {
               className="my-4 mx-auto"
               onClick={() => {
                 clearQueue();
-                addToQueue([asana]);
+                addToQueue([transition_video]);
                 setPlaylistState(false);
                 setPlaylistState(true);
               }}
@@ -562,76 +412,7 @@ function EditAsana() {
                   Add Marker
                 </Button>
               </form>
-            </div>
-
-            {/* set thumbnail form */}
-            <div className="border rounded-lg p-4">
-              <Description title="Set Thumbnail" />
-              <Spacer y={2} />
-              <div className="flex flex-col">
-                <div className="flex flex-row gap-4 w-full justify-between">
-                  <div>
-                    <Description title="Current Thumbnail" />
-                    {customerCode && asana ? (
-                      <img
-                        className="max-w-[256px] rounded-lg"
-                        alt="Current Timestamp"
-                        src={`https://customer-${customerCode}.cloudflarestream.com/${
-                          asana?.asana_videoID ?? asana?.transition_video_ID
-                        }/thumbnails/thumbnail.jpg?time=${
-                          modalData.asana_thumbnailTs
-                        }s?height=150?`}
-                      />
-                    ) : (
-                      <></>
-                    )}
-                    <Spacer y={1} />
-                    <Input value={modalData.asana_thumbnailTs} width="100%">
-                      Current Timestamp
-                    </Input>
-                  </div>
-                  <div>
-                    <Description title="New Thumbnail" />
-                    {customerCode ? (
-                      <img
-                        className="max-w-[256px] rounded-lg"
-                        src={`https://customer-${customerCode}.cloudflarestream.com/${
-                          asana?.asana_videoID ?? asana?.transition_video_ID
-                        }/thumbnails/thumbnail.jpg?time=${nextThumbnailTimestamp}s?height=150?`}
-                        alt="New Timestamp"
-                      />
-                    ) : (
-                      <></>
-                    )}
-                    <Spacer y={1} />
-                    <Input value={nextThumbnailTimestamp} width="100%" disabled>
-                      New Timestamp
-                    </Input>
-                  </div>
-                </div>
-                <Spacer y={2} />
-                <div className="grid grid-cols-2 gap-4">
-                  <Button
-                    scale={0.8}
-                    title="Preview Thumbnail at current timestamp"
-                    onClick={handleThumbnailTimestampChange}
-                  >
-                    Preview Thumbnail
-                  </Button>
-                  <Button
-                    scale={0.8}
-                    type="success"
-                    onClick={() =>
-                      handleSelect(
-                        currentTime?.toFixed(2) ?? 0,
-                        "asana_thumbnailTs"
-                      )
-                    }
-                  >
-                    Set Thumbnail
-                  </Button>
-                </div>
-              </div>
+              <Button onClick={updateData}>Save Markers</Button>
             </div>
           </div>
         </div>
@@ -641,4 +422,4 @@ function EditAsana() {
   );
 }
 
-export default EditAsana;
+export default EditTransition;
