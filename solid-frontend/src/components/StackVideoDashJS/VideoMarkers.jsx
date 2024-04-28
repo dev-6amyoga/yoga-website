@@ -17,6 +17,9 @@ export default function VideoMarkers() {
 				if (videoStore.currentVideo?.video?.markers?.length > 0) {
 					setCurrentMarkerIdx(0);
 				}
+			} else {
+				setMarkers([]);
+				setCurrentMarkerIdx(null);
 			}
 		})
 	);
