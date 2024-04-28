@@ -4,7 +4,6 @@ import { render } from "solid-js/web";
 
 import { createStore, produce } from "solid-js/store";
 import { v5 as uuidV5 } from "uuid";
-import App from "./App";
 import { VIDEO_VIEW_STUDENT_MODE } from "./enums/video_view_modes";
 import "./index.css";
 import Video from "./pages/Video";
@@ -500,8 +499,7 @@ function VideoPage() {
 render(
 	() => (
 		<Router>
-			<Route path="/" component={App} />
-			<Route path="/testing/video" component={VideoPage} />
+			<Route path="/" component={VideoPage} />
 		</Router>
 	),
 	document.getElementById("app")
