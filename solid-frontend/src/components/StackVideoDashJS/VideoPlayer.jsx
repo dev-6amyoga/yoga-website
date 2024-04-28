@@ -147,7 +147,9 @@ function VideoPlayer() {
 		) {
 			console.log("Playlist start --------------------->");
 			setPlaylistState(false);
-			setPlaylistState(true);
+			setTimeout(() => {
+				setPlaylistState(true);
+			}, 100);
 		}
 	};
 
@@ -175,10 +177,11 @@ function VideoPlayer() {
 		on(
 			// dependencies
 			[() => playlistStore.queue, () => videoStore.playlistState],
-			(v) => {
-				console.log("Queue or playlistState changed : ", {
-					v,
-				});
+			() => {
+				console.log(
+					"Queue or playlistState changed : ",
+					videoStore.playlistState
+				);
 				if (
 					playlistStore.queue &&
 					playlistStore.queue.length > 0 &&
