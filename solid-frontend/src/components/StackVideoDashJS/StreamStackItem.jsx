@@ -14,6 +14,7 @@ import {
 
 import { DragDropProvider } from "@thisbeyond/solid-dnd";
 import {
+	Show,
 	createEffect,
 	createMemo,
 	createSignal,
@@ -25,6 +26,7 @@ import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
 import { toTimeString } from "../../utils/toTimeString";
 import DashPlayer from "./DashPlayer";
+import VideoMarkers from "./VideoMarkers";
 import VideoPlaybar from "./VideoPlaybar";
 
 console.log(STATE_VIDEO_LOADING);
@@ -510,11 +512,11 @@ function StreamStackItem(props) {
 		// 	}`}>
 		// 	<div
 		// class="relative h-full w-full block">
-		<div class="">
+		<div class="absolute h-full w-full">
 			<DragDropProvider>
 				<div
-					class={`relative stream-stack-item border-2 border-red-600 ${
-						props.isActive ? "block" : "block"
+					class={`relative stream-stack-item w-full h-full ${
+						props.isActive ? "block" : "invisible"
 					}`}>
 					{/* class={props.isActive ? "flex-1" : "w-60"}> */}
 					<DashPlayer
@@ -536,10 +538,28 @@ function StreamStackItem(props) {
 						onSeeking={handleVideoSeeking}
 						onSeeked={handleVideoSeeked}
 						setDuration={setDuration}
-						className="dashjs-player w-full h-full"
 					/>
 
-					<div className="absolute bottom-0 z-20 h-40 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0 border-green-500">
+					<Show when={videoStore.fullScreen}>
+						<div class="absolute top-0 left-0 text-white z-[1001] h-1/2 w-full p-8 hover:opacity-100 opacity-0 hover:delay-0 delay-1000">
+							<h5 class="uppercase text-gray-300">
+								{props?.video?.video?.asana_name
+									? "ASANA"
+									: "TRANSITION"}
+							</h5>
+							<h3>
+								{props?.video?.video?.asana_name ||
+									props?.video?.video?.transition_name}
+							</h3>
+						</div>
+					</Show>
+
+					<div className="absolute bottom-0 z-20 h-1/3 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0 pointer-events-auto touch-auto">
+						<Show when={videoStore.fullScreen}>
+							<div class="absolute bottom-28 w-full">
+								<VideoMarkers />
+							</div>
+						</Show>
 						<div className="absolute bottom-0 w-full">
 							<VideoPlaybar
 								playbarVisible={true}

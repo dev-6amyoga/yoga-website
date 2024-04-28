@@ -2,9 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-/* button {
+.btn {
 	@apply bg-blue-500 text-white font-bold py-2 px-4 rounded;
-} */
+}
+
+*::selection {
+	background-color: black !important;
+	color: white !important;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	margin: 0 !important;
+}
+
+h1 {
+	@apply text-step-5 font-bold;
+}
+
+h2 {
+	@apply text-step-4 font-bold;
+}
+
+h3 {
+	@apply text-step-3 font-bold;
+}
+
+h4 {
+	@apply text-step-2 font-bold;
+}
+
+h5 {
+	@apply text-step-1 font-bold;
+}
+
+h6 {
+	@apply text-step-0 font-bold;
+}
+
+p,
+small,
+label,
+a,
+span,
+li,
+td,
+th,
+input,
+textarea,
+select,
+button {
+	font-size: text-step--2;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	@apply font-heading;
+}
+
+.card-base {
+	@apply rounded-lg border p-4;
+}
 
 @layer components {
 	.clip-rect-left-0 {

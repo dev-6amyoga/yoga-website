@@ -5,7 +5,7 @@ import { usePlaylistStoreContext } from "../../store/PlaylistStore";
 import { useVideoStoreContext } from "../../store/VideoStore";
 import QueueItem from "./QueueItem";
 
-function VideoQueue() {
+function VideoQueue(props) {
 	// const queue = usePlaylistStore((state) => state.queue);
 	// const popFromQueue = usePlaylistStore((state) => state.popFromQueue);
 	// const moveUpQueue = usePlaylistStore((state) => state.moveUpQueue);
@@ -22,22 +22,33 @@ function VideoQueue() {
 
 	return (
 		<div
-			class={`max-w-7xl mx-auto overflow-y-auto overflow-x-hidden rounded-xl bg-blue-50 ${
+			class={`relative max-w-7xl mx-auto overflow-y-auto overflow-x-hidden rounded-xl bg-blue-50 ${
 				videoStore.fullScreen ? "" : "xl:h-full"
 			}`}>
+			<Show when={videoStore.fullScreen}>
+				<div class="absolute top-0 right-0 p-2">
+					<button
+						class="rounded-full p-2 bg-y-white text-black"
+						onClick={() => {
+							props.setOpenQueue(false);
+						}}>
+						Close
+					</button>
+				</div>
+			</Show>
 			<div class="flex flex-col items-center gap-2 overflow-hidden">
 				<h3 class="pt-2 text-center">Queue</h3>
-				<button auto type="secondary" onClick={clearQueue}>
+				<button class="btn" onClick={clearQueue}>
 					Clear Queue
 				</button>
 				<Show
 					when={playlistStore.queue.length > 0}
 					fallback={<p>No Items In Queue</p>}>
 					<div
-						class={`flex flex-row gap-2 max-w-full overflow-x-auto p-2 ${
+						class={`flex gap-2 max-w-full overflow-x-auto p-2 ${
 							videoStore.fullScreen
-								? ""
-								: "md:overflow-x-hidden xl:flex-col"
+								? "flex-col"
+								: "flex-row md:overflow-x-hidden xl:flex-col"
 						}`}>
 						<For each={playlistStore.queue}>
 							{(queue_item, idx) => {

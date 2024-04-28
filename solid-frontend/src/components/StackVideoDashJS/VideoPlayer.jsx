@@ -146,6 +146,7 @@ function VideoPlayer() {
 			playlistStore.queue.length > 0
 		) {
 			console.log("Playlist start --------------------->");
+			setPlaylistState(false);
 			setPlaylistState(true);
 		}
 	};
@@ -251,9 +252,9 @@ function VideoPlayer() {
 
 	return (
 		<div
-			clas={`hover:cursor-pointer bg-black border w-full ${
+			class={`hover:cursor-pointer bg-black border w-full ${
 				videoStore.fullScreen
-					? "h-screen"
+					? "fixed z-[1000] top-0 left-0 right-0 bottom-0"
 					: "rounded-xl overflow-hidden"
 			}`}>
 			{/* <div>
@@ -270,8 +271,8 @@ function VideoPlayer() {
 			</div> */}
 			{/* <pre>{JSON.stringify(videos())}</pre> */}
 			<div
-				clas={`mx-auto aspect-video ${
-					videoStore.fullScreen ? "h-full" : ""
+				class={`${
+					videoStore.fullScreen ? "h-full" : "mx-auto aspect-video"
 				}`}>
 				<Show
 					when={
@@ -283,8 +284,10 @@ function VideoPlayer() {
 						<Show
 							when={playlistStore.queue.length > 0}
 							fallback={<p></p>}>
-							<div class="flex flex-col items-center justify-center gap-4 text-lg w-full h-full border border-red-500">
-								<button onClick={handleStartPlaylist}>
+							<div class="flex flex-col items-center justify-center gap-4 text-lg w-full h-full">
+								<button
+									onClick={handleStartPlaylist}
+									class="btn">
 									Start
 								</button>
 							</div>
@@ -293,44 +296,41 @@ function VideoPlayer() {
 					<Show
 						when={videoStore.videoState !== STATE_VIDEO_ERROR}
 						fallback={
-							<div class="flex flex-col items-center justify-center gap-4 text-lg w-full h-full border border-red-500">
+							<div class="flex flex-col items-center justify-center gap-4 text-lg w-full h-full">
 								<p>Error : Video playback error</p>
 								<button onClick={handleSetPlay}>Refresh</button>
 							</div>
 						}>
-						<div>
-							<div class="relative">
-								{/* <div class="flex flex-row items-end gap-4"> */}
-								<Show when={playlistStore.queue.length > 0}>
-									<For each={playlistStore.queue.slice(0, 2)}>
-										{(queueItem) => {
-											return (
-												<StreamStackItem
-													key={queueItem.queue_id}
-													video={queueItem}
-													handleEnd={handleEnd}
-													handleLoading={
-														handleLoading
-													}
-													handlePlaybackError={
-														handlePlaybackError
-													}
-													// setDuration={setDuration}
-													isActive={
-														videoStore.currentVideo
-															?.queue_id ===
-														queueItem?.queue_id
-													}
-													setVideoStateVisible={
-														setVideoStateVisible
-													}
-													handleFullScreen={() => {}}
-												/>
-											);
-										}}
-									</For>
-								</Show>
-								{/* <div class="absolute bottom-0 z-20 h-40 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0">
+						<div class="relative w-full h-full">
+							{/* <div class="flex flex-row items-end gap-4"> */}
+							<Show when={playlistStore.queue.length > 0}>
+								<For each={playlistStore.queue.slice(0, 2)}>
+									{(queueItem) => {
+										return (
+											<StreamStackItem
+												key={queueItem.queue_id}
+												video={queueItem}
+												handleEnd={handleEnd}
+												handleLoading={handleLoading}
+												handlePlaybackError={
+													handlePlaybackError
+												}
+												// setDuration={setDuration}
+												isActive={
+													videoStore.currentVideo
+														?.queue_id ===
+													queueItem?.queue_id
+												}
+												setVideoStateVisible={
+													setVideoStateVisible
+												}
+												handleFullScreen={() => {}}
+											/>
+										);
+									}}
+								</For>
+							</Show>
+							{/* <div class="absolute bottom-0 z-20 h-40 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0">
 									<div class="absolute bottom-0 w-full ">
 										<VideoPlaybar
 											duration={duration}
@@ -342,7 +342,6 @@ function VideoPlayer() {
 										/>
 									</div>
 								</div> */}
-							</div>
 						</div>
 					</Show>
 				</Show>

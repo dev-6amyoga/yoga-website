@@ -1,3 +1,8 @@
+import {
+	BiRegularExitFullscreen,
+	BiRegularFullscreen,
+	BiSolidBookReader,
+} from "solid-icons/bi";
 import { Match, Show, Switch, createEffect, createMemo, on } from "solid-js";
 import { usePlaylistStoreContext } from "../../store/PlaylistStore";
 import {
@@ -12,7 +17,7 @@ import {
 	FaSolidForward as FaForward,
 	FaSolidPause as FaPause,
 	FaSolidPlay as FaPlay,
-	FaSolidExpand,
+	FaSolidPersonChalkboard,
 } from "solid-icons/fa";
 
 import {
@@ -34,7 +39,7 @@ import {
 	VIDEO_VIEW_TEACHING_MODE,
 } from "../../enums/video_view_modes";
 
-function VideoControls({ handleFullScreen }) {
+function VideoControls(props) {
 	const [playlistStore, { popFromQueue, popFromArchive }] =
 		usePlaylistStoreContext();
 
@@ -49,6 +54,7 @@ function VideoControls({ handleFullScreen }) {
 			setViewMode,
 			setCurrentMarkerIdx,
 			setPauseReason,
+			setFullScreen,
 		},
 	] = useVideoStoreContext();
 
@@ -157,7 +163,7 @@ function VideoControls({ handleFullScreen }) {
 	};
 
 	const handleViewModeToggle = (e) => {
-		if (e.target.checked) {
+		if (videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE) {
 			// toast("View Mode: teacher", { type: "success" });
 			setViewMode(VIDEO_VIEW_TEACHING_MODE);
 		} else {
@@ -173,9 +179,17 @@ function VideoControls({ handleFullScreen }) {
 		});
 	};
 
+	const handleFullScreen = () => {
+		if (videoStore.fullScreen) {
+			setFullScreen(false);
+		} else {
+			setFullScreen(true);
+		}
+	};
+
 	const iconButtonClass = createMemo(
 		on([() => ""], () => {
-			// return handleFullScreen.active
+			// return videoStore.fullScreen
 			// 	? "video_controls__ctrl__button_fs "
 			// 	: "video_controls__ctrl__button ";
 
@@ -186,7 +200,7 @@ function VideoControls({ handleFullScreen }) {
 	return (
 		<div class="flex items-center justify-between px-4 pb-1">
 			<div class="flex items-center justify-start rounded-xl text-white">
-				{/* {String(handleFullScreen.active)} */}
+				{/* {String(videoStore.fullScreen)} */}
 				{/* previous video */}
 				<button
 					class={iconButtonClass()}
@@ -335,7 +349,7 @@ function VideoControls({ handleFullScreen }) {
 						type="range"
 						min="0"
 						max="100"
-						class="hidden w-0 accent-orange-500 opacity-0 transition-all duration-300 group-hover:w-20 group-hover:opacity-100 md:block"
+						class="hidden w-0 accent-orange-500 opacity-0 transition-all duration-300 group-hover:w-20 xl:group-hover:w-28 group-hover:opacity-100 md:block"
 						ref={volumeSliderRef}
 						onChange={(e) => {
 							console.log(
@@ -354,38 +368,49 @@ function VideoControls({ handleFullScreen }) {
 						{videoStore.viewMode}
 					</span>
 					<div
-						class={handleFullScreen.active ? "-mt-3" : "-mt-1"}
+						class={videoStore.fullScreen ? "" : ""}
 						title="View Mode">
-						<input
-							checked={
-								videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE
-							}
-							type="checkbox"
-							// class={+handleFullScreen.active ? 'scale-150' : ''}
-							// scale={handleFullScreen.active ? 2 : 1.3}
-							onChange={handleViewModeToggle}
-						/>
+						<button
+							onClick={handleViewModeToggle}
+							class={videoStore.fullScreen ? "mt-1.5" : "mt-1.5"}>
+							<Switch>
+								<Match
+									when={
+										videoStore.viewMode ===
+										VIDEO_VIEW_TEACHING_MODE
+									}>
+									<FaSolidPersonChalkboard class="video_controls__ctrl__button__icon" />
+								</Match>
+								<Match
+									when={
+										videoStore.viewMode ===
+										VIDEO_VIEW_STUDENT_MODE
+									}>
+									<BiSolidBookReader class="video_controls__ctrl__button__icon" />
+								</Match>
+							</Switch>
+						</button>
 					</div>
 				</div>
 
 				{/* full screen */}
 				<button
 					class={
-						handleFullScreen.active
+						videoStore.fullScreen
 							? "video_controls__ctrl__button_fs"
 							: "video_controls__ctrl__button"
 					}
-					onClick={() => {
-						console.log()
-						if (handleFullScreen?.active) handleFullScreen?.exit();
-						else handleFullScreen?.enter();
-					}}
+					onClick={handleFullScreen}
 					title="Full Screen">
-					{handleFullScreen.active ? (
-						<FaSolidExpand class="video_controls__ctrl__button__icon" />
-					) : (
-						<FaSolidExpand class="video_controls__ctrl__button__icon" />
-					)}
+					<Switch>
+						<Match when={videoStore.fullScreen}>
+							<BiRegularExitFullscreen class="video_controls__ctrl__button__icon" />
+						</Match>
+
+						<Match when={!videoStore.fullScreen}>
+							<BiRegularFullscreen class="video_controls__ctrl__button__icon" />
+						</Match>
+					</Switch>
 				</button>
 			</div>
 		</div>
