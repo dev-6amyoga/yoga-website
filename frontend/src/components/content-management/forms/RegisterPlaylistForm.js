@@ -19,7 +19,9 @@ import { ArrowDown, ArrowUp } from "@geist-ui/icons";
 function RegisterPlaylistForm() {
   const navigate = useNavigate();
   const [asanas, setAsanas] = useState([]);
+  const [allAsanas, setAllAsanas] = useState([]);
   const [showTeacherMode, setShowTeacherMode] = useState(false);
+  const [showDrm, setShowDrm] = useState(false);
   const [transitions, setTransitions] = useState([]);
   const [playlistMode, setPlaylistMode] = useState("");
   const predefinedOrder = [
@@ -59,6 +61,7 @@ function RegisterPlaylistForm() {
             url: "/content/video/getTeacherAsanas",
           });
           setAsanas(response.data);
+          setAllAsanas(response.data);
         } catch (error) {
           toast(error);
         }
@@ -68,6 +71,7 @@ function RegisterPlaylistForm() {
             url: "/content/video/getNonTeacherAsanas",
           });
           setAsanas(response.data);
+          setAllAsanas(response.data);
         } catch (error) {
           toast(error);
         }
@@ -75,6 +79,34 @@ function RegisterPlaylistForm() {
     };
     fetchData();
   }, [showTeacherMode]);
+
+  useEffect(() => {
+    if (showDrm == true) {
+      let filteredAsanas = [];
+      console.log(allAsanas, "IN SHOW DRM TRUE BEFORE");
+      for (var entry in allAsanas) {
+        if (allAsanas[entry].drm_video === true) {
+          filteredAsanas.push(allAsanas[entry]);
+        } else {
+          continue;
+        }
+      }
+      console.log(filteredAsanas, "IN SHOW DRM TRUE AFTER");
+      setAsanas(filteredAsanas);
+    } else {
+      let filteredAsanas = [];
+      console.log(allAsanas, "IN SHOW DRM FALSE BEFORE");
+      for (var entry in allAsanas) {
+        if (allAsanas[entry].drm_video === false) {
+          filteredAsanas.push(allAsanas[entry]);
+        } else {
+          continue;
+        }
+      }
+      console.log(filteredAsanas, "IN SHOW DRM TRUE AFTER");
+      setAsanas(filteredAsanas);
+    }
+  }, [showDrm, showTeacherMode]);
 
   useEffect(() => {
     const s1 = asanas.sort((a, b) => {
@@ -580,6 +612,13 @@ function RegisterPlaylistForm() {
             onChange={() => setShowTeacherMode((prevMode) => !prevMode)}
           />
           <Text h6>{showTeacherMode ? "Teacher Mode" : "Normal Mode"}</Text>
+        </div>
+        <div className="flex flex-row">
+          <Toggle
+            initialChecked={showDrm}
+            onChange={() => setShowDrm((prevMode) => !prevMode)}
+          />
+          <Text h6>{showDrm ? "DRM Videos" : "Non DRM Videos"}</Text>
         </div>
         <Spacer />
         <Collapse.Group className="col-span-2 col-start-1">
