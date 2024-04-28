@@ -151,7 +151,7 @@ export default function VideoInfo() {
 					</Show>
 				</div>
 			</div>
-			<div class="flex flex-col gap-4 rounded-lg border p-4">
+			<div class="flex flex-col gap-4 rounded-2xl border p-4 my-4">
 				<p>Video Info</p>
 				<Show
 					when={

@@ -265,6 +265,10 @@ function StreamStackItem(props) {
 					}
 				};
 
+				// checks if the video should be paused or looped based on markers
+				// returns true, if the loop should be skipped
+				// if in student mode, always return false
+				//
 				const checkPauseOrLoop = (ct) => {
 					if (videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE) {
 						return false;
@@ -317,10 +321,13 @@ function StreamStackItem(props) {
 								)
 							) {
 								// popFromSeekQueue(0);
+								// TODO: see if logic is fine, if there are outstanding seeks,
+								// clear them as they must have been added to the commit seek time
 								clearSeekQueue();
 								setVideoState(STATE_VIDEO_PLAY);
 								return;
 							}
+
 							if (
 								videoStore.videoState !== STATE_VIDEO_LOADING &&
 								checkPauseOrLoop(
@@ -330,6 +337,8 @@ function StreamStackItem(props) {
 							) {
 								return;
 							}
+
+							// set current marker based on current time of video
 							if (
 								videoStore.videoState !== STATE_VIDEO_LOADING ||
 								videoStore.videoState !== STATE_VIDEO_ERROR ||
@@ -341,11 +350,16 @@ function StreamStackItem(props) {
 								);
 							}
 
+							// TODO: check if theres a better solution, in student mode
+							// before 0.05 seconds of video end, add a video event
+							// to play the inactive video
 							if (
+								videoStore.viewMode ===
+									VIDEO_VIEW_STUDENT_MODE &&
 								playerRef().current?.videoElement?.currentTime -
 									playerRef().current?.videoElement
 										?.duration >
-								-0.05
+									-0.05
 							) {
 								if (videoStore.videoEvents.length === 0) {
 									console.log(
@@ -454,8 +468,16 @@ function StreamStackItem(props) {
 
 	// set the videoStore.volume
 	const handleVideoVolumeChange = () => {
-		if (playerRef().current !== null && playerRef().current.videoElement) {
-			setVolume(playerRef().current.videoElement.videoStore.volume || 0);
+		const vVolume =
+			playerRef().current.videoElement.volume > 0
+				? playerRef().current.videoElement.volume
+				: 0;
+		if (
+			playerRef().current !== null &&
+			playerRef().current.videoElement !== null &&
+			videoStore.volume !== vVolume
+		) {
+			setVolume(vVolume);
 		}
 	};
 

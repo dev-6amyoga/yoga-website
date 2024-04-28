@@ -89,6 +89,22 @@ function DashPlayer(props) {
 	);
 
 	createEffect(
+		on(
+			[
+				() => props.isActive,
+				() => videoStore.volume,
+				metadataLoaded,
+				playerRef,
+			],
+			() => {
+				if (playerRef() && props.isActive && metadataLoaded()) {
+					playerRef().setVolume(videoStore.volume);
+				}
+			}
+		)
+	);
+
+	createEffect(
 		on([() => props.isActive, () => videoStore.videoState], () => {
 			if (props.isActive) {
 				if (videoStore.videoState === STATE_VIDEO_PLAY) {
