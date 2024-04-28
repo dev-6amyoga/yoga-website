@@ -25,8 +25,11 @@ import "./AllAsanas.css";
 
 function AllAsanas() {
   const [asanas, setAsanas] = useState([]);
+  const [allAsanas, setAllAsanas] = useState([]);
   const [deleteModal, setDeleteModal] = useState(false);
   const [delAsanaId, setDelAsanaId] = useState(0);
+  const [showTeacherModeAsanas, setShowTeacherModeAsanas] = useState(false);
+  const [showNonDrmAsanas, setShowNonDrmAsanas] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sortedAsanas, setSortedAsanas] = useState([]);
   const [sortOrder, setSortOrder] = useState("asc");
@@ -122,8 +125,17 @@ function AllAsanas() {
           url: "/content/video/getAllAsanas",
         });
         const data = response.data;
-        setAsanas(data);
-        setFilteredTransitions(data);
+        setAllAsanas(data);
+        let finalAsanas = [];
+        for (var entry in data) {
+          if (data[entry].drm_video === true) {
+            if (data[entry].teacher_mode === false) {
+              finalAsanas.push(data[entry]);
+            }
+          }
+        }
+        setAsanas(finalAsanas);
+        setFilteredTransitions(finalAsanas);
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -132,6 +144,61 @@ function AllAsanas() {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (showTeacherModeAsanas === true) {
+      if (showNonDrmAsanas === true) {
+        let finalAsanas = [];
+        for (var entry in allAsanas) {
+          if (allAsanas[entry].drm_video === false) {
+            if (allAsanas[entry].teacher_mode === true) {
+              finalAsanas.push(allAsanas[entry]);
+            }
+          }
+        }
+        setAsanas(finalAsanas);
+        setFilteredTransitions(finalAsanas);
+      }
+      if (showNonDrmAsanas === false) {
+        let finalAsanas = [];
+        for (var entry in allAsanas) {
+          if (allAsanas[entry].drm_video === true) {
+            if (allAsanas[entry].teacher_mode === true) {
+              finalAsanas.push(allAsanas[entry]);
+            }
+          }
+        }
+        setAsanas(finalAsanas);
+        setFilteredTransitions(finalAsanas);
+      }
+    }
+    if (showTeacherModeAsanas === false) {
+      if (showNonDrmAsanas === true) {
+        let finalAsanas = [];
+        for (var entry in allAsanas) {
+          if (allAsanas[entry].drm_video === false) {
+            if (allAsanas[entry].teacher_mode === false) {
+              finalAsanas.push(allAsanas[entry]);
+            }
+          }
+        }
+        setAsanas(finalAsanas);
+        setFilteredTransitions(finalAsanas);
+      }
+      if (showNonDrmAsanas === false) {
+        let finalAsanas = [];
+        for (var entry in allAsanas) {
+          if (allAsanas[entry].drm_video === true) {
+            if (allAsanas[entry].teacher_mode === false) {
+              finalAsanas.push(allAsanas[entry]);
+            }
+          }
+        }
+        setAsanas(finalAsanas);
+        setFilteredTransitions(finalAsanas);
+      }
+    }
+  }, [showTeacherModeAsanas, showNonDrmAsanas]);
 
   useEffect(() => {
     const sortedData = [...asanas].sort((a, b) => {
@@ -325,68 +392,44 @@ function AllAsanas() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+        <Button
+          onClick={() => {
+            setShowTeacherModeAsanas(!showTeacherModeAsanas);
+          }}
+        >
+          {showTeacherModeAsanas
+            ? "View Normal Mode Asanas"
+            : "View Teacher Mode Asanas"}
+        </Button>
+        <Button
+          onClick={() => {
+            setShowNonDrmAsanas(!showNonDrmAsanas);
+          }}
+        >
+          {showNonDrmAsanas ? "View DRM Asanas" : "View NON DRM Asanas"}
+        </Button>
         {loading ? (
           <Text>Loading</Text>
         ) : (
           <Table data={filteredTransitions} className="bg-white ">
-            <Table.Column prop="id" label="Asana ID" />
             <Table.Column prop="asana_name" label="Asana Name" />
             <Table.Column
               prop="teacher_mode"
               label="Teacher Mode"
               render={(teacherMode) => (teacherMode ? "Yes" : "No")}
             />{" "}
-            {/* <Table.Column prop="asana_desc" label="Description" /> */}
             <Table.Column prop="asana_category" label="Category" />
             <Table.Column prop="language" label="Language" />
-            <Table.Column prop="asana_type" label="Type" />
-            {/* <Table.Column prop="asana_difficulty" label="Difficulty" /> */}
             <Table.Column
-              prop="asana_difficulty"
-              label="Difficulty"
-              render={(data) => {
-                if (data.includes("Beginner")) {
-                  if (data.includes("Intermediate")) {
-                    if (data.includes("Advanced")) {
-                      return "Beg, Int, Adv";
-                    } else {
-                      return "Beg, Int";
-                    }
-                  } else if (data.includes("Advanced")) {
-                    return "Beg, Adv";
-                  } else {
-                    return "Beg";
-                  }
-                } else if (data.includes("Intermediate")) {
-                  if (data.includes("Advanced")) {
-                    return "Int, Adv";
-                  } else {
-                    return "Int";
-                  }
-                } else {
-                  if (data.includes("Adnvanced")) {
-                    return "Adv";
-                  } else {
-                    return "";
-                  }
-                }
-              }}
+              prop="drm_video"
+              label="DRM Video"
+              render={(drm_video) => (drm_video ? "Yes" : "No")}
             />
-            <Table.Column prop="asana_videoID" label="Video URL" />
-            <Table.Column prop="asana_dash_url" label="DASH URL" />
-            <Table.Column prop="duration" label="Duration" />
             <Table.Column
               prop="nobreak_asana"
               label="No Break Asana"
               render={renderBool}
             />
-            <Table.Column
-              prop="asana_withAudio"
-              label="With Audio?"
-              render={renderBool}
-            />
-            <Table.Column prop="muted" label="Muted?" render={renderBool} />
-            <Table.Column prop="counter" label="Counter?" render={renderBool} />
             <Table.Column
               prop="operation"
               label="ACTIONS"
@@ -521,3 +564,58 @@ function AllAsanas() {
 }
 
 export default withAuth(AllAsanas, ROLE_ROOT);
+
+// {
+//   /* <Table.Column prop="asana_difficulty" label="Difficulty" /> */
+// }
+// {
+//   /* <Table.Column
+//               prop="asana_difficulty"
+//               label="Difficulty"
+//               render={(data) => {
+//                 if (data.includes("Beginner")) {
+//                   if (data.includes("Intermediate")) {
+//                     if (data.includes("Advanced")) {
+//                       return "Beg, Int, Adv";
+//                     } else {
+//                       return "Beg, Int";
+//                     }
+//                   } else if (data.includes("Advanced")) {
+//                     return "Beg, Adv";
+//                   } else {
+//                     return "Beg";
+//                   }
+//                 } else if (data.includes("Intermediate")) {
+//                   if (data.includes("Advanced")) {
+//                     return "Int, Adv";
+//                   } else {
+//                     return "Int";
+//                   }
+//                 } else {
+//                   if (data.includes("Adnvanced")) {
+//                     return "Adv";
+//                   } else {
+//                     return "";
+//                   }
+//                 }
+//               }}
+//             /> */
+// }
+// {
+//   /* <Table.Column
+//   prop="asana_withAudio"
+//   label="With Audio?"
+//   render={renderBool}
+// />
+// {
+//   /* <Table.Column prop="asana_dash_url" label="DASH URL" /> */
+// }
+// {
+//   /* <Table.Column prop="duration" label="Duration" /> */
+// }
+// <Table.Column prop="muted" label="Muted?" render={renderBool} />
+// <Table.Column prop="counter" label="Counter?" render={renderBool} /> */
+// }
+//             {
+//               /* <Table.Column prop="id" label="Asana ID" /> */
+//             }
