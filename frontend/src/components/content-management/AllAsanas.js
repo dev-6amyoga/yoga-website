@@ -412,64 +412,24 @@ function AllAsanas() {
           <Text>Loading</Text>
         ) : (
           <Table data={filteredTransitions} className="bg-white ">
-            <Table.Column prop="id" label="Asana ID" />
             <Table.Column prop="asana_name" label="Asana Name" />
             <Table.Column
               prop="teacher_mode"
               label="Teacher Mode"
               render={(teacherMode) => (teacherMode ? "Yes" : "No")}
             />{" "}
-            {/* <Table.Column prop="asana_desc" label="Description" /> */}
             <Table.Column prop="asana_category" label="Category" />
             <Table.Column prop="language" label="Language" />
-            <Table.Column prop="asana_type" label="Type" />
-            {/* <Table.Column prop="asana_difficulty" label="Difficulty" /> */}
             <Table.Column
-              prop="asana_difficulty"
-              label="Difficulty"
-              render={(data) => {
-                if (data.includes("Beginner")) {
-                  if (data.includes("Intermediate")) {
-                    if (data.includes("Advanced")) {
-                      return "Beg, Int, Adv";
-                    } else {
-                      return "Beg, Int";
-                    }
-                  } else if (data.includes("Advanced")) {
-                    return "Beg, Adv";
-                  } else {
-                    return "Beg";
-                  }
-                } else if (data.includes("Intermediate")) {
-                  if (data.includes("Advanced")) {
-                    return "Int, Adv";
-                  } else {
-                    return "Int";
-                  }
-                } else {
-                  if (data.includes("Adnvanced")) {
-                    return "Adv";
-                  } else {
-                    return "";
-                  }
-                }
-              }}
+              prop="drm_video"
+              label="DRM Video"
+              render={(drm_video) => (drm_video ? "Yes" : "No")}
             />
-            <Table.Column prop="asana_videoID" label="Video URL" />
-            <Table.Column prop="asana_dash_url" label="DASH URL" />
-            <Table.Column prop="duration" label="Duration" />
             <Table.Column
               prop="nobreak_asana"
               label="No Break Asana"
               render={renderBool}
             />
-            <Table.Column
-              prop="asana_withAudio"
-              label="With Audio?"
-              render={renderBool}
-            />
-            <Table.Column prop="muted" label="Muted?" render={renderBool} />
-            <Table.Column prop="counter" label="Counter?" render={renderBool} />
             <Table.Column
               prop="operation"
               label="ACTIONS"
@@ -604,3 +564,58 @@ function AllAsanas() {
 }
 
 export default withAuth(AllAsanas, ROLE_ROOT);
+
+// {
+//   /* <Table.Column prop="asana_difficulty" label="Difficulty" /> */
+// }
+// {
+//   /* <Table.Column
+//               prop="asana_difficulty"
+//               label="Difficulty"
+//               render={(data) => {
+//                 if (data.includes("Beginner")) {
+//                   if (data.includes("Intermediate")) {
+//                     if (data.includes("Advanced")) {
+//                       return "Beg, Int, Adv";
+//                     } else {
+//                       return "Beg, Int";
+//                     }
+//                   } else if (data.includes("Advanced")) {
+//                     return "Beg, Adv";
+//                   } else {
+//                     return "Beg";
+//                   }
+//                 } else if (data.includes("Intermediate")) {
+//                   if (data.includes("Advanced")) {
+//                     return "Int, Adv";
+//                   } else {
+//                     return "Int";
+//                   }
+//                 } else {
+//                   if (data.includes("Adnvanced")) {
+//                     return "Adv";
+//                   } else {
+//                     return "";
+//                   }
+//                 }
+//               }}
+//             /> */
+// }
+// {
+//   /* <Table.Column
+//   prop="asana_withAudio"
+//   label="With Audio?"
+//   render={renderBool}
+// />
+// {
+//   /* <Table.Column prop="asana_dash_url" label="DASH URL" /> */
+// }
+// {
+//   /* <Table.Column prop="duration" label="Duration" /> */
+// }
+// <Table.Column prop="muted" label="Muted?" render={renderBool} />
+// <Table.Column prop="counter" label="Counter?" render={renderBool} /> */
+// }
+//             {
+//               /* <Table.Column prop="id" label="Asana ID" /> */
+//             }
