@@ -24,6 +24,7 @@ import LogPayment from "../pages/admin/transactions/LogPayment";
 import RefundManagement from "../pages/admin/transactions/Refund";
 import AllPlaylistConfigs from "../components/content-management/AllPlaylistConfigs";
 import PlayerPage from "../pages/admin/PlayerPage";
+import EditTransition from "../pages/admin/content-management/video/EditTransition";
 export const AdminRoutes = [
   {
     path: "/admin",
@@ -37,6 +38,10 @@ export const AdminRoutes = [
   {
     path: "/admin/video/edit/:asana_id",
     element: <EditAsana />,
+  },
+  {
+    path: "/admin/transition/edit/:transition_id",
+    element: <EditTransition />,
   },
   {
     path: "/admin/video/view-all",

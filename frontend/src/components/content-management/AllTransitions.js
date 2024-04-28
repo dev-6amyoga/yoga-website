@@ -7,7 +7,7 @@ import {
   Text,
   Tooltip,
 } from "@geist-ui/core";
-import { Search, Edit, Delete } from "@geist-ui/icons";
+import { Search, Edit, Delete, PenTool } from "@geist-ui/icons";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -132,6 +132,15 @@ function AllTransitions() {
             <Edit className="w-6 h-6" />
           </div>
         </Tooltip>
+        <Tooltip text={"Edit"}>
+          <div
+            onClick={() => {
+              navigate(`/admin/transition/edit/${rowData?.transition_id}`);
+            }}
+          >
+            <PenTool className="w-6 h-6" />
+          </div>
+        </Tooltip>
       </div>
     );
   };
@@ -247,7 +256,7 @@ function AllTransitions() {
           />{" "}
           <Table.Column prop="transition_video_ID" label="Cloudflare ID" />
           <Table.Column prop="transition_dash_url" label="DASH URL" />
-          <Table.Column prop="duration" label="Transition Duration" />
+          {/* <Table.Column prop="duration" label="Transition Duration" /> */}
           <Table.Column
             prop="operation"
             label="ACTIONS"
