@@ -253,7 +253,7 @@ function VideoControls({ handleFullScreen }) {
 					onClick={handleSeekFoward}
 					title="Fast Forward 5s"
 					className={iconButtonClass + " hidden md:block"}>
-					<FaStepForward className="video_controls__ctrl__button__icon" />
+					<FaBackward className="video_controls__ctrl__button__icon rotate-180" />
 				</button>
 
 				{/* next video */}
