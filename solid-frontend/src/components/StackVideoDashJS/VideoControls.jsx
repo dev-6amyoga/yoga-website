@@ -372,6 +372,7 @@ function VideoControls({ handleFullScreen }) {
 							: "video_controls__ctrl__button"
 					}
 					onClick={() => {
+						console.log()
 						if (handleFullScreen?.active) handleFullScreen?.exit();
 						else handleFullScreen?.enter();
 					}}
