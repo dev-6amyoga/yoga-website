@@ -25,8 +25,11 @@ import "./AllAsanas.css";
 
 function AllAsanas() {
   const [asanas, setAsanas] = useState([]);
+  const [allAsanas, setAllAsanas] = useState([]);
   const [deleteModal, setDeleteModal] = useState(false);
   const [delAsanaId, setDelAsanaId] = useState(0);
+  const [showTeacherModeAsanas, setShowTeacherModeAsanas] = useState(false);
+  const [showNonDrmAsanas, setShowNonDrmAsanas] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sortedAsanas, setSortedAsanas] = useState([]);
   const [sortOrder, setSortOrder] = useState("asc");
@@ -122,8 +125,17 @@ function AllAsanas() {
           url: "/content/video/getAllAsanas",
         });
         const data = response.data;
-        setAsanas(data);
-        setFilteredTransitions(data);
+        setAllAsanas(data);
+        let finalAsanas = [];
+        for (var entry in data) {
+          if (data[entry].drm_video === true) {
+            if (data[entry].teacher_mode === false) {
+              finalAsanas.push(data[entry]);
+            }
+          }
+        }
+        setAsanas(finalAsanas);
+        setFilteredTransitions(finalAsanas);
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -132,6 +144,61 @@ function AllAsanas() {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (showTeacherModeAsanas === true) {
+      if (showNonDrmAsanas === true) {
+        let finalAsanas = [];
+        for (var entry in allAsanas) {
+          if (allAsanas[entry].drm_video === false) {
+            if (allAsanas[entry].teacher_mode === true) {
+              finalAsanas.push(allAsanas[entry]);
+            }
+          }
+        }
+        setAsanas(finalAsanas);
+        setFilteredTransitions(finalAsanas);
+      }
+      if (showNonDrmAsanas === false) {
+        let finalAsanas = [];
+        for (var entry in allAsanas) {
+          if (allAsanas[entry].drm_video === true) {
+            if (allAsanas[entry].teacher_mode === true) {
+              finalAsanas.push(allAsanas[entry]);
+            }
+          }
+        }
+        setAsanas(finalAsanas);
+        setFilteredTransitions(finalAsanas);
+      }
+    }
+    if (showTeacherModeAsanas === false) {
+      if (showNonDrmAsanas === true) {
+        let finalAsanas = [];
+        for (var entry in allAsanas) {
+          if (allAsanas[entry].drm_video === false) {
+            if (allAsanas[entry].teacher_mode === false) {
+              finalAsanas.push(allAsanas[entry]);
+            }
+          }
+        }
+        setAsanas(finalAsanas);
+        setFilteredTransitions(finalAsanas);
+      }
+      if (showNonDrmAsanas === false) {
+        let finalAsanas = [];
+        for (var entry in allAsanas) {
+          if (allAsanas[entry].drm_video === true) {
+            if (allAsanas[entry].teacher_mode === false) {
+              finalAsanas.push(allAsanas[entry]);
+            }
+          }
+        }
+        setAsanas(finalAsanas);
+        setFilteredTransitions(finalAsanas);
+      }
+    }
+  }, [showTeacherModeAsanas, showNonDrmAsanas]);
 
   useEffect(() => {
     const sortedData = [...asanas].sort((a, b) => {
@@ -325,6 +392,22 @@ function AllAsanas() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+        <Button
+          onClick={() => {
+            setShowTeacherModeAsanas(!showTeacherModeAsanas);
+          }}
+        >
+          {showTeacherModeAsanas
+            ? "View Normal Mode Asanas"
+            : "View Teacher Mode Asanas"}
+        </Button>
+        <Button
+          onClick={() => {
+            setShowNonDrmAsanas(!showNonDrmAsanas);
+          }}
+        >
+          {showNonDrmAsanas ? "View DRM Asanas" : "View NON DRM Asanas"}
+        </Button>
         {loading ? (
           <Text>Loading</Text>
         ) : (
