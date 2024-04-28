@@ -14,7 +14,7 @@
 
 export const dashSettings = {
 	debug: {
-		logLevel: 4,
+		logLevel: 5,
 	},
 	streaming: {
 		cacheInitSegments: true,

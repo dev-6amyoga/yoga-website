@@ -315,7 +315,7 @@ function VideoControls({ handleFullScreen }) {
 							</Match>
 							<Match when={videoStore.volume > 0.5}>
 								<IoVolumeHigh
-									onClick={() => setVolume(0)}
+									onClick={() => setVolume(0.0)}
 									class="h-7 w-7"
 								/>
 							</Match>
@@ -337,9 +337,13 @@ function VideoControls({ handleFullScreen }) {
 						max="100"
 						class="hidden w-0 accent-orange-500 opacity-0 transition-all duration-300 group-hover:w-20 group-hover:opacity-100 md:block"
 						ref={volumeSliderRef}
-						onChange={(e) =>
-							setVolume(parseFloat(e.target.value) / 100)
-						}
+						onChange={(e) => {
+							console.log(
+								"[VIDEO CONTROLS] VOLUME : ",
+								parseFloat(e.target.value)
+							);
+							setVolume(parseFloat(e.target.value) / 100);
+						}}
 					/>
 				</div>
 
