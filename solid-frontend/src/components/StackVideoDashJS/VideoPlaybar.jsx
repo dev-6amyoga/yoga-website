@@ -3,7 +3,13 @@ import {
 	createDraggable,
 	useDragDropContext,
 } from "@thisbeyond/solid-dnd";
-import { createEffect, createMemo, createSignal, on } from "solid-js";
+import {
+	createEffect,
+	createMemo,
+	createSignal,
+	on,
+	onCleanup,
+} from "solid-js";
 import { SEEK_TYPE_MOVE } from "../../enums/seek_types";
 import { usePlaylistStoreContext } from "../../store/PlaylistStore";
 import {
@@ -212,6 +218,7 @@ export default function VideoPlaybar(props) {
 	const handleSetBarBounds = () => {
 		if (barRef) {
 			const bounds = barRef.getBoundingClientRect();
+			console.log("[VIDEO PLAYBAR] BOUNDS : ", bounds);
 			setBarBound({
 				top: bounds.top,
 				bottom: bounds.bottom,
@@ -224,9 +231,17 @@ export default function VideoPlaybar(props) {
 	};
 
 	// set bar bounds on mount
-	createEffect(() => {
-		handleSetBarBounds();
-	});
+	createEffect(
+		on([() => videoStore.fullScreen], () => {
+			handleSetBarBounds();
+
+			window.addEventListener("resize", handleSetBarBounds);
+
+			onCleanup(() => {
+				window.removeEventListener("resize", handleSetBarBounds);
+			});
+		})
+	);
 
 	const moveToTimestamp = (t) => {
 		// console.log("MOVING BY ", t - currentTime);
@@ -249,15 +264,17 @@ export default function VideoPlaybar(props) {
 
 	const seekOnClick = (e, location) => {
 		e.preventDefault();
-		//   console.log(
-		//     "Calling move to	timestamp from seekOnClick",
-		//     e.type,
-		//     location
-		//   );
-		moveToTimestamp(
+		const t =
 			(props.duration() * (e.clientX - barBound().left)) /
-				barBound().width
-		);
+			barBound().width;
+		console.log("Calling move to timestamp from seekOnClick", {
+			duration: props.duration(),
+			location,
+			clientX: e.clientX,
+			barBound: barBound(),
+			t: t,
+		});
+		moveToTimestamp(t);
 	};
 
 	const handleDragOnStart = (e, data) => {
@@ -310,7 +327,7 @@ export default function VideoPlaybar(props) {
 					} absolute z-20`}></div>
 				<div
 					class={`mt-4 w-[calc(100%+0.5rem)] -left-1 mx-auto h-[32%] absolute z-10`}></div>
-				{/* orange bar */}
+				{/* play bar */}
 				<div class="absolute z-[100] w-full h-full">
 					<div
 						class={`mt-3 bg-y-green ${

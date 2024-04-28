@@ -39,13 +39,13 @@ function DashPlayer(props) {
 	const [streamInitialized, setStreamInitialized] = createSignal(false);
 	const [drmSet, setDrmSet] = createSignal(false);
 	const [playInActive, setPlayInActive] = createSignal(false);
-	let playInActiveTimer = null;
+	// let playInActiveTimer = null;
 
 	console.log("dashplayer! >>>>");
 
 	const [
 		videoStore,
-		{ setPlayreadyKeyUrl, addVideoEvent, clearVideoEvents, setVideoState },
+		{ setPlayreadyKeyUrl, clearVideoEvents, setVideoState },
 	] = useVideoStoreContext();
 
 	createEffect(
@@ -598,8 +598,12 @@ function DashPlayer(props) {
 	);
 
 	return (
-		<div class={props.className + " relative"}>
+		<div
+			class={
+				"dash-player w-full h-full relative grid place-content-center "
+			}>
 			<video
+				class="aspect-video"
 				id={props.queueItemId}
 				ref={setVideoRef}
 				controls={!props.isActive}></video>

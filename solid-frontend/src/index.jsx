@@ -112,7 +112,7 @@ function VideoPage() {
 	];
 
 	const [videoStore, setVideoStore] = createStore({
-		devMode: true,
+		devMode: false,
 		fullScreen: false,
 		playlistState: false,
 		currentVideo: null,
@@ -204,6 +204,7 @@ function VideoPage() {
 						// if the current time is greater than the last marker, set to last marker
 						if (idx === -2) {
 							state.currentMarkerIdx = state.markers.length - 1;
+							return;
 						}
 
 						state.currentMarkerIdx = idx;
@@ -254,7 +255,7 @@ function VideoPage() {
 					produce((state) => {
 						// console.log(state.seekQueue, seekTime)
 						// {type: move | seek, time: number}
-						state.seekQueue = [...state.seekQueue, seekEvent];
+						state.seekQueue = [seekEvent];
 						state.pauseReason = null;
 					})
 				),
