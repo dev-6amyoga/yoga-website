@@ -17,6 +17,7 @@ import { WatchHistoryContext } from "../store/WatchHistoryStore";
 export default function Video() {
 	const [store, { setEnableWatchHistory }] = useContext(WatchHistoryContext);
 
+
 	const [videoStore, { setCurrentMarkerIdx, addToSeekQueue }] =
 		useVideoStoreContext();
 
@@ -97,12 +98,9 @@ export default function Video() {
 
 				// for hand held pointer
 				const handleKeyDown = (event) => {
-					// console.log({
-					// 	playlistState,
-					// 	videoState.value,
-					// 	viewMode.value,
-					// 	key: event.key,
-					// });
+					console.log(
+						event.key, "HI I AM KEY"
+					);
 
 					// TODO : fix plalist state when start is clicked
 					if (
@@ -113,6 +111,7 @@ export default function Video() {
 						return;
 					}
 					switch (event.key) {
+
 						case "PageUp":
 							event.preventDefault();
 
@@ -136,6 +135,45 @@ export default function Video() {
 						case "PageDown":
 							event.preventDefault();
 
+							if (
+								videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE
+							) {
+								console.log("Move to next video");
+								popFromQueue(0);
+							} else if (
+								videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE
+							) {
+								console.log("Move to next marker");
+								// console.log(
+								// 	videoStore.markers,
+								// 	videoStore.currentMarkerIdx
+								// );
+								handleNextMarker();
+							}
+							break;
+
+						case "ArrowLeft":
+							event.preventDefault();
+
+							if (
+								videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE
+							) {
+								console.log("Move to prev video");
+								popFromArchive(-1);
+							} else if (
+								videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE
+							) {
+								//
+								console.log("Move to prev marker");
+								// console.log(
+								// 	videoStore.markers,
+								// 	videoStore.currentMarkerIdx
+								// );
+								handlePrevMarker();
+							}
+							break;
+						case "ArrowRight":
+							event.preventDefault();
 							if (
 								videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE
 							) {
