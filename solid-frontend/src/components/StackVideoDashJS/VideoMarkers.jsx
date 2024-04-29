@@ -26,7 +26,7 @@ export default function VideoMarkers() {
 
 	return (
 		<div
-			class={`bg-white rounded-2xl border p-4 ${
+			class={`hidden bg-white rounded-2xl border p-4 ${
 				videoStore.currentVideo?.video?.transition_id
 					? "opacity-0"
 					: "opacity-100"
