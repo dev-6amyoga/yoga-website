@@ -45,7 +45,7 @@ function DashPlayer(props) {
 
 	const [
 		videoStore,
-		{ setPlayreadyKeyUrl, clearVideoEvents, setVideoState },
+		{ setPlayreadyKeyUrl, clearVideoEvents, setVideoState, setVolume },
 	] = useVideoStoreContext();
 
 	createEffect(
@@ -363,6 +363,10 @@ function DashPlayer(props) {
 		if (!props.isActive) {
 			console.log("[DASH PLAYER] : onCanPlay event");
 			playerRef().pause();
+		}
+
+		if (props.isActive) {
+			setVolume(1.0);
 		}
 	};
 

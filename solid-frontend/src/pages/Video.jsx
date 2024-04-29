@@ -17,8 +17,7 @@ import { WatchHistoryContext } from "../store/WatchHistoryStore";
 export default function Video() {
 	const [store, { setEnableWatchHistory }] = useContext(WatchHistoryContext);
 
-
-	const [videoStore, { setCurrentMarkerIdx, addToSeekQueue }] =
+	const [videoStore, { setCurrentMarkerIdx, addToSeekQueue, setFullScreen }] =
 		useVideoStoreContext();
 
 	const [playlistStore, { popFromArchive, popFromQueue }] =
@@ -98,9 +97,7 @@ export default function Video() {
 
 				// for hand held pointer
 				const handleKeyDown = (event) => {
-					console.log(
-						event.key, "HI I AM KEY"
-					);
+					console.log(event.key, "HI I AM KEY");
 
 					// TODO : fix plalist state when start is clicked
 					if (
@@ -111,7 +108,6 @@ export default function Video() {
 						return;
 					}
 					switch (event.key) {
-
 						case "PageUp":
 							event.preventDefault();
 
@@ -203,6 +199,46 @@ export default function Video() {
 			}
 		)
 	);
+
+	createEffect(
+		on([() => videoStore.fullScreen], () => {
+			try {
+				if (videoStore.fullScreen) {
+					document.getElementById("app").requestFullscreen();
+				} else {
+					document.exitFullscreen();
+				}
+			} catch (err) {}
+		})
+	);
+
+	createEffect(() => {
+		const handleFullscreenExit = (event) => {
+			if (!document.fullscreenElement) {
+				console.log("FULL SCREEN EXIT");
+				setFullScreen(false);
+			}
+		};
+
+		const handleFullScreenError = () => {
+			alert("ERROR : Fullscreen failed to enter/exit.");
+		};
+
+		document.addEventListener("fullscreenchange", handleFullscreenExit);
+
+		document.addEventListener("fullscreenerror", handleFullScreenError);
+
+		onCleanup(() => {
+			document.removeEventListener(
+				"fullscreenchange",
+				handleFullscreenExit
+			);
+			document.removeEventListener(
+				"fullscreenerror",
+				handleFullScreenError
+			);
+		});
+	});
 
 	createEffect(() => {
 		console.log("Disable watch history");
