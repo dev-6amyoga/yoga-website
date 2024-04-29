@@ -121,7 +121,7 @@ function VideoPage() {
 		pauseReason: null,
 		playbackRate: 1.0,
 		autoplayInitialized: false,
-		volume: 100.0,
+		volume: 0.0,
 		seekQueue: [],
 		currentTime: 0,
 		viewMode: VIDEO_VIEW_TEACHING_MODE,
