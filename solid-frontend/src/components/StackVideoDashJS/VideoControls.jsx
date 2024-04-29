@@ -323,7 +323,6 @@ function VideoControls(props) {
 						type="range"
 						min="0"
 						max="100"
-						value="100"
 						class="hidden w-0 accent-orange-500 opacity-0 transition-all duration-300 group-hover:w-20 xl:group-hover:w-28 group-hover:opacity-100 md:block"
 						ref={volumeSliderRef}
 						onChange={(e) => {
