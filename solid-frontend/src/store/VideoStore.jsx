@@ -2,7 +2,7 @@ import { children, createContext, useContext } from "solid-js";
 
 // import {} from "zustand";
 import { createStore, produce } from "solid-js/store";
-import { VIDEO_VIEW_STUDENT_MODE } from "../enums/video_view_modes";
+import { VIDEO_VIEW_TEACHING_MODE } from "../enums/video_view_modes";
 import createWithStore from "../utils/createWithStore";
 
 export const STATE_VIDEO_PLAY = "PLAY",
@@ -148,7 +148,7 @@ const useVideoStore = createWithStore((set) => ({
 			return { currentTime: { value: time } };
 		}),
 
-	viewMode: { value: VIDEO_VIEW_STUDENT_MODE },
+	viewMode: { value: VIDEO_VIEW_TEACHING_MODE },
 	setViewMode: (mode) =>
 		set(() => {
 			return { viewMode: { value: mode } };
@@ -182,7 +182,7 @@ export const VideoStoreContext = createContext([
 		volume: 0.0,
 		seekQueue: [],
 		currentTime: 0,
-		viewMode: VIDEO_VIEW_STUDENT_MODE,
+		viewMode: VIDEO_VIEW_TEACHING_MODE,
 		commitSeekTime: -1,
 		playreadyKeyUrl: null,
 		videoEvents: [],
@@ -205,7 +205,7 @@ export const VideoStoreProvider = (props) => {
 		volume: 0.0,
 		seekQueue: [],
 		currentTime: 0,
-		viewMode: VIDEO_VIEW_STUDENT_MODE,
+		viewMode: VIDEO_VIEW_TEACHING_MODE,
 		commitSeekTime: -1,
 		playreadyKeyUrl: null,
 	});

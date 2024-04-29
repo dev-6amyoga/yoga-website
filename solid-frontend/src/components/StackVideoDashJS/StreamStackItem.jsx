@@ -515,10 +515,10 @@ function StreamStackItem(props) {
 		<div class="absolute h-full w-full">
 			<DragDropProvider>
 				<div
-					class={`relative stream-stack-item w-full h-full ${
-						props.isActive ? "block" : "invisible"
-					}`}>
-					{/* class={props.isActive ? "flex-1" : "w-60"}> */}
+					// class={`relative stream-stack-item w-full h-full ${
+					// 	props.isActive ? "block" : "block"
+					// }`}>
+					 class={props.isActive ? "flex-1" : "w-60"}> 
 					<DashPlayer
 						ref={playerInit}
 						src={videoUrl()}
