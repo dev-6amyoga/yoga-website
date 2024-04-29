@@ -30,7 +30,7 @@ export default function VideoMarkers() {
 				videoStore.currentVideo?.video?.transition_id
 					? "opacity-0"
 					: "opacity-100"
-			} ${videoStore.fullScreen ? "m-4" : ""}`}>
+			}`}>
 			<h5 class="">Markers</h5>
 			<div class="mt-4 flex flex-row gap-1 overflow-x-auto">
 				<Show when={videoStore.markers.length > 0}>

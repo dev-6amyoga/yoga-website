@@ -26,7 +26,6 @@ import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
 import { toTimeString } from "../../utils/toTimeString";
 import DashPlayer from "./DashPlayer";
-import VideoMarkers from "./VideoMarkers";
 import VideoPlaybar from "./VideoPlaybar";
 
 console.log(STATE_VIDEO_LOADING);
@@ -555,11 +554,13 @@ function StreamStackItem(props) {
 					</Show>
 
 					<div className="absolute bottom-0 z-20 h-1/3 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0 pointer-events-auto touch-auto">
-						<Show when={videoStore.fullScreen}>
+						{/* markers */}
+						{/* <Show when={videoStore.fullScreen}>
 							<div class="absolute bottom-28 w-full">
 								<VideoMarkers />
 							</div>
-						</Show>
+						</Show> */}
+						{/* playbar */}
 						<div className="absolute bottom-0 w-full">
 							<VideoPlaybar
 								playbarVisible={true}

@@ -2,9 +2,9 @@ import { Match, Switch, createEffect, createSignal, on } from "solid-js";
 import { useVideoStoreContext } from "../../store/VideoStore";
 import "./StackVideo.css";
 import VideoInfo from "./VideoInfo";
-import VideoMarkers from "./VideoMarkers";
 import VideoPlayer from "./VideoPlayer";
 import VideoQueue from "./VideoQueue";
+import VideoMarkers from "./VideoMarkers";
 
 export default function VideoPlayerWrapper() {
 	// const [fullScreen] = useVideoStore((state) => [state.fullScreen]);
