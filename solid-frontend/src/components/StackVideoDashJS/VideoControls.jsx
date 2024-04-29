@@ -58,32 +58,6 @@ function VideoControls(props) {
 		},
 	] = useVideoStoreContext();
 
-	// const handlePlay = useCallback(() => {
-	// 	console.log("SETTING VIDEO STATE TO PLAY ------------>");
-	// 	if (videoStore.videoState === STATE_VIDEO_PAUSED) {
-	// 		if (pauseReason === VIDEO_PAUSE_MARKER) {
-	// 			console.log("VIDEO PLAY : PAUSE REASON MARKER");
-	// 			setCurrentMarkerIdx(
-	// 				videoStore.currentMarkerIdx + 1 > markers.length - 1
-	// 					? 0
-	// 					: videoStore.currentMarkerIdx + 1
-	// 			);
-	// 			setPauseReason(null);
-	// 		}
-	// 	}
-	// 	if (videoStore.videoState !== STATE_VIDEO_PLAY) {
-	// 		setVideoState(STATE_VIDEO_PLAY);
-	// 	}
-	// }, [
-	// 	videoStore.videoState,
-	// 	pauseReason,
-	// 	markers,
-	// 	videoStore.currentMarkerIdx,
-	// 	setPauseReason,
-	// 	setCurrentMarkerIdx,
-	// 	setVideoState,
-	// ]);
-
 	const handlePlay = () => {
 		console.log("SETTING VIDEO STATE TO PLAY ------------>");
 		if (videoStore.videoState === STATE_VIDEO_PAUSED) {
@@ -349,6 +323,7 @@ function VideoControls(props) {
 						type="range"
 						min="0"
 						max="100"
+						value="100"
 						class="hidden w-0 accent-orange-500 opacity-0 transition-all duration-300 group-hover:w-20 xl:group-hover:w-28 group-hover:opacity-100 md:block"
 						ref={volumeSliderRef}
 						onChange={(e) => {

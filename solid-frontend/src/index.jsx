@@ -4,7 +4,7 @@ import { render } from "solid-js/web";
 
 import { createStore, produce } from "solid-js/store";
 import { v5 as uuidV5 } from "uuid";
-import { VIDEO_VIEW_STUDENT_MODE } from "./enums/video_view_modes";
+import { VIDEO_VIEW_TEACHING_MODE } from "./enums/video_view_modes";
 import "./index.css";
 import Video from "./pages/Video";
 import { PlaylistStoreContext } from "./store/PlaylistStore";
@@ -121,10 +121,10 @@ function VideoPage() {
 		pauseReason: null,
 		playbackRate: 1.0,
 		autoplayInitialized: false,
-		volume: 0.0,
+		volume: 100.0,
 		seekQueue: [],
 		currentTime: 0,
-		viewMode: VIDEO_VIEW_STUDENT_MODE,
+		viewMode: VIDEO_VIEW_TEACHING_MODE,
 		commitSeekTime: -1,
 		playreadyKeyUrl: null,
 		videoEvents: [],
