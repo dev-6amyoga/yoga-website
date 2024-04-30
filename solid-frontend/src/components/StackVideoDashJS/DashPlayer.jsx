@@ -99,6 +99,12 @@ function DashPlayer(props) {
 			() => {
 				if (playerRef() && props.isActive && metadataLoaded()) {
 					playerRef().setVolume(videoStore.volume);
+				} else if (playerRef() && !props.isActive && metadataLoaded()) {
+					playerRef().pause();
+
+					if (videoRef.current) {
+						videoRef.current.currentTime = 0;
+					}
 				}
 			}
 		)

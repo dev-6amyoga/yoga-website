@@ -553,7 +553,7 @@ function StreamStackItem(props) {
 						</div>
 					</Show>
 
-					<div className="absolute bottom-0 z-20 h-1/3 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0 pointer-events-auto touch-auto">
+					<div class="absolute bottom-0 z-20 h-1/3 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0 pointer-events-auto touch-auto">
 						{/* markers */}
 						{/* <Show when={videoStore.fullScreen}>
 							<div class="absolute bottom-28 w-full">
@@ -561,7 +561,7 @@ function StreamStackItem(props) {
 							</div>
 						</Show> */}
 						{/* playbar */}
-						<div className="absolute bottom-0 w-full">
+						<div class="absolute bottom-0 w-full">
 							<VideoPlaybar
 								playbarVisible={true}
 								duration={duration}
