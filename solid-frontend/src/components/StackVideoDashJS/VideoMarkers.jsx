@@ -3,7 +3,7 @@ import { SEEK_TYPE_MARKER } from "../../enums/seek_types";
 import { useVideoStoreContext } from "../../store/VideoStore";
 
 export default function VideoMarkers() {
-	const [videoStore, { addToSeekQueue, setMarkers, setCurrentMarkerIdx }] =
+	const [videoStore, { clearSeekQueue, addToSeekQueue, setMarkers, setCurrentMarkerIdx }] =
 		useVideoStoreContext();
 
 	createEffect(
@@ -13,6 +13,8 @@ export default function VideoMarkers() {
 				videoStore.currentVideo.video?.markers
 			);
 			if (videoStore.currentVideo) {
+				console.log("currentVideo changed : ", "SEEK QUEUE CLEARED!")
+				clearSeekQueue();
 				setMarkers(videoStore.currentVideo?.video?.markers || []);
 				if (videoStore.currentVideo?.video?.markers?.length > 0) {
 					setCurrentMarkerIdx(0);
