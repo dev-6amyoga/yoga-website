@@ -9,8 +9,7 @@ export default function VideoInfo() {
 	return (
 		<div class="">
 			{/* debug info */}
-			{/* <Show when={!videoStore.fullScreen}>
-				<button onClick={clearSeekQueue}>Clear Seek Queue</button>
+			<Show when={!videoStore.fullScreen}>
 				<div class="flex w-full gap-4 border my-5">
 					<pre class="flex-1">
 						{JSON.stringify(
@@ -38,7 +37,7 @@ export default function VideoInfo() {
 						)}
 					</pre>
 				</div>
-			</Show> */}
+			</Show>
 
 			<div class="flex flex-col gap-4 rounded-2xl border p-4 my-4">
 				<p>Video Info</p>
