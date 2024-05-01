@@ -239,7 +239,7 @@ export default function Video() {
 			);
 		});
 	});
-
+	// no
 	createEffect(() => {
 		console.log("Disable watch history");
 		setEnableWatchHistory(false);
