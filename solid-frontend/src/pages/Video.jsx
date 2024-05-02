@@ -44,58 +44,40 @@ export default function Video() {
 			],
 			() => {
 				const handlePrevMarker = () => {
-					console.log("Prev Marker Clicked");
-					const markers = videoStore.markers;
-					const currentMarkerIdx = videoStore.currentMarkerIdx;
-
-					console.log("Prev Marker", markers.length);
-					if (markers.length > 0) {
-						const idx = (currentMarkerIdx || 0) - 1;
-						console.log("SETTING MARKER ID :", idx);
-						if (idx <= 0) {
-							setCurrentMarkerIdx(null);
-							popFromArchive(-1);
-							// console.log("end reached");
+					console.log("Prev Marker");
+					if (videoStore.markers.length > 0) {
+						if (videoStore.currentMarkerIdx === 0) {
+							addToSeekQueue({ t: 0, type: SEEK_TYPE_MOVE });
 							return;
 						}
-						// seek to prev marker
-						else {
-							setCurrentMarkerIdx(idx);
-							addToSeekQueue({
-								t: markers[idx].timestamp,
-								type: SEEK_TYPE_MOVE,
-							});
-							return;
-						}
-					}
-					else{
+						const idx =
+							((videoStore.currentMarkerIdx || 0) -
+								1 +
+								videoStore.markers.length) %
+							videoStore.markers.length;
+						setCurrentMarkerIdx(idx);
+						addToSeekQueue({
+							t: videoStore.markers[idx].timestamp,
+							type: SEEK_TYPE_MOVE,
+						});
+					} else {
 						popFromArchive(-1);
 					}
 				};
 
 				const handleNextMarker = () => {
-					console.log("Next Marker Clicked");
-					const markers = videoStore.markers;
-					const currentMarkerIdx = videoStore.currentMarkerIdx;
-
-					console.log("Next Marker", markers.length);
-					if (markers.length > 0) {
-						const idx = (currentMarkerIdx || 0) + 1;
-
-						if (idx >= markers.length) {
-							popFromQueue(0);
-							return;
-						}
-
-						console.log("SETTING MARKER ID :", idx);
+					console.log("Next Marker");
+					if (videoStore.markers.length > 0) {
+						const idx =
+							((videoStore.currentMarkerIdx || 0) + 1) %
+							videoStore.markers.length;
 						setCurrentMarkerIdx(idx);
 						// seek to next marker
 						addToSeekQueue({
-							t: markers[idx].timestamp,
+							t: videoStore.markers[idx].timestamp,
 							type: SEEK_TYPE_MOVE,
 						});
-					}
-					else{
+					} else {
 						popFromQueue(0);
 					}
 				};
