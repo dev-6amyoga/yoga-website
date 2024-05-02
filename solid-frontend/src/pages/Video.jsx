@@ -68,6 +68,9 @@ export default function Video() {
 							return;
 						}
 					}
+					else{
+						popFromArchive(-1);
+					}
 				};
 
 				const handleNextMarker = () => {
@@ -81,7 +84,6 @@ export default function Video() {
 
 						if (idx >= markers.length) {
 							popFromQueue(0);
-							// console.log("end reached");
 							return;
 						}
 
@@ -92,6 +94,9 @@ export default function Video() {
 							t: markers[idx].timestamp,
 							type: SEEK_TYPE_MOVE,
 						});
+					}
+					else{
+						popFromQueue(0);
 					}
 				};
 
