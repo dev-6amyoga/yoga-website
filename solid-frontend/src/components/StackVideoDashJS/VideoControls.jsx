@@ -104,22 +104,24 @@ function VideoControls(props) {
 	const handlePrevMarker = () => {
 		console.log("Prev Marker");
 		if (videoStore.markers.length > 0) {
-			if (videoStore.currentMarkerIdx === 0) {
-				addToSeekQueue({ t: 0, type: SEEK_TYPE_MOVE });
+			const idx = (videoStore.currentMarkerIdx || 0) - 1;
+			console.log("SETTING MARKER ID :", idx);
+			if (idx <= 0) {
+				setCurrentMarkerIdx(null);
+				popFromArchive(-1);
+				// console.log("end reached");
 				return;
 			}
-			const idx =
-				((videoStore.currentMarkerIdx || 0) -
-					1 +
-					videoStore.markers.length) %
-				videoStore.markers.length;
-			setCurrentMarkerIdx(idx);
-			addToSeekQueue({
-				t: videoStore.markers[idx].timestamp,
-				type: SEEK_TYPE_MOVE,
-			});
-		}
-		else{
+			// seek to prev marker
+			else {
+				setCurrentMarkerIdx(idx);
+				addToSeekQueue({
+					t: videoStore.markers[idx].timestamp,
+					type: SEEK_TYPE_MOVE,
+				});
+				return;
+			}
+		} else {
 			popFromArchive(-1);
 		}
 	};
@@ -127,17 +129,22 @@ function VideoControls(props) {
 	const handleNextMarker = () => {
 		console.log("Next Marker");
 		if (videoStore.markers.length > 0) {
-			const idx =
-				((videoStore.currentMarkerIdx || 0) + 1) %
-				videoStore.markers.length;
+			const idx = (videoStore.currentMarkerIdx || 0) + 1;
+
+			if (idx >= videoStore.markers.length) {
+				popFromQueue(0);
+				// console.log("end reached");
+				return;
+			}
+
+			console.log("SETTING MARKER ID :", idx);
 			setCurrentMarkerIdx(idx);
 			// seek to next marker
 			addToSeekQueue({
 				t: videoStore.markers[idx].timestamp,
 				type: SEEK_TYPE_MOVE,
 			});
-		}
-		else{
+		} else {
 			popFromQueue(0);
 		}
 	};
