@@ -119,6 +119,9 @@ function VideoControls(props) {
 				type: SEEK_TYPE_MOVE,
 			});
 		}
+		else{
+			popFromArchive(-1);
+		}
 	};
 
 	const handleNextMarker = () => {
@@ -133,6 +136,9 @@ function VideoControls(props) {
 				t: videoStore.markers[idx].timestamp,
 				type: SEEK_TYPE_MOVE,
 			});
+		}
+		else{
+			popFromQueue(0);
 		}
 	};
 
