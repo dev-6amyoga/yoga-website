@@ -25,6 +25,8 @@ import RefundManagement from "../pages/admin/transactions/Refund";
 import AllPlaylistConfigs from "../components/content-management/AllPlaylistConfigs";
 import PlayerPage from "../pages/admin/PlayerPage";
 import EditTransition from "../pages/admin/content-management/video/EditTransition";
+import RegisterNewClass from "../pages/class-mode/RegisterNewClass";
+import ViewAllClasses from "../pages/class-mode/ViewAllClasses";
 export const AdminRoutes = [
   {
     path: "/admin",
@@ -34,6 +36,14 @@ export const AdminRoutes = [
   {
     path: "/admin/video/create",
     element: <RegisterVideo />,
+  },
+  {
+    path: "/admin/classmode/create",
+    element: <RegisterNewClass />,
+  },
+  {
+    path: "/admin/classmode/view",
+    element: <ViewAllClasses />,
   },
   {
     path: "/admin/video/edit/:asana_id",

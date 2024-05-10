@@ -22,6 +22,17 @@ const paths = [
     title: "Video Player",
   },
   {
+    title: "Class Mode",
+    type: "group",
+    subPaths: [
+      {
+        path: "/admin/classmode/create",
+        title: "Register New Class",
+      },
+      { path: "/admin/classmode/view", title: "View All Classes" },
+    ],
+  },
+  {
     title: "Member Management",
     type: "group",
     subPaths: [
