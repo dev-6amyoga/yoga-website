@@ -44,13 +44,9 @@ export default function Video() {
 			],
 			() => {
 				const handlePrevMarker = () => {
-					console.log("Prev Marker Clicked");
-					const markers = videoStore.markers;
-					const currentMarkerIdx = videoStore.currentMarkerIdx;
-
-					console.log("Prev Marker", markers.length);
-					if (markers.length > 0) {
-						const idx = (currentMarkerIdx || 0) - 1;
+					console.log("Prev Marker");
+					if (videoStore.markers.length > 0) {
+						const idx = (videoStore.currentMarkerIdx || 0) - 1;
 						console.log("SETTING MARKER ID :", idx);
 						if (idx <= 0) {
 							setCurrentMarkerIdx(null);
@@ -62,28 +58,24 @@ export default function Video() {
 						else {
 							setCurrentMarkerIdx(idx);
 							addToSeekQueue({
-								t: markers[idx].timestamp,
+								t: videoStore.markers[idx].timestamp,
 								type: SEEK_TYPE_MOVE,
 							});
 							return;
 						}
-					}
-					else{
+					} else {
 						popFromArchive(-1);
 					}
 				};
 
 				const handleNextMarker = () => {
-					console.log("Next Marker Clicked");
-					const markers = videoStore.markers;
-					const currentMarkerIdx = videoStore.currentMarkerIdx;
+					console.log("Next Marker");
+					if (videoStore.markers.length > 0) {
+						const idx = (videoStore.currentMarkerIdx || 0) + 1;
 
-					console.log("Next Marker", markers.length);
-					if (markers.length > 0) {
-						const idx = (currentMarkerIdx || 0) + 1;
-
-						if (idx >= markers.length) {
+						if (idx >= videoStore.markers.length) {
 							popFromQueue(0);
+							// console.log("end reached");
 							return;
 						}
 
@@ -91,11 +83,10 @@ export default function Video() {
 						setCurrentMarkerIdx(idx);
 						// seek to next marker
 						addToSeekQueue({
-							t: markers[idx].timestamp,
+							t: videoStore.markers[idx].timestamp,
 							type: SEEK_TYPE_MOVE,
 						});
-					}
-					else{
+					} else {
 						popFromQueue(0);
 					}
 				};
