@@ -104,7 +104,7 @@ export default function Video() {
 				const handleKeyDown = (event) => {
 					console.log(event.key, "HI I AM KEY");
 
-					// TODO : fix plalist state when start is clicked
+					// TODO : fix playlist state when start is clicked
 					if (
 						videoStore.videoState === null ||
 						videoStore.videoState === STATE_VIDEO_ERROR ||
@@ -265,3 +265,5 @@ export default function Video() {
 		</div>
 	);
 }
+
+-5
