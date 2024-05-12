@@ -56,7 +56,6 @@ export default function RegisterNewClass() {
     e.preventDefault();
     const formData = getFormData(e);
     formData["days"] = days;
-    console.log(formData);
     try {
       const response = await Fetch({
         url: "/classMode/create",

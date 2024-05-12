@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const ClassMode = require("../models/mongo/ClassMode");
+
 router.post("/create", async (req, res) => {
   try {
     const requestData = req.body;
@@ -36,4 +37,18 @@ router.get("/getAllClasses", async (req, res) => {
     });
   }
 });
+
+router.post("/get-class-by-id", async (req, res) => {
+  try {
+    const classId = req.body;
+    console.log(classId);
+    const classObj = await ClassMode.findById(classId.class_id);
+    res.status(200).json({ classObj });
+  } catch (err) {
+    res.status(500).json({
+      error: "Failed to fetch class",
+    });
+  }
+});
+
 module.exports = router;
