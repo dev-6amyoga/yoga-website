@@ -12,9 +12,11 @@ import {
 import getFormData from "../../utils/getFormData";
 import { Fetch } from "../../utils/Fetch";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 export default function RegisterNewClass() {
   const [days, setDays] = useState(null);
+  const navigate = useNavigate();
   const [duration, setDuration] = useState(null);
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
@@ -63,6 +65,7 @@ export default function RegisterNewClass() {
       });
       if (response?.status === 200) {
         toast("New class created successfully");
+        navigate("/admin/classmode/view");
       } else {
         console.log("Failed to create new class");
       }
