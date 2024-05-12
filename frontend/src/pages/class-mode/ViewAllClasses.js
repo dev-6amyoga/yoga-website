@@ -4,13 +4,18 @@ import SortableColumn from "../../components/Common/DataTable/SortableColumn";
 import { DataTable } from "../../components/Common/DataTable/DataTable";
 import { Fetch } from "../../utils/Fetch";
 import { toast } from "react-toastify";
-import { Button, Card, Divider, Text } from "@geist-ui/core";
+import { useNavigate } from "react-router-dom";
+import { Button, Card, Divider, Modal, Text, Spacer } from "@geist-ui/core";
+
 export default function ViewAllClasses() {
   const [allClasses, setAllClasses] = useState(null);
+  const navigate = useNavigate();
   const [today, setToday] = useState("");
   const [activeClasses, setActiveClasses] = useState([]);
   const [inactiveClasses, setInactiveClasses] = useState([]);
   const [currentTime, setCurrentTime] = useState("");
+  const [activeClassModal, setActiveClassModal] = useState(false);
+  const [activeClassModalData, setActiveClassModalData] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,7 +77,8 @@ export default function ViewAllClasses() {
     ];
     let t1 = days[now.getDay()];
     if (rowData.row.original.days.includes(t1)) {
-      console.log("is active");
+      setActiveClassModal(true);
+      setActiveClassModalData(rowData.row.original);
     } else {
       toast("This class is not active yet!");
     }
@@ -155,6 +161,36 @@ export default function ViewAllClasses() {
             data={inactiveClasses || []}
           ></DataTable>
         </Card>
+      </div>
+      <div>
+        <Modal
+          visible={activeClassModal}
+          onClose={() => setActiveClassModal(false)}
+        >
+          <Modal.Title>Class Details</Modal.Title>
+          <Modal.Subtitle>{activeClassModalData.class_name}</Modal.Subtitle>
+          <Modal.Content>
+            <div className="flex flex-col align-center">
+              <Card hoverable>
+                <div className="flex flex-col">
+                  <Text>Start Time : {activeClassModalData.start_time}</Text>
+                  <Text>End Time : {activeClassModalData.end_time}</Text>
+                  <Text>Days: {activeClassModalData.days.join(", ")}</Text>
+                  <Text>Description : {activeClassModalData.class_desc}</Text>
+                </div>
+              </Card>
+              <Divider />
+              <Spacer />
+              <Button
+                onClick={() => {
+                  window.open(activeClassModalData.class_url, "_blank");
+                }}
+              >
+                Join Class
+              </Button>
+            </div>
+          </Modal.Content>
+        </Modal>
       </div>
     </AdminPageWrapper>
   );

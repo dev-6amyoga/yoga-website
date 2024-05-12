@@ -7,6 +7,7 @@ const classModeSchema = new mongoose.Schema({
   start_time: String,
   end_time: String,
   days: [String],
+  class_url: String,
 });
 
 const ClassMode = mongoose.model("ClassMode", classModeSchema, "class_mode");
