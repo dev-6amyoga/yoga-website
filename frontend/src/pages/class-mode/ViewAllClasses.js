@@ -175,7 +175,7 @@ export default function ViewAllClasses() {
                 <div className="flex flex-col">
                   <Text>Start Time : {activeClassModalData.start_time}</Text>
                   <Text>End Time : {activeClassModalData.end_time}</Text>
-                  <Text>Days: {activeClassModalData.days.join(", ")}</Text>
+                  {/* <Text>Days: {activeClassModalData.days.join(", ")}</Text> */}
                   <Text>Description : {activeClassModalData.class_desc}</Text>
                 </div>
               </Card>
