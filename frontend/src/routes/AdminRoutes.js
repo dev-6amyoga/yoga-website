@@ -27,6 +27,7 @@ import PlayerPage from "../pages/admin/PlayerPage";
 import EditTransition from "../pages/admin/content-management/video/EditTransition";
 import RegisterNewClass from "../pages/class-mode/RegisterNewClass";
 import ViewAllClasses from "../pages/class-mode/ViewAllClasses";
+import ClassModePage from "../pages/class-mode/ClassModePage";
 export const AdminRoutes = [
   {
     path: "/admin",
@@ -45,6 +46,11 @@ export const AdminRoutes = [
     path: "/admin/classmode/view",
     element: <ViewAllClasses />,
   },
+  {
+    path: "/class-mode/:class_id",
+    element: <ClassModePage />,
+  },
+
   {
     path: "/admin/video/edit/:asana_id",
     element: <EditAsana />,
