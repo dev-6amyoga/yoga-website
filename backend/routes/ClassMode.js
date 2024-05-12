@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const ClassMode = require("../models/mongo/ClassMode");
-
 router.post("/create", async (req, res) => {
   try {
     const requestData = req.body;
@@ -13,9 +12,11 @@ router.post("/create", async (req, res) => {
       newId = 1;
     }
     requestData.id = newId;
-    const newClass = new ClassMode(requestData);
-    const savedClass = await newClass.save();
-    res.status(200).json(savedClass);
+    let newClass = new ClassMode(requestData);
+    let class_url = `http://localhost:3000/class-mode/${newClass._id.toString()}`;
+    newClass.class_url = class_url;
+    const updatedClass = await newClass.save();
+    res.status(200).json({ updatedClass });
   } catch (error) {
     console.error("Error saving new Class:", error);
     res.status(500).json({
