@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import AdminPageWrapper from "../../components/Common/AdminPageWrapper";
 
-import { Card, Text } from "@geist-ui/core";
+import { Card, Spacer, Text } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { Fetch } from "../../utils/Fetch";
 import { toast } from "react-toastify";
@@ -68,17 +68,33 @@ export default function ClassModePage() {
   return (
     <AdminPageWrapper heading="Class Page">
       <div className="elements">
-        <Card hoverable>
-          <Text h5>This is where the class will happen!</Text>
-          {classDetails && (
-            <Card hoverable>
-              <Text>Class Name : {classDetails.class_name}</Text>
-              <Text>Start Time : {classDetails.start_time}</Text>
-              <Text>End Time : {classDetails.end_time}</Text>
-              <Text>Time Remaining: {timeRemaining}</Text>
-            </Card>
-          )}
-        </Card>
+        {classDetails && (
+          <Card hoverable>
+            <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center">
+                <Text>Class Name : {classDetails.class_name}</Text>
+                <Text>Start Time : {classDetails.start_time}</Text>
+                <Text>End Time : {classDetails.end_time}</Text>
+              </div>
+              <Spacer />
+              <Card type="warning" width="50%" hoverable>
+                <div className="flex flex-col items-center">
+                  <Text h3>Time Remaining</Text>
+                  <div
+                    style={{
+                      fontSize: "32px",
+                      fontWeight: "bold",
+                      fontFamily: "'Roboto', sans-serif",
+                      color: "white", // Text color
+                    }}
+                  >
+                    <span style={{ fontSize: "40px" }}>{timeRemaining}</span>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </Card>
+        )}
       </div>
     </AdminPageWrapper>
   );
