@@ -1,14 +1,16 @@
 import { useParams } from "react-router-dom";
 import AdminPageWrapper from "../../components/Common/AdminPageWrapper";
 
-import { Card, Text, useScale } from "@geist-ui/core";
+import { Card, Text } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import { Fetch } from "../../utils/Fetch";
 import { toast } from "react-toastify";
 
 export default function ClassModePage() {
   const { class_id } = useParams();
-  const { classDetails, setClassDetails } = useState(null);
+  const [classDetails, setClassDetails] = useState(null);
+  const [timeRemaining, setTimeRemaining] = useState(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -30,6 +32,39 @@ export default function ClassModePage() {
     };
     fetchData();
   }, [class_id]);
+
+  useEffect(() => {
+    let countdownInterval;
+    if (classDetails) {
+      const updateCountdown = () => {
+        const startTimeParts = classDetails.start_time.split(":");
+        const now = new Date();
+        const currentHours = now.getHours();
+        const currentMinutes = now.getMinutes();
+        const currentSeconds = now.getSeconds();
+        let totalSecondsRemaining =
+          (parseInt(startTimeParts[0], 10) - currentHours) * 3600 +
+          (parseInt(startTimeParts[1], 10) - currentMinutes) * 60 +
+          (0 - currentSeconds);
+        if (totalSecondsRemaining > 0) {
+          const hours = Math.floor(totalSecondsRemaining / 3600);
+          const minutes = Math.floor(
+            (totalSecondsRemaining - hours * 3600) / 60
+          );
+          const seconds = totalSecondsRemaining - hours * 3600 - minutes * 60;
+          setTimeRemaining(`${hours}h ${minutes}m ${seconds}s`);
+        } else {
+          setTimeRemaining("Class has started!");
+          clearInterval(countdownInterval);
+        }
+      };
+
+      updateCountdown();
+      countdownInterval = setInterval(updateCountdown, 1000);
+    }
+    return () => clearInterval(countdownInterval); // Cleanup
+  }, [classDetails]);
+
   return (
     <AdminPageWrapper heading="Class Page">
       <div className="elements">
@@ -37,7 +72,10 @@ export default function ClassModePage() {
           <Text h5>This is where the class will happen!</Text>
           {classDetails && (
             <Card hoverable>
-              <Text>{classDetails.class_name}</Text>
+              <Text>Class Name : {classDetails.class_name}</Text>
+              <Text>Start Time : {classDetails.start_time}</Text>
+              <Text>End Time : {classDetails.end_time}</Text>
+              <Text>Time Remaining: {timeRemaining}</Text>
             </Card>
           )}
         </Card>
