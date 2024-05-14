@@ -7,6 +7,7 @@ import { withAuth } from "../../../utils/withAuth";
 import { useMemo } from "react";
 import { DataTable } from "../../../components/Common/DataTable/DataTable";
 import SortableColumn from "../../../components/Common/DataTable/SortableColumn";
+import { Button } from "@geist-ui/core";
 function ViewAllSchedules() {
   const columnsDataTable = useMemo(
     () => [
@@ -28,6 +29,7 @@ function ViewAllSchedules() {
           <SortableColumn column={column}>End Date</SortableColumn>
         ),
       },
+
       {
         accessorKey: "asana_ids",
         header: () => (
@@ -37,33 +39,26 @@ function ViewAllSchedules() {
           <div className="flex flex-row flex-wrap gap-2 p-2">
             {value &&
               value.map((asanaId, index) => {
-                console.log("from view sched : ", asanaId);
+                const asanaName = asanaNameMap[asanaId];
+                return (
+                  <span key={asanaId}>
+                    {asanaName ? asanaName : "Unknown Asana"}
+                  </span>
+                );
               })}
           </div>
         ),
+      },
 
-        // render: (value, rowData) => (
-        //   <div className="flex flex-row flex-wrap gap-2 p-2">
-        //     {value.map((asanaId, index) => {
-        //       console.log("from view sched : ", asanaId);
-        //       // const asana = allAsanas.find((asana) => asana.id === asanaId);
-        //       // console.log(asana, "from view sched : ");
-        //       // return (
-        //       //   <div key={index}>
-        //       //     {asana && (
-        //       //       <div className="flex flex-col align-center">
-        //       //         <div className="w-24 h-12 bg-gray-200 rounded-lg overflow-hidden transition-transform hover:scale-110">
-        //       //           <div className="flex items-center justify-center h-full">
-        //       //             <span>{asana.asana_name}</span>
-        //       //           </div>
-        //       //         </div>
-        //       //       </div>
-        //       //     )}
-        //       //   </div>
-        //       // );
-        //     })}
-        //   </div>
-        // ),
+      {
+        accessorKey: "actions",
+        header: () => <span>Actions</span>,
+        cell: (rowData) => (
+          <div className="flex flex-row items-center">
+            <Button auto>Delete</Button>
+            <Button auto>Update</Button>
+          </div>
+        ),
       },
     ],
     []
@@ -71,6 +66,16 @@ function ViewAllSchedules() {
 
   const [allSchedules, setAllSchedules] = useState([]);
   const [allAsanas, setAllAsanas] = useState([]);
+  const asanaNameMap = useMemo(() => {
+    return allAsanas.reduce((map, asana) => {
+      map[asana.id] = asana.asana_name;
+      return map;
+    }, {});
+  }, [allAsanas]);
+  useEffect(() => {
+    console.log("map : ", asanaNameMap);
+  }, [asanaNameMap]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
