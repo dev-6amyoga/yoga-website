@@ -5,7 +5,6 @@ import {
   Modal,
   Select,
   Table,
-  Tag,
   Text,
   Tooltip,
 } from "@geist-ui/core";
@@ -486,6 +485,10 @@ function AllPlaylists() {
     }));
   };
 
+  useEffect(() => {
+    console.log(modalData, "IS MODAL DATA");
+  }, [modalData]);
+
   return (
     <AdminPageWrapper heading="Content Management - View All Playlists">
       <div className="elements">
@@ -599,7 +602,7 @@ function AllPlaylists() {
         )}
       </div>
       <div>
-        <Modal
+        {/* <Modal
           visible={modalState}
           onClose={() => setModalState(false)}
           width="50rem"
@@ -720,6 +723,144 @@ function AllPlaylists() {
                         <br />
                       </div>
                     )}
+                  </div>
+                );
+              })}
+              <br />
+              <Tooltip text={"Add New Asana"} type="dark">
+                {" "}
+                <Button
+                  iconRight={<PlusCircle />}
+                  auto
+                  scale={2 / 3}
+                  onClick={handleAddNewAsana}
+                />
+              </Tooltip>
+            </form>
+          </Modal.Content>
+          <Modal.Action passive onClick={() => setModalState(false)}>
+            Cancel
+          </Modal.Action>
+          <Modal.Action onClick={updateData}>Update</Modal.Action>
+        </Modal> */}
+
+        <Modal
+          visible={modalState}
+          onClose={() => setModalState(false)}
+          width="50rem"
+        >
+          <Modal.Title>Update Playlist</Modal.Title>
+          <Modal.Subtitle>{modalData.playlist_name}</Modal.Subtitle>
+          <Modal.Content>
+            <form>
+              <Input
+                width="100%"
+                id="playlist_name"
+                placeholder={modalData.playlist_name}
+                onChange={handleInputChange}
+              >
+                Playlist Name
+              </Input>
+              <br />
+              <br />
+              {modalData.asana_ids.map((asanaId, index) => {
+                let isAsana = true;
+                let asanaName = "";
+                if (asanaId !== "") {
+                  const asana = playlistAsanas.find(
+                    (asana) => asana.id === asanaId
+                  );
+                  if (asana) {
+                    isAsana = true;
+                    asanaName = asana.asana_name;
+                  } else {
+                    isAsana = false;
+                  }
+                }
+                return (
+                  <div>
+                    {isAsana && (
+                      <div>
+                        <Text type="error">Asana {index + 1}</Text>
+                        <Grid.Container gap={1} justify="left" height="40px">
+                          <Grid>
+                            {" "}
+                            <Select
+                              key={index}
+                              width="100%"
+                              placeholder={`Select Asana ${index + 1}`}
+                              value={asanaName}
+                              onChange={(value) =>
+                                handleAsanaNameChange(value, index)
+                              }
+                            >
+                              {playlistAsanas.map((asanaOption) => (
+                                <Select.Option
+                                  key={asanaOption.id}
+                                  value={asanaOption.asana_name}
+                                >
+                                  {asanaOption.asana_name +
+                                    " " +
+                                    asanaOption.language}
+                                </Select.Option>
+                              ))}
+                            </Select>
+                          </Grid>
+                          <Grid>
+                            {" "}
+                            {index > 0 && (
+                              <Tooltip text={"Move Up"} type="dark">
+                                {" "}
+                                <Button
+                                  icon={<ArrowUpCircle />}
+                                  auto
+                                  scale={2 / 3}
+                                  onClick={() =>
+                                    handleAsanaReorder(index, "up")
+                                  }
+                                />
+                              </Tooltip>
+                            )}
+                          </Grid>
+                          <Grid>
+                            {" "}
+                            {index < modalData.asana_ids.length - 1 && (
+                              <Tooltip text={"Move Down"} type="dark">
+                                {" "}
+                                <Button
+                                  icon={<ArrowDownCircle />}
+                                  auto
+                                  scale={2 / 3}
+                                  onClick={() =>
+                                    handleAsanaReorder(index, "down")
+                                  }
+                                />
+                              </Tooltip>
+                            )}
+                          </Grid>
+                          <Grid>
+                            <Tooltip text={"Delete Asana"} type="dark">
+                              {" "}
+                              <Button
+                                type="error"
+                                icon={<XCircle />}
+                                auto
+                                scale={2 / 3}
+                                onClick={() => handleRemoveAsana(index)}
+                              />
+                            </Tooltip>
+                          </Grid>
+                        </Grid.Container>
+                        <br />
+                      </div>
+                    )}
+                    {/* {!isAsana && (
+                      <div>
+                        <Text type="success">Transition Video</Text>
+                        <h5>{asanaName}</h5>
+                        <br />
+                      </div>
+                    )} */}
                   </div>
                 );
               })}
