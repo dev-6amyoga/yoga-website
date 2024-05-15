@@ -59,6 +59,7 @@ function StudentNavbar() {
           data: { user_id: user?.user_id },
         });
         const data = response.data;
+        console.log("NAVBAR DATA : ", data);
         if (data["userPlan"].length !== 0) {
           const indexOfActiveUserPlan = data["userPlan"].findIndex(
             (plan) => plan.current_status === USER_PLAN_ACTIVE
@@ -100,10 +101,16 @@ function StudentNavbar() {
       {
         path: "/student/purchase-a-plan",
         title: "Purchase a plan",
+        props: {
+          disabled: false,
+        },
       },
       {
         path: "/student/free-videos",
         title: "Free Videos",
+        props: {
+          disabled: false,
+        },
       },
       {
         path: "/student/playlist-view",
@@ -112,43 +119,58 @@ function StudentNavbar() {
           disabled: disabled,
         },
       },
-      {
-        type: "group",
-        path: "/student/playlist-view",
-        title: "My Playlists",
-        props: {
-          disabled: disabledTailorMade,
-        },
-        subPaths: [
-          {
-            path: "/student/register-new-playlist",
-            title: "Register New Playlist",
-          },
-          {
-            path: "/student/view-all-playlists",
-            title: "View All Playlists",
-          },
-        ],
-      },
+      // {
+      //   type: "group",
+      //   path: "/student/playlist-view",
+      //   title: "My Playlists",
+      //   props: {
+      //     disabled: disabledTailorMade,
+      //   },
+      //   subPaths: [
+      //     {
+      //       path: "/student/register-new-playlist",
+      //       title: "Register New Playlist",
+      //     },
+      //     {
+      //       path: "/student/view-all-playlists",
+      //       title: "View All Playlists",
+      //     },
+      //   ],
+      // },
       {
         path: "/student/about-us",
         title: "About Us",
+        props: {
+          disabled: false,
+        },
       },
       {
         path: "/student/contact-us",
         title: "Contact Us",
+        props: {
+          disabled: false,
+        },
       },
       {
         path: "/student/transactions",
         title: "Transaction History",
+        props: {
+          disabled: false,
+        },
       },
       {
         path: "/student/watch-history",
         title: "Watch History",
+        props: {
+          disabled: false,
+        },
       },
       {
         path: "/student/my-profile",
         title: user ? user?.name : "",
+        props: {
+          disabled: false,
+        },
       },
     ];
   }, [user, disabledTailorMade, disabled]);
@@ -209,6 +231,7 @@ function StudentNavbar() {
                   onClick={() => {
                     navigate(path.path);
                   }}
+                  disabled={path.props?.disabled}
                 >
                   {path.title}
                 </Button>
