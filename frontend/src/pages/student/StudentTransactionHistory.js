@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { DataTable } from "../../components/Common/DataTable/DataTable";
 
 import SortableColumn from "../../components/Common/DataTable/SortableColumn";
+
 export default function StudentTransactionHistory() {
   let user = useUserStore((state) => state.user);
   const [transactions, setTransactions] = useState([]);
@@ -47,7 +48,10 @@ export default function StudentTransactionHistory() {
   };
 
   const subscribePlan = async (rowData, setLoading) => {
-    console.log(rowData.user_id, rowData.transaction_order_id);
+    console.log(
+      rowData.original.user_id,
+      rowData.original.transaction_order_id
+    );
     try {
       setLoading(true);
       const response = await Fetch({
@@ -55,8 +59,8 @@ export default function StudentTransactionHistory() {
         method: "POST",
         responseType: "arraybuffer",
         data: JSON.stringify({
-          user_id: rowData.user_id,
-          transaction_order_id: rowData.transaction_order_id,
+          user_id: rowData.original.user_id,
+          transaction_order_id: rowData.original.transaction_order_id,
         }),
       });
       // console.log(typeof response.data);
@@ -84,7 +88,7 @@ export default function StudentTransactionHistory() {
 
   const RenderAction = (value, rowData, index) => {
     const [loading, setLoading] = useState(false);
-    console.log(rowData);
+    console.log("RENDER ACTIONS : ", rowData);
     return (
       <Grid.Container gap={0.1}>
         <Grid>
@@ -93,7 +97,9 @@ export default function StudentTransactionHistory() {
             auto
             scale={1 / 3}
             font="12px"
-            disabled={loading || rowData?.payment_status !== "succeeded"}
+            disabled={
+              loading || rowData?.original?.payment_status !== "succeeded"
+            }
             loading={loading}
             onClick={() => {
               subscribePlan(rowData, setLoading);
@@ -150,9 +156,7 @@ export default function StudentTransactionHistory() {
         accessorKey: "operation",
         header: "Actions",
         cell: ({ row }) => {
-          return (
-            RenderAction(null, row, null)
-          );
+          return RenderAction(null, row, null);
         },
       },
     ],
