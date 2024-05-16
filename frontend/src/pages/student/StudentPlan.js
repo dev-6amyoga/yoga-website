@@ -370,8 +370,10 @@ function StudentPlan() {
       const response = await Fetch({
         url: "/plan/get-all-student-plans",
       });
-      console.log(response.data?.plans);
-      setAllPlans(response.data?.plans);
+      const filteredPlans = response.data?.plans?.filter(
+        (plan) => plan.name === "Basic Plan"
+      );
+      setAllPlans(filteredPlans);
     } catch (error) {
       toast("Error fetching plans", { type: "error" });
       console.log(error);
@@ -551,34 +553,35 @@ function StudentPlan() {
         if (response?.status === 200) {
           toast("Plan subscribed successfully", { type: "success" });
           //invoice download here!! order_id, toBeRegistered.user_id
-          // FetchRetry({
-          //     url: '/invoice/student/mail-invoice',
-          //     method: 'POST',
-          //     data: JSON.stringify({
-          //         user_id: toBeRegistered.user_id,
-          //         transaction_order_id: order_id,
-          //     }),
-          //     n: 2,
-          //     retryDelayMs: 2000,
-          // })
-          //     .then((responseInvoice) => {
-          //         if (responseInvoice.status === 200) {
-          //             toast('Invoice mailed successfully', {
-          //                 type: 'success',
-          //             })
-          //         }
-          //         setShowCard(false)
-          //         setLoading(false)
-          //     })
-          //     .catch((error) => {
-          //         console.log(error)
-          //         setShowCard(false)
-          //         toast(
-          //             'Error mailing invoice; Download invoice in Transaction History',
-          //             { type: 'error' }
-          //         )
-          //         setLoading(false)
-          //     })
+
+          FetchRetry({
+            url: "/invoice/student/mail-invoice",
+            method: "POST",
+            data: JSON.stringify({
+              user_id: toBeRegistered.user_id,
+              transaction_order_id: order_id,
+            }),
+            n: 2,
+            retryDelayMs: 2000,
+          })
+            .then((responseInvoice) => {
+              if (responseInvoice.status === 200) {
+                toast("Invoice mailed successfully", {
+                  type: "success",
+                });
+              }
+              setShowCard(false);
+              setLoading(false);
+            })
+            .catch((error) => {
+              console.log(error);
+              setShowCard(false);
+              toast(
+                "Error mailing invoice; Download invoice in Transaction History",
+                { type: "error" }
+              );
+              setLoading(false);
+            });
 
           fetchUserPlans();
           setLoading(false);
