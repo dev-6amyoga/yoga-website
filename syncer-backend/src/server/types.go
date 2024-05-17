@@ -1,7 +1,7 @@
 package server
 
 import (
-	"net"
+	"syncer-backend/src/timer"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
@@ -9,11 +9,13 @@ import (
 
 type Server struct {
 	// socker server instance
-	socketGroups map[string][]net.Conn
 
 	// db
 	dbClient *mongo.Client
 
 	// logger
 	logger *zap.SugaredLogger
+
+	// timers
+	timers timer.TimerMap
 }
