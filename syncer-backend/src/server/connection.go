@@ -111,7 +111,16 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 				return
 			}
 
-			s.timers.UpdateTime(event.ClassID, timerEvent.CurrentTime, et.UnixMilli())
+			err = s.timers.UpdateTime(event.ClassID, timerEvent.CurrentTime, et.UnixMilli())
+
+			if err != nil {
+				conn.WriteJSON(events.EventTeacherResponse{
+					Status:  events.EVENT_STATUS_NACK,
+					Message: "Error updating timer",
+				})
+				s.logger.Error("Error updating timer:", err)
+				return
+			}
 		}
 
 		conn.WriteJSON(events.EventTeacherResponse{
