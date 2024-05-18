@@ -15,6 +15,7 @@ import {
 import { WatchHistoryContext } from "../store/WatchHistoryStore";
 
 export default function Video() {
+
 	const [store, { setEnableWatchHistory }] = useContext(WatchHistoryContext);
 
 	const [videoStore, { setCurrentMarkerIdx, addToSeekQueue, setFullScreen }] =
@@ -23,16 +24,6 @@ export default function Video() {
 	const [playlistStore, { popFromArchive, popFromQueue }] =
 		usePlaylistStoreContext();
 
-	// const [devMode, setDevMode, fullScreen] = useVideoStore((state) => [
-	// 	state.devMode,
-	// 	state.setDevMode,
-	// 	state.fullScreen,
-	// ]);
-
-	// const [popFromArchive, popFromQueue] = usePlaylistStore((state) => [
-	// 	state.popFromArchive,
-	// 	state.popFromQueue,
-	// ]);
 
 	createEffect(
 		on(
@@ -235,7 +226,7 @@ export default function Video() {
 			);
 		});
 	});
-	// no
+	
 	createEffect(() => {
 		console.log("Disable watch history");
 		setEnableWatchHistory(false);
@@ -245,15 +236,19 @@ export default function Video() {
 		<div class={`toplvlpage relative max-w-7xl mx-auto`}>
 			<VideoPlayerWrapper />
 			<Playlist />
-
-			{/* <button
-				class={`fixed bottom-4 right-4 p-4 ${
-					devMode ? "bg-y-green" : "bg-y-white text-black"
-				} rounded-full shadow-lg`}
-				onClick={() => setDevMode(!devMode)}>
-				Dev Mode : {devMode ? "ON" : "OFF"}
-			</button> */}
 		</div>
 	);
 }
 
+
+
+	// const [devMode, setDevMode, fullScreen] = useVideoStore((state) => [
+	// 	state.devMode,
+	// 	state.setDevMode,
+	// 	state.fullScreen,
+	// ]);
+
+	// const [popFromArchive, popFromQueue] = usePlaylistStore((state) => [
+	// 	state.popFromArchive,
+	// 	state.popFromQueue,
+	// ]);
