@@ -1,6 +1,8 @@
 package timer
 
 import (
+	"errors"
+
 	"github.com/puzpuzpuz/xsync"
 )
 
@@ -16,7 +18,7 @@ func (t TimerMap) AddTimer(classId string, duration float32) {
 	})
 }
 
-func (t TimerMap) UpdateTime(classId string, duration float32, eventTime int64) {
+func (t TimerMap) UpdateTime(classId string, duration float32, eventTime int64) error {
 	ct, ok := t.Map.Load(classId)
 
 	if !ok {
@@ -27,12 +29,14 @@ func (t TimerMap) UpdateTime(classId string, duration float32, eventTime int64) 
 	} else {
 		// skip out of order events
 		if ct.LastUpdated >= eventTime {
-			return
+			return errors.New("out of order event")
 		}
 
 		ct.CurrentTime = duration
 		t.Map.Store(classId, ct)
 	}
+
+	return nil
 }
 
 func (t TimerMap) GetTime(classId string) float32 {

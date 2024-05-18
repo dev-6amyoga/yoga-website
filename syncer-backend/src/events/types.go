@@ -31,9 +31,9 @@ const (
 
 type Event struct {
 	// objectID string of the class in mongodb
-	ClassID string    `json:"class_id"`
-	Type    EventType `json:"type"`
-	Data    struct{}  `json:"data"`
+	ClassID string      `json:"class_id"`
+	Type    EventType   `json:"type"`
+	Data    interface{} `json:"data"`
 }
 
 // ----------------------------------------------------------
@@ -47,8 +47,17 @@ const (
 
 type QueueEvent struct {
 	SubType   QueueEventType `json:"subtype"`
-	Data      struct{}       `json:"data"`
+	Data      interface{}    `json:"data"`
 	EventTime string         `json:"event_time"`
+}
+
+type QueueEventPushData struct {
+	VideoID string `json:"video_id"`
+}
+
+type QueueEventPopData struct {
+	VideoID string `json:"video_id"`
+	Idx     int    `json:"idx"`
 }
 
 // ----------------------------------------------------------
@@ -65,8 +74,16 @@ const (
 
 type ControlsEvent struct {
 	SubType   ControlsEventType `json:"subtype"`
-	Data      struct{}          `json:"data"`
+	Data      interface{}       `json:"data"`
 	EventTime string            `json:"event_time"`
+}
+
+type ControlsEventSeekToData struct {
+	Time float32 `json:"time"`
+}
+
+type ControlsEventSeekMarkerData struct {
+	Marker int32 `json:"marker"`
 }
 
 // ----------------------------------------------------------

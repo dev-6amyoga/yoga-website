@@ -3,6 +3,7 @@ package class
 import (
 	"context"
 	"fmt"
+	"syncer-backend/src/events"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -14,7 +15,7 @@ func NewClass() (*ClassModel, error) {
 }
 
 // add to mongo db
-func AddToActionsQueue(db *mongo.Client, classId string, action string) error {
+func AddToActionsQueue(db *mongo.Client, classId string, action events.QueueEvent) error {
 	// Get the collection you want to update from
 	collection := db.Database("db_name").Collection("class")
 
@@ -48,7 +49,7 @@ func AddToActionsQueue(db *mongo.Client, classId string, action string) error {
 	return nil
 }
 
-func AddToControlsQueue(db *mongo.Client, classId string, action string) error {
+func AddToControlsQueue(db *mongo.Client, classId string, action events.ControlsEvent) error {
 	// Get the collection you want to update from
 	collection := db.Database("db_name").Collection("class")
 
