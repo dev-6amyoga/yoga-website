@@ -2,13 +2,21 @@ import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
 // import PageWrapper from "../../components/Common/PageWrapper";
 import { useEffect, useState } from "react";
 import Playlist from "../../components/Sidebar/Playlist";
-import VideoPlayerWrapper from "../../components/StackVideoShaka/VideoPlayerWrapper";
+// import VideoPlayerWrapper from "../../components/StackVideoShaka/VideoPlayerWrapper";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
+import VideoPlayerWrapper from "../../../../solid-frontend/src/components/StackVideoDashJS/VideoPlayerWrapper";
+// import VideoPlayerWrapper from "../../solid-frontend/src/components/StackVideoDashJS/VideoPlayerWrapper";
+import {
+  convertToReactComponent,
+  ReactToSolidBridgeProvider,
+} from "react-solid-bridge";
+
 import "./MovingText.css";
 
 function StudentHome() {
   const [position, setPosition] = useState(0);
+  const ReactMySolidComponent = convertToReactComponent(VideoPlayerWrapper);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -21,6 +29,7 @@ function StudentHome() {
   let user = useUserStore((state) => state.user);
   const [userPlan, setUserPlan] = useState({});
   const [planId, setPlanId] = useState(0);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -57,7 +66,13 @@ function StudentHome() {
 
       <div className="mx-auto max-w-7xl">
         <div className="my-10">
-          <VideoPlayerWrapper />
+          {/* <VideoPlayerWrapper /> */}
+          <ReactToSolidBridgeProvider>
+            <div>
+              <h2>React Component</h2>
+              <ReactMySolidComponent />
+            </div>
+          </ReactToSolidBridgeProvider>
           <hr />
           <Playlist />
         </div>
