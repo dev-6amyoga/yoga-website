@@ -5,7 +5,8 @@ import Playlist from "../../components/Sidebar/Playlist";
 // import VideoPlayerWrapper from "../../components/StackVideoShaka/VideoPlayerWrapper";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
-import VideoPlayerWrapper from "../../../../solid-frontend/src/components/StackVideoDashJS/VideoPlayerWrapper";
+import VideoPlayerWrapper from "./shared-components/StackVideoDashJS/VideoPlayerWrapper";
+// import VideoPlayerWrapper from "../../../../solid-frontend/src/components/StackVideoDashJS/VideoPlayerWrapper";
 // import VideoPlayerWrapper from "../../solid-frontend/src/components/StackVideoDashJS/VideoPlayerWrapper";
 import {
   convertToReactComponent,
