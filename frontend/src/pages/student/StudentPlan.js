@@ -552,6 +552,7 @@ function StudentPlan() {
         console.log({ response });
         if (response?.status === 200) {
           toast("Plan subscribed successfully", { type: "success" });
+
           //invoice download here!! order_id, toBeRegistered.user_id
 
           FetchRetry({
