@@ -63,6 +63,10 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 				s.logger.Error("Error unmarshalling message:", err)
 				return
 			}
+
+			// process data based on subtype
+			s.ProcessQueueEvent(event.ClassID, queueEvent, conn)
+
 		case events.EVENT_CONTROLS:
 			s.logger.Infof("Received event: %s", event.Type)
 			controlsEvent := events.ControlsEvent{}
@@ -77,6 +81,10 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 				s.logger.Error("Error unmarshalling message:", err)
 				return
 			}
+
+			// process data based on subtype
+			s.ProcessControlsEvent(event.ClassID, controlsEvent, conn)
+
 		case events.EVENT_TIMER:
 			s.logger.Infof("Received event: %s", event.Type)
 			timerEvent := events.TimerEvent{}
