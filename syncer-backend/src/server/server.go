@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"net/http"
+	"syncer-backend/src/timer"
 
 	"github.com/gorilla/websocket"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -11,6 +12,7 @@ import (
 )
 
 func NewServer() *Server {
+	// logger
 	l, err := zap.NewDevelopment()
 
 	if err != nil {
@@ -19,9 +21,18 @@ func NewServer() *Server {
 
 	prependedLogger := l.Sugar()
 
+	// timers
+	timers := timer.NewTimerMap()
+
+	// mongo connector
+	bsonOpts := &options.BSONOptions{
+		UseJSONStructTags: true,
+		NilSliceAsEmpty:   true,
+	}
+
 	client, err := mongo.Connect(
 		context.Background(),
-		options.Client().ApplyURI("mongodb://localhost:27017"),
+		options.Client().ApplyURI("mongodb://localhost:27017").SetBSONOptions(bsonOpts),
 	)
 
 	if err != nil {
@@ -41,6 +52,7 @@ func NewServer() *Server {
 	return &Server{
 		dbClient: client,
 		logger:   prependedLogger,
+		timers:   timers,
 	}
 }
 
@@ -52,9 +64,14 @@ func (s *Server) Start() {
 	http.HandleFunc("/teacher/ws", s.handleTeacherConnection)
 	http.HandleFunc("/student/ws", s.handleStudentConnection)
 
-	go http.ListenAndServe(":8080", nil) // Example: Port 8080
-
-	s.logger.Info("HTTP server for WebSocket started at port 8080")
+	s.logger.Info("HTTP server for WebSocket started at port 4949")
+	http.ListenAndServe(":4949", nil)
 }
 
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  4096,
+	WriteBufferSize: 4096,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
