@@ -349,7 +349,7 @@ export default function VideoPlaybar(props) {
 				{/* boop */}
 				<div>
 					<div
-						use:draggable
+						// use:draggable
 						class={`draggable timeboop bg-y-darkgreen rounded-full absolute z-[100] mt-[18px] w-3 h-3 hover:w-5 hover:h-5 ${
 							videoStore.videoState === STATE_VIDEO_ERROR
 								? "opacity-0"

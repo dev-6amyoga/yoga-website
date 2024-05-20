@@ -1,3 +1,4 @@
+import React from "react";
 import AllAsanaCategories from "../components/content-management/AllAsanaCategories";
 import AllAsanas from "../components/content-management/AllAsanas";
 import AllLanguages from "../components/content-management/AllLanguages";
