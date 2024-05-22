@@ -36,6 +36,10 @@ type Event struct {
 	Data    interface{} `json:"data"`
 }
 
+type StudentEventInitRequest struct {
+	ClassID string `json:"class_id"`
+}
+
 // ----------------------------------------------------------
 type QueueEventType string
 

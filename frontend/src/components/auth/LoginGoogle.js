@@ -16,7 +16,7 @@ export default function LoginGoogle() {
 	const [clientID, setClientID] = useState("");
 
 	useEffect(() => {
-		setClientID(process.env.REACT_APP_GOOGLE_CLIENT_ID);
+		setClientID(import.meta.env.VITE_GOOGLE_CLIENT_ID);
 	}, []);
 
 	async function verify_login(email, name) {

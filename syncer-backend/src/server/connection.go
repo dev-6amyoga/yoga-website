@@ -143,6 +143,10 @@ func (s *Server) handleStudentConnection(w http.ResponseWriter, r *http.Request)
 	}
 	defer conn.Close()
 
+	// read class id
+
+	conn.ReadJSON()
+
 	for {
 		// poll for events
 		// send events to students

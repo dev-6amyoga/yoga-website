@@ -948,8 +948,8 @@ function PurchaseAPlan() {
 
 				<RenderRazorpay
 					userId={user?.user_id}
-					keyId={process.env.REACT_APP_RAZORPAY_KEY_ID}
-					keySecret={process.env.REACT_APP_RAZORPAY_KEY_SECRET}
+					keyId={import.meta.env.VITE_RAZORPAY_KEY_ID}
+					keySecret={import.meta.env.VITE_RAZORPAY_KEY_SECRET}
 					orderId={orderDetails.orderId}
 					currency={orderDetails.currency}
 					currencyId={selectedCurrencyId}
