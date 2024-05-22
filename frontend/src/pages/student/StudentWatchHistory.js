@@ -38,7 +38,7 @@ export default function StudentWatchHistory() {
 	const [activePlan, setActivePlan] = useState(null);
 
 	useEffect(() => {
-		setCustomerCode(process.env.REACT_APP_CLOUDFLARE_CUSTOMER_CODE);
+		setCustomerCode(import.meta.env.VITE_CLOUDFLARE_CUSTOMER_CODE);
 	}, []);
 
 	const fetchWatchHistory = useCallback(() => {

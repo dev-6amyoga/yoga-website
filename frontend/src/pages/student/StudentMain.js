@@ -1,10 +1,5 @@
-import React from "react";
-import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
-import useUserStore from "../../store/UserStore";
-import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
+import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
 export default function StudentMain() {
 	return (
 		<div>

@@ -161,7 +161,7 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 				placeholder="Enter Phone Number"
 				className="w-full rounded-lg border py-2"
 			/>
-			{/* <ReCAPTCHA sitekey={process.env?.REACT_APP_} /> */}
+			{/* <ReCAPTCHA sitekey={process.env?.VITE_} /> */}
 			<RecaptchaContainer
 				containerRef={setUpReCaptcha}
 				className="sm:w-10"

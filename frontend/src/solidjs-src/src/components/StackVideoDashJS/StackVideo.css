@@ -1,0 +1,372 @@
+.video_controls__ctrl__button {
+	@apply flex h-9 w-11 items-center justify-center px-1 py-2 bg-transparent;
+}
+
+.video_controls__ctrl__button_fs {
+	@apply flex h-16 w-16 items-center justify-center px-1 py-5;
+}
+
+.video_controls__ctrl__button__icon {
+	@apply h-6 w-6;
+}
+
+.video-grid {
+	display: grid;
+	grid-template-columns: 2fr 0.5fr;
+	grid-template-rows: repeat(2, minmax(auto, 264px));
+
+	grid-template-areas:
+		"video queue"
+		"video queue"
+		". .";
+}
+
+.video-area {
+	grid-area: video;
+}
+.queue-area {
+	grid-area: queue;
+	aspect-ratio: 4 / 9;
+}
+
+@media (max-width: 1280px) {
+	.video-grid {
+		@apply flex flex-col;
+	}
+	.video-area {
+	}
+	.queue-area {
+		aspect-ratio: auto;
+	}
+}
+
+@font-face {
+	font-family: "Roboto";
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url(https://fonts.gstatic.com/s/roboto/v27/KFOmCnqEu92Fr1Me5Q.ttf)
+		format("truetype");
+}
+@font-face {
+	font-family: "Roboto";
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+	src: url(https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmEU9vAw.ttf)
+		format("truetype");
+}
+
+.custom-shaka {
+	font-family: "Roboto", sans-serif;
+}
+
+.shaka-video-container .fa-icons {
+	font-family: "Font Awesome 6 Free";
+}
+
+.custom-shaka-toggle-mode-label {
+	@apply flex gap-1 items-center;
+}
+
+.custom-shaka-toggle-mode-teacher {
+	display: none;
+}
+
+.custom-shaka-toggle-mode-student {
+	display: inline;
+}
+
+.custom-shaka-toggle-mode-label input:checked ~ span span:first-of-type {
+	display: inline;
+}
+
+.custom-shaka-toggle-mode-label input:checked ~ span span:last-of-type {
+	display: none;
+}
+
+.custom-shaka .shaka-bottom-controls {
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	padding-bottom: 0.5rem;
+	z-index: 1;
+}
+
+.custom-shaka .shaka-bottom-controls {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	-ms-flex-direction: column;
+	flex-direction: column;
+}
+
+.custom-shaka .shaka-controls-button-panel {
+	-webkit-box-ordinal-group: 3;
+	-ms-flex-order: 2;
+	order: 2;
+	height: 44px;
+	padding: 0 10px;
+}
+
+.custom-shaka .shaka-range-container {
+	margin: 4px 10px 4px 10px;
+	top: 0;
+}
+
+.custom-shaka .shaka-small-play-button {
+	-webkit-box-ordinal-group: -2;
+	-ms-flex-order: -3;
+	order: -3;
+}
+
+.custom-shaka .shaka-small-play-button:focus {
+	outline: none;
+	border: none;
+}
+
+.custom-shaka .shaka-mute-button {
+	-webkit-box-ordinal-group: -1;
+	-ms-flex-order: -2;
+	order: -2;
+}
+.custom-shaka .shaka-controls-button-panel > * {
+	margin: 0;
+	padding: 3px 8px;
+	color: #eee;
+	height: 40px;
+}
+
+/* .custom-shaka .shaka-controls-button-panel > *:focus {
+	outline: none;
+	-webkit-box-shadow: inset 0 0 0 2px rgba(27, 127, 204, 0.8);
+	box-shadow: inset 0 0 0 2px rgba(27, 127, 204, 0.8);
+	color: #fff;
+} */
+
+.custom-shaka .shaka-controls-button-panel > *:hover {
+	color: #fff;
+}
+.custom-shaka .shaka-controls-button-panel .shaka-volume-bar-container {
+	position: relative;
+	z-index: 10;
+	left: -1px;
+	-webkit-box-ordinal-group: 0;
+	-ms-flex-order: -1;
+	order: -1;
+	opacity: 0;
+	width: 0px;
+	-webkit-transition: width 0.2s cubic-bezier(0.4, 0, 1, 1);
+	height: 3px;
+	transition: width 0.2s cubic-bezier(0.4, 0, 1, 1);
+	padding: 0;
+}
+.custom-shaka .shaka-controls-button-panel .shaka-volume-bar-container:hover,
+.custom-shaka .shaka-controls-button-panel .shaka-volume-bar-container:focus {
+	display: block;
+	width: 50px;
+	opacity: 1;
+	padding: 0 6px;
+}
+.custom-shaka .shaka-mute-button:hover + div {
+	opacity: 1;
+	width: 50px;
+	padding: 0 6px;
+}
+.custom-shaka .shaka-current-time {
+	padding: 0 10px;
+	font-size: 12px;
+}
+.custom-shaka .shaka-seek-bar-container {
+	height: 3px;
+	position: relative;
+	top: -1px;
+	border-radius: 0;
+	margin-bottom: 0;
+}
+.custom-shaka .shaka-seek-bar-container .shaka-range-element {
+	opacity: 0;
+}
+.custom-shaka .shaka-seek-bar-container:hover {
+	height: 5px;
+	top: 0;
+	cursor: pointer;
+}
+.custom-shaka .shaka-seek-bar-container:hover .shaka-range-element {
+	opacity: 1;
+	cursor: pointer;
+}
+.custom-shaka
+	.shaka-seek-bar-container
+	input[type="range"]::-webkit-slider-thumb {
+	background: #ffbf00;
+	cursor: pointer;
+}
+.custom-shaka .shaka-seek-bar-container input[type="range"]::-moz-range-thumb {
+	background: #ffbf00;
+	cursor: pointer;
+}
+.custom-shaka .shaka-seek-bar-container input[type="range"]::-ms-thumb {
+	background: #ffbf00;
+	cursor: pointer;
+}
+.custom-shaka .shaka-video-container * {
+	font-family: "Roboto", sans-serif;
+}
+.custom-shaka .shaka-video-container .material-icons-round {
+	font-family: "Material Icons Sharp";
+}
+
+/*
+.custom-shaka .shaka-overflow-menu,
+.custom-shaka .shaka-settings-menu {
+	border-radius: 2px;
+	background: rgba(28, 28, 28, 0.9);
+	text-shadow: 0 0 2px rgb(0 0 0%);
+	-webkit-transition: opacity 0.1s cubic-bezier(0, 0, 0.2, 1);
+	transition: opacity 0.1s cubic-bezier(0, 0, 0.2, 1);
+	-moz-user-select: none;
+	-ms-user-select: none;
+	-webkit-user-select: none;
+	right: 10px;
+	bottom: 50px;
+	padding: 8px 0;
+	min-width: 200px;
+}
+.custom-shaka .shaka-settings-menu {
+	padding: 0 0 8px 0;
+}
+.custom-shaka .shaka-settings-menu button {
+	font-size: 12px;
+}
+.custom-shaka .shaka-settings-menu button span {
+	margin-left: 33px;
+	font-size: 13px;
+}
+.custom-shaka .shaka-settings-menu button[aria-selected="true"] {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+}
+.custom-shaka .shaka-settings-menu button[aria-selected="true"] span {
+	-webkit-box-ordinal-group: 3;
+	-ms-flex-order: 2;
+	order: 2;
+	margin-left: 0;
+}
+.custom-shaka .shaka-settings-menu button[aria-selected="true"] i {
+	-webkit-box-ordinal-group: 2;
+	-ms-flex-order: 1;
+	order: 1;
+	font-size: 18px;
+	padding-left: 5px;
+}
+.custom-shaka .shaka-overflow-menu button {
+	padding: 0;
+}
+.custom-shaka .shaka-overflow-menu button i {
+	display: none;
+}
+.custom-shaka .shaka-overflow-menu button .shaka-overflow-button-label {
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-pack: justify;
+	-ms-flex-pack: justify;
+	justify-content: space-between;
+	-webkit-box-orient: horizontal;
+	-webkit-box-direction: normal;
+	-ms-flex-direction: row;
+	flex-direction: row;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	cursor: default;
+	outline: none;
+	height: 40px;
+	-webkit-box-flex: 0;
+	-ms-flex: 0 0 100%;
+	flex: 0 0 100%;
+}
+.custom-shaka .shaka-overflow-menu button .shaka-overflow-button-label span {
+	-ms-flex-negative: initial;
+	flex-shrink: initial;
+	padding-left: 15px;
+	font-size: 13px;
+	font-weight: 500;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+}
+.custom-shaka .shaka-overflow-menu span + span {
+	color: #fff;
+	font-weight: 400 !important;
+	font-size: 12px !important;
+	padding-right: 8px;
+	padding-left: 0 !important;
+}
+.custom-shaka .shaka-overflow-menu span + span:after {
+	content: "navigate_next";
+	font-family: "Material Icons Sharp";
+	font-size: 20px;
+}
+.custom-shaka .shaka-overflow-menu .shaka-pip-button span + span {
+	padding-right: 15px !important;
+}
+.custom-shaka .shaka-overflow-menu .shaka-pip-button span + span:after {
+	content: "";
+}
+.custom-shaka .shaka-back-to-overflow-button {
+	padding: 8px 0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+	font-size: 12px;
+	color: #eee;
+	height: 40px;
+}
+.custom-shaka .shaka-back-to-overflow-button .material-icons-round {
+	font-size: 15px;
+	padding-right: 10px;
+}
+.custom-shaka .shaka-back-to-overflow-button span {
+	margin-left: 3px !important;
+}
+.custom-shaka .shaka-overflow-menu button:hover,
+.custom-shaka .shaka-settings-menu button:hover {
+	background-color: rgba(255, 255, 255, 0.1);
+	cursor: pointer;
+}
+.custom-shaka .shaka-overflow-menu button:hover label,
+.custom-shaka .shaka-settings-menu button:hover label {
+	cursor: pointer;
+}
+.custom-shaka .shaka-overflow-menu button:focus,
+.custom-shaka .shaka-settings-menu button:focus {
+	background-color: rgba(255, 255, 255, 0.1);
+	border: none;
+	outline: none;
+}
+.custom-shaka .shaka-overflow-menu button,
+.custom-shaka .shaka-settings-menu button {
+	color: #eee;
+}
+
+*/
+
+.custom-shaka .shaka-captions-off {
+	color: #bfbfbf;
+}
+.custom-shaka .shaka-overflow-menu-button {
+	font-size: 18px;
+	margin-right: 5px;
+}
+
+.custom-shaka .shaka-fullscreen-button:hover {
+	font-size: 25px;
+	-webkit-transition: font-size 0.1s cubic-bezier(0, 0, 0.2, 1);
+	transition: font-size 0.1s cubic-bezier(0, 0, 0.2, 1);
+}

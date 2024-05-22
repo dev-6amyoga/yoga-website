@@ -16,7 +16,7 @@ function VideoQueue() {
 	const [customerCode, setCustomerCode] = useState("");
 
 	useEffect(() => {
-		setCustomerCode(process.env.REACT_APP_CLOUDFLARE_CUSTOMER_CODE);
+		setCustomerCode(import.meta.env.VITE_CLOUDFLARE_CUSTOMER_CODE);
 	}, []);
 
 	return (
