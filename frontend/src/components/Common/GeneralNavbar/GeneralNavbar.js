@@ -87,92 +87,119 @@ import { Link, useNavigate } from "react-router-dom";
 // }
 
 export default function GeneralNavbar() {
-	const navigate = useNavigate();
-	const [open, setOpen] = useState(false);
-	const [contentVisible, setContentVisible] = useState(false);
-	const handleNavbarToggle = () => {
-		setOpen((p) => !p);
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [contentVisible, setContentVisible] = useState(false);
+  const handleNavbarToggle = () => {
+    setOpen((p) => !p);
 
-		if (contentVisible) {
-			setTimeout(() => {
-				setContentVisible((p) => !p);
-			}, 400);
-		} else {
-			setTimeout(() => {
-				setContentVisible((p) => !p);
-			}, 400);
-		}
-	};
+    if (contentVisible) {
+      setTimeout(() => {
+        setContentVisible((p) => !p);
+      }, 400);
+    } else {
+      setTimeout(() => {
+        setContentVisible((p) => !p);
+      }, 400);
+    }
+  };
 
-	const NavLinks = () => {
-		return (
-			<div className="flex flex-col items-center gap-8 md:gap-12 justify-center font-mono md:text-5xl text-2xl w-full min-h-screen">
-				<Link
-					to="/"
-					className="text-black font-bold hover:text-black transition-colors">
-					HOME
-				</Link>
-				<Link
+  const NavLinks = () => {
+    return (
+      <div className="flex flex-col items-center gap-8 md:gap-12 justify-center font-mono md:text-5xl text-2xl w-full min-h-screen">
+        <Link
+          to="/"
+          className="text-black font-bold hover:text-black transition-colors"
+        >
+          HOME
+        </Link>
+        {/* <Link
 					to="/about-us"
 					className="text-black font-bold hover:text-black transition-colors">
 					ABOUT
-				</Link>
-				<Link
-					to="/pricing"
-					className="text-black font-bold hover:text-black transition-colors">
-					PLANS & PRICING
-				</Link>
-				<Link
-					to="/contact-us"
-					className="text-black font-bold hover:text-black transition-colors">
-					CONTACT
-				</Link>
-				<Link
-					to="/auth"
-					className="text-black font-bold hover:text-black transition-colors">
-					LOGIN/REGISTER
-				</Link>
-			</div>
-		);
-	};
-	return (
-		<div className="">
-			<div className="fixed top-0 z-[100]">
-				<div className="min-h-screen w-12 ">
-					<div className="h-screen flex items-center justify-center pointer-events">
-						<div
-							className="w-7 h-7 text-black hover:cursor-pointer"
-							onClick={handleNavbarToggle}>
-							<AnimatePresence mode="wait">
-								{open ? (
-									<motion.div
-										key="open"
-										initial={{ x: -10, opacity: 0 }}
-										animate={{ x: 0, opacity: 1 }}
-										exit={{ x: 10, opacity: 0 }}>
-										<RxCross1 className="w-full h-full" />
-									</motion.div>
-								) : (
-									<motion.div
-										key="close"
-										initial={{ x: -10, opacity: 0 }}
-										animate={{ x: 0, opacity: 1 }}
-										exit={{ x: 10, opacity: 0 }}>
-										<FaBars className="w-full h-full" />
-									</motion.div>
-								)}
-							</AnimatePresence>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div
-				className={`h-full bg-grey-900 bg-opacity-40 backdrop-blur-md fixed top-0 z-50 text-white text-2xl ${open ? "w-full" : "w-0"} pointer-events transition-all duration-500`}>
-				<div
-					className={`${open ? "opacity-100" : "opacity-0"} delay-100 duration-100 transition-all ${contentVisible ? "block" : "hidden"}`}>
-					<NavLinks />
-				</div>
-			</div>
-		</div>
-	);
+				</Link> */}
+        <Link
+          to="/pricing"
+          className="text-black font-bold hover:text-black transition-colors"
+        >
+          PLANS & PRICING
+        </Link>
+        <Link
+          to="/pricing"
+          className="text-black font-bold hover:text-black transition-colors"
+        >
+          PRIVACY POLICY
+        </Link>
+        <Link
+          to="/pricing"
+          className="text-black font-bold hover:text-black transition-colors"
+        >
+          TERMS & CONDITIONS
+        </Link>
+        <Link
+          to="/pricing"
+          className="text-black font-bold hover:text-black transition-colors"
+        >
+          CANCELLATION AND REFUNDS
+        </Link>
+        <Link
+          to="/contact-us"
+          className="text-black font-bold hover:text-black transition-colors"
+        >
+          CONTACT
+        </Link>
+        <Link
+          to="/auth"
+          className="text-black font-bold hover:text-black transition-colors"
+        >
+          LOGIN/REGISTER
+        </Link>
+      </div>
+    );
+  };
+  return (
+    <div className="">
+      <div className="fixed top-0 z-[100]">
+        <div className="min-h-screen w-12 ">
+          <div className="h-screen flex items-center justify-center pointer-events">
+            <div
+              className="w-7 h-7 text-black hover:cursor-pointer"
+              onClick={handleNavbarToggle}
+            >
+              <AnimatePresence mode="wait">
+                {open ? (
+                  <motion.div
+                    key="open"
+                    initial={{ x: -10, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: 10, opacity: 0 }}
+                  >
+                    <RxCross1 className="w-full h-full" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="close"
+                    initial={{ x: -10, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: 10, opacity: 0 }}
+                  >
+                    <FaBars className="w-full h-full" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className={`h-full bg-grey-900 bg-opacity-40 backdrop-blur-md fixed top-0 z-50 text-white text-2xl ${open ? "w-full" : "w-0"} pointer-events transition-all duration-500`}
+      >
+        <div
+          className={`${open ? "opacity-100" : "opacity-0"} delay-100 duration-100 transition-all ${contentVisible ? "block" : "hidden"}`}
+        >
+          <NavLinks />
+        </div>
+      </div>
+    </div>
+  );
 }
