@@ -125,19 +125,19 @@ export default function GeneralNavbar() {
           PLANS & PRICING
         </Link>
         <Link
-          to="/pricing"
+          to="/privacy"
           className="text-black font-bold hover:text-black transition-colors"
         >
           PRIVACY POLICY
         </Link>
         <Link
-          to="/pricing"
+          to="/terms-and-conditions"
           className="text-black font-bold hover:text-black transition-colors"
         >
           TERMS & CONDITIONS
         </Link>
         <Link
-          to="/pricing"
+          to="/cancellations"
           className="text-black font-bold hover:text-black transition-colors"
         >
           CANCELLATION AND REFUNDS
