@@ -126,23 +126,25 @@
 // }
 
 import VideoPlayerWrapper from "../../solidjs-src/src/components/StackVideoDashJS/VideoPlayerWrapper";
+import VideoStoreContext from "../../solidjs-src/src/store/VideoStore";
 // import { Cube as SolidCube } from "phosphor-solid";
 import {
-	convertToReactComponent,
-	ReactToSolidBridgeProvider,
+  convertToReactComponent,
+  ReactToSolidBridgeProvider,
 } from "react-solid-bridge";
 
 const VideoPlayerWrapperSolid = convertToReactComponent(VideoPlayerWrapper);
+const VideoStoreContextSolid = convertToReactComponent(VideoStoreContext);
 
 export default function TestingVideo() {
-	return (
-		<ReactToSolidBridgeProvider>
-			<h1>Hello</h1>
-			{/* <ReactToSolidBridge
+  return (
+    <ReactToSolidBridgeProvider>
+      <h1>Hello</h1>
+      {/* <ReactToSolidBridge
 				getSolidComponent={({ getChildren, props }) =>
 					VideoPlayerWrapper({ children: getChildren })
 				}></ReactToSolidBridge> */}
-			<VideoPlayerWrapperSolid />
-		</ReactToSolidBridgeProvider>
-	);
+      <VideoPlayerWrapperSolid />
+    </ReactToSolidBridgeProvider>
+  );
 }
