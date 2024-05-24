@@ -10,6 +10,7 @@ import {
 	EVENT_QUEUE_CLEAR,
 	EVENT_QUEUE_POP,
 	EVENT_QUEUE_PUSH,
+	EVENT_TIMER,
 } from "../../enums/class_mode_events";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -89,6 +90,7 @@ function TeacherSocket() {
 				EVENT_CONTROLS_SEEK_TO,
 				EVENT_CONTROLS_SEEK_MARKER,
 			],
+			timer: [EVENT_TIMER],
 		};
 	}, []);
 
@@ -165,6 +167,33 @@ function TeacherSocket() {
 				})}
 			</div>
 
+			<div className="flex flex-row gap-4 border">
+				{eventTypes.timer.map((e) => {
+					return (
+						<button
+							className="p-2 border border-gray-300 rounded-lg"
+							key={e}
+							onClick={() => {
+								if (socket) {
+									socket.send(
+										JSON.stringify({
+											class_id: "123",
+											type: EVENT_TIMER,
+											data: {
+												current_time: 3.123,
+												event_time:
+													new Date().toISOString(),
+											},
+										})
+									);
+								}
+							}}>
+							{e}
+						</button>
+					);
+				})}
+			</div>
+
 			<div className="flex flex-row flex-wrap p-4 border">
 				{queue.map((m) => {
 					return (
@@ -217,6 +246,13 @@ function StudentSocket() {
 
 			// 	);
 			// }, 5000);
+
+			socket.send(
+				JSON.stringify({
+					class_id: "123",
+					student_id: "1",
+				})
+			);
 		};
 
 		const handleClose = () => {
@@ -249,6 +285,31 @@ function StudentSocket() {
 			<h1>Student Socket</h1>
 
 			<p>Connection : {connectionOpen ? "OPEN" : "CLOSE"}</p>
+
+			<button
+				onClick={() => {
+					if (socket) {
+						if (connectionOpen) {
+							socket.close();
+						} else {
+							setStartConnection(true);
+						}
+					}
+				}}>
+				{connectionOpen ? "Close Connection" : "Open Connection"}
+			</button>
+
+			<div className="flex flex-row flex-wrap p-4 border">
+				{queue.map((m) => {
+					return (
+						<div
+							className="m-2 p-2 border border-gray-300 rounded-lg"
+							key={m.event_time}>
+							<p>{m.status}</p>
+						</div>
+					);
+				})}
+			</div>
 		</div>
 	);
 }

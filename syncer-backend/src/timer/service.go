@@ -12,13 +12,13 @@ func NewTimerMap() TimerMap {
 	}
 }
 
-func (t TimerMap) AddTimer(classId string, duration float32) {
+func (t TimerMap) AddTimer(classId string, duration float64) {
 	t.Map.Store(classId, Timer{
 		CurrentTime: duration,
 	})
 }
 
-func (t TimerMap) UpdateTime(classId string, duration float32, eventTime int64) error {
+func (t TimerMap) UpdateTime(classId string, duration float64, eventTime int64) error {
 	ct, ok := t.Map.Load(classId)
 
 	if !ok {
@@ -39,7 +39,7 @@ func (t TimerMap) UpdateTime(classId string, duration float32, eventTime int64) 
 	return nil
 }
 
-func (t TimerMap) GetTime(classId string) float32 {
+func (t TimerMap) GetTime(classId string) float64 {
 	ct, ok := t.Map.Load(classId)
 
 	if !ok {

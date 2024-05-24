@@ -1,8 +1,6 @@
-import {
-	DragDropSensors,
-	createDraggable,
-	useDragDropContext,
-} from "@thisbeyond/solid-dnd";
+import { useDragDropContext } from "@thisbeyond/solid-dnd";
+
+import { createDraggable } from "@neodrag/solid";
 import {
 	createEffect,
 	createMemo,
@@ -69,7 +67,7 @@ export default function VideoPlaybar(props) {
 	let barRef = null;
 	let draggableHandle = null;
 
-	let draggable = createDraggable(1);
+	let { draggable } = createDraggable();
 
 	const [mouseDown, setMouseDown] = createSignal(false);
 	const [barBound, setBarBound] = createSignal({
@@ -313,8 +311,6 @@ export default function VideoPlaybar(props) {
 
 	return (
 		<>
-			<DragDropSensors />
-			<ConstrainDragAxis />
 			<div
 				class={`w-[calc(100%-0.35rem)] h-[1.5rem] bg-transparent relative mx-auto group flex items-start mt-2`}
 				onClick={(e) => seekOnClick(e, "barclick")}
@@ -349,7 +345,10 @@ export default function VideoPlaybar(props) {
 				{/* boop */}
 				<div>
 					<div
-						// use:draggable
+						use:draggable={{
+							axis: "x",
+							bounds: barBound,
+						}}
 						class={`draggable timeboop bg-y-darkgreen rounded-full absolute z-[100] mt-[18px] w-3 h-3 hover:w-5 hover:h-5 ${
 							videoStore.videoState === STATE_VIDEO_ERROR
 								? "opacity-0"
@@ -364,8 +363,8 @@ export default function VideoPlaybar(props) {
 									? "-top-[calc(50%-0.3rem)]"
 									: "-top-[calc(50%-0.3rem)] hover:-top-[calc(50%-0.1rem)]"
 								: mouseDown()
-								? "-top-[calc(50%-0.2rem)]"
-								: "-top-[calc(50%-0.225rem)] hover:-top-[calc(50%+0.1rem)]"
+									? "-top-[calc(50%-0.2rem)]"
+									: "-top-[calc(50%-0.225rem)] hover:-top-[calc(50%+0.1rem)]"
 						} `}
 						ref={draggableHandle}
 						style={{

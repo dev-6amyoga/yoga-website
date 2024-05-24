@@ -5,7 +5,7 @@ import (
 )
 
 type Timer struct {
-	CurrentTime float32
+	CurrentTime float64
 	LastUpdated int64
 }
 
