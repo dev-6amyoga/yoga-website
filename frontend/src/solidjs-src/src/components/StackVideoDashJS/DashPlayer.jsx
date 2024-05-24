@@ -352,7 +352,7 @@ function DashPlayer(props) {
 	};
 
 	const onPlaybackNotAllowed = () => {
-		if (playerRef() && isActive) {
+		if (playerRef() && props.isActive) {
 			console.log("[DASH PLAYER] : playback not allowed");
 			playerRef().setMute(true);
 			playerRef().initialize(videoRef.current, props.src, true, 0.0);
@@ -608,10 +608,7 @@ function DashPlayer(props) {
 	);
 
 	return (
-		<div
-			class={
-				"dash-player w-full h-full relative grid place-content-center "
-			}>
+		<div class={"dash-player w-full h-full relative"}>
 			<video
 				class="aspect-video"
 				id={props.queueItemId}
