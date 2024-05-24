@@ -1,4 +1,5 @@
 import { Card } from "@geist-ui/core";
+import PageWrapper from "../../components/Common/PageWrapper";
 
 function Cancellations() {
   return (

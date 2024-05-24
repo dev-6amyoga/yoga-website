@@ -1,4 +1,5 @@
 import PageWrapper from "../../components/Common/PageWrapper";
+import { Card } from "@geist-ui/core";
 
 function TermsAndConditions() {
   return (
