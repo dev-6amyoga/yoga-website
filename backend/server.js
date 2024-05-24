@@ -202,7 +202,7 @@ app.use("/playlist-configs", playlistConfigsRouter);
 app.use("/playback", playbackRouter);
 app.use("/classMode", classModeRouter);
 
-const port = parseInt(process.env.SERVER_PORT);
+const port = parseInt(process.env.PORT);
 
 app.listen(port || 4000, () => {
   console.log(`Server is running on port ${port}`);
