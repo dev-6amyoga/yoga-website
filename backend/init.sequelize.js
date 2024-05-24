@@ -27,8 +27,8 @@ var sequelize = new Sequelize(DB_DATABASE, DB_USERNAME, DB_PASSWORD, {
 
 // Initializes and syncs the db
 function initializeSequelize() {
-  //   return sequelize.sync({ alter: true });
-  return sequelize.sync({ force: true });
+  return sequelize.sync({ alter: true });
+  // return sequelize.sync({ force: true });
 }
 
 module.exports = { sequelize, initializeSequelize };
