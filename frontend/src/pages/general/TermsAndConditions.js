@@ -6,7 +6,7 @@ function TermsAndConditions() {
     <PageWrapper heading={"Terms and Conditions"}>
       <div className="flex flex-col items-center">
         <Divider />{" "}
-        <Card width="50%" type="dark">
+        <Card width="50%" type="secondary" hoverable>
           <Text h4 my={0}>
             Terms and Conditions
           </Text>
