@@ -9,26 +9,21 @@ const buttonVariants = cva(
 	{
 		variants: {
 			variant: {
-				default:
-					"bg-y-darkgreen text-y-white border-2 border-transparent hover:border-y-black hover:bg-y-darkgreen/90",
-				destructive:
-					"bg-y-red text-y-black btn-move-base transition-all text-y-black hover:solid-shadow-black",
-				outline:
-					"border border-input bg-background hover:bg-y-white border-2 border-y-gray hover:border-y-black",
-				secondary:
-					"bg-y-white text-y-black border-2 border-transparent hover:border-y-black hover:bg-y-white/90",
-				ghost: "bg-y-white text-y-green btn-move-base transition-all hover:solid-shadow-darkgreen",
-				link: "text-primary underline-offset-4 hover:underline",
-				experiment:
-					"z-10 relative bg-y-darkgreen btn-move-base transition-all text-y-white hover:solid-shadow-black",
-				dark: "z-10 relative bg-y-black btn-move-base transition-all text-y-white hover:solid-shadow-green",
+				default: "btn-default",
+				destructive: "btn-destructive",
+				outline: "btn-outline",
+				secondary: "btn-secondary",
+				ghost: "btn-ghost",
+				link: "btn-link",
+				experiment: "btn-experiment",
+				dark: "btn-dark",
 			},
 			size: {
-				default: "h-10 px-4 py-2",
-				sm: "h-9 rounded-md px-3",
-				xs: "h-5 rounded-full py-2 px-2 text-xs",
-				lg: "h-11 rounded-md px-8",
-				icon: "h-10 w-10",
+				default: "btn",
+				sm: "btn-sm",
+				xs: "btn-xs",
+				lg: "btn-lg",
+				icon: "btn-icon",
 			},
 		},
 		defaultVariants: {
