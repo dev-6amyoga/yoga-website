@@ -6,6 +6,7 @@ import (
 	"syncer-backend/src/timer"
 
 	"github.com/gorilla/websocket"
+	"github.com/puzpuzpuz/xsync"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
@@ -50,15 +51,15 @@ func NewServer() *Server {
 	prependedLogger.Info("Successfully connected to MongoDB")
 
 	return &Server{
-		dbClient: client,
-		logger:   prependedLogger,
-		timers:   timers,
+		dbClient:       client,
+		logger:         prependedLogger,
+		Timers:         timers,
+		UpdateChannels: xsync.NewMapOf[[]chan float64](),
 	}
 }
 
 func (s *Server) Start() {
 	// start socket server
-	s.logger.Info("Server started at port ----")
 
 	// serve
 	http.HandleFunc("/teacher/ws", s.handleTeacherConnection)

@@ -1,19 +1,21 @@
-import { createEffect, on } from "solid-js";
+import { For, Show, createEffect, on } from "solid-js";
 import { SEEK_TYPE_MARKER } from "../../enums/seek_types";
 import { useVideoStoreContext } from "../../store/VideoStore";
 
 export default function VideoMarkers() {
-	const [videoStore, { clearSeekQueue, addToSeekQueue, setMarkers, setCurrentMarkerIdx }] =
-		useVideoStoreContext();
+	const [
+		videoStore,
+		{ clearSeekQueue, addToSeekQueue, setMarkers, setCurrentMarkerIdx },
+	] = useVideoStoreContext();
 
 	createEffect(
 		on([() => videoStore.currentVideo], () => {
-			console.log(
-				"currentVideo changed : ",
-				videoStore.currentVideo.video?.markers
-			);
 			if (videoStore.currentVideo) {
-				console.log("currentVideo changed : ", "SEEK QUEUE CLEARED!")
+				console.log(
+					"currentVideo changed : ",
+					videoStore.currentVideo.video?.markers
+				);
+				console.log("currentVideo changed : ", "SEEK QUEUE CLEARED!");
 				clearSeekQueue();
 				setMarkers(videoStore.currentVideo?.video?.markers || []);
 				if (videoStore.currentVideo?.video?.markers?.length > 0) {

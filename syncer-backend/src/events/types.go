@@ -31,13 +31,14 @@ const (
 
 type Event struct {
 	// objectID string of the class in mongodb
-	ClassID string      `json:"class_id"`
-	Type    EventType   `json:"type"`
-	Data    interface{} `json:"data"`
+	ClassID string                 `json:"class_id"`
+	Type    EventType              `json:"type"`
+	Data    map[string]interface{} `json:"data"`
 }
 
 type StudentEventInitRequest struct {
-	ClassID string `json:"class_id"`
+	ClassID   string `json:"class_id"`
+	StudentID string `json:"student_id"`
 }
 
 // ----------------------------------------------------------
@@ -50,9 +51,9 @@ const (
 )
 
 type QueueEvent struct {
-	SubType   QueueEventType `json:"subtype"`
-	Data      interface{}    `json:"data"`
-	EventTime string         `json:"event_time"`
+	SubType   QueueEventType         `json:"subtype"`
+	Data      map[string]interface{} `json:"data"`
+	EventTime string                 `json:"event_time"`
 }
 
 type QueueEventPushData struct {
@@ -77,13 +78,13 @@ const (
 )
 
 type ControlsEvent struct {
-	SubType   ControlsEventType `json:"subtype"`
-	Data      interface{}       `json:"data"`
-	EventTime string            `json:"event_time"`
+	SubType   ControlsEventType      `json:"subtype"`
+	Data      map[string]interface{} `json:"data"`
+	EventTime string                 `json:"event_time"`
 }
 
 type ControlsEventSeekToData struct {
-	Time float32 `json:"time"`
+	Time float64 `json:"time"`
 }
 
 type ControlsEventSeekMarkerData struct {
@@ -93,7 +94,7 @@ type ControlsEventSeekMarkerData struct {
 // ----------------------------------------------------------
 
 type TimerEvent struct {
-	CurrentTime float32 `json:"current_time"`
+	CurrentTime float64 `json:"current_time"`
 	EventTime   string  `json:"event_time"`
 }
 
@@ -106,8 +107,9 @@ const (
 )
 
 type EventStudentResponse struct {
-	Status EventStatus `json:"status"`
-	Data   []Event     `json:"data"`
+	Status  EventStatus `json:"status"`
+	Message string      `json:"message"`
+	Events  []Event     `json:"events"`
 }
 
 type EventTeacherResponse struct {

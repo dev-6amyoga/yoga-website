@@ -1,4 +1,4 @@
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import { defineConfig, transformWithEsbuild } from "vite";
 import solidPlugin from "vite-plugin-solid";
 
@@ -10,6 +10,13 @@ export default defineConfig({
 				if (!id.match(/src\/.*\.js$/)) return null;
 
 				if (id.match(/src\/solidjs-src\/src\/.*\.js$/)) {
+					return transformWithEsbuild(code, id, {
+						loader: "jsx",
+						jsx: "preserve",
+					});
+				}
+
+				if (id.match(/node_modules\/@thisbeyond\/solid-dnd\/.*\.js$/)) {
 					return transformWithEsbuild(code, id, {
 						loader: "jsx",
 						jsx: "preserve",

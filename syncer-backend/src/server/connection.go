@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"syncer-backend/src/events"
 	"time"
@@ -86,19 +87,23 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			s.ProcessControlsEvent(event.ClassID, controlsEvent, conn)
 
 		case events.EVENT_TIMER:
-			s.logger.Infof("Received event: %s", event.Type)
-			timerEvent := events.TimerEvent{}
+			s.logger.Infof("Received event: %s; %v; %s", event.Type, event.Data, message)
 
-			err = json.Unmarshal(message, &timerEvent)
-
-			if err != nil {
-				conn.WriteJSON(events.EventTeacherResponse{
-					Status:  events.EVENT_STATUS_NACK,
-					Message: "Error unmarshalling timer event",
-				})
-				s.logger.Error("Error unmarshalling message:", err)
-				return
+			timerEvent := events.TimerEvent{
+				CurrentTime: event.Data["current_time"].(float64),
+				EventTime:   event.Data["event_time"].(string),
 			}
+
+			s.logger.Infof("Timer event: %v; %v", timerEvent.CurrentTime, timerEvent.EventTime)
+
+			// if !ok {
+			// 	conn.WriteJSON(events.EventTeacherResponse{
+			// 		Status:  events.EVENT_STATUS_NACK,
+			// 		Message: "Error unmarshalling timer event",
+			// 	})
+			// 	s.logger.Errorf("Error unmarshalling timer event: %v", timerEvent)
+			// 	return
+			// }
 
 			et, err := time.Parse(time.RFC3339, timerEvent.EventTime)
 
@@ -111,7 +116,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 				return
 			}
 
-			err = s.timers.UpdateTime(event.ClassID, timerEvent.CurrentTime, et.UnixMilli())
+			err = s.Timers.UpdateTime(event.ClassID, timerEvent.CurrentTime, et.UnixMilli())
 
 			if err != nil {
 				conn.WriteJSON(events.EventTeacherResponse{
@@ -120,6 +125,19 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 				})
 				s.logger.Error("Error updating timer:", err)
 				return
+			}
+
+			chs, ok := s.UpdateChannels.Load(event.ClassID)
+
+			if !ok {
+				chs = make([]chan float64, 0)
+
+				s.UpdateChannels.Store(event.ClassID, chs)
+			} else {
+				// update all the channels
+				for _, ch := range chs {
+					ch <- timerEvent.CurrentTime
+				}
 			}
 		}
 
@@ -143,24 +161,85 @@ func (s *Server) handleStudentConnection(w http.ResponseWriter, r *http.Request)
 	}
 	defer conn.Close()
 
-	// read class id
+	// read class id to initialize the connection
+	studentEventInitReq := events.StudentEventInitRequest{}
 
-	conn.ReadJSON()
+	conn.ReadJSON(&studentEventInitReq)
+
+	classId := studentEventInitReq.ClassID
+
+	if classId == "" {
+		conn.WriteJSON(events.EventStudentResponse{
+			Status:  events.EVENT_STATUS_NACK,
+			Message: "Invalid class ID",
+		})
+		return
+	}
+
+	// initialize the subscription to update channel for the class
+	ch := make(chan float64)
+	chs, ok := s.UpdateChannels.Load(classId)
+
+	if !ok {
+		conn.WriteJSON(events.EventStudentResponse{
+			Status:  events.EVENT_STATUS_NACK,
+			Message: "Class not found",
+		})
+		return
+	}
+
+	chs = append(chs, ch)
+	s.UpdateChannels.Store(classId, chs)
+
+	// close the channel when the function returns/errors out
+	defer close(ch)
+
+	timer := time.NewTicker(2 * time.Second)
 
 	for {
-		// poll for events
-		// send events to students
-		msg := []byte("{'message': 'Hello'}")
+		select {
 
-		err := conn.WriteJSON(msg)
+		case <-timer.C:
+			// poll for events
+			// send events to students
+			msg := events.EventStudentResponse{
+				Status:  events.EVENT_STATUS_ACK,
+				Message: fmt.Sprintf("[FIRED BY TIMER] Event from class %s", classId),
+			}
 
-		if err != nil {
-			conn.WriteJSON(events.EventTeacherResponse{
-				Status:  events.EVENT_STATUS_NACK,
-				Message: "Error writing to WebSocket",
-			})
-			s.logger.Error("Error writing to WebSocket:", err)
-			return
+			err := conn.WriteJSON(msg)
+
+			if err != nil {
+				conn.WriteJSON(events.EventTeacherResponse{
+					Status:  events.EVENT_STATUS_NACK,
+					Message: "Error writing to WebSocket",
+				})
+				s.logger.Error("Error writing to WebSocket:", err)
+				return
+			}
+
+		case <-ch:
+			// poll for events
+			// send events to students
+			msg := events.EventStudentResponse{
+				Status:  events.EVENT_STATUS_ACK,
+				Message: fmt.Sprintf("[FIRED BY UPDATE] Event from class %s", classId),
+			}
+
+			err := conn.WriteJSON(msg)
+
+			if err != nil {
+				conn.WriteJSON(events.EventTeacherResponse{
+					Status:  events.EVENT_STATUS_NACK,
+					Message: "Error writing to WebSocket",
+				})
+				s.logger.Error("Error writing to WebSocket:", err)
+				return
+			}
+
+			timer.Reset(2 * time.Second)
+
 		}
 	}
+
 }

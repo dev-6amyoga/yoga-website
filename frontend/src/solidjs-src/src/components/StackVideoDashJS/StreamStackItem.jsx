@@ -12,7 +12,6 @@ import {
 	useVideoStoreContext,
 } from "../../store/VideoStore";
 
-import { DragDropProvider } from "@thisbeyond/solid-dnd";
 import {
 	Show,
 	createEffect,
@@ -24,9 +23,9 @@ import {
 import { VIDEO_EVENT_PLAY_INACTIVE } from "../../enums/video_event";
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
-import { toTimeString } from "../../utils/toTimeString";
 import DashPlayer from "./DashPlayer";
 import VideoPlaybar from "./VideoPlaybar";
+import { toTimeString } from "../../utils/toTimeString";
 
 console.log(STATE_VIDEO_LOADING);
 
@@ -100,8 +99,8 @@ function StreamStackItem(props) {
 		usePlaylistStoreContext();
 
 	const tryToPlay = () => {
-		console.log(`Try to play called : ${isActive}`);
-		if (!isActive) return;
+		console.log(`Try to play called : ${props.isActive}`);
+		if (!props.isActive) return;
 
 		console.log("Try to play called", props.video.idx, Date.now());
 		playerRef().current.player.play();
@@ -512,145 +511,139 @@ function StreamStackItem(props) {
 		// 	<div
 		// class="relative h-full w-full block">
 		<div class="absolute h-full w-full">
-			<DragDropProvider>
-				<div
-					class={`relative stream-stack-item w-full h-full ${
-						props.isActive ? "block" : "invisible"
-					}`}>
-					{/* class={props.isActive ? "flex-1" : "w-60"}> */}
-					<DashPlayer
-						ref={playerInit}
-						src={videoUrl()}
-						queueItemId={props.video.idx}
-						isAsanaVideo={
-							!isNaN(props.video?.video?.id) &&
-							typeof props.video?.video?.id === "number"
-						}
-						video={props.video}
-						isActive={props.isActive}
-						onError={handlePlayerError}
-						onCanPlayThrough={handleVideoCanPlayThrough}
-						onVolumeChange={handleVideoVolumeChange}
-						onEnded={props.handleEnd}
-						onLoading={handlePlayerLoading}
-						onLoaded={handlePlayerLoaded}
-						onSeeking={handleVideoSeeking}
-						onSeeked={handleVideoSeeked}
-						setDuration={setDuration}
-					/>
+			<div
+				class={`relative stream-stack-item w-full h-full ${
+					props.isActive ? "block" : "invisible"
+				}`}>
+				{/* class={props.isActive ? "flex-1" : "w-60"}> */}
+				<DashPlayer
+					ref={playerInit}
+					src={videoUrl()}
+					queueItemId={props.video.idx}
+					isAsanaVideo={
+						!isNaN(props.video?.video?.id) &&
+						typeof props.video?.video?.id === "number"
+					}
+					video={props.video}
+					isActive={props.isActive}
+					onError={handlePlayerError}
+					onCanPlayThrough={handleVideoCanPlayThrough}
+					onVolumeChange={handleVideoVolumeChange}
+					onEnded={props.handleEnd}
+					onLoading={handlePlayerLoading}
+					onLoaded={handlePlayerLoaded}
+					onSeeking={handleVideoSeeking}
+					onSeeked={handleVideoSeeked}
+					setDuration={setDuration}
+				/>
 
-					<Show when={videoStore.fullScreen}>
-						<div class="absolute top-0 left-0 text-white z-[1001] h-1/2 w-full p-8 hover:opacity-100 opacity-0 hover:delay-0 delay-1000">
-							<h5 class="uppercase text-gray-300">
-								{props?.video?.video?.asana_name
-									? "ASANA"
-									: "TRANSITION"}
-							</h5>
-							<h3>
-								{props?.video?.video?.asana_name ||
-									props?.video?.video?.transition_name}
-							</h3>
-						</div>
-					</Show>
+				<Show when={videoStore.fullScreen}>
+					<div class="absolute top-0 left-0 text-white z-[1001] h-1/2 w-full p-8 hover:opacity-100 opacity-0 hover:delay-0 delay-1000">
+						<h5 class="uppercase text-gray-300">
+							{props?.video?.video?.asana_name
+								? "ASANA"
+								: "TRANSITION"}
+						</h5>
+						<h3>
+							{props?.video?.video?.asana_name ||
+								props?.video?.video?.transition_name}
+						</h3>
+					</div>
+				</Show>
 
-					<div class="absolute bottom-0 z-20 h-1/3 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0 pointer-events-auto touch-auto">
-						{/* markers */}
-						{/* <Show when={videoStore.fullScreen}>
+				<div class="absolute bottom-0 z-20 h-1/3 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0 pointer-events-auto touch-auto">
+					{/* markers */}
+					{/* <Show when={videoStore.fullScreen}>
 							<div class="absolute bottom-28 w-full">
 								<VideoMarkers />
 							</div>
 						</Show> */}
-						{/* playbar */}
-						<div class="absolute bottom-0 w-full">
-							<VideoPlaybar
-								playbarVisible={true}
-								duration={duration}
-								toTimeString={toTimeString}
-								handleSetPlay={() => {}}
-								handleSetPause={() => {}}
-								handleFullScreen={{
-									enter: () => {},
-									exit: () => {},
-									active: false,
-								}}
-							/>
-						</div>
+					{/* playbar */}
+					<div class="absolute bottom-0 w-full">
+						<VideoPlaybar
+							playbarVisible={true}
+							duration={duration}
+							toTimeString={toTimeString}
+							handleSetPlay={() => {}}
+							handleSetPause={() => {}}
+							handleFullScreen={{
+								enter: () => {},
+								exit: () => {},
+								active: false,
+							}}
+						/>
 					</div>
+				</div>
 
-					{videoStore.devMode ? (
-						<div class="absolute bg-white left-4 top-4 p-2 text-sm flex flex-col">
-							<p>
-								props.isActive: {String(props.isActive)} ||{" "}
-								{String(props.isActive)}
-							</p>
-							<p>Video IDX : {props.video?.idx}</p>
-							<p>
-								videoStore.videoState: {videoStore.videoState}
-							</p>
-							<p>
-								videoStore.pauseReason: {videoStore.pauseReason}
-							</p>
-							<p>videoStore.viewMode: {videoStore.viewMode}</p>
-							<p>
-								videoStore.currentMarkerIdx:{" "}
-								{videoStore.currentMarkerIdx}
-							</p>
-							{/* <p>metadataLoaded(): {String(metadataLoaded())}</p> */}
-							{/* <p>
+				{videoStore.devMode ? (
+					<div class="absolute bg-white left-4 top-4 p-2 text-sm flex flex-col">
+						<p>
+							props.isActive: {String(props.isActive)} ||{" "}
+							{String(props.isActive)}
+						</p>
+						<p>Video IDX : {props.video?.idx}</p>
+						<p>videoStore.videoState: {videoStore.videoState}</p>
+						<p>videoStore.pauseReason: {videoStore.pauseReason}</p>
+						<p>videoStore.viewMode: {videoStore.viewMode}</p>
+						<p>
+							videoStore.currentMarkerIdx:{" "}
+							{videoStore.currentMarkerIdx}
+						</p>
+						{/* <p>metadataLoaded(): {String(metadataLoaded())}</p> */}
+						{/* <p>
 						autoplayInitialized(): {String(autoplayInitialized())}
 					</p> */}
-							<p>playerLoaded(): {String(playerLoaded())}</p>
-							<p>
-								videoStore.commitSeekTime:{" "}
-								{videoStore.commitSeekTime}
-							</p>
-							<p>videoStore.volume: {videoStore.volume}</p>
-							<p>
-								videoStore.fullScreen:{" "}
-								{String(videoStore.fullScreen)}
-							</p>
-							<div>
-								Buffer :{" "}
-								{playerRef().current &&
-								playerRef().current.videoElement ? (
-									<>
-										{Array.from(
-											Array(
-												playerRef().current.videoElement
-													.buffered.length
-											).keys()
-										).map((i) => {
-											return (
-												<span>
-													{playerRef().current.videoElement.buffered.start(
-														i
-													)}{" "}
-													-{" "}
-													{playerRef().current.videoElement.buffered.end(
-														i
-													)}
-												</span>
-											);
-										})}{" "}
-										| props.video :{" "}
-										{playerRef().current.player.getBufferLength(
-											"video"
-										)}{" "}
-										| audio :{" "}
-										{playerRef().current.player.getBufferLength(
-											"audio"
-										)}
-									</>
-								) : (
-									"nil"
-								)}
-							</div>
+						<p>playerLoaded(): {String(playerLoaded())}</p>
+						<p>
+							videoStore.commitSeekTime:{" "}
+							{videoStore.commitSeekTime}
+						</p>
+						<p>videoStore.volume: {videoStore.volume}</p>
+						<p>
+							videoStore.fullScreen:{" "}
+							{String(videoStore.fullScreen)}
+						</p>
+						<div>
+							Buffer :{" "}
+							{playerRef().current &&
+							playerRef().current.videoElement ? (
+								<>
+									{Array.from(
+										Array(
+											playerRef().current.videoElement
+												.buffered.length
+										).keys()
+									).map((i) => {
+										return (
+											<span>
+												{playerRef().current.videoElement.buffered.start(
+													i
+												)}{" "}
+												-{" "}
+												{playerRef().current.videoElement.buffered.end(
+													i
+												)}
+											</span>
+										);
+									})}{" "}
+									| props.video :{" "}
+									{playerRef().current.player.getBufferLength(
+										"video"
+									)}{" "}
+									| audio :{" "}
+									{playerRef().current.player.getBufferLength(
+										"audio"
+									)}
+								</>
+							) : (
+								"nil"
+							)}
 						</div>
-					) : (
-						<></>
-					)}
-				</div>
-			</DragDropProvider>
+					</div>
+				) : (
+					<></>
+				)}
+			</div>
 		</div>
 	);
 }
