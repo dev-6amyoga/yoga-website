@@ -126,7 +126,6 @@
 // }
 
 import VideoPlayerWrapper from "../../solidjs-src/src/components/StackVideoDashJS/VideoPlayerWrapper";
-import VideoStoreContext from "../../solidjs-src/src/store/VideoStore";
 // import { Cube as SolidCube } from "phosphor-solid";
 import {
 	ReactToSolidBridge,
@@ -616,12 +615,29 @@ export default function TestingVideo() {
 	return (
 		<ReactToSolidBridgeProvider>
 			<h1>Hello</h1>
-			<ReactToSolidBridge
-				getSolidComponent={({ getChildren, props }) =>
-					VideoPlayerWrapper({ children: getChildren })
-				}></ReactToSolidBridge>{" "}
-			*/}
-			<VideoPlayerWrapperSolid />
+			<div className="max-w-7xl mx-auto">
+				<ReactToSolidBridge
+					getSolidComponent={({ getChildren, props }) =>
+						VideoStoreContext.Provider({
+							value: videoStoreActions,
+							get children() {
+								return PlaylistStoreContext.Provider({
+									value: playlistStoreActions,
+									get children() {
+										return WatchHistoryContext.Provider({
+											value: watchHistoryStoreActions,
+											get children() {
+												return VideoPlayerWrapper({
+													children: getChildren,
+												});
+											},
+										});
+									},
+								});
+							},
+						})
+					}></ReactToSolidBridge>
+			</div>
 		</ReactToSolidBridgeProvider>
 	);
 }

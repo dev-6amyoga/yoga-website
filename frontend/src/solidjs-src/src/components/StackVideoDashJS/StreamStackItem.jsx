@@ -23,11 +23,11 @@ import {
 import { VIDEO_EVENT_PLAY_INACTIVE } from "../../enums/video_event";
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
+import { toTimeString } from "../../utils/toTimeString";
 import DashPlayer from "./DashPlayer";
 import VideoPlaybar from "./VideoPlaybar";
-import { toTimeString } from "../../utils/toTimeString";
 
-console.log(STATE_VIDEO_LOADING);
+// console.log(STATE_VIDEO_LOADING);
 
 function StreamStackItem(props) {
 	// const user = useUserStore((state) => state.user);
@@ -561,11 +561,12 @@ function StreamStackItem(props) {
 					{/* playbar */}
 					<div class="absolute bottom-0 w-full">
 						<VideoPlaybar
+							isActive={props.isActive}
 							playbarVisible={true}
 							duration={duration}
 							toTimeString={toTimeString}
-							handleSetPlay={() => {}}
-							handleSetPause={() => {}}
+							handleSetPlay={props.handleSetPlay}
+							handleSetPause={props.handleSetPause}
 							handleFullScreen={{
 								enter: () => {},
 								exit: () => {},
