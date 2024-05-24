@@ -1,8 +1,3 @@
-import {
-	BiRegularExitFullscreen,
-	BiRegularFullscreen,
-	BiSolidBookReader,
-} from "solid-icons/bi";
 import { Match, Show, Switch, createEffect, createMemo, on } from "solid-js";
 import { usePlaylistStoreContext } from "../../store/PlaylistStore";
 import {
@@ -13,19 +8,22 @@ import {
 } from "../../store/VideoStore";
 
 import {
-	FaSolidBackward as FaBackward,
-	FaSolidForward as FaForward,
-	FaSolidPause as FaPause,
-	FaSolidPlay as FaPlay,
-	FaSolidPersonChalkboard,
-} from "solid-icons/fa";
-
-import {
-	AiFillStepBackward as FaStepBackward,
-	AiFillStepForward as FaStepForward,
-} from "solid-icons/ai";
-import { IoVolumeHigh, IoVolumeLow, IoVolumeOff } from "solid-icons/io";
-import { TbArrowBadgeLeft, TbArrowBadgeRight } from "solid-icons/tb";
+	CaretLeft,
+	CaretRight,
+	ChalkboardTeacher,
+	CornersIn,
+	CornersOut,
+	FastForward,
+	Pause,
+	Play,
+	Rewind,
+	SkipBack,
+	SkipForward,
+	SpeakerHigh,
+	SpeakerLow,
+	SpeakerSimpleSlash,
+	Student,
+} from "phosphor-solid";
 
 import {
 	SEEK_TYPE_MARKER,
@@ -195,14 +193,14 @@ function VideoControls(props) {
 						popFromArchive(-1);
 					}}
 					title="Previous video">
-					<FaStepBackward class="video_controls__ctrl__button__icon" />
+					<SkipBack class="video_controls__ctrl__button__icon" />
 				</button>
 				{/* seek back */}
 				<button
 					onClick={handleSeekBackward}
 					title="Rewind 5s"
 					class={iconButtonClass() + " hidden md:block"}>
-					<FaBackward class="video_controls__ctrl__button__icon" />
+					<Rewind class="video_controls__ctrl__button__icon" />
 				</button>
 				{/* previous marker */}
 				<Show when={videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE}>
@@ -210,7 +208,7 @@ function VideoControls(props) {
 						class={iconButtonClass()}
 						onClick={handlePrevMarker}
 						title="Prev Marker">
-						<TbArrowBadgeLeft class="video_controls__ctrl__button__icon" />
+						<CaretLeft class="video_controls__ctrl__button__icon" />
 					</button>
 				</Show>
 
@@ -235,12 +233,12 @@ function VideoControls(props) {
 					<Switch>
 						<Match
 							when={videoStore.videoState === STATE_VIDEO_PLAY}>
-							<FaPause class="video_controls__ctrl__button__icon" />
+							<Pause class="video_controls__ctrl__button__icon" />
 						</Match>
 
 						<Match
 							when={videoStore.videoState === STATE_VIDEO_PAUSED}>
-							<FaPlay class="video_controls__ctrl__button__icon" />
+							<Play class="video_controls__ctrl__button__icon" />
 						</Match>
 
 						<Match
@@ -257,7 +255,7 @@ function VideoControls(props) {
 						class={iconButtonClass()}
 						onClick={handleNextMarker}
 						title="Next Marker">
-						<TbArrowBadgeRight class="video_controls__ctrl__button__icon" />
+						<CaretRight class="video_controls__ctrl__button__icon" />
 					</button>
 				)}
 				{/* seek forward */}
@@ -265,7 +263,7 @@ function VideoControls(props) {
 					onClick={handleSeekFoward}
 					title="Fast Forward 5s"
 					class={iconButtonClass() + " hidden md:block"}>
-					<FaForward class="video_controls__ctrl__button__icon" />
+					<FastForward class="video_controls__ctrl__button__icon" />
 				</button>
 
 				{/* next video */}
@@ -273,7 +271,7 @@ function VideoControls(props) {
 					class={iconButtonClass()}
 					onClick={handleNextVideo}
 					title="Next Video">
-					<FaStepForward class="video_controls__ctrl__button__icon" />
+					<SkipForward class="video_controls__ctrl__button__icon" />
 				</button>
 
 				<Show when={videoStore.pauseReason === VIDEO_PAUSE_MARKER}>
@@ -309,15 +307,15 @@ function VideoControls(props) {
 					<div class={iconButtonClass() + ""}>
 						<Switch>
 							<Match when={videoStore.volume === 0}>
-								<IoVolumeOff
+								<SpeakerSimpleSlash
 									onClick={() => setVolume(0.3)}
-									class="h-7 w-7"
+									class="video_controls__ctrl__button__icon"
 								/>
 							</Match>
 							<Match when={videoStore.volume > 0.5}>
-								<IoVolumeHigh
+								<SpeakerHigh
 									onClick={() => setVolume(0.0)}
-									class="h-7 w-7"
+									class="video_controls__ctrl__button__icon"
 								/>
 							</Match>
 							<Match
@@ -325,9 +323,9 @@ function VideoControls(props) {
 									videoStore.volume <= 0.5 &&
 									videoStore.volume > 0
 								}>
-								<IoVolumeLow
+								<SpeakerLow
 									onClick={() => setVolume(0.0)}
-									class="h-7 w-7"
+									class="video_controls__ctrl__button__icon"
 								/>
 							</Match>
 						</Switch>
@@ -336,7 +334,7 @@ function VideoControls(props) {
 						type="range"
 						min="0"
 						max="100"
-						class="hidden w-0 accent-orange-500 opacity-0 transition-all duration-300 group-hover:w-20 xl:group-hover:w-28 group-hover:opacity-100 md:block"
+						class="hidden w-0 accent-y-darkgreen opacity-0 transition-all duration-300 group-hover:w-20 xl:group-hover:w-28 group-hover:opacity-100 md:block"
 						ref={volumeSliderRef}
 						onChange={(e) => {
 							console.log(
@@ -366,14 +364,14 @@ function VideoControls(props) {
 										videoStore.viewMode ===
 										VIDEO_VIEW_TEACHING_MODE
 									}>
-									<FaSolidPersonChalkboard class="video_controls__ctrl__button__icon" />
+									<ChalkboardTeacher class="video_controls__ctrl__button__icon" />
 								</Match>
 								<Match
 									when={
 										videoStore.viewMode ===
 										VIDEO_VIEW_STUDENT_MODE
 									}>
-									<BiSolidBookReader class="video_controls__ctrl__button__icon" />
+									<Student class="video_controls__ctrl__button__icon" />
 								</Match>
 							</Switch>
 						</button>
@@ -391,11 +389,11 @@ function VideoControls(props) {
 					title="Full Screen">
 					<Switch>
 						<Match when={videoStore.fullScreen}>
-							<BiRegularExitFullscreen class="video_controls__ctrl__button__icon" />
+							<CornersIn class="video_controls__ctrl__button__icon" />
 						</Match>
 
 						<Match when={!videoStore.fullScreen}>
-							<BiRegularFullscreen class="video_controls__ctrl__button__icon" />
+							<CornersOut class="video_controls__ctrl__button__icon" />
 						</Match>
 					</Switch>
 				</button>

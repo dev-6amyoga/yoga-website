@@ -78,6 +78,10 @@ export default function VideoPlaybar(props) {
 		width: 0,
 		height: 0,
 	});
+	const [options, setOptions] = createSignal({
+		axis: "x",
+		bounds: "parent",
+	});
 
 	const [currentBoopPosition, setCurrentBoopPosition] = createSignal(0);
 
@@ -249,9 +253,10 @@ export default function VideoPlaybar(props) {
 	// set the current position of the boop
 	createEffect(
 		on([() => videoStore.currentTime, barBound, props.duration], () => {
-			setCurrentBoopPosition(
-				barBound().width * (videoStore.currentTime / props.duration())
-			);
+			const pos =
+				barBound().width * (videoStore.currentTime / props.duration());
+			// console.log("[EVENT] setting boop pos: ", pos);
+			setCurrentBoopPosition(pos);
 		})
 	);
 
@@ -261,34 +266,55 @@ export default function VideoPlaybar(props) {
 	// }, [props.handleFullScreen?.active]);
 
 	const seekOnClick = (e, location) => {
-		e.preventDefault();
-		const t =
-			(props.duration() * (e.clientX - barBound().left)) /
-			barBound().width;
-		console.log("Calling move to timestamp from seekOnClick", {
-			duration: props.duration(),
-			location,
-			clientX: e.clientX,
-			barBound: barBound(),
-			t: t,
-		});
-		moveToTimestamp(t);
+		if (location === "barclick") {
+			const bounds = barBound();
+			const t =
+				(props.duration() * (e.clientX - bounds.left)) / bounds.width;
+			console.log("[EVENT] Calling move to timestamp from seekOnClick", {
+				duration: props.duration(),
+				location,
+				offsetX: e.clientX,
+				barBound: bounds,
+				t: t,
+			});
+			moveToTimestamp(t);
+		} else {
+			const bounds = barBound();
+			const t =
+				(props.duration() * (e.offsetX - bounds.left)) / bounds.width;
+			console.log("[EVENT] Calling move to timestamp from seekOnClick", {
+				duration: props.duration(),
+				location,
+				offsetX: e.offsetX,
+				barBound: bounds,
+				t: t,
+			});
+			moveToTimestamp(t);
+		}
 	};
 
-	const handleDragOnStart = (e, data) => {
+	const handleDragOnStart = (e) => {
+		console.log("[EVENT] DRAG STARTED", e, props.isActive, barBound());
 		setMouseDown(true);
-		props.handleSetPause();
+		props.handleSetPause(props.isActive);
 	};
 
-	const handleDragOnStop = (e, data) => {
+	const handleDragOnStop = (e) => {
+		console.log("[EVENT] DRAG STOPPED", e, e.offsetX - barBound().left);
 		seekOnClick(e, "boopdrag");
 		setMouseDown(false);
 	};
 
-	const handleOnDrag = (e, data) => {
+	const handleOnDrag = (e) => {
 		const bounds = barBound();
-		const cbp = e.clientX - bounds.left;
+		const cbp = e.offsetX - bounds.left;
 		const calcpos = cbp < 0 ? 0 : cbp > bounds.width ? bounds.width : cbp;
+		console.log("[EVENT] Dragging : ", {
+			cbp,
+			calcpos,
+			e,
+			offLeft: e.offsetX,
+		});
 		setCurrentBoopPosition((p) => calcpos);
 	};
 
@@ -307,13 +333,31 @@ export default function VideoPlaybar(props) {
 		})
 	);
 
+	createEffect(
+		on([barBound], () => {
+			// const bounds = barBound();
+			const ops = {
+				axis: "x",
+				bounds: "parent",
+				onDragStart: handleDragOnStart,
+				onDragEnd: handleDragOnStop,
+				onDrag: handleOnDrag,
+			};
+			console.log("[EVENT] drag options change ", ops);
+			setOptions(ops);
+		})
+	);
+
 	// const draggedDuration = createMemo(() => 0);
 
 	return (
 		<>
 			<div
 				class={`w-[calc(100%-0.35rem)] h-[1.5rem] bg-transparent relative mx-auto group flex items-start mt-2`}
-				onClick={(e) => seekOnClick(e, "barclick")}
+				onClick={(e) => {
+					e.preventDefault();
+					seekOnClick(e, "barclick");
+				}}
 				ref={(el) => {
 					barRef = el;
 				}}>
@@ -343,52 +387,51 @@ export default function VideoPlaybar(props) {
 				</div>
 
 				{/* boop */}
-				<div>
-					<div
-						use:draggable={{
-							axis: "x",
-							bounds: barBound,
-						}}
-						class={`draggable timeboop bg-y-darkgreen rounded-full absolute z-[100] mt-[18px] w-3 h-3 hover:w-5 hover:h-5 ${
-							videoStore.videoState === STATE_VIDEO_ERROR
-								? "opacity-0"
-								: "opacity-100"
-						}   ${
-							mouseDown()
-								? "w-5 h-5"
-								: "duration-300 transition-all ease-linear"
-						} ${
-							props.handleFullScreen.active
-								? mouseDown()
-									? "-top-[calc(50%-0.3rem)]"
-									: "-top-[calc(50%-0.3rem)] hover:-top-[calc(50%-0.1rem)]"
-								: mouseDown()
-									? "-top-[calc(50%-0.2rem)]"
-									: "-top-[calc(50%-0.225rem)] hover:-top-[calc(50%+0.1rem)]"
-						} `}
-						ref={draggableHandle}
-						style={{
-							left: `${
-								((currentBoopPosition() - 2) /
-									barBound().width) *
-								100
-							}%`,
-						}}>
-						{mouseDown() ? (
-							<div
-								class={`text-white absolute rounded-lg px-4 text-xs transition-all ${
-									props.duration() - draggedDuration() < 5
-										? "-left-[calc(50%+3.5rem)]"
-										: "-left-[calc(50%+1rem)]"
-								} -top-[calc(50%+1.5rem)] border border-white`}>
-								{videoStore.videoState === STATE_VIDEO_LOADING
-									? "--:--"
-									: props.toTimeString(draggedDuration())}
-							</div>
-						) : (
-							<></>
-						)}
-					</div>
+				<div
+					use:draggable={{
+						axis: "x",
+						bounds: "parent",
+						onDragStart: handleDragOnStart,
+						onDragEnd: handleDragOnStop,
+						onDrag: handleOnDrag,
+					}}
+					class={`draggable timeboop bg-y-darkgreen rounded-full absolute z-[100] mt-[18px] w-3 h-3 hover:w-5 hover:h-5 ${
+						videoStore.videoState === STATE_VIDEO_ERROR
+							? "opacity-0"
+							: "opacity-100"
+					}   ${
+						mouseDown()
+							? "w-5 h-5"
+							: "duration-300 transition-all ease-linear"
+					} ${
+						props.handleFullScreen.active
+							? mouseDown()
+								? "-top-[calc(50%-0.3rem)]"
+								: "-top-[calc(50%-0.3rem)] hover:-top-[calc(50%-0.1rem)]"
+							: mouseDown()
+								? "-top-[calc(50%-0.2rem)]"
+								: "-top-[calc(50%-0.225rem)] hover:-top-[calc(50%+0.1rem)]"
+					} `}
+					ref={draggableHandle}
+					style={{
+						transform: `translate3d(${
+							currentBoopPosition() - 2
+						}px, 0, 0)`,
+					}}>
+					{mouseDown() ? (
+						<div
+							class={`text-white absolute rounded-lg px-4 text-xs transition-all ${
+								props.duration() - draggedDuration() < 5
+									? "-left-[calc(50%+3.5rem)]"
+									: "-left-[calc(50%+1rem)]"
+							} -top-[calc(50%+1.5rem)] border border-white`}>
+							{videoStore.videoState === STATE_VIDEO_LOADING
+								? "--:--"
+								: props.toTimeString(draggedDuration())}
+						</div>
+					) : (
+						<></>
+					)}
 				</div>
 
 				{/* time */}

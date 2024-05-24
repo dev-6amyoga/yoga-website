@@ -290,7 +290,7 @@ function VideoPlayer() {
 							<div class="flex flex-col items-center justify-center gap-4 text-lg w-full h-full">
 								<button
 									onClick={handleStartPlaylist}
-									class="btn">
+									class="btn-lg btn-default">
 									Start
 								</button>
 							</div>
@@ -328,6 +328,8 @@ function VideoPlayer() {
 													setVideoStateVisible
 												}
 												handleFullScreen={() => {}}
+												handleSetPause={handleSetPause}
+												handleSetPlay={handleSetPlay}
 											/>
 										);
 									}}
