@@ -80,6 +80,7 @@ const corsOptions = {
     "https://www.my-yogateacher-player.6amyoga.com",
     "http://my-yogateacher-player.6amyoga.com",
     "http://www.my-yogateacher-player.6amyoga.com",
+    "https://my-yogateacher-48ee4315f8b4.herokuapp.com/",
   ],
   optionSuccessStatus: 200,
 };
