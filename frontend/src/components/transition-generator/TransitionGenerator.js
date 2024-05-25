@@ -50,6 +50,7 @@ export const transitionGenerator = (
     console.log(matchingTransition1);
     return matchingTransition1;
   };
+
   const transitionFinder2 = (transition_video_name, language) => {
     console.log(teacher_mode);
     console.log(transition_video_name);
