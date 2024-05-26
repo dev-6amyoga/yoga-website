@@ -9,6 +9,7 @@ import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
 import { validateEmail, validatePhone } from "../../utils/formValidation";
 import getFormData from "../../utils/getFormData";
+import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
 
 export default function StudentProfile() {
   const user = useUserStore((state) => state.user);
@@ -141,11 +142,9 @@ export default function StudentProfile() {
         });
       });
   };
+
   return (
-    <div>
-      <div>
-        <StudentNavbar />
-      </div>
+    <StudentPageWrapper heading="My Profile">
       <div className="container mx-auto my-8 p-8 bg-gray-100 rounded-md shadow-md">
         <div>
           <Card type="cyan" shadow hoverable>
@@ -250,6 +249,6 @@ export default function StudentProfile() {
           </Card>
         )}
       </div>
-    </div>
+    </StudentPageWrapper>
   );
 }
