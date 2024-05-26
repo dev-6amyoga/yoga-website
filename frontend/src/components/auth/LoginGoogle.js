@@ -1,79 +1,47 @@
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { useShallow } from "zustand/react/shallow";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
-import { getBackendDomain } from "../../utils/getBackendDomain";
+
 export default function LoginGoogle() {
 	const [loginStatus, setLoginStatus] = useState(null);
 	const navigate = useNavigate();
 	const [type, SetType] = useState("");
-	const [setUser, setCurrentRole] = useUserStore(
-		useShallow((state) => [state.setUser, state.setCurrentRole])
+	const [
+		user,
+		setUser,
+		userPlan,
+		setUserPlan,
+		setAccessToken,
+		setRefreshToken,
+		setCurrentInstituteId,
+		setInstitutes,
+		currentRole,
+		setCurrentRole,
+		setRoles,
+	] = useUserStore(
+		useShallow((state) => [
+			state.user,
+			state.setUser,
+			state.userPlan,
+			state.setUserPlan,
+			state.setAccessToken,
+			state.setRefreshToken,
+			state.setCurrentInstituteId,
+			state.setInstitutes,
+			state.currentRole,
+			state.setCurrentRole,
+			state.setRoles,
+		])
 	);
 	const [clientID, setClientID] = useState("");
 
 	useEffect(() => {
 		setClientID(import.meta.env.VITE_GOOGLE_CLIENT_ID);
 	}, []);
-
-	async function verify_login(email, name) {
-		try {
-			const baseURL = getBackendDomain();
-			const response = await axios.post(`${baseURL}/user/get-by-email`, {
-				email: email,
-			});
-			var userExists = false;
-			if (response?.status === 200) {
-				userExists = true;
-				console.log(response.data);
-				setUser(response.data.user);
-				const roleFetcher = await Fetch({
-					url: "/user/get-role-by-user-id",
-					method: "POST",
-					data: {
-						user_id: response.data.user?.user_id,
-					},
-				});
-				const data = roleFetcher.data;
-				let maxRole = 0;
-				if (data) {
-					for (var i = 0; i < data.user_role.length; i++) {
-						if (data.user_role[i].role_id === 1) {
-							maxRole = 1;
-						}
-					}
-					if (maxRole !== 1) {
-						maxRole = Math.max(
-							...data.user_role.map((role) => role.role_id)
-						);
-					}
-					console.log("max", maxRole);
-					if (maxRole === 5) {
-						SetType("student");
-					}
-					if (maxRole === 4) {
-						SetType("teacher");
-					}
-					if (maxRole === 3) {
-						SetType("institute_admin");
-					}
-					if (maxRole === 1) {
-						setCurrentRole("ROOT");
-						SetType("root");
-					}
-				}
-			}
-			setLoginStatus(
-				userExists ? "Login successful" : "Invalid credentials"
-			);
-		} catch (error) {
-			console.error(error);
-			setLoginStatus("Failed to verify login");
-		}
-	}
 
 	useEffect(() => {
 		if (loginStatus === "Login successful" && type === "student") {
@@ -99,20 +67,52 @@ export default function LoginGoogle() {
 						const jwt_token = credentialResponse.credential
 							? credentialResponse.credential
 							: null;
-						const baseURL = getBackendDomain();
-						const payload = await axios.post(
-							`${baseURL}/auth/verify-google`,
-							{
+
+						const response = await Fetch({
+							url: `/auth/login-google`,
+							method: "POST",
+							data: {
 								client_id: clientID,
 								jwtToken: jwt_token,
-							}
-						);
-						const email_verified = payload.data.email_verified;
-						if (email_verified) {
-							const email = payload.data.email;
-							const name = payload.data.name;
-							verify_login(email, name);
+							},
+						});
+
+						if (response && response?.status === 200) {
+							const userData = response.data;
+							setUser(userData.user);
+							setAccessToken(userData?.accessToken);
+							setRefreshToken(userData?.refreshToken);
+							setRoles(userData?.user?.roles);
+							const currRole = Object.keys(
+								userData?.user?.roles
+							)[0];
+							const currPlan =
+								userData?.user?.roles[currRole][0]?.plan;
+							setUserPlan(currPlan);
+							console.log(userData?.user?.roles[currRole]);
+							const ins = userData?.user?.roles[currRole].map(
+								(r) => r?.institute
+							);
+							setInstitutes(ins);
+							setCurrentInstituteId(ins[0]?.institute_id);
+							sessionStorage.setItem(
+								"6amyoga_access_token",
+								userData?.accessToken
+							);
+							sessionStorage.setItem(
+								"6amyoga_refresh_token",
+								userData?.refreshToken
+							);
+
+							// should navigate based on role
+							setCurrentRole(currRole);
 						} else {
+							const errorData = response.data;
+							// removeCookie("6amyoga_access_token");
+							// removeCookie("6amyoga_refresh_token");
+							sessionStorage.removeItem("6amyoga_access_token");
+							sessionStorage.removeItem("6amyoga_refresh_token");
+							toast(errorData?.error, { type: "error" });
 						}
 					}}
 					onError={() => {
