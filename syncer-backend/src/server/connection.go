@@ -35,7 +35,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			break
 		}
 
-		event := events.Event{}
+		var event *events.Event
 
 		// unmarshal the message
 		err = json.Unmarshal(message, &event)
@@ -87,23 +87,34 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			s.ProcessControlsEvent(event.ClassID, controlsEvent, conn)
 
 		case events.EVENT_TIMER:
-			s.logger.Infof("Received event: %s; %v; %s", event.Type, event.Data, message)
+			s.logger.Infof("Received event: %s", event.Type)
 
-			timerEvent := events.TimerEvent{
-				CurrentTime: event.Data["current_time"].(float64),
-				EventTime:   event.Data["event_time"].(string),
+			timerEvent := events.TimerEvent{}
+
+			temp, err := json.Marshal(event.Data)
+
+			if err != nil {
+				conn.WriteJSON(events.EventTeacherResponse{
+					Status:  events.EVENT_STATUS_NACK,
+					Message: "Error unmarshalling timer event",
+				})
+				s.logger.Errorf("Error unmarshalling timer event: %v", timerEvent)
+				return
+			}
+
+			err = json.Unmarshal(temp, &timerEvent)
+
+			if err != nil {
+
+				conn.WriteJSON(events.EventTeacherResponse{
+					Status:  events.EVENT_STATUS_NACK,
+					Message: "Error unmarshalling timer event",
+				})
+				s.logger.Errorf("Error unmarshalling timer event: %v", timerEvent)
+				return
 			}
 
 			s.logger.Infof("Timer event: %v; %v", timerEvent.CurrentTime, timerEvent.EventTime)
-
-			// if !ok {
-			// 	conn.WriteJSON(events.EventTeacherResponse{
-			// 		Status:  events.EVENT_STATUS_NACK,
-			// 		Message: "Error unmarshalling timer event",
-			// 	})
-			// 	s.logger.Errorf("Error unmarshalling timer event: %v", timerEvent)
-			// 	return
-			// }
 
 			et, err := time.Parse(time.RFC3339, timerEvent.EventTime)
 

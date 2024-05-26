@@ -31,9 +31,9 @@ const (
 
 type Event struct {
 	// objectID string of the class in mongodb
-	ClassID string                 `json:"class_id"`
-	Type    EventType              `json:"type"`
-	Data    map[string]interface{} `json:"data"`
+	ClassID string      `json:"class_id"`
+	Type    EventType   `json:"type"`
+	Data    interface{} `json:"data"`
 }
 
 type StudentEventInitRequest struct {
@@ -51,9 +51,9 @@ const (
 )
 
 type QueueEvent struct {
-	SubType   QueueEventType         `json:"subtype"`
-	Data      map[string]interface{} `json:"data"`
-	EventTime string                 `json:"event_time"`
+	SubType   QueueEventType `json:"subtype"`
+	Data      interface{}    `json:"-"`
+	EventTime string         `json:"event_time"`
 }
 
 type QueueEventPushData struct {
@@ -78,9 +78,9 @@ const (
 )
 
 type ControlsEvent struct {
-	SubType   ControlsEventType      `json:"subtype"`
-	Data      map[string]interface{} `json:"data"`
-	EventTime string                 `json:"event_time"`
+	SubType   ControlsEventType `json:"subtype"`
+	Data      interface{}       `json:"-"`
+	EventTime string            `json:"event_time"`
 }
 
 type ControlsEventSeekToData struct {
