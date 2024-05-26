@@ -137,13 +137,13 @@ function StudentNavbar() {
       //     },
       //   ],
       // },
-      {
-        path: "/student/about-us",
-        title: "About Us",
-        props: {
-          disabled: false,
-        },
-      },
+      // {
+      //   path: "/student/about-us",
+      //   title: "About Us",
+      //   props: {
+      //     disabled: false,
+      //   },
+      // },
       {
         path: "/student/contact-us",
         title: "Contact Us",
