@@ -17,10 +17,10 @@ var sequelize = new Sequelize(DB_DATABASE, DB_USERNAME, DB_PASSWORD, {
   host: DB_HOST,
   port: DB_PORT,
   dialectOptions: {
-    ssl: {
-      require: true, // This will help you. But you will see nwe error
-      rejectUnauthorized: false, // This line will fix new error
-    },
+    // ssl: {
+    //   require: true, // This will help you. But you will see nwe error
+    //   rejectUnauthorized: false, // This line will fix new error
+    // },
   },
   benchmark: true,
 });

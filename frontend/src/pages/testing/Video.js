@@ -126,7 +126,6 @@
 // }
 
 import VideoPlayerWrapper from "../../solidjs-src/src/components/StackVideoDashJS/VideoPlayerWrapper";
-// import VideoStoreContext from "../../solidjs-src/src/store/VideoStore";
 // import { Cube as SolidCube } from "phosphor-solid";
 import {
   ReactToSolidBridge,
@@ -142,6 +141,7 @@ import {
 } from "../../solidjs-src/src/store/VideoStore";
 import { WatchHistoryContext } from "../../solidjs-src/src/store/WatchHistoryStore";
 import { Fetch } from "../../solidjs-src/src/utils/Fetch";
+import PageWrapper from "../../components/Common/PageWrapper";
 
 // const VideoPlayerWrapperSolid = convertToReactComponent(VideoPlayerWrapper);
 
@@ -604,15 +604,64 @@ export default function TestingVideo() {
     },
   ];
 
+  // VideoStoreContext.Provider({
+  //   get children() {
+  //     return PlaylistStoreContext.Provider({
+  //       get children() {
+  //         return WatchHistoryContext.Provider({
+  //           get children() {
+  //             return VideoPlayerWrapper({ children: getChildren });
+  //           },
+  //         });
+  //       },
+  //     });
+  //   },
+  // });
+
+  // VideoStoreContext.Provider({
+  //   value: videoStoreActions,
+  //   get children() {
+  //     return PlaylistStoreContext.Provider({
+  //       value: playlistStoreActions,
+  //       get children() {
+  //         return WatchHistoryContext.Provider({
+  //           value: watchHistoryStoreActions,
+  //           get children() {
+  //             return VideoPlayerWrapper({ children: getChildren });
+  //           },
+  //         });
+  //       },
+  //     });
+  //   },
+  // });
+
   return (
-    <ReactToSolidBridgeProvider>
-      <h1>Hello</h1>
-      <ReactToSolidBridge
-        getSolidComponent={({ getChildren, props }) =>
-          VideoPlayerWrapper({ children: getChildren })
-        }
-      ></ReactToSolidBridge>{" "}
-      {/* <VideoPlayerWrapperSolid /> */}
-    </ReactToSolidBridgeProvider>
+    <PageWrapper heading="Player">
+      <div className="mx-auto max-w-7xl">
+        <ReactToSolidBridgeProvider>
+          <ReactToSolidBridge
+            getSolidComponent={({ getChildren, props }) =>
+              VideoStoreContext.Provider({
+                value: videoStoreActions,
+                get children() {
+                  return PlaylistStoreContext.Provider({
+                    value: playlistStoreActions,
+                    get children() {
+                      return WatchHistoryContext.Provider({
+                        value: watchHistoryStoreActions,
+                        get children() {
+                          return VideoPlayerWrapper({ children: getChildren });
+                        },
+                      });
+                    },
+                  });
+                },
+              })
+            }
+          ></ReactToSolidBridge>{" "}
+          {/* <VideoPlayerWrapperSolid /> */}
+        </ReactToSolidBridgeProvider>
+      </div>
+    </PageWrapper>
   );
 }
