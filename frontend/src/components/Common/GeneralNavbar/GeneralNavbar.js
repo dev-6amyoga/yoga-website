@@ -1,3 +1,4 @@
+import { Card } from "@geist-ui/core";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { FaBars } from "react-icons/fa6";
@@ -107,53 +108,58 @@ export default function GeneralNavbar() {
   const NavLinks = () => {
     return (
       <div className="flex flex-col items-center gap-8 md:gap-12 justify-center font-mono md:text-5xl text-2xl w-full min-h-screen">
-        <Link
-          to="/"
-          className="text-black font-bold hover:text-black transition-colors"
-        >
-          HOME
-        </Link>
-        {/* <Link
-					to="/about-us"
-					className="text-black font-bold hover:text-black transition-colors">
-					ABOUT
-				</Link> */}
-        <Link
-          to="/pricing"
-          className="text-black font-bold hover:text-black transition-colors"
-        >
-          PLANS & PRICING
-        </Link>
-        <Link
-          to="/privacy"
-          className="text-black font-bold hover:text-black transition-colors"
-        >
-          PRIVACY POLICY
-        </Link>
-        <Link
-          to="/terms-and-conditions"
-          className="text-black font-bold hover:text-black transition-colors"
-        >
-          TERMS & CONDITIONS
-        </Link>
-        <Link
-          to="/cancellations"
-          className="text-black font-bold hover:text-black transition-colors"
-        >
-          CANCELLATION AND REFUNDS
-        </Link>
-        <Link
-          to="/contact-us"
-          className="text-black font-bold hover:text-black transition-colors"
-        >
-          CONTACT
-        </Link>
-        <Link
-          to="/auth"
-          className="text-black font-bold hover:text-black transition-colors"
-        >
-          LOGIN/REGISTER
-        </Link>
+        <Card hoverable type="dark">
+          <div className="flex flex-col items-center gap-12 text-xl md:gap-12 justify-center font-mono">
+            <Link
+              to="/"
+              className="text-white font-bold hover:text-white transition-colors"
+            >
+              HOME
+            </Link>
+
+            <Link
+              to="/pricing"
+              className="text-white font-bold hover:text-white transition-colors"
+            >
+              PLANS & PRICING
+            </Link>
+
+            <Link
+              to="/privacy"
+              className="text-white font-bold hover:text-white transition-colors"
+            >
+              PRIVACY POLICY
+            </Link>
+
+            <Link
+              to="/terms-and-conditions"
+              className="text-white font-bold hover:text-white transition-colors"
+            >
+              TERMS & CONDITIONS
+            </Link>
+
+            <Link
+              to="/cancellations"
+              className="text-white font-bold hover:text-white transition-colors"
+            >
+              CANCELLATION AND REFUNDS
+            </Link>
+
+            <Link
+              to="/contact-us"
+              className="text-white font-bold hover:text-white transition-colors"
+            >
+              CONTACT
+            </Link>
+
+            <Link
+              to="/auth"
+              className="text-white font-bold hover:text-white transition-colors"
+            >
+              LOGIN/REGISTER
+            </Link>
+          </div>
+        </Card>
       </div>
     );
   };
