@@ -280,8 +280,7 @@ export default function VideoPlaybar(props) {
 			moveToTimestamp(t);
 		} else {
 			const bounds = barBound();
-			const t =
-				(props.duration() * (e.offsetX - bounds.left)) / bounds.width;
+			const t = (props.duration() * e.offsetX) / bounds.width;
 			console.log("[EVENT] Calling move to timestamp from seekOnClick", {
 				duration: props.duration(),
 				location,
@@ -307,7 +306,7 @@ export default function VideoPlaybar(props) {
 
 	const handleOnDrag = (e) => {
 		const bounds = barBound();
-		const cbp = e.offsetX - bounds.left;
+		const cbp = e.offsetX;
 		const calcpos = cbp < 0 ? 0 : cbp > bounds.width ? bounds.width : cbp;
 		console.log("[EVENT] Dragging : ", {
 			cbp,
@@ -333,37 +332,38 @@ export default function VideoPlaybar(props) {
 		})
 	);
 
-	createEffect(
-		on([barBound], () => {
-			// const bounds = barBound();
-			const ops = {
-				axis: "x",
-				bounds: "parent",
-				onDragStart: handleDragOnStart,
-				onDragEnd: handleDragOnStop,
-				onDrag: handleOnDrag,
-			};
-			console.log("[EVENT] drag options change ", ops);
-			setOptions(ops);
-		})
-	);
+	// createEffect(
+	// 	on([barBound], () => {
+	// 		// const bounds = barBound();
+	// 		const ops = {
+	// 			axis: "x",
+	// 			bounds: "parent",
+	// 			onDragStart: handleDragOnStart,
+	// 			onDragEnd: handleDragOnStop,
+	// 			onDrag: handleOnDrag,
+	// 		};
+	// 		console.log("[EVENT] drag options change ", ops);
+	// 		setOptions(ops);
+	// 	})
+	// );
 
 	// const draggedDuration = createMemo(() => 0);
 
 	return (
-		<>
+		<div class="w-full relative border border-green-600 playbar-bound">
 			<div
-				class={`w-[calc(100%-0.35rem)] h-[1.5rem] bg-transparent relative mx-auto group flex items-start mt-2`}
+				class={`w-[calc(100%-0.35rem)] h-[1.5rem] bg-transparent relative mx-auto group flex items-start mt-2 border border-red-500`}
 				onClick={(e) => {
 					e.preventDefault();
 					seekOnClick(e, "barclick");
 				}}
 				ref={(el) => {
+					console.log(el.getBoundingClientRect());
 					barRef = el;
 				}}>
 				<div
 					class={`mt-3 w-full bg-white ${
-						mouseDown() ? "h-[50%]" : "h-[30%]"
+						mouseDown() ? "" : "h-[30%]"
 					} absolute z-20`}></div>
 				<div
 					class={`mt-4 w-[calc(100%+0.5rem)] -left-1 mx-auto h-[32%] absolute z-10`}></div>
@@ -371,7 +371,7 @@ export default function VideoPlaybar(props) {
 				<div class="absolute z-[100] w-full h-full">
 					<div
 						class={`mt-3 bg-y-green ${
-							mouseDown() ? "h-[50%]" : "h-[30%]"
+							mouseDown() ? "" : "h-[30%]"
 						} relative transition-all duration-300 ease-linear ${
 							videoStore.videoState === STATE_VIDEO_ERROR ||
 							videoStore.videoState === STATE_VIDEO_LOADING
@@ -390,18 +390,28 @@ export default function VideoPlaybar(props) {
 				<div
 					use:draggable={{
 						axis: "x",
-						bounds: "parent",
+						bounds: {
+							left: barBound().left - 10,
+							right: window.innerWidth - barBound().right - 10,
+							top: 0,
+							bottom: 0,
+						},
 						onDragStart: handleDragOnStart,
 						onDragEnd: handleDragOnStop,
 						onDrag: handleOnDrag,
+						recomputeBounds: {
+							dragStart: true,
+							drag: false,
+							dragEnd: false,
+						},
 					}}
-					class={`draggable timeboop bg-y-darkgreen rounded-full absolute z-[100] mt-[18px] w-3 h-3 hover:w-5 hover:h-5 ${
+					class={`timeboop bg-y-darkgreen rounded-full border border-pink-500 absolute z-[100] mt-[18px] w-3 h-3 ${
 						videoStore.videoState === STATE_VIDEO_ERROR
 							? "opacity-0"
 							: "opacity-100"
 					}   ${
 						mouseDown()
-							? "w-5 h-5"
+							? ""
 							: "duration-300 transition-all ease-linear"
 					} ${
 						props.handleFullScreen.active
@@ -410,28 +420,26 @@ export default function VideoPlaybar(props) {
 								: "-top-[calc(50%-0.3rem)] hover:-top-[calc(50%-0.1rem)]"
 							: mouseDown()
 								? "-top-[calc(50%-0.2rem)]"
-								: "-top-[calc(50%-0.225rem)] hover:-top-[calc(50%+0.1rem)]"
+								: "-top-[calc(50%-0.225rem)]"
 					} `}
 					ref={draggableHandle}
 					style={{
-						transform: `translate3d(${
-							currentBoopPosition() - 2
-						}px, 0, 0)`,
+						transform: `translate3d(${currentBoopPosition() - 2}px, 0, 0)`,
 					}}>
-					{mouseDown() ? (
+					{/* {mouseDown() ? (
 						<div
 							class={`text-white absolute rounded-lg px-4 text-xs transition-all ${
 								props.duration() - draggedDuration() < 5
-									? "-left-[calc(50%+3.5rem)]"
-									: "-left-[calc(50%+1rem)]"
-							} -top-[calc(50%+1.5rem)] border border-white`}>
+									? "-left-[calc(50%+3.5rem)] -top-[calc(50%+3rem)]"
+									: "-left-[calc(50%+1rem)] -top-[calc(50%+1.5rem)]"
+							}  border border-white`}>
 							{videoStore.videoState === STATE_VIDEO_LOADING
 								? "--:--"
 								: props.toTimeString(draggedDuration())}
 						</div>
 					) : (
 						<></>
-					)}
+					)} */}
 				</div>
 
 				{/* time */}
@@ -447,6 +455,6 @@ export default function VideoPlaybar(props) {
 				</p>
 			</div>
 			<VideoControls handleFullScreen={props.handleFullScreen} />
-		</>
+		</div>
 	);
 }
