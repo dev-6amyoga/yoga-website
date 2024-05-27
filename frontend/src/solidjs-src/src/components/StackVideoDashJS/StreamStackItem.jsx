@@ -510,10 +510,10 @@ function StreamStackItem(props) {
 		// 	}`}>
 		// 	<div
 		// class="relative h-full w-full block">
-		<div class="absolute h-full w-full">
+		<div class="h-full w-full">
 			<div
 				class={`relative stream-stack-item w-full h-full ${
-					props.isActive ? "block" : "invisible"
+					props.isActive ? "block" : "block"
 				}`}>
 				{/* class={props.isActive ? "flex-1" : "w-60"}> */}
 				<DashPlayer
