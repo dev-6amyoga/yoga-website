@@ -431,7 +431,7 @@ export default function Register({ switchForm }) {
   };
 
   return (
-    <div class="scale-55">
+    <div class="scale-70 !important">
       <GoogleOAuthProvider clientId={clientID}>
         <Card className="w-80 sm:w-96 lg:w-[440px]">
           <CardHeader>
@@ -441,17 +441,17 @@ export default function Register({ switchForm }) {
                 alt="6AM Yoga"
                 className="mx-auto max-h-24 my-4"
               />
-              <h3 className="text-center">Register</h3>
+              <h5 className="text-center">Register</h5>
             </div>
-            <hr />
           </CardHeader>
+
           <CardContent>
             <Progress
               className="accent-y-darkgreen"
               value={step}
               max={role === "STUDENT" ? maxSteps : maxSteps + 1}
             />
-            <Spacer y={4} />
+            {/* <Spacer y={4} /> */}
             {RenderStep}
             <div className="flex flex-row justify-between my-10 sm:flex flex-col py-2 gap-y-2">
               {(role === "STUDENT" && step < maxSteps) ||
@@ -499,9 +499,6 @@ export default function Register({ switchForm }) {
                 </Button>
               )}
             </div>
-
-            <hr />
-
             <div className="flex flex-col gap-1 items-center w-full mt-4">
               <Button
                 variant="ghost"
@@ -513,48 +510,47 @@ export default function Register({ switchForm }) {
             </div>
           </CardContent>
         </Card>
-        <Modal
-          visible={disclaimerModal}
-          onClose={() => setDisclaimerModal(() => false)}
-        >
-          <Modal.Title>Disclaimer</Modal.Title>
-          <Modal.Content>
-            <Card shadow>
-              {" "}
-              <div className="flex flex-col gap-3">
-                <p>
-                  I would like to utilize in the yoga videos offered by 6AM
-                  Yoga. I fully understand that yoga includes physical activity
-                  that may or may not cause physical injury.
-                </p>
-                <p>
-                  I agree to declare any health issues and/or conditions I may
-                  have before signing up for the platform. I declare that a
-                  physician's approval has been taken before enrollment.{" "}
-                </p>
-                <p>
-                  In the event that poses might be uncomfortable, any suggested
-                  modifications can be discussed with me. If there's any strain
-                  or fatigue, I can come out of the pose to rest and understand
-                  that each and every one have their own physical limitations.
-                </p>
-                <p>
-                  I fully recognize that any injuries sustained from the yoga
-                  practice will be my responsibility. Therefore I release 6AM
-                  Yoga of any liabilities in this regard. I have read and fully
-                  understood the terms of the declaration and accept all of it.
-                </p>
-              </div>
-            </Card>
-          </Modal.Content>
-          <Modal.Action onClick={() => disclaimerAccepted()}>
-            Accept
-          </Modal.Action>
-          <Modal.Action onClick={() => setDisclaimerModal(false)}>
-            Cancel
-          </Modal.Action>
-        </Modal>
       </GoogleOAuthProvider>
+
+      <Modal
+        visible={disclaimerModal}
+        onClose={() => setDisclaimerModal(() => false)}
+      >
+        <Modal.Title>Disclaimer</Modal.Title>
+        <Modal.Content>
+          <Card shadow>
+            {" "}
+            <div className="flex flex-col gap-3">
+              <p>
+                I would like to utilize in the yoga videos offered by 6AM Yoga.
+                I fully understand that yoga includes physical activity that may
+                or may not cause physical injury.
+              </p>
+              <p>
+                I agree to declare any health issues and/or conditions I may
+                have before signing up for the platform. I declare that a
+                physician's approval has been taken before enrollment.{" "}
+              </p>
+              <p>
+                In the event that poses might be uncomfortable, any suggested
+                modifications can be discussed with me. If there's any strain or
+                fatigue, I can come out of the pose to rest and understand that
+                each and every one have their own physical limitations.
+              </p>
+              <p>
+                I fully recognize that any injuries sustained from the yoga
+                practice will be my responsibility. Therefore I release 6AM Yoga
+                of any liabilities in this regard. I have read and fully
+                understood the terms of the declaration and accept all of it.
+              </p>
+            </div>
+          </Card>
+        </Modal.Content>
+        <Modal.Action onClick={() => disclaimerAccepted()}>Accept</Modal.Action>
+        <Modal.Action onClick={() => setDisclaimerModal(false)}>
+          Cancel
+        </Modal.Action>
+      </Modal>
     </div>
   );
 }
