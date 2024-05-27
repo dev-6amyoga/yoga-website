@@ -4,6 +4,7 @@ import AutomaticRegister from "../components/content-management/forms/AutomaticR
 import TeacherPlaylistCreation from "../pages/teacher/TeacherPlaylistCreation";
 import DesignBoard from "../pages/testing/DesignBoard";
 import SocketPage from "../pages/testing/Socket";
+import PlaybarPage from "../pages/testing/Playbar";
 export const TestingRoutes = [
 	{
 		path: "/testing/video",
@@ -24,5 +25,9 @@ export const TestingRoutes = [
 	{
 		path: "/testing/socket",
 		element: <SocketPage />,
+	},
+	{
+		path: "/testing/playbar",
+		element: <PlaybarPage />,
 	},
 ];

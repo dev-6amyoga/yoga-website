@@ -274,9 +274,7 @@ function VideoPlayer() {
 			</div> */}
 			{/* <pre>{JSON.stringify(videos())}</pre> */}
 			<div
-				class={`${
-					videoStore.fullScreen ? "h-full" : "mx-auto aspect-video"
-				}`}>
+				class={`${videoStore.fullScreen ? "h-full" : "w-full h-full"}`}>
 				<Show
 					when={
 						videoStore.currentVideo &&
@@ -304,7 +302,7 @@ function VideoPlayer() {
 								<button onClick={handleSetPlay}>Refresh</button>
 							</div>
 						}>
-						<div class="relative w-full h-full">
+						<div class="relative w-full h-full flex flex-row gap-2">
 							{/* <div class="flex flex-row items-end gap-4"> */}
 							<Show when={playlistStore.queue.length > 0}>
 								<For each={playlistStore.queue.slice(0, 2)}>

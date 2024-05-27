@@ -245,7 +245,7 @@ function DashPlayer(props) {
 				console.log("Checking for isMobile", isMobile);
 				// const store = useVideoStore.getState();
 				var playreadyKeyUrl;
-				playreadyKeyUrl = undefined;
+				playreadyKeyUrl = videoStore.playreadyKeyUrl ?? undefined;
 				// const setPlayreadyKeyUrl = videoStore.setPlayreadyKeyUrl;
 				//console.log("Fetching DRM Info");
 				console.log("[DASH PLAYER] : isAsanaVideo", props.isAsanaVideo);

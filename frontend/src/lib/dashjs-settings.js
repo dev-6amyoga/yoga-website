@@ -6,8 +6,8 @@ export const dashSettings = {
 		cacheInitSegments: true,
 		buffer: {
 			initialBufferLevel: 4,
-			bufferTimeAtTopQuality: 15,
-			bufferToKeep: 20,
+			bufferTimeAtTopQuality: 10,
+			bufferToKeep: 15,
 		},
 	},
 };
