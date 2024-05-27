@@ -510,10 +510,10 @@ function StreamStackItem(props) {
 		// 	}`}>
 		// 	<div
 		// class="relative h-full w-full block">
-		<div class="h-full w-full">
+		<div class="absolute h-full w-full">
 			<div
 				class={`relative stream-stack-item w-full h-full ${
-					props.isActive ? "block" : "block"
+					props.isActive ? "block" : "invisible"
 				}`}>
 				{/* class={props.isActive ? "flex-1" : "w-60"}> */}
 				<DashPlayer
@@ -552,13 +552,6 @@ function StreamStackItem(props) {
 				</Show>
 
 				<div class="absolute bottom-0 z-20 h-1/3 w-full opacity-0 transition-opacity delay-1000 duration-300 ease-in-out hover:opacity-100 hover:delay-0 pointer-events-auto touch-auto">
-					{/* markers */}
-					{/* <Show when={videoStore.fullScreen}>
-							<div class="absolute bottom-28 w-full">
-								<VideoMarkers />
-							</div>
-						</Show> */}
-					{/* playbar */}
 					<div class="absolute bottom-0 w-full">
 						<VideoPlaybar
 							isActive={props.isActive}

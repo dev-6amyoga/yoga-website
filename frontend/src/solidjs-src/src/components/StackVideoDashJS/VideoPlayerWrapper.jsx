@@ -1,4 +1,4 @@
-import { createEffect, createSignal, on } from "solid-js";
+import { Match, Switch, createEffect, createSignal, on } from "solid-js";
 import { useVideoStoreContext } from "../../store/VideoStore";
 import Playlist from "../Sidebar/Playlist";
 import "./StackVideo.css";
@@ -22,11 +22,11 @@ export default function VideoPlayerWrapper() {
 
 	return (
 		<>
-			<div>
+			{/* <div>
 				<VideoPlayer />
 				<VideoQueue />
-			</div>
-			{/* <div
+			</div> */}
+			<div
 				class={
 					videoStore.fullScreen
 						? "relative w-full h-screen"
@@ -66,7 +66,7 @@ export default function VideoPlayerWrapper() {
 						</Match>
 					</Switch>
 				</div>
-			</div> */}
+			</div>
 			{/* <VideoPlayer />
 
 			<VideoQueue /> */}

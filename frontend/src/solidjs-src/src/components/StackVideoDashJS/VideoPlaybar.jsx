@@ -1,9 +1,7 @@
-import { useDragDropContext } from "@thisbeyond/solid-dnd";
-
-import { createDraggable } from "@neodrag/solid";
 import {
 	createEffect,
 	createMemo,
+	createRenderEffect,
 	createSignal,
 	on,
 	onCleanup,
@@ -17,26 +15,121 @@ import {
 } from "../../store/VideoStore";
 import VideoControls from "./VideoControls";
 
-const ConstrainDragAxis = () => {
-	const [, { onDragStart, onDragEnd, addTransformer, removeTransformer }] =
-		useDragDropContext();
+function draggable(el, value) {
+	const { onDragStart, onDrag, onDragEnd, bounds } = value();
+	let active = false;
+	let targetBounds = null;
+	let dragBounds = null;
 
-	const transformer = {
-		id: "constrain-x-axis",
-		order: 100,
-		callback: (transform) => ({ ...transform, y: 0 }),
+	const calcData = (e) => {
+		let data = {
+			clientX: e.clientX,
+			clientY: e.clientY,
+			offsetX: e.clientX - dragBounds.left,
+			offsetY: e.clientY - dragBounds.top,
+			max: dragBounds.width - targetBounds.width / 2,
+			min: 0,
+		};
+
+		if (bounds === "parent") {
+			if (e.clientX < dragBounds.left) {
+				data.clientX = dragBounds.left;
+				data.offsetX = 0;
+			}
+			if (e.clientX > dragBounds.right - targetBounds.width / 2) {
+				data.clientX = dragBounds.right;
+				data.offsetX = dragBounds.width - targetBounds.width / 2;
+			}
+
+			if (e.clientY < dragBounds.top) {
+				data.clientY = dragBounds.top;
+				data.offsetY = 0;
+			}
+			if (e.clientY > dragBounds.bottom) {
+				data.clientY = dragBounds.bottom;
+				data.offsetY = dragBounds.height;
+			}
+		}
+
+		return data;
 	};
 
-	onDragStart(({ draggable }) => {
-		addTransformer("draggables", draggable.id, transformer);
-	});
+	const handlePointerDown = (e) => {
+		targetBounds = el.getBoundingClientRect();
 
-	onDragEnd(({ draggable }) => {
-		removeTransformer("draggables", draggable.id, transformer.id);
-	});
+		if (bounds === "parent") {
+			dragBounds = el.parentNode.getBoundingClientRect();
+			el.parentNode.style["user-select"] = "none";
+			el.style["user-select"] = "none";
+			// console.log({ dragBounds });
+		}
 
-	return <></>;
-};
+		// console.log(
+		// 	e.clientX,
+		// 	e.clientY,
+		// 	targetBounds,
+		// 	e.clientX > targetBounds.left,
+		// 	e.clientX < targetBounds.right,
+		// 	e.clientY > targetBounds.top,
+		// 	e.clientY < targetBounds.bottom
+		// );
+
+		if (
+			e.clientX > targetBounds.left &&
+			e.clientX < targetBounds.right &&
+			e.clientY > targetBounds.top &&
+			e.clientY < targetBounds.bottom
+		) {
+			console.log("ACTIVE");
+			active = true;
+			if (onDragStart) onDragStart();
+		}
+	};
+
+	const handlePointerUp = (e) => {
+		active = false;
+		console.log("INACTIVE");
+		el.parentNode.style["user-select"] = "auto";
+		el.style["user-select"] = "auto";
+
+		let data = calcData(e);
+
+		if (onDragEnd) onDragEnd(data);
+	};
+
+	const handlePointerMove = (e) => {
+		if (!active) {
+			return;
+		}
+
+		let data = calcData(e);
+
+		if (onDrag) onDrag(data);
+	};
+
+	const handleResize = () => {
+		targetBounds = el.getBoundingClientRect();
+		if (bounds === "parent") {
+			dragBounds = el.parentNode.getBoundingClientRect();
+		}
+	};
+
+	createRenderEffect(() => {
+		document.addEventListener("pointerdown", handlePointerDown);
+		document.addEventListener("pointerup", handlePointerUp);
+		document.addEventListener("pointermove", handlePointerMove);
+
+		window.addEventListener("resize", handleResize);
+
+		onCleanup(() => {
+			document.removeEventListener("pointerdown", handlePointerDown);
+			document.removeEventListener("pointerup", handlePointerUp);
+			document.removeEventListener("pointermove", handlePointerMove);
+
+			window.removeEventListener("resize", handleResize);
+		});
+	});
+}
 
 /*
 	playbarVisible,
@@ -66,8 +159,6 @@ export default function VideoPlaybar(props) {
 	let popTimeout = null;
 	let barRef = null;
 	let draggableHandle = null;
-
-	let { draggable } = createDraggable();
 
 	const [mouseDown, setMouseDown] = createSignal(false);
 	const [barBound, setBarBound] = createSignal({
@@ -299,22 +390,21 @@ export default function VideoPlaybar(props) {
 	};
 
 	const handleDragOnStop = (e) => {
-		console.log("[EVENT] DRAG STOPPED", e, e.offsetX - barBound().left);
+		console.log("[EVENT] DRAG STOPPED", e, e.offsetX);
 		seekOnClick(e, "boopdrag");
 		setMouseDown(false);
 	};
 
 	const handleOnDrag = (e) => {
-		const bounds = barBound();
 		const cbp = e.offsetX;
-		const calcpos = cbp < 0 ? 0 : cbp > bounds.width ? bounds.width : cbp;
-		console.log("[EVENT] Dragging : ", {
-			cbp,
-			calcpos,
-			e,
-			offLeft: e.offsetX,
-		});
-		setCurrentBoopPosition((p) => calcpos);
+		// const calcpos = cbp < 0 ? 0 : cbp > bounds.width ? bounds.width : cbp;
+		// console.log("[EVENT] Dragging : ", {
+		// 	cbp,
+		// 	calcpos,
+		// 	e,
+		// 	offLeft: e.offsetX,
+		// });
+		setCurrentBoopPosition((p) => cbp);
 	};
 
 	const draggedDuration = createMemo(
@@ -349,8 +439,10 @@ export default function VideoPlaybar(props) {
 
 	// const draggedDuration = createMemo(() => 0);
 
+	// createEffect(on([() => props.isActive], () => {}));
+
 	return (
-		<div class="w-full relative border border-green-600 playbar-bound">
+		<div class="w-full relative playbar-bound">
 			<div
 				class={`w-[calc(100%-0.35rem)] h-[1.5rem] bg-transparent relative mx-auto group flex items-start mt-2 border border-red-500`}
 				onClick={(e) => {
@@ -389,23 +481,12 @@ export default function VideoPlaybar(props) {
 				{/* boop */}
 				<div
 					use:draggable={{
-						axis: "x",
-						bounds: {
-							left: barBound().left - 10,
-							right: window.innerWidth - barBound().right - 10,
-							top: 0,
-							bottom: 0,
-						},
+						bounds: "parent",
 						onDragStart: handleDragOnStart,
 						onDragEnd: handleDragOnStop,
 						onDrag: handleOnDrag,
-						recomputeBounds: {
-							dragStart: true,
-							drag: false,
-							dragEnd: false,
-						},
 					}}
-					class={`timeboop bg-y-darkgreen rounded-full border border-pink-500 absolute z-[100] mt-[18px] w-3 h-3 ${
+					class={`timeboop bg-y-darkgreen rounded-full absolute z-[100] mt-[18px] w-3 h-3 ${
 						videoStore.videoState === STATE_VIDEO_ERROR
 							? "opacity-0"
 							: "opacity-100"

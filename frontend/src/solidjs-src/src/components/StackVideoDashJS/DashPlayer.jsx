@@ -612,8 +612,7 @@ function DashPlayer(props) {
 			<video
 				class="aspect-video"
 				id={props.queueItemId}
-				ref={setVideoRef}
-				controls={!props.isActive}></video>
+				ref={setVideoRef}></video>
 		</div>
 	);
 }
