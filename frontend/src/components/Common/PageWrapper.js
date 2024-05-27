@@ -14,6 +14,7 @@ import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LoginIcon from "@mui/icons-material/Login";
 
 export default function PageWrapper({ heading, children }) {
   const navigate = useNavigate();
@@ -42,7 +43,6 @@ export default function PageWrapper({ heading, children }) {
         }}
       >
         <Container maxWidth="xl">
-          {/* <Toolbar disableGutters> */}
           <Toolbar
             variant="regular"
             sx={(theme) => ({
@@ -70,13 +70,14 @@ export default function PageWrapper({ heading, children }) {
               alt="image_description"
               className="w-20 pt-2"
             />
-            <Button
+            <LoginIcon color="error" />
+            {/* <Button
               variant="contained"
               onClick={() => navigate("/auth")}
-              sx={{ backgroundColor: "black", color: "white" }}
+              sx={{ backgroundColor: "blue", color: "white" }}
             >
               Login/Register
-            </Button>
+            </Button> */}
           </Toolbar>
         </Container>
       </AppBar>
