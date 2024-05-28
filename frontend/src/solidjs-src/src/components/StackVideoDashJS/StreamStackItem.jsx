@@ -285,7 +285,7 @@ function StreamStackItem(props) {
 							videoStore.markers[videoStore.currentMarkerIdx + 1]
 								?.timestamp
 						) {
-							if (currentMarker.loop) {
+							if (currentMarker?.loop) {
 								console.log("LOOPING CUZ OF MARKER");
 								addToSeekQueue({
 									type: SEEK_TYPE_MARKER,
