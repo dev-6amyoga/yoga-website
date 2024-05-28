@@ -27,8 +27,6 @@ import { toTimeString } from "../../utils/toTimeString";
 import DashPlayer from "./DashPlayer";
 import VideoPlaybar from "./VideoPlaybar";
 
-// console.log(STATE_VIDEO_LOADING);
-
 function StreamStackItem(props) {
 	// const user = useUserStore((state) => state.user);
 	const [playerRef, setPlayerRef] = createSignal({
@@ -40,9 +38,6 @@ function StreamStackItem(props) {
 	let playInActiveTimer = null;
 
 	let [duration, setDuration] = createSignal(0);
-
-	// const [metadataLoaded, setMetadataLoaded] = createSignal(false);
-	// const [autoplayInitialized, setAutoplayInitialized] = createSignal(false);
 	const [playerLoaded, setPlayerLoaded] = createSignal(false);
 
 	const videoUrl = createMemo(
@@ -55,26 +50,6 @@ function StreamStackItem(props) {
 			);
 		})
 	);
-
-	// createEffect(
-	// 	on([() => props.isActive, () => props.video], () => {
-	// 		console.log(props.video, props.isActive);
-
-	// 		if (props.isActive) {
-	// 			console.log(playerRef(), "IS REF!"); // If needed for debugging
-	// 			if (playerRef().current.player !== null) {
-	// 				playerRef().current.player.preload();
-	// 			}
-	// 		} else {
-	// 			console.log(playerRef(), "IS REF NON ACTIVE");
-	// 		}
-	// 		console.log({
-	// 			propsIsActive: props.isActive,
-	// 			videoidx: props.video?.idx,
-	// 		});
-	// 	})
-	// );
-
 	const [
 		videoStore,
 		{
@@ -109,70 +84,6 @@ function StreamStackItem(props) {
 		// 	setAutoplayInitialized(true);
 		// }
 	};
-
-	// createEffect(
-	// 	on([() => props.isActive, () => props.video], () => {
-	// 		const pr = playerRef().current.videoElement;
-	// 		if (!props.isActive && pr && pr.currentTime > 0) {
-	// 			console.log(
-	// 				"PAUSE AND RESET ----------------------------->",
-	// 				props.video.idx
-	// 			);
-	// 			pr.muted = true;
-	// 			setVolume(0);
-	// 			pr.pause();
-	// 			// pr.currentTime = 0;
-	// 		}
-
-	// 		onCleanup(() => {
-	// 			if (pr && !props.isActive) {
-	// 				// pr.currentTime = 0;
-	// 			}
-	// 			pr?.pause();
-	// 		});
-	// 	})
-	// );
-
-	// createEffect(
-	// 	on(
-	// 		[
-	// 			() => props.video,
-	// 			metadataLoaded,
-	// 			() => videoStore.videoState,
-	// 			() => props.isActive,
-	// 			autoplayInitialized,
-	// 		],
-	// 		() => {
-	// 			if (
-	// 				props.isActive &&
-	// 				metadataLoaded() &&
-	// 				playerRef().current !== null &&
-	// 				playerRef().current !== undefined
-	// 			) {
-	// 				setPauseReason(null);
-
-	// 				if (videoStore.videoState === STATE_VIDEO_PAUSED) {
-	// 					console.log(
-	// 						"createEffect : changing to pause",
-	// 						props.video.idx
-	// 					);
-	// 					if (props.isActive) {
-	// 						playerRef().current.player.pause();
-	// 					}
-	// 				} else if (videoStore.videoState === STATE_VIDEO_PLAY) {
-	// 					console.log(
-	// 						"createEffect : changing to play",
-	// 						props.video.idx
-	// 					);
-	// 					if (props.isActive) {
-	// 						playerRef().current.player.play();
-	// 					}
-	// 				}
-	// 			}
-	// 		}
-	// 	)
-	// );
-
 	// seeking
 	createEffect(
 		on([() => props.isActive, () => videoStore.seekQueue], () => {
@@ -265,10 +176,6 @@ function StreamStackItem(props) {
 					}
 				};
 
-				// checks if the video should be paused or looped based on markers
-				// returns true, if the loop should be skipped
-				// if in student mode, always return false
-				//
 				const checkPauseOrLoop = (ct) => {
 					if (videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE) {
 						return false;
