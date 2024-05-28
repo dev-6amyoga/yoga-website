@@ -1,6 +1,7 @@
 import { Match, Switch, createEffect, createSignal, on } from "solid-js";
 import { useVideoStoreContext } from "../../store/VideoStore";
 import Playlist from "../Sidebar/Playlist";
+// import VideoPlayer from "./Singular/VideoPlayer";
 import "./StackVideo.css";
 import VideoInfo from "./VideoInfo";
 import VideoMarkers from "./VideoMarkers";
