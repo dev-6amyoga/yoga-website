@@ -87,14 +87,16 @@ function draggable(el, value) {
 	};
 
 	const handlePointerUp = (e) => {
-		active = false;
-		console.log("INACTIVE");
-		el.parentNode.style["user-select"] = "auto";
-		el.style["user-select"] = "auto";
+		if (active) {
+			active = false;
+			console.log("INACTIVE");
+			el.parentNode.style["user-select"] = "auto";
+			el.style["user-select"] = "auto";
 
-		let data = calcData(e);
+			let data = calcData(e);
 
-		if (onDragEnd) onDragEnd(data);
+			if (onDragEnd) onDragEnd(data);
+		}
 	};
 
 	const handlePointerMove = (e) => {
@@ -444,7 +446,7 @@ export default function VideoPlaybar(props) {
 	return (
 		<div class="w-full relative playbar-bound">
 			<div
-				class={`w-[calc(100%-0.35rem)] h-[1.5rem] bg-transparent relative mx-auto group flex items-start mt-2 border border-red-500`}
+				class={`w-[calc(100%-0.35rem)] h-[1.5rem] bg-transparent relative mx-auto group flex items-start mt-2`}
 				onClick={(e) => {
 					e.preventDefault();
 					seekOnClick(e, "barclick");

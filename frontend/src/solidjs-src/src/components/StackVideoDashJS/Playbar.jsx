@@ -131,8 +131,8 @@ export default function Playbar() {
 	return (
 		<div>
 			<div class="max-w-4xl aspect-video bg-black mx-auto relative">
-				<div class="absolute w-full h-24 border border-red-500 bottom-0">
-					<div class="bar relative w-[calc(100%-0.5rem)] h-2 border-green-600 bg-white mx-auto">
+				<div class="absolute w-full h-24 bottom-0">
+					<div class="bar relative w-[calc(100%-0.5rem)] h-2  bg-white mx-auto">
 						<div
 							use:draggable={{
 								onDragStart: () => {},
