@@ -11,25 +11,6 @@ import {
 import { Fetch } from "../../utils/Fetch";
 import { isMobileTablet } from "../../utils/isMobileOrTablet";
 
-// {
-// 		src,
-// 		isActive,
-// 		isAsanaVideo,
-// 		props.setDuration,
-// 		props.onCanPlayThrough,
-// 		props.onEnded,
-// 		props.onPlay,
-// 		props.onPause,
-// 		props.onError,
-// 		props.onVolumeChange,
-// 		onLoading,
-// 		onLoaded,
-// 		props.onSeeking,
-// 		props.onSeeked,
-// 		className,
-// 		...rest
-// 	},
-// 	ref
 
 function DashPlayer(props) {
 	let videoRef = { current: null };
@@ -130,36 +111,6 @@ function DashPlayer(props) {
 			}
 		})
 	);
-
-	// createEffect(
-	// 	on([playerRefSet, () => props.src, drmSet], () => {
-	// 		if (playerRefSet() && drmSet() && props.src) {
-	// 			console.log("[DASH PLAYER] : preloading");
-	// 			playerRef().preload();
-	// 			playerRef().play().catch((error) => {
-	// 				console.error("Play failed");
-	// 			});
-	// 		}
-	// 	})
-	// );
-
-	// createEffect(
-	// 	on([playerRefSet, () => props.src, drmSet], () => {
-	// 		if (playerRefSet() && drmSet() && props.src) {
-	// 			console.log("[DASH PLAYER] : preloading");
-	// 			playerRef().preload();
-	// 			const playPromise = playerRef()
-	// 				.play()
-	// 				.catch((error) => {
-	// 					console.error("Play failed:", error);
-	// 				});
-	// 			playPromise.then(() => {
-	// 				playerRef().pause();
-	// 			});
-	// 		}
-	// 	})
-	// );
-
 	createEffect(
 		on(
 			[
@@ -184,7 +135,6 @@ function DashPlayer(props) {
 						props.isActive,
 						playInActive()
 					);
-					// playerRef().play();
 					// if not active and playInActive (or) active and not playInActive
 					if (
 						(!props.isActive && playInActive()) ||
@@ -226,10 +176,6 @@ function DashPlayer(props) {
 							props.isActive,
 							props.video.idx
 						);
-						// playInActiveTimer = setTimeout(() => {
-						//   console.log("sending video event!");
-						//   addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
-						// }, inactiveVideoDuration * 1000);
 					}
 				}
 			}
@@ -244,16 +190,12 @@ function DashPlayer(props) {
 				const check = isMobileTablet();
 				const isMobile = { done: true, check: check };
 				console.log("Checking for isMobile", isMobile);
-				// const store = useVideoStore.getState();
 				var playreadyKeyUrl;
 				playreadyKeyUrl = videoStore.playreadyKeyUrl ?? undefined;
-				// const setPlayreadyKeyUrl = videoStore.setPlayreadyKeyUrl;
-				//console.log("Fetching DRM Info");
 				console.log("[DASH PLAYER] : isAsanaVideo", props.isAsanaVideo);
 
 				if (props.isAsanaVideo) {
 					if (isMobile.check) {
-						// Mobile
 						Fetch({
 							url: "/playback/get-widevine-token",
 							method: "POST",
@@ -391,12 +333,6 @@ function DashPlayer(props) {
 					props.video.idx
 				);
 			}
-			// playerRef().current.player.play();
-			// if (playInActiveTimer) {
-			//   clearTimeout(playInActiveTimer);
-			// }
-			//   playerRef().current.currentTime = 0;
-
 			const currentTime = playerRef().time();
 			const duration = playerRef().duration();
 			const remainingTime = duration - currentTime;
@@ -418,10 +354,6 @@ function DashPlayer(props) {
 				props.isActive,
 				props.video.idx
 			);
-			// playInActiveTimer = setTimeout(() => {
-			//   console.log("sending video event!");
-			//   addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
-			// }, inactiveVideoDuration * 1000);
 		}
 	};
 
@@ -432,13 +364,8 @@ function DashPlayer(props) {
 					"PAUSING ----------------------------->",
 					props.video.idx
 				);
-				// setVideoState(STATE_VIDEO_PAUSED);
 			}
 			clearVideoEvents();
-
-			// if (playInActiveTimer) {
-			//     clearTimeout(playInActiveTimer);
-			//   }
 		}
 	};
 
