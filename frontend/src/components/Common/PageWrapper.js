@@ -15,7 +15,7 @@ import AdbIcon from "@mui/icons-material/Adb";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginIcon from "@mui/icons-material/Login";
-
+import PersonIcon from "@mui/icons-material/Person";
 export default function PageWrapper({ heading, children }) {
   const navigate = useNavigate();
   const pages = ["Login/Register"];
@@ -70,7 +70,12 @@ export default function PageWrapper({ heading, children }) {
               alt="image_description"
               className="w-20 pt-2"
             />
-            <LoginIcon color="error" />
+
+            <Tooltip title="Register/Login">
+              <Button>
+                <PersonIcon style={{ color: "blue" }} />
+              </Button>
+            </Tooltip>
             {/* <Button
               variant="contained"
               onClick={() => navigate("/auth")}
