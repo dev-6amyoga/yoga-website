@@ -17,8 +17,8 @@ export const dashSettings = {
 			movingAverageMethod: "ewma",
 		},
 		gaps: {
-			jumpGaps: true,
-			jumpLargeGaps: true,
+			jumpGaps: false,
+			jumpLargeGaps: false,
 			smallGapLimit: 1,
 			threshold: 0.3,
 		},

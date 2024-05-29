@@ -33,6 +33,7 @@ function VideoPlayer() {
 			setCurrentMarkerIdx,
 			setCurrentTime,
 			setFullScreen,
+			clearSeekQueue,
 		},
 	] = useVideoStoreContext();
 
@@ -48,6 +49,7 @@ function VideoPlayer() {
 		setCurrentMarkerIdx(null);
 		setPauseReason(null);
 		setCurrentTime(0);
+		clearSeekQueue();
 	};
 
 	const handleEnd = () => {
