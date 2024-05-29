@@ -50,6 +50,7 @@ function StreamStackItem(props) {
 			);
 		})
 	);
+
 	const [
 		videoStore,
 		{
@@ -85,6 +86,7 @@ function StreamStackItem(props) {
 		// }
 	};
 	// seeking
+	
 	createEffect(
 		on([() => props.isActive, () => videoStore.seekQueue], () => {
 			if (props.isActive && videoStore.seekQueue.length > 0) {
