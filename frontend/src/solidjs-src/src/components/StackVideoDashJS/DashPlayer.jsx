@@ -104,7 +104,6 @@ function DashPlayer(props) {
 				} else if (playerRef() && !props.isActive && metadataLoaded()) {
 					console.log("[DASH PLAYER] : pausing !isActive video");
 					playerRef().pause();
-
 					if (videoRef.current) {
 						videoRef.current.currentTime = 0;
 					}
@@ -345,6 +344,25 @@ function DashPlayer(props) {
 			setVolume(1.0);
 		}
 	};
+
+	// 	const onCanPlay = () => {
+	//   if (!props.isActive) {
+	//     playerRef().pause();
+	//   }
+
+	//   if (props.isActive) {
+	//     setVolume(1.0);
+
+	//     if (buffering()) { // Check if buffering is in progress
+	//       videoRef.current.play().then(() => {
+	//         console.log("[DASH PLAYER]: Video play event success from CAN_PLAY");
+	//         setBuffering(false);  // Mark buffering as complete
+	//       }).catch((err) => {
+	//         console.log("[DASH PLAYER]: Video play event failed", err);
+	//       });
+	//     }
+	//   }
+	// };
 
 	const onPlay = () => {
 		console.log(
