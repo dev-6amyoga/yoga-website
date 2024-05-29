@@ -39,6 +39,7 @@ function StreamStackItem(props) {
 
 	let [duration, setDuration] = createSignal(0);
 	const [playerLoaded, setPlayerLoaded] = createSignal(false);
+	const [setupDashPlayer, setSetupDashPlayer] = createSignal(false);
 
 	const videoUrl = createMemo(
 		on([() => props.video], () => {
@@ -86,7 +87,7 @@ function StreamStackItem(props) {
 		// }
 	};
 	// seeking
-	
+
 	createEffect(
 		on([() => props.isActive, () => videoStore.seekQueue], () => {
 			if (props.isActive && videoStore.seekQueue.length > 0) {
@@ -412,6 +413,17 @@ function StreamStackItem(props) {
 		}
 	};
 
+	createEffect(() => {
+		const setupDash = setTimeout(() => {
+			setSetupDashPlayer(true);
+			console.log("[StreamStackItem] Delayed dash player setup");
+		}, 1500);
+
+		onCleanup(() => {
+			clearTimeout(setupDash);
+		});
+	});
+
 	return (
 		// <div
 		// 	class={`relative h-full w-full ${
@@ -425,26 +437,28 @@ function StreamStackItem(props) {
 					props.isActive ? "block" : "invisible"
 				}`}>
 				{/* class={props.isActive ? "flex-1" : "w-60"}> */}
-				<DashPlayer
-					ref={playerInit}
-					src={videoUrl()}
-					queueItemId={props.video.idx}
-					isAsanaVideo={
-						!isNaN(props.video?.video?.id) &&
-						typeof props.video?.video?.id === "number"
-					}
-					video={props.video}
-					isActive={props.isActive}
-					onError={handlePlayerError}
-					onCanPlayThrough={handleVideoCanPlayThrough}
-					onVolumeChange={handleVideoVolumeChange}
-					onEnded={props.handleEnd}
-					onLoading={handlePlayerLoading}
-					onLoaded={handlePlayerLoaded}
-					onSeeking={handleVideoSeeking}
-					onSeeked={handleVideoSeeked}
-					setDuration={setDuration}
-				/>
+				<Show when={setupDashPlayer()}>
+					<DashPlayer
+						ref={playerInit}
+						src={videoUrl()}
+						queueItemId={props.video.idx}
+						isAsanaVideo={
+							!isNaN(props.video?.video?.id) &&
+							typeof props.video?.video?.id === "number"
+						}
+						video={props.video}
+						isActive={props.isActive}
+						onError={handlePlayerError}
+						onCanPlayThrough={handleVideoCanPlayThrough}
+						onVolumeChange={handleVideoVolumeChange}
+						onEnded={props.handleEnd}
+						onLoading={handlePlayerLoading}
+						onLoaded={handlePlayerLoaded}
+						onSeeking={handleVideoSeeking}
+						onSeeked={handleVideoSeeked}
+						setDuration={setDuration}
+					/>
+				</Show>
 
 				<Show when={videoStore.fullScreen}>
 					<div class="absolute top-0 left-0 text-white z-[1001] h-1/2 w-full p-8 hover:opacity-100 opacity-0 hover:delay-0 delay-1000">
