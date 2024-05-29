@@ -20,6 +20,7 @@ function DashPlayer(props) {
 	const [drmSet, setDrmSet] = createSignal(false);
 	const [playInActive, setPlayInActive] = createSignal(false);
 	const [metrics, setMetrics] = createSignal({ bitrate: 0, bufferLevel: 0 });
+	const [seekedToZero, setSeekedToZero] = createSignal(false);
 	// let playInActiveTimer = null;
 
 	console.log("dashplayer! >>>>");
@@ -327,6 +328,11 @@ function DashPlayer(props) {
 	const onStreamInitialized = () => {
 		console.log("[DASH PLAYER] : stream initialized");
 		setStreamInitialized(true);
+		if (!seekedToZero()) {
+			console.log("[DASH PLAYER] : seeked to zero");
+			videoRef.current.currentTime = 0;
+			setSeekedToZero(true);
+		}
 	};
 
 	const onCanPlay = () => {
@@ -398,6 +404,14 @@ function DashPlayer(props) {
 		}
 	};
 
+	const onPlaybackLoadedData = () => {
+		// if (!seekedToZero()) {
+		// console.log("[DASH PLAYER] : seeked to zero");
+		// videoRef.current.currentTime = 0;
+		// setSeekedToZero(true);
+		// }
+	};
+
 	// Setting event listeners
 	createEffect(
 		on(
@@ -425,9 +439,7 @@ function DashPlayer(props) {
 					);
 					playerRef().on(
 						dashjs.MediaPlayer.events.PLAYBACK_LOADED_DATA,
-						() => {
-							// videoRef.current.currentTime = 0;
-						}
+						onPlaybackLoadedData
 					);
 					playerRef().on(
 						dashjs.MediaPlayer.events.CAN_PLAY,
@@ -482,10 +494,10 @@ function DashPlayer(props) {
 						dashjs.MediaPlayer.events.CAN_PLAY_THROUGH,
 						props.onCanPlayThrough
 					);
-					// playerRef().on(
-					// 	dashjs.MediaPlayer.events.PLAYBACK_WAITING,
-					// 	onWaiting
-					// );
+					playerRef().on(
+						dashjs.MediaPlayer.events.PLAYBACK_LOADED_DATA,
+						onPlaybackLoadedData
+					);
 					playerRef().off(
 						dashjs.MediaPlayer.events.CAN_PLAY,
 						onCanPlay
@@ -585,11 +597,11 @@ function DashPlayer(props) {
 						bufferLevel: bufferLevel,
 					};
 
-					console.log("[DASH PLAYER] : metrics", m);
+					// console.log("[DASH PLAYER] : metrics", m);
 
 					setMetrics(m);
 				}
-			}, 1000);
+			}, 2000);
 
 			onCleanup(() => {
 				console.log("[DASH PLAYER] : clearing metrics interval");
