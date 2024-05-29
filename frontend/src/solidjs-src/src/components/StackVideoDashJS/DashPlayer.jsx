@@ -53,8 +53,8 @@ function DashPlayer(props) {
 				p = dashjs.MediaPlayer().create();
 				setPlayerRef(p);
 				p.updateSettings(dashSettings);
-				p.initialize(null, props.src, false, 0.0);
-				// p.initialize(null, props.src, true, { autoplay: true, muted: true });
+				// p.initialize(null, props.src, false, 0.0);
+				p.initialize(null, props.src, true, { autoplay: true, muted: true });
 				p.attachView(videoRef.current);
 				p.preload();
 				p.play();
@@ -323,6 +323,11 @@ function DashPlayer(props) {
 			playerRef().setMute(false);
 		}
 	};
+
+	// const onStreamInitialized = () => {
+	// 	console.log("[DASH PLAYER] : stream initialized");
+	// 	setStreamInitialized(true);
+	// };
 
 	const onStreamInitialized = () => {
 		console.log("[DASH PLAYER] : stream initialized");

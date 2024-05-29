@@ -424,6 +424,7 @@ function StreamStackItem(props) {
 		});
 	});
 
+
 	return (
 		// <div
 		// 	class={`relative h-full w-full ${
@@ -436,7 +437,7 @@ function StreamStackItem(props) {
 				class={`relative stream-stack-item w-full h-full ${
 					props.isActive ? "block" : "invisible"
 				}`}>
-				{/* class={props.isActive ? "flex-1" : "w-60"}> */}
+				{/* //  class={props.isActive ? "flex-1" : "w-60"}>  */}
 				<Show when={setupDashPlayer()}>
 					<DashPlayer
 						ref={playerInit}
