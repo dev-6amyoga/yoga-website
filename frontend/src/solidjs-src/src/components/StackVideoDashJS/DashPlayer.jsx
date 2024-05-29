@@ -103,7 +103,6 @@ function DashPlayer(props) {
 				} else if (playerRef() && !props.isActive && metadataLoaded()) {
 					console.log("[DASH PLAYER] : pausing !isActive video");
 					playerRef().pause();
-
 					if (videoRef.current) {
 						videoRef.current.currentTime = 0;
 					}
@@ -340,6 +339,25 @@ function DashPlayer(props) {
 		}
 	};
 
+// 	const onCanPlay = () => {
+//   if (!props.isActive) {
+//     playerRef().pause();
+//   }
+
+//   if (props.isActive) {
+//     setVolume(1.0);
+
+//     if (buffering()) { // Check if buffering is in progress
+//       videoRef.current.play().then(() => {
+//         console.log("[DASH PLAYER]: Video play event success from CAN_PLAY");
+//         setBuffering(false);  // Mark buffering as complete
+//       }).catch((err) => {
+//         console.log("[DASH PLAYER]: Video play event failed", err);
+//       });
+//     }
+//   }
+// };
+
 	const onPlay = () => {
 		console.log(
 			"[DASH PLAYER] handlePlay event called",
@@ -426,7 +444,7 @@ function DashPlayer(props) {
 					playerRef().on(
 						dashjs.MediaPlayer.events.PLAYBACK_LOADED_DATA,
 						() => {
-							// videoRef.current.currentTime = 0;
+							videoRef.current.currentTime = 0;
 						}
 					);
 					playerRef().on(
@@ -482,10 +500,6 @@ function DashPlayer(props) {
 						dashjs.MediaPlayer.events.CAN_PLAY_THROUGH,
 						props.onCanPlayThrough
 					);
-					// playerRef().on(
-					// 	dashjs.MediaPlayer.events.PLAYBACK_WAITING,
-					// 	onWaiting
-					// );
 					playerRef().off(
 						dashjs.MediaPlayer.events.CAN_PLAY,
 						onCanPlay
@@ -612,3 +626,4 @@ function DashPlayer(props) {
 }
 
 export default DashPlayer;
+
