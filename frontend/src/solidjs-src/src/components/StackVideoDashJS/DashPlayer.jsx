@@ -70,6 +70,26 @@ function DashPlayer(props) {
 		})
 	);
 
+// 	createEffect(() => {
+//     return () => {
+//         if (playerRef()) {
+//             playerRef().reset();
+//             playerRef().destroy();
+//             setPlayerRef(null);
+//         }
+//     };
+// }, [props.src]);
+    // createEffect(() => {
+    //     if (props.src) {
+    //         console.log("[DASH PLAYER] : setup", { src: props.src });
+    //         initializePlayer(props.src);
+    //     }
+
+    //     return () => {
+    //         cleanupPlayer();
+    //     };
+    // }, [props.src]);
+
 	createEffect(
 		on(
 			[
@@ -111,6 +131,7 @@ function DashPlayer(props) {
 			}
 		})
 	);
+	
 	createEffect(
 		on(
 			[
@@ -408,10 +429,6 @@ function DashPlayer(props) {
 							videoRef.current.currentTime = 0;
 						}
 					);
-					// playerRef().on(
-					// 	dashjs.MediaPlayer.events.PLAYBACK_WAITING,
-					// 	onWaiting
-					// );
 					playerRef().on(
 						dashjs.MediaPlayer.events.CAN_PLAY,
 						onCanPlay

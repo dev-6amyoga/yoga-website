@@ -14,8 +14,9 @@ import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LoginIcon from "@mui/icons-material/Login";
 import PersonIcon from "@mui/icons-material/Person";
+import { BrowserRouter } from "react-router-dom";
+
 export default function PageWrapper({ heading, children }) {
   const navigate = useNavigate();
   const pages = ["Login/Register"];
@@ -54,7 +55,7 @@ export default function PageWrapper({ heading, children }) {
               bgcolor:
                 theme.palette.mode === "light"
                   ? "rgba(255, 255, 255, 1.3)"
-                  : "rgba(0, 0, 0, 0.4)",
+                  : "rgba(2, 31, 59, 0.7)",
               backdropFilter: "blur(24px)",
               maxHeight: 40,
               border: "1px solid",
@@ -63,6 +64,10 @@ export default function PageWrapper({ heading, children }) {
                 theme.palette.mode === "light"
                   ? `0 0 1px rgba(85, 166, 246, 0.1), 1px 1.5px 2px -1px rgba(85, 166, 246, 0.15), 4px 4px 12px -2.5px rgba(85, 166, 246, 0.15)`
                   : "0 0 1px rgba(2, 31, 59, 0.7), 1px 1.5px 2px -1px rgba(2, 31, 59, 0.65), 4px 4px 12px -2.5px rgba(2, 31, 59, 0.65)",
+              // boxShadow:
+              //   theme.palette.mode === "light"
+              //     ? `0 0 1px rgba(0, 255, 0, 0.1), 1px 1.5px 2px -1px rgba(0, 255, 0, 0.15), 4px 4px 12px -2.5px rgba(0, 255, 0, 0.15)`
+              //     : "0 0 1px rgba(2, 31, 59, 0.7), 1px 1.5px 2px -1px rgba(2, 31, 59, 0.65), 4px 4px 12px -2.5px rgba(2, 31, 59, 0.65)",
             })}
           >
             <img
@@ -72,17 +77,14 @@ export default function PageWrapper({ heading, children }) {
             />
 
             <Tooltip title="Register/Login">
-              <Button>
+              <Button
+                onClick={() => {
+                  navigate("/auth");
+                }}
+              >
                 <PersonIcon style={{ color: "blue" }} />
               </Button>
             </Tooltip>
-            {/* <Button
-              variant="contained"
-              onClick={() => navigate("/auth")}
-              sx={{ backgroundColor: "blue", color: "white" }}
-            >
-              Login/Register
-            </Button> */}
           </Toolbar>
         </Container>
       </AppBar>

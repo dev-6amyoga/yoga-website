@@ -263,9 +263,9 @@ export default function Login({ switchForm }) {
                 <div>
                   <LoginGoogle />
                 </div>
-                <Button onClick={phoneSignInFunction} className="w-full">
+                {/* <Button onClick={phoneSignInFunction} className="w-full">
                   Login with Phone Number
-                </Button>
+                </Button> */}
               </div>
 
               {/* <hr /> */}
