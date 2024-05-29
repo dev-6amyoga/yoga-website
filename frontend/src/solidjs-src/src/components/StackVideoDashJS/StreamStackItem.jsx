@@ -424,7 +424,7 @@ function StreamStackItem(props) {
 				class={`relative stream-stack-item w-full h-full ${
 					props.isActive ? "block" : "invisible"
 				}`}>
-				{/* class={props.isActive ? "flex-1" : "w-60"}> */}
+				{/* // class={ `flex flex-column ${props.isActive ? "flex-1" : "w-60"}`}>  */}
 				<DashPlayer
 					ref={playerInit}
 					src={videoUrl()}
