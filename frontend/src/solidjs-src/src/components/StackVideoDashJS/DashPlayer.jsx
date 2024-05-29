@@ -11,7 +11,6 @@ import {
 import { Fetch } from "../../utils/Fetch";
 import { isMobileTablet } from "../../utils/isMobileOrTablet";
 
-
 function DashPlayer(props) {
 	let videoRef = { current: null };
 	const [playerRef, setPlayerRef] = createSignal(null);
@@ -70,25 +69,25 @@ function DashPlayer(props) {
 		})
 	);
 
-// 	createEffect(() => {
-//     return () => {
-//         if (playerRef()) {
-//             playerRef().reset();
-//             playerRef().destroy();
-//             setPlayerRef(null);
-//         }
-//     };
-// }, [props.src]);
-    // createEffect(() => {
-    //     if (props.src) {
-    //         console.log("[DASH PLAYER] : setup", { src: props.src });
-    //         initializePlayer(props.src);
-    //     }
+	// 	createEffect(() => {
+	//     return () => {
+	//         if (playerRef()) {
+	//             playerRef().reset();
+	//             playerRef().destroy();
+	//             setPlayerRef(null);
+	//         }
+	//     };
+	// }, [props.src]);
+	// createEffect(() => {
+	//     if (props.src) {
+	//         console.log("[DASH PLAYER] : setup", { src: props.src });
+	//         initializePlayer(props.src);
+	//     }
 
-    //     return () => {
-    //         cleanupPlayer();
-    //     };
-    // }, [props.src]);
+	//     return () => {
+	//         cleanupPlayer();
+	//     };
+	// }, [props.src]);
 
 	createEffect(
 		on(
@@ -102,6 +101,7 @@ function DashPlayer(props) {
 				if (playerRef() && props.isActive && metadataLoaded()) {
 					playerRef().setVolume(videoStore.volume);
 				} else if (playerRef() && !props.isActive && metadataLoaded()) {
+					console.log("[DASH PLAYER] : pausing !isActive video");
 					playerRef().pause();
 
 					if (videoRef.current) {
@@ -131,7 +131,7 @@ function DashPlayer(props) {
 			}
 		})
 	);
-	
+
 	createEffect(
 		on(
 			[
@@ -426,7 +426,7 @@ function DashPlayer(props) {
 					playerRef().on(
 						dashjs.MediaPlayer.events.PLAYBACK_LOADED_DATA,
 						() => {
-							videoRef.current.currentTime = 0;
+							// videoRef.current.currentTime = 0;
 						}
 					);
 					playerRef().on(

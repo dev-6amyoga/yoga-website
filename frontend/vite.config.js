@@ -1,4 +1,4 @@
-import react from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react-swc";
 import { defineConfig, transformWithEsbuild } from "vite";
 import solidPlugin from "vite-plugin-solid";
 
