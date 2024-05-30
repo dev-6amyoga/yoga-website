@@ -13,6 +13,7 @@ import { isMobileTablet } from "../../utils/isMobileOrTablet";
 
 
 function DashPlayer(props) {
+	
 	let videoRef = { current: null };
 	const [playerRef, setPlayerRef] = createSignal(null);
 	const [playerRefSet, setPlayerRefSet] = createSignal(false);
@@ -29,13 +30,6 @@ function DashPlayer(props) {
 		videoStore,
 		{ setPlayreadyKeyUrl, clearVideoEvents, setVideoState, setVolume },
 	] = useVideoStoreContext();
-
-
-	createEffect(
-		on([() => drmSet], () => {
-			console.log("hi drm : ", drmSet())
-		})
-	);
 
 	createEffect(
 		on([() => videoStore.videoEvents, () => props.isActive], () => {
@@ -78,17 +72,18 @@ function DashPlayer(props) {
 		})
 	);
 
-
 	createEffect(
 		on([() => props.isActive, () => videoStore.volume, metadataLoaded, playerRef], () => {
 			if (playerRef() && props.isActive && metadataLoaded()) {
 				playerRef().setVolume(videoStore.volume);
 			} else if (playerRef() && (!props.isActive || !metadataLoaded() )) {
 				playerRef().pause();
+				if (videoRef.current) {
+					videoRef.current.currentTime = 0;
+				}
 			}
 		})
 	);
-
 
 	createEffect(
 		on([() => props.isActive, () => videoStore.videoState], () => {
@@ -187,7 +182,6 @@ function DashPlayer(props) {
 			}
 		})
 	);
-
 
 	const onMetadataLoaded = () => {
 		console.log("[DASH PLAYER] : metadata loaded event");

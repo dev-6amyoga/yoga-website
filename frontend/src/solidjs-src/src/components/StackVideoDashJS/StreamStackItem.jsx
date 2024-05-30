@@ -237,7 +237,6 @@ function StreamStackItem(props) {
 								setVideoState(STATE_VIDEO_PLAY);
 								return;
 							}
-
 							if (
 								videoStore.videoState !== STATE_VIDEO_LOADING &&
 								checkPauseOrLoop(
@@ -247,7 +246,6 @@ function StreamStackItem(props) {
 							) {
 								return;
 							}
-
 							// set current marker based on current time of video
 							if (
 								videoStore.videoState !== STATE_VIDEO_LOADING ||
@@ -259,7 +257,6 @@ function StreamStackItem(props) {
 										?.currentTime
 								);
 							}
-
 							// TODO: check if theres a better solution, in student mode
 							// before 0.05 seconds of video end, add a video event
 							// to play the inactive video
@@ -269,7 +266,7 @@ function StreamStackItem(props) {
 								playerRef().current?.videoElement?.currentTime -
 									playerRef().current?.videoElement
 										?.duration >
-									-0.5
+									0.1
 							) {
 								if (videoStore.videoEvents.length === 0) {
 									console.log(
@@ -374,11 +371,11 @@ function StreamStackItem(props) {
 			playerRef().current.videoElement.currentTime
 		);
 		console.log("can play through, seek event : ", videoStore.seekQueue[0]);
-		if (playerRef().current.videoElement.currentTime !== 0) {
-			if(!videoStore.seekQueue[0]){
-				playerRef().current.videoElement.currentTime = 0;
-			}
-		}
+		// if (playerRef().current.videoElement.currentTime !== 0) {
+		// 	if(!videoStore.seekQueue[0]){
+		// 		playerRef().current.videoElement.currentTime = 0;
+		// 	}
+		// }
 		// tryToPlay();
 		// setVideoState(STATE_VIDEO_PLAY);
 	};
