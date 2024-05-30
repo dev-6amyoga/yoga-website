@@ -443,6 +443,25 @@ export default function VideoPlaybar(props) {
 
 	// createEffect(on([() => props.isActive], () => {}));
 
+	// createEffect(
+	// 	on(
+	// 		[
+	// 			() => props.isActive,
+	// 			() => videoStore.currentTime,
+	// 			props.duration,
+	// 		],
+	// 		() => {
+	// 			if (props.isActive) {
+	// 				console.log(
+	// 					videoStore.currentTime,
+	// 					props.duration(),
+	// 					videoStore.currentTime / props.duration()
+	// 				);
+	// 			}
+	// 		}
+	// 	)
+	// );
+
 	return (
 		<div class="w-full relative playbar-bound">
 			<div
