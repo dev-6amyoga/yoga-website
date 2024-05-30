@@ -269,7 +269,7 @@ function StreamStackItem(props) {
 								playerRef().current?.videoElement?.currentTime -
 									playerRef().current?.videoElement
 										?.duration >
-									-0.05
+									-0.5
 							) {
 								if (videoStore.videoEvents.length === 0) {
 									console.log(
@@ -370,8 +370,15 @@ function StreamStackItem(props) {
 		console.log(
 			"Can play through...",
 			videoStore.videoState,
+			playerRef().current.videoElement,
 			playerRef().current.videoElement.currentTime
 		);
+		console.log("can play through, seek event : ", videoStore.seekQueue[0]);
+		if (playerRef().current.videoElement.currentTime !== 0) {
+			if(!videoStore.seekQueue[0]){
+				playerRef().current.videoElement.currentTime = 0;
+			}
+		}
 		// tryToPlay();
 		// setVideoState(STATE_VIDEO_PLAY);
 	};
