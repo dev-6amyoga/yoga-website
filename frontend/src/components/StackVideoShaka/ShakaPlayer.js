@@ -1,3 +1,4 @@
+import React from "react";
 import shaka from "shaka-player/dist/shaka-player.ui";
 
 /**
