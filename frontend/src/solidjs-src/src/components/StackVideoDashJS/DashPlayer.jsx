@@ -32,6 +32,7 @@ function DashPlayer(props) {
 
 	createEffect(
 		on([() => videoStore.videoEvents, () => props.isActive], () => {
+			console.log("create effect order 1");
 			if (videoStore.videoEvents.length > 0 && !props.isActive) {
 				const event = videoStore.videoEvents[0];
 				if (event?.t === VIDEO_EVENT_PLAY_INACTIVE) {
@@ -47,6 +48,7 @@ function DashPlayer(props) {
 
 	createEffect(
 		on([() => props.src], () => {
+			console.log("create effect order 2");
 			console.log("[DASH PLAYER] : setup", { src: props.src });
 			let p = null;
 			if (props.src) {
@@ -71,6 +73,7 @@ function DashPlayer(props) {
 	);
 
 	// 	createEffect(() => {
+
 	//     return () => {
 	//         if (playerRef()) {
 	//             playerRef().reset();
@@ -79,6 +82,7 @@ function DashPlayer(props) {
 	//         }
 	//     };
 	// }, [props.src]);
+
 	// createEffect(() => {
 	//     if (props.src) {
 	//         console.log("[DASH PLAYER] : setup", { src: props.src });
@@ -99,6 +103,7 @@ function DashPlayer(props) {
 				playerRef,
 			],
 			() => {
+				console.log("create effect order 3");
 				if (playerRef() && props.isActive && metadataLoaded()) {
 					playerRef().setVolume(videoStore.volume);
 				} else if (playerRef() && !props.isActive && metadataLoaded()) {
@@ -114,6 +119,7 @@ function DashPlayer(props) {
 
 	createEffect(
 		on([() => props.isActive, () => videoStore.videoState], () => {
+			console.log("create effect order 4");
 			if (props.isActive) {
 				if (videoStore.videoState === STATE_VIDEO_PLAY) {
 					console.log("[DASH PLAYER] Switch state : play", {
@@ -143,6 +149,7 @@ function DashPlayer(props) {
 				playInActive,
 			],
 			() => {
+				console.log("create effect order 5");
 				if (
 					playerRefSet() &&
 					props.src &&
@@ -206,6 +213,7 @@ function DashPlayer(props) {
 	// DRM Info
 	createEffect(
 		on([playerRefSet, () => props.src, () => props.isAsanaVideo], () => {
+			console.log("create effect order 6");
 			if (playerRefSet && props.src && videoRef.current) {
 				console.log("[DASH PLAYER] : setting DRM Info");
 				const check = isMobileTablet();
@@ -303,7 +311,7 @@ function DashPlayer(props) {
 			}
 		})
 	);
-
+	
 	const onMetadataLoaded = () => {
 		console.log("[DASH PLAYER] : metadata loaded event");
 		console.log(
@@ -324,19 +332,14 @@ function DashPlayer(props) {
 		}
 	};
 
-	// const onStreamInitialized = () => {
-	// 	console.log("[DASH PLAYER] : stream initialized");
-	// 	setStreamInitialized(true);
-	// };
-
 	const onStreamInitialized = () => {
 		console.log("[DASH PLAYER] : stream initialized");
 		setStreamInitialized(true);
-		if (!seekedToZero()) {
-			console.log("[DASH PLAYER] : seeked to zero");
-			videoRef.current.currentTime = 0;
-			setSeekedToZero(true);
-		}
+		// if (!seekedToZero()) {
+		// 	console.log("[DASH PLAYER] : seeked to zero");
+		// 	videoRef.current.currentTime = 0;
+		// 	setSeekedToZero(true);
+		// }
 	};
 
 	const onCanPlay = () => {
@@ -349,25 +352,6 @@ function DashPlayer(props) {
 			setVolume(1.0);
 		}
 	};
-
-	// 	const onCanPlay = () => {
-	//   if (!props.isActive) {
-	//     playerRef().pause();
-	//   }
-
-	//   if (props.isActive) {
-	//     setVolume(1.0);
-
-	//     if (buffering()) { // Check if buffering is in progress
-	//       videoRef.current.play().then(() => {
-	//         console.log("[DASH PLAYER]: Video play event success from CAN_PLAY");
-	//         setBuffering(false);  // Mark buffering as complete
-	//       }).catch((err) => {
-	//         console.log("[DASH PLAYER]: Video play event failed", err);
-	//       });
-	//     }
-	//   }
-	// };
 
 	const onPlay = () => {
 		console.log(
@@ -435,7 +419,6 @@ function DashPlayer(props) {
 		// }
 	};
 
-	// Setting event listeners
 	createEffect(
 		on(
 			[
@@ -454,6 +437,7 @@ function DashPlayer(props) {
 				() => onWaiting,
 			],
 			() => {
+				console.log("create effect order 7");
 				if (playerRefSet() && props.src && videoRef.current) {
 					console.log("[DASH PLAYER] : setting up event listeners");
 					playerRef().on(
@@ -577,6 +561,7 @@ function DashPlayer(props) {
 
 	createEffect(
 		on([playerRefSet, playerRef], () => {
+			console.log("create effect order 8");
 			console.log("[DASH PLAYER] : platyerRefChanged", playerRefSet());
 			if (playerRefSet()) {
 				props.ref({
@@ -589,6 +574,7 @@ function DashPlayer(props) {
 
 	createEffect(
 		on([playerRef], () => {
+			console.log("create effect order 9");
 			console.log("[DASH PLAYER] : setting up metrics thingy");
 			var eventPoller = setInterval(function () {
 				let p = playerRef();
