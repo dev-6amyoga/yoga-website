@@ -356,11 +356,6 @@ function StreamStackItem(props) {
 		props.handleLoading(true, props.isActive);
 	};
 
-	const handleVideoSeeked = (e) => {
-		console.log("Seeked...");
-		setVideoState(STATE_VIDEO_PLAY);
-	};
-
 	const handleVideoCanPlayThrough = (e) => {
 		// setMetadataLoaded(true);
 		// const state = useVideoStore.getState();
@@ -428,7 +423,6 @@ function StreamStackItem(props) {
 		});
 	});
 
-
 	return (
 		// <div
 		// 	class={`relative h-full w-full ${
@@ -460,7 +454,6 @@ function StreamStackItem(props) {
 						onLoading={handlePlayerLoading}
 						onLoaded={handlePlayerLoaded}
 						onSeeking={handleVideoSeeking}
-						onSeeked={handleVideoSeeked}
 						setDuration={setDuration}
 					/>
 				</Show>

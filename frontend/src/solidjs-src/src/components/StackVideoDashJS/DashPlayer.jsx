@@ -11,9 +11,7 @@ import {
 import { Fetch } from "../../utils/Fetch";
 import { isMobileTablet } from "../../utils/isMobileOrTablet";
 
-
 function DashPlayer(props) {
-	
 	let videoRef = { current: null };
 	const [playerRef, setPlayerRef] = createSignal(null);
 	const [playerRefSet, setPlayerRefSet] = createSignal(false);
@@ -47,10 +45,10 @@ function DashPlayer(props) {
 	);
 
 	createEffect(
-		on([() => props.src ], () => {
+		on([() => props.src], () => {
 			console.log("[DASH PLAYER] : setup", { src: props.src });
 			let p = null;
-			if (props.src ) {
+			if (props.src) {
 				p = dashjs.MediaPlayer().create();
 				setPlayerRef(p);
 				p.updateSettings(dashSettings);
@@ -73,16 +71,27 @@ function DashPlayer(props) {
 	);
 
 	createEffect(
-		on([() => props.isActive, () => videoStore.volume, metadataLoaded, playerRef], () => {
-			if (playerRef() && props.isActive && metadataLoaded()) {
-				playerRef().setVolume(videoStore.volume);
-			} else if (playerRef() && (!props.isActive || !metadataLoaded() )) {
-				playerRef().pause();
-				if (videoRef.current) {
-					videoRef.current.currentTime = 0;
+		on(
+			[
+				() => props.isActive,
+				() => videoStore.volume,
+				metadataLoaded,
+				playerRef,
+			],
+			() => {
+				if (playerRef() && props.isActive && metadataLoaded()) {
+					playerRef().setVolume(videoStore.volume);
+				} else if (
+					playerRef() &&
+					(!props.isActive || !metadataLoaded())
+				) {
+					playerRef().pause();
+					if (videoRef.current) {
+						videoRef.current.currentTime = 0;
+					}
 				}
 			}
-		})
+		)
 	);
 
 	createEffect(
@@ -108,12 +117,15 @@ function DashPlayer(props) {
 	// DRM Info
 	createEffect(
 		on([playerRefSet, () => props.src, () => props.isAsanaVideo], () => {
-			if (playerRefSet && props.src && videoRef.current) {
+			if (playerRefSet() && props.src && videoRef.current) {
 				console.log("in drm setter!!");
 				const check = isMobileTablet();
 				const isMobile = { done: true, check: check };
 				var playreadyKeyUrl = videoStore.playreadyKeyUrl ?? undefined;
-				console.log("in drm setter : playready key url", playreadyKeyUrl);
+				console.log(
+					"in drm setter : playready key url",
+					playreadyKeyUrl
+				);
 				if (props.isAsanaVideo) {
 					console.log("in drm setter : is asana");
 					if (isMobile.check) {
@@ -122,26 +134,32 @@ function DashPlayer(props) {
 							method: "POST",
 							token: false,
 						})
-						.then((res) => {
-							console.log("in drm setter : is mobile");
-							const data = res.data;
-							if (data && data.licenseAcquisitionUrl) {
-								console.log("in drm setter : is mobile, data obtained, setting now");
-								playerRef().setProtectionData({
-									"com.widevine.alpha": {
-										serverURL: data.licenseAcquisitionUrl,
-									},
-								});
-								setDrmSet(true);
-							}
-						})
-						.catch((err) => {
-							props.onError();
-						});
+							.then((res) => {
+								console.log("in drm setter : is mobile");
+								const data = res.data;
+								if (data && data.licenseAcquisitionUrl) {
+									console.log(
+										"in drm setter : is mobile, data obtained, setting now"
+									);
+									playerRef().setProtectionData({
+										"com.widevine.alpha": {
+											serverURL:
+												data.licenseAcquisitionUrl,
+										},
+									});
+									setDrmSet(true);
+								}
+							})
+							.catch((err) => {
+								props.onError();
+							});
 					} else {
 						console.log("in drm setter : is laptop");
 						if (playreadyKeyUrl) {
-							console.log("in drm setter: is asana, is drm, is laptop", playreadyKeyUrl);
+							console.log(
+								"in drm setter: is asana, is drm, is laptop",
+								playreadyKeyUrl
+							);
 							playerRef().setProtectionData({
 								"com.microsoft.playready": {
 									serverURL: playreadyKeyUrl,
@@ -149,31 +167,49 @@ function DashPlayer(props) {
 							});
 							setDrmSet(true);
 						} else {
-							console.log("in drm setter: is asana, is drm, is laptop", playreadyKeyUrl);
+							console.log(
+								"in drm setter: is asana, is drm, is laptop",
+								playreadyKeyUrl
+							);
 							Fetch({
 								url: "/playback/get-playready-token",
 								method: "POST",
 								token: false,
 							})
-							.then((res) => {
-								
-								const data = res.data;
-								console.log("in drm setter: is asana, is drm, is laptop, data obtained : ", data);
+								.then((res) => {
+									const data = res.data;
+									console.log(
+										"in drm setter: is asana, is drm, is laptop, data obtained : ",
+										data
+									);
 
-								if (data && data.licenseAcquisitionUrl && data.token) {
-									console.log("in drm setter : setting everything!!")
-									playerRef().setProtectionData({
-										"com.microsoft.playready": {
-											serverURL: data.licenseAcquisitionUrl + "?ExpressPlayToken=" + data.token,
-										},
-									});
-									setPlayreadyKeyUrl(data.licenseAcquisitionUrl + "?ExpressPlayToken=" + data.token);
-									setDrmSet(true);
-								}
-							})
-							.catch((err) => {
-								props.onError();
-							});
+									if (
+										data &&
+										data.licenseAcquisitionUrl &&
+										data.token
+									) {
+										console.log(
+											"in drm setter : setting everything!!"
+										);
+										playerRef().setProtectionData({
+											"com.microsoft.playready": {
+												serverURL:
+													data.licenseAcquisitionUrl +
+													"?ExpressPlayToken=" +
+													data.token,
+											},
+										});
+										setPlayreadyKeyUrl(
+											data.licenseAcquisitionUrl +
+												"?ExpressPlayToken=" +
+												data.token
+										);
+										setDrmSet(true);
+									}
+								})
+								.catch((err) => {
+									props.onError();
+								});
 						}
 					}
 				} else {
@@ -277,6 +313,22 @@ function DashPlayer(props) {
 		}
 	};
 
+	const onTimeUpdate = (e) => {
+		console.log(
+			"[DASH PLAYER] : onTimeUpdate event",
+			videoRef.current.currentTime,
+			videoRef.current.buffered
+		);
+	};
+
+	const onSeeked = () => {
+		console.log(
+			"[DASH PLAYER] : onSeeked event",
+			videoRef.current.currentTime
+		);
+		setVideoState(STATE_VIDEO_PLAY);
+	};
+
 	// Setting event listeners
 	createEffect(
 		on(
@@ -322,7 +374,7 @@ function DashPlayer(props) {
 					);
 					playerRef().on(
 						dashjs.MediaPlayer.events.PLAYBACK_SEEKED,
-						props.onSeeked
+						onSeeked
 					);
 					playerRef().on(
 						dashjs.MediaPlayer.events.PLAYBACK_SEEKING,
@@ -352,6 +404,11 @@ function DashPlayer(props) {
 					playerRef().on(
 						dashjs.MediaPlayer.events.STREAM_INITIALIZED,
 						onStreamInitialized
+					);
+
+					videoRef.current.addEventListener(
+						"timeupdate",
+						onTimeUpdate
 					);
 				}
 
@@ -379,7 +436,7 @@ function DashPlayer(props) {
 					);
 					playerRef().off(
 						dashjs.MediaPlayer.events.PLAYBACK_SEEKED,
-						props.onSeeked
+						onSeeked
 					);
 					playerRef().off(
 						dashjs.MediaPlayer.events.PLAYBACK_SEEKING,
@@ -408,6 +465,11 @@ function DashPlayer(props) {
 					playerRef().off(
 						dashjs.MediaPlayer.events.STREAM_INITIALIZED,
 						onStreamInitialized
+					);
+
+					videoRef.current.removeEventListener(
+						"timeupdate",
+						onTimeUpdate
 					);
 				};
 			}
