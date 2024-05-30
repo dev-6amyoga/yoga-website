@@ -74,11 +74,16 @@ export const useVideoStore = create(
 			});
 		},
 
-		videoEvent: null,
-		setVideoEvent: (videoEvent) =>
-			set(() => {
-				return { videoEvent };
+		videoEvent: [],
+		setVideoEvent: (e) =>
+			set((state) => {
+				return { videoEvent: [...state.videoEvent, e] };
 			}),
+		clearVideoEvent: () => {
+			set(() => {
+				return { videoEvent: [] };
+			});
+		},
 
 		// videoState is one of the STATE_VIDEO_* constants
 		videoState: STATE_VIDEO_LOADING,

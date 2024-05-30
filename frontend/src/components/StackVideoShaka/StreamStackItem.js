@@ -36,6 +36,7 @@ import shaka from "shaka-player/dist/shaka-player.ui";
 // import shakaLog from "shaka-player/dist/shaka-player"
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
+import { VIDEO_EVENT_PLAY_INACTIVE } from "../../solidjs-src/src/enums/video_event";
 
 // shakaL.log.setLogLevel(shaka.log.Level.V1);
 
@@ -115,6 +116,7 @@ function StreamStackItem({
 		// video event
 		videoEvent,
 		setVideoEvent,
+		clearVideoEvent,
 		// markers
 		currentMarkerIdx,
 		setCurrentMarkerIdx,
@@ -154,6 +156,7 @@ function StreamStackItem({
 		//
 		state.videoEvent,
 		state.setVideoEvent,
+		state.clearVideoEvent,
 		//
 		state.currentMarkerIdx,
 		state.setCurrentMarkerIdx,
@@ -198,31 +201,6 @@ function StreamStackItem({
 		state.setWatchTimeBuffer,
 		state.flushWatchTimeBuffer,
 	]);
-
-	const handleNextVideo = useCallback(() => {
-		popFromQueue(0);
-	}, [popFromQueue]);
-
-	const handlePrevVideo = useCallback(() => {
-		popFromArchive(-1);
-	}, [popFromArchive]);
-
-	const handleSeekFoward = useCallback(() => {
-		addToSeekQueue({ t: 5, type: "seek" });
-	}, [addToSeekQueue]);
-
-	const handleSeekBackward = useCallback(() => {
-		addToSeekQueue({ t: -5, type: "seek" });
-	}, [addToSeekQueue]);
-
-	const playerOnError = useCallback(
-		(e) => {
-			//console.log("[StreamStackItem:error] Error playing video", e);
-			setVideoState(STATE_VIDEO_ERROR);
-			// alert(JSON.stringify({ err: e }));
-		},
-		[setVideoState]
-	);
 
 	const tryToPlay = useCallback(() => {
 		// toast(`Try to play called : ${isActiveRef.current}`, { type: "info" });
@@ -361,36 +339,6 @@ function StreamStackItem({
 		setVolume,
 		tryToPlay,
 	]);
-
-	// setup the player
-	// useEffect(
-	// 	() => {
-	// 		console.log("Setting up player", video.idx, playerRefSet);
-	// 		if (!playerRefSet?.done) return;
-
-	// 		if (video === undefined || video === null) return;
-
-	// 		if (videoUrl === undefined || videoUrl === null || videoUrl === "")
-	// 			return;
-
-	// 		setPlayerLoaded(true);
-	// 	},
-	// 	[
-	// 		playerRefSet,
-	// 		video,
-	// 		videoUrl,
-	// 		// handleNextVideo,
-	// 		// handlePrevVideo,
-	// 		// handleSeekFoward,
-	// 		// handleSeekBackward,
-	// 		// setVideoState,
-	// 		// playerOnError,
-	// 		// handleEnd,
-	// 		// handleLoading,
-	// 		// setVolume,
-	// 		// tryToPlay,
-	// 	]
-	// );
 
 	// pop from seek queue and update the time
 	useEffect(() => {
@@ -549,10 +497,42 @@ function StreamStackItem({
 						playerRef.current?.videoElement?.currentTime
 					);
 				}
+
+				// before 0.05 seconds of video end, add a video event
+				// to play the inactive video
+				// console.log(
+				// 	"VIDEO_EVENT_PLAY_INACTIVE : ",
+				// 	playerRef.current?.videoElement?.currentTime -
+				// 		playerRef.current?.videoElement?.duration
+				// );
+				if (
+					viewMode === VIDEO_VIEW_STUDENT_MODE &&
+					playerRef.current?.videoElement?.duration -
+						playerRef.current?.videoElement?.currentTime <
+						0.3
+				) {
+					console.log("VIDEO_EVENT_PLAY_INACTIVE");
+					if (videoEvent.length === 0) {
+						console.log(
+							"[StreamStackItem] Video event play inactive",
+							{
+								currentTime:
+									playerRef.current?.videoElement
+										?.currentTime,
+								duration:
+									playerRef.current?.videoElement?.duration,
+							}
+						);
+						setVideoEvent({
+							t: VIDEO_EVENT_PLAY_INACTIVE,
+						});
+					}
+				}
+
 				setCurrentTime(playerRef.current?.videoElement?.currentTime);
 				setVolume(playerRef.current?.videoElement?.volume);
 			}
-		}, 250);
+		}, 50);
 
 		return () => {
 			// console.log('CLEANING INTERVAL --------------------------------------->')
@@ -577,6 +557,7 @@ function StreamStackItem({
 		setPauseReason,
 		handleLoading,
 		setVolume,
+		videoEvent,
 	]);
 
 	const flushWatchTimeBufferE = useCallback(
@@ -706,6 +687,19 @@ function StreamStackItem({
 	]);
 	*/
 
+	// video events to play inactive video
+	useEffect(() => {
+		if (videoEvent.length > 0 && !isActive) {
+			const event = videoEvent[0];
+			if (event?.t === VIDEO_EVENT_PLAY_INACTIVE) {
+				console.log("[DASH PLAYER] : [INACTIVE] play event received");
+				// play the video
+				playerRef?.current?.videoElement.play();
+			}
+			clearVideoEvent();
+		}
+	}, [videoEvent, isActive, clearVideoEvent, setVideoState]);
+
 	const handlePlayerLoading = useCallback(
 		(e) => {
 			handleLoading(true, isActiveRef.current);
@@ -752,6 +746,31 @@ function StreamStackItem({
 			setVolume(playerRef.current.videoElement.volume || 0);
 		}
 	}, [setVolume]);
+
+	const handleNextVideo = useCallback(() => {
+		popFromQueue(0);
+	}, [popFromQueue]);
+
+	const handlePrevVideo = useCallback(() => {
+		popFromArchive(-1);
+	}, [popFromArchive]);
+
+	const handleSeekFoward = useCallback(() => {
+		addToSeekQueue({ t: 5, type: "seek" });
+	}, [addToSeekQueue]);
+
+	const handleSeekBackward = useCallback(() => {
+		addToSeekQueue({ t: -5, type: "seek" });
+	}, [addToSeekQueue]);
+
+	const playerOnError = useCallback(
+		(e) => {
+			//console.log("[StreamStackItem:error] Error playing video", e);
+			setVideoState(STATE_VIDEO_ERROR);
+			// alert(JSON.stringify({ err: e }));
+		},
+		[setVideoState]
+	);
 
 	const playerInit = useCallback(
 		(ref) => {
