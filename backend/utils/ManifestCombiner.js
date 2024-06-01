@@ -264,11 +264,11 @@ class MPDCombiner {
 
 		try {
 			const start = new Date();
-			const data = await fs.readFile(this.files[0].url, "utf8");
+			const data = await fs.readFile(this.files[0].file, "utf8");
 			this.parseInitialManifest(this.files[0], data);
 
 			const filePromises = this.files.slice(1).map((file) => {
-				return fs.readFile(file.url, "utf8");
+				return fs.readFile(file.file, "utf8");
 			});
 
 			const filesData = await Promise.all(filePromises);
