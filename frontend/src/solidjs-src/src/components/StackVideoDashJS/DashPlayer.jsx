@@ -20,7 +20,6 @@ function DashPlayer(props) {
 	const [drmSet, setDrmSet] = createSignal(false);
 	const [playInActive, setPlayInActive] = createSignal(false);
 	const [metrics, setMetrics] = createSignal({ bitrate: 0, bufferLevel: 0 });
-	// let playInActiveTimer = null;
 
 	console.log("dashplayer! >>>>");
 
@@ -98,16 +97,8 @@ function DashPlayer(props) {
 		on([() => props.isActive, () => videoStore.videoState], () => {
 			if (props.isActive) {
 				if (videoStore.videoState === STATE_VIDEO_PLAY) {
-					console.log("[DASH PLAYER] Switch state : play", {
-						idx: props.video.idx,
-						ct: videoRef.current.currentTime,
-					});
 					playerRef().play();
 				} else if (videoStore.videoState === STATE_VIDEO_PAUSED) {
-					console.log("[DASH PLAYER] Switch state : pause", {
-						idx: props.video.idx,
-						ct: videoRef.current.currentTime,
-					});
 					playerRef().pause();
 				}
 			}
@@ -269,27 +260,6 @@ function DashPlayer(props) {
 					props.video.idx
 				);
 			}
-			const currentTime = playerRef().time();
-			const duration = playerRef().duration();
-			const remainingTime = duration - currentTime;
-			const inactiveVideoDuration = remainingTime - 0.1;
-
-			console.log(
-				"[DASH PLAYER IS ACTIVE] starting event timer for playing inactive : currentTime = ",
-				currentTime,
-				"duration",
-				duration,
-				"remainingTime",
-				remainingTime,
-				"inactiveVideoDuration",
-				inactiveVideoDuration
-			);
-			console.log(
-				"[DASH PLAYER] starting event timer for playing inactive @ ",
-				inactiveVideoDuration,
-				props.isActive,
-				props.video.idx
-			);
 		}
 	};
 
@@ -501,7 +471,6 @@ function DashPlayer(props) {
 				var streamInfo = p.getActiveStream().getStreamInfo();
 				var dashMetrics = p.getDashMetrics();
 				var dashAdapter = p.getDashAdapter();
-
 				if (dashMetrics && streamInfo) {
 					const periodIdx = streamInfo.index;
 					var repSwitch = dashMetrics.getCurrentRepresentationSwitch(

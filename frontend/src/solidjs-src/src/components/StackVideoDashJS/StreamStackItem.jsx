@@ -173,6 +173,7 @@ function StreamStackItem(props) {
 						if (props.isActive)
 							props.handleLoading(false, props.isActive);
 						autoSetCurrentMarkerIdx(videoStore.commitSeekTime);
+						console.log("CHECK SEEK TRUE!");
 						return true;
 					} else {
 						return false;
@@ -230,9 +231,6 @@ function StreamStackItem(props) {
 										?.currentTime
 								)
 							) {
-								// popFromSeekQueue(0);
-								// TODO: see if logic is fine, if there are outstanding seeks,
-								// clear them as they must have been added to the commit seek time
 								clearSeekQueue();
 								setVideoState(STATE_VIDEO_PLAY);
 								return;
@@ -260,6 +258,7 @@ function StreamStackItem(props) {
 							// TODO: check if theres a better solution, in student mode
 							// before 0.05 seconds of video end, add a video event
 							// to play the inactive video
+
 							if (
 								videoStore.viewMode ===
 									VIDEO_VIEW_STUDENT_MODE &&
@@ -424,12 +423,6 @@ function StreamStackItem(props) {
 	});
 
 	return (
-		// <div
-		// 	class={`relative h-full w-full ${
-		// 		props.isActive ? "block" : "block"
-		// 	}`}>
-		// 	<div
-		// class="relative h-full w-full block">
 		<div class="absolute h-full w-full">
 			<div
 				class={`relative stream-stack-item w-full h-full ${
