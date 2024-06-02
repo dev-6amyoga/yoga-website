@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
-
+import ShakaVideo from "../testing/ShakaVideo";
 import {
   DrawingUtils,
   FilesetResolver,
@@ -195,7 +195,7 @@ function StudentHome() {
   // );
   return (
     <StudentPageWrapper heading="Player">
-      <div className="border-8 border-gray-950">
+      {/* <div className="border-8 border-gray-950">
         <Button ref={enableWebcamButtonRef} onClick={enableCam}>
           ENABLE PREDICTIONS
         </Button>
@@ -231,6 +231,9 @@ function StudentHome() {
             }}
           ></canvas>
         </div>
+      </div> */}
+      <div>
+        <ShakaVideo />
       </div>
     </StudentPageWrapper>
   );

@@ -143,10 +143,16 @@ const useVideoStore = createWithStore((set) => ({
 		}),
 
 	currentTime: { value: 0 },
+	// setCurrentTime: (time) =>
+	// 	set(() => {
+	// 		console.log("SET CURRENT TIME HAS BEEN CALLED!!!")
+	// 		return { currentTime: { value: time } };
+	// 	}),
 	setCurrentTime: (time) =>
-		set(() => {
-			return { currentTime: { value: time } };
-		}),
+	set(() => {
+		return { currentTime: { value: time } };
+	}), 
+
 
 	viewMode: { value: VIDEO_VIEW_TEACHING_MODE },
 	setViewMode: (mode) =>
