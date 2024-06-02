@@ -765,7 +765,7 @@ function StreamStackItem({
 
 	const playerOnError = useCallback(
 		(e) => {
-			//console.log("[StreamStackItem:error] Error playing video", e);
+			console.log("[StreamStackItem:error] Error playing video", e);
 			setVideoState(STATE_VIDEO_ERROR);
 			// alert(JSON.stringify({ err: e }));
 		},
@@ -913,9 +913,13 @@ function StreamStackItem({
 
 					//console.log("Fetching DRM Info");
 					//fetch only if it is not a transition video
+
 					if (
-						!isNaN(video?.video?.id) &&
-						typeof video?.video?.id === "number"
+						(!isNaN(video?.video?.id) &&
+							typeof video?.video?.id === "number") ||
+						String(video?.video?.transition_video_name)
+							.toLowerCase()
+							.search(/(drm)/) !== -1
 					) {
 						//   if (!isNaN(video.video.id) && typeof video.video.id !== "number") {
 						if (isMobile.check) {

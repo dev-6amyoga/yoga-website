@@ -141,13 +141,13 @@ function VideoPlayer() {
 				"VIDEO END : TEACHING MODE: popping video, marker null"
 			);
 
-			handleReset();
-			popFromQueue(0);
+			// handleReset();
+			// popFromQueue(0);
 		} else {
 			console.log("VIDEO END : STUDENT MODE: popping video");
 			// if student mode, pop from queue
-			handleReset();
-			popFromQueue(0);
+			// handleReset();
+			// popFromQueue(0);
 		}
 	}, [popFromQueue, addToSeekQueue, handleReset]);
 
