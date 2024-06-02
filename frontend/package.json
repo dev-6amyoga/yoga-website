@@ -75,7 +75,7 @@
 		"react-webcam": "^7.2.0",
 		"react-youtube": "^10.1.0",
 		"recharts": "^2.12.3",
-		"shaka-player": "^4.7.11",
+		"shaka-player": "^4.9.0",
 		"solid-icons": "^1.1.0",
 		"solid-js": "^1.8.17",
 		"solid-zustand": "^1.8.1",

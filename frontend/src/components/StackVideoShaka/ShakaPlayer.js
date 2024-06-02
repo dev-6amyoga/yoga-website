@@ -42,7 +42,7 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
 				ui.destroy();
 			}
 		};
-	}, []);
+	}, [chromeless]);
 
 	// Keep shaka.Player.configure in sync.
 	React.useEffect(() => {
