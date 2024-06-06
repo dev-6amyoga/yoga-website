@@ -59,6 +59,7 @@ class MPDCombiner {
 
 	modifyPeriodAttrib(rootElement, file) {
 		// modifies the duration and id of Period, returns Period element
+
 		if (!rootElement) {
 			console.error("Root element not provided");
 			return;
@@ -136,6 +137,34 @@ class MPDCombiner {
 				"media",
 				file.name + "/" + segmentTemplate.getAttribute("media")
 			);
+		}
+	}
+
+	modifySegmentBaseURL(rootElement, file) {
+		// add the file name to BaseURL to point to the correct file
+
+		// get all representations
+		let representations = rootElement.getElementsByTagNameNS(
+			NAMESPACE,
+			"Representation"
+		);
+
+		// get all BaseURL elements in the representation, update the URL
+
+		for (let i = 0; i < representations.length; i++) {
+			let representation = representations[i];
+
+			let baseURLs = representation.getElementsByTagNameNS(
+				NAMESPACE,
+				"BaseURL"
+			);
+
+			for (let j = 0; j < baseURLs.length; j++) {
+				let baseURL = baseURLs[j];
+
+				let newURL = file.name + "/" + baseURL.textContent;
+				baseURL.textContent = newURL;
+			}
 		}
 	}
 
@@ -252,23 +281,50 @@ class MPDCombiner {
 			return;
 		}
 
-		if (!this.output) {
-			console.error("[MPDCombiner] No output file provided");
-			return;
-		}
+		// if (!this.output) {
+		// 	console.error("[MPDCombiner] No output file provided");
+		// 	return;
+		// }
 
-		if (this.files.length < 2) {
-			console.error("[MPDCombiner] No files found to combine");
-			return;
-		}
+		// if (this.files.length < 2) {
+		// 	console.error("[MPDCombiner] No files found to combine");
+		// 	return;
+		// }
 
 		try {
 			const start = new Date();
-			const data = await fs.readFile(this.files[0].file, "utf8");
+			// const data = await fs.readFile(this.files[0].file, "utf8");
+
+			if (!this.files[0].url) {
+				throw new Error("[MPDCombiner] No URL provided for file");
+			}
+
+			if (!this.files[0].name) {
+				throw new Error("[MPDCombiner] No name provided for file");
+			}
+
+			const res = await fetch(this.files[0].url, { method: "GET" });
+			let data = await res.text();
+
+			if (this.files.length < 2) {
+				// Only one file, no need to combine
+				return data;
+			}
+
 			this.parseInitialManifest(this.files[0], data);
 
-			const filePromises = this.files.slice(1).map((file) => {
-				return fs.readFile(file.file, "utf8");
+			// all files except the first one
+			const filePromises = this.files.slice(1).map(async (file) => {
+				if (!file.url) {
+					throw new Error("[MPDCombiner] No URL provided for file");
+				}
+
+				if (!file.name) {
+					throw new Error("[MPDCombiner] No name provided for file");
+				}
+
+				const res = await fetch(file.url, { method: "GET" });
+				return await res.text();
 			});
 
 			const filesData = await Promise.all(filePromises);
@@ -288,12 +344,14 @@ class MPDCombiner {
 
 			const finalManifest = `<?xml version="1.0" ?>\n${combinedManifest}`;
 
-			await fs.writeFile(this.output, finalManifest);
+			if (this.output) {
+				await fs.writeFile(this.output, finalManifest);
+			}
 
 			const end = new Date();
-			console.log("Time taken:", end - start, "ms");
+			console.log("Time taken to combine mpd:", end - start, "ms");
 
-			return end - start;
+			return finalManifest;
 		} catch (err) {
 			console.error("[MPDCombiner] Error :", err);
 		}
@@ -328,13 +386,15 @@ class MPDCombiner {
 
 		this.modifyPeriodAttrib(this.parent, file);
 
-		this.modifySegmentTemplate(this.parent, file);
+		// this.modifySegmentTemplate(this.parent, file);
+		this.modifySegmentBaseURL(this.parent, file);
 
 		console.log("[MPDCombiner] Initial manifest parsed successfully");
 	}
 
 	appendManifestToParent(file, mpdFileString) {
 		// Parse the MPD string using DOMParser
+
 		const parser = this.getParser();
 		const doc = parser.parseFromString(mpdFileString, "text/xml");
 
@@ -349,7 +409,8 @@ class MPDCombiner {
 
 		let period = this.modifyPeriodAttrib(root, file);
 
-		this.modifySegmentTemplate(root, file);
+		// this.modifySegmentTemplate(root, file);
+		this.modifySegmentBaseURL(root, file);
 
 		this.parent.appendChild(this.getNewLineNode(doc));
 		this.parent.appendChild(doc.createComment(file.name));
@@ -359,4 +420,6 @@ class MPDCombiner {
 	}
 }
 
-export const mpdCombiner = new MPDCombiner();
+module.exports = {
+	MPDCombiner,
+};

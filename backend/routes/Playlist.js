@@ -6,6 +6,11 @@ const {
 	HTTP_NOT_FOUND,
 	HTTP_INTERNAL_SERVER_ERROR,
 } = require("../utils/http_status_codes");
+const R2 = require("../utils/R2Client");
+const { ListObjectsCommand } = require("@aws-sdk/client-s3");
+const Asana = require("../models/mongo/Asana");
+const TransitionVideo = require("../models/mongo/TransitionVideo");
+const { MPDCombiner } = require("../utils/ManifestCombiner");
 
 router.post("/playlists/addPlaylist", async (req, res) => {
 	try {
@@ -100,16 +105,117 @@ router.post("/playlists/createManifest/:playlistId", async (req, res) => {
 		});
 
 		if (playlist) {
+			// all the asanas and transitions
+
+			const asanaIds = playlist.asana_ids.filter(
+				(id) => typeof id === "number"
+			);
+
+			console.log(asanaIds);
+
+			let asanas = [];
+
+			let asanaMap = {};
+
+			if (asanaIds.length > 0) {
+				asanas = await Asana.find({ id: { $in: asanaIds } });
+
+				asanaMap = asanas.reduce((acc, a) => {
+					acc[a.id] = a;
+					return acc;
+				}, {});
+			}
+
+			const transitionIds = playlist.asana_ids.filter(
+				(id) => typeof id === "string"
+			);
+
+			let transitions = [];
+
+			let transitionMap = {};
+
+			if (transitionIds.length > 0) {
+				transitions = await TransitionVideo.find({
+					transition_id: { $in: transitionIds },
+				});
+
+				transitionMap = transitions.reduce((acc, t) => {
+					acc[t.transition_id] = t;
+					return acc;
+				}, {});
+			}
+
 			// get all the mpd files
+
+			/*
+			{
+				name: "",
+				url: "",
+			}
+			*/
+
+			const files = playlist.asana_ids.map((id) => {
+				if (typeof id === "number") {
+					const asana = asanaMap[id];
+					if (!asana) {
+						throw new Error("Asana not found : " + id);
+					}
+
+					const split = asana.asana_dash_url.split("/");
+					const name = split[split.length - 2];
+
+					return {
+						name: name,
+						url: asana.asana_dash_url,
+					};
+				} else {
+					const transition = transitionMap[id];
+
+					if (!transition) {
+						throw new Error("Transition not found : " + id);
+					}
+					const split = transition.transition_dash_url.split("/");
+					const name = split[split.length - 2];
+					return {
+						name: name,
+						url: transition.transition_dash_url,
+					};
+				}
+			});
+
+			console.log(files);
+
 			// combine them
+			let mpdCombiner = new MPDCombiner(files, null);
 			// save the combined mpd file
+			let combinedManifest = await mpdCombiner.getCombinedManifest();
+
+			// save the file to cloudflare
+			await R2.cloudflareAddFile(
+				`${playlist._id.toString()}.mpd`,
+				combinedManifest
+			);
+
+			if (!process.env.CLOUDFLARE_R2_PUBLIC_URL) {
+				throw new Error("CLOUDFLARE_R2_PUBLIC_URL not set");
+			}
+
+			playlist.playlist_dash_url = `${
+				process.env.CLOUDFLARE_R2_PUBLIC_URL
+			}/${playlist._id.toString()}.mpd`;
+
+			await playlist.save();
+
+			return res.status(HTTP_OK).json({ message: "Manifest generated" });
 		} else {
-			res.status(HTTP_NOT_FOUND).json({ message: "Playlist not found" });
+			return res
+				.status(HTTP_NOT_FOUND)
+				.json({ message: "Playlist not found" });
 		}
 	} catch (error) {
 		console.error(error);
 		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-			error: "Failed to delete Playlist",
+			error: "Failed to generate manifest for playlist",
 		});
 	}
 });
