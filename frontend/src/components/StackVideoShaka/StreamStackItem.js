@@ -1033,6 +1033,10 @@ function StreamStackItem({
 			handleVideoSeeked,
 			handleVideoVolumeChange,
 			handleVideoCanPlayThrough,
+			handleEnd,
+			handleFullscreen,
+			handleLoading,
+			setVideoState,
 		]
 	);
 
@@ -1043,7 +1047,7 @@ function StreamStackItem({
 				ref={playerInit}
 				className="custom-shaka w-full h-full"
 			/>
-			{devMode ? (
+			{/* {devMode ? (
 				<div className="absolute bg-white left-4 top-4 p-2 text-sm flex flex-col">
 					<p>
 						isActive: {String(isActive)} ||{" "}
@@ -1063,7 +1067,7 @@ function StreamStackItem({
 				</div>
 			) : (
 				<></>
-			)}
+			)} */}
 		</div>
 	);
 }

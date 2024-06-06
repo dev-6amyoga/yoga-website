@@ -327,6 +327,7 @@ function Playlist() {
 		// })
 		// .catch((err) => console.log(err));
 
+		clearQueue();
 		addToQueue([playlist]);
 	};
 
@@ -341,30 +342,6 @@ function Playlist() {
 
 	return (
 		<div className="rounded-xl">
-			{/* <Modal visible={modalState} onClose={closeModal}>
-        <Modal.Title>Playlist Details</Modal.Title>
-        <Modal.Subtitle>
-          {modalData.playlist_name || modalData.schedule_name}
-        </Modal.Subtitle>
-        <Modal.Subtitle>
-          Playlist Type : {modalData.playlist_mode} Mode
-        </Modal.Subtitle>
-        <h5>
-          Playlist Duration : {(modalData.duration / 60).toFixed(2)} minutes
-        </h5>
-        {asana_details?.map((asanaDetail) => (
-          <div>
-            <p>
-              {asanaDetail?.asana_name}
-              {asanaDetail?.language ? ` - ${asanaDetail.language}` : ""}
-            </p>
-          </div>
-        ))}
-
-        <Modal.Action passive onClick={closeModal}>
-          Close
-        </Modal.Action>
-      </Modal> */}
 			<Modal visible={modalState} onClose={closeModal} width={30}>
 				<Modal.Title>Playlist Details</Modal.Title>
 				<Modal.Subtitle>
@@ -378,7 +355,7 @@ function Playlist() {
 					minutes
 				</h5>
 				{asana_details && asana_details.length > 0 ? (
-					<>
+					<div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2 max-h-96 overflow-auto">
 						{asana_details
 							.reduce((acc, current) => {
 								const lastIndex = acc.length - 1;
@@ -394,7 +371,9 @@ function Playlist() {
 								return acc;
 							}, [])
 							.map((asanaDetail) => (
-								<div key={asanaDetail.asana_name}>
+								<div
+									key={asanaDetail.asana_name}
+									className="p-2 border border-y-green rounded-lg">
 									<p>
 										{asanaDetail.asana_name}
 										{asanaDetail.language
@@ -404,7 +383,7 @@ function Playlist() {
 									</p>
 								</div>
 							))}
-					</>
+					</div>
 				) : (
 					<p>No asanas found</p>
 				)}

@@ -104,7 +104,7 @@ export default function FreeVideos() {
 				/>
 			</div>
 
-			<div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-10">
+			<div className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-10">
 				{freeVideos.map((video, index) => (
 					<Card key={video?.videoId}>
 						<div className="flex items-center justify-between gap-4">
