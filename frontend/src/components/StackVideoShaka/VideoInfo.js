@@ -2,7 +2,6 @@
 import { Description, Spacer } from "@geist-ui/core";
 import { useEffect } from "react";
 import { SEEK_TYPE_MARKER } from "../../enums/seek_types";
-import { VIDEO_EVENT_MOVING_MARKER } from "../../enums/video_event";
 import useVideoStore from "../../store/VideoStore";
 
 export default function VideoInfo() {
@@ -83,7 +82,7 @@ export default function VideoInfo() {
 			) : (
 				<></>
 			)}
-			<div
+			{/* <div
 				className={`rounded-2xl border p-4 ${
 					currentVideo?.video?.transition_id
 						? "opacity-0"
@@ -123,7 +122,47 @@ export default function VideoInfo() {
 						<></>
 					)}
 				</div>
-			</div>
+			</div> */}
+
+			{currentVideo?.video?.sections ? (
+				<div
+					className={`rounded-2xl border p-4 ${
+						currentVideo?.video?.transition_id
+							? "opacity-0"
+							: "opacity-100"
+					}`}>
+					<h5 className="">Sections</h5>
+					<div className="mt-4 flex flex-wrap gap-1">
+						{currentVideo?.video?.sections.map((k, idx) => {
+							return (
+								<p
+									key={k.time}
+									className={`m-0 rounded-full border-2 px-2 py-1 text-sm hover:cursor-pointer ${
+										currentMarkerIdx === idx
+											? "border-y-green"
+											: ""
+									}`}
+									onClick={() => {
+										// TODO : fix this, bug when you go to previous marker
+										console.log("CLICKED SECTION : ", idx);
+										// setVideoEvent({
+										// 	type: VIDEO_EVENT_MOVING_MARKER,
+										// 	markerIdx: idx,
+										// });
+										addToSeekQueue({
+											type: SEEK_TYPE_MARKER,
+											t: k.time,
+										});
+									}}>
+									{k.time} : {k.name}
+								</p>
+							);
+						})}
+					</div>
+				</div>
+			) : (
+				<></>
+			)}
 			<Spacer y={2}></Spacer>
 			<div className="flex flex-col gap-4 rounded-lg border p-4">
 				<Description title="Video Info"></Description>

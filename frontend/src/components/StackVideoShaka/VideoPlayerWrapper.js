@@ -3,7 +3,6 @@ import Playlist from "../Sidebar/Playlist";
 import "./StackVideo.css";
 import VideoInfo from "./VideoInfo";
 import VideoPlayer from "./VideoPlayer";
-import VideoQueue from "./VideoQueue";
 
 export default function VideoPlayerWrapper() {
 	const [fullScreen] = useVideoStore((state) => [state.fullScreen]);
@@ -34,7 +33,7 @@ export default function VideoPlayerWrapper() {
 			</div> */}
 			<VideoPlayer />
 
-			{fullScreen ? (
+			{/* {fullScreen ? (
 				<div className="queue-area">
 					<VideoQueue />
 				</div>
@@ -42,8 +41,9 @@ export default function VideoPlayerWrapper() {
 				<>
 					<VideoQueue />
 				</>
-			)}
-			<div className="flex flex-col gap-4">
+			)} */}
+
+			<div className="flex flex-col gap-4 py-8">
 				<VideoInfo />
 			</div>
 
