@@ -260,19 +260,6 @@ function VideoPlayer() {
 					? "fixed z-[1000] top-0 left-0 right-0 bottom-0"
 					: "rounded-xl overflow-hidden"
 			}`}>
-			{/* <div>
-				{String(videoStore.playlistState)}|{playlistStore.queue.length}
-				{JSON.stringify(videoStore.currentVideo)}|{videos().length}
-				<button
-					onClick={() => {
-						console.log("setting ...");
-						setPlaylistState(true);
-						console.log("set...");
-					}}>
-					Alt
-				</button>
-			</div> */}
-			{/* <pre>{JSON.stringify(videos())}</pre> */}
 			<div
 				class={`${videoStore.fullScreen ? "h-full" : "mx-auto aspect-video"}`}>
 				<Show

@@ -13,83 +13,97 @@ import shaka from "shaka-player/dist/shaka-player.ui";
  * @constructor
  */
 function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
-	const uiContainerRef = React.useRef(null);
-	const videoRef = React.useRef(null);
+  const uiContainerRef = React.useRef(null);
+  const videoRef = React.useRef(null);
 
-	const [player, setPlayer] = React.useState(null);
-	const [ui, setUi] = React.useState(null);
+  const [player, setPlayer] = React.useState(null);
+  const [ui, setUi] = React.useState(null);
 
-	// Effect to handle component mount & mount.
-	// Not related to the src prop, this hook creates a shaka.Player instance.
-	// This should always be the first effect to run.
-	React.useEffect(() => {
-		const player = new shaka.Player(videoRef.current);
-		setPlayer(player);
+  React.useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (player) {
+        const stats = player.getStats();
 
-		let ui;
-		if (!chromeless) {
-			const ui = new shaka.ui.Overlay(
-				player,
-				uiContainerRef.current,
-				videoRef.current
-			);
-			setUi(ui);
-		}
+        console.log("Estimated buffer level (seconds):", stats);
+      }
+    }, 1000); // Log every 1000 milliseconds (1 second)
 
-		return () => {
-			player.destroy();
-			if (ui) {
-				ui.destroy();
-			}
-		};
-	}, [chromeless]);
+    return () => {
+      clearInterval(intervalId); // Clean up the interval when the component unmounts
+    };
+  }, [player]); // Only re-run the effect if the player instance changes
 
-	// Keep shaka.Player.configure in sync.
-	React.useEffect(() => {
-		if (player && config) {
-			player.configure(config);
-		}
-	}, [player, config]);
+  // Effect to handle component mount & mount.
+  // Not related to the src prop, this hook creates a shaka.Player instance.
+  // This should always be the first effect to run.
+  React.useEffect(() => {
+    const player = new shaka.Player(videoRef.current);
+    setPlayer(player);
 
-	// Load the source url when we have one.
-	React.useEffect(() => {
-		if (player && src) {
-			player.load(src);
-		}
-	}, [player, src]);
+    let ui;
+    if (!chromeless) {
+      const ui = new shaka.ui.Overlay(
+        player,
+        uiContainerRef.current,
+        videoRef.current
+      );
+      setUi(ui);
+    }
 
-	// Define a handle for easily referencing Shaka's player & ui API's.
-	React.useImperativeHandle(
-		ref,
-		() => ({
-			get player() {
-				return player;
-			},
-			get ui() {
-				return ui;
-			},
-			get uiContainer() {
-				return uiContainerRef.current;
-			},
-			get videoElement() {
-				return videoRef.current;
-			},
-		}),
-		[player, ui]
-	);
+    return () => {
+      player.destroy();
+      if (ui) {
+        ui.destroy();
+      }
+    };
+  }, [chromeless]);
 
-	return (
-		<div ref={uiContainerRef} className={className}>
-			<video
-				ref={videoRef}
-				style={{
-					maxWidth: "100%",
-					width: "100%",
-				}}
-				{...rest}
-			/>
-		</div>
-	);
+  // Keep shaka.Player.configure in sync.
+  React.useEffect(() => {
+    if (player && config) {
+      player.configure(config);
+    }
+  }, [player, config]);
+
+  // Load the source url when we have one.
+  React.useEffect(() => {
+    if (player && src) {
+      player.load(src);
+    }
+  }, [player, src]);
+
+  // Define a handle for easily referencing Shaka's player & ui API's.
+  React.useImperativeHandle(
+    ref,
+    () => ({
+      get player() {
+        return player;
+      },
+      get ui() {
+        return ui;
+      },
+      get uiContainer() {
+        return uiContainerRef.current;
+      },
+      get videoElement() {
+        return videoRef.current;
+      },
+    }),
+    [player, ui]
+  );
+
+  return (
+    <div ref={uiContainerRef} className={className}>
+      <video
+        ref={videoRef}
+        style={{
+          maxWidth: "100%",
+          width: "100%",
+        }}
+        {...rest}
+      />
+    </div>
+  );
 }
 
 export default React.memo(React.forwardRef(ShakaPlayer));
