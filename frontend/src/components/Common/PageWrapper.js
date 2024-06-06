@@ -64,10 +64,6 @@ export default function PageWrapper({ heading, children }) {
                 theme.palette.mode === "light"
                   ? `0 0 1px rgba(85, 166, 246, 0.1), 1px 1.5px 2px -1px rgba(85, 166, 246, 0.15), 4px 4px 12px -2.5px rgba(85, 166, 246, 0.15)`
                   : "0 0 1px rgba(2, 31, 59, 0.7), 1px 1.5px 2px -1px rgba(2, 31, 59, 0.65), 4px 4px 12px -2.5px rgba(2, 31, 59, 0.65)",
-              // boxShadow:
-              //   theme.palette.mode === "light"
-              //     ? `0 0 1px rgba(0, 255, 0, 0.1), 1px 1.5px 2px -1px rgba(0, 255, 0, 0.15), 4px 4px 12px -2.5px rgba(0, 255, 0, 0.15)`
-              //     : "0 0 1px rgba(2, 31, 59, 0.7), 1px 1.5px 2px -1px rgba(2, 31, 59, 0.65), 4px 4px 12px -2.5px rgba(2, 31, 59, 0.65)",
             })}
           >
             <img
@@ -88,14 +84,28 @@ export default function PageWrapper({ heading, children }) {
           </Toolbar>
         </Container>
       </AppBar>
-      <div className="min-h-screen">
-        {heading ? (
-          <h1 className="pt-4 font-bold text-center">{heading}</h1>
-        ) : (
-          <></>
-        )}
-        <div className="">{children}</div>
-      </div>
+
+      <Box
+        id="hero"
+        sx={(theme) => ({
+          width: "100%",
+          backgroundImage:
+            theme.palette.mode === "light"
+              ? "linear-gradient(180deg, #CEE5FD, #FFF)"
+              : `linear-gradient(#02294F, ${alpha("#090E10", 0.0)})`,
+          backgroundSize: "100% 20%",
+          backgroundRepeat: "no-repeat",
+        })}
+      >
+        <div className="min-h-screen">
+          {heading ? (
+            <h1 className="pt-4 font-bold text-center">{heading}</h1>
+          ) : (
+            <></>
+          )}
+          <div className="">{children}</div>
+        </div>
+      </Box>
     </>
   );
 }

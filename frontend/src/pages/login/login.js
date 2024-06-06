@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useShallow } from "zustand/react/shallow";
 import LoginGoogle from "../../components/auth/LoginGoogle";
-import { Button } from "../../components/ui/button";
+// import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { Form, FormFieldWrapper } from "../../components/ui/form";
 import useUserStore from "../../store/UserStore";
@@ -13,6 +13,20 @@ import { Fetch } from "../../utils/Fetch";
 import { navigateToDashboard } from "../../utils/navigateToDashboard";
 import Otp from "../otp/Otp";
 import "./login.css";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import CssBaseline from "@mui/material/CssBaseline";
+import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Link from "@mui/material/Link";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import { Paper } from "@mui/material";
+import PageWrapper from "../../components/Common/PageWrapper";
 
 export default function Login({ switchForm }) {
   const navigate = useNavigate();
@@ -224,93 +238,244 @@ export default function Login({ switchForm }) {
   }, [user, type]);
 
   return (
-    <div class="scale-90">
-      <Card variant="primary" className="h-90 w-80 sm:w-96 lg:w-[440px]">
-        <CardContent>
-          <div className="mb-4">
-            <img
-              src="/logo_6am.png"
-              alt="6AM Yoga"
-              className="mx-auto my-4 max-h-24"
-            />
-            <h3 className="text-center">Login</h3>
-          </div>
-          {/* <hr /> */}
-          {mainVisible && (
-            <div className="mt-4 flex w-full flex-col items-center gap-1">
-              <Form {...authForm}>
-                <form
-                  onSubmit={authForm.handleSubmit(handleSubmit)}
-                  className="flex w-full flex-col gap-4"
-                >
-                  <FormFieldWrapper name="username">Username</FormFieldWrapper>
-                  <FormFieldWrapper type="password" name="password">
-                    Password
-                  </FormFieldWrapper>
-                  <Button
-                    size="xs"
-                    variant="outline"
-                    className="max-w-fit"
-                    onClick={handleForgotPassword}
-                  >
-                    Forgot Password
-                  </Button>
-                  <Button>Login</Button>
-                </form>
-              </Form>
-              <p>{"( or )"}</p>
-              <div className="flex flex-col gap-2 items-center w-full">
-                <div>
-                  <LoginGoogle />
-                </div>
-                {/* <Button onClick={phoneSignInFunction} className="w-full">
-                  Login with Phone Number
-                </Button> */}
-              </div>
-
-              {/* <hr /> */}
-
-              <Button
-                variant="ghost"
-                className="w-full"
-                onClick={() => switchForm((s) => !s)}
-              >
-                Register Account
-              </Button>
-            </div>
-          )}
-          {(forgotPassword || phoneSignInVisible) && (
-            <div>
-              <Otp onSuccessCallback={func1} />
-              <Button
-                className="w-full"
-                variant="ghost"
-                onClick={() => {
-                  setPhoneSignInVisible(false);
-                  setForgotPasswordVisible(false);
-                  setForgotPassword(false);
-                  setPhoneSignIn(false);
-                  setMainVisible(true);
-                }}
-              >
-                Go Back
-              </Button>
-            </div>
-          )}
-
-          {forgotPasswordVisible && (
-            <div>
-              <Input.Password width="100%" id="new_password">
-                Password
-              </Input.Password>
-              <Input.Password width="100%" id="new_confirm_password">
-                Confirm Password
-              </Input.Password>
-              <Button onClick={updateNewPassword}>Reset Password</Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+    <PageWrapper>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "70%",
+        }}
+      >
+        <Avatar sx={{ m: 1, bgcolor: "#0b7dda" }}>
+          <LockOutlinedIcon />
+        </Avatar>
+        <Typography component="h1" variant="h5">
+          Sign in
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Username"
+            name="email"
+            autoComplete="email"
+            autoFocus
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+          />
+          <FormControlLabel
+            control={<Checkbox value="remember" color="primary" />}
+            label="Remember me"
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Sign In
+          </Button>
+          <Grid container>
+            <Grid item xs>
+              <Link href="#" variant="body2">
+                Forgot password?
+              </Link>
+            </Grid>
+            <Grid item>
+              <Link href="#" variant="body2">
+                {"Don't have an account? Sign Up"}
+              </Link>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
+    </PageWrapper>
+    // <div className="flex flex-col justify-center items-center">
+    //   {/* <Paper
+    //     elevation={3}
+    //     className="flex flex-col justify-center items-center"
+    //   > */}
+    //   <Box
+    //     id="hero"
+    //     sx={(theme) => ({
+    //       width: "100%",
+    //       backgroundImage:
+    //         theme.palette.mode === "light"
+    //           ? "linear-gradient(180deg, #CEE5FD, #FFF)"
+    //           : `linear-gradient(#02294F, ${alpha("#090E10", 0.0)})`,
+    //       backgroundSize: "100% 20%",
+    //       backgroundRepeat: "no-repeat",
+    //     })}
+    //   >
+    //     <Box
+    //       sx={{
+    //         display: "flex",
+    //         flexDirection: "column",
+    //         alignItems: "center",
+    //         width: "70%",
+    //       }}
+    //     >
+    //       <Avatar sx={{ m: 1, bgcolor: "#0b7dda" }}>
+    //         <LockOutlinedIcon />
+    //       </Avatar>
+    //       <Typography component="h1" variant="h5">
+    //         Sign in
+    //       </Typography>
+    //       <Box
+    //         component="form"
+    //         onSubmit={handleSubmit}
+    //         noValidate
+    //         sx={{ mt: 1 }}
+    //       >
+    //         <TextField
+    //           margin="normal"
+    //           required
+    //           fullWidth
+    //           id="email"
+    //           label="Username"
+    //           name="email"
+    //           autoComplete="email"
+    //           autoFocus
+    //         />
+    //         <TextField
+    //           margin="normal"
+    //           required
+    //           fullWidth
+    //           name="password"
+    //           label="Password"
+    //           type="password"
+    //           id="password"
+    //           autoComplete="current-password"
+    //         />
+    //         <FormControlLabel
+    //           control={<Checkbox value="remember" color="primary" />}
+    //           label="Remember me"
+    //         />
+    //         <Button
+    //           type="submit"
+    //           fullWidth
+    //           variant="contained"
+    //           sx={{ mt: 3, mb: 2 }}
+    //         >
+    //           Sign In
+    //         </Button>
+    //         <Grid container>
+    //           <Grid item xs>
+    //             <Link href="#" variant="body2">
+    //               Forgot password?
+    //             </Link>
+    //           </Grid>
+    //           <Grid item>
+    //             <Link href="#" variant="body2">
+    //               {"Don't have an account? Sign Up"}
+    //             </Link>
+    //           </Grid>
+    //         </Grid>
+    //       </Box>
+    //     </Box>
+    //   </Box>
+    //   {/* </Paper> */}
+    // </div>
   );
+  // return (
+  //   <div class="scale-90">
+  //     <Card variant="primary" className="h-90 w-80 sm:w-96 lg:w-[440px]">
+  //       <CardContent>
+  //         <div className="mb-4">
+  //           <img
+  //             src="/logo_6am.png"
+  //             alt="6AM Yoga"
+  //             className="mx-auto my-4 max-h-24"
+  //           />
+  //           <h3 className="text-center">Login</h3>
+  //         </div>
+  //         {/* <hr /> */}
+  //         {mainVisible && (
+  //           <div className="mt-4 flex w-full flex-col items-center gap-1">
+  //             <Form {...authForm}>
+  //               <form
+  //                 onSubmit={authForm.handleSubmit(handleSubmit)}
+  //                 className="flex w-full flex-col gap-4"
+  //               >
+  //                 <FormFieldWrapper name="username">Username</FormFieldWrapper>
+  //                 <FormFieldWrapper type="password" name="password">
+  //                   Password
+  //                 </FormFieldWrapper>
+  //                 <Button
+  //                   size="xs"
+  //                   variant="outline"
+  //                   className="max-w-fit"
+  //                   onClick={handleForgotPassword}
+  //                 >
+  //                   Forgot Password
+  //                 </Button>
+  //                 <Button>Login</Button>
+  //               </form>
+  //             </Form>
+  //             <p>{"( or )"}</p>
+  //             <div className="flex flex-col gap-2 items-center w-full">
+  //               <div>
+  //                 <LoginGoogle />
+  //               </div>
+  //               {/* <Button onClick={phoneSignInFunction} className="w-full">
+  //                 Login with Phone Number
+  //               </Button> */}
+  //             </div>
+
+  //             {/* <hr /> */}
+
+  //             <Button
+  //               variant="ghost"
+  //               className="w-full"
+  //               onClick={() => switchForm((s) => !s)}
+  //             >
+  //               Register Account
+  //             </Button>
+  //           </div>
+  //         )}
+  //         {(forgotPassword || phoneSignInVisible) && (
+  //           <div>
+  //             <Otp onSuccessCallback={func1} />
+  //             <Button
+  //               className="w-full"
+  //               variant="ghost"
+  //               onClick={() => {
+  //                 setPhoneSignInVisible(false);
+  //                 setForgotPasswordVisible(false);
+  //                 setForgotPassword(false);
+  //                 setPhoneSignIn(false);
+  //                 setMainVisible(true);
+  //               }}
+  //             >
+  //               Go Back
+  //             </Button>
+  //           </div>
+  //         )}
+
+  //         {forgotPasswordVisible && (
+  //           <div>
+  //             <Input.Password width="100%" id="new_password">
+  //               Password
+  //             </Input.Password>
+  //             <Input.Password width="100%" id="new_confirm_password">
+  //               Confirm Password
+  //             </Input.Password>
+  //             <Button onClick={updateNewPassword}>Reset Password</Button>
+  //           </div>
+  //         )}
+  //       </CardContent>
+  //     </Card>
+  //   </div>
+  // );
 }
