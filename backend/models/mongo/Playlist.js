@@ -7,6 +7,12 @@ const PlaylistSchema6am = new mongoose.Schema({
 	playlist_dash_url: String,
 	duration: Number,
 	playist_mode: String,
+	sections: [
+		{
+			name: String,
+			time: Number,
+		},
+	],
 });
 
 const Playlist = mongoose.model(
