@@ -4,53 +4,49 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import AutoFixHighRoundedIcon from "@mui/icons-material/AutoFixHighRounded";
-import ConstructionRoundedIcon from "@mui/icons-material/ConstructionRounded";
-import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
-import SettingsSuggestRoundedIcon from "@mui/icons-material/SettingsSuggestRounded";
-import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
 import ThumbUpAltRoundedIcon from "@mui/icons-material/ThumbUpAltRounded";
-
+import EmailIcon from "@mui/icons-material/Email";
+import PhoneIcon from "@mui/icons-material/Phone";
+import { TextField, Button } from "@mui/material";
+import { useState } from "react";
 const items = [
   {
-    icon: <SettingsSuggestRoundedIcon />,
-    title: "Adaptable performance",
-    description:
-      "Our product effortlessly adjusts to your needs, boosting efficiency and simplifying your tasks.",
+    icon: <EmailIcon />,
+    title: "Get in Touch",
+    description: "992351@gmail.com",
   },
   {
-    icon: <ConstructionRoundedIcon />,
-    title: "Built to last",
-    description:
-      "Experience unmatched durability that goes above and beyond with lasting investment.",
+    icon: <PhoneIcon />,
+    title: "Talk to Us",
+    description: "+91-9980802351",
   },
   {
     icon: <ThumbUpAltRoundedIcon />,
-    title: "Great user experience",
+    title: "Address",
     description:
-      "Integrate our product into your routine with an intuitive and easy-to-use interface.",
-  },
-  {
-    icon: <AutoFixHighRoundedIcon />,
-    title: "Innovative functionality",
-    description:
-      "Stay ahead with features that set new standards, addressing your evolving needs better than the rest.",
-  },
-  {
-    icon: <SupportAgentRoundedIcon />,
-    title: "Reliable support",
-    description:
-      "Count on our responsive customer support, offering assistance that goes beyond the purchase.",
-  },
-  {
-    icon: <QueryStatsRoundedIcon />,
-    title: "Precision in every detail",
-    description:
-      "Enjoy a meticulously crafted product where small touches make a significant impact on your overall experience.",
+      "4th floor, Shalom Arcade, Kasavanahalli, Sarjapur Road, Bangalore, 560035",
   },
 ];
 
 export default function Highlights() {
+  const [formData, setFormData] = useState({
+    query_name: "",
+    query_email: "",
+    query_phone: "",
+    query_text: "",
+  });
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    // Handle form submission logic (e.g., send data to API)
+    console.log(formData);
+  };
   return (
     <Box
       id="highlights"
@@ -58,7 +54,7 @@ export default function Highlights() {
         pt: { xs: 4, sm: 12 },
         pb: { xs: 8, sm: 16 },
         color: "white",
-        bgcolor: "#06090a",
+        background: "linear-gradient(#033363, #021F3B)",
       }}
     >
       <Container
@@ -77,16 +73,16 @@ export default function Highlights() {
           }}
         >
           <Typography component="h2" variant="h4">
-            Highlights
+            Reach out to us!
           </Typography>
           <Typography variant="body1" sx={{ color: "grey.400" }}>
-            Explore why our product stands out: adaptability, durability,
-            user-friendly design, and innovation. Enjoy reliable customer
-            support and precision in every detail.
+            Our team of experts will give you a tailored product tour, showing
+            you how our platform can streamline your workflow, address your pain
+            points, and ultimately help you achieve your goals.
           </Typography>
         </Box>
         <Grid container spacing={2.5}>
-          {items.map((item, index) => (
+          {/* {items.map((item, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <Stack
                 direction="column"
@@ -98,9 +94,9 @@ export default function Highlights() {
                   p: 3,
                   height: "100%",
                   border: "1px solid",
-                  borderColor: "grey.800",
+                  borderColor: "#AAC0DB",
                   background: "transparent",
-                  backgroundColor: "grey.900",
+                  backgroundColor: "#FFFFFF",
                 }}
               >
                 <Box sx={{ opacity: "50%" }}>{item.icon}</Box>
@@ -114,8 +110,160 @@ export default function Highlights() {
                 </div>
               </Stack>
             </Grid>
+          ))} */}
+          {items.map((item, index) => (
+            <Grid item xs={12} sm={6} md={4} key={index}>
+              <Stack
+                direction="column"
+                color="inherit"
+                component={Card}
+                spacing={1}
+                useFlexGap
+                sx={{
+                  p: 3,
+                  height: "100%",
+                  border: "1px solid",
+                  borderColor: "#AAC0DB",
+                  background: "transparent",
+                  backgroundColor: "#FFFFFF",
+                }}
+              >
+                <Box
+                  sx={{
+                    opacity: "50%",
+                    filter: "grayscale(1) brightness(0)",
+                    color: "black",
+                  }}
+                >
+                  {" "}
+                  {/* Apply filter to logo */}
+                  {item.icon}
+                </Box>
+                <div>
+                  <Typography
+                    fontWeight="medium"
+                    gutterBottom
+                    sx={{ color: "black" }}
+                  >
+                    {" "}
+                    {/* Set text color */}
+                    {item.title}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "black" }}>
+                    {" "}
+                    {/* Set text color */}
+                    {item.description}
+                  </Typography>
+                </div>
+              </Stack>
+            </Grid>
           ))}
         </Grid>
+        <Typography component="h2" variant="h4">
+          Submit your query here
+        </Typography>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{
+            "& .MuiTextField-root": {
+              /* ... (text field styles remain the same) */
+            },
+            p: 3,
+            border: "1px solid",
+            borderColor: "#AAC0DB",
+            backgroundColor: "#FFFFFF",
+            borderRadius: 2, // Add rounded corners
+            boxShadow: 0, // No shadow by default
+            transition: "box-shadow 0.3s", // Smooth transition for shadow
+            "&:hover": {
+              boxShadow: 3, // Shadow on hover
+            },
+          }}
+        >
+          <Typography
+            variant="h6"
+            component="h2"
+            gutterBottom
+            sx={{ color: "black" }}
+          >
+            Name
+          </Typography>
+          <TextField
+            name="query_name"
+            // label="Name"
+            variant="outlined"
+            fullWidth
+            value={formData.query_name}
+            onChange={handleChange}
+          />
+
+          <Typography
+            variant="h6"
+            component="h2"
+            gutterBottom
+            sx={{ color: "black" }}
+          >
+            Email
+          </Typography>
+          <TextField
+            name="query_email"
+            // label="Email"
+            variant="outlined"
+            fullWidth
+            value={formData.query_email}
+            onChange={handleChange}
+          />
+
+          <Typography
+            variant="h6"
+            component="h2"
+            gutterBottom
+            sx={{ color: "black" }}
+          >
+            Phone No.
+          </Typography>
+          <TextField
+            name="query_phone"
+            // label="Phone Number"
+            variant="outlined"
+            fullWidth
+            value={formData.query_phone}
+            onChange={handleChange}
+          />
+
+          <Typography
+            variant="h6"
+            component="h2"
+            gutterBottom
+            sx={{ color: "black" }}
+          >
+            Query
+          </Typography>
+          <TextField
+            name="query_text"
+            // label="Your Query"
+            multiline
+            rows={4}
+            variant="outlined"
+            fullWidth
+            value={formData.query_text}
+            onChange={handleChange}
+          />
+
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{
+              backgroundColor: "grey.600", // Lighter gray background
+              "&:hover": { backgroundColor: "grey.500" }, // Hover effect
+              color: "white", // White text color
+            }}
+          >
+            {" "}
+            Submit
+          </Button>
+        </Box>
       </Container>
     </Box>
   );

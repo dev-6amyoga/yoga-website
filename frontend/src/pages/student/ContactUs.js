@@ -40,19 +40,6 @@
 //     }
 //   };
 //   return (
-//     <StudentPageWrapper>
-//       <div className="mx-auto max-w-2xl">
-//         <img src="/logo_6am.png" alt="logo" className="w-auto h-auto" />
-//       </div>
-//       <div className="w-full h-full gap-2 p-6 bg-y-white text-white rounded-lg">
-//         <iframe
-//           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.9968518180767!2d77.67348657454568!3d12.907923616272244!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae1340031bb427%3A0xee0df18d7177d35d!2s6am%20Yoga!5e0!3m2!1sen!2sin!4v1706362049496!5m2!1sen!2sin"
-//           // style="border:0;"
-//           className="w-full h-96"
-//           allowfullscreen=""
-//           loading="lazy"
-//           referrerpolicy="no-referrer-when-downgrade"
-//         ></iframe>
 //       </div>
 //       <div className="flex justify-center">
 //         <div className="flex flex-col items-center p-6 rounded-md bg-y-white shadow-md mt-10 mx-10">
