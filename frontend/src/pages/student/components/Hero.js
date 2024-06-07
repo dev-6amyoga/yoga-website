@@ -7,7 +7,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
-export default function Hero() {
+export default function Hero({ heading }) {
   return (
     <Box
       id="hero"
@@ -26,7 +26,7 @@ export default function Hero() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          pt: { xs: 14, sm: 20 },
+          pt: { xs: 12, sm: 12 },
           pb: { xs: 8, sm: 12 },
         }}
       >
@@ -38,11 +38,11 @@ export default function Hero() {
               flexDirection: { xs: "column", md: "row" },
               alignSelf: "center",
               textAlign: "center",
-              fontSize: "clamp(3.5rem, 10vw, 4rem)",
+              fontSize: "clamp(1.5rem, 6vw, 2rem)",
             }}
           >
-            Our latest&nbsp;
-            <Typography
+            {heading}
+            {/* <Typography
               component="span"
               variant="h1"
               sx={{
@@ -54,9 +54,9 @@ export default function Hero() {
               }}
             >
               products
-            </Typography>
+            </Typography> */}
           </Typography>
-          <Typography
+          {/* <Typography
             textAlign="center"
             color="text.secondary"
             sx={{ alignSelf: "center", width: { sm: "100%", md: "80%" } }}
@@ -64,15 +64,15 @@ export default function Hero() {
             Explore our cutting-edge dashboard, delivering high-quality
             solutions tailored to your needs. Elevate your experience with
             top-tier features and services.
-          </Typography>
-          <Stack
+          </Typography> */}
+          {/* <Stack
             direction={{ xs: "column", sm: "row" }}
             alignSelf="center"
             spacing={1}
             useFlexGap
             sx={{ pt: 2, width: { xs: "100%", sm: "auto" } }}
-          >
-            <TextField
+          > */}
+          {/* <TextField
               id="outlined-basic"
               hiddenLabel
               size="small"
@@ -86,9 +86,9 @@ export default function Hero() {
             />
             <Button variant="contained" color="primary">
               Start now
-            </Button>
-          </Stack>
-          <Typography
+            </Button> */}
+          {/* </Stack> */}
+          {/* <Typography
             variant="caption"
             textAlign="center"
             sx={{ opacity: 0.8 }}
@@ -98,9 +98,9 @@ export default function Hero() {
               Terms & Conditions
             </Link>
             .
-          </Typography>
+          </Typography> */}
         </Stack>
-        <Box
+        {/* <Box
           id="image"
           sx={(theme) => ({
             mt: { xs: 8, sm: 10 },
@@ -123,7 +123,7 @@ export default function Hero() {
                 ? `0 0 12px 8px ${alpha("#9CCCFC", 0.2)}`
                 : `0 0 24px 12px ${alpha("#033363", 0.2)}`,
           })}
-        />
+        /> */}
       </Container>
     </Box>
   );
