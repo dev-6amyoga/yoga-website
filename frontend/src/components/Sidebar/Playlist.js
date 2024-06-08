@@ -6,6 +6,7 @@ import usePlaylistStore from "../../store/PlaylistStore";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
 import PlaylistItem from "./PlaylistItem";
+import PlaylistList from "./PlaylistList";
 
 function Playlist() {
 	const [modalState, setModalState] = useState(false);
@@ -557,29 +558,14 @@ function Playlist() {
 				</div>
 			)}
 
-			<h4>6AM Yoga Playlists</h4>
-			<p className="pb-4 text-sm">
-				Choose from a variety of playlists to practice.
-			</p>
-			<div className="grid grid-cols-3 gap-2">
-				{playlists.map((playlist) => (
-					<PlaylistItem
-						key={playlist.playlist_name}
-						type={
-							queue
-								? queue.includes(playlist)
-									? "success"
-									: "secondary"
-								: "secondary"
-						}
-						add={() => handleAddToQueue(playlist)}
-						deets={() => showDetails(playlist)}
-						playlist={playlist}
-						isFuture={false}
-					/>
-				))}
-			</div>
-			<Divider />
+			<PlaylistList
+				name={"6AM Yoga Curated Playlists"}
+				desc={"Choose from curated playlists to practice."}
+				playlists={playlists}
+				handleAddToQueue={handleAddToQueue}
+				showDetails={showDetails}
+				show={true}
+			/>
 		</div>
 	);
 }
