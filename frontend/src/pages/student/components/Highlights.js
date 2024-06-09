@@ -166,29 +166,22 @@ export default function Highlights() {
           component="form"
           onSubmit={handleSubmit}
           sx={{
-            "& .MuiTextField-root": {
-              /* ... (text field styles remain the same) */
-            },
+            "& .MuiTextField-root": {},
             p: 3,
             border: "1px solid",
             borderColor: "#AAC0DB",
             backgroundColor: "#FFFFFF",
-            borderRadius: 2, // Add rounded corners
-            boxShadow: 0, // No shadow by default
-            transition: "box-shadow 0.3s", // Smooth transition for shadow
+            borderRadius: 2,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            boxShadow: 0,
+            transition: "box-shadow 0.3s",
             "&:hover": {
-              boxShadow: 3, // Shadow on hover
+              boxShadow: 3,
             },
           }}
         >
-          {/* <Typography
-            variant="h6"
-            component="h2"
-            gutterBottom
-            sx={{ color: "black" }}
-          >
-            Name
-          </Typography> */}
           <TextField
             name="query_name"
             label="Name"
@@ -198,14 +191,6 @@ export default function Highlights() {
             onChange={handleChange}
           />
 
-          {/* <Typography
-            variant="h6"
-            component="h2"
-            gutterBottom
-            sx={{ color: "black" }}
-          >
-            Email
-          </Typography> */}
           <TextField
             name="query_email"
             label="Email"
@@ -215,14 +200,6 @@ export default function Highlights() {
             onChange={handleChange}
           />
 
-          {/* <Typography
-            variant="h6"
-            component="h2"
-            gutterBottom
-            sx={{ color: "black" }}
-          >
-            Phone No.
-          </Typography> */}
           <TextField
             name="query_phone"
             label="Phone"
@@ -232,17 +209,9 @@ export default function Highlights() {
             onChange={handleChange}
           />
 
-          <Typography
-            variant="h6"
-            component="h2"
-            gutterBottom
-            sx={{ color: "black" }}
-          >
-            Query
-          </Typography>
           <TextField
             name="query_text"
-            // label="Your Query"
+            label="Your Query"
             multiline
             rows={4}
             variant="outlined"
@@ -255,9 +224,9 @@ export default function Highlights() {
             type="submit"
             variant="contained"
             sx={{
-              backgroundColor: "grey.600", // Lighter gray background
-              "&:hover": { backgroundColor: "grey.500" }, // Hover effect
-              color: "white", // White text color
+              backgroundColor: "grey.600",
+              "&:hover": { backgroundColor: "grey.500" },
+              color: "white",
             }}
           >
             {" "}
