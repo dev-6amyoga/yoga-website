@@ -373,7 +373,7 @@ function Playlist() {
 					</p>
 				</Modal.Subtitle>
 				{asana_details && asana_details.length > 0 ? (
-					<div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-2 max-h-96 overflow-auto py-10 px-4">
+					<div className="flex flex-col gap-1 max-h-96 overflow-auto py-10 px-4">
 						{asana_details
 							.reduce((acc, current) => {
 								const lastIndex = acc.length - 1;
@@ -391,14 +391,14 @@ function Playlist() {
 							.map((asanaDetail) => (
 								<div
 									key={asanaDetail.asana_name}
-									className="p-2 border border-y-green rounded-lg">
+									className="grid grid-cols-3 gap-1 text-sm border-b p-1">
+									<p>{asanaDetail.asana_name}</p>
 									<p>
-										{asanaDetail.asana_name}
 										{asanaDetail.language
-											? ` - ${asanaDetail.language}`
+											? asanaDetail.language
 											: ""}{" "}
-										(x{asanaDetail.count})
 									</p>
+									<p>(x{asanaDetail.count})</p>
 								</div>
 							))}
 					</div>
