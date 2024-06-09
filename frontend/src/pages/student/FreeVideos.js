@@ -16,6 +16,7 @@ import {
   alpha,
 } from "@mui/material";
 import PlayCircleFilledWhiteOutlinedIcon from "@mui/icons-material/PlayCircleFilledWhiteOutlined"; // Icon for "Watch"
+import { Spacer } from "@geist-ui/core";
 
 export default function FreeVideos() {
   const [planId, setPlanId] = useState(0);
@@ -99,20 +100,88 @@ export default function FreeVideos() {
     []
   );
 
+  //   return (
+  //     <StudentPageWrapper>
+  //       <div className="flex flex-col items-center">
+  //         <Typography variant="h5" component="h5" sx={{ mb: 4 }}>
+  //           Free Videos
+  //         </Typography>
+
+  //         {/* Main Content Container */}
+  //         <Container
+  //           maxWidth="md"
+  //           sx={{ display: "flex", justifyContent: "center" }}
+  //         >
+  //           {/* YouTube Video Player */}
+  //           <Box sx={{ mb: 4, width: "100%" }}>
+  //             <YouTube
+  //               videoId={currentVideoId}
+  //               opts={videoOptions}
+  //               onEnd={handleEnd}
+  //               onReady={saveTarget}
+  //               onStateChange={iChanged}
+  //               containerClassName="yt-container"
+  //               iframeClassName="w-full"
+  //             />
+  //           </Box>
+  //         </Container>
+
+  //         {/* Video Title */}
+  //         {currentVideoId && (
+  //           <Typography variant="h5" align="center" gutterBottom>
+  //             {
+  //               freeVideos.find((video) => video.videoId === currentVideoId)
+  //                 ?.title
+  //             }
+  //           </Typography>
+  //         )}
+  //         <Spacer h={2} />
+
+  //         {/* Free Videos Grid */}
+  //         <Container maxWidth="md">
+  //           {" "}
+  //           {/* Constrain the width of the grid */}
+  //           <Grid container spacing={2}>
+  //             {freeVideos.map((video) => (
+  //               <Grid item xs={12} sm={6} md={4} key={video.videoId}>
+  //                 <Card>
+  //                   <CardContent>
+  //                     <Typography variant="body1">{video.title}</Typography>
+  //                   </CardContent>
+  //                   <CardActions>
+  //                     <Button
+  //                       variant="contained"
+  //                       onClick={() => setCurrentVideoId(video.videoId)}
+  //                       startIcon={<PlayCircleFilledWhiteOutlinedIcon />}
+  //                     >
+  //                       Watch
+  //                     </Button>
+  //                   </CardActions>
+  //                 </Card>
+  //               </Grid>
+  //             ))}
+  //           </Grid>
+  //         </Container>
+  //       </div>
+  //     </StudentPageWrapper>
+  //   );
+
   return (
     <StudentPageWrapper>
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center h-96">
         <Typography variant="h5" component="h5" sx={{ mb: 4 }}>
           Free Videos
         </Typography>
-
-        {/* Main Content Container */}
         <Container
-          maxWidth="md"
-          sx={{ display: "flex", justifyContent: "center" }}
+          maxWidth="xl"
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: 2,
+            mt: 4,
+          }}
         >
-          {/* YouTube Video Player */}
-          <Box sx={{ mb: 4, width: "100%" }}>
+          <Box sx={{ mb: 4, width: { xs: "100%", md: "70%" } }}>
             <YouTube
               videoId={currentVideoId}
               opts={videoOptions}
@@ -121,45 +190,47 @@ export default function FreeVideos() {
               onStateChange={iChanged}
               containerClassName="yt-container"
               iframeClassName="w-full"
-            />
+            />{" "}
           </Box>
-        </Container>
 
-        {/* Video Title */}
-        {currentVideoId && (
-          <Typography variant="h5" align="center" gutterBottom>
-            {
-              freeVideos.find((video) => video.videoId === currentVideoId)
-                ?.title
-            }
-          </Typography>
-        )}
-
-        {/* Free Videos Grid */}
-        <Container maxWidth="md">
-          {" "}
-          {/* Constrain the width of the grid */}
-          <Grid container spacing={2}>
+          {/* Free Videos List (Scrollable) */}
+          <Box
+            sx={{
+              width: { xs: "100%", md: "30%" },
+              overflowY: "auto",
+              maxHeight: 400,
+            }}
+          >
             {freeVideos.map((video) => (
-              <Grid item xs={12} sm={6} md={4} key={video.videoId}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="body1">{video.title}</Typography>
-                  </CardContent>
-                  <CardActions>
+              <Card key={video.videoId} sx={{ mb: 2 }}>
+                {" "}
+                {/* Add margin-bottom to each card */}
+                <CardContent>
+                  <div className="flex flex-row items-center">
                     <Button
                       variant="contained"
                       onClick={() => setCurrentVideoId(video.videoId)}
                       startIcon={<PlayCircleFilledWhiteOutlinedIcon />}
-                    >
-                      Watch
-                    </Button>
-                  </CardActions>
-                </Card>
-              </Grid>
+                    />
+                    <Typography variant="subtitle1" className="truncate ml-2">
+                      {video.title}
+                    </Typography>
+                  </div>
+                </CardContent>
+                {/* <CardActions>
+                  <Button
+                    variant="contained"
+                    onClick={() => setCurrentVideoId(video.videoId)}
+                    startIcon={<PlayCircleFilledWhiteOutlinedIcon />}
+                  >
+                    Watch
+                  </Button>
+                </CardActions> */}
+              </Card>
             ))}
-          </Grid>
+          </Box>
         </Container>
+        {/* Video Title (Remains the same) */}
       </div>
     </StudentPageWrapper>
   );
