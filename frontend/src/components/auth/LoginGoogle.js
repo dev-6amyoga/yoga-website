@@ -118,6 +118,7 @@ export default function LoginGoogle() {
 					onError={() => {
 						console.log("Login Failed");
 					}}
+					size="large"
 				/>
 			</div>
 		</GoogleOAuthProvider>

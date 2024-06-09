@@ -1,10 +1,9 @@
-import { Input } from "@geist-ui/core";
+import { Button, TextField } from "@mui/material";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PhoneInput from "react-phone-number-input";
 import { toast } from "react-toastify";
 import { auth } from "../../utils/firebase";
-import { Button } from "../ui/button";
 import RecaptchaContainer from "./RecaptchaContainer";
 
 export default function LoginPhone({ onSuccessCallback, setLoading }) {
@@ -167,11 +166,17 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 				className="sm:w-10"
 			/>
 			<div className="flex w-full flex-col gap-2 items-center justify-center sm:flex-row sm:justify-between">
-				<Button className="w-full sm:w-auto">Cancel</Button>
+				<Button
+					className="w-full sm:w-auto"
+					size="medium"
+					variant="outlined">
+					Cancel
+				</Button>
 				<Button
 					onClick={() => sendOTP()}
 					disabled={!verified || startResendTimer}
-					className="w-full sm:w-auto">
+					className="w-full sm:w-auto"
+					variant="contained">
 					{resendCounter === 0
 						? "Send OTP"
 						: timer === 30
@@ -183,15 +188,17 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 			{/* verify otp */}
 			{number && (
 				<div className="flex w-full flex-col gap-4 PhoneNumberForm">
-					<Input
-						htmlType="number"
-						placeholder="Enter OTP here"
+					<TextField
+						type="number"
+						label="Enter OTP here"
 						onChange={(e) => {
 							setOtp(e.target.value);
 						}}
-						width={"100%"}
 					/>
-					<Button onClick={verifyOtp} className="w-full sm:w-auto">
+					<Button
+						variant="contained"
+						onClick={verifyOtp}
+						className="w-full sm:w-auto">
 						Verify
 					</Button>
 				</div>
