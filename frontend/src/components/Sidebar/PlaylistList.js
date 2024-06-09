@@ -1,4 +1,4 @@
-import { Divider, Spacer } from "@geist-ui/core";
+import { Spacer } from "@geist-ui/core";
 import { Button } from "@mui/material";
 import { useState } from "react";
 import PlaylistItem from "./PlaylistItem";
@@ -87,11 +87,11 @@ export default function PlaylistList({
 								</div>
 							</>
 						) : (
-							<p></p>
+							<p>Playlists yet to be added.</p>
 						)}
 					</>
 					<Spacer h={3}></Spacer>
-					<Divider type="dark" />
+					{/* <Divider type="dark" /> */}
 				</>
 			) : (
 				<></>
