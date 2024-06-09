@@ -63,8 +63,8 @@ module.exports = {
 			},
 			fontFamily: {
 				// sans: ["var(--font-sans)", ...fontFamily.sans],
-				heading: ["Bitter", "serif"],
-				content: ["Bitter", "serif"],
+				heading: ["Roboto", "sans-serif"],
+				content: ["Roboto", "sans-serif"],
 			},
 			fontSize: {
 				"step--2": "clamp(0.85rem, 1rem + -0.4vw, 0.64rem)",

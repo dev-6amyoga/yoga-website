@@ -61,6 +61,10 @@
 	.btn-move-base {
 		@apply hover:-translate-y-0.5 hover:-translate-x-0.5 transform;
 	}
+
+	.playlist-item-grid {
+		grid-template-columns: 1fr 0.5fr;
+	}
 }
 
 @layer base {
@@ -183,23 +187,23 @@ h6 {
 }
 
 h1 {
-	@apply text-step-5 font-bold;
-}
-
-h2 {
 	@apply text-step-4 font-bold;
 }
 
-h3 {
+h2 {
 	@apply text-step-3 font-bold;
 }
 
-h4 {
+h3 {
 	@apply text-step-2 font-bold;
 }
 
-h5 {
+h4 {
 	@apply text-step-1 font-bold;
+}
+
+h5 {
+	@apply text-step-0 font-bold;
 }
 
 h6 {
@@ -221,14 +225,14 @@ button {
 	font-size: text-step--2;
 }
 
-h1,
+/* h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
 	@apply font-heading;
-}
+} */
 
 .card-base {
 	@apply rounded-lg border p-4;

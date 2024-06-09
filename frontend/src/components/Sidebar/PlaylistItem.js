@@ -1,26 +1,31 @@
 import { Add } from "@mui/icons-material";
-import { Button, Card, CardActions, CardContent } from "@mui/material";
-import { memo } from "react";
+import { Button, Tooltip } from "@mui/material";
+import { memo, useMemo } from "react";
 
 function PlaylistItem({ playlist, add, deets, isFuture }) {
-  return (
-    <Card sx={{ flexShrink: 0, p: 1 }}>
-      <CardContent sx={{ p: 1 }}>
-        {" "}
-        <div>
-          <p>{playlist.playlist_name || playlist.schedule_name}</p>
-          <div className="flex gap-2 items-center scale-75"></div>
-        </div>
-      </CardContent>
-      <CardActions sx={{ p: 1 }}>
-        {" "}
-        <Button onClick={add} disabled={isFuture}>
-          Add
-        </Button>
-        <Button onClick={deets}>Details</Button>
-      </CardActions>
-    </Card>
-  );
+	const name = useMemo(() => {
+		return String(playlist.playlist_name ?? playlist.schedule_name ?? "");
+	}, [playlist]);
+
+	return (
+		<div className="border border-y-slate-100 rounded-lg p-2 grid playlist-item-grid items-center">
+			<Tooltip title={name}>
+				<p className="">
+					{name.length > 35 ? name.substring(0, 35) + "..." : name}
+				</p>
+			</Tooltip>
+			<div className="flex gap-2 justify-between scale-75">
+				<Button
+					onClick={add}
+					disabled={isFuture}
+					startIcon={<Add />}
+					variant="outlined">
+					Add
+				</Button>
+				<Button onClick={deets}>Details</Button>
+			</div>
+		</div>
+	);
 }
 
 export default memo(PlaylistItem);

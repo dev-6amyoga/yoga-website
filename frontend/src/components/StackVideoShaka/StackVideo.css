@@ -12,9 +12,10 @@
 
 .video-grid {
 	display: grid;
-	grid-template-columns: 2fr 0.5fr;
-	grid-template-rows: repeat(2, minmax(auto, 264px));
+	grid-template-columns: 2fr 1fr;
+	/* grid-template-rows: repeat(2, minmax(min-content, 264px)); */
 
+	grid-template-rows: repeat(2, minmax(min-content, 232px));
 	grid-template-areas:
 		"video queue"
 		"video queue"
@@ -26,7 +27,7 @@
 }
 .queue-area {
 	grid-area: queue;
-	aspect-ratio: 4 / 9;
+	/* aspect-ratio: 4 / 9; */
 }
 
 @media (max-width: 1280px) {

@@ -1,6 +1,5 @@
 // import { Code } from "@geist-ui/core";
-import { Description, Spacer } from "@geist-ui/core";
-import { useEffect } from "react";
+import { Description } from "@geist-ui/core";
 import useVideoStore from "../../store/VideoStore";
 
 export default function VideoInfo() {
@@ -36,14 +35,14 @@ export default function VideoInfo() {
 		state.devMode,
 	]);
 
-	useEffect(() => {
-		if (currentVideo) {
-			setMarkers(currentVideo?.video?.markers || []);
-			if (currentVideo?.video?.markers?.length > 0) {
-				setCurrentMarkerIdx(0);
-			}
-		}
-	}, [currentVideo, setCurrentMarkerIdx, setMarkers]);
+	// useEffect(() => {
+	// 	if (currentVideo) {
+	// 		setMarkers(
+	// 			currentVideo?.video?.markers ?? currentVideo?.video?.sections
+	// 		);
+	// 		setCurrentMarkerIdx(0);
+	// 	}
+	// }, [currentVideo, setCurrentMarkerIdx, setMarkers]);
 
 	// useEffect(() => {
 	//     if (
@@ -162,13 +161,12 @@ export default function VideoInfo() {
 			) : (
 				<></>
 			)} */}
-			<Spacer y={2}></Spacer>
 			<div className="flex flex-col gap-4 rounded-lg border p-4">
-				<Description title="Video Info"></Description>
+				<Description title="Currently Playing"></Description>
 				{currentVideo ? (
 					<>
 						{/* <Code block>{JSON.stringify(currentVideo, null, 4)}</Code> */}
-						<h3>
+						<h4>
 							<span className="text-sm text-zinc-500">
 								{currentVideo?.video?.transition_id
 									? "TRANSITION"
@@ -180,16 +178,22 @@ export default function VideoInfo() {
 							{currentVideo?.video?.asana_name ||
 								currentVideo?.video?.transition_video_name ||
 								currentVideo?.video?.playlist_name}
-						</h3>
+						</h4>
 
-						<span className="text-sm text-zinc-500">
-							{currentVideo?.video?.transition_id
-								? ""
-								: currentVideo?.video?.playlist_id
-									? ""
-									: "ASANA DESCRIPTION"}
-						</span>
-						<p>{currentVideo?.video?.asana_desc}</p>
+						{currentVideo?.video?.asana_desc ? (
+							<>
+								<span className="text-sm text-zinc-500">
+									{currentVideo?.video?.transition_id
+										? ""
+										: currentVideo?.video?.playlist_id
+											? ""
+											: "ASANA DESCRIPTION"}
+								</span>
+								<p>{currentVideo?.video?.asana_desc}</p>
+							</>
+						) : (
+							<></>
+						)}
 					</>
 				) : (
 					<></>
