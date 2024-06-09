@@ -82,35 +82,6 @@ export default function Highlights() {
           </Typography>
         </Box>
         <Grid container spacing={2.5}>
-          {/* {items.map((item, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <Stack
-                direction="column"
-                color="inherit"
-                component={Card}
-                spacing={1}
-                useFlexGap
-                sx={{
-                  p: 3,
-                  height: "100%",
-                  border: "1px solid",
-                  borderColor: "#AAC0DB",
-                  background: "transparent",
-                  backgroundColor: "#FFFFFF",
-                }}
-              >
-                <Box sx={{ opacity: "50%" }}>{item.icon}</Box>
-                <div>
-                  <Typography fontWeight="medium" gutterBottom>
-                    {item.title}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "grey.400" }}>
-                    {item.description}
-                  </Typography>
-                </div>
-              </Stack>
-            </Grid>
-          ))} */}
           {items.map((item, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <Stack
@@ -136,7 +107,6 @@ export default function Highlights() {
                   }}
                 >
                   {" "}
-                  {/* Apply filter to logo */}
                   {item.icon}
                 </Box>
                 <div>
@@ -160,13 +130,15 @@ export default function Highlights() {
           ))}
         </Grid>
         <Typography component="h2" variant="h4">
-          Submit your query here
+          Submit your query here!
         </Typography>
         <Box
           component="form"
           onSubmit={handleSubmit}
           sx={{
-            "& .MuiTextField-root": {},
+            "& .MuiTextField-root": {
+              mb: 2, // Add margin-bottom to each TextField
+            },
             p: 3,
             border: "1px solid",
             borderColor: "#AAC0DB",
