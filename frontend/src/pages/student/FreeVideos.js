@@ -6,17 +6,18 @@ import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
 import { Fetch } from "../../utils/Fetch";
 import {
   Container,
-  Grid,
   Typography,
   Card,
   CardContent,
-  CardActions,
   Button,
   Box,
-  alpha,
+  CssBaseline,
 } from "@mui/material";
 import PlayCircleFilledWhiteOutlinedIcon from "@mui/icons-material/PlayCircleFilledWhiteOutlined"; // Icon for "Watch"
 import { Spacer } from "@geist-ui/core";
+import Hero from "./components/Hero";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
 
 export default function FreeVideos() {
   const [planId, setPlanId] = useState(0);
@@ -74,6 +75,8 @@ export default function FreeVideos() {
     }
   }, [user]);
 
+  const [mode, setMode] = useState("light");
+
   const freeVideos = useMemo(
     () => [
       {
@@ -99,79 +102,14 @@ export default function FreeVideos() {
     ],
     []
   );
-
-  //   return (
-  //     <StudentPageWrapper>
-  //       <div className="flex flex-col items-center">
-  //         <Typography variant="h5" component="h5" sx={{ mb: 4 }}>
-  //           Free Videos
-  //         </Typography>
-
-  //         {/* Main Content Container */}
-  //         <Container
-  //           maxWidth="md"
-  //           sx={{ display: "flex", justifyContent: "center" }}
-  //         >
-  //           {/* YouTube Video Player */}
-  //           <Box sx={{ mb: 4, width: "100%" }}>
-  //             <YouTube
-  //               videoId={currentVideoId}
-  //               opts={videoOptions}
-  //               onEnd={handleEnd}
-  //               onReady={saveTarget}
-  //               onStateChange={iChanged}
-  //               containerClassName="yt-container"
-  //               iframeClassName="w-full"
-  //             />
-  //           </Box>
-  //         </Container>
-
-  //         {/* Video Title */}
-  //         {currentVideoId && (
-  //           <Typography variant="h5" align="center" gutterBottom>
-  //             {
-  //               freeVideos.find((video) => video.videoId === currentVideoId)
-  //                 ?.title
-  //             }
-  //           </Typography>
-  //         )}
-  //         <Spacer h={2} />
-
-  //         {/* Free Videos Grid */}
-  //         <Container maxWidth="md">
-  //           {" "}
-  //           {/* Constrain the width of the grid */}
-  //           <Grid container spacing={2}>
-  //             {freeVideos.map((video) => (
-  //               <Grid item xs={12} sm={6} md={4} key={video.videoId}>
-  //                 <Card>
-  //                   <CardContent>
-  //                     <Typography variant="body1">{video.title}</Typography>
-  //                   </CardContent>
-  //                   <CardActions>
-  //                     <Button
-  //                       variant="contained"
-  //                       onClick={() => setCurrentVideoId(video.videoId)}
-  //                       startIcon={<PlayCircleFilledWhiteOutlinedIcon />}
-  //                     >
-  //                       Watch
-  //                     </Button>
-  //                   </CardActions>
-  //                 </Card>
-  //               </Grid>
-  //             ))}
-  //           </Grid>
-  //         </Container>
-  //       </div>
-  //     </StudentPageWrapper>
-  //   );
+  const defaultTheme = createTheme({ palette: { mode } });
 
   return (
-    <StudentPageWrapper>
+    <ThemeProvider theme={defaultTheme}>
+      <CssBaseline />
+      <StudentNavMUI />
       <div className="flex flex-col items-center h-96">
-        <Typography variant="h5" component="h5" sx={{ mb: 4 }}>
-          Free Videos
-        </Typography>
+        <Hero heading="Free Videos" />
         <Container
           maxWidth="xl"
           sx={{
@@ -232,6 +170,6 @@ export default function FreeVideos() {
         </Container>
         {/* Video Title (Remains the same) */}
       </div>
-    </StudentPageWrapper>
+    </ThemeProvider>
   );
 }
