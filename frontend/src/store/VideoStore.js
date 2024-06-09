@@ -56,13 +56,12 @@ export const useVideoStore = create(
 				}
 
 				// if the current time is less than the first marker, set to null
-				if (ct < state.markers[0].timestamp) {
+				if (ct < state.markers[0].time) {
 					return { currentMarkerIdx: null };
 				}
 
 				// find the first marker that is greater than the current time
-				const idx =
-					state.markers.findIndex((m) => m.timestamp > ct) - 1;
+				const idx = state.markers.findIndex((m) => m.time > ct) - 1;
 				// console.log("autoSetCurrentMarkerIdx :", idx, ct);
 
 				// if the current time is greater than the last marker, set to last marker

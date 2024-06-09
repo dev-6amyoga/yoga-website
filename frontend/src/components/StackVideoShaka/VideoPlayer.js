@@ -8,7 +8,7 @@ import useVideoStore, {
 	STATE_VIDEO_PLAY,
 } from "../../store/VideoStore";
 
-import { Button } from "@geist-ui/core";
+import { Button } from "@mui/material";
 import { useState } from "react";
 import { SEEK_TYPE_MOVE } from "../../enums/seek_types";
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
@@ -234,7 +234,9 @@ function VideoPlayer() {
 							{videoState === STATE_VIDEO_ERROR ? (
 								<div className="flex flex-col items-center justify-center gap-4 text-lg w-full h-full border border-red-500">
 									<p>Error : Video playback error</p>
-									<Button onClick={handleSetPlay}>
+									<Button
+										onClick={handleSetPlay}
+										variant="contained">
 										Refresh
 									</Button>
 								</div>
@@ -280,14 +282,20 @@ function VideoPlayer() {
 						</>
 					) : queue.length > 0 ? (
 						<div className="flex flex-col items-center justify-center gap-4 text-lg w-full h-full">
-							<Button onClick={handleStartPlaylist}>Start</Button>
+							<Button
+								onClick={handleStartPlaylist}
+								variant="contained">
+								Start
+							</Button>
 						</div>
 					) : (
 						<div className="flex flex-col items-center justify-center gap-4 text-lg w-full h-full">
 							<p className="text-white">
 								Add playlists to practice!
 							</p>
-							<Button onClick={scrollToPlaylists}>
+							<Button
+								onClick={scrollToPlaylists}
+								variant="contained">
 								View Playlists
 							</Button>
 						</div>
