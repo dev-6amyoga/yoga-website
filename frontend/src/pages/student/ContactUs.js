@@ -5,6 +5,7 @@
 // import { validateEmail, validatePhone } from "../../utils/formValidation";
 // import getFormData from "../../utils/getFormData";
 // export default function ContactUs() {
+
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();
 //     const formData = getFormData(e);
@@ -39,6 +40,7 @@
 //       console.log(err);
 //     }
 //   };
+
 //   return (
 //       </div>
 //       <div className="flex justify-center">
