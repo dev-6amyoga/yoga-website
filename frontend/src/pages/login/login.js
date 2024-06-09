@@ -239,7 +239,7 @@ export default function Login({ switchForm }) {
   }, [user, type]);
 
   return (
-    <PageWrapper heading="Player">
+    <PageWrapper>
       <div className="flex flex-col justify-center">
         <Box
           sx={{
