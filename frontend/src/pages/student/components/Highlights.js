@@ -137,7 +137,10 @@ export default function Highlights() {
           onSubmit={handleSubmit}
           sx={{
             "& .MuiTextField-root": {
-              mb: 2, // Add margin-bottom to each TextField
+              mb: 2,
+            },
+            "& .MuiOutlinedInput-root": {
+              backgroundColor: "#F0F5FF",
             },
             p: 3,
             border: "1px solid",
