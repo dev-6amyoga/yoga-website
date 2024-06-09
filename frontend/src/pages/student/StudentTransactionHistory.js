@@ -5,11 +5,12 @@ import { toast } from "react-toastify";
 import { DataTable } from "../../components/Common/DataTable/DataTable";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
-
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
 import SortableColumn from "../../components/Common/DataTable/SortableColumn";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
-import { Typography } from "@mui/material";
-
+import { Typography, CssBaseline } from "@mui/material";
+import Hero from "./components/Hero";
 export default function StudentTransactionHistory() {
   let user = useUserStore((state) => state.user);
   const [transactions, setTransactions] = useState([]);
@@ -163,10 +164,16 @@ export default function StudentTransactionHistory() {
     []
   );
 
+  const [mode, setMode] = useState("light");
+
+  const defaultTheme = createTheme({ palette: { mode } });
+
   return (
-    <StudentPageWrapper>
+    <ThemeProvider theme={defaultTheme}>
+      <CssBaseline />
+      <StudentNavMUI />
+      <Hero heading="Transaction History" />
       <div className="flex flex-col items-center justify-center py-20">
-        <Typography variant="h5">Transaction History</Typography>
         <Spacer h={3} />
         <a
           className="hidden"
@@ -192,7 +199,7 @@ export default function StudentTransactionHistory() {
           </div>
         </div>
       </div>
-    </StudentPageWrapper>
+    </ThemeProvider>
   );
 }
 

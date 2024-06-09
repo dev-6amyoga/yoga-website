@@ -26,8 +26,8 @@ export default function Hero({ heading }) {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          pt: { xs: 12, sm: 12 },
-          pb: { xs: 8, sm: 12 },
+          pt: { xs: 13, sm: 13 },
+          pb: { xs: 2, sm: 2 },
         }}
       >
         <Stack spacing={2} useFlexGap sx={{ width: { xs: "100%", sm: "70%" } }}>
