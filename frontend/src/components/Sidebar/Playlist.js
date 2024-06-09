@@ -1,11 +1,11 @@
-import { Divider, Modal, Tooltip } from "@geist-ui/core";
-import { useEffect, useState } from "react";
+import { Modal, Spacer } from "@geist-ui/core";
+import { TextField } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { useShallow } from "zustand/react/shallow";
 import usePlaylistStore from "../../store/PlaylistStore";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
-import PlaylistItem from "./PlaylistItem";
 import PlaylistList from "./PlaylistList";
 
 function Playlist() {
@@ -53,6 +53,9 @@ function Playlist() {
 	const addToQueue = usePlaylistStore((state) => state.addToQueue);
 	const clearQueue = usePlaylistStore((state) => state.clearQueue);
 
+	const [query, setQuery] = useState("");
+	const searchTimeout = useRef(null);
+
 	useEffect(() => {
 		if (currentInstituteId) {
 			Fetch({
@@ -78,7 +81,7 @@ function Playlist() {
 							},
 						}).then((res) => {
 							if (res.status === 200) {
-								console.log(res.data, "IS RES!!");
+								// console.log(res.data, "IS RES!!");
 								setNextMonthSchedules(res.data);
 								if (res.data.length > 0) {
 									setNextMonthSchedulePresent(true);
@@ -126,7 +129,7 @@ function Playlist() {
 					url: "/content/video/getAllTransitions",
 				});
 				const data = response.data;
-				console.log(data);
+				// console.log(data);
 				setAllTransitions(data);
 			} catch (error) {
 				toast(error);
@@ -287,7 +290,7 @@ function Playlist() {
 					url: "/content/playlists/getAllPlaylists",
 				});
 				const data = response.data;
-				console.log(data);
+				// console.log(data);
 				setPlaylists(data);
 				setLoading(false);
 			} catch (error) {
@@ -303,7 +306,7 @@ function Playlist() {
 			return [];
 		}
 		const allAsanasData = asana_ids.map((asana_id) => {
-			console.log("FETCHING FOR : ", asana_id, "\n");
+			// console.log("FETCHING FOR : ", asana_id, "\n");
 			if (Number(asana_id)) {
 				const asanaObject = allAsanas.find(
 					(asana) => asana.id === asana_id
@@ -313,7 +316,7 @@ function Playlist() {
 				const transitionObject = allTransitions.find(
 					(transition) => transition.transition_id === asana_id
 				);
-				console.log(transitionObject);
+				// console.log(transitionObject);
 				return transitionObject || null;
 			}
 		});
@@ -341,22 +344,34 @@ function Playlist() {
 		setModalState(false);
 	};
 
+	const handleSearch = (e) => {
+		console.log("e", e);
+		if (searchTimeout.current) {
+			clearTimeout(searchTimeout.current);
+		}
+
+		searchTimeout.current = setTimeout(() => {
+			const q = String(e.target.value).toLowerCase();
+
+			setQuery(q);
+		}, 500);
+	};
+
 	return (
-		<div className="rounded-xl">
-			<Modal visible={modalState} onClose={closeModal} width={30}>
-				<Modal.Title>Playlist Details</Modal.Title>
-				<Modal.Subtitle>
+		<div className="bg-blue-50 px-4 pb-4 mb-12 rounded-lg">
+			<Modal visible={modalState} onClose={closeModal} width="30%">
+				<Modal.Title>
 					{modalData.playlist_name || modalData.schedule_name}
-				</Modal.Subtitle>
+				</Modal.Title>
 				<Modal.Subtitle>
-					Playlist Type: {modalData.playlist_mode} Mode
+					<p>Playlist Type: {modalData.playlist_mode} Mode</p>
+					<p>
+						Playlist Duration:{" "}
+						{(modalData.duration / 60).toFixed(2)} minutes
+					</p>
 				</Modal.Subtitle>
-				<h5>
-					Playlist Duration: {(modalData.duration / 60).toFixed(2)}{" "}
-					minutes
-				</h5>
 				{asana_details && asana_details.length > 0 ? (
-					<div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2 max-h-96 overflow-auto">
+					<div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-2 max-h-96 overflow-auto py-10 px-4">
 						{asana_details
 							.reduce((acc, current) => {
 								const lastIndex = acc.length - 1;
@@ -394,177 +409,105 @@ function Playlist() {
 				</Modal.Action>
 			</Modal>
 
-			{isInstitute && (
-				<div>
-					<h4>Institutes Playlists</h4>
-					<p className="pb-4 text-sm">
-						Choose from institutes' playlists to practice.
-					</p>
-					<div className="flex flex-row gap-2">
-						{institutePlaylists.map((playlist) => (
-							<PlaylistItem
-								key={playlist.playlist_name}
-								type={
-									queue
-										? queue.includes(playlist)
-											? "success"
-											: "secondary"
-										: "secondary"
-								}
-								add={() => handleAddToQueue(playlist.asana_ids)}
-								deets={() => showDetails(playlist)}
-								playlist={playlist}
-								isFuture={false}
-							/>
-						))}
-					</div>
-					<Divider />
-				</div>
-			)}
-			{schedulePresent && (
-				<div>
-					<h4>Schedules</h4>
-					<p className="pb-4 text-sm">
-						Choose from applicable schedules to practice.
-					</p>
-					<div className="flex flex-row gap-2">
-						{schedules.map((schedule) => (
-							<PlaylistItem
-								key={schedule.schedule_name}
-								type={
-									queue
-										? queue.includes(schedule)
-											? "success"
-											: "secondary"
-										: "secondary"
-								}
-								add={() => handleAddToQueue(schedule.asana_ids)}
-								deets={() => showDetails(schedule)}
-								playlist={schedule}
-								isFuture={false}
-							/>
-						))}
-					</div>
-					<Divider />
-					<h4>Next Months Schedules</h4>
-					<p className="pb-4 text-sm">View Next Months Schedules.</p>
-					<div className="flex flex-row gap-2">
-						{nextMonthSchedules.map((schedule) => (
-							<PlaylistItem
-								key={schedule.schedule_name}
-								type={
-									queue
-										? queue.includes(schedule)
-											? "success"
-											: "secondary"
-										: "secondary"
-								}
-								add={() => handleAddToQueue(schedule.asana_ids)}
-								deets={() => showDetails(schedule)}
-								playlist={schedule}
-								isFuture={true}
-							/>
-						))}
-					</div>
-					<Divider />
-				</div>
-			)}
-			{isTeacher && (
-				<div>
-					<h4>Teacher's Playlists</h4>
-					<p className="pb-4 text-sm">
-						Choose from your playlists to practice.
-					</p>
-					<div className="flex flex-row gap-2">
-						{teacherPlaylists.map((playlist) => (
-							<Tooltip
-								text={"Made for " + playlist.student_name}
-								type="dark">
-								<PlaylistItem
-									key={playlist.playlist_name}
-									type={
-										queue
-											? queue.includes(playlist)
-												? "success"
-												: "secondary"
-											: "secondary"
-									}
-									add={() =>
-										handleAddToQueue(playlist.asana_ids)
-									}
-									deets={() => showDetails(playlist)}
-									playlist={playlist}
-									isFuture={false}
-								/>
-							</Tooltip>
-						))}
+			<Spacer h={1} />
+			<div className="sm:flex sm:justify-between gap-2 sm:w-full pb-4 sm:pb-0">
+				<h3>Playlists & Schedules</h3>
+				<Spacer h={1} />
+				<TextField
+					label="Search"
+					size="small"
+					fullWidth
+					sx={{
+						display: { xs: "none", sm: "block" },
+						width: "30%",
+					}}
+					onChange={handleSearch}
+				/>
+				<TextField
+					label="Search"
+					size="small"
+					fullWidth
+					sx={{
+						display: { xs: "block", sm: "none" },
+					}}
+					onChange={handleSearch}
+				/>
+			</div>
 
-						<br />
-					</div>
-					<Divider />
-				</div>
-			)}
-			{isTeacher && (
-				<div>
-					<h4>Made for you : </h4>
-					<div className="flex flex-row gap-2">
-						{madeForTeacher.map((playlist) => (
-							<PlaylistItem
-								key={playlist.playlist_name}
-								type={
-									queue
-										? queue.includes(playlist)
-											? "success"
-											: "secondary"
-										: "secondary"
-								}
-								add={() =>
-									handleAddToQueue(playlist?.asana_ids)
-								}
-								deets={() => showDetails(playlist)}
-								playlist={playlist}
-								isFuture={false}
-							/>
-						))}
-					</div>
-					<Divider />
-				</div>
-			)}
-			{isPersonal && (
-				<div>
-					<h4>My Playlists</h4>
-					<p className="pb-4 text-sm">
-						Choose from your playlists to practice.
-					</p>
-					<div className="flex flex-row gap-2">
-						{userPlaylists.map((playlist) => (
-							<PlaylistItem
-								key={playlist.playlist_name}
-								type={
-									queue
-										? queue.includes(playlist)
-											? "success"
-											: "secondary"
-										: "secondary"
-								}
-								add={() => handleAddToQueue(playlist.asana_ids)}
-								deets={() => showDetails(playlist)}
-								playlist={playlist}
-								isFuture={false}
-							/>
-						))}
-					</div>
-					<Divider />
-				</div>
-			)}
+			<PlaylistList
+				name="Institute Playlists"
+				desc="Choose from institutes' playlists to practice."
+				playlists={institutePlaylists}
+				query={query}
+				handleAddToQueue={handleAddToQueue}
+				showDetails={showDetails}
+				show={isInstitute}
+				isFuture={false}
+			/>
+
+			<PlaylistList
+				name="Schedule Playlists"
+				desc="Choose from your schedules to practice."
+				playlists={schedules}
+				query={query}
+				handleAddToQueue={handleAddToQueue}
+				showDetails={showDetails}
+				show={schedulePresent}
+				isFuture={false}
+			/>
+
+			<PlaylistList
+				name="Next Month Schedule Playlists"
+				desc="Choose from your schedules to practice."
+				playlists={nextMonthSchedules}
+				query={query}
+				handleAddToQueue={handleAddToQueue}
+				showDetails={showDetails}
+				show={nextMonthSchedulePresent}
+				isFuture={true}
+			/>
+
+			<PlaylistList
+				name="Teacher's Playlists"
+				desc="Choose from your playlists to practice."
+				playlists={teacherPlaylists}
+				query={query}
+				handleAddToQueue={handleAddToQueue}
+				showDetails={showDetails}
+				show={isTeacher}
+				isFuture={false}
+			/>
+
+			<PlaylistList
+				name="Made for you"
+				playlists={madeForTeacher}
+				query={query}
+				handleAddToQueue={handleAddToQueue}
+				showDetails={showDetails}
+				show={isTeacher}
+				isFuture={false}
+			/>
+
+			<PlaylistList
+				name="My Playlists"
+				desc="Choose from your playlists to practice."
+				playlists={userPlaylists}
+				query={query}
+				handleAddToQueue={handleAddToQueue}
+				showDetails={showDetails}
+				show={isPersonal}
+				isFuture={false}
+			/>
 
 			<PlaylistList
 				name={"6AM Yoga Curated Playlists"}
 				desc={"Choose from curated playlists to practice."}
 				playlists={playlists}
+				query={query}
 				handleAddToQueue={handleAddToQueue}
 				showDetails={showDetails}
 				show={true}
+				isFuture={false}
 			/>
 		</div>
 	);
