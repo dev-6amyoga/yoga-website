@@ -12,7 +12,10 @@ import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import { useTheme } from "@mui/system";
-import { Button } from "@mui/material";
+import { Button, CssBaseline } from "@mui/material";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
+import Hero from "./components/Hero";
 
 function DisplayWatchTime({ hh, mm, ss }) {
   return (
@@ -169,9 +172,15 @@ export default function StudentWatchHistory() {
       ),
     },
   ];
+  const [mode, setMode] = useState("light");
+
+  const defaultTheme = createTheme({ palette: { mode } });
 
   return (
-    <StudentPageWrapper>
+    <ThemeProvider theme={defaultTheme}>
+      <CssBaseline />
+      <StudentNavMUI />
+      <Hero heading="Watch History" />
       <Container
         id="testimonials"
         sx={{
@@ -184,17 +193,6 @@ export default function StudentWatchHistory() {
           gap: { xs: 3, sm: 6 },
         }}
       >
-        <Box
-          sx={{
-            width: { sm: "100%", md: "60%" },
-            textAlign: { sm: "left", md: "center" },
-          }}
-        >
-          <Typography component="h2" variant="h5" color="text.primary">
-            Watch History
-          </Typography>
-        </Box>
-
         <Grid container spacing={2}>
           {userTestimonials.map((testimonial, index) => (
             <Grid
@@ -289,6 +287,6 @@ export default function StudentWatchHistory() {
 					))}
 				</div>
 			</section> */}
-    </StudentPageWrapper>
+    </ThemeProvider>
   );
 }
