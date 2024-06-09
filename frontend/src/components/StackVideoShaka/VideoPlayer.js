@@ -217,6 +217,12 @@ function VideoPlayer() {
 		}
 	}, [currentVideo, queue, setPlaylistState]);
 
+	const scrollToPlaylists = useCallback(() => {
+		document
+			.getElementById("playlist-section")
+			?.scrollIntoView({ behavior: "smooth" });
+	}, []);
+
 	return (
 		<div className="flex flex-col items-center">
 			<div
@@ -273,11 +279,18 @@ function VideoPlayer() {
 							)}
 						</>
 					) : queue.length > 0 ? (
-						<div className="flex flex-col items-center justify-center gap-4 text-lg w-full h-full border border-red-500">
+						<div className="flex flex-col items-center justify-center gap-4 text-lg w-full h-full">
 							<Button onClick={handleStartPlaylist}>Start</Button>
 						</div>
 					) : (
-						<div className="text-lg"> </div>
+						<div className="flex flex-col items-center justify-center gap-4 text-lg w-full h-full">
+							<p className="text-white">
+								Add playlists to practice!
+							</p>
+							<Button onClick={scrollToPlaylists}>
+								View Playlists
+							</Button>
+						</div>
 					)}
 				</div>
 			</div>
