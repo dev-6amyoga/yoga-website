@@ -14,6 +14,7 @@ import { navigateToDashboard } from "../../utils/navigateToDashboard";
 import Otp from "../otp/Otp";
 import "./login.css";
 import Avatar from "@mui/material/Avatar";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -26,8 +27,9 @@ import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import { Paper } from "@mui/material";
+import { AppBar, Paper, Toolbar, Tooltip } from "@mui/material";
 import PageWrapper from "../../components/Common/PageWrapper";
+import PersonIcon from "@mui/icons-material/Person";
 
 export default function Login({ switchForm }) {
   const navigate = useNavigate();
@@ -41,6 +43,9 @@ export default function Login({ switchForm }) {
   const [forgotPassword, setForgotPassword] = useState(false);
   const [forgotPasswordVisible, setForgotPasswordVisible] = useState(false);
   const authForm = useForm();
+  const [mode, setMode] = useState("light");
+
+  const defaultTheme = createTheme({ palette: { mode } });
 
   const [
     user,
@@ -239,15 +244,62 @@ export default function Login({ switchForm }) {
   }, [user, type]);
 
   return (
-    <PageWrapper>
-      <div className="flex flex-col justify-center">
+    <ThemeProvider theme={defaultTheme}>
+      <CssBaseline />
+      <AppBar
+        position="fixed"
+        sx={{
+          boxShadow: 0,
+          bgcolor: "transparent",
+          backgroundImage: "none",
+          mt: 2,
+        }}
+      >
+        <Container maxWidth="xl">
+          <Toolbar
+            variant="regular"
+            sx={(theme) => ({
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexShrink: 0,
+              borderRadius: "999px",
+              bgcolor: "rgba(255, 255, 255, 1.3)",
+              backdropFilter: "blur(24px)",
+              maxHeight: 40,
+              border: "1px solid",
+              borderColor: "divider",
+              boxShadow:
+                "0 0 1px rgba(85, 166, 246, 0.1), 1px 1.5px 2px -1px rgba(85, 166, 246, 0.15), 4px 4px 12px -2.5px rgba(85, 166, 246, 0.15)",
+            })}
+          >
+            <img
+              src="logo_6am.png"
+              alt="image_description"
+              className="w-20 pt-2"
+            />
+
+            <Tooltip title="Register/Login">
+              <Button
+                onClick={() => {
+                  navigate("/auth");
+                }}
+              >
+                <PersonIcon style={{ color: "blue" }} />
+              </Button>
+            </Tooltip>
+          </Toolbar>
+        </Container>
+      </AppBar>
+
+      <div className="flex flex-col items-center justify-center h-screen -mt-20">
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            width: "70%",
+            width: { xs: "90%", sm: "70%" },
           }}
         >
           <Avatar sx={{ m: 1, bgcolor: "#0b7dda" }}>
@@ -309,7 +361,7 @@ export default function Login({ switchForm }) {
           </Box>
         </Box>
       </div>
-    </PageWrapper>
+    </ThemeProvider>
 
     // <div className="flex flex-col justify-center items-center">
     //   {/* <Paper
