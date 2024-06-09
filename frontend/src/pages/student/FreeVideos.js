@@ -12,6 +12,7 @@ import {
   Button,
   Box,
   CssBaseline,
+  alpha,
 } from "@mui/material";
 import PlayCircleFilledWhiteOutlinedIcon from "@mui/icons-material/PlayCircleFilledWhiteOutlined"; // Icon for "Watch"
 import { Spacer } from "@geist-ui/core";
@@ -110,52 +111,68 @@ export default function FreeVideos() {
       <StudentNavMUI />
       <div className="flex flex-col items-center h-96">
         <Hero heading="Free Videos" />
-        <Container
-          maxWidth="xl"
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            gap: 2,
-            mt: 4,
-          }}
-        >
-          <Box sx={{ mb: 4, width: { xs: "100%", md: "70%" } }}>
-            <YouTube
-              videoId={currentVideoId}
-              opts={videoOptions}
-              onEnd={handleEnd}
-              onReady={saveTarget}
-              onStateChange={iChanged}
-              containerClassName="yt-container"
-              iframeClassName="w-full"
-            />{" "}
-          </Box>
 
-          {/* Free Videos List (Scrollable) */}
-          <Box
+        <Box
+          id="image"
+          sx={(theme) => ({
+            mt: { xs: 8, sm: 10 },
+            alignSelf: "center",
+            height: { xs: 200, sm: 900 },
+            width: "80%",
+            backgroundSize: "cover",
+            borderRadius: "10px",
+            outline: "1px solid",
+            outlineColor: alpha("#BFCCD9", 0.5),
+            boxShadow: `0 0 12px 8px ${alpha("#9CCCFC", 0.2)}`,
+          })}
+        >
+          <Container
+            maxWidth="xl"
             sx={{
-              width: { xs: "100%", md: "30%" },
-              overflowY: "auto",
-              maxHeight: 400,
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              gap: 2,
+              mt: 4,
             }}
           >
-            {freeVideos.map((video) => (
-              <Card key={video.videoId} sx={{ mb: 2 }}>
-                {" "}
-                {/* Add margin-bottom to each card */}
-                <CardContent>
-                  <div className="flex flex-row items-center">
-                    <Button
-                      variant="contained"
-                      onClick={() => setCurrentVideoId(video.videoId)}
-                      startIcon={<PlayCircleFilledWhiteOutlinedIcon />}
-                    />
-                    <Typography variant="subtitle1" className="truncate ml-2">
-                      {video.title}
-                    </Typography>
-                  </div>
-                </CardContent>
-                {/* <CardActions>
+            <Box sx={{ mb: 4, width: { xs: "100%", md: "70%" } }}>
+              <YouTube
+                videoId={currentVideoId}
+                opts={videoOptions}
+                onEnd={handleEnd}
+                onReady={saveTarget}
+                onStateChange={iChanged}
+                containerClassName="yt-container"
+                iframeClassName="w-full"
+              />{" "}
+            </Box>
+
+            {/* Free Videos List (Scrollable) */}
+            <Box
+              sx={{
+                width: { xs: "100%", md: "30%" },
+                overflowY: "auto",
+                maxHeight: 400,
+                pb: 2,
+              }}
+            >
+              {freeVideos.map((video) => (
+                <Card key={video.videoId} sx={{ mb: 2 }}>
+                  {" "}
+                  {/* Add margin-bottom to each card */}
+                  <CardContent>
+                    <div className="flex flex-row items-center">
+                      <Button
+                        variant="contained"
+                        onClick={() => setCurrentVideoId(video.videoId)}
+                        startIcon={<PlayCircleFilledWhiteOutlinedIcon />}
+                      />
+                      <Typography variant="subtitle1" className="truncate ml-2">
+                        {video.title}
+                      </Typography>
+                    </div>
+                  </CardContent>
+                  {/* <CardActions>
                   <Button
                     variant="contained"
                     onClick={() => setCurrentVideoId(video.videoId)}
@@ -164,11 +181,11 @@ export default function FreeVideos() {
                     Watch
                   </Button>
                 </CardActions> */}
-              </Card>
-            ))}
-          </Box>
-        </Container>
-        {/* Video Title (Remains the same) */}
+                </Card>
+              ))}
+            </Box>
+          </Container>
+        </Box>
       </div>
     </ThemeProvider>
   );
