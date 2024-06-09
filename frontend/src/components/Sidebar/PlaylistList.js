@@ -43,7 +43,7 @@ export default function PlaylistList({
 					<Spacer h={2}></Spacer>
 					<div className="flex flex-col md:flex-row justify-between items-start w-full">
 						<div className="flex flex-col">
-							<h2 className="text-xl font-bold">{name}</h2>
+							<h4>{name}</h4>
 							<p className="pb-4 text-sm">{desc}</p>
 						</div>
 					</div>
