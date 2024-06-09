@@ -1,6 +1,6 @@
-import { Divider } from "@geist-ui/core";
-import { Autocomplete, Button, TextField } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { Divider, Spacer } from "@geist-ui/core";
+import { Button } from "@mui/material";
+import { useState } from "react";
 import PlaylistItem from "./PlaylistItem";
 
 export default function PlaylistList({
@@ -10,10 +10,9 @@ export default function PlaylistList({
 	handleAddToQueue,
 	showDetails,
 	show,
+	query,
 }) {
 	const [showIndex, setShowIndex] = useState(5);
-	const [results, setResults] = useState(playlists ?? []);
-	const searchTimeout = useRef(null);
 
 	const handleShowMore = () => {
 		setShowIndex(() => Math.min(showIndex + 5, 4 * playlists.length));
@@ -23,82 +22,76 @@ export default function PlaylistList({
 		setShowIndex(() => Math.max(showIndex - 5, 5));
 	};
 
-	useEffect(() => {
-		setResults(playlists);
-	}, [playlists]);
-
-	const handleSearch = (e) => {
-		console.log("e", e);
-		if (searchTimeout.current) {
-			clearTimeout(searchTimeout.current);
+	const searchFilter = (p) => {
+		if (query === undefined || query === null || !query) {
+			return true;
 		}
 
-		searchTimeout.current = setTimeout(() => {
-			const query = String(e.target.value).toLowerCase();
-			console.log("query", query);
+		if (query === "") {
+			return true;
+		}
 
-			if (!query) {
-				setResults(playlists);
-				return;
-			}
+		const name = p?.playlist_name ?? p?.schedule_name;
 
-			setResults((prev) => {
-				return prev.filter((playlist) =>
-					playlist.playlist_name.toLowerCase().includes(query)
-				);
-			});
-		}, 500);
+		return name ? name.toLowerCase().includes(query) : false;
 	};
 
 	return (
 		<>
 			{show ? (
 				<>
-					<div className="flex justify-between items-start">
+					<Spacer h={2}></Spacer>
+					<div className="flex flex-col md:flex-row justify-between items-start w-full">
 						<div className="flex flex-col">
-							<h2 className="text-2xl font-bold">{name}</h2>
+							<h2 className="text-xl font-bold">{name}</h2>
 							<p className="pb-4 text-sm">{desc}</p>
 						</div>
-
-						<div className="flex gap-2">
-							<Autocomplete
-								disablePortal
-								options={
-									playlists?.map(
-										(playlist) => playlist.playlist_name
-									) ?? []
-								}
-								sx={{ width: 200 }}
-								renderInput={(params) => (
-									<TextField
-										{...params}
-										label="Search"
-										size="small"
-										onChange={handleSearch}
-									/>
-								)}
-							/>
-							<Button onClick={handleShowMore} size="small">
-								Show More
-							</Button>
-							<Button onClick={handleShowLess} size="small">
-								Show Less
-							</Button>
-						</div>
 					</div>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl-grid-cols-4 gap-4">
-						{results?.slice(0, showIndex).map((playlist, idx) => (
-							<PlaylistItem
-								key={playlist.playlist_name + idx}
-								add={() => handleAddToQueue(playlist)}
-								deets={() => showDetails(playlist)}
-								playlist={playlist}
-								isFuture={false}
-							/>
-						))}
-					</div>
-					<Divider />
+					<>
+						{playlists && playlists.length > 0 ? (
+							<>
+								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl-grid-cols-4 gap-4">
+									{playlists
+										?.slice(0, showIndex)
+										.filter(searchFilter)
+										.map((playlist, idx) => (
+											<PlaylistItem
+												key={
+													(playlist?.playlist_name ??
+														playlist?.schedule_name) +
+													idx
+												}
+												add={() =>
+													handleAddToQueue(playlist)
+												}
+												deets={() =>
+													showDetails(playlist)
+												}
+												playlist={playlist}
+												isFuture={false}
+											/>
+										))}
+								</div>
+								<div className="flex gap-2 py-4">
+									<Button
+										onClick={handleShowMore}
+										size="small">
+										Show More
+									</Button>
+									<Button
+										onClick={handleShowLess}
+										size="small">
+										Show Less
+									</Button>
+								</div>
+							</>
+						) : (
+							<p></p>
+						)}
+					</>
+					<Spacer h={3}></Spacer>
+					<Divider type="dark" />
 				</>
 			) : (
 				<></>

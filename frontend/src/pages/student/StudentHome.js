@@ -1,7 +1,7 @@
-import {
-	DrawingUtils,
-	PoseLandmarker,
-} from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0";
+// import {
+// 	DrawingUtils,
+// 	PoseLandmarker,
+// } from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0";
 import { useEffect, useRef, useState } from "react";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
 import useUserStore from "../../store/UserStore";
@@ -91,16 +91,17 @@ function StudentHome() {
 		}
 	}, [user]);
 
-	const startWebcam = () => {
-		const constraints = { video: true };
-		navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-			videoRef.current.srcObject = stream;
-			videoRef.current.style.display = "block";
-			videoRef.current.play(); // Ensure the video starts playing
-			videoRef.current.addEventListener("loadeddata", predictWebcam);
-		});
-	};
+	// const startWebcam = () => {
+	// 	const constraints = { video: true };
+	// 	navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+	// 		videoRef.current.srcObject = stream;
+	// 		videoRef.current.style.display = "block";
+	// 		videoRef.current.play(); // Ensure the video starts playing
+	// 		videoRef.current.addEventListener("loadeddata", predictWebcam);
+	// 	});
+	// };
 
+	/*
 	const predictWebcam = async () => {
 		const videoHeight = 360;
 		const videoWidth = 480;
@@ -149,6 +150,7 @@ function StudentHome() {
 			window.requestAnimationFrame(predictWebcam);
 		}
 	};
+  */
 
 	// const enableCam = (event) => {
 	//   if (!poseLandmarker) {
