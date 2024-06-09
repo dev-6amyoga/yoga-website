@@ -11,6 +11,7 @@ export default function PlaylistList({
 	showDetails,
 	show,
 	query,
+	lastInOrder,
 }) {
 	const [showIndex, setShowIndex] = useState(5);
 
@@ -87,10 +88,12 @@ export default function PlaylistList({
 								</div>
 							</>
 						) : (
-							<p>Playlists yet to be added.</p>
+							<p className="text-sm">
+								Playlists yet to be added.
+							</p>
 						)}
 					</>
-					<Spacer h={3}></Spacer>
+					{lastInOrder || <Spacer h={3}></Spacer>}
 					{/* <Divider type="dark" /> */}
 				</>
 			) : (

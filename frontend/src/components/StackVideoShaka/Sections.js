@@ -33,7 +33,7 @@ export default function PlaylistSections() {
 					return (
 						<div
 							key={s.time}
-							className="flex flex-row items-center gap-2 p-2"
+							className="flex flex-row items-center gap-2 p-2 hover:cursor-pointer"
 							onClick={() => handleSeek(s, idx)}>
 							<Avatar sx={{ bgcolor: blue[700] }}>
 								{idx + 1}

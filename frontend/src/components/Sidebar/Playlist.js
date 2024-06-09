@@ -358,7 +358,9 @@ function Playlist() {
 	};
 
 	return (
-		<div className="bg-blue-50 px-4 pb-4 mb-12 rounded-lg">
+		<div
+			className="bg-blue-50 px-4 pb-4 mb-12 rounded-lg"
+			id="playlist-section">
 			<Modal visible={modalState} onClose={closeModal} width="30%">
 				<Modal.Title>
 					{modalData.playlist_name || modalData.schedule_name}
@@ -443,6 +445,7 @@ function Playlist() {
 				showDetails={showDetails}
 				show={isInstitute}
 				isFuture={false}
+				lastInOrder={false}
 			/>
 
 			<PlaylistList
@@ -454,6 +457,7 @@ function Playlist() {
 				showDetails={showDetails}
 				show={schedulePresent}
 				isFuture={false}
+				lastInOrder={false}
 			/>
 
 			<PlaylistList
@@ -465,6 +469,7 @@ function Playlist() {
 				showDetails={showDetails}
 				show={nextMonthSchedulePresent}
 				isFuture={true}
+				lastInOrder={false}
 			/>
 
 			<PlaylistList
@@ -476,6 +481,7 @@ function Playlist() {
 				showDetails={showDetails}
 				show={isTeacher}
 				isFuture={false}
+				lastInOrder={false}
 			/>
 
 			<PlaylistList
@@ -486,6 +492,7 @@ function Playlist() {
 				showDetails={showDetails}
 				show={isTeacher}
 				isFuture={false}
+				lastInOrder={false}
 			/>
 
 			<PlaylistList
@@ -497,6 +504,7 @@ function Playlist() {
 				showDetails={showDetails}
 				show={isPersonal}
 				isFuture={false}
+				lastInOrder={false}
 			/>
 
 			<PlaylistList
@@ -508,6 +516,7 @@ function Playlist() {
 				showDetails={showDetails}
 				show={true}
 				isFuture={false}
+				lastInOrder={true}
 			/>
 		</div>
 	);
