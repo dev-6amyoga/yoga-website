@@ -135,14 +135,14 @@ export default function LandingPage() {
       <CssBaseline />
       <StudentNavMUI />
       <Hero heading="Contact Us" />
-      <div className="flex flex-col justify-center border-600-blue">
+      <div className="flex flex-col items-center border-600-blue">
         <Box
           id="image"
           sx={(theme) => ({
             mt: { xs: 0, sm: 0 },
             alignSelf: "center",
-            height: { xs: 200, sm: 500 },
-            width: "60%",
+            height: { xs: 150, sm: 400 }, // Reduced height
+            width: { xs: "90%", sm: "50%" }, // Reduced and responsive width
             borderRadius: "10px",
             outline: "1px solid",
             outlineColor:
@@ -157,27 +157,21 @@ export default function LandingPage() {
         >
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.9968518180767!2d77.67348657454568!3d12.907923616272244!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae1340031bb427%3A0xee0df18d7177d35d!2s6am%20Yoga!5e0!3m2!1sen!2sin!4v1706362049496!5m2!1sen!2sin"
-            // style="border:0;"
             className="w-full h-full"
             allowfullscreen=""
             loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
+            referrerPolicy="no-referrer-when-downgrade"
           ></iframe>
         </Box>
       </div>
+
       <Box sx={{ mt: { xs: 2, sm: 2 }, bgcolor: "background.default" }}>
-        {/* <LogoCollection /> */}
-        {/* <Features /> */}
         <Divider />
-        {/* <Testimonials />
-        <Divider /> */}
+        <Divider />
         <Highlights />
-        {/* <Divider />
-        <Pricing /> */}
+
         <Divider />
         <FAQ />
-        {/* <Divider />
-        <Footer /> */}
       </Box>
     </ThemeProvider>
   );
