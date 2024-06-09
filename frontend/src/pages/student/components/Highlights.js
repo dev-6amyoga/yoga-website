@@ -181,51 +181,51 @@ export default function Highlights() {
             },
           }}
         >
-          <Typography
+          {/* <Typography
             variant="h6"
             component="h2"
             gutterBottom
             sx={{ color: "black" }}
           >
             Name
-          </Typography>
+          </Typography> */}
           <TextField
             name="query_name"
-            // label="Name"
+            label="Name"
             variant="outlined"
             fullWidth
             value={formData.query_name}
             onChange={handleChange}
           />
 
-          <Typography
+          {/* <Typography
             variant="h6"
             component="h2"
             gutterBottom
             sx={{ color: "black" }}
           >
             Email
-          </Typography>
+          </Typography> */}
           <TextField
             name="query_email"
-            // label="Email"
+            label="Email"
             variant="outlined"
             fullWidth
             value={formData.query_email}
             onChange={handleChange}
           />
 
-          <Typography
+          {/* <Typography
             variant="h6"
             component="h2"
             gutterBottom
             sx={{ color: "black" }}
           >
             Phone No.
-          </Typography>
+          </Typography> */}
           <TextField
             name="query_phone"
-            // label="Phone Number"
+            label="Phone"
             variant="outlined"
             fullWidth
             value={formData.query_phone}

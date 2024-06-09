@@ -5,11 +5,11 @@ import VideoInfo from "./VideoInfo";
 import VideoPlayer from "./VideoPlayer";
 
 export default function VideoPlayerWrapper() {
-	const [fullScreen] = useVideoStore((state) => [state.fullScreen]);
+  const [fullScreen] = useVideoStore((state) => [state.fullScreen]);
 
-	return (
-		<>
-			{/* <div
+  return (
+    <>
+      {/* <div
 				className={
 					fullScreen
 						? "relative w-full h-screen"
@@ -31,9 +31,9 @@ export default function VideoPlayerWrapper() {
 					<></>
 				)}
 			</div> */}
-			<VideoPlayer />
+      <VideoPlayer />
 
-			{/* {fullScreen ? (
+      {/* {fullScreen ? (
 				<div className="queue-area">
 					<VideoQueue />
 				</div>
@@ -43,11 +43,11 @@ export default function VideoPlayerWrapper() {
 				</>
 			)} */}
 
-			<div className="flex flex-col gap-4 py-8">
-				<VideoInfo />
-			</div>
+      <div className="flex flex-col gap-4 py-8">
+        <VideoInfo />
+      </div>
 
-			<Playlist />
-		</>
-	);
+      <Playlist />
+    </>
+  );
 }
