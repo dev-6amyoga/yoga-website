@@ -1,11 +1,10 @@
 // import { useEffect, useState } from "react";
-import { Input } from "@geist-ui/core";
+import { Button, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
 import { validateEmail, validatePassword } from "../../../utils/formValidation";
 import getFormData from "../../../utils/getFormData";
-import { Button } from "../../ui/button";
 
 export default function GeneralInformationForm({
 	generalInfo,
@@ -106,22 +105,22 @@ export default function GeneralInformationForm({
 			className="flex flex-col gap-4 w-full"
 			onSubmit={handleGeneralInfoChange}>
 			<h6 className="text-center">General Information</h6>
-			<Input
+			<TextField
 				width="100%"
 				name="name"
 				placeholder="John Doe"
 				initialValue={generalInfo?.name}
-				required>
-				Name
-			</Input>
-			<Input
+				required
+				label="Name"
+			/>
+			<TextField
 				width="100%"
 				name="email_id"
 				placeholder="abc@email.com"
 				initialValue={generalInfo?.email_id}
-				required>
-				Email ID
-			</Input>
+				required
+				label="Email ID"
+			/>
 
 			{/* {googleInfo && googleInfo?.verified ? (
         <></>
@@ -134,7 +133,7 @@ export default function GeneralInformationForm({
 				) : (
 					<></>
 				)}
-				<Input
+				<TextField
 					width="100%"
 					name="username"
 					placeholder="johnDoe123"
@@ -143,9 +142,9 @@ export default function GeneralInformationForm({
 						setUsername(e.target.value);
 						handleUsernameCheck(e.target.value);
 					}}
-					required>
-					Username
-				</Input>
+					required
+					label="Username"
+				/>
 				<p
 					className={`text-sm border p-2 rounded-lg text-zinc-500 ${
 						passwordError ? "border-red-500" : ""
@@ -153,24 +152,26 @@ export default function GeneralInformationForm({
 					Password must be minimum 8 letters and contain atleast 1
 					number, 1 alphabet, 1 special character [!@#$%^&*,?]
 				</p>
-				<Input.Password
+				<TextField
+					type="password"
 					width="100%"
 					name="password"
 					initialValue={generalInfo?.password}
 					onChange={(e) => setPassword(e.target.value)}
 					title="Password must be minimum 8 letters and contain atleast 1 number, 1 alphabet, 1 special character."
-					required>
-					Password
-				</Input.Password>
-				<Input.Password
+					required
+					label="Password"
+				/>
+				<TextField
+					type="password"
 					width="100%"
 					name="confirm_password"
 					initialValue={generalInfo?.confirm_password}
 					onChange={(e) => setConfirmPassword(e.target.value)}
 					title="Password must be minimum 8 letters and contain atleast 1 number, 1 alphabet, 1 special character."
-					required>
-					Confirm Password
-				</Input.Password>
+					required
+					label="Confirm Password"
+				/>
 				{password && confirmPassword && password !== confirmPassword ? (
 					<p className="text-sm border border-red-500 p-2 rounded-lg">
 						Passwords dont match!
@@ -180,7 +181,9 @@ export default function GeneralInformationForm({
 				)}
 			</>
 			{/* )} */}
-			<Button>Save Changes</Button>
+			<Button variant="outlined" type="submit">
+				Save Changes
+			</Button>
 		</form>
 	);
 }
