@@ -171,7 +171,7 @@ function StudentHome() {
 	// };
 
 	return (
-		<StudentPageWrapper heading="6AM Yoga Studio">
+		<StudentPageWrapper>
 			{/* <div className="border-8 border-gray-950">
         <Button ref={enableWebcamButtonRef} onClick={enableCam}>
           ENABLE PREDICTIONS

@@ -84,18 +84,18 @@ export default function PageWrapper({ heading, children }) {
           </Toolbar>
         </Container>
       </AppBar>
-
       <Box
-        id="hero"
-        sx={(theme) => ({
-          width: "100%",
-          backgroundImage:
-            theme.palette.mode === "light"
-              ? "linear-gradient(180deg, #CEE5FD, #FFF)"
-              : `linear-gradient(#02294F, ${alpha("#090E10", 0.0)})`,
-          backgroundSize: "100% 20%",
-          backgroundRepeat: "no-repeat",
-        })}
+        className="flex flex-col justify-center border border-blue-600 rounded-md"
+        // id="hero"
+        // sx={(theme) => ({
+        //   width: "100%",
+        //   backgroundImage:
+        //     theme.palette.mode === "light"
+        //       ? "linear-gradient(180deg, #CEE5FD, #FFF)"
+        //       : `linear-gradient(#02294F, ${alpha("#090E10", 0.0)})`,
+        //   backgroundSize: "100% 20%",
+        //   backgroundRepeat: "no-repeat",
+        // })}
       >
         <div className="min-h-screen">
           {heading ? (
