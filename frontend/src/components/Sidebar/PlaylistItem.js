@@ -1,3 +1,4 @@
+import { Add } from "@mui/icons-material";
 import { Button, Card, CardActions, CardContent } from "@mui/material";
 import { memo } from "react";
 
@@ -14,7 +15,11 @@ function PlaylistItem({ playlist, add, deets, isFuture }) {
 				</div>
 			</CardContent>
 			<CardActions>
-				<Button onClick={add} disabled={isFuture}>
+				<Button
+					onClick={add}
+					disabled={isFuture}
+					startIcon={<Add />}
+					variant="outlined">
 					Add
 				</Button>
 				<Button onClick={deets}>Details</Button>
