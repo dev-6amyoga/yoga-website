@@ -993,6 +993,7 @@ import FAQ from "./components/FAQ";
 import Footer from "./components/Footer";
 import getLPTheme from "./getLPTheme";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
+import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
 
 function ToggleCustomTheme({ showCustomTheme, toggleCustomTheme }) {
   return (
@@ -1051,26 +1052,11 @@ export default function StudentPlan() {
   };
 
   return (
-    <StudentPageWrapper heading="Pricing">
-      <ThemeProvider theme={showCustomTheme ? defaultTheme : defaultTheme}>
-        <CssBaseline />
-        {/* <Hero /> */}
-        <Pricing />
-        <Box sx={{ bgcolor: "background.default" }}>
-          {/* <LogoCollection />
-          <Features />
-          <Divider />
-          <Testimonials />
-          <Divider />
-          <Highlights />
-          <Divider /> */}
-          {/* <Pricing /> */}
-          {/* <Divider />
-          <FAQ />
-          <Divider />
-          <Footer /> */}
-        </Box>
-      </ThemeProvider>
-    </StudentPageWrapper>
+    <ThemeProvider theme={defaultTheme}>
+      <CssBaseline />
+      <StudentNavMUI />
+      <Hero heading="Plans and Pricing" />
+      <Pricing />
+    </ThemeProvider>
   );
 }
