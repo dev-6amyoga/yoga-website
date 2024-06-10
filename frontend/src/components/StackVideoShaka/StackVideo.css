@@ -15,7 +15,7 @@
 	grid-template-columns: 2fr 1fr;
 	/* grid-template-rows: repeat(2, minmax(min-content, 264px)); */
 
-	grid-template-rows: repeat(2, minmax(min-content, 232px));
+	grid-template-rows: repeat(2, minmax(min-content, 220px));
 	grid-template-areas:
 		"video queue"
 		"video queue"
