@@ -111,19 +111,9 @@ import Box from "@mui/material/Box";
 import { alpha } from "@mui/material";
 import Divider from "@mui/material/Divider";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
-import AppAppBar from "../../components/SidebarMui";
 import Hero from "./components/Hero";
-import LogoCollection from "./components/LogoCollection";
 import Highlights from "./components/Highlights";
-import Pricing from "./components/Pricing";
-import Features from "./components/Features";
-import Testimonials from "./components/Testimonials";
 import FAQ from "./components/FAQ";
-import Footer from "./components/Footer";
-import getLPTheme from "./getLPTheme";
 import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
 
 export default function LandingPage() {
@@ -158,7 +148,7 @@ export default function LandingPage() {
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.9968518180767!2d77.67348657454568!3d12.907923616272244!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae1340031bb427%3A0xee0df18d7177d35d!2s6am%20Yoga!5e0!3m2!1sen!2sin!4v1706362049496!5m2!1sen!2sin"
             className="w-full h-full"
-            allowfullscreen=""
+            allowFullScreen=""
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
           ></iframe>

@@ -9,6 +9,9 @@ import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { TextField, Button } from "@mui/material";
 import { useState } from "react";
+import { validateEmail, validatePhone } from "../../../utils/formValidation";
+import { toast } from "react-toastify";
+import { Fetch } from "../../../utils/Fetch";
 const items = [
   {
     icon: <EmailIcon />,
@@ -42,10 +45,39 @@ export default function Highlights() {
       [name]: value,
     });
   };
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Handle form submission logic (e.g., send data to API)
+    const [validPhone, phoneError] = validatePhone(formData.query_phone);
+    if (!validPhone) {
+      toast(phoneError.message, { type: "error" });
+      return;
+    }
+    if (!formData.query_phone.startsWith("+91")) {
+      formData.query_phone = "+91" + formData.query_phone;
+    }
+    const [validEmail, emailError] = validateEmail(formData.query_email);
+    if (!validEmail) {
+      toast(emailError.message, { type: "error" });
+      return;
+    }
+    toast("Sending Query!");
     console.log(formData);
+    try {
+      const response = await Fetch({
+        url: "/query/register",
+        method: "POST",
+        data: formData,
+      });
+      if (response?.status === 200) {
+        toast("Query submitted!");
+      } else {
+        toast(
+          "Could not submit query. An error occured! Kindly contact us directly."
+        );
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
   return (
     <Box

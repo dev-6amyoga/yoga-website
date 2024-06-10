@@ -203,7 +203,7 @@ function AppAppBar({ mode, toggleColorMode }) {
                   >
                     <ToggleColorMode
                       mode={mode}
-                      toggleColorMode={toggleColorMode}
+                      ToggleColorMode={toggleColorMode}
                     />
                   </Box>
                   <MenuItem onClick={() => scrollToSection("features")}>

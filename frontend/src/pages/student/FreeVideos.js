@@ -115,7 +115,7 @@ export default function FreeVideos() {
         <Box
           id="image"
           sx={(theme) => ({
-            mt: { xs: 8, sm: 10 },
+            mt: { xs: 0, sm: 0 },
             alignSelf: "center",
             height: { xs: 200, sm: 900 },
             width: "80%",
@@ -161,13 +161,13 @@ export default function FreeVideos() {
                   {" "}
                   {/* Add margin-bottom to each card */}
                   <CardContent>
-                    <div className="flex flex-row items-center">
+                    <div className="flex flex-row items-center gap-2">
                       <Button
                         variant="contained"
                         onClick={() => setCurrentVideoId(video.videoId)}
                         startIcon={<PlayCircleFilledWhiteOutlinedIcon />}
                       />
-                      <Typography variant="subtitle1" className="truncate ml-2">
+                      <Typography variant="subtitle1" className="truncate">
                         {video.title}
                       </Typography>
                     </div>

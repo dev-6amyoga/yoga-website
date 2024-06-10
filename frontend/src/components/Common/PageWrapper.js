@@ -85,7 +85,7 @@ export default function PageWrapper({ heading, children }) {
         </Container>
       </AppBar>
       <Box
-        className="flex flex-col justify-center border border-blue-600 rounded-md"
+        className="flex flex-col justify-center rounded-md"
         // id="hero"
         // sx={(theme) => ({
         //   width: "100%",

@@ -20,7 +20,7 @@ export default function Auth() {
 
   return (
     <PageWrapper>
-      <div className="bg-y-white min-h-screen grid place-items-center">
+      <div className="min-h-screen grid place-items-center">
         {loginOpen ? (
           <div className="p-4 lg:p-20">
             <Login switchForm={setLoginOpen} />

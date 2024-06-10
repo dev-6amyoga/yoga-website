@@ -184,7 +184,7 @@ export default function StudentWatchHistory() {
       <Container
         id="testimonials"
         sx={{
-          pt: { xs: 4, sm: 12 },
+          pt: { xs: 2, sm: 2 },
           pb: { xs: 8, sm: 16 },
           position: "relative",
           display: "flex",
