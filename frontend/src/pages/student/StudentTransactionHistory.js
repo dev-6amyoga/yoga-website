@@ -43,16 +43,11 @@ export default function StudentTransactionHistory() {
       const url = URL.createObjectURL(blob);
       downloadATag.current.setAttribute("href", url);
       downloadATag.current.setAttribute("download", "data.csv");
-      // downloadATag.current.style.visibility = "hidden";
       downloadATag.current.click();
     }
   };
 
   const subscribePlan = async (rowData, setLoading) => {
-    console.log(
-      rowData.original.user_id,
-      rowData.original.transaction_order_id
-    );
     try {
       setLoading(true);
       const response = await Fetch({
@@ -64,32 +59,25 @@ export default function StudentTransactionHistory() {
           transaction_order_id: rowData.original.transaction_order_id,
         }),
       });
-      // console.log(typeof response.data);
       const dataBuffer = new Blob([response.data], {
         type: "application/pdf",
       });
       const url = URL.createObjectURL(dataBuffer);
-      console.log(downloadATag.current);
-
       downloadATag.current.setAttribute("href", url);
       downloadATag.current.setAttribute(
         "download",
         `6AMYOGA_plan_purchase_${rowData.transaction_order_id}.pdf`
       );
       downloadATag.current.click();
-      // console.log("DONE!", dataBuffer);
       setLoading(false);
     } catch (err) {
-      console.log(err);
       toast(err);
       setLoading(false);
     }
-    // setLoading(false)
   };
 
   const RenderAction = (value, rowData, index) => {
     const [loading, setLoading] = useState(false);
-    console.log("RENDER ACTIONS : ", rowData);
     return (
       <Grid.Container gap={0.1}>
         <Grid>
@@ -115,10 +103,32 @@ export default function StudentTransactionHistory() {
 
   const columnsDataTable = useMemo(
     () => [
+      // {
+      //   accessorKey: "payment_date",
+      //   header: ({ column }) => (
+      //     <SortableColumn column={column} sx={{ width: "80px" }}>
+      //       Payment Date
+      //     </SortableColumn>
+      //   ),
+      // },
       {
         accessorKey: "payment_date",
         header: ({ column }) => (
-          <SortableColumn column={column}>Payment Date</SortableColumn>
+          <SortableColumn column={column} sx={{ width: "70px" }}>
+            Payment Date
+          </SortableColumn>
+        ),
+        cell: ({ row }) => (
+          <div
+            style={{
+              width: "80px",
+              whiteSpace: "normal",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {row.original.payment_date}
+          </div>
         ),
       },
       {
@@ -130,7 +140,7 @@ export default function StudentTransactionHistory() {
       {
         accessorKey: "transaction_payment_id",
         header: ({ column }) => (
-          <SortableColumn column={column}>
+          <SortableColumn column={column} sx={{ width: "20px" }}>
             Transaction Payment ID
           </SortableColumn>
         ),
@@ -173,8 +183,8 @@ export default function StudentTransactionHistory() {
       <CssBaseline />
       <StudentNavMUI />
       <Hero heading="Transaction History" />
-      <div className="flex flex-col items-center justify-center py-20">
-        <Spacer h={3} />
+      <div className="flex flex-col items-center justify-center py-0">
+        <Spacer h={1} />
         <a
           className="hidden"
           href="#"
@@ -201,46 +211,4 @@ export default function StudentTransactionHistory() {
       </div>
     </ThemeProvider>
   );
-}
-
-{
-  /* 
-          <Table width={100} data={transactions} className="bg-white ">
-            <Table.Column
-              prop="payment_date"
-              label="Payment Date"
-              // render={(data) => {
-              //   return Intl.DateTimeFormat("en-US", {
-              //     timeZone: "Asia/Kolkata",
-              //   }).format(Date(data));
-              // }}
-              render={(data) => {
-                Date(data);
-              }}
-            />
-            <Table.Column
-              prop="amount"
-              label="Amount Paid"
-              render={(data) => {
-                return "Rs." + String(data / 100);
-              }}
-            />
-            <Table.Column prop="payment_method" label="Payment Method" />
-            <Table.Column prop="payment_status" label="Payment Status" />
-            <Table.Column
-              prop="transaction_order_id"
-              label="Transaction Order ID"
-            />
-            <Table.Column
-              prop="transaction_payment_id"
-              label="Transaction Payment ID"
-            />
-            <Table.Column
-              prop="operation"
-              label="Download Invoice"
-              width={150}
-              render={RenderAction}
-            />
-          </Table>
-           */
 }
