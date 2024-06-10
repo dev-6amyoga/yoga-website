@@ -43,6 +43,14 @@ export default function PickRegistationMode({
 								},
 							});
 
+							if (payload?.data?.message) {
+								toast(payload.data.message, {
+									type: "warning",
+								});
+								setLoading(false);
+								return;
+							}
+
 							const email_verified = payload.data.email_verified;
 
 							if (email_verified) {

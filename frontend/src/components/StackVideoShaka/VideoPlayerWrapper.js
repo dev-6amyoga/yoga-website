@@ -1,7 +1,6 @@
 import useVideoStore from "../../store/VideoStore";
 import Playlist from "../Sidebar/Playlist";
 import PlaylistSections from "./Sections";
-import VideoInfo from "./VideoInfo";
 import VideoPlayer from "./VideoPlayer";
 
 export default function VideoPlayerWrapper() {
@@ -9,19 +8,24 @@ export default function VideoPlayerWrapper() {
 
 	return (
 		<>
-			{/* <div className="flex flex-col gap-4 my-4">
-				<VideoInfo />
-			</div> */}
 			<div
-				className={`w-full gap-2 ${fullScreen ? "h-screen" : "video-grid"} mb-4`}>
-				<div className={`video-area ${fullScreen ? "h-screen" : ""}`}>
+				className={
+					fullScreen ? "" : "relative video-grid mb-12 w-full gap-2"
+				}>
+				<div
+					className={
+						fullScreen
+							? "absolute w-full h-screen top-0 left-0 right-0 bottom-0 z-[10000]"
+							: "video-area"
+					}>
 					<VideoPlayer />
 				</div>
-
-				{!fullScreen && (
+				{!fullScreen ? (
 					<div className="queue-area">
 						<PlaylistSections />
 					</div>
+				) : (
+					<></>
 				)}
 			</div>
 

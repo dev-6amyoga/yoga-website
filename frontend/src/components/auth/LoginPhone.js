@@ -85,6 +85,12 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 		if (number === "" || number === undefined) {
 			return;
 		}
+
+		if (number && number.length < 10) {
+			toast("Invalid phone number", { type: "error" });
+			return;
+		}
+
 		if (setLoading) setLoading(true);
 
 		setResendCounter((prev) => prev + 1);
@@ -98,6 +104,7 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 				.then((confResult) => {
 					// console.log({ confirmationResult: confResult });
 					confirmationResult.current = confResult;
+					toast(`OTP Sent to ${number}`, { type: "success" });
 				})
 				.catch((error) => {
 					console.log("HERE IS THE ERROR:", error);
@@ -143,6 +150,8 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 					.finally(() => {
 						if (setLoading) setLoading(false);
 					});
+			} else {
+				toast.warn("No OTP Sent", { type: "warning" });
 			}
 		} catch (err) {
 			console.log(err);

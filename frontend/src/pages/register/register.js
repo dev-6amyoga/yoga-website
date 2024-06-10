@@ -457,7 +457,7 @@ export default function Register({ switchForm }) {
 						<div className="p-2 bg-blue-500 rounded-full text-white">
 							<Assignment />
 						</div>
-						<h2 className="text-center">Sign In</h2>
+						<h2 className="text-center">Sign Up</h2>
 					</div>
 
 					<LinearProgress
@@ -474,7 +474,7 @@ export default function Register({ switchForm }) {
 
 					{/* <Spacer y={4} /> */}
 					{RenderStep}
-					<div className="flex flex-row justify-between my-10 sm:flex flex-col py-2 gap-y-2">
+					<div className="flex justify-between my-10 sm:flex flex-col py-2 gap-y-2">
 						{(role === "STUDENT" && step < maxSteps) ||
 						(role === "INSTITUTE_OWNER" && step < maxSteps + 1) ? (
 							step === 1 ? (

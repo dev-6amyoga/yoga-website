@@ -50,9 +50,20 @@ router.post("/verify-google", async (req, res) => {
 				.json({ error: "Invalid Google OAuth token" });
 		}
 
-		return res
-			.status(HTTP_OK)
-			.json({ message: "Token verified", ...userInfo });
+		const user = await GetUserInfo({ email: userInfo.email });
+
+		if (!user) {
+			return res
+				.status(HTTP_OK)
+				.json({ message: "Token verified", ...userInfo });
+		} else {
+			return res
+				.status(HTTP_OK)
+				.json({
+					message: "User already exists; Please sign in",
+					...userInfo,
+				});
+		}
 	} catch (error) {
 		console.error("Authentication error:", error.message);
 		return res.status(401).json({ error: "Authentication failed" });
