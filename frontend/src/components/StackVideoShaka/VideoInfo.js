@@ -1,5 +1,7 @@
 // import { Code } from "@geist-ui/core";
 import { Description } from "@geist-ui/core";
+import { useMemo } from "react";
+import usePlaylistStore from "../../store/PlaylistStore";
 import useVideoStore from "../../store/VideoStore";
 
 export default function VideoInfo() {
@@ -35,10 +37,12 @@ export default function VideoInfo() {
 		state.devMode,
 	]);
 
+	const [queue] = usePlaylistStore((state) => [state.queue]);
+
 	// useEffect(() => {
 	// 	if (currentVideo) {
 	// 		setMarkers(
-	// 			currentVideo?.video?.markers ?? currentVideo?.video?.sections
+	// 			currVideo?.video?.markers ?? currVideo?.video?.sections
 	// 		);
 	// 		setCurrentMarkerIdx(0);
 	// 	}
@@ -55,6 +59,20 @@ export default function VideoInfo() {
 	//         })
 	//     }
 	// }, [currentMarkerIdx, addToSeekQueue, markers, videoEvent])
+
+	const currVideo = useMemo(() => {
+		if (queue && queue.length > 0) {
+			return queue[0];
+		}
+		return null;
+	}, [queue]);
+
+	const currMarker = useMemo(() => {
+		if (markers && markers.length > 0) {
+			return markers[currentMarkerIdx];
+		}
+		return null;
+	}, [currentMarkerIdx, markers]);
 
 	return (
 		<div className="">
@@ -80,116 +98,36 @@ export default function VideoInfo() {
 			) : (
 				<></>
 			)}
-			{/* <div
-				className={`rounded-2xl border p-4 ${
-					currentVideo?.video?.transition_id
-						? "opacity-0"
-						: "opacity-100"
-				}`}>
-				<h5 className="">Markers</h5>
-				<div className="mt-4 flex flex-wrap gap-1">
-					{markers ? (
-						markers.map((k, idx) => {
-							return (
-								<p
-									key={k.timestamp + String(currentMarkerIdx)}
-									className={`m-0 rounded-full border-2 px-2 py-1 text-sm hover:cursor-pointer ${
-										currentMarkerIdx === idx
-											? "border-y-green"
-											: ""
-									}`}
-									onClick={() => {
-										// TODO : fix this, bug when you go to previous marker
-										console.log("CLICKED MARKER : ", idx);
-										setVideoEvent({
-											type: VIDEO_EVENT_MOVING_MARKER,
-											markerIdx: idx,
-										});
-										addToSeekQueue({
-											type: SEEK_TYPE_MARKER,
-											t: k.timestamp,
-											idx: idx,
-										});
-									}}>
-									{k.timestamp} : {k.title}{" "}
-									{k.loop ? "🔁" : ""}
-								</p>
-							);
-						})
-					) : (
-						<></>
-					)}
-				</div>
-			</div> */}
+			{/* <pre block>{JSON.stringify(queue, null, 4)}</pre> */}
 
-			{/* {currentVideo?.video?.sections ? (
-				<div
-					className={`rounded-2xl border p-4 ${
-						currentVideo?.video?.transition_id
-							? "opacity-0"
-							: "opacity-100"
-					}`}>
-					<h5 className="">Sections</h5>
-					<div className="mt-4 flex flex-wrap gap-1">
-						{currentVideo?.video?.sections.map((k, idx) => {
-							return (
-								<p
-									key={k.time}
-									className={`m-0 rounded-full border-2 px-2 py-1 text-sm hover:cursor-pointer ${
-										currentMarkerIdx === idx
-											? "border-y-green"
-											: ""
-									}`}
-									onClick={() => {
-										// TODO : fix this, bug when you go to previous marker
-										console.log("CLICKED SECTION : ", idx);
-										// setVideoEvent({
-										// 	type: VIDEO_EVENT_MOVING_MARKER,
-										// 	markerIdx: idx,
-										// });
-										addToSeekQueue({
-											type: SEEK_TYPE_MARKER,
-											t: k.time,
-										});
-									}}>
-									{k.time} : {k.name}
-								</p>
-							);
-						})}
-					</div>
-				</div>
-			) : (
-				<></>
-			)} */}
 			<div className="flex flex-col gap-4 rounded-lg border p-4">
 				<Description title="Currently Playing"></Description>
-				{currentVideo ? (
+				{currVideo ? (
 					<>
-						{/* <Code block>{JSON.stringify(currentVideo, null, 4)}</Code> */}
 						<h4>
 							<span className="text-sm text-zinc-500">
-								{currentVideo?.video?.transition_id
+								{currVideo?.video?.transition_id
 									? "TRANSITION"
-									: currentVideo?.video?.playlist_id
+									: currVideo?.video?.playlist_id
 										? "PLAYLIST"
 										: "ASANA"}
 							</span>
 							<br />
-							{currentVideo?.video?.asana_name ||
-								currentVideo?.video?.transition_video_name ||
-								currentVideo?.video?.playlist_name}
+							{currVideo?.video?.asana_name ||
+								currVideo?.video?.transition_video_name ||
+								currVideo?.video?.playlist_name}
 						</h4>
 
-						{currentVideo?.video?.asana_desc ? (
+						{currVideo?.video?.asana_desc ? (
 							<>
 								<span className="text-sm text-zinc-500">
-									{currentVideo?.video?.transition_id
+									{currVideo?.video?.transition_id
 										? ""
-										: currentVideo?.video?.playlist_id
+										: currVideo?.video?.playlist_id
 											? ""
 											: "ASANA DESCRIPTION"}
 								</span>
-								<p>{currentVideo?.video?.asana_desc}</p>
+								<p>{currVideo?.video?.asana_desc}</p>
 							</>
 						) : (
 							<></>

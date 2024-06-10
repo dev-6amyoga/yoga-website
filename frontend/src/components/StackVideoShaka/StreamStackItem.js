@@ -732,14 +732,11 @@ function StreamStackItem({
 		[setVideoState]
 	);
 
-	const handleVideoCanPlayThrough = useCallback(
-		(e) => {
-			const state = useVideoStore.getState();
-			console.log("Can play through...", state.videoState);
-			tryToPlay();
-		},
-		[tryToPlay]
-	);
+	const handleVideoCanPlayThrough = useCallback((e) => {
+		const state = useVideoStore.getState();
+		console.log("Can play through...", state.videoState);
+		// tryToPlay();
+	}, []);
 
 	// set the volume
 	const handleVideoVolumeChange = useCallback(() => {

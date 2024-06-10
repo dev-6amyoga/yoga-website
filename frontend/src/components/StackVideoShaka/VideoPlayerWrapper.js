@@ -9,9 +9,9 @@ export default function VideoPlayerWrapper() {
 
 	return (
 		<>
-			<div className="flex flex-col gap-4 my-4">
+			{/* <div className="flex flex-col gap-4 my-4">
 				<VideoInfo />
-			</div>
+			</div> */}
 			<div
 				className={`w-full gap-2 ${fullScreen ? "h-screen" : "video-grid"} mb-4`}>
 				<div className={`video-area ${fullScreen ? "h-screen" : ""}`}>

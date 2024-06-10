@@ -15,7 +15,7 @@ export default function PlaylistList({
 	const [showIndex, setShowIndex] = useState(5);
 
 	const handleShowMore = () => {
-		setShowIndex(() => Math.min(showIndex + 5, 4 * playlists.length));
+		setShowIndex(() => Math.min(showIndex + 5, playlists.length));
 	};
 
 	const handleShowLess = () => {
@@ -52,7 +52,7 @@ export default function PlaylistList({
 						{playlists && playlists.length > 0 ? (
 							<>
 								<div className="flex flex-col max-h-[60vh] overflow-y-auto gap-4 py-6">
-									{[...playlists, ...playlists, ...playlists]
+									{playlists
 										?.slice(0, showIndex)
 										.filter(searchFilter)
 										.map((playlist, idx) => (
@@ -76,12 +76,16 @@ export default function PlaylistList({
 								<div className="flex gap-2 py-4">
 									<Button
 										onClick={handleShowMore}
-										size="small">
+										size="small"
+										disabled={
+											showIndex >= playlists.length
+										}>
 										Show More
 									</Button>
 									<Button
 										onClick={handleShowLess}
-										size="small">
+										size="small"
+										disabled={showIndex <= 5}>
 										Show Less
 									</Button>
 								</div>
