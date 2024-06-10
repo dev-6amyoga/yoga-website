@@ -1,4 +1,4 @@
-import { Button, Grid, Spacer } from "@geist-ui/core";
+import { Grid } from "@geist-ui/core";
 import Papa from "papaparse";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -14,6 +14,7 @@ import {
   CssBaseline,
   Chip,
   alpha,
+  Button,
   Box,
   Container,
 } from "@mui/material";
@@ -89,10 +90,8 @@ export default function StudentTransactionHistory() {
       <Grid.Container gap={0.1}>
         <Grid>
           <Button
-            type="error"
-            auto
-            scale={1 / 3}
-            font="12px"
+            variant="contained"
+            color="primary"
             disabled={
               loading || rowData?.original?.payment_status !== "succeeded"
             }
@@ -204,8 +203,8 @@ export default function StudentTransactionHistory() {
       <StudentNavMUI />
       <Hero heading="Transaction History" />
       <Container maxWidth="lg">
-        <Box display="flex" flexDirection="column" alignItems="center" py={4}>
-          <Box my={2}>
+        <Box display="flex" flexDirection="column" alignItems="center" py={2}>
+          <Box my={1}>
             <Button
               variant="contained"
               color="secondary"
