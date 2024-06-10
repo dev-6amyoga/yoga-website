@@ -103,60 +103,39 @@ export default function StudentTransactionHistory() {
 
   const columnsDataTable = useMemo(
     () => [
-      // {
-      //   accessorKey: "payment_date",
-      //   header: ({ column }) => (
-      //     <SortableColumn column={column} sx={{ width: "80px" }}>
-      //       Payment Date
-      //     </SortableColumn>
-      //   ),
-      // },
       {
         accessorKey: "payment_date",
         header: ({ column }) => (
-          <SortableColumn column={column} sx={{ width: "70px" }}>
-            Payment Date
-          </SortableColumn>
-        ),
-        cell: ({ row }) => (
-          <div
-            style={{
-              width: "80px",
-              whiteSpace: "normal",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {row.original.payment_date}
-          </div>
+          <SortableColumn column={column}>Payment Date</SortableColumn>
         ),
       },
+
       {
         accessorKey: "transaction_order_id",
         header: ({ column }) => (
           <SortableColumn column={column}>Transaction Order ID</SortableColumn>
         ),
       },
-      {
-        accessorKey: "transaction_payment_id",
-        header: ({ column }) => (
-          <SortableColumn column={column} sx={{ width: "20px" }}>
-            Transaction Payment ID
-          </SortableColumn>
-        ),
-      },
+      // {
+      //   accessorKey: "transaction_payment_id",
+      //   header: ({ column }) => (
+      //     <SortableColumn column={column}>
+      //       Transaction Payment ID
+      //     </SortableColumn>
+      //   ),
+      // },
       {
         accessorKey: "amount",
         header: ({ column }) => (
           <SortableColumn column={column}>Amount</SortableColumn>
         ),
       },
-      {
-        accessorKey: "payment_method",
-        header: ({ column }) => (
-          <SortableColumn column={column}>Payment Method</SortableColumn>
-        ),
-      },
+      // {
+      //   accessorKey: "payment_method",
+      //   header: ({ column }) => (
+      //     <SortableColumn column={column}>Payment Method</SortableColumn>
+      //   ),
+      // },
       {
         accessorKey: "payment_status",
         header: ({ column }) => (
