@@ -1,4 +1,4 @@
-import { Button, Grid, Spacer } from "@geist-ui/core";
+import { Grid } from "@geist-ui/core";
 import Papa from "papaparse";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -9,7 +9,15 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
 import SortableColumn from "../../components/Common/DataTable/SortableColumn";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
-import { Typography, CssBaseline } from "@mui/material";
+import {
+  Typography,
+  CssBaseline,
+  Chip,
+  alpha,
+  Button,
+  Box,
+  Container,
+} from "@mui/material";
 import Hero from "./components/Hero";
 export default function StudentTransactionHistory() {
   let user = useUserStore((state) => state.user);
@@ -82,10 +90,8 @@ export default function StudentTransactionHistory() {
       <Grid.Container gap={0.1}>
         <Grid>
           <Button
-            type="error"
-            auto
-            scale={1 / 3}
-            font="12px"
+            variant="contained"
+            color="primary"
             disabled={
               loading || rowData?.original?.payment_status !== "succeeded"
             }
@@ -103,60 +109,39 @@ export default function StudentTransactionHistory() {
 
   const columnsDataTable = useMemo(
     () => [
-      // {
-      //   accessorKey: "payment_date",
-      //   header: ({ column }) => (
-      //     <SortableColumn column={column} sx={{ width: "80px" }}>
-      //       Payment Date
-      //     </SortableColumn>
-      //   ),
-      // },
       {
         accessorKey: "payment_date",
         header: ({ column }) => (
-          <SortableColumn column={column} sx={{ width: "70px" }}>
-            Payment Date
-          </SortableColumn>
-        ),
-        cell: ({ row }) => (
-          <div
-            style={{
-              width: "80px",
-              whiteSpace: "normal",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {row.original.payment_date}
-          </div>
+          <SortableColumn column={column}>Payment Date</SortableColumn>
         ),
       },
+
       {
         accessorKey: "transaction_order_id",
         header: ({ column }) => (
           <SortableColumn column={column}>Transaction Order ID</SortableColumn>
         ),
       },
-      {
-        accessorKey: "transaction_payment_id",
-        header: ({ column }) => (
-          <SortableColumn column={column} sx={{ width: "20px" }}>
-            Transaction Payment ID
-          </SortableColumn>
-        ),
-      },
+      // {
+      //   accessorKey: "transaction_payment_id",
+      //   header: ({ column }) => (
+      //     <SortableColumn column={column}>
+      //       Transaction Payment ID
+      //     </SortableColumn>
+      //   ),
+      // },
       {
         accessorKey: "amount",
         header: ({ column }) => (
           <SortableColumn column={column}>Amount</SortableColumn>
         ),
       },
-      {
-        accessorKey: "payment_method",
-        header: ({ column }) => (
-          <SortableColumn column={column}>Payment Method</SortableColumn>
-        ),
-      },
+      // {
+      //   accessorKey: "payment_method",
+      //   header: ({ column }) => (
+      //     <SortableColumn column={column}>Payment Method</SortableColumn>
+      //   ),
+      // },
       {
         accessorKey: "payment_status",
         header: ({ column }) => (
@@ -178,37 +163,70 @@ export default function StudentTransactionHistory() {
 
   const defaultTheme = createTheme({ palette: { mode } });
 
+  // return (
+  //   <ThemeProvider theme={defaultTheme}>
+  //     <CssBaseline />
+  //     <StudentNavMUI />
+  //     <Hero heading="Transaction History" />
+  //     <div className="flex flex-col items-center justify-center py-0">
+  //       <Spacer h={1} />
+  //       <a
+  //         className="hidden"
+  //         href="#"
+  //         ref={downloadATag}
+  //         target="_blank"
+  //         rel="noreferer"
+  //       ></a>
+  //       <div className="elements">
+  //         <Button
+  //           onClick={() => {
+  //             handleDownload(transactions);
+  //           }}
+  //         >
+  //           Download CSV
+  //         </Button>
+  //         <br />
+  //         <div className="border max-w-7xl">
+  //           <DataTable
+  //             columns={columnsDataTable}
+  //             data={transactions || []}
+  //           ></DataTable>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </ThemeProvider>
+  // );
+
   return (
     <ThemeProvider theme={defaultTheme}>
       <CssBaseline />
       <StudentNavMUI />
       <Hero heading="Transaction History" />
-      <div className="flex flex-col items-center justify-center py-0">
-        <Spacer h={1} />
-        <a
-          className="hidden"
-          href="#"
-          ref={downloadATag}
-          target="_blank"
-          rel="noreferer"
-        ></a>
-        <div className="elements">
-          <Button
-            onClick={() => {
-              handleDownload(transactions);
-            }}
-          >
-            Download CSV
-          </Button>
-          <br />
-          <div className="max-w-7xl">
-            <DataTable
-              columns={columnsDataTable}
-              data={transactions || []}
-            ></DataTable>
-          </div>
-        </div>
-      </div>
+      <Container maxWidth="lg">
+        <Box display="flex" flexDirection="column" alignItems="center" py={2}>
+          <Box my={1}>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => {
+                handleDownload(transactions);
+              }}
+            >
+              Download CSV
+            </Button>
+          </Box>
+          <a
+            className="hidden"
+            href="#"
+            ref={downloadATag}
+            target="_blank"
+            rel="noreferer"
+          ></a>
+          <Box width="100%" my={4}>
+            <DataTable columns={columnsDataTable} data={transactions || []} />
+          </Box>
+        </Box>
+      </Container>
     </ThemeProvider>
   );
 }

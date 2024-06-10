@@ -74,4 +74,5 @@ router.post("/register", async (req, res) => {
       .json({ error: "Internal server error" });
   }
 });
+
 module.exports = router;

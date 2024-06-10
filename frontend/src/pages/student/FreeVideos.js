@@ -122,6 +122,8 @@ export default function FreeVideos() {
             backgroundSize: "cover",
             borderRadius: "10px",
             outline: "1px solid",
+            mb: 4,
+            background: "linear-gradient(#033363, #021F3B)",
             outlineColor: alpha("#BFCCD9", 0.5),
             boxShadow: `0 0 12px 8px ${alpha("#9CCCFC", 0.2)}`,
           })}
@@ -146,20 +148,16 @@ export default function FreeVideos() {
                 iframeClassName="w-full"
               />{" "}
             </Box>
-
-            {/* Free Videos List (Scrollable) */}
             <Box
               sx={{
                 width: { xs: "100%", md: "30%" },
                 overflowY: "auto",
                 maxHeight: 400,
-                pb: 2,
+                mb: 4,
               }}
             >
               {freeVideos.map((video) => (
                 <Card key={video.videoId} sx={{ mb: 2 }}>
-                  {" "}
-                  {/* Add margin-bottom to each card */}
                   <CardContent>
                     <div className="flex flex-row items-center gap-2">
                       <Button
@@ -172,15 +170,6 @@ export default function FreeVideos() {
                       </Typography>
                     </div>
                   </CardContent>
-                  {/* <CardActions>
-                  <Button
-                    variant="contained"
-                    onClick={() => setCurrentVideoId(video.videoId)}
-                    startIcon={<PlayCircleFilledWhiteOutlinedIcon />}
-                  >
-                    Watch
-                  </Button>
-                </CardActions> */}
                 </Card>
               ))}
             </Box>
