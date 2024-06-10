@@ -9,7 +9,14 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
 import SortableColumn from "../../components/Common/DataTable/SortableColumn";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
-import { Typography, CssBaseline } from "@mui/material";
+import {
+  Typography,
+  CssBaseline,
+  Chip,
+  alpha,
+  Box,
+  Container,
+} from "@mui/material";
 import Hero from "./components/Hero";
 export default function StudentTransactionHistory() {
   let user = useUserStore((state) => state.user);
@@ -157,37 +164,70 @@ export default function StudentTransactionHistory() {
 
   const defaultTheme = createTheme({ palette: { mode } });
 
+  // return (
+  //   <ThemeProvider theme={defaultTheme}>
+  //     <CssBaseline />
+  //     <StudentNavMUI />
+  //     <Hero heading="Transaction History" />
+  //     <div className="flex flex-col items-center justify-center py-0">
+  //       <Spacer h={1} />
+  //       <a
+  //         className="hidden"
+  //         href="#"
+  //         ref={downloadATag}
+  //         target="_blank"
+  //         rel="noreferer"
+  //       ></a>
+  //       <div className="elements">
+  //         <Button
+  //           onClick={() => {
+  //             handleDownload(transactions);
+  //           }}
+  //         >
+  //           Download CSV
+  //         </Button>
+  //         <br />
+  //         <div className="border max-w-7xl">
+  //           <DataTable
+  //             columns={columnsDataTable}
+  //             data={transactions || []}
+  //           ></DataTable>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </ThemeProvider>
+  // );
+
   return (
     <ThemeProvider theme={defaultTheme}>
       <CssBaseline />
       <StudentNavMUI />
       <Hero heading="Transaction History" />
-      <div className="flex flex-col items-center justify-center py-0">
-        <Spacer h={1} />
-        <a
-          className="hidden"
-          href="#"
-          ref={downloadATag}
-          target="_blank"
-          rel="noreferer"
-        ></a>
-        <div className="elements">
-          <Button
-            onClick={() => {
-              handleDownload(transactions);
-            }}
-          >
-            Download CSV
-          </Button>
-          <br />
-          <div className="max-w-7xl">
-            <DataTable
-              columns={columnsDataTable}
-              data={transactions || []}
-            ></DataTable>
-          </div>
-        </div>
-      </div>
+      <Container maxWidth="lg">
+        <Box display="flex" flexDirection="column" alignItems="center" py={4}>
+          <Box my={2}>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => {
+                handleDownload(transactions);
+              }}
+            >
+              Download CSV
+            </Button>
+          </Box>
+          <a
+            className="hidden"
+            href="#"
+            ref={downloadATag}
+            target="_blank"
+            rel="noreferer"
+          ></a>
+          <Box width="100%" my={4}>
+            <DataTable columns={columnsDataTable} data={transactions || []} />
+          </Box>
+        </Box>
+      </Container>
     </ThemeProvider>
   );
 }
