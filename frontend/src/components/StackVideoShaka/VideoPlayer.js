@@ -224,83 +224,73 @@ function VideoPlayer() {
 	}, []);
 
 	return (
-		<div className="flex flex-col items-center">
+		<div
+			className={`hover:cursor-pointer bg-black w-full ${fullScreen ? "h-screen" : "h-auto rounded-xl overflow-hidden"}`}>
 			<div
-				className={`hover:cursor-pointer bg-black w-full h-auto md:h-1/6 ${fullScreen ? "h-screen" : "rounded-xl overflow-hidden"}`}>
-				<div
-					className={`mx-auto aspect-video ${fullScreen ? "h-full" : ""}`}>
-					{currentVideo ? (
-						<>
-							{videoState === STATE_VIDEO_ERROR ? (
-								<div className="flex flex-col items-center justify-center gap-4 text-lg w-full h-full border border-red-500">
-									<p>Error : Video playback error</p>
-									<Button
-										onClick={handleSetPlay}
-										variant="contained">
-										Refresh
-									</Button>
-								</div>
-							) : (
-								<div className="relative h-full w-full flex flex-col">
-									{queue.length > 0 ? (
-										<div className="">
-											{queue
-												.slice(0, 2)
-												.map((queueItem, idx) => {
-													return (
-														<StreamStackItem
-															key={
-																queueItem.queue_id
-															}
-															video={queueItem}
-															handleEnd={
-																handleEnd
-															}
-															handleLoading={
-																handleLoading
-															}
-															handlePlaybackError={
-																handlePlaybackError
-															}
-															isActive={
-																currentVideo?.queue_id ===
-																queueItem?.queue_id
-															}
-															setVideoStateVisible={
-																setVideoStateVisible
-															}
-															handleFullScreen={() => {}}
-														/>
-													);
-												})}
-										</div>
-									) : (
-										<></>
-									)}
-								</div>
-							)}
-						</>
-					) : queue.length > 0 ? (
-						<div className="flex flex-col items-center justify-center gap-4 text-lg w-full h-full">
-							<Button
-								onClick={handleStartPlaylist}
-								variant="contained">
-								Start
-							</Button>
-						</div>
-					) : (
-						<div className="flex flex-col items-center justify-center gap-4 text-lg w-full h-full">
-							<p className="text-white">
-								Add playlists to practice!
-							</p>
-							<Button
-								onClick={scrollToPlaylists}
-								variant="contained">
-								View Playlists
-							</Button>
-						</div>
-					)}
-				</div>
+				className={`mx-auto aspect-video ${fullScreen ? "h-full" : ""}`}>
+				{currentVideo ? (
+					<>
+						{videoState === STATE_VIDEO_ERROR ? (
+							<div className="flex flex-col items-center justify-center gap-4 text-lg w-full h-full border border-red-500">
+								<p>Error : Video playback error</p>
+								<Button
+									onClick={handleSetPlay}
+									variant="contained">
+									Refresh
+								</Button>
+							</div>
+						) : (
+							<div className="relative h-full w-full flex flex-col">
+								{queue.length > 0 ? (
+									<div className="">
+										{queue
+											.slice(0, 2)
+											.map((queueItem, idx) => {
+												return (
+													<StreamStackItem
+														key={queueItem.queue_id}
+														video={queueItem}
+														handleEnd={handleEnd}
+														handleLoading={
+															handleLoading
+														}
+														handlePlaybackError={
+															handlePlaybackError
+														}
+														isActive={
+															currentVideo?.queue_id ===
+															queueItem?.queue_id
+														}
+														setVideoStateVisible={
+															setVideoStateVisible
+														}
+														handleFullScreen={() => {}}
+													/>
+												);
+											})}
+									</div>
+								) : (
+									<></>
+								)}
+							</div>
+						)}
+					</>
+				) : queue.length > 0 ? (
+					<div className="flex flex-col items-center justify-center gap-4 text-lg w-full h-full">
+						<Button
+							onClick={handleStartPlaylist}
+							variant="contained">
+							Start
+						</Button>
+					</div>
+				) : (
+					<div className="flex flex-col items-center justify-center gap-4 text-lg w-full h-full">
+						<p className="text-white">Add playlists to practice!</p>
+						<Button onClick={scrollToPlaylists} variant="contained">
+							View Playlists
+						</Button>
+					</div>
+				)}
 			</div>
 		</div>
 	);

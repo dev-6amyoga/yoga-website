@@ -1,6 +1,6 @@
 import { Avatar, Tooltip } from "@mui/material";
 import { blue } from "@mui/material/colors";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { SEEK_TYPE_MARKER } from "../../enums/seek_types";
 import usePlaylistStore from "../../store/PlaylistStore";
 import useVideoStore from "../../store/VideoStore";
@@ -8,6 +8,7 @@ import { toTimeString } from "../../utils/toTimeString";
 
 export default function PlaylistSections() {
 	// const [sections] = usePlaylistStore((state) => [state.sections]);
+	const sectionsRef = useRef(null);
 
 	const [
 		fullScreen,
@@ -107,12 +108,15 @@ export default function PlaylistSections() {
 				)}
 			</div>
 
-			<div className="flex flex-col gap-4 pb-4 max-h-72">
+			<div
+				className="flex flex-col gap-4 pb-4 max-h-72"
+				ref={sectionsRef}>
 				<h5 className="uppercase p-4">Sections</h5>
 				{currVideo?.video?.sections?.map((s, idx) => {
 					return (
 						<div
 							key={s.time}
+							id={`section-${idx}`}
 							className={`flex flex-row items-center gap-2 p-2 hover:cursor-pointer hover:bg-blue-100 transition-colors ${currentMarkerIdx === idx ? "bg-blue-100" : ""}`}
 							onClick={() => handleSeek(s, idx)}>
 							<Avatar sx={{ bgcolor: blue[700] }}>
