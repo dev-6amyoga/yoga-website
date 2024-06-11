@@ -191,6 +191,10 @@ export default function StudentWatchHistory() {
           flexDirection: "column",
           alignItems: "center",
           gap: { xs: 3, sm: 6 },
+          background: "linear-gradient(#033363, #021F3B)",
+          borderRadius: 8, // Add this line for rounded corners
+
+          // border: "1px solid lightgray",
         }}
       >
         <Grid container spacing={2}>
@@ -244,7 +248,7 @@ export default function StudentWatchHistory() {
             </Grid>
           ))}
         </Grid>
-        <Button
+        {/* <Button
           onClick={() => {
             fetchWatchHistory();
             fetchWatchTimeStats();
@@ -252,7 +256,7 @@ export default function StudentWatchHistory() {
           }}
         >
           Refresh
-        </Button>
+        </Button> */}
       </Container>
 
       {/* 
