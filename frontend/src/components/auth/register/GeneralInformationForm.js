@@ -109,7 +109,7 @@ export default function GeneralInformationForm({
 				width="100%"
 				name="name"
 				placeholder="John Doe"
-				initialValue={generalInfo?.name}
+				defaultValue={generalInfo?.name}
 				required
 				label="Name"
 			/>
@@ -117,7 +117,7 @@ export default function GeneralInformationForm({
 				width="100%"
 				name="email_id"
 				placeholder="abc@email.com"
-				initialValue={generalInfo?.email_id}
+				defaultValue={generalInfo?.email_id}
 				required
 				label="Email ID"
 			/>
@@ -137,7 +137,7 @@ export default function GeneralInformationForm({
 					width="100%"
 					name="username"
 					placeholder="johnDoe123"
-					initialValue={generalInfo?.username}
+					defaultValue={generalInfo?.username}
 					onChange={(e) => {
 						setUsername(e.target.value);
 						handleUsernameCheck(e.target.value);
@@ -156,7 +156,7 @@ export default function GeneralInformationForm({
 					type="password"
 					width="100%"
 					name="password"
-					initialValue={generalInfo?.password}
+					defaultValue={generalInfo?.password}
 					onChange={(e) => setPassword(e.target.value)}
 					title="Password must be minimum 8 letters and contain atleast 1 number, 1 alphabet, 1 special character."
 					required
@@ -166,7 +166,7 @@ export default function GeneralInformationForm({
 					type="password"
 					width="100%"
 					name="confirm_password"
-					initialValue={generalInfo?.confirm_password}
+					defaultValue={generalInfo?.confirm_password}
 					onChange={(e) => setConfirmPassword(e.target.value)}
 					title="Password must be minimum 8 letters and contain atleast 1 number, 1 alphabet, 1 special character."
 					required
