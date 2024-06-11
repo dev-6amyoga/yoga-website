@@ -34,9 +34,9 @@ import ShakaPlayer from "./ShakaPlayer";
 import shaka from "shaka-player/dist/shaka-player.ui";
 
 // import shakaLog from "shaka-player/dist/shaka-player"
+import { VIDEO_EVENT_PLAY_INACTIVE } from "../../enums/video_event";
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
-import { VIDEO_EVENT_PLAY_INACTIVE } from "../../solidjs-src/src/enums/video_event";
 
 // shakaL.log.setLogLevel(shaka.log.Level.V1);
 
