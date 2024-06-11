@@ -10,6 +10,7 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 	const [otp, setOtp] = useState("");
 	const [number, setNumber] = useState("");
 	const [verified, setVerified] = useState(false);
+	const [otpError, setOtpError] = useState(null);
 
 	// resend related
 	const [startResendTimer, setStartResendTimer] = useState(false);
@@ -59,6 +60,7 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 		};
 	}, []);
 
+	// setting up resend timer
 	useEffect(() => {
 		let t;
 		if (startResendTimer) {
@@ -122,20 +124,23 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 	};
 
 	const verifyOtp = async () => {
+		setOtpError(null);
 		// console.log("otp", otp);
 		if (otp === "" || otp === undefined) {
-			toast("OTP is required", { type: "error" });
+			// toast("OTP is required", { type: "error" });
+			setOtpError("OTP is required");
 			return;
 		}
 		if (setLoading) setLoading(true);
 		try {
 			if (confirmationResult.current) {
-				console.log("Confirming...");
+				// console.log("Confirming...");
 				confirmationResult.current
 					.confirm(otp)
 					.then((result) => {
 						// console.log({ result });
 						toast("Verified!", { type: "success" });
+						setOtpError(null);
 						if (setLoading) setLoading(false);
 						// stop timer
 						setStartResendTimer(false);
@@ -144,18 +149,21 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 						onSuccessCallback(number);
 					})
 					.catch((err) => {
-						toast(err, { type: "error" });
+						// toast(err, { type: "error" });
+						setOtpError("Error / Incorrect OTP");
 						if (setLoading) setLoading(false);
 					})
 					.finally(() => {
 						if (setLoading) setLoading(false);
 					});
 			} else {
-				toast.warn("No OTP Sent", { type: "warning" });
+				// toast.warn("No OTP Sent", { type: "warning" });
+				setOtpError("No OTP Sent");
 			}
 		} catch (err) {
 			console.log(err);
-			toast("Error verifying OTP", { type: "error" });
+			// toast("Error verifying OTP", { type: "error" });
+			setOtpError("Error verifying OTP");
 			if (setLoading) setLoading(false);
 		}
 	};
@@ -203,6 +211,8 @@ export default function LoginPhone({ onSuccessCallback, setLoading }) {
 						onChange={(e) => {
 							setOtp(e.target.value);
 						}}
+						error={otpError}
+						helperText={otpError ? "Incorrect OTP" : ""}
 					/>
 					<Button
 						variant="contained"

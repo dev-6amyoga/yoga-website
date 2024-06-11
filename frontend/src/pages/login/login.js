@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useShallow } from "zustand/react/shallow";
 // import { Button } from "../../components/ui/button";
@@ -17,15 +17,15 @@ import Otp from "../otp/Otp";
 
 export default function Login({ switchForm }) {
 	const navigate = useNavigate();
-	const notify = (x) => toast(x);
 	const [type, SetType] = useState("");
 	const [number, setNumber] = useState("");
-	const [userNow, setUserNow] = useState({});
+	const [userNow, setUserNow] = useState(null);
 	const [phoneSignIn, setPhoneSignIn] = useState(false);
 	const [phoneSignInVisible, setPhoneSignInVisible] = useState(false);
 	const [mainVisible, setMainVisible] = useState(true);
 	const [forgotPassword, setForgotPassword] = useState(false);
 	const [forgotPasswordVisible, setForgotPasswordVisible] = useState(false);
+	const [searchParams, setSearchParams] = useSearchParams();
 
 	const [
 		user,
@@ -67,7 +67,7 @@ export default function Login({ switchForm }) {
 	};
 
 	useEffect(() => {
-		if (number.length > 0) {
+		if (number.length >= 10) {
 			const fetchData = async () => {
 				try {
 					const response = await Fetch({
@@ -87,9 +87,10 @@ export default function Login({ switchForm }) {
 					console.log(error);
 				}
 			};
+			console.log("Getting user?");
 			fetchData();
 		}
-	}, [number, phoneSignIn, user, setUser]);
+	}, [number, phoneSignIn, setUser, setUserNow]);
 
 	const updateNewPassword = async (e) => {
 		e.preventDefault();
@@ -98,23 +99,34 @@ export default function Login({ switchForm }) {
 		const password = formData?.new_password;
 		const confirm_password = formData?.new_confirm_password;
 
+		if (password !== confirm_password) {
+			toast.error("Passwords do not match");
+			return;
+		}
+
 		try {
 			const response = await Fetch({
 				url: "/user/reset-password",
 				method: "POST",
 				data: {
-					user_id: "",
+					user_id: userNow?.user_id,
 					new_password: password,
 					confirm_new_password: confirm_password,
 				},
 			});
 
-			setTimeout(() => {
-				window.location.reload();
-			}, 2000);
-
-			toast(response.data.message);
+			if (response && response?.status === 200) {
+				toast.success("Password updated successfully");
+				setForgotPasswordVisible(false);
+				setForgotPassword(false);
+				setMainVisible(true);
+			} else {
+				const errorData = response.data;
+				console.log(errorData.data.error);
+				toast.error(errorData?.error);
+			}
 		} catch (err) {
+			console.log(err);
 			toast(err);
 		}
 	};
@@ -285,7 +297,9 @@ export default function Login({ switchForm }) {
 						<Button
 							size="small"
 							variant="outlined"
-							onClick={() => switchForm((s) => !s)}>
+							onClick={() => {
+								setSearchParams({ register: true });
+							}}>
 							Don't have an account? Sign up
 						</Button>
 					</div>
@@ -309,19 +323,30 @@ export default function Login({ switchForm }) {
 				</div>
 			)}
 
-			{forgotPasswordVisible && (
+			{forgotPasswordVisible && userNow && (
 				<form
 					onSubmit={updateNewPassword}
 					className="flex flex-col gap-4">
+					<p>
+						Setting password for user :{" "}
+						<strong>{userNow?.username}</strong>
+					</p>
+					<p
+						className={`text-sm border p-2 rounded-lg text-zinc-500`}>
+						Password must be minimum 8 letters and contain atleast 1
+						number, 1 alphabet, 1 special character [!@#$%^&*,?]
+					</p>
 					<TextField
-						width="100%"
 						name="new_password"
 						label="New Password"
+						type="password"
+						required
 					/>
 					<TextField
-						width="100%"
 						name="new_confirm_password"
 						label="Confirm New Password"
+						type="password"
+						required
 					/>
 					<Button type="submit" variant="contained">
 						Reset Password
