@@ -16,8 +16,8 @@
   }
 
   header {
-    background-color: #222;
-    color: #fa4617;
+    background-color: #ffffff;
+    color: #222;
     display: flex;
     flex-direction: column; 
   }
@@ -64,8 +64,8 @@
   }
 
   footer {
-    background-color: #222;
-    color: #fa4617;
+    background-color: #ffffff;
+    color: #222;
     padding: 1.5rem;
     display: flex;
     justify-content: space-between;
@@ -222,6 +222,7 @@
       C4.911245,396.767517 4.554278,398.227081 3.504757,399.840576 
       C2.758687,400.432739 2.238844,400.529968 1.342179,400.221283 
     z"/>
+
     <path fill="#020200" opacity="1.000000" stroke="none" 
       d="
     M964.541931,1.000000 
@@ -299,6 +300,7 @@
       C946.563599,6.087015 949.861694,3.206375 953.797852,1.283519 
       C957.361267,1.000000 960.722595,1.000000 964.541931,1.000000 
     z"/>
+
     <path fill="#ED1F28" opacity="1.000000" stroke="none" 
       d="
     M2.584611,400.371094 
@@ -330,6 +332,7 @@
       C1.515195,433.373566 1.515720,421.525177 1.514974,409.216614 
       C1.732772,406.080994 0.919404,403.299927 2.584611,400.371094 
     z"/>
+
     <path fill="#FFFEFE" opacity="1.000000" stroke="none" 
       d="
     M2.565787,455.782227 
@@ -341,6 +344,7 @@
       C1.000000,552.312439 1.000000,504.624878 1.000000,456.468658 
       C1.360299,455.655579 1.788314,455.509430 2.565787,455.782227 
     z"/>
+
     <path fill="#DE474C" opacity="1.000000" stroke="none" 
       d="
     M1.690280,407.718750 
@@ -349,6 +353,7 @@
       C1.000000,433.645782 1.000000,421.291534 1.000000,408.468658 
       C1.144756,407.840637 1.289511,407.681274 1.690280,407.718750 
     z"/>
+
     <path fill="#EDECEC" opacity="1.000000" stroke="none" 
       d="
     M1.000000,446.454102 
@@ -357,6 +362,7 @@
       C2.436971,456.006287 2.026387,456.009521 1.307901,456.006378 
       C1.000000,452.969391 1.000000,449.938812 1.000000,446.454102 
     z"/>
+
     <path fill="#EDECEC" opacity="1.000000" stroke="none" 
       d="
     M1.929304,407.509399 
@@ -1242,7 +1248,10 @@
     <div class="header__info">
       <p>
       <small>
-        Address : 5th floor, Shalom Arcade, Kasavanahalli, Bangalore- 560035, near HDFC Bank, Bengaluru, Karnataka 560035
+        Address : 4th floor, Shalom Arcade, Kasavanahalli, Bangalore- 560035, near HDFC Bank, Bengaluru, Karnataka 560035
+      </small>
+      <small>
+          GSTIN : 29ADNPP9570A1Z4
       </small>
     </p>
   </div>
