@@ -322,7 +322,7 @@ function VideoControls({ handleFullScreen }) {
           />
         </div>
 
-        <div className="group mr-3 flex items-center gap-3">
+        {/* <div className="group mr-3 flex items-center gap-3">
           <span
             className="clip-rect-left-0 group-hover:clip-rect-full w-0 text-sm capitalize transition-all duration-300 group-hover:w-16"
             title="Current View Mode"
@@ -341,7 +341,7 @@ function VideoControls({ handleFullScreen }) {
               onChange={handleViewModeToggle}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* full screen */}
         <button
