@@ -8,7 +8,6 @@ import { Fetch } from "../../utils/Fetch";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
 import SortableColumn from "../../components/Common/DataTable/SortableColumn";
-import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
 import {
   Typography,
   CssBaseline,
