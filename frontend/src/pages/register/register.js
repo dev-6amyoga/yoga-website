@@ -2,7 +2,7 @@ import { Checkbox, Divider, Input, Modal } from "@geist-ui/core";
 
 import { Button, LinearProgress } from "@mui/material";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowRight } from "react-feather";
 import { toast } from "react-toastify";
 import GeneralInformationForm from "../../components/auth/register/GeneralInformationForm";
@@ -14,6 +14,7 @@ import { Card } from "../../components/ui/card";
 import { Fetch } from "../../utils/Fetch";
 
 import { Assignment, East, West } from "@mui/icons-material";
+import { useSearchParams } from "react-router-dom";
 import getFormData from "../../utils/getFormData";
 import "./register.css";
 
@@ -45,6 +46,8 @@ export default function Register({ switchForm }) {
 	const [instituteInfo, setInstituteInfo] = useState({});
 
 	const [clientID, setClientID] = useState("");
+
+	const [searchParams, setSearchParams] = useSearchParams();
 
 	useEffect(() => {
 		setClientID(import.meta.env.VITE_GOOGLE_CLIENT_ID);
@@ -191,7 +194,17 @@ export default function Register({ switchForm }) {
 		if (disclaimerAcceptedVar) {
 			fetchData();
 		}
-	}, [disclaimerAcceptedVar]);
+	}, [
+		disclaimerAcceptedVar,
+		generalInfo,
+		phoneInfo,
+		role,
+		instituteInfo,
+		businessPhoneInfo,
+		billingAddressSame,
+		googleInfo,
+		clientID,
+	]);
 
 	const handleStudentRegistration = async () => {
 		Fetch({
@@ -209,6 +222,7 @@ export default function Register({ switchForm }) {
 			}
 		});
 	};
+
 	const handleInstituteRegistration = async () => {
 		Fetch({
 			url: "/invite/get-email-verification-by-token",
@@ -227,22 +241,25 @@ export default function Register({ switchForm }) {
 			}
 		});
 	};
+
 	const maxSteps = 5;
 	const minSteps = 1;
-	const handleNextStep = () => {
+
+	const handleNextStep = useCallback(() => {
 		if (
 			(role === "STUDENT" && step < maxSteps) ||
 			(role === "INSTITUTE_OWNER" && step < maxSteps + 1)
 		)
 			setStep((s) => s + 1);
-	};
-	const handlePrevStep = () => {
+	}, [step, role]);
+
+	const handlePrevStep = useCallback(() => {
 		if (step > minSteps) setStep((s) => s - 1);
 		setBlockStep(false);
 		setLoading(false);
-	};
+	}, [step]);
 
-	const sendEmail = async () => {
+	const sendEmail = useCallback(async () => {
 		toast("Sending email!");
 		Fetch({
 			url: "/invite/create-email-verification",
@@ -260,7 +277,8 @@ export default function Register({ switchForm }) {
 					type: "error",
 				});
 			});
-	};
+	}, [generalInfo]);
+
 	const handlePhoneSubmit = (e) => {
 		e.preventDefault();
 		const formData = getFormData(e);
@@ -270,6 +288,7 @@ export default function Register({ switchForm }) {
 		});
 		toast("Personal Number Saved!");
 	};
+
 	const RenderStep = useMemo(() => {
 		switch (step) {
 			case 1:
@@ -437,6 +456,9 @@ export default function Register({ switchForm }) {
 		generalInfo,
 		phoneInfo,
 		clientID,
+		handleNextStep,
+		regVerifyDisabled,
+		sendEmail,
 	]);
 
 	const disclaimerAccepted = async () => {
@@ -522,7 +544,11 @@ export default function Register({ switchForm }) {
 					</div>
 					<div className="flex flex-col gap-1 items-center w-full mt-4">
 						<Button
-							onClick={() => switchForm((s) => !s)}
+							onClick={() => {
+								setSearchParams({
+									login: true,
+								});
+							}}
 							size="small"
 							variant="outlined">
 							Have an account already? Sign in.

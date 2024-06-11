@@ -9,7 +9,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBlocker, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import VideoPlayer from "../../../../components/StackVideoDashJS/VideoPlayer";
+import VideoPlayer from "../../../../components/StackVideoShaka/VideoPlayer";
 import { Fetch } from "../../../../utils/Fetch";
 
 import { ArrowLeft, ArrowRight } from "@geist-ui/icons";
