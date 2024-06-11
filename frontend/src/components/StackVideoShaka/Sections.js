@@ -107,7 +107,11 @@ export default function PlaylistSections() {
         )}
       </div>
 
-      <div className="flex flex-col gap-4 pb-4 max-h-72" ref={sectionsRef}>
+      {/* <div className="flex flex-col gap-4 pb-4 max-h-72" ref={sectionsRef}> */}
+      <div
+        className="flex flex-col gap-4 pb-4 max-h-72 max-w-xl"
+        ref={sectionsRef}
+      >
         <h5 className="uppercase p-4">Sections</h5>
         {currVideo?.video?.sections?.map((s, idx) => {
           return (
