@@ -531,7 +531,7 @@ const shakaUIConfig = {
 		"mute",
 		"volume",
 		"time_and_duration",
-		"toggle_mode",
+		// "toggle_mode",
 		"custom_fullscreen",
 	],
 	seekBarColors: {
