@@ -93,7 +93,7 @@ export default function StudentTransactionHistory() {
             variant="contained"
             color="primary"
             disabled={
-              loading || rowData?.original?.payment_status !== "succeeded"
+              loading || rowData?.original?.payment_status !== "successful"
             }
             loading={loading}
             onClick={() => {
