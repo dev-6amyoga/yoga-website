@@ -226,7 +226,6 @@ export default function StudentProfile() {
               gap: 2,
             }}
           >
-            {/* Conditionally render the tab content */}
             {tabIndex === 0 && (
               <form onSubmit={handleSubmit} style={{ width: "100%" }}>
                 <TextField
