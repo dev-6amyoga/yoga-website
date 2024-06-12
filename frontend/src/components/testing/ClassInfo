@@ -2,10 +2,10 @@ import { useEffect } from "react";
 import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
 import VideoPlayer from "../../components/StackVideoShaka/VideoPlayer";
 import ClassInfoStudent from "../../components/testing/ClassInfoStudent";
-import PlaylistSectionsStudent from "../../components/testing/PlaylistSectionsStudent";
 import usePlaylistStore from "../../store/PlaylistStore";
 import useVideoStore from "../../store/VideoStore";
 import Hero from "../student/components/Hero";
+import PlaylistSectionsStudent from "./PlaylistSectionsStudent";
 
 function ClassModeStudent() {
 	const [fullScreen] = useVideoStore((state) => [state.fullScreen]);
