@@ -1,4 +1,4 @@
-import { ExitToApp, Share } from "@mui/icons-material";
+import { Edit, ExitToApp, Share } from "@mui/icons-material";
 import { Avatar, Button, Card, CardContent } from "@mui/material";
 import "./ClassInfoStudent.css";
 
@@ -15,7 +15,7 @@ const classInfo = {
 	attendees: 12,
 };
 
-export default function ClassInfoStudent() {
+export default function ClassInfoTeacher() {
 	return (
 		<Card
 			sx={{
@@ -80,7 +80,15 @@ export default function ClassInfoStudent() {
 							sx={{
 								minWidth: "fit-content",
 							}}>
-							Leave Class
+							Start Class
+						</Button>
+						<Button
+							variant="contained"
+							startIcon={<Edit />}
+							sx={{
+								minWidth: "fit-content",
+							}}>
+							Edit Info
 						</Button>
 						<Button
 							sx={{
