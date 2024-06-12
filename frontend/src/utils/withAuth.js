@@ -1,71 +1,71 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  ROLE_INSTITUTE_ADMIN,
-  ROLE_INSTITUTE_OWNER,
-  ROLE_ROOT,
-  ROLE_STUDENT,
-  ROLE_TEACHER,
+	ROLE_INSTITUTE_ADMIN,
+	ROLE_INSTITUTE_OWNER,
+	ROLE_ROOT,
+	ROLE_STUDENT,
+	ROLE_TEACHER,
 } from "../enums/roles";
 import useUserStore from "../store/UserStore";
 
 export const withAuth = (Component, ...roles) => {
-  const isRoleValid = roles.every((role) => {
-    if (
-      role !== ROLE_INSTITUTE_ADMIN &&
-      role !== ROLE_INSTITUTE_OWNER &&
-      role !== ROLE_STUDENT &&
-      role !== ROLE_TEACHER &&
-      role !== ROLE_ROOT &&
-      role !== null
-    ) {
-      return false;
-    }
-    return true;
-  });
+	const isRoleValid = roles.every((role) => {
+		if (
+			role !== ROLE_INSTITUTE_ADMIN &&
+			role !== ROLE_INSTITUTE_OWNER &&
+			role !== ROLE_STUDENT &&
+			role !== ROLE_TEACHER &&
+			role !== ROLE_ROOT &&
+			role !== null
+		) {
+			return false;
+		}
+		return true;
+	});
 
-  return function AuthenticatedComponent(props) {
-    const [user, currentRole] = useUserStore((state) => [
-      state.user,
-      state.currentRole,
-    ]);
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [show, setShow] = useState(false);
+	return function AuthenticatedComponent(props) {
+		const [user, currentRole] = useUserStore((state) => [
+			state.user,
+			state.currentRole,
+		]);
+		const navigate = useNavigate();
+		const location = useLocation();
+		const [show, setShow] = useState(false);
 
-    useEffect(() => {
-      // if user is there, check if role is valid
-      if (user) {
-        console.log(user, "IN WITH AUTH");
-        console.log(roles, " IN WITH AUTH");
-        console.log(currentRole, "IN WITH AUTH");
-        // if role is null, show the component [authenticated+public]
-        if (roles.includes(null)) {
-          setShow(true);
-          return;
-        } else if (!roles.includes(currentRole)) {
-          // if role is not null, and current role is not equal to role, navigate to unauthorized
-          navigate("/unauthorized", {
-            state: { from: location.pathname },
-          });
-          return;
-        }
-        setShow(true);
-      } else {
-        setShow(false);
-        if (location && location.pathname !== "/auth") {
-          navigate("/auth", {
-            state: { login: true, from: location.pathname },
-          });
-        }
-        return;
-      }
-    }, [user, currentRole, location, navigate]);
+		useEffect(() => {
+			// if user is there, check if role is valid
+			if (user) {
+				// console.log(user, "IN WITH AUTH");
+				// console.log(roles, " IN WITH AUTH");
+				// console.log(currentRole, "IN WITH AUTH");
+				// if role is null, show the component [authenticated+public]
+				if (roles.includes(null)) {
+					setShow(true);
+					return;
+				} else if (!roles.includes(currentRole)) {
+					// if role is not null, and current role is not equal to role, navigate to unauthorized
+					navigate("/unauthorized", {
+						state: { from: location.pathname },
+					});
+					return;
+				}
+				setShow(true);
+			} else {
+				setShow(false);
+				if (location && location.pathname !== "/auth") {
+					navigate("/auth", {
+						state: { login: true, from: location.pathname },
+					});
+				}
+				return;
+			}
+		}, [user, currentRole, location, navigate]);
 
-    // useEffect(() => {
-    // 	console.log("withAuth : userChanged");
-    // }, [user]);
+		// useEffect(() => {
+		// 	console.log("withAuth : userChanged");
+		// }, [user]);
 
-    return <>{show ? <Component {...props} /> : <></>}</>;
-  };
+		return <>{show ? <Component {...props} /> : <></>}</>;
+	};
 };

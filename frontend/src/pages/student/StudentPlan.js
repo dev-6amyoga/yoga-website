@@ -25,6 +25,8 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
+import { ROLE_STUDENT } from "../../enums/roles";
+import { withAuth } from "../../utils/withAuth";
 import Hero from "./components/Hero";
 
 const allowedCountriesCurrencyMap = {
@@ -827,7 +829,7 @@ function StudentPlan() {
 	);
 }
 
-export default StudentPlan;
+export default withAuth(StudentPlan, ROLE_STUDENT);
 
 // import * as React from "react";
 
