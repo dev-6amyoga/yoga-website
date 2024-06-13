@@ -54,7 +54,7 @@ export const withAuth = (Component, ...roles) => {
 			} else {
 				setShow(false);
 				if (location && location.pathname !== "/auth") {
-					navigate("/auth", {
+					navigate("/auth?login=true", {
 						state: { login: true, from: location.pathname },
 					});
 				}
