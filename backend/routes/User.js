@@ -627,4 +627,5 @@ router.post("/update-email", async (req, res) => {
       .json({ error: "Failed to update user" });
   }
 });
+
 module.exports = router;
