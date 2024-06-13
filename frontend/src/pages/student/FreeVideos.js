@@ -20,7 +20,7 @@ import Hero from "./components/Hero";
 
 export default function FreeVideos() {
   const [planId, setPlanId] = useState(0);
-  const [currentVideoId, setCurrentVideoId] = useState("jYIE9dtfmr8");
+  const [currentVideoId, setCurrentVideoId] = useState("sKlJT1WIEbI");
   let user = useUserStore((state) => state.user);
   const videoOptions = {
     playerVars: {
@@ -65,6 +65,15 @@ export default function FreeVideos() {
 
   const freeVideos = useMemo(
     () => [
+      {
+        videoId: "sKlJT1WIEbI",
+        title: "What yoga means to me",
+      },
+      {
+        videoId: "U7HrzV8dpvs",
+        title: "My weightloss journey",
+      },
+
       {
         videoId: "jYIE9dtfmr8",
         title: "Yoga to improve bowel movements",
