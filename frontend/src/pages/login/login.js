@@ -9,7 +9,7 @@ import { navigateToDashboard } from "../../utils/navigateToDashboard";
 import "./login.css";
 
 import { LockOutlined } from "@mui/icons-material";
-import { TextField } from "@mui/material";
+import { TextField, Typography } from "@mui/material";
 import Button from "@mui/material/Button";
 import LoginGoogle from "../../components/auth/LoginGoogle";
 import getFormData from "../../utils/getFormData";
@@ -21,9 +21,8 @@ export default function Login({ switchForm }) {
   const [number, setNumber] = useState("");
   const [userNow, setUserNow] = useState(null);
   const [phoneSignIn, setPhoneSignIn] = useState(false);
-  const [phoneSignInVisible, setPhoneSignInVisible] = useState(false);
   const [mainVisible, setMainVisible] = useState(true);
-  const [forgotPassword, setForgotPassword] = useState(false);
+  const [emailVerify, setEmailVerify] = useState(false);
   const [forgotPasswordVisible, setForgotPasswordVisible] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -55,42 +54,31 @@ export default function Login({ switchForm }) {
     ])
   );
 
-  const onSuccessCallbackOtp = (number) => {
-    setNumber(number);
-    setMainVisible(false);
-    if (phoneSignIn) {
-      signWithPhone();
-    } else {
-      setForgotPasswordVisible(true);
-      setForgotPassword(false);
-    }
-  };
-
-  useEffect(() => {
-    if (number.length >= 10) {
-      const fetchData = async () => {
-        try {
-          const response = await Fetch({
-            url: "/user/get-by-phone",
-            method: "POST",
-            data: { phone: number },
-          });
-          const data = await response.data;
-          if (data["user"] !== undefined && data["user"] !== null) {
-            if (phoneSignIn) {
-              setUser(data["user"]);
-            } else {
-              setUserNow(data["user"]);
-            }
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      };
-      console.log("Getting user?");
-      fetchData();
-    }
-  }, [number, phoneSignIn, setUser, setUserNow]);
+  // useEffect(() => {
+  //   if (number.length >= 10) {
+  //     const fetchData = async () => {
+  //       try {
+  //         const response = await Fetch({
+  //           url: "/user/get-by-phone",
+  //           method: "POST",
+  //           data: { phone: number },
+  //         });
+  //         const data = await response.data;
+  //         if (data["user"] !== undefined && data["user"] !== null) {
+  //           if (phoneSignIn) {
+  //             setUser(data["user"]);
+  //           } else {
+  //             setUserNow(data["user"]);
+  //           }
+  //         }
+  //       } catch (error) {
+  //         console.log(error);
+  //       }
+  //     };
+  //     console.log("Getting user?");
+  //     fetchData();
+  //   }
+  // }, [number, phoneSignIn, setUser, setUserNow]);
 
   const updateNewPassword = async (e) => {
     e.preventDefault();
@@ -180,56 +168,24 @@ export default function Login({ switchForm }) {
   useEffect(() => {
     console.log("in navigate use effect");
     if (user && currentRole) {
+      console.log("hello!");
       navigateToDashboard(currentRole, userPlan, navigate);
     }
   }, [user, currentRole, navigate, userPlan]);
 
   const handleForgotPassword = () => {
     setMainVisible(false);
-    setPhoneSignIn(false);
-    setPhoneSignInVisible(false);
-    setForgotPassword(true);
-    setForgotPasswordVisible(false);
+    setEmailVerify(true);
   };
 
-  const phoneSignInFunction = () => {
-    setMainVisible(false);
-    setForgotPassword(false);
-    setForgotPasswordVisible(false);
-    setPhoneSignIn(true);
-    setPhoneSignInVisible(true);
-  };
-
-  const signWithPhone = async () => {
-    setPhoneSignIn(false);
-    setUser(user);
-    const roleFetcher = await Fetch({
-      url: "/user/get-role-by-user-id",
-      method: "POST",
-      data: {
-        user_id: "",
-      },
-    });
-    const data = roleFetcher.data;
-    if (data) {
-      const maxRole = Math.max(...data.user_role.map((role) => role.role_id));
-      console.log(maxRole);
-      if (maxRole === 5) {
-        SetType("student");
-      }
-      if (maxRole === 4) {
-        SetType("teacher");
-      }
-      if (maxRole === 3) {
-        SetType("institute_admin");
-      }
-      if (maxRole === 2) {
-        SetType("root");
-      }
-    }
+  const emailVerifyFunc = async (e) => {
+    console.log("verifying email!!");
+    toast("verifying email!");
   };
 
   useEffect(() => {
+    console.log("NAVIGATINGGGG");
+
     if (user?.user_id) {
       if (type === "student") {
         navigate("/student/free-videos");
@@ -294,23 +250,16 @@ export default function Login({ switchForm }) {
           </div>
         </div>
       )}
-      {(forgotPassword || phoneSignInVisible) && (
-        <div>
-          <Otp onSuccessCallback={onSuccessCallbackOtp} />
-          <Button
-            className="w-full"
-            variant="ghost"
-            onClick={() => {
-              setPhoneSignInVisible(false);
-              setForgotPasswordVisible(false);
-              setForgotPassword(false);
-              setPhoneSignIn(false);
-              setMainVisible(true);
-            }}
-          >
-            Go Back
+
+      {emailVerify && (
+        <form onSubmit={emailVerifyFunc} className="flex flex-col gap-4">
+          {" "}
+          <Typography>Forgot Password</Typography>
+          <TextField name="email_verify" label="Enter your Email ID" required />
+          <Button type="submit" variant="contained">
+            Send Email
           </Button>
-        </div>
+        </form>
       )}
 
       {forgotPasswordVisible && userNow && (
