@@ -265,7 +265,7 @@ const RenderRazorpay = ({
 			retry: {
 				enabled: false,
 			},
-			timeout: 5,
+			timeout: 300,
 			theme: {
 				color: "",
 			},
@@ -277,6 +277,7 @@ const RenderRazorpay = ({
 			// console.log("in razorpay");
 			showRazorpay(options);
 		} else {
+			razorpayRendered.current = false;
 			// reset razorpay
 			if (gateway.current) {
 				window.Razorpay = null;
