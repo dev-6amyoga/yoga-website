@@ -322,42 +322,42 @@ function StudentNavMUI({ mode, toggleColorMode }) {
                       alignItems: "end",
                       flexGrow: 1,
                     }}
-                  ></Box>
-
-                  {paths.map((path) => {
-                    return (
-                      <MenuItem
-                        onClick={() => navigate(path.path)}
-                        disabled={path.props.disabled}
-                      >
-                        {path.title}
-                      </MenuItem>
-                    );
-                  })}
-                  <Divider />
-                  {user ? (
-                    <>
-                      <h2 className="text-center text-sm">
-                        Logged in as {user?.name}
-                      </h2>
-                      <Button variant="destructive" onClick={handleLogout}>
-                        Logout
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <MenuItem>
-                        <Button
-                          color="primary"
-                          variant="outlined"
-                          onClick={() => navigate("/auth")}
-                          sx={{ width: "100%" }}
+                  >
+                    {paths.map((path) => {
+                      return (
+                        <MenuItem
+                          onClick={() => navigate(path.path)}
+                          disabled={path.props.disabled}
                         >
-                          Sign in / Sign Up
+                          {path.title}
+                        </MenuItem>
+                      );
+                    })}
+                    <Divider />
+                    {user ? (
+                      <>
+                        <h2 className="text-center text-sm">
+                          Logged in as {user?.name}
+                        </h2>
+                        <Button variant="destructive" onClick={handleLogout}>
+                          Logout
                         </Button>
-                      </MenuItem>
-                    </>
-                  )}
+                      </>
+                    ) : (
+                      <>
+                        <MenuItem>
+                          <Button
+                            color="primary"
+                            variant="outlined"
+                            onClick={() => navigate("/auth")}
+                            sx={{ width: "100%" }}
+                          >
+                            Sign in / Sign Up
+                          </Button>
+                        </MenuItem>
+                      </>
+                    )}
+                  </Box>
                 </Box>
               </Drawer>
             </Box>
