@@ -116,20 +116,6 @@ function StudentTransactionHistory() {
           <SortableColumn column={column}>Transaction Order ID</SortableColumn>
         ),
       },
-      // {
-      //   accessorKey: "transaction_payment_id",
-      //   header: ({ column }) => (
-      //     <SortableColumn column={column}>
-      //       Transaction Payment ID
-      //     </SortableColumn>
-      //   ),
-      // },
-      //   {
-      //     accessorKey: "amount",
-      //     header: ({ column }) => (
-      //       <SortableColumn column={column}>Amount</SortableColumn>
-      //     ),
-      //   },
       {
         accessorKey: "amount",
         header: ({ column }) => (
@@ -137,16 +123,10 @@ function StudentTransactionHistory() {
         ),
         cell: ({ row }) => {
           const amount = row.original.amount;
-          const formattedAmount = `Rs. ${(amount / 100).toFixed(2)}`; // Format with Rs. and 2 decimals
+          const formattedAmount = `Rs. ${(amount / 100).toFixed(2)}`;
           return <div>{formattedAmount}</div>;
         },
       },
-      // {
-      //   accessorKey: "payment_method",
-      //   header: ({ column }) => (
-      //     <SortableColumn column={column}>Payment Method</SortableColumn>
-      //   ),
-      // },
       {
         accessorKey: "payment_status",
         header: ({ column }) => (
@@ -167,40 +147,6 @@ function StudentTransactionHistory() {
   const [mode, setMode] = useState("light");
 
   const defaultTheme = createTheme({ palette: { mode } });
-
-  // return (
-  //   <ThemeProvider theme={defaultTheme}>
-  //     <CssBaseline />
-  //     <StudentNavMUI />
-  //     <Hero heading="Transaction History" />
-  //     <div className="flex flex-col items-center justify-center py-0">
-  //       <Spacer h={1} />
-  //       <a
-  //         className="hidden"
-  //         href="#"
-  //         ref={downloadATag}
-  //         target="_blank"
-  //         rel="noreferer"
-  //       ></a>
-  //       <div className="elements">
-  //         <Button
-  //           onClick={() => {
-  //             handleDownload(transactions);
-  //           }}
-  //         >
-  //           Download CSV
-  //         </Button>
-  //         <br />
-  //         <div className="border max-w-7xl">
-  //           <DataTable
-  //             columns={columnsDataTable}
-  //             data={transactions || []}
-  //           ></DataTable>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   </ThemeProvider>
-  // );
 
   return (
     <ThemeProvider theme={defaultTheme}>

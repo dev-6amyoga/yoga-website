@@ -1,4 +1,4 @@
-import { Avatar, Tooltip } from "@mui/material";
+import { Avatar, Button, Tooltip } from "@mui/material";
 import { blue } from "@mui/material/colors";
 import { useEffect, useMemo, useRef } from "react";
 import { SEEK_TYPE_MARKER } from "../../enums/seek_types";
@@ -27,6 +27,8 @@ export default function PlaylistSections() {
   ]);
 
   const [queue] = usePlaylistStore((state) => [state.queue]);
+  console.log(queue, "IS OUR QUEUE HAHAHAHHAHA");
+  const clearQueue = usePlaylistStore((state) => state.clearQueue);
 
   const handleSeek = (s, idx) => {
     // TODO : fix this, bug when you go to previous marker
@@ -72,6 +74,9 @@ export default function PlaylistSections() {
       className={`relative max-w-4xl mx-auto overflow-y-auto overflow-x-hidden rounded-xl bg-blue-50 ${fullScreen ? "" : "xl:h-full"}`}
     >
       <div className="p-4 sticky top-0 bg-blue-50 z-[1000] rounded-xl">
+        <Button variant="contained" onClick={clearQueue}>
+          Clear Queue
+        </Button>
         <h5 className="uppercase">Currently Playing</h5>
         {currVideo ? (
           <div className="flex flex-col gap-2 py-2">

@@ -1,11 +1,11 @@
 import VideoPlayerWrapper from "../../components/StackVideoShaka/VideoPlayerWrapper";
 
 export default function ShakaVideo() {
-	return (
-		// <PageWrapper heading="Player">
-		<div>
-			<VideoPlayerWrapper />
-		</div>
-		// </PageWrapper>
-	);
+  return (
+    // <PageWrapper heading="Player">
+    <div>
+      <VideoPlayerWrapper />
+    </div>
+    // </PageWrapper>
+  );
 }
