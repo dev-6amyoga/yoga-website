@@ -216,6 +216,7 @@ router.post("/login-google", async (req, res) => {
 
     // get email and name
     const { email, name } = userInfo;
+    console.log(email, name);
 
     if (!email || !name) {
       return res
@@ -226,16 +227,11 @@ router.post("/login-google", async (req, res) => {
     // check if user exists
     let [user, errorUser] = await GetUserInfo({ email });
 
-    if (!user || errorUser)
+    if (!user || errorUser) {
       return res
         .status(HTTP_BAD_REQUEST)
         .json({ error: "User does not exist" });
-
-    // if (user.is_google_login === false) {
-    // 	return res
-    // 		.status(HTTP_BAD_REQUEST)
-    // 		.json({ error: "User not registered using Google" });
-    // }
+    }
 
     // check if user has active login token
     const login_token_history = await LoginToken.findAll({
