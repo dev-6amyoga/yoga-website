@@ -77,25 +77,25 @@ function StudentHome() {
     }
   }, [user]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await Fetch({
-          url: "/user-plan/get-user-plan-by-id",
-          method: "POST",
-          data: { user_id: user.user_id },
-        });
-        const data = response.data;
-        setUserPlan(data["userPlan"]);
-        setPlanId(data["userPlan"]["plan_id"]);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    if (user) {
-      fetchData();
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await Fetch({
+  //         url: "/user-plan/get-user-plan-by-id",
+  //         method: "POST",
+  //         data: { user_id: user.user_id },
+  //       });
+  //       const data = response.data;
+  //       setUserPlan(data["userPlan"]);
+  //       setPlanId(data["userPlan"]["plan_id"]);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
+  //   if (user) {
+  //     fetchData();
+  //   }
+  // }, [user]);
 
   // const startWebcam = () => {
   // 	const constraints = { video: true };
