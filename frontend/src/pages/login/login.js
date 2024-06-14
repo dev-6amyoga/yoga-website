@@ -54,31 +54,6 @@ export default function Login({ switchForm }) {
     ])
   );
 
-  // useEffect(() => {
-  //   if (number.length >= 10) {
-  //     const fetchData = async () => {
-  //       try {
-  //         const response = await Fetch({
-  //           url: "/user/get-by-phone",
-  //           method: "POST",
-  //           data: { phone: number },
-  //         });
-  //         const data = await response.data;
-  //         if (data["user"] !== undefined && data["user"] !== null) {
-  //           if (phoneSignIn) {
-  //             setUser(data["user"]);
-  //           } else {
-  //             setUserNow(data["user"]);
-  //           }
-  //         }
-  //       } catch (error) {
-  //         console.log(error);
-  //       }
-  //     };
-  //     fetchData();
-  //   }
-  // }, [number, phoneSignIn, setUser, setUserNow]);
-
   const updateNewPassword = async (e) => {
     e.preventDefault();
     const formData = getFormData(e);
