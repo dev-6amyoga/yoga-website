@@ -334,7 +334,7 @@ router.post("/update-profile", async (req, res) => {
 router.post("/update-password", async (req, res) => {
   const { user_id, old_password, new_password, confirm_new_password } =
     req.body;
-
+  console.log(user_id, old_password, new_password);
   if (!user_id || !old_password || !new_password || !confirm_new_password) {
     return res
       .status(HTTP_BAD_REQUEST)

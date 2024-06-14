@@ -216,8 +216,6 @@ router.post("/login-google", async (req, res) => {
 
     // get email and name
     const { email, name } = userInfo;
-    console.log(email, name);
-
     if (!email || !name) {
       return res
         .status(HTTP_BAD_REQUEST)
@@ -229,8 +227,8 @@ router.post("/login-google", async (req, res) => {
 
     if (!user || errorUser) {
       return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: "User does not exist" });
+        .status(HTTP_OK)
+        .json({ user: userInfo, message: "User does not exist" });
     }
 
     // check if user has active login token

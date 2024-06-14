@@ -1,5 +1,5 @@
 import { Checkbox, Divider, Input, Modal } from "@geist-ui/core";
-
+import { useLocation, useSearchParams } from "react-router-dom";
 import { Button, LinearProgress } from "@mui/material";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -12,15 +12,13 @@ import PickRegistationMode from "../../components/auth/register/PickRegistration
 import RoleSelectorForm from "../../components/auth/register/RoleSelectorForm";
 import { Card } from "../../components/ui/card";
 import { Fetch } from "../../utils/Fetch";
-
 import { Assignment, East, West } from "@mui/icons-material";
-import { useSearchParams } from "react-router-dom";
 import getFormData from "../../utils/getFormData";
 import "./register.css";
 
 export default function Register({ switchForm }) {
-  // const { toast } = useToast();
   const notify = (x) => toast(x);
+  const location = useLocation();
 
   const [step, setStep] = useState(1);
   const [blockStep, setBlockStep] = useState(false);
@@ -32,30 +30,30 @@ export default function Register({ switchForm }) {
   const [regVerifyDisabled, setRegVerifyDisabled] = useState(false);
   const [role, setRole] = useState("STUDENT"); // STUDENT | INSTITUTE_OWNER
   const [regMode, setRegMode] = useState("NORMAL"); // NORMAL | GOOGLE
-
   const [loading, setLoading] = useState(false);
-
   const [googleInfo, setGoogleInfo] = useState({});
   const [generalInfo, setGeneralInfo] = useState({});
-
   const [phoneInfo, setPhoneInfo] = useState({});
   const [personalBusinessPhoneInfoSame, setPersonalBusinessPhoneInfoSame] =
     useState(true);
   const [businessPhoneInfo, setBusinessPhoneInfo] = useState({});
-
   const [instituteInfo, setInstituteInfo] = useState({});
-
   const [clientID, setClientID] = useState("");
-
   const [searchParams, setSearchParams] = useSearchParams();
-
   useEffect(() => {
     setClientID(import.meta.env.VITE_GOOGLE_CLIENT_ID);
   }, []);
 
   useEffect(() => {
-    console.log(generalInfo);
-  }, [generalInfo]);
+    const params = new URLSearchParams(location.search);
+    const register = params.get("register");
+    const googleName = params.get("googleName");
+    const googleEmail = params.get("googleEmail");
+    if (register === "true" && googleName && googleEmail) {
+      setGeneralInfo({ name: googleName, email_id: googleEmail });
+      setStep(2);
+    }
+  }, [location]);
 
   useEffect(() => {
     if (role === "STUDENT") {
@@ -70,10 +68,7 @@ export default function Register({ switchForm }) {
     role,
   ]);
 
-  // const navigate = useNavigate();
-
   const [billingAddressSame, setBillingAddressSame] = useState(true);
-
   useEffect(() => {
     const fetchData = async () => {
       if (role === "STUDENT") {
@@ -89,7 +84,6 @@ export default function Register({ switchForm }) {
           newUser.client_id = clientID;
           newUser.jwt_token = googleInfo?.jwt_token;
         }
-        console.log(newUser, "TO BE REGISTERED ");
         const response = await Fetch({
           url: url,
           method: "POST",
@@ -174,7 +168,6 @@ export default function Register({ switchForm }) {
                 }
               })
               .catch((err) => {
-                console.log(err);
                 toast("Error registering user: " + err?.response?.data?.error, {
                   type: "error",
                 });
@@ -264,7 +257,6 @@ export default function Register({ switchForm }) {
         setRegVerifyDisabled(true);
       })
       .catch((err) => {
-        console.log(err);
         toast(`Error : ${err?.response?.data?.message}`, {
           type: "error",
         });
