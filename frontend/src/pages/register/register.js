@@ -1,5 +1,5 @@
 import { Checkbox, Divider, Input, Modal } from "@geist-ui/core";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Button, LinearProgress } from "@mui/material";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -15,12 +15,41 @@ import { Fetch } from "../../utils/Fetch";
 import { Assignment, East, West } from "@mui/icons-material";
 import getFormData from "../../utils/getFormData";
 import "./register.css";
+import useUserStore from "../../store/UserStore";
+import { useShallow } from "zustand/react/shallow";
 
 export default function Register({ switchForm }) {
   const notify = (x) => toast(x);
   const location = useLocation();
-
+  const [
+    user,
+    setUser,
+    userPlan,
+    setUserPlan,
+    setAccessToken,
+    setRefreshToken,
+    setCurrentInstituteId,
+    setInstitutes,
+    currentRole,
+    setCurrentRole,
+    setRoles,
+  ] = useUserStore(
+    useShallow((state) => [
+      state.user,
+      state.setUser,
+      state.userPlan,
+      state.setUserPlan,
+      state.setAccessToken,
+      state.setRefreshToken,
+      state.setCurrentInstituteId,
+      state.setInstitutes,
+      state.currentRole,
+      state.setCurrentRole,
+      state.setRoles,
+    ])
+  );
   const [step, setStep] = useState(1);
+  const [loggingIn, setLoggingIn] = useState(false);
   const [blockStep, setBlockStep] = useState(false);
   const [blockPhoneStep, setBlockPhoneStep] = useState(false);
   const [disclaimerModal, setDisclaimerModal] = useState(false);
@@ -40,6 +69,7 @@ export default function Register({ switchForm }) {
   const [instituteInfo, setInstituteInfo] = useState({});
   const [clientID, setClientID] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   useEffect(() => {
     setClientID(import.meta.env.VITE_GOOGLE_CLIENT_ID);
   }, []);
@@ -69,12 +99,12 @@ export default function Register({ switchForm }) {
   ]);
 
   const [billingAddressSame, setBillingAddressSame] = useState(true);
+
   useEffect(() => {
     const fetchData = async () => {
       if (role === "STUDENT") {
         const newUser = {
           ...generalInfo,
-          //   phone_no: phoneInfo?.phone_no,
           role_name: "STUDENT",
           is_google_login: googleInfo && googleInfo?.verified ? true : false,
         };
@@ -90,12 +120,13 @@ export default function Register({ switchForm }) {
           data: newUser,
         });
         if (response?.status === 200) {
-          toast("New User added successfully! Kindly login.", {
-            type: "success",
-          });
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
+          handleLogin(newUser.username, newUser.password);
+          // toast("New User added successfully! Kindly login.", {
+          //   type: "success",
+          // });
+          // setTimeout(() => {
+          //   window.location.reload();
+          // }, 2000);
         } else {
           const errorData = response.data;
           toast(errorData?.message, { type: "error" });
@@ -225,6 +256,69 @@ export default function Register({ switchForm }) {
         }
       }
     });
+  };
+
+  useEffect(() => {
+    if (user?.user_id) {
+      if (role === "STUDENT") {
+        navigate("/student/free-videos");
+      }
+      // else if (type === "root") {
+      //   navigate("/admin");
+      // }
+      // else if (type === "teacher")
+      //   {
+      //   navigate("/teacher");
+      // }
+      else if (role === "INSTITUTE_OWNER") {
+        navigate("/institute");
+      }
+    }
+  }, [user, role]);
+
+  const handleLogin = async (username, password) => {
+    const loginData = {
+      username: username,
+      password: password,
+    };
+    toast("Logging you in, please wait!");
+    try {
+      const response = await Fetch({
+        url: "/auth/login",
+        method: "POST",
+        data: loginData,
+      });
+      if (response && response?.status === 200) {
+        const userData = response.data;
+        setUser(userData.user);
+        setAccessToken(userData?.accessToken);
+        setRefreshToken(userData?.refreshToken);
+        setRoles(userData?.user?.roles);
+        const currRole = Object.keys(userData?.user?.roles)[0];
+        const currPlan = userData?.user?.roles[currRole][0]?.plan;
+        setUserPlan(currPlan);
+        const ins = userData?.user?.roles[currRole].map((r) => r?.institute);
+        setInstitutes(ins);
+        setCurrentInstituteId(ins[0]?.institute_id);
+        sessionStorage.setItem("6amyoga_access_token", userData?.accessToken);
+        sessionStorage.setItem("6amyoga_refresh_token", userData?.refreshToken);
+        setCurrentRole(currRole);
+        setLoggingIn(true);
+      } else {
+        const errorData = response.data;
+        // removeCookie("6amyoga_access_token");
+        // removeCookie("6amyoga_refresh_token");
+        sessionStorage.removeItem("6amyoga_access_token");
+        sessionStorage.removeItem("6amyoga_refresh_token");
+        toast(errorData?.error, { type: "error" });
+      }
+    } catch (error) {
+      // removeCookie("6amyoga_access_token");
+      // removeCookie("6amyoga_refresh_token");
+      sessionStorage.removeItem("6amyoga_access_token");
+      sessionStorage.removeItem("6amyoga_refresh_token");
+      toast("Error logging in, try again", { type: "error" });
+    }
   };
 
   const maxSteps = 4;
