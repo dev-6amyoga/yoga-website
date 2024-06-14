@@ -275,7 +275,7 @@ router.post("/get-by-planid", async (req, res) => {
 });
 
 router.post("/update-profile", async (req, res) => {
-  const { user_id, name, email, phone } = req.body;
+  const { user_id, name, email, phone, username } = req.body;
   if (!user_id) {
     return res
       .status(HTTP_BAD_REQUEST)
@@ -301,7 +301,7 @@ router.post("/update-profile", async (req, res) => {
 
     // Update the user's profile
     const [n] = await User.update(
-      { name, email, phone },
+      { name, email, phone, username },
       {
         where: { user_id: user_id },
       }
@@ -313,23 +313,16 @@ router.post("/update-profile", async (req, res) => {
         .json({ error: "User does not exist" });
     }
 
-    const user = await User.findByPk(user_id, {
-      include: [{ model: Role, attributes: ["name"] }],
+    const user = await User.findOne({
+      where: { user_id: user_id },
     });
-
     if (!user) {
       return res
         .status(HTTP_BAD_REQUEST)
         .json({ error: "User does not exist" });
     }
 
-    const plan = await UserPlan.findOne({
-      include: [{ model: User, where: { user_id: user.user_id } }],
-    });
-
-    return res
-      .status(HTTP_OK)
-      .json({ message: "Updated successfully", user, plan });
+    return res.status(HTTP_OK).json({ message: "Updated successfully", user });
   } catch (error) {
     console.error(error);
     return res

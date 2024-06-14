@@ -36,12 +36,10 @@ function StudentProfile() {
     setTabIndex(newTabIndex);
   };
   const user = useUserStore((state) => state.user);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [userData, setUserData] = useState({});
   const [update, setUpdate] = useState(false);
-  const [token, setToken] = useState("");
   const [isEmailUpdate, setIsEmailUpdate] = useState(false);
-  const [isPhoneUpdate, setIsPhoneUpdate] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [updateData, setUpdateData] = useState({});
   const closeUpdateHandler = (event) => {
@@ -87,9 +85,6 @@ function StudentProfile() {
       setIsEditing(true);
     } else {
       const formData = getFormData(e);
-      console.log(formData, "IS FORM DATA MUAUAUAUAUAU");
-      console.log(userData, "IS FORM DATA MUAUAUAUAUAU");
-
       if (
         formData.name_profile === "" &&
         formData.email_profile === "" &&
@@ -120,6 +115,11 @@ function StudentProfile() {
         updateData.name_profile !== ""
           ? updateData.name_profile
           : userData.name,
+      username:
+        updateData.username_profile !== ""
+          ? updateData.username_profile
+          : userData.username,
+
       email:
         updateData.email_profile !== ""
           ? updateData.email_profile
@@ -130,18 +130,20 @@ function StudentProfile() {
           : userData.phone,
     };
 
-    if (updateData1.phone) {
-      const [validPhone, phoneError] = validatePhone(updateData1.phone);
+    if (updateData.phone_profile) {
+      const [validPhone, phoneError] = validatePhone(updateData.phone_profile);
       if (!validPhone) {
         toast(phoneError.message, { type: "error" });
         return;
       }
     }
 
-    const [validEmail, emailError] = validateEmail(updateData1.email);
-    if (!validEmail) {
-      toast(emailError.message, { type: "error" });
-      return;
+    if (updateData.email_profile) {
+      const [validEmail, emailError] = validateEmail(updateData.email_profile);
+      if (!validEmail) {
+        toast(emailError.message, { type: "error" });
+        return;
+      }
     }
 
     if (
@@ -151,13 +153,28 @@ function StudentProfile() {
       setIsEmailUpdate(true);
       toast("Email Update");
     }
-    if (
-      updateData.phone_profile !== "" &&
-      updateData.phone_profile !== userData.phone
-    ) {
-      setIsPhoneUpdate(true);
-      toast("Phone Update");
-    }
+    setIsEditing(false);
+    console.log(updateData1, "to be updated!");
+    Fetch({
+      url: "/user/update-profile",
+      method: "POST",
+      data: {
+        user_id: updateData1.user_id,
+        username: updateData1.username,
+        name: updateData1.name,
+        phone: updateData1.phone,
+        email: updateData1.email,
+      },
+    })
+      .then((res) => {
+        console.log(res);
+        toast("Updated!", { type: "success" });
+      })
+      .catch((err) => {
+        toast(`Error : ${err.response.data.error}`, {
+          type: "error",
+        });
+      });
   };
 
   const sendEmail = async () => {
@@ -257,9 +274,6 @@ function StudentProfile() {
                   sx={{ mb: 2 }}
                 />
 
-                {/* <Button type="warning" htmlType="submit">
-                  {isEditing ? "Save Changes" : "Edit Profile"}
-                </Button> */}
                 <Box
                   sx={{
                     display: "flex",
