@@ -184,8 +184,6 @@ export default function Login({ switchForm }) {
   };
 
   useEffect(() => {
-    console.log("NAVIGATINGGGG");
-
     if (user?.user_id) {
       if (type === "student") {
         navigate("/student/free-videos");
