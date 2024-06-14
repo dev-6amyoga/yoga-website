@@ -306,7 +306,6 @@ router.post("/update-profile", async (req, res) => {
         where: { user_id: user_id },
       }
     );
-
     if (n !== 1) {
       return res
         .status(HTTP_BAD_REQUEST)
