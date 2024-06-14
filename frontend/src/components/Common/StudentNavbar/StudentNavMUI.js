@@ -266,7 +266,7 @@ function StudentNavMUI({ mode, toggleColorMode }) {
                       </ListItemIcon>{" "}
                       Profile
                     </MenuItem>
-                    <MenuItem
+                    {/*<MenuItem
                       onClick={() => {
                         navigate("/student/settings");
                         handleCloseProfileMenu();
@@ -276,7 +276,7 @@ function StudentNavMUI({ mode, toggleColorMode }) {
                         <Settings fontSize="small" />
                       </ListItemIcon>{" "}
                       Settings
-                    </MenuItem>
+                    </MenuItem>*/}
                     <Divider />
 
                     <MenuItem
