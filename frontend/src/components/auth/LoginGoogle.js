@@ -78,31 +78,41 @@ export default function LoginGoogle() {
             });
 
             if (response && response?.status === 200) {
-              const userData = response.data;
-              setUser(userData.user);
-              setAccessToken(userData?.accessToken);
-              setRefreshToken(userData?.refreshToken);
-              setRoles(userData?.user?.roles);
-              const currRole = Object.keys(userData?.user?.roles)[0];
-              const currPlan = userData?.user?.roles[currRole][0]?.plan;
-              setUserPlan(currPlan);
-              console.log(userData?.user?.roles[currRole]);
-              const ins = userData?.user?.roles[currRole].map(
-                (r) => r?.institute
-              );
-              setInstitutes(ins);
-              setCurrentInstituteId(ins[0]?.institute_id);
-              sessionStorage.setItem(
-                "6amyoga_access_token",
-                userData?.accessToken
-              );
-              sessionStorage.setItem(
-                "6amyoga_refresh_token",
-                userData?.refreshToken
-              );
+              console.log("response is : ", response);
+              if (response.data?.message === "User does not exist") {
+                const googleName = response.data?.user.name;
+                const googleEmail = response.data?.user.email;
+                // navigate("/auth?register=true");
+                navigate(
+                  `/auth?register=true&googleName=${encodeURIComponent(googleName)}&googleEmail=${encodeURIComponent(googleEmail)}`
+                );
+              } else {
+                const userData = response.data;
+                setUser(userData.user);
+                setAccessToken(userData?.accessToken);
+                setRefreshToken(userData?.refreshToken);
+                setRoles(userData?.user?.roles);
+                const currRole = Object.keys(userData?.user?.roles)[0];
+                const currPlan = userData?.user?.roles[currRole][0]?.plan;
+                setUserPlan(currPlan);
+                console.log(userData?.user?.roles[currRole]);
+                const ins = userData?.user?.roles[currRole].map(
+                  (r) => r?.institute
+                );
+                setInstitutes(ins);
+                setCurrentInstituteId(ins[0]?.institute_id);
+                sessionStorage.setItem(
+                  "6amyoga_access_token",
+                  userData?.accessToken
+                );
+                sessionStorage.setItem(
+                  "6amyoga_refresh_token",
+                  userData?.refreshToken
+                );
 
-              // should navigate based on role
-              setCurrentRole(currRole);
+                // should navigate based on role
+                setCurrentRole(currRole);
+              }
             } else {
               const errorData = response.data;
               // removeCookie("6amyoga_access_token");

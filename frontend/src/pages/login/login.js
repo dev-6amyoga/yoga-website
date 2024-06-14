@@ -75,7 +75,6 @@ export default function Login({ switchForm }) {
   //         console.log(error);
   //       }
   //     };
-  //     console.log("Getting user?");
   //     fetchData();
   //   }
   // }, [number, phoneSignIn, setUser, setUserNow]);
@@ -110,11 +109,9 @@ export default function Login({ switchForm }) {
         setMainVisible(true);
       } else {
         const errorData = response.data;
-        console.log(errorData.data.error);
         toast.error(errorData?.error);
       }
     } catch (err) {
-      console.log(err);
       toast(err);
     }
   };
@@ -122,8 +119,6 @@ export default function Login({ switchForm }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = getFormData(e);
-    console.log(formData);
-
     toast("Logging you in, please wait!");
     try {
       const response = await Fetch({
@@ -133,7 +128,6 @@ export default function Login({ switchForm }) {
       });
       if (response && response?.status === 200) {
         const userData = response.data;
-        // console.log(userData, "IS USER DATA!!");
         setUser(userData.user);
         setAccessToken(userData?.accessToken);
         setRefreshToken(userData?.refreshToken);
@@ -141,7 +135,6 @@ export default function Login({ switchForm }) {
         const currRole = Object.keys(userData?.user?.roles)[0];
         const currPlan = userData?.user?.roles[currRole][0]?.plan;
         setUserPlan(currPlan);
-        console.log(userData?.user?.roles[currRole]);
         const ins = userData?.user?.roles[currRole].map((r) => r?.institute);
         setInstitutes(ins);
         setCurrentInstituteId(ins[0]?.institute_id);
@@ -166,9 +159,7 @@ export default function Login({ switchForm }) {
   };
 
   useEffect(() => {
-    console.log("in navigate use effect");
     if (user && currentRole) {
-      console.log("hello!");
       navigateToDashboard(currentRole, userPlan, navigate);
     }
   }, [user, currentRole, navigate, userPlan]);
@@ -179,7 +170,6 @@ export default function Login({ switchForm }) {
   };
 
   const emailVerifyFunc = async (e) => {
-    console.log("verifying email!!");
     toast("verifying email!");
   };
 
