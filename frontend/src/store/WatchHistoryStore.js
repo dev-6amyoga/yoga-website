@@ -15,15 +15,19 @@ const useWatchHistoryStore = create((set, get) => ({
 
 	committedTs: 0,
 	setCommittedTs: (ts) => set({ committedTs: ts }),
-	addToCommittedTs: (ts) => set((state) => ({ committedTs: ts })),
+	addToCommittedTs: (ts) =>
+		set((state) => {
+			// console.log("watch history setting --> ", ts);
+			return { committedTs: ts };
+		}),
 
 	/* 
-   {
-    user_id,
-    asana_id,
-    playlist_id,
-    timedelta,
-   }
+	{
+		user_id,
+		asana_id,
+		playlist_id,
+		timedelta,
+	}
   */
 	watchTimeBuffer: [],
 	appendToWatchTimeBuffer: (watchTimeLogs) => {
@@ -34,12 +38,19 @@ const useWatchHistoryStore = create((set, get) => ({
 		});
 	},
 	updateWatchTimeBuffer: (wh) => {
+		console.log(get());
 		const timedelta = wh.currentTime - get().committedTs;
 		// console.log({ timedelta });
 
 		if (timedelta < 1) {
 			return;
 		}
+
+		console.log("WATCH HISTORY : ", {
+			timedelta,
+			ct: wh.currentTime,
+			cts: get().committedTs,
+		});
 
 		set((state) => {
 			return {
