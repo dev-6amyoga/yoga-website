@@ -103,20 +103,18 @@ function StudentPlan() {
 	const [loading, setLoading] = useState(false);
 
 	const today = new Date();
-	const formattedDate = today?.toISOString().split("T")[0];
+	const formattedDate = today?.toISOString();
 
-	// useEffect(() => {
-	// 	if (user) {
-	// 		navigator.geolocation.getCurrentPosition((pos) => {
-	// 			// console.log(pos);
-	// 		});
-	// 	}
-	// }, [user]);
+	useEffect(() => {
+		if (showCard) {
+			setLoading(false);
+		}
+	}, [showCard]);
 
 	const calculateEndDate = (validityDays) => {
 		const endDate = new Date(validityFromDate);
 		endDate.setUTCDate(endDate.getUTCDate() + validityDays);
-		return endDate.toISOString().split("T")[0];
+		return endDate.toISOString();
 	};
 
 	const handleDiscountCouponFormSubmit = async (e) => {
@@ -377,6 +375,8 @@ function StudentPlan() {
 				validityTo.getDate() + cardData.plan_validity_days
 			);
 			const validityToDate = validityTo?.toISOString();
+
+			console.log({ validityFromDate, validityToDate });
 			userPlanData.purchase_date = formattedDate;
 			userPlanData.validity_from = validityFromDate;
 			userPlanData.validity_to = validityToDate;
@@ -413,6 +413,7 @@ function StudentPlan() {
 						amount: razorpayOrder?.amount,
 					});
 					setDisplayRazorpay(true);
+					setLoading(true);
 				}
 			} else {
 				toast(response.data?.message);
@@ -435,16 +436,16 @@ function StudentPlan() {
 	};
 
 	const registerUserPlan = async (order_id) => {
-		toBeRegistered.transaction_order_id = order_id;
-		toBeRegistered.user_type = "STUDENT";
-		toBeRegistered.institute_id = null;
-		setLoading(true);
+		const finalUserPlan = { ...toBeRegistered };
+		finalUserPlan.transaction_order_id = order_id;
+		finalUserPlan.user_type = "STUDENT";
+		finalUserPlan.institute_id = null;
 
 		FetchRetry({
 			url: "/user-plan/register",
 			method: "POST",
 			token: true,
-			data: toBeRegistered,
+			data: finalUserPlan,
 			n: 5,
 			retryDelayMs: 2000,
 		})
@@ -459,7 +460,7 @@ function StudentPlan() {
 						url: "/invoice/student/mail-invoice",
 						method: "POST",
 						data: JSON.stringify({
-							user_id: toBeRegistered.user_id,
+							user_id: finalUserPlan.user_id,
 							transaction_order_id: order_id,
 						}),
 						n: 2,
@@ -487,7 +488,6 @@ function StudentPlan() {
 						});
 
 					fetchUserPlans();
-					setLoading(false);
 				} else {
 					toast(response?.data?.message);
 					setLoading(false);
@@ -505,7 +505,6 @@ function StudentPlan() {
 	const registerErrorCallback = () => {
 		setShowCard(false);
 		setCardData(null);
-		// // console.log("Error in payment");
 	};
 
 	useEffect(() => {
@@ -516,12 +515,7 @@ function StudentPlan() {
 
 	// Staging plan validity from date
 	useEffect(() => {
-		const fetchData = async () => {
-			setValidityFromDate(getEndDate(myPlans));
-		};
-		if (myPlans) {
-			fetchData();
-		}
+		setValidityFromDate(getEndDate(myPlans));
 	}, [myPlans]);
 
 	// on mount get student plans & currencies
@@ -748,7 +742,7 @@ function StudentPlan() {
 											<span className="text-center">
 												{new Date(
 													validityFromDate
-												).toDateString()}
+												).toLocaleString()}
 											</span>
 										</p>
 
@@ -761,7 +755,7 @@ function StudentPlan() {
 													calculateEndDate(
 														cardData.plan_validity_days
 													)
-												).toDateString()}
+												).toLocaleString()}
 											</span>
 										</p>
 									</div>
