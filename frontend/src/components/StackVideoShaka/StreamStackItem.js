@@ -618,7 +618,7 @@ function StreamStackItem({
 			flushWatchTimeBuffer(user?.user_id);
 
 			// resetting committedTs
-			setCommittedTs(0);
+			// setCommittedTs(0);
 
 			// clearing previous interval to flush
 			if (flushTimeInterval.current) {
