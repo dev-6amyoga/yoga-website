@@ -25,5 +25,6 @@ export const dashSettings = {
 			bufferTimeAtTopQualityLongForm: 30,
 			stableBufferTime: 10,
 		},
+		fragmentRequestTimeout: 30000,
 	},
 };
