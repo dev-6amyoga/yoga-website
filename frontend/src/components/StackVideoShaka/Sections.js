@@ -122,6 +122,7 @@ function PlaylistSections() {
 						<div
 							key={s.time}
 							id={`section-${idx}`}
+							id={`section-${idx}`}
 							className={`flex flex-row items-center gap-2 p-2 hover:cursor-pointer hover:bg-blue-100 transition-colors ${currentMarkerIdx === idx ? "bg-blue-100" : ""}`}
 							onClick={() => handleSeek(s, idx)}>
 							<Avatar sx={{ bgcolor: blue[700] }}>
