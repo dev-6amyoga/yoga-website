@@ -13,18 +13,18 @@
 // };
 
 export const dashSettings = {
-	debug: {
-		logLevel: 3,
-	},
-	streaming: {
-		cacheInitSegments: true,
-		buffer: {
-			initialBufferLevel: 0,
-			bufferTimeAtTopQuality: 16,
-			bufferToKeep: 10,
-			bufferTimeAtTopQualityLongForm: 30,
-			stableBufferTime: 10,
-		},
-		fragmentRequestTimeout: 30000,
-	},
+  debug: {
+    logLevel: 3,
+  },
+  streaming: {
+    cacheInitSegments: true,
+    buffer: {
+      initialBufferLevel: 0,
+      bufferTimeAtTopQuality: 16,
+      bufferToKeep: 10,
+      bufferTimeAtTopQualityLongForm: 30,
+      stableBufferTime: 10,
+    },
+    fragmentRequestTimeout: 30000,
+  },
 };
