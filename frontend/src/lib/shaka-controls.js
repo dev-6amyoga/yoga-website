@@ -562,6 +562,24 @@ const shakaStreamConfig = {
 			stallTimeout: 15000,
 		},
 	},
+	streaming: {
+		// maxDisabledTime: 0,
+		// inaccurateManifestTolerance: 0,
+		// lowLatencyMode: true,
+		bufferingGoal: 10,
+		bufferBehind: 20,
+		rebufferingGoal: 4,
+		ignoreTextStreamFailures: true,
+		stallThreshold: 3,
+		segmentPrefetchLimit: 3,
+		preloadNextUrlWindow: 40,
+		retryParameters: {
+			maxAttempts: 3,
+			timeout: 30000,
+			connectionTimeout: 30000,
+			stallTimeout: 15000,
+		},
+	},
 };
 
 export {
