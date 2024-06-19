@@ -269,6 +269,7 @@ function StreamStackItem({
 			//console.log("PAUSE AND RESET ----------------------------->", video.idx);
 			pr.muted = true;
 			setVolume(0);
+			// pr.currentTime = 0.04;
 			pr.pause();
 			// pr.currentTime = 0;
 		}
@@ -510,7 +511,7 @@ function StreamStackItem({
 					viewMode === VIDEO_VIEW_STUDENT_MODE &&
 					playerRef.current?.videoElement?.duration -
 						playerRef.current?.videoElement?.currentTime <
-						0.3
+						0.1
 				) {
 					console.log("VIDEO_EVENT_PLAY_INACTIVE");
 					if (videoEvent.length === 0) {
@@ -722,7 +723,7 @@ function StreamStackItem({
 	// video events
 	const handleVideoSeeking = useCallback(
 		(e) => {
-			console.log("Seeking...", e.target.currentTime, e.reason); // Log current time and seek reason
+			console.log("Seeking...", e.target.currentTime); // Log current time and seek reason
 			handleLoading(true, isActiveRef.current);
 		},
 		[handleLoading]
@@ -905,10 +906,10 @@ function StreamStackItem({
 						}
 					);
 
-					playerRef.current.player.configure(
-						"manifest.dash.ignoreMinBufferTime",
-						true
-					);
+					// playerRef.current.player.configure(
+					// 	"manifest.dash.ignoreMinBufferTime",
+					// 	true
+					// );
 
 					// stream settings
 					playerRef.current.player.configure(shakaStreamConfig);
@@ -918,7 +919,8 @@ function StreamStackItem({
 
 					if (
 						(!isNaN(video?.video?.id) &&
-							typeof video?.video?.id === "number") ||
+							typeof video?.video?.id === "number" &&
+							video?.video?.drm_video) ||
 						String(video?.video?.transition_video_name)
 							.toLowerCase()
 							.search(/(drm)/) !== -1 ||
@@ -965,6 +967,7 @@ function StreamStackItem({
 									);
 								});
 						} else {
+							console.log("Fetching Playready Token");
 							Fetch({
 								url: "/playback/get-playready-token",
 								method: "POST",
@@ -1007,12 +1010,17 @@ function StreamStackItem({
 								});
 						}
 					} else {
-						//console.log("no drm");
+						console.log("no drm");
 						playerRef.current.player
-							.load(videoUrl)
-							.then(() => {
-								//console.log("Video Loaded");
-								setMetadataLoaded(true);
+							.preload(videoUrl)
+							.then((preloadManager) => {
+								playerRef.current.player
+									.load(preloadManager)
+									.then(() => {
+										//console.log("Video Loaded");
+										setMetadataLoaded(true);
+									})
+									.catch(playerOnError);
 							})
 							.catch(playerOnError);
 					}
