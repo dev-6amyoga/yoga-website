@@ -75,7 +75,7 @@ function DashPlayer(props) {
 				// p.initialize(null, props.src, true, { autoplay: true, muted: true });
 				p.attachView(videoRef.current);
 				p.preload();
-				p.play();
+				// p.play();
 				setPlayerRefSet(true);
 				console.log("[DASH PLAYER] : player created");
 			}
