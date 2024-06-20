@@ -32,11 +32,11 @@ export const TestingRoutes = [
 		element: <SocketPage />,
 	},
 	{
-		path: "/testing/class-mode-student",
+		path: "/testing/class-mode-student/:class_id",
 		element: <ClassModeStudent />,
 	},
 	{
-		path: "/testing/class-mode-teacher",
+		path: "/testing/class-mode-teacher/:class_id",
 		element: <ClassModeTeacher />,
 	},
 	// {

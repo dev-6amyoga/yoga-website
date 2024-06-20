@@ -15,7 +15,7 @@ const classInfo = {
 	attendees: 12,
 };
 
-export default function ClassInfoStudent() {
+export default function ClassInfoStudent({ class_id }) {
 	return (
 		<Card
 			sx={{
@@ -29,7 +29,9 @@ export default function ClassInfoStudent() {
 				<div className="class-info-student">
 					{/* info */}
 					<div className="class-info-student-title">
-						<h3 className="text-white">{classInfo.title}</h3>
+						<h3 className="text-white">
+							{class_id} | {classInfo.title}
+						</h3>
 						<p className="class-info-student-desc text-y-white text-sm">
 							{classInfo.desc}
 						</p>
