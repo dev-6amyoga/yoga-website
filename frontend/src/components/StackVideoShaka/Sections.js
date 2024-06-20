@@ -61,7 +61,8 @@ function PlaylistSections() {
 			currVideo &&
 			currentMarkerIdx !== null &&
 			currentMarkerIdx !== undefined &&
-			currentMarkerIdx >= 0
+			currentMarkerIdx >= 0 &&
+			currVideo?.video?.sections !== undefined
 		) {
 			return currVideo?.video?.sections[currentMarkerIdx];
 		}

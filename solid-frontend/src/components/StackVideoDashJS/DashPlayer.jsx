@@ -75,7 +75,7 @@ function DashPlayer(props) {
 				// p.initialize(null, props.src, true, { autoplay: true, muted: true });
 				p.attachView(videoRef.current);
 				p.preload();
-				p.play();
+				// p.play();
 				setPlayerRefSet(true);
 				console.log("[DASH PLAYER] : player created");
 			}
@@ -237,89 +237,61 @@ function DashPlayer(props) {
 
 	// DRM Info
 	createEffect(
-		on([playerRefSet, () => props.src, () => props.isAsanaVideo], () => {
-			if (playerRefSet && props.src && videoRef.current) {
-				console.log("[DASH PLAYER] : setting DRM Info");
-				const check = isMobileTablet();
-				const isMobile = { done: true, check: check };
-				console.log("Checking for isMobile", isMobile);
-				// const store = useVideoStore.getState();
-				var playreadyKeyUrl;
-				playreadyKeyUrl = undefined;
-				// const setPlayreadyKeyUrl = videoStore.setPlayreadyKeyUrl;
-				//console.log("Fetching DRM Info");
-				console.log("[DASH PLAYER] : isAsanaVideo", props.isAsanaVideo);
+		on(
+			[
+				playerRefSet,
+				() => props.src,
+				() => props.isAsanaVideo,
+				() => props.video,
+			],
+			() => {
+				if (playerRefSet && props.src && videoRef.current) {
+					console.log("[DASH PLAYER] : setting DRM Info");
+					const check = isMobileTablet();
+					const isMobile = { done: true, check: check };
+					console.log("Checking for isMobile", isMobile);
+					// const store = useVideoStore.getState();
+					var playreadyKeyUrl;
+					playreadyKeyUrl = undefined;
+					// const setPlayreadyKeyUrl = videoStore.setPlayreadyKeyUrl;
+					//console.log("Fetching DRM Info");
+					// TODO : all asanas and transition videos must have drm_video flag
+					let drm_vid =
+						props.video?.video?.drm_video !== undefined
+							? props.video?.video?.drm_video
+							: false;
 
-				if (props.isAsanaVideo) {
-					if (isMobile.check) {
-						// Mobile
-						Fetch({
-							url: "/playback/get-widevine-token",
-							method: "POST",
-							token: false,
-						})
-							.then((res) => {
-								const data = res.data;
-								console.log("[DASH PLAYER] : widevine token");
+					console.log("[DASH PLAYER] : drm req", {
+						isAsanaVideo: props.isAsanaVideo,
+						drm_video: drm_vid,
+						drm_req: drm_vid,
+						id:
+							props.video?.video?.id ||
+							props.video?.video?.transition_id ||
+							props.video?.video?.playlist_id,
+					});
 
-								if (data && data.licenseAcquisitionUrl) {
-									playerRef().setProtectionData({
-										"com.widevine.alpha": {
-											serverURL:
-												data.licenseAcquisitionUrl,
-										},
-									});
-									setDrmSet(true);
-								}
-							})
-							.catch((err) => {
-								console.log("Error fetching DRM info :", err);
-								props.onError();
-							});
-					} else {
-						// Non Mobile
-						if (playreadyKeyUrl) {
-							console.log(
-								"[DASH PLAYER] : playready token cached"
-							);
-							playerRef().setProtectionData({
-								"com.microsoft.playready": {
-									serverURL: playreadyKeyUrl,
-								},
-							});
-							setDrmSet(true);
-						} else {
+					if (drm_vid) {
+						if (isMobile.check) {
+							// Mobile
 							Fetch({
-								url: "/playback/get-playready-token",
+								url: "/playback/get-widevine-token",
 								method: "POST",
 								token: false,
 							})
 								.then((res) => {
 									const data = res.data;
 									console.log(
-										"[DASH PLAYER] : playready token"
+										"[DASH PLAYER] : widevine token"
 									);
-									if (
-										data &&
-										data.licenseAcquisitionUrl &&
-										data.token
-									) {
+
+									if (data && data.licenseAcquisitionUrl) {
 										playerRef().setProtectionData({
-											"com.microsoft.playready": {
+											"com.widevine.alpha": {
 												serverURL:
-													data.licenseAcquisitionUrl +
-													"?ExpressPlayToken=" +
-													data.token,
+													data.licenseAcquisitionUrl,
 											},
 										});
-										console.log(
-											"[DASH PLAYER] : playready token caching now!"
-										);
-										setPlayreadyKeyUrl(
-											data.licenseAcquisitionUrl +
-												"?ExpressPlayToken=" +
-												data.token
-										);
 										setDrmSet(true);
 									}
 								})
@@ -330,14 +302,69 @@ function DashPlayer(props) {
 									);
 									props.onError();
 								});
+						} else {
+							// Non Mobile
+							if (playreadyKeyUrl) {
+								console.log(
+									"[DASH PLAYER] : playready token cached"
+								);
+								playerRef().setProtectionData({
+									"com.microsoft.playready": {
+										serverURL: playreadyKeyUrl,
+									},
+								});
+								setDrmSet(true);
+							} else {
+								Fetch({
+									url: "/playback/get-playready-token",
+									method: "POST",
+									token: false,
+								})
+									.then((res) => {
+										const data = res.data;
+										console.log(
+											"[DASH PLAYER] : playready token"
+										);
+										if (
+											data &&
+											data.licenseAcquisitionUrl &&
+											data.token
+										) {
+											playerRef().setProtectionData({
+												"com.microsoft.playready": {
+													serverURL:
+														data.licenseAcquisitionUrl +
+														"?ExpressPlayToken=" +
+														data.token,
+												},
+											});
+											console.log(
+												"[DASH PLAYER] : playready token caching now!"
+											);
+											setPlayreadyKeyUrl(
+												data.licenseAcquisitionUrl +
+													"?ExpressPlayToken=" +
+													data.token
+											);
+											setDrmSet(true);
+										}
+									})
+									.catch((err) => {
+										console.log(
+											"Error fetching DRM info :",
+											err
+										);
+										props.onError();
+									});
+							}
 						}
+					} else {
+						console.log("[DASH PLAYER] : transition video");
+						setDrmSet(true);
 					}
-				} else {
-					console.log("[DASH PLAYER] : transition video");
-					setDrmSet(true);
 				}
 			}
-		})
+		)
 	);
 
 	const onMetadataLoaded = () => {
