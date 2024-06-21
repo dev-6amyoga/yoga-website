@@ -207,11 +207,16 @@ func (s *Server) handleStudentConnection(w http.ResponseWriter, r *http.Request)
 
 	timer := time.NewTicker(2 * time.Second)
 
+	conn.WriteJSON(events.EventStudentResponse{
+		Status:  events.EVENT_STATUS_ACK,
+		Message: "Connection established",
+	})
+
 	for {
 		select {
 
 		case <-timer.C:
-			// poll for events
+			// TODO : poll for events
 			// send events to students
 			msg := events.EventStudentResponse{
 				Status:  events.EVENT_STATUS_ACK,
