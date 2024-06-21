@@ -560,6 +560,14 @@ const shakaStreamConfig = {
       stallTimeout: 15000,
     },
   },
+
+  abr: {
+    enabled: true,
+    defaultBandwidthEstimate: 1e6,
+    switchInterval: 8,
+    bandwidthUpgradeTarget: 0.85,
+    bandwidthDowngradeTarget: 0.95,
+  },
 };
 
 export {
