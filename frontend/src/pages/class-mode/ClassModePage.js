@@ -37,25 +37,36 @@ export default function ClassModePage() {
     let countdownInterval;
     if (classDetails) {
       const updateCountdown = () => {
-        const startTimeParts = classDetails.start_time.split(":");
+        const [startHours, startMinutes] = classDetails.start_time
+          .split(":")
+          .map(Number);
+        const [endHours, endMinutes] = classDetails.end_time
+          .split(":")
+          .map(Number);
         const now = new Date();
         const currentHours = now.getHours();
         const currentMinutes = now.getMinutes();
         const currentSeconds = now.getSeconds();
-        let totalSecondsRemaining =
-          (parseInt(startTimeParts[0], 10) - currentHours) * 3600 +
-          (parseInt(startTimeParts[1], 10) - currentMinutes) * 60 +
-          (0 - currentSeconds);
-        if (totalSecondsRemaining > 0) {
+
+        const totalStartSeconds = startHours * 3600 + startMinutes * 60;
+        const totalEndSeconds = endHours * 3600 + endMinutes * 60;
+        const currentTotalSeconds =
+          currentHours * 3600 + currentMinutes * 60 + currentSeconds;
+
+        if (currentTotalSeconds > totalEndSeconds) {
+          setTimeRemaining("Class has ended!");
+          clearInterval(countdownInterval);
+        } else if (currentTotalSeconds >= totalStartSeconds) {
+          setTimeRemaining("Class has started!");
+          clearInterval(countdownInterval);
+        } else {
+          const totalSecondsRemaining = totalStartSeconds - currentTotalSeconds;
           const hours = Math.floor(totalSecondsRemaining / 3600);
           const minutes = Math.floor(
             (totalSecondsRemaining - hours * 3600) / 60
           );
           const seconds = totalSecondsRemaining - hours * 3600 - minutes * 60;
           setTimeRemaining(`${hours}h ${minutes}m ${seconds}s`);
-        } else {
-          setTimeRemaining("Class has started!");
-          clearInterval(countdownInterval);
         }
       };
 
