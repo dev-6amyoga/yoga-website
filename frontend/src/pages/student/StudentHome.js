@@ -308,12 +308,65 @@ function StudentHome() {
   let [position, setPosition] = useState(0);
   const [lastVideoTime, setLastVideoTime] = useState(-1);
   const [poseLandmarker, setPoseLandmarker] = useState(null);
+  const [webcamSkeleton, setWebcamSkeleton] = useState(null);
+  const [preRecordedSkeleton, setPreRecordedSkeleton] = useState(null);
   const webcamRunningRef = useRef(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const enableWebcamButtonRef = useRef(null);
   const preRecordedVideoRef = useRef(null);
   const preRecordedCanvasRef = useRef(null);
+
+  function cosineSimilarity(vector1, vector2) {
+    if (vector1.length !== vector2.length) {
+      throw new Error("Vectors must be of the same length");
+    }
+
+    // Calculate dot product
+    let dotProduct = 0;
+    let norm1 = 0;
+    let norm2 = 0;
+
+    for (let i = 0; i < vector1.length; i++) {
+      dotProduct += vector1[i] * vector2[i];
+      norm1 += vector1[i] * vector1[i];
+      norm2 += vector2[i] * vector2[i];
+    }
+
+    norm1 = Math.sqrt(norm1);
+    norm2 = Math.sqrt(norm2);
+
+    // Handle edge case where norm is 0
+    if (norm1 === 0 || norm2 === 0) {
+      return 0; // Or handle as you see fit: throw an error, return null, etc.
+    }
+
+    // Calculate cosine similarity
+    const similarity = dotProduct / (norm1 * norm2);
+    return similarity;
+  }
+
+  function compareSkeletons(skeleton1, skeleton2) {
+    const similarities = [];
+
+    for (let i = 0; i < skeleton1.length; i++) {
+      const coordinates1 = skeleton1[i];
+      const coordinates2 = skeleton2[i];
+
+      // Extract x, y, z coordinates
+      const vector1 = [coordinates1.x, coordinates1.y, coordinates1.z];
+      const vector2 = [coordinates2.x, coordinates2.y, coordinates2.z];
+
+      // Calculate cosine similarity between vectors
+      const similarity = cosineSimilarity(vector1, vector2);
+      similarities.push(similarity);
+    }
+
+    // Calculate average similarity or any other metric
+    const averageSimilarity =
+      similarities.reduce((acc, val) => acc + val, 0) / similarities.length;
+    return averageSimilarity;
+  }
 
   const processPreRecordedVideo = async () => {
     const video = preRecordedVideoRef.current;
@@ -326,12 +379,12 @@ function StudentHome() {
     canvasElement.width = videoWidth;
     video.height = videoHeight;
     video.width = videoWidth;
-
     if (!poseLandmarker) return;
     await poseLandmarker.setOptions({ runningMode: "VIDEO" });
     const processFrame = async () => {
       const startTimeMs = performance.now();
       poseLandmarker.detectForVideo(video, startTimeMs, (result) => {
+        setPreRecordedSkeleton(result.landmarks[0]);
         canvasCtx.save();
         canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
         for (const landmark of result.landmarks) {
@@ -351,6 +404,13 @@ function StudentHome() {
     };
     video.addEventListener("play", processFrame);
   };
+
+  useEffect(() => {
+    if (preRecordedSkeleton && webcamSkeleton) {
+      const similarity = compareSkeletons(preRecordedSkeleton, webcamSkeleton);
+      toast(similarity);
+    }
+  }, [preRecordedSkeleton, webcamSkeleton]);
 
   useEffect(() => {
     if (poseLandmarker && preRecordedVideoRef.current) {
@@ -384,10 +444,6 @@ function StudentHome() {
     createPoseLandmarker();
   }, []);
 
-  useEffect(() => {
-    console.log(preRecordedVideoRef);
-  }, [preRecordedVideoRef]);
-
   const startWebcam = () => {
     const constraints = { video: true };
     navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
@@ -415,6 +471,7 @@ function StudentHome() {
     if (video.currentTime !== lastVideoTime) {
       setLastVideoTime(video.currentTime);
       poseLandmarker.detectForVideo(video, startTimeMs, (result) => {
+        setWebcamSkeleton(result.landmarks[0]);
         canvasCtx.save();
         canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
         for (const landmark of result.landmarks) {
@@ -507,7 +564,7 @@ function StudentHome() {
             <video
               id="prerecorded"
               autoPlay
-              // muted
+              muted
               playsInline
               ref={preRecordedVideoRef}
               controls
