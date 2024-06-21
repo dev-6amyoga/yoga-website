@@ -32,6 +32,7 @@ const {
 } = require("../models/sql/UserInstitutePlanRole");
 const { LoginHistory } = require("../models/sql/LoginHistory");
 const { LoginToken } = require("../models/sql/LoginToken");
+const { UpdateUserPlanStatus } = require("../services/UserPlan.service");
 
 router.use(requestIp.mw());
 
@@ -50,19 +51,18 @@ router.post("/verify-google", async (req, res) => {
 				.json({ error: "Invalid Google OAuth token" });
 		}
 
-		const user = await GetUserInfo({ email: userInfo.email });
-
+		const user = await GetUserInfo({ email: userInfo.email })[0];
 		if (!user) {
+			console.log(userInfo);
 			return res
 				.status(HTTP_OK)
 				.json({ message: "Token verified", ...userInfo });
 		} else {
-			return res
-				.status(HTTP_OK)
-				.json({
-					message: "User already exists; Please sign in",
-					...userInfo,
-				});
+			console.log("there");
+			return res.status(HTTP_OK).json({
+				message: "User already exists; Please sign in",
+				...userInfo,
+			});
 		}
 	} catch (error) {
 		console.error("Authentication error:", error.message);
@@ -106,7 +106,8 @@ router.post("/verify-tokens", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-	// const clientIp = req.clientIp;
+	const clientIp = req.clientIp;
+	// console.log(clientIp, req.ip);
 
 	const { username, password } = req.body;
 	if (!username || !password)
@@ -142,13 +143,18 @@ router.post("/login", async (req, res) => {
 		},
 	});
 
+	// console.log(login_token_history.entries());
+
 	if (login_token_history) {
 		const login_token_history_json = login_token_history.map((lth) =>
 			lth.toJSON()
 		);
 
+		// console.log(login_token_history_json);
+
 		if (
-			login_token_history_json.findIndex((lth) => lth.ip !== req.ip) > -1
+			login_token_history_json.findIndex((lth) => lth.ip !== clientIp) >
+			-1
 		) {
 			return res
 				.status(HTTP_BAD_REQUEST)
@@ -156,6 +162,7 @@ router.post("/login", async (req, res) => {
 		}
 	}
 
+	// generate tokens
 	const [accessToken, access_token_creation_at, access_token_expiry_at] =
 		generateAccessToken(user);
 	const [refreshToken, refresh_token_creation_at, refresh_token_expiry_at] =
@@ -175,7 +182,7 @@ router.post("/login", async (req, res) => {
 				access_token_expiry_at,
 				refresh_token_creation_at,
 				refresh_token_expiry_at,
-				ip: req.ip,
+				ip: clientIp,
 				user_id: user?.user_id,
 			},
 			{ transaction: t }
@@ -185,15 +192,76 @@ router.post("/login", async (req, res) => {
 		await LoginHistory.create(
 			{
 				user_id: user?.user_id,
-				ip: req.ip || null,
+				ip: clientIp ?? null,
 				user_agent:
-					req.get("User-Agent") || req?.useragent?.source || null,
+					req.get("User-Agent") ?? req?.useragent?.source ?? null,
 				platform: req?.useragent?.platform,
 				os: req?.useragent?.os,
 				browser: req?.useragent?.browser,
 			},
 			{ transaction: t }
 		);
+
+		// update user plan status if necessary
+
+		/*
+    user = {
+      ...,
+      "roles": {
+        "STUDENT": {
+          "user_institute_plan_role_id": number,
+          "user_id": number,
+          "role_id": number,
+          "institute_id": number,
+          "user_plan_id": number,
+          "updated": string,
+          "institute": null | {},
+          "role": {
+            "role_id": number,
+            "name": string
+          },
+          "plan": {
+            "plan_id": number,
+            "name": string,
+            "has_basic_playlist": bool,
+            "has_playlist_creation": bool,
+            "playlist_creation_limit": number,
+            "has_self_audio_upload": bool,
+            "number_of_teachers": number,
+            "plan_validity_days": number,
+            "watch_time_limit": number
+          }
+        }
+      }
+    }
+    */
+
+		const roles = Object.keys(user?.roles);
+
+		// they should have atleast a single role
+		if (roles.length === 0) {
+			await t.rollback();
+			return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+				message: "No roles assigned",
+			});
+		}
+
+		for (let idx = 0; idx < roles.length; i++) {
+			let institute_id = user?.roles[roles[idx]]?.institute_id;
+
+			const [data, error] = await UpdateUserPlanStatus(
+				user.user_id,
+				institute_id,
+				t
+			);
+
+			if (error) {
+				await t.rollback();
+				return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+					message: error,
+				});
+			}
+		}
 
 		await t.commit();
 		return res.status(HTTP_OK).json({ user, accessToken, refreshToken });
@@ -222,7 +290,6 @@ router.post("/login-google", async (req, res) => {
 
 		// get email and name
 		const { email, name } = userInfo;
-
 		if (!email || !name) {
 			return res
 				.status(HTTP_BAD_REQUEST)
@@ -232,16 +299,11 @@ router.post("/login-google", async (req, res) => {
 		// check if user exists
 		let [user, errorUser] = await GetUserInfo({ email });
 
-		if (!user || errorUser)
+		if (!user || errorUser) {
 			return res
-				.status(HTTP_BAD_REQUEST)
-				.json({ error: "User does not exist" });
-
-		// if (user.is_google_login === false) {
-		// 	return res
-		// 		.status(HTTP_BAD_REQUEST)
-		// 		.json({ error: "User not registered using Google" });
-		// }
+				.status(HTTP_OK)
+				.json({ user: userInfo, message: "User does not exist" });
+		}
 
 		// check if user has active login token
 		const login_token_history = await LoginToken.findAll({
