@@ -23,6 +23,8 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	s.logger.Info("Teacher connected")
+
 	// close the connection when the function returns
 	defer conn.Close()
 
@@ -166,10 +168,14 @@ Student connection handler
 */
 func (s *Server) handleStudentConnection(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
+
 	if err != nil {
 		s.logger.Error("Error upgrading to WebSocket:", err)
 		return
 	}
+
+	s.logger.Info("Teacher connected")
+
 	defer conn.Close()
 
 	// read class id to initialize the connection
