@@ -395,6 +395,7 @@ function DashPlayer(
 				className="w-full h-full"></video>
 			<div className="absolute bottom-4 right-4 flex flex-row gap-2">
 				<button
+					className="bg-white text-black px-4 py-2 rounded-md"
 					onClick={() => {
 						playerRef.current.play();
 						timingObjRef.current.update({ velocity: 1 });
@@ -402,6 +403,7 @@ function DashPlayer(
 					Play
 				</button>
 				<button
+					className="bg-white text-black px-4 py-2 rounded-md"
 					onClick={() => {
 						playerRef.current.pause();
 						timingObjRef.current.update({ velocity: 0 });
