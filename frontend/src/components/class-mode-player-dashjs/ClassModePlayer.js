@@ -2,7 +2,7 @@
 // import MCorp from "https://www.mcorp.no/lib/mcorp-2.0.js";
 
 import { useEffect, useRef } from "react";
-import DashPlayer from "./DashPlayer";
+import ShakaPlayerWrapper from "./ShakaPlayerWrapper";
 
 export default function ClassModePlayer() {
 	const player = useRef(null);
@@ -40,11 +40,18 @@ export default function ClassModePlayer() {
 
 	return (
 		<div className="w-full max-w-5xl mx-auto aspect-video bg-black">
-			<DashPlayer
+			{/* <DashPlayer
 				ref={player}
 				timingObjRef={timingObj}
+				isAsanaVideo={true}
 				className="w-full h-full"
-				src="https://pub-0f821d8aa0b0446cae0613788ad21abc.r2.dev/66534d88d655c7a09791b21c.mpd"
+				src="https://pub-0f821d8aa0b0446cae0613788ad21abc.r2.dev/66617a16485e980956f9f772.mpd"
+			/> */}
+			<ShakaPlayerWrapper
+				timingObjRef={timingObj}
+				isDrm={true}
+				className="w-full h-full"
+				src="https://pub-0f821d8aa0b0446cae0613788ad21abc.r2.dev/66617a16485e980956f9f772.mpd"
 			/>
 		</div>
 	);
