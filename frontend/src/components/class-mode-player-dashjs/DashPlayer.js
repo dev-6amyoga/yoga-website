@@ -8,6 +8,9 @@ import {
 	useState,
 } from "react";
 import { dashSettings } from "../../lib/dashjs-settings";
+import useVideoStore from "../../store/VideoStore";
+import { Fetch } from "../../utils/Fetch";
+import { isMobileTablet } from "../../utils/isMobileOrTablet";
 
 function DashPlayer(
 	{
@@ -63,7 +66,7 @@ function DashPlayer(
 		const p = dashjs.MediaPlayer().create();
 		playerRef.current = p;
 		playerRef.current.updateSettings(dashSettings);
-		playerRef.current.initialize(videoRef.current, src, false);
+		playerRef.current.initialize(videoRef.current, src, true);
 		setPlayerRefSet(true);
 		return () => {
 			console.log("[DASH PLAYER] Cleanup, player reset");
@@ -71,105 +74,105 @@ function DashPlayer(
 		};
 	}, [src]);
 
-	// useEffect(() => {
-	// 	if (playerRefSet && src && videoRef.current) {
-	// 		console.log(
-	// 			"[DASH PLAYER] : setting DRM Info"
-	// 			// playerRef.current,
-	// 			// playerRefSet
-	// 		);
-	// 		const check = isMobileTablet();
-	// 		const isMobile = { done: true, check: check };
-	// 		console.log("Checking for isMobile", isMobile);
-	// 		const store = useVideoStore.getState();
-	// 		const playreadyKeyUrl = store.playreadyKeyUrl;
-	// 		const setPlayreadyKeyUrl = store.setPlayreadyKeyUrl;
+	useEffect(() => {
+		if (playerRefSet && src && videoRef.current) {
+			console.log(
+				"[DASH PLAYER] : setting DRM Info"
+				// playerRef.current,
+				// playerRefSet
+			);
+			const check = isMobileTablet();
+			const isMobile = { done: true, check: check };
+			console.log("Checking for isMobile", isMobile);
+			const store = useVideoStore.getState();
+			const playreadyKeyUrl = store.playreadyKeyUrl;
+			const setPlayreadyKeyUrl = store.setPlayreadyKeyUrl;
 
-	// 		//console.log("Fetching DRM Info");
-	// 		//fetch only if it is not a transition video
-	// 		// playerRef.current.initialize(videoRef.current, src, false);
-	// 		console.log("[DASH PLAYER] : isAsanaVideo", isAsanaVideo);
+			//console.log("Fetching DRM Info");
+			//fetch only if it is not a transition video
+			// playerRef.current.initialize(videoRef.current, src, false);
+			console.log("[DASH PLAYER] : isAsanaVideo", isAsanaVideo);
 
-	// 		if (isAsanaVideo) {
-	// 			if (isMobile.check) {
-	// 				// Mobile
-	// 				Fetch({
-	// 					url: "/playback/get-widevine-token",
-	// 					method: "POST",
-	// 					token: false,
-	// 				})
-	// 					.then((res) => {
-	// 						const data = res.data;
-	// 						console.log("[DASH PLAYER] : widevine token");
+			if (isAsanaVideo) {
+				if (isMobile.check) {
+					// Mobile
+					Fetch({
+						url: "/playback/get-widevine-token",
+						method: "POST",
+						token: false,
+					})
+						.then((res) => {
+							const data = res.data;
+							console.log("[DASH PLAYER] : widevine token");
 
-	// 						if (data && data.licenseAcquisitionUrl) {
-	// 							playerRef.current.setProtectionData({
-	// 								"com.widevine.alpha": {
-	// 									serverURL: data.licenseAcquisitionUrl,
-	// 								},
-	// 							});
-	// 							setDrmSet(true);
-	// 						}
-	// 					})
-	// 					.catch((err) => {
-	// 						console.log("Error fetching DRM info :", err);
-	// 						onError();
-	// 					});
-	// 			} else {
-	// 				// Non Mobile
-	// 				if (playreadyKeyUrl) {
-	// 					console.log("[DASH PLAYER] : playready token cached");
-	// 					playerRef.current.setProtectionData({
-	// 						"com.microsoft.playready": {
-	// 							serverURL: playreadyKeyUrl,
-	// 						},
-	// 					});
-	// 					setDrmSet(true);
-	// 				} else {
-	// 					Fetch({
-	// 						url: "/playback/get-playready-token",
-	// 						method: "POST",
-	// 						token: false,
-	// 					})
-	// 						.then((res) => {
-	// 							const data = res.data;
-	// 							console.log("[DASH PLAYER] : playready token");
-	// 							if (
-	// 								data &&
-	// 								data.licenseAcquisitionUrl &&
-	// 								data.token
-	// 							) {
-	// 								playerRef.current.setProtectionData({
-	// 									"com.microsoft.playready": {
-	// 										serverURL:
-	// 											data.licenseAcquisitionUrl +
-	// 											"?ExpressPlayToken=" +
-	// 											data.token,
-	// 									},
-	// 								});
-	// 								console.log(
-	// 									"[DASH PLAYER] : playready token caching now!"
-	// 								);
-	// 								setPlayreadyKeyUrl(
-	// 									data.licenseAcquisitionUrl +
-	// 										"?ExpressPlayToken=" +
-	// 										data.token
-	// 								);
-	// 								setDrmSet(true);
-	// 							}
-	// 						})
-	// 						.catch((err) => {
-	// 							console.log("Error fetching DRM info :", err);
-	// 							onError();
-	// 						});
-	// 				}
-	// 			}
-	// 		} else {
-	// 			console.log("[DASH PLAYER] : transition video");
-	// 			setDrmSet(true);
-	// 		}
-	// 	}
-	// }, [playerRefSet, src, isAsanaVideo, onError]);
+							if (data && data.licenseAcquisitionUrl) {
+								playerRef.current.setProtectionData({
+									"com.widevine.alpha": {
+										serverURL: data.licenseAcquisitionUrl,
+									},
+								});
+								setDrmSet(true);
+							}
+						})
+						.catch((err) => {
+							console.log("Error fetching DRM info :", err);
+							onError();
+						});
+				} else {
+					// Non Mobile
+					if (playreadyKeyUrl) {
+						console.log("[DASH PLAYER] : playready token cached");
+						playerRef.current.setProtectionData({
+							"com.microsoft.playready": {
+								serverURL: playreadyKeyUrl,
+							},
+						});
+						setDrmSet(true);
+					} else {
+						Fetch({
+							url: "/playback/get-playready-token",
+							method: "POST",
+							token: false,
+						})
+							.then((res) => {
+								const data = res.data;
+								console.log("[DASH PLAYER] : playready token");
+								if (
+									data &&
+									data.licenseAcquisitionUrl &&
+									data.token
+								) {
+									playerRef.current.setProtectionData({
+										"com.microsoft.playready": {
+											serverURL:
+												data.licenseAcquisitionUrl +
+												"?ExpressPlayToken=" +
+												data.token,
+										},
+									});
+									console.log(
+										"[DASH PLAYER] : playready token caching now!"
+									);
+									setPlayreadyKeyUrl(
+										data.licenseAcquisitionUrl +
+											"?ExpressPlayToken=" +
+											data.token
+									);
+									setDrmSet(true);
+								}
+							})
+							.catch((err) => {
+								console.log("Error fetching DRM info :", err);
+								onError();
+							});
+					}
+				}
+			} else {
+				console.log("[DASH PLAYER] : transition video");
+				setDrmSet(true);
+			}
+		}
+	}, [playerRefSet, src, isAsanaVideo, onError]);
 
 	useEffect(() => {
 		if (playerRefSet && isActive && metadataLoaded) {
@@ -409,6 +412,36 @@ function DashPlayer(
 						timingObjRef.current.update({ velocity: 0 });
 					}}>
 					Pause
+				</button>
+				<button
+					className="bg-white text-black px-4 py-2 rounded-md"
+					onClick={() => {
+						// playerRef.current.seek(playerRef.current.time() - 10);
+						timingObjRef.current.update({
+							position:
+								timingObjRef.current.query().position - 10,
+						});
+					}}>
+					Seek -10
+				</button>
+				<button
+					className="bg-white text-black px-4 py-2 rounded-md"
+					onClick={() => {
+						timingObjRef.current.update({
+							position:
+								timingObjRef.current.query().position + 10,
+						});
+					}}>
+					Seek +10
+				</button>
+				<button
+					className="bg-white text-black px-4 py-2 rounded-md"
+					onClick={() => {
+						timingObjRef.current.update({
+							position: 0,
+						});
+					}}>
+					Reset
 				</button>
 			</div>
 		</div>
