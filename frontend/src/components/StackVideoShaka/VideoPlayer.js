@@ -141,13 +141,13 @@ function VideoPlayer() {
 				"VIDEO END : TEACHING MODE: popping video, marker null"
 			);
 
-			// handleReset();
-			// popFromQueue(0);
+			handleReset();
+			popFromQueue(0);
 		} else {
 			console.log("VIDEO END : STUDENT MODE: popping video");
 			// if student mode, pop from queue
-			// handleReset();
-			// popFromQueue(0);
+			handleReset();
+			popFromQueue(0);
 		}
 	}, [addToSeekQueue]);
 
@@ -240,9 +240,9 @@ function VideoPlayer() {
 								</Button>
 							</div>
 						) : (
-							<div className="relative h-full w-full flex flex-col">
+							<div className="relative h-full w-full flex flex-row">
 								{queue.length > 0 ? (
-									<div className="">
+									<>
 										{queue
 											.slice(0, 2)
 											.map((queueItem, idx) => {
@@ -268,7 +268,7 @@ function VideoPlayer() {
 													/>
 												);
 											})}
-									</div>
+									</>
 								) : (
 									<></>
 								)}

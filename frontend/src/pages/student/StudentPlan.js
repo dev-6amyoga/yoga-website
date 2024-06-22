@@ -25,6 +25,8 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
+import { ROLE_STUDENT } from "../../enums/roles";
+import { withAuth } from "../../utils/withAuth";
 import Hero from "./components/Hero";
 
 const allowedCountriesCurrencyMap = {
@@ -101,20 +103,18 @@ function StudentPlan() {
 	const [loading, setLoading] = useState(false);
 
 	const today = new Date();
-	const formattedDate = today?.toISOString().split("T")[0];
+	const formattedDate = today?.toISOString();
 
-	// useEffect(() => {
-	// 	if (user) {
-	// 		navigator.geolocation.getCurrentPosition((pos) => {
-	// 			console.log(pos);
-	// 		});
-	// 	}
-	// }, [user]);
+	useEffect(() => {
+		if (showCard) {
+			setLoading(false);
+		}
+	}, [showCard]);
 
 	const calculateEndDate = (validityDays) => {
 		const endDate = new Date(validityFromDate);
 		endDate.setUTCDate(endDate.getUTCDate() + validityDays);
-		return endDate.toISOString().split("T")[0];
+		return endDate.toISOString();
 	};
 
 	const handleDiscountCouponFormSubmit = async (e) => {
@@ -143,13 +143,13 @@ function StudentPlan() {
 			setCurrentStatus(USER_PLAN_ACTIVE);
 			var today = new Date();
 			updatedValidityString = today?.toISOString();
-			console.log("New plan starts from date:", updatedValidityString);
+			// console.log("New plan starts from date:", updatedValidityString);
 		} else if (userPlan.length === 1) {
 			setCurrentStatus(USER_PLAN_STAGED);
 			var validityDate = new Date(userPlan[0].validity_to);
 			validityDate.setDate(validityDate.getDate() + 1);
 			updatedValidityString = validityDate?.toISOString();
-			console.log("New plan validity from date:", updatedValidityString);
+			// console.log("New plan validity from date:", updatedValidityString);
 		} else {
 			var highestValidityDate = null;
 			setCurrentStatus(USER_PLAN_STAGED);
@@ -166,12 +166,12 @@ function StudentPlan() {
 			if (highestValidityDate !== null) {
 				highestValidityDate.setDate(highestValidityDate.getDate() + 1);
 				updatedValidityString = highestValidityDate?.toISOString();
-				console.log(
-					"New plan validity from date:",
-					updatedValidityString
-				);
+				// console.log(
+				// 	"New plan validity from date:",
+				// 	updatedValidityString
+				// );
 			} else {
-				console.log("No valid validity_to dates found.");
+				// console.log("No valid validity_to dates found.");
 			}
 		}
 		return updatedValidityString;
@@ -189,7 +189,7 @@ function StudentPlan() {
 			});
 			const data = response.data;
 
-			console.log({ planzzzzzzz: data });
+			// console.log({ planzzzzzzz: data });
 
 			if (data?.userPlan.length !== 0) {
 				const filteredPlans = data.userPlan.filter(
@@ -256,7 +256,7 @@ function StudentPlan() {
 				// toast("You don't have a plan yet! Purchase one to continue");
 			}
 		} catch (error) {
-			console.log(error);
+			// console.log(error);
 		}
 	}, [user, formattedDate]);
 
@@ -267,12 +267,12 @@ function StudentPlan() {
 				url: "/plan/get-all-student-plans",
 			});
 			const filteredPlans = response.data?.plans?.filter(
-				(plan) => plan.name === "Basic Plan"
+				(plan) => plan.plan_user_type === "STUDENT"
 			);
 			setAllPlans(filteredPlans);
 		} catch (error) {
 			toast("Error fetching plans", { type: "error" });
-			console.log(error);
+			// console.log(error);
 		}
 	}, []);
 
@@ -283,10 +283,10 @@ function StudentPlan() {
 			});
 
 			setAllCurrencies(response?.data?.currencies);
-			console.log("Fetching currencies");
+			// console.log("Fetching currencies");
 		} catch (error) {
 			toast("Error fetching plans", { type: "error" });
-			console.log(error);
+			// console.log(error);
 		}
 	}, []);
 
@@ -311,14 +311,14 @@ function StudentPlan() {
 			});
 
 			if (res.status === 200) {
-				console.log(res.data);
+				// console.log(res.data);
 				setDiscountCoupon(res.data.discount_coupon);
 				setDiscountCouponApplied(true);
 				return null;
 			}
 			return new Error("Invalid discount coupon");
 		} catch (err) {
-			console.log(err);
+			// console.log(err);
 			return new Error("Invalid discount coupon");
 		}
 	};
@@ -375,6 +375,8 @@ function StudentPlan() {
 				validityTo.getDate() + cardData.plan_validity_days
 			);
 			const validityToDate = validityTo?.toISOString();
+
+			console.log({ validityFromDate, validityToDate });
 			userPlanData.purchase_date = formattedDate;
 			userPlanData.validity_from = validityFromDate;
 			userPlanData.validity_to = validityToDate;
@@ -395,7 +397,7 @@ function StudentPlan() {
 		}
 
 		try {
-			console.log("BUYING : ", userPlanData);
+			// console.log("BUYING : ", userPlanData);
 			const response = await Fetch({
 				url: "/payment/order",
 				method: "POST",
@@ -411,12 +413,13 @@ function StudentPlan() {
 						amount: razorpayOrder?.amount,
 					});
 					setDisplayRazorpay(true);
+					setLoading(true);
 				}
 			} else {
 				toast(response.data?.message);
 			}
 		} catch (error) {
-			console.log(error);
+			// console.log(error);
 			toast("Error setting up order, try again", { type: "error" });
 		}
 	};
@@ -433,21 +436,21 @@ function StudentPlan() {
 	};
 
 	const registerUserPlan = async (order_id) => {
-		toBeRegistered.transaction_order_id = order_id;
-		toBeRegistered.user_type = "STUDENT";
-		toBeRegistered.institute_id = null;
-		setLoading(true);
+		const finalUserPlan = { ...toBeRegistered };
+		finalUserPlan.transaction_order_id = order_id;
+		finalUserPlan.user_type = "STUDENT";
+		finalUserPlan.institute_id = null;
 
 		FetchRetry({
 			url: "/user-plan/register",
 			method: "POST",
 			token: true,
-			data: toBeRegistered,
+			data: finalUserPlan,
 			n: 5,
 			retryDelayMs: 2000,
 		})
 			.then((response) => {
-				console.log({ response });
+				// console.log({ response });
 				if (response?.status === 200) {
 					toast("Plan subscribed successfully", { type: "success" });
 
@@ -457,7 +460,7 @@ function StudentPlan() {
 						url: "/invoice/student/mail-invoice",
 						method: "POST",
 						data: JSON.stringify({
-							user_id: toBeRegistered.user_id,
+							user_id: finalUserPlan.user_id,
 							transaction_order_id: order_id,
 						}),
 						n: 2,
@@ -470,11 +473,13 @@ function StudentPlan() {
 								});
 							}
 							setShowCard(false);
+							setCardData(null);
 							setLoading(false);
 						})
 						.catch((error) => {
-							console.log(error);
+							// console.log(error);
 							setShowCard(false);
+							setCardData(null);
 							toast(
 								"Error mailing invoice; Download invoice in Transaction History",
 								{ type: "error" }
@@ -483,19 +488,23 @@ function StudentPlan() {
 						});
 
 					fetchUserPlans();
-					setLoading(false);
 				} else {
 					toast(response?.data?.message);
 					setLoading(false);
 				}
 			})
 			.catch((error) => {
-				console.log(error);
+				// console.log(error);
 				toast(
 					"Error subscribing plan; Incase money has been debited from your account, it will be refunded within 4 to 5 business days! Please try again!",
 					{ type: "error" }
 				);
 			});
+	};
+
+	const registerErrorCallback = () => {
+		setShowCard(false);
+		setCardData(null);
 	};
 
 	useEffect(() => {
@@ -506,12 +515,7 @@ function StudentPlan() {
 
 	// Staging plan validity from date
 	useEffect(() => {
-		const fetchData = async () => {
-			setValidityFromDate(getEndDate(myPlans));
-		};
-		if (myPlans) {
-			fetchData();
-		}
+		setValidityFromDate(getEndDate(myPlans));
 	}, [myPlans]);
 
 	// on mount get student plans & currencies
@@ -545,7 +549,7 @@ function StudentPlan() {
 				}
 			})
 			.catch((err) => {
-				console.log(err);
+				// console.log(err);
 				setInvalidCountry(true);
 			});
 	}, []);
@@ -623,11 +627,6 @@ function StudentPlan() {
 			)}
 
 			<div className="mx-auto flex max-w-7xl flex-col items-center justify-center pt-4">
-				{/* <PlansTable
-					allPlans={allPlans}
-					subscribePlan={subscribePlan}
-					selectedCurrency={selectedCurrency}
-				/> */}
 				{invalidCountry ? (
 					<Alert variant="outlined" severity="warning">
 						6AM Yoga is unavailable in your country right now! We
@@ -743,7 +742,7 @@ function StudentPlan() {
 											<span className="text-center">
 												{new Date(
 													validityFromDate
-												).toDateString()}
+												).toLocaleString()}
 											</span>
 										</p>
 
@@ -756,7 +755,7 @@ function StudentPlan() {
 													calculateEndDate(
 														cardData.plan_validity_days
 													)
-												).toDateString()}
+												).toLocaleString()}
 											</span>
 										</p>
 									</div>
@@ -820,6 +819,7 @@ function StudentPlan() {
 				payment_for={"user_plan"}
 				redirectUrl={"/student"}
 				onSuccessCallback={registerUserPlan}
+				onErrorCallback={registerErrorCallback}
 				displayRazorpay={displayRazorpay}
 				setDisplayRazorpay={setDisplayRazorpay}
 			/>
@@ -827,7 +827,7 @@ function StudentPlan() {
 	);
 }
 
-export default StudentPlan;
+export default withAuth(StudentPlan, ROLE_STUDENT);
 
 // import * as React from "react";
 
