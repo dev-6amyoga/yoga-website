@@ -15,7 +15,10 @@ const {
 	UserInstitutePlanRole,
 } = require("../models/sql/UserInstitutePlanRole");
 const { Institute } = require("../models/sql/Institute");
-const { USER_PLAN_ACTIVE } = require("../enums/user_plan_status");
+const {
+	USER_PLAN_ACTIVE,
+	USER_PLAN_STAGED,
+} = require("../enums/user_plan_status");
 const { Role } = require("../models/sql/Role");
 const WatchTimeQuota = require("../models/mongo/WatchTimeQuota");
 const WatchHistory = require("../models/mongo/WatchHistory");
@@ -242,8 +245,8 @@ router.post("/register", authenticateToken, async (req, res) => {
 		institute_id,
 
 		purchase_date,
-		validity_from,
-		validity_to,
+		validity_from = null,
+		validity_to = null,
 
 		cancellation_date,
 		auto_renewal_enabled,
@@ -262,10 +265,7 @@ router.post("/register", authenticateToken, async (req, res) => {
 	if (
 		!user_id ||
 		!plan_id ||
-		!validity_from ||
-		!validity_to ||
 		!purchase_date ||
-		!current_status ||
 		!transaction_order_id ||
 		!user_type ||
 		institute_id === undefined
@@ -273,6 +273,16 @@ router.post("/register", authenticateToken, async (req, res) => {
 		return res
 			.status(HTTP_BAD_REQUEST)
 			.json({ error: "Missing required fields" });
+
+	if (current_status === USER_PLAN_ACTIVE && !validity_from && !validity_to) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ error: "Missing required fields" });
+	} else if (current_status === USER_PLAN_STAGED) {
+	} else {
+		return res.status(HTTP_BAD_REQUEST).json({ error: "Invalid status" });
+	}
+
 	const user_plan = await UserPlan.findOne({
 		where: {
 			user_id: user_id,

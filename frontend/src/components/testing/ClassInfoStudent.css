@@ -1,0 +1,29 @@
+.class-info-student {
+	display: grid;
+	grid-template-columns: 1fr 0.5fr;
+	grid-template-rows: repeat(2, 1fr);
+	grid-template-areas:
+		"class-info-student-title class-info-student-title class-info-student-teacher"
+		"class-info-student-info class-info-student-info class-info-student-actions";
+	gap: 1rem;
+}
+
+.class-info-student-title {
+	grid-area: class-info-student-title;
+}
+
+.class-info-student-teacher {
+	grid-area: class-info-student-teacher;
+}
+
+.class-info-student-desc {
+	grid-area: class-info-student-desc;
+}
+
+.class-info-student-info {
+	grid-area: class-info-student-info;
+}
+
+.class-info-student-actions {
+	grid-area: class-info-student-actions;
+}

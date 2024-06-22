@@ -32,6 +32,7 @@ const {
 } = require("../models/sql/UserInstitutePlanRole");
 const { LoginHistory } = require("../models/sql/LoginHistory");
 const { LoginToken } = require("../models/sql/LoginToken");
+const { UpdateUserPlanStatus } = require("../services/UserPlan.service");
 
 router.use(requestIp.mw());
 
@@ -225,11 +226,16 @@ router.post("/login-google", async (req, res) => {
     // check if user exists
     let [user, errorUser] = await GetUserInfo({ email });
 
-    if (!user || errorUser) {
+    if (!user || errorUser)
       return res
-        .status(HTTP_OK)
-        .json({ user: userInfo, message: "User does not exist" });
-    }
+        .status(HTTP_BAD_REQUEST)
+        .json({ error: "User does not exist" });
+
+    // if (user.is_google_login === false) {
+    // 	return res
+    // 		.status(HTTP_BAD_REQUEST)
+    // 		.json({ error: "User not registered using Google" });
+    // }
 
     // check if user has active login token
     const login_token_history = await LoginToken.findAll({

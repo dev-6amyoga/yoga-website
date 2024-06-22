@@ -1,6 +1,8 @@
 // import withAuth from "../utils/withAuth";
 import AutomaticRegister from "../components/content-management/forms/AutomaticRegister";
 import TeacherPlaylistCreation from "../pages/teacher/TeacherPlaylistCreation";
+import ClassModeStudent from "../pages/testing/ClassModeStudent";
+import ClassModeTeacher from "../pages/testing/ClassModeTeacher";
 import DesignBoard from "../pages/testing/DesignBoard";
 import ShakaVideo from "../pages/testing/ShakaVideo";
 import SocketPage from "../pages/testing/Socket";
