@@ -25,21 +25,6 @@ function PlaylistSections() {
     state.setCurrentMarkerIdx,
     state.setMarkers,
   ]);
-  const [
-    fullScreen,
-    currentVideo,
-    addToSeekQueue,
-    currentMarkerIdx,
-    setCurrentMarkerIdx,
-    setMarkers,
-  ] = useVideoStore((state) => [
-    state.fullScreen,
-    state.currentVideo,
-    state.addToSeekQueue,
-    state.currentMarkerIdx,
-    state.setCurrentMarkerIdx,
-    state.setMarkers,
-  ]);
 
   const [queue] = usePlaylistStore((state) => [state.queue]);
   const clearQueue = usePlaylistStore((state) => state.clearQueue);
@@ -56,18 +41,6 @@ function PlaylistSections() {
       t: s.time,
     });
   };
-  const handleSeek = (s, idx) => {
-    // TODO : fix this, bug when you go to previous marker
-    console.log("CLICKED SECTION : ", idx);
-    // setVideoEvent({
-    // 	type: VIDEO_EVENT_MOVING_MARKER,
-    // 	markerIdx: idx,
-    // });
-    addToSeekQueue({
-      type: SEEK_TYPE_MARKER,
-      t: s.time,
-    });
-  };
 
   const currVideo = useMemo(() => {
     if (queue && queue.length > 0) {
@@ -75,19 +48,7 @@ function PlaylistSections() {
     }
     return null;
   }, [queue]);
-  const currVideo = useMemo(() => {
-    if (queue && queue.length > 0) {
-      return queue[0];
-    }
-    return null;
-  }, [queue]);
 
-  useEffect(() => {
-    if (currVideo) {
-      setMarkers(currVideo?.video?.markers ?? currVideo?.video?.sections);
-      setCurrentMarkerIdx(0);
-    }
-  }, [currVideo, setCurrentMarkerIdx, setMarkers]);
   useEffect(() => {
     if (currVideo) {
       setMarkers(currVideo?.video?.markers ?? currVideo?.video?.sections);
