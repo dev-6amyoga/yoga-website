@@ -43,6 +43,7 @@ const usePlaylistStore = create((set) => ({
 
 	addToQueue: (items) =>
 		set((state) => {
+			// console.log(items);
 			return {
 				queue: [
 					...state.queue,

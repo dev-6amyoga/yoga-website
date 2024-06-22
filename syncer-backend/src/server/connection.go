@@ -23,6 +23,8 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	s.logger.Info("Teacher connected")
+
 	// close the connection when the function returns
 	defer conn.Close()
 
@@ -166,10 +168,14 @@ Student connection handler
 */
 func (s *Server) handleStudentConnection(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
+
 	if err != nil {
 		s.logger.Error("Error upgrading to WebSocket:", err)
 		return
 	}
+
+	s.logger.Info("Teacher connected")
+
 	defer conn.Close()
 
 	// read class id to initialize the connection
@@ -207,11 +213,16 @@ func (s *Server) handleStudentConnection(w http.ResponseWriter, r *http.Request)
 
 	timer := time.NewTicker(2 * time.Second)
 
+	conn.WriteJSON(events.EventStudentResponse{
+		Status:  events.EVENT_STATUS_ACK,
+		Message: "Connection established",
+	})
+
 	for {
 		select {
 
 		case <-timer.C:
-			// poll for events
+			// TODO : poll for events
 			// send events to students
 			msg := events.EventStudentResponse{
 				Status:  events.EVENT_STATUS_ACK,
