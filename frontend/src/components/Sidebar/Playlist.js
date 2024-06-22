@@ -32,11 +32,12 @@ function Playlist() {
 	const [playlists, setPlaylists] = useState([]);
 	const [userPlaylists, setUserPlaylists] = useState([]);
 	const [loading, setLoading] = useState(true);
-	const [user, institutes, currentInstituteId] = useUserStore(
+	const [user, institutes, currentInstituteId, currentRole] = useUserStore(
 		useShallow((state) => [
 			state.user,
 			state.institutes,
 			state.currentInstituteId,
+			state.currentRole,
 		])
 	);
 	const user_id = user?.user_id;
@@ -129,7 +130,6 @@ function Playlist() {
 					url: "/content/video/getAllTransitions",
 				});
 				const data = response.data;
-				// console.log(data);
 				setAllTransitions(data);
 			} catch (error) {
 				toast(error);
@@ -290,8 +290,17 @@ function Playlist() {
 					url: "/content/playlists/getAllPlaylists",
 				});
 				const data = response.data;
-				// console.log(data);
-				setPlaylists(data);
+				console.log(data, "IS A RESP YO");
+				if (currentRole === "STUDENT") {
+					const studentPlaylists = data.filter(
+						(playlist) =>
+							playlist.playlist_mode.toLowerCase() === "student"
+					);
+
+					setPlaylists(studentPlaylists);
+				} else {
+					setPlaylists(data);
+				}
 				setLoading(false);
 			} catch (error) {
 				setLoading(false);
@@ -301,58 +310,52 @@ function Playlist() {
 		fetchData();
 	}, [user_id, currentInstituteId]);
 
-	const getAllAsanas = async (asana_ids) => {
-		if (asana_ids.length === 0) {
-			return [];
-		}
-		const allAsanasData = asana_ids.map((asana_id) => {
-			// console.log("FETCHING FOR : ", asana_id, "\n");
-			if (Number(asana_id)) {
-				const asanaObject = allAsanas.find(
-					(asana) => asana.id === asana_id
-				);
-				return asanaObject || null;
-			} else {
-				const transitionObject = allTransitions.find(
-					(transition) => transition.transition_id === asana_id
-				);
-				// console.log(transitionObject);
-				return transitionObject || null;
-			}
-		});
-		return allAsanasData;
-	};
-
 	const handleAddToQueue = (playlist) => {
-		// getAllAsanas(playlist.asana_ids)
-		// .then((asanas) => {
-		// 	console.log(asanas);
-		// 	addToQueue(asanas.filter((v) => v !== null));
-		// })
-		// .catch((err) => console.log(err));
-
 		clearQueue();
-		addToQueue([playlist]);
+		if (playlist?.playlist_dash_url) {
+			addToQueue([playlist]);
+		} else {
+			// addToQueue()
+			// console.log(playlist);
+			let videos = [];
+
+			playlist.asana_ids.forEach((asana_id) => {
+				if (typeof asana_id === "number") {
+					const asana = allAsanas.find(
+						(asana) => asana.asana_id === asana_id
+					);
+					if (asana) {
+						videos.push(asana);
+					}
+				} else {
+					const transition = allTransitions.find(
+						(transition) => transition.transition_id === asana_id
+					);
+					if (transition) {
+						videos.push(transition);
+					}
+				}
+			});
+
+			addToQueue(videos);
+		}
 	};
 
 	const showDetails = (x) => {
-		console.log("in show details");
 		setModalData(x);
 		setModalState(true);
 	};
+
 	const closeModal = () => {
 		setModalState(false);
 	};
 
 	const handleSearch = (e) => {
-		console.log("e", e);
 		if (searchTimeout.current) {
 			clearTimeout(searchTimeout.current);
 		}
-
 		searchTimeout.current = setTimeout(() => {
 			const q = String(e.target.value).toLowerCase();
-
 			setQuery(q);
 		}, 500);
 	};

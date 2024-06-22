@@ -1,23 +1,25 @@
-import {
-  Button,
-  Card,
-  Divider,
-  Grid,
-  Input,
-  Modal,
-  Table,
-  Text,
-} from "@geist-ui/core";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
-import { transitionGenerator } from "../../components/transition-generator/TransitionGenerator";
-import useUserStore from "../../store/UserStore";
-import { Fetch } from "../../utils/Fetch";
-import { MonthlyPlaylistChecker } from "../../utils/MonthlyPlaylistChecker";
+import
+  {
+    Button,
+    Card,
+    Divider,
+    Grid,
+    Input,
+    Modal,
+    Table,
+    Text,
+  } from "@geist-ui/core"
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
+import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar"
+import { transitionGenerator } from "../../components/transition-generator/TransitionGenerator"
+import useUserStore from "../../store/UserStore"
+import { Fetch } from "../../utils/Fetch"
+import { MonthlyPlaylistChecker } from "../../utils/MonthlyPlaylistChecker"
+import { withAuth } from "../../utils/withAuth"
 
-export default function RegisterNewPlaylistStudent() {
+function RegisterNewPlaylistStudent() {
   const navigate = useNavigate();
   let user = useUserStore((state) => state.user);
   const [asanas, setAsanas] = useState([]);
@@ -577,3 +579,5 @@ export default function RegisterNewPlaylistStudent() {
     </div>
   );
 }
+
+export default withAuth(RegisterNewPlaylistStudent, "STUDENT");

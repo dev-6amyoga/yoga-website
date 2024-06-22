@@ -1,58 +1,51 @@
+import CancelIcon from "@mui/icons-material/Cancel";
+import EditIcon from "@mui/icons-material/Edit";
+import PersonIcon from "@mui/icons-material/Person";
+import SaveIcon from "@mui/icons-material/Save";
 import {
-  Container,
-  Typography,
+  Avatar,
+  Box,
+  Button,
   Card,
   CardContent,
-  Box,
-  Tabs,
-  Tab,
-  TextField,
-  Button,
-  IconButton,
-  Tooltip,
+  Container,
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
-  Avatar,
-  FormControlLabel,
-  Checkbox,
-  Grid,
-  Link,
-  alpha,
+  DialogContent,
+  DialogTitle,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
 } from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
-import EditIcon from "@mui/icons-material/Edit";
-import SaveIcon from "@mui/icons-material/Save";
-import CancelIcon from "@mui/icons-material/Cancel";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
 import ChangePassword from "../../components/student/UserSettings/ChangePassword";
+import { ROLE_STUDENT } from "../../enums/roles";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
 import { validateEmail, validatePhone } from "../../utils/formValidation";
 import getFormData from "../../utils/getFormData";
+import { withAuth } from "../../utils/withAuth";
 
-export default function StudentProfile() {
+function StudentProfile() {
   const [tabIndex, setTabIndex] = useState(0);
   const handleTabChange = (event, newTabIndex) => {
     setTabIndex(newTabIndex);
   };
-
   const user = useUserStore((state) => state.user);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [userData, setUserData] = useState({});
   const [update, setUpdate] = useState(false);
-  const [token, setToken] = useState("");
   const [isEmailUpdate, setIsEmailUpdate] = useState(false);
-  const [isPhoneUpdate, setIsPhoneUpdate] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [updateData, setUpdateData] = useState({});
   const closeUpdateHandler = (event) => {
     setUpdate(false);
   };
+
   useEffect(() => {
     Fetch({
       url: "/user/get-by-id",
@@ -70,15 +63,13 @@ export default function StudentProfile() {
       }
     });
   }, [user]);
+
   const [formData, setFormData] = useState({
-    // Separate state for form data
     name_profile: "",
     username_profile: "",
     email_profile: "",
     phone_profile: "",
   });
-
-  // ... your useEffect and other functions ...
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -87,6 +78,7 @@ export default function StudentProfile() {
       [name]: value,
     }));
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isEditing) {
@@ -96,13 +88,15 @@ export default function StudentProfile() {
       if (
         formData.name_profile === "" &&
         formData.email_profile === "" &&
-        formData.phone_profile === ""
+        formData.phone_profile === "" &&
+        formData.username_profile === ""
       ) {
         toast("No changes to commit!");
       } else if (
         formData.name_profile === userData.name &&
         formData.email_profile === userData.email &&
-        formData.phone_profile === userData.phone
+        formData.phone_profile === userData.phone &&
+        formData.username_profile === userData.username
       ) {
         toast("No changes to commit!");
       } else {
@@ -121,6 +115,11 @@ export default function StudentProfile() {
         updateData.name_profile !== ""
           ? updateData.name_profile
           : userData.name,
+      username:
+        updateData.username_profile !== ""
+          ? updateData.username_profile
+          : userData.username,
+
       email:
         updateData.email_profile !== ""
           ? updateData.email_profile
@@ -131,21 +130,20 @@ export default function StudentProfile() {
           : userData.phone,
     };
 
-    if (updateData1.phone) {
-      const [validPhone, phoneError] = validatePhone(updateData1.phone);
+    if (updateData.phone_profile) {
+      const [validPhone, phoneError] = validatePhone(updateData.phone_profile);
       if (!validPhone) {
         toast(phoneError.message, { type: "error" });
         return;
       }
-      // if (!updateData1.phone.startsWith("+91")) {
-      //   updateData1.phone = "+91" + updateData1.phone;
-      // }
     }
 
-    const [validEmail, emailError] = validateEmail(updateData1.email);
-    if (!validEmail) {
-      toast(emailError.message, { type: "error" });
-      return;
+    if (updateData.email_profile) {
+      const [validEmail, emailError] = validateEmail(updateData.email_profile);
+      if (!validEmail) {
+        toast(emailError.message, { type: "error" });
+        return;
+      }
     }
 
     if (
@@ -155,14 +153,28 @@ export default function StudentProfile() {
       setIsEmailUpdate(true);
       toast("Email Update");
     }
-    if (
-      updateData.phone_profile !== "" &&
-      updateData.phone_profile !== userData.phone
-    ) {
-      //do otp verification on old number and if verified then register new number.
-      setIsPhoneUpdate(true);
-      toast("Phone Update");
-    }
+    setIsEditing(false);
+    console.log(updateData1, "to be updated!");
+    Fetch({
+      url: "/user/update-profile",
+      method: "POST",
+      data: {
+        user_id: updateData1.user_id,
+        username: updateData1.username,
+        name: updateData1.name,
+        phone: updateData1.phone,
+        email: updateData1.email,
+      },
+    })
+      .then((res) => {
+        console.log(res);
+        toast("Updated!", { type: "success" });
+      })
+      .catch((err) => {
+        toast(`Error : ${err.response.data.error}`, {
+          type: "error",
+        });
+      });
   };
 
   const sendEmail = async () => {
@@ -226,21 +238,49 @@ export default function StudentProfile() {
               gap: 2,
             }}
           >
-            {/* Conditionally render the tab content */}
             {tabIndex === 0 && (
               <form onSubmit={handleSubmit} style={{ width: "100%" }}>
                 <TextField
-                  label="Name"
                   name="name_profile"
                   fullWidth
-                  value={formData.name_profile || userData?.name}
+                  placeholder={formData.name_profile || userData?.name}
                   onChange={handleChange}
                   disabled={!isEditing}
                   sx={{ mb: 2 }}
                 />
-                {/* ... other TextFields ... */}
 
-                <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                <TextField
+                  fullWidth
+                  name="username_profile"
+                  placeholder={userData?.username}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  name="email_profile"
+                  placeholder={userData?.email}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  name="phone_profile"
+                  placeholder={userData?.phone}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  sx={{ mb: 2 }}
+                />
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    mt: 2,
+                  }}
+                >
                   {isEditing ? (
                     <>
                       <Button
@@ -313,3 +353,5 @@ export default function StudentProfile() {
     </StudentPageWrapper>
   );
 }
+
+export default withAuth(StudentProfile, ROLE_STUDENT);

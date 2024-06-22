@@ -3,7 +3,7 @@ import VideoPlayerWrapper from "../../components/StackVideoShaka/VideoPlayerWrap
 export default function ShakaVideo() {
 	return (
 		// <PageWrapper heading="Player">
-		<div>
+		<div className="max-w-7xl mx-auto p-4">
 			<VideoPlayerWrapper />
 		</div>
 		// </PageWrapper>

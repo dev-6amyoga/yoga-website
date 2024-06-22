@@ -1,6 +1,8 @@
 import "react-toastify/dist/ReactToastify.css";
 import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
-export default function StudentMain() {
+import { ROLE_STUDENT } from "../../enums/roles";
+import { withAuth } from "../../utils/withAuth";
+function StudentMain() {
 	return (
 		<div>
 			<div>
@@ -13,3 +15,5 @@ export default function StudentMain() {
 		</div>
 	);
 }
+
+export default withAuth(StudentMain, ROLE_STUDENT);

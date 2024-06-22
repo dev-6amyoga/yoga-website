@@ -1,24 +1,19 @@
 import { Grid } from "@geist-ui/core";
+import { Box, Button, Container, CssBaseline } from "@mui/material";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import Papa from "papaparse";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { DataTable } from "../../components/Common/DataTable/DataTable";
+import SortableColumn from "../../components/Common/DataTable/SortableColumn";
+import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
+import { ROLE_STUDENT } from "../../enums/roles";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
-import SortableColumn from "../../components/Common/DataTable/SortableColumn";
-import {
-  Typography,
-  CssBaseline,
-  Chip,
-  alpha,
-  Button,
-  Box,
-  Container,
-} from "@mui/material";
+import { withAuth } from "../../utils/withAuth";
 import Hero from "./components/Hero";
-export default function StudentTransactionHistory() {
+
+function StudentTransactionHistory() {
   let user = useUserStore((state) => state.user);
   const [transactions, setTransactions] = useState([]);
   const downloadATag = useRef(null);
@@ -121,26 +116,17 @@ export default function StudentTransactionHistory() {
           <SortableColumn column={column}>Transaction Order ID</SortableColumn>
         ),
       },
-      // {
-      //   accessorKey: "transaction_payment_id",
-      //   header: ({ column }) => (
-      //     <SortableColumn column={column}>
-      //       Transaction Payment ID
-      //     </SortableColumn>
-      //   ),
-      // },
       {
         accessorKey: "amount",
         header: ({ column }) => (
           <SortableColumn column={column}>Amount</SortableColumn>
         ),
+        cell: ({ row }) => {
+          const amount = row.original.amount;
+          const formattedAmount = `Rs. ${(amount / 100).toFixed(2)}`;
+          return <div>{formattedAmount}</div>;
+        },
       },
-      // {
-      //   accessorKey: "payment_method",
-      //   header: ({ column }) => (
-      //     <SortableColumn column={column}>Payment Method</SortableColumn>
-      //   ),
-      // },
       {
         accessorKey: "payment_status",
         header: ({ column }) => (
@@ -161,40 +147,6 @@ export default function StudentTransactionHistory() {
   const [mode, setMode] = useState("light");
 
   const defaultTheme = createTheme({ palette: { mode } });
-
-  // return (
-  //   <ThemeProvider theme={defaultTheme}>
-  //     <CssBaseline />
-  //     <StudentNavMUI />
-  //     <Hero heading="Transaction History" />
-  //     <div className="flex flex-col items-center justify-center py-0">
-  //       <Spacer h={1} />
-  //       <a
-  //         className="hidden"
-  //         href="#"
-  //         ref={downloadATag}
-  //         target="_blank"
-  //         rel="noreferer"
-  //       ></a>
-  //       <div className="elements">
-  //         <Button
-  //           onClick={() => {
-  //             handleDownload(transactions);
-  //           }}
-  //         >
-  //           Download CSV
-  //         </Button>
-  //         <br />
-  //         <div className="border max-w-7xl">
-  //           <DataTable
-  //             columns={columnsDataTable}
-  //             data={transactions || []}
-  //           ></DataTable>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   </ThemeProvider>
-  // );
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -229,3 +181,5 @@ export default function StudentTransactionHistory() {
     </ThemeProvider>
   );
 }
+
+export default withAuth(StudentTransactionHistory, ROLE_STUDENT);
