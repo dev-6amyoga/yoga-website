@@ -5,9 +5,9 @@ import { useParams } from "react-router-dom";
 // import Attendees from "../../components/testing/Attendees";
 // import ClassInfoTeacher from "../../components/testing/ClassInfoTeacher";
 // import PlaylistSectionsTeacher from "../../components/testing/PlaylistSectionsTeacher";
-import ClassModePlayer from "../../components/class-mode-player-dashjs/ClassModePlayer";
-import useVideoStore from "../../store/VideoStore";
-import Hero from "../student/components/Hero";
+import ClassModePlayer from "../../../components/class-mode-player-dashjs/ClassModePlayer";
+import useVideoStore from "../../../store/VideoStore";
+import Hero from "../../student/components/Hero";
 
 function ClassModeTeacher() {
 	const [fullScreen] = useVideoStore((state) => [state.fullScreen]);

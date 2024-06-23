@@ -1,7 +1,10 @@
+import { Fetch } from "../utils/Fetch";
+
 export class ClassModeAPI {
 	static async postCreateClass(
 		class_name,
-		class_description,
+		class_desc,
+		teacher_id,
 		start_time,
 		end_time
 	) {
@@ -11,7 +14,42 @@ export class ClassModeAPI {
 				method: "POST",
 				data: {
 					class_name: class_name,
-					class_description: class_description,
+					class_desc: class_desc,
+					teacher_id: teacher_id,
+					start_time: start_time,
+					end_time: end_time,
+				},
+			});
+
+			if (response.status === 200) {
+				return [response.data, null];
+			} else {
+				return [null, response.data];
+			}
+		} catch (err) {
+			return [null, err];
+		}
+	}
+
+	static async postUpdateClass(
+		class_id,
+		class_name,
+		class_desc,
+		status,
+		teacher_id,
+		start_time,
+		end_time
+	) {
+		try {
+			const response = await Fetch({
+				url: "/class-mode/update",
+				method: "POST",
+				data: {
+					class_id: class_id,
+					class_name: class_name,
+					class_desc: class_desc,
+					status: status,
+					teacher_id: teacher_id,
 					start_time: start_time,
 					end_time: end_time,
 				},

@@ -25,9 +25,7 @@ import RegisterNewSchedule from "../pages/admin/schedule-management/RegisterNewS
 import ViewAllSchedules from "../pages/admin/schedule-management/ViewAllSchedules";
 import LogPayment from "../pages/admin/transactions/LogPayment";
 import RefundManagement from "../pages/admin/transactions/Refund";
-import ClassModePage from "../pages/class-mode/ClassModePage";
-import RegisterNewClass from "../pages/class-mode/RegisterNewClass";
-import ViewAllClasses from "../pages/class-mode/ViewAllClasses";
+
 export const AdminRoutes = [
 	{
 		path: "/admin",
@@ -38,18 +36,18 @@ export const AdminRoutes = [
 		path: "/admin/video/create",
 		element: <RegisterVideo />,
 	},
-	{
-		path: "/admin/classmode/create",
-		element: <RegisterNewClass />,
-	},
-	{
-		path: "/admin/classmode/view",
-		element: <ViewAllClasses />,
-	},
-	{
-		path: "/class-mode/:class_id",
-		element: <ClassModePage />,
-	},
+	// {
+	// 	path: "/admin/classmode/create",
+	// 	element: <RegisterNewClass />,
+	// },
+	// {
+	// 	path: "/admin/classmode/view",
+	// 	element: <ViewAllClasses />,
+	// },
+	// {
+	// 	path: "/class-mode/:class_id",
+	// 	element: <ClassModePage />,
+	// },
 
 	{
 		path: "/admin/video/edit/:asana_id",
