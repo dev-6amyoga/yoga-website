@@ -3,7 +3,7 @@ import {
   PoseLandmarker,
   FilesetResolver,
 } from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0";
-import { Button, CssBaseline, Typography } from "@mui/material";
+import { Button, Card, CssBaseline, Typography } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useEffect, useState, useRef } from "react";
 import "./MovingText.css";
@@ -127,20 +127,16 @@ function StudentHome() {
       nextStep = "";
       legPositionMessage = "Take left heel to groin!";
       if (globalScore !== 0) {
-        handleScoreUpdate(-globalScore);
+        setGlobalScore(0);
       }
     } else if (leftHeelY - rightHeelY > 0.1) {
       nextStep = "";
       legPositionMessage = "Swap Legs!";
       if (globalScore !== 0) {
-        handleScoreUpdate(-globalScore);
+        setGlobalScore(0);
       }
     } else {
-      if (globalScore === 0) {
-        handleScoreUpdate(30);
-      } else {
-        handleScoreUpdate(30 - globalScore);
-      }
+      setGlobalScore(30);
       nextStep = "Legs correct!";
     }
 
@@ -384,14 +380,35 @@ function StudentHome() {
       <CssBaseline />
       <Hero heading="6AM Yoga Player" />
       <div className="max-w-7xl mx-auto py-2 px-1 xl:px-0">
+        {globalScore && (
+          <Typography variant="h1" component="div">
+            {globalScore}
+          </Typography>
+        )}
         <div className="border-8 border-gray-950">
-          {globalScore && (
-            <div className="global-message bg-gray-200 text-center p-4 rounded-md shadow-md">
-              <h2 className="text-2xl font-bold text-gray-700">
-                {globalScore}
-              </h2>
-            </div>
-          )}
+          {/* {globalScore && (
+            <Card
+              sx={{
+                backgroundColor: "gray.800",
+                color: "white",
+                padding: 10,
+                borderRadius: "lg",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100vh",
+              }}
+            >
+              <div>
+                <Typography variant="h3" gutterBottom>
+                  Your Score
+                </Typography>
+                <Typography variant="h1" component="div">
+                  {globalScore}
+                </Typography>
+              </div>
+            </Card>
+          )} */}
           <Button ref={enableWebcamButtonRef} onClick={enableCam}>
             ENABLE PREDICTIONS
           </Button>
