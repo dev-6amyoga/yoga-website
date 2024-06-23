@@ -164,8 +164,14 @@ function StudentHome() {
       if (leftHeelY < rightKneeY) {
         const midLength = (midHipY + rightKneeY) / 4;
         if (leftHeelY > midHipY + midLength) {
-          if (globalScore >= 30 && globalScore <= 65) {
-            handleScoreUpdate(-26.25);
+          if (globalScore >= 30 && globalScore < 65) {
+            if (globalScore === 30) {
+              handleScoreUpdate(26.25);
+            } else if (globalScore === 38.75) {
+              handleScoreUpdate(17.5);
+            } else if (globalScore === 47.5) {
+              handleScoreUpdate(8.75);
+            }
           } else {
             handleScoreUpdate(-8.75);
           }
