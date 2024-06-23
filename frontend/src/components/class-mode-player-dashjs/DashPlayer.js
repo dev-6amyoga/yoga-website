@@ -30,6 +30,7 @@ function DashPlayer(
 		onSeeked = () => {},
 		timingObjRef = { current: null },
 		className,
+		isStudent,
 		...rest
 	},
 	ref
@@ -67,6 +68,9 @@ function DashPlayer(
 		playerRef.current = p;
 		playerRef.current.updateSettings(dashSettings);
 		playerRef.current.initialize(videoRef.current, src, true);
+		if (timingObjRef.current) {
+			timingObjRef.current.update({ velocity: 1 });
+		}
 		setPlayerRefSet(true);
 		return () => {
 			console.log("[DASH PLAYER] Cleanup, player reset");
@@ -394,56 +398,58 @@ function DashPlayer(
 			<video
 				ref={setVideoRef}
 				{...rest}
-				controls
+				controls={!isStudent}
 				className="w-full h-full"></video>
-			<div className="absolute bottom-4 right-4 flex flex-row gap-2">
-				<button
-					className="bg-white text-black px-4 py-2 rounded-md"
-					onClick={() => {
-						playerRef.current.play();
-						timingObjRef.current.update({ velocity: 1 });
-					}}>
-					Play
-				</button>
-				<button
-					className="bg-white text-black px-4 py-2 rounded-md"
-					onClick={() => {
-						playerRef.current.pause();
-						timingObjRef.current.update({ velocity: 0 });
-					}}>
-					Pause
-				</button>
-				<button
-					className="bg-white text-black px-4 py-2 rounded-md"
-					onClick={() => {
-						// playerRef.current.seek(playerRef.current.time() - 10);
-						timingObjRef.current.update({
-							position:
-								timingObjRef.current.query().position - 10,
-						});
-					}}>
-					Seek -10
-				</button>
-				<button
-					className="bg-white text-black px-4 py-2 rounded-md"
-					onClick={() => {
-						timingObjRef.current.update({
-							position:
-								timingObjRef.current.query().position + 10,
-						});
-					}}>
-					Seek +10
-				</button>
-				<button
-					className="bg-white text-black px-4 py-2 rounded-md"
-					onClick={() => {
-						timingObjRef.current.update({
-							position: 0,
-						});
-					}}>
-					Reset
-				</button>
-			</div>
+			{!isStudent && (
+				<div className={`absolute bottom-4 right-4`}>
+					<button
+						className="bg-white text-black px-4 py-2 rounded-md"
+						onClick={() => {
+							playerRef.current.play();
+							timingObjRef.current.update({ velocity: 1 });
+						}}>
+						Play
+					</button>
+					<button
+						className="bg-white text-black px-4 py-2 rounded-md"
+						onClick={() => {
+							playerRef.current.pause();
+							timingObjRef.current.update({ velocity: 0 });
+						}}>
+						Pause
+					</button>
+					<button
+						className="bg-white text-black px-4 py-2 rounded-md"
+						onClick={() => {
+							// playerRef.current.seek(playerRef.current.time() - 10);
+							timingObjRef.current.update({
+								position:
+									timingObjRef.current.query().position - 10,
+							});
+						}}>
+						Seek -10
+					</button>
+					<button
+						className="bg-white text-black px-4 py-2 rounded-md"
+						onClick={() => {
+							timingObjRef.current.update({
+								position:
+									timingObjRef.current.query().position + 10,
+							});
+						}}>
+						Seek +10
+					</button>
+					<button
+						className="bg-white text-black px-4 py-2 rounded-md"
+						onClick={() => {
+							timingObjRef.current.update({
+								position: 0,
+							});
+						}}>
+						Reset
+					</button>
+				</div>
+			)}
 		</div>
 	);
 }

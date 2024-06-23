@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 // import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
 // import Playlist from "../../components/Sidebar/Playlist";
@@ -14,67 +13,67 @@ function ClassModeTeacher() {
 	const [fullScreen] = useVideoStore((state) => [state.fullScreen]);
 	const { class_id } = useParams();
 
-	const [connectionOpen, setConnectionOpen] = useState(false);
-	// const [socket, setSocket] = useState(null);
-	const [queue, setQueue] = useState([]);
-	const [startConnection, setStartConnection] = useState(false);
-	let intervalTimer = useRef(null);
-	let socket = useRef(null);
+	// const [connectionOpen, setConnectionOpen] = useState(false);
+	// // const [socket, setSocket] = useState(null);
+	// const [queue, setQueue] = useState([]);
+	// const [startConnection, setStartConnection] = useState(false);
+	// let intervalTimer = useRef(null);
+	// let socket = useRef(null);
 
-	const getSampleTeacherReq = (event_type) => {
-		return JSON.stringify({
-			class_id: class_id,
-			type: EVENT_CONTROLS,
-			data: {
-				subtype: "EVENT_CONTROLS_PLAY",
-				data: {},
-				event_time: new Date().toISOString(),
-			},
-		});
-	};
+	// const getSampleTeacherReq = (event_type) => {
+	// 	return JSON.stringify({
+	// 		class_id: class_id,
+	// 		type: EVENT_CONTROLS,
+	// 		data: {
+	// 			subtype: "EVENT_CONTROLS_PLAY",
+	// 			data: {},
+	// 			event_time: new Date().toISOString(),
+	// 		},
+	// 	});
+	// };
 
-	const handleOpen = useCallback(() => {
-		setConnectionOpen(true);
-		console.log("Connection opened");
-		if (socket.current) {
-			// socket.current.send(
-			// 	JSON.stringify({
-			// 		class_id: class_id,
-			// 		teacher_id: "1",
-			// 	})
-			// );
-		}
-	}, []);
+	// const handleOpen = useCallback(() => {
+	// 	setConnectionOpen(true);
+	// 	console.log("Connection opened");
+	// 	if (socket.current) {
+	// 		// socket.current.send(
+	// 		// 	JSON.stringify({
+	// 		// 		class_id: class_id,
+	// 		// 		teacher_id: "1",
+	// 		// 	})
+	// 		// );
+	// 	}
+	// }, []);
 
-	const handleClose = useCallback(() => {
-		console.log("Connection closed");
-		setConnectionOpen(false);
-		clearInterval(intervalTimer.current);
-	}, []);
+	// const handleClose = useCallback(() => {
+	// 	console.log("Connection closed");
+	// 	setConnectionOpen(false);
+	// 	clearInterval(intervalTimer.current);
+	// }, []);
 
-	const handleMessage = useCallback((e) => {
-		const data = JSON.parse(e.data);
-		console.log("Message received: ", data);
-		setQueue((prev) => [...prev, data]);
-	}, []);
+	// const handleMessage = useCallback((e) => {
+	// 	const data = JSON.parse(e.data);
+	// 	console.log("Message received: ", data);
+	// 	setQueue((prev) => [...prev, data]);
+	// }, []);
 
-	// if startConnection is true, create a new WebSocket connection
-	useEffect(() => {
-		if (!startConnection) return;
+	// // if startConnection is true, create a new WebSocket connection
+	// useEffect(() => {
+	// 	if (!startConnection) return;
 
-		const ws = new WebSocket("ws://localhost:4949/teacher/ws");
-		socket.current = ws;
+	// 	const ws = new WebSocket("ws://localhost:4949/teacher/ws");
+	// 	socket.current = ws;
 
-		socket.current.addEventListener("open", handleOpen);
-		socket.current.addEventListener("close", handleClose);
-		socket.current.addEventListener("message", handleMessage);
+	// 	socket.current.addEventListener("open", handleOpen);
+	// 	socket.current.addEventListener("close", handleClose);
+	// 	socket.current.addEventListener("message", handleMessage);
 
-		return () => {
-			if (ws) {
-				ws.close();
-			}
-		};
-	}, [startConnection]);
+	// 	return () => {
+	// 		if (ws) {
+	// 			ws.close();
+	// 		}
+	// 	};
+	// }, [startConnection]);
 
 	// const eventTypes = useMemo(() => {
 	// 	return {
@@ -155,7 +154,7 @@ function ClassModeTeacher() {
 			</div> */}
 
 			{/* dash video player */}
-			<ClassModePlayer />
+			<ClassModePlayer isStudent={false} />
 		</main>
 	);
 }
