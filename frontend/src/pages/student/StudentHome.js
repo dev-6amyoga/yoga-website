@@ -20,6 +20,10 @@ function StudentHome() {
   const canvasRef = useRef(null);
   const enableWebcamButtonRef = useRef(null);
   const [globalMessage, setGlobalMessage] = useState(null);
+  const [globalScore, setGlobalScore] = useState(0);
+  const handleScoreUpdate = (value) => {
+    setGlobalScore((prevScore) => prevScore + value);
+  };
 
   const LANDMARKS = {
     NOSE: 0,
@@ -120,10 +124,23 @@ function StudentHome() {
     let nextStep = "";
 
     if (roundTo(leftHeelY, 1) === roundTo(rightHeelY, 1)) {
+      nextStep = "";
       legPositionMessage = "Take left heel to groin!";
+      if (globalScore !== 0) {
+        handleScoreUpdate(-globalScore);
+      }
     } else if (leftHeelY - rightHeelY > 0.1) {
+      nextStep = "";
       legPositionMessage = "Swap Legs!";
+      if (globalScore !== 0) {
+        handleScoreUpdate(-globalScore);
+      }
     } else {
+      if (globalScore === 0) {
+        handleScoreUpdate(30);
+      } else {
+        handleScoreUpdate(30 - globalScore);
+      }
       nextStep = "Legs correct!";
     }
 
@@ -132,16 +149,28 @@ function StudentHome() {
         leftHeelY === rightAnkleY ||
         Math.abs(leftHeelY - rightAnkleY) < 0.1
       ) {
-        marksMessage = "5 marks";
+        if (globalScore >= 30 && globalScore <= 65) {
+          handleScoreUpdate(8.75);
+        } else {
+          handleScoreUpdate(-26.25);
+        }
       } else if (leftHeelY + 0.1 < rightAnkleY && leftHeelY > rightKneeY) {
-        marksMessage = "10 marks";
+        if (globalScore >= 30 && globalScore <= 65) {
+          handleScoreUpdate(17.5);
+        } else {
+          handleScoreUpdate(-17.5);
+        }
       }
       if (leftHeelY < rightKneeY) {
         const midLength = (midHipY + rightKneeY) / 4;
         if (leftHeelY > midHipY + midLength) {
-          marksMessage = "15 marks";
+          if (globalScore >= 30 && globalScore <= 65) {
+            handleScoreUpdate(26.25);
+          } else {
+            handleScoreUpdate(-8.75);
+          }
         } else {
-          marksMessage = "20 marks";
+          handleScoreUpdate(65 - globalScore);
         }
       }
 
