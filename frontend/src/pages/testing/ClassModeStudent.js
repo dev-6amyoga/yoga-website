@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
-import VideoPlayer from "../../components/StackVideoShaka/VideoPlayer";
+import ClassModePlayer from "../../components/class-mode-player-dashjs/ClassModePlayer";
 import ClassInfoStudent from "../../components/testing/ClassInfoStudent";
 import PlaylistSectionsStudent from "../../components/testing/PlaylistSectionsStudent";
 import useVideoStore from "../../store/VideoStore";
@@ -102,7 +102,7 @@ function ClassModeStudent() {
 										? "absolute w-full h-screen top-0 left-0 right-0 bottom-0 z-[10000]"
 										: "video-area"
 								}>
-								<VideoPlayer />
+								<ClassModePlayer isStudent={true} />
 							</div>
 							{!fullScreen ? (
 								<div className="queue-area">
