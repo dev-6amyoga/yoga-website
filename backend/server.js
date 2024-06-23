@@ -201,7 +201,7 @@ app.use("/query", queryRouter);
 app.use("/update-request", updateRequestsRouter);
 app.use("/playlist-configs", playlistConfigsRouter);
 app.use("/playback", playbackRouter);
-app.use("/classMode", classModeRouter);
+app.use("/class-mode", classModeRouter);
 
 const port = parseInt(process.env.PORT);
 

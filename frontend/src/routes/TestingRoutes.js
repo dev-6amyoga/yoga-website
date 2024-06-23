@@ -1,9 +1,10 @@
 // import withAuth from "../utils/withAuth";
 import AutomaticRegister from "../components/content-management/forms/AutomaticRegister";
+import ClassModeStudent from "../pages/class-mode/student/ClassModeStudent";
+import ClassModeTeacher from "../pages/class-mode/teacher/ClassModeTeacher";
+import ManageClasses from "../pages/class-mode/teacher/ManageClasses";
 import StudentHome from "../pages/student/StudentHome";
 import TeacherPlaylistCreation from "../pages/teacher/TeacherPlaylistCreation";
-import ClassModeStudent from "../pages/testing/ClassModeStudent";
-import ClassModeTeacher from "../pages/testing/ClassModeTeacher";
 import DesignBoard from "../pages/testing/DesignBoard";
 import ShakaVideo from "../pages/testing/ShakaVideo";
 import SocketPage from "../pages/testing/Socket";
@@ -37,12 +38,24 @@ export const TestingRoutes = [
 		element: <SocketPage />,
 	},
 	{
-		path: "/testing/class-mode-student/:class_id",
+		path: "/testing/class/student/:class_id",
 		element: <ClassModeStudent />,
 	},
 	{
-		path: "/testing/class-mode-teacher/:class_id",
+		path: "/testing/class/teacher/:class_id",
 		element: <ClassModeTeacher />,
+	},
+	{
+		path: "/testing/class/teacher/:class_id/info",
+		element: <div />,
+	},
+	{
+		path: "/testing/class/student/:class_id/info",
+		element: <div />,
+	},
+	{
+		path: "/testing/class/manage",
+		element: <ManageClasses />,
 	},
 	// {
 	//   path: "/testing/playbar",
