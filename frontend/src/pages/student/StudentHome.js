@@ -147,7 +147,7 @@ function StudentHome() {
       ) {
         if (globalScore >= 30 && globalScore <= 65) {
           if (globalScore === 30) {
-            handleScoreUpdate(8.75);
+            setGlobalScore(38.75);
           } else if (globalScore === 38.75) {
             // do nothing
           } else if (globalScore === 47.5) {
@@ -163,9 +163,9 @@ function StudentHome() {
       } else if (leftHeelY + 0.1 < rightAnkleY && leftHeelY > rightKneeY) {
         if (globalScore >= 30 && globalScore <= 65) {
           if (globalScore === 30) {
-            handleScoreUpdate(17.5);
+            setGlobalScore(47.5);
           } else if (globalScore === 38.75) {
-            handleScoreUpdate(8.75);
+            setGlobalScore(47.5);
           } else if (globalScore === 47.5) {
             // do nothing
           } else if (globalScore === 56.25) {
@@ -182,11 +182,11 @@ function StudentHome() {
         if (leftHeelY > midHipY + midLength) {
           if (globalScore >= 30 && globalScore < 65) {
             if (globalScore === 30) {
-              handleScoreUpdate(26.25);
+              setGlobalScore(56.25);
             } else if (globalScore === 38.75) {
-              handleScoreUpdate(17.5);
+              setGlobalScore(56.25);
             } else if (globalScore === 47.5) {
-              handleScoreUpdate(8.75);
+              setGlobalScore(56.25);
             } else if (globalScore === 56.25) {
               //do nothing
             } else if (globalScore === 65) {
@@ -197,13 +197,13 @@ function StudentHome() {
           }
         } else {
           if (globalScore === 30) {
-            handleScoreUpdate(35);
+            setGlobalScore(65);
           } else if (globalScore === 38.75) {
-            handleScoreUpdate(26.25);
+            setGlobalScore(65);
           } else if (globalScore === 47.5) {
-            handleScoreUpdate(17.5);
+            setGlobalScore(65);
           } else if (globalScore === 56.25) {
-            handleScoreUpdate(8.75);
+            setGlobalScore(65);
           } else if (globalScore === 65) {
             // do nothing
           } else {
@@ -218,7 +218,7 @@ function StudentHome() {
         if (midPalmY < midHipY && midPalmY > midShoulderY) {
           if (globalScore >= 65 && globalScore <= 100) {
             if (globalScore === 65) {
-              handleScoreUpdate(8.75);
+              setGlobalScore(73.75);
             } else if (globalScore === 73.75) {
               // do nothing
             } else if (globalScore === 82.5) {
@@ -238,9 +238,9 @@ function StudentHome() {
         ) {
           if (globalScore >= 65 && globalScore <= 100) {
             if (globalScore === 65) {
-              handleScoreUpdate(17.5);
+              setGlobalScore(82.5);
             } else if (globalScore === 73.75) {
-              handleScoreUpdate(8.75);
+              setGlobalScore(82.5);
             } else if (globalScore === 82.5) {
               // do nothing
             } else if (globalScore === 91.25) {
@@ -259,11 +259,11 @@ function StudentHome() {
         ) {
           if (globalScore >= 65 && globalScore <= 100) {
             if (globalScore === 65) {
-              handleScoreUpdate(26.25);
+              setGlobalScore(91.25);
             } else if (globalScore === 73.75) {
-              handleScoreUpdate(17.5);
+              setGlobalScore(91.25);
             } else if (globalScore === 82.5) {
-              handleScoreUpdate(8.75);
+              setGlobalScore(91.25);
             } else if (globalScore === 91.25) {
               // do nothing
             } else if (globalScore === 100) {
@@ -288,13 +288,13 @@ function StudentHome() {
           } else {
             if (globalScore >= 65 && globalScore <= 100) {
               if (globalScore === 65) {
-                handleScoreUpdate(35);
+                setGlobalScore(100);
               } else if (globalScore === 73.75) {
-                handleScoreUpdate(26.25);
+                setGlobalScore(100);
               } else if (globalScore === 82.5) {
-                handleScoreUpdate(17.5);
+                setGlobalScore(100);
               } else if (globalScore === 91.25) {
-                handleScoreUpdate(8.75);
+                setGlobalScore(100);
               } else if (globalScore === 100) {
                 //do nothing
               }
