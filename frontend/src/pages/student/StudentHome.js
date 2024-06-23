@@ -126,15 +126,11 @@ function StudentHome() {
     if (roundTo(leftHeelY, 1) === roundTo(rightHeelY, 1)) {
       nextStep = "";
       legPositionMessage = "Take left heel to groin!";
-      if (globalScore !== 0) {
-        setGlobalScore(0);
-      }
+      setGlobalScore(0);
     } else if (leftHeelY - rightHeelY > 0.1) {
       nextStep = "";
       legPositionMessage = "Swap Legs!";
-      if (globalScore !== 0) {
-        setGlobalScore(0);
-      }
+      setGlobalScore(0);
     } else {
       setGlobalScore(30);
       nextStep = "Legs correct!";
@@ -145,18 +141,16 @@ function StudentHome() {
         leftHeelY === rightAnkleY ||
         Math.abs(leftHeelY - rightAnkleY) < 0.1
       ) {
-        if (globalScore >= 30 && globalScore <= 65) {
-          if (globalScore === 30) {
-            setGlobalScore(38.75);
-          } else if (globalScore === 38.75) {
-            // do nothing
-          } else if (globalScore === 47.5) {
-            handleScoreUpdate(-8.75);
-          } else if (globalScore === 56.25) {
-            handleScoreUpdate(-17.5);
-          } else if (globalScore === 65) {
-            handleScoreUpdate(-26.25);
-          }
+        if (globalScore < 38.75 && globalScore >= 30) {
+          setGlobalScore(38.75);
+        } else if (globalScore === 38.75) {
+          // do nothing
+        } else if (globalScore === 47.5) {
+          handleScoreUpdate(-8.75);
+        } else if (globalScore === 56.25) {
+          handleScoreUpdate(-17.5);
+        } else if (globalScore === 65) {
+          handleScoreUpdate(-26.25);
         } else {
           handleScoreUpdate(-26.25);
         }
@@ -380,10 +374,15 @@ function StudentHome() {
       <CssBaseline />
       <Hero heading="6AM Yoga Player" />
       <div className="max-w-7xl mx-auto py-2 px-1 xl:px-0">
-        {globalScore && (
-          <Typography variant="h1" component="div">
-            {globalScore}
-          </Typography>
+        {globalScore && globalMessage && (
+          <div>
+            <Typography variant="h1" component="div">
+              {globalScore}
+            </Typography>
+            <Typography variant="h3" component="div">
+              {globalMessage}
+            </Typography>
+          </div>
         )}
         <div className="border-8 border-gray-950">
           {/* {globalScore && (
