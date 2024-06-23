@@ -165,7 +165,7 @@ function StudentHome() {
         const midLength = (midHipY + rightKneeY) / 4;
         if (leftHeelY > midHipY + midLength) {
           if (globalScore >= 30 && globalScore <= 65) {
-            handleScoreUpdate(26.25);
+            handleScoreUpdate(-26.25);
           } else {
             handleScoreUpdate(-8.75);
           }
@@ -178,20 +178,33 @@ function StudentHome() {
         marksMessage += ", Take your arms up";
       } else {
         if (midPalmY < midHipY && midPalmY > midShoulderY) {
-          marksMessage += ", 5 marks(Take Palm Up)";
+          if (globalScore > 65 && globalScore <= 100) {
+            handleScoreUpdate(-26.25);
+          } else {
+            handleScoreUpdate(+8.75);
+          }
         } else if (
           midPalmY < midHipY &&
           midPalmY < midShoulderY &&
           midElbowY > midShoulderY
         ) {
           marksMessage += ", 10 marks(Take Elbow Up)";
+          if (globalScore > 65 && globalScore <= 100) {
+            handleScoreUpdate(-17.5);
+          } else {
+            handleScoreUpdate(17.5);
+          }
         } else if (
           midPalmY < midHipY &&
           midPalmY < midShoulderY &&
           midElbowY < midShoulderY &&
           midElbowY > midEyeY
         ) {
-          marksMessage += ", 15 marks(Lift elbow more!)";
+          if (globalScore > 65 && globalScore <= 100) {
+            handleScoreUpdate(-8.75);
+          } else {
+            handleScoreUpdate(26.25);
+          }
         } else if (
           midPalmY < midHipY &&
           midPalmY < midShoulderY &&
@@ -206,7 +219,7 @@ function StudentHome() {
               ", Right Palm x= " +
               String(rightPalmX);
           } else {
-            marksMessage += ", 20 marks";
+            handleScoreUpdate(100 - globalScore);
           }
         }
       }
