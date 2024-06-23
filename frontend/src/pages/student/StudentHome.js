@@ -10,6 +10,7 @@ import "./MovingText.css";
 import Hero from "./components/Hero";
 import { toast } from "react-toastify";
 import { LifeBuoy } from "lucide-react";
+import ShakaVideo from "../testing/ShakaVideo";
 
 function StudentHome() {
   const [lastVideoTime, setLastVideoTime] = useState(-1);
@@ -84,21 +85,8 @@ function StudentHome() {
       videoRef.current.addEventListener("loadeddata", predictWebcam);
     });
   };
-  const detectVrikshasana = (landmarks) => {
-    function calculateDistance(landmarks) {
-      const leftHip = landmarks[LANDMARKS.LEFT_HIP];
-      const rightHip = landmarks[LANDMARKS.RIGHT_HIP];
-      const midHip = {
-        x: (leftHip.x + rightHip.x) / 2,
-        y: (leftHip.y + rightHip.y) / 2,
-        z: (leftHip.z + rightHip.z) / 2,
-      };
-      const leftHeel = landmarks[LANDMARKS.LEFT_HEEL];
-      const rightHeel = landmarks[LANDMARKS.RIGHT_HEEL];
-      const selectedHeel = leftHeel.x > rightHeel.x ? leftHeel : rightHeel;
-      return Math.abs(selectedHeel.y - midHip.y);
-    }
 
+  const detectVrikshasana = (landmarks) => {
     const leftHeelY = landmarks[LANDMARKS.LEFT_HEEL].y;
     const rightHeelY = landmarks[LANDMARKS.RIGHT_HEEL].y;
     const rightAnkleY = landmarks[LANDMARKS.RIGHT_ANKLE].y;
@@ -198,6 +186,14 @@ function StudentHome() {
     setGlobalMessage(
       legPositionMessage + (marksMessage ? ", " + marksMessage : "")
     );
+    // speakMessage(
+    //   legPositionMessage + (marksMessage ? ", " + marksMessage : "")
+    // );
+  };
+
+  const speakMessage = (message) => {
+    const utterance = new SpeechSynthesisUtterance(message);
+    window.speechSynthesis.speak(utterance);
   };
 
   const predictWebcam = async () => {
@@ -307,6 +303,9 @@ function StudentHome() {
             ></canvas>
           </div>
         </div>
+      </div>
+      <div className="mt-6">
+        <ShakaVideo />
       </div>
     </ThemeProvider>
   );
