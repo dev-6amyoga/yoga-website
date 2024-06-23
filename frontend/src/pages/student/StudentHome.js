@@ -150,13 +150,27 @@ function StudentHome() {
         Math.abs(leftHeelY - rightAnkleY) < 0.1
       ) {
         if (globalScore >= 30 && globalScore <= 65) {
-          handleScoreUpdate(8.75);
+          if (globalScore === 30) {
+            handleScoreUpdate(8.75);
+          } else if (globalScore === 38.75) {
+            // do nothing
+          } else if (globalScore === 47.5) {
+            handleScoreUpdate(-8.75);
+          } else if (globalScore === 56.25) {
+            handleScoreUpdate(-17.5);
+          } else if (globalScore === 65) {
+            handleScoreUpdate(-26.25);
+          }
         } else {
           handleScoreUpdate(-26.25);
         }
       } else if (leftHeelY + 0.1 < rightAnkleY && leftHeelY > rightKneeY) {
-        if (globalScore >= 30 && globalScore <= 65) {
-          handleScoreUpdate(17.5);
+        if (globalScore >= 30 && globalScore < 65) {
+          if (globalScore === 30) {
+            handleScoreUpdate(17.5);
+          } else if (globalScore === 38.75) {
+            handleScoreUpdate(8.75);
+          }
         } else {
           handleScoreUpdate(-17.5);
         }
