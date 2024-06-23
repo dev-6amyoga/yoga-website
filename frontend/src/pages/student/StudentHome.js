@@ -165,7 +165,7 @@ function StudentHome() {
           handleScoreUpdate(-26.25);
         }
       } else if (leftHeelY + 0.1 < rightAnkleY && leftHeelY > rightKneeY) {
-        if (globalScore >= 30 && globalScore < 65) {
+        if (globalScore >= 30 && globalScore <= 65) {
           if (globalScore === 30) {
             handleScoreUpdate(17.5);
           } else if (globalScore === 38.75) {
@@ -200,7 +200,19 @@ function StudentHome() {
             handleScoreUpdate(-8.75);
           }
         } else {
-          handleScoreUpdate(65 - globalScore);
+          if (globalScore === 30) {
+            handleScoreUpdate(35);
+          } else if (globalScore === 38.75) {
+            handleScoreUpdate(26.25);
+          } else if (globalScore === 47.5) {
+            handleScoreUpdate(17.5);
+          } else if (globalScore === 56.25) {
+            handleScoreUpdate(8.75);
+          } else if (globalScore === 65) {
+            // do nothing
+          } else {
+            // do nothing
+          }
         }
       }
 
@@ -208,19 +220,38 @@ function StudentHome() {
         marksMessage += ", Take your arms up";
       } else {
         if (midPalmY < midHipY && midPalmY > midShoulderY) {
-          if (globalScore > 65 && globalScore <= 100) {
-            handleScoreUpdate(-26.25);
+          if (globalScore >= 65 && globalScore <= 100) {
+            if (globalScore === 65) {
+              handleScoreUpdate(8.75);
+            } else if (globalScore === 73.75) {
+              // do nothing
+            } else if (globalScore === 82.5) {
+              handleScoreUpdate(-8.75);
+            } else if (globalScore === 91.25) {
+              handleScoreUpdate(-17.5);
+            } else if (globalScore === 100) {
+              handleScoreUpdate(-26.25);
+            }
           } else {
-            handleScoreUpdate(+8.75);
+            handleScoreUpdate(8.75);
           }
         } else if (
           midPalmY < midHipY &&
           midPalmY < midShoulderY &&
           midElbowY > midShoulderY
         ) {
-          marksMessage += ", 10 marks(Take Elbow Up)";
-          if (globalScore > 65 && globalScore <= 100) {
-            handleScoreUpdate(-17.5);
+          if (globalScore >= 65 && globalScore <= 100) {
+            if (globalScore === 65) {
+              handleScoreUpdate(17.5);
+            } else if (globalScore === 73.75) {
+              handleScoreUpdate(8.75);
+            } else if (globalScore === 82.5) {
+              // do nothing
+            } else if (globalScore === 91.25) {
+              handleScoreUpdate(-8.75);
+            } else if (globalScore === 100) {
+              handleScoreUpdate(-17.5);
+            }
           } else {
             handleScoreUpdate(17.5);
           }
@@ -230,8 +261,18 @@ function StudentHome() {
           midElbowY < midShoulderY &&
           midElbowY > midEyeY
         ) {
-          if (globalScore > 65 && globalScore <= 100) {
-            handleScoreUpdate(-8.75);
+          if (globalScore >= 65 && globalScore <= 100) {
+            if (globalScore === 65) {
+              handleScoreUpdate(26.25);
+            } else if (globalScore === 73.75) {
+              handleScoreUpdate(17.5);
+            } else if (globalScore === 82.5) {
+              handleScoreUpdate(8.75);
+            } else if (globalScore === 91.25) {
+              // do nothing
+            } else if (globalScore === 100) {
+              handleScoreUpdate(-8.75);
+            }
           } else {
             handleScoreUpdate(26.25);
           }
@@ -249,7 +290,21 @@ function StudentHome() {
               ", Right Palm x= " +
               String(rightPalmX);
           } else {
-            handleScoreUpdate(100 - globalScore);
+            if (globalScore >= 65 && globalScore <= 100) {
+              if (globalScore === 65) {
+                handleScoreUpdate(35);
+              } else if (globalScore === 73.75) {
+                handleScoreUpdate(26.25);
+              } else if (globalScore === 82.5) {
+                handleScoreUpdate(17.5);
+              } else if (globalScore === 91.25) {
+                handleScoreUpdate(8.75);
+              } else if (globalScore === 100) {
+                //do nothing
+              }
+            } else {
+              handleScoreUpdate(35);
+            }
           }
         }
       }
@@ -330,14 +385,12 @@ function StudentHome() {
       <Hero heading="6AM Yoga Player" />
       <div className="max-w-7xl mx-auto py-2 px-1 xl:px-0">
         <div className="border-8 border-gray-950">
-          {globalMessage && (
-            <Typography
-              variant="h2"
-              component="div"
-              style={{ fontWeight: "bold" }}
-            >
-              {globalMessage}
-            </Typography>
+          {globalScore && (
+            <div className="global-message bg-gray-200 text-center p-4 rounded-md shadow-md">
+              <h2 className="text-2xl font-bold text-gray-700">
+                {globalScore}
+              </h2>
+            </div>
           )}
           <Button ref={enableWebcamButtonRef} onClick={enableCam}>
             ENABLE PREDICTIONS
