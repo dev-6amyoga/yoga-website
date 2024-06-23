@@ -20,6 +20,7 @@ import {
 	CLASS_UPCOMING,
 } from "../../../enums/class_status";
 import getFormData from "../../../utils/getFormData";
+import { getFrontendDomain } from "../../../utils/getFrontendDomain";
 import Timer from "../../Common/Timer";
 
 export default function ViewDetailsModal({

@@ -1,5 +1,7 @@
 // import withAuth from "../utils/withAuth";
 import AutomaticRegister from "../components/content-management/forms/AutomaticRegister";
+import ClassInfoStudent from "../components/testing/ClassInfoStudent";
+import ClassInfoTeacher from "../components/testing/ClassInfoTeacher";
 import ClassModeStudent from "../pages/class-mode/student/ClassModeStudent";
 import ClassModeTeacher from "../pages/class-mode/teacher/ClassModeTeacher";
 import ManageClasses from "../pages/class-mode/teacher/ManageClasses";
@@ -47,11 +49,11 @@ export const TestingRoutes = [
 	},
 	{
 		path: "/testing/class/teacher/:class_id/info",
-		element: <div />,
+		element: <ClassInfoTeacher />,
 	},
 	{
 		path: "/testing/class/student/:class_id/info",
-		element: <div />,
+		element: <ClassInfoStudent />,
 	},
 	{
 		path: "/testing/class/manage",
