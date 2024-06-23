@@ -114,11 +114,13 @@ router.get("/get-all", async (req, res) => {
 		);
 
 		for (let i = 0; i < classes.length; i++) {
-			const classObj = classes[i];
+			const classObj = classes[i].toJSON();
 			const teacher = await User.findByPk(classObj.teacher_id, {
 				attributes: ["name", "email"],
 			});
 			classObj.teacher = teacher;
+
+			classes[i] = classObj;
 		}
 
 		res.status(HTTP_OK).json(classes);
@@ -152,9 +154,7 @@ router.post("/get-by-id", async (req, res) => {
 			attributes: ["name", "email"],
 		});
 
-		classObj.teacher = teacher;
-
-		res.status(HTTP_OK).json({ class: classObj });
+		res.status(HTTP_OK).json({ class: { ...classObj.toJSON(), teacher } });
 	} catch (err) {
 		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
 			error: "Failed to fetch class",

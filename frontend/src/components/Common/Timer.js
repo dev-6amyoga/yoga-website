@@ -35,7 +35,7 @@ export default function Timer({ endTime, onEndTitle = "Timer Ended" }) {
 	return (
 		<div>
 			{ended ? (
-				<p>Timer Ended</p>
+				<p>{onEndTitle}</p>
 			) : (
 				<p>Class Ends in {timeLeftSeconds} seconds</p>
 			)}

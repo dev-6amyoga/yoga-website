@@ -110,6 +110,15 @@ export default function ManageClasses() {
 				header: ({ column }) => (
 					<SortableColumn column={column}>Description</SortableColumn>
 				),
+				cell: ({ getValue }) => {
+					return (
+						<div>
+							<span className="max-w-[35ch] break-all">
+								{getValue()}
+							</span>
+						</div>
+					);
+				},
 			},
 			{
 				accessorKey: "start_time",
@@ -136,6 +145,13 @@ export default function ManageClasses() {
 						</div>
 					);
 				},
+			},
+
+			{
+				accessorKey: "status",
+				header: ({ column }) => (
+					<SortableColumn column={column}>Status</SortableColumn>
+				),
 			},
 			{
 				accessorKey: "actions",
