@@ -9,31 +9,36 @@ export default function ClassModePlayer({ isStudent }) {
 
 	const timingObj = useRef(null);
 
+	console.log("ClassModePlayer");
+
 	useEffect(() => {
 		// 8449551217753191202
 
-		const to = new TIMINGSRC.TimingObject();
+		if (timingObj.current === null) {
+			console.log("[TIMING OBJ] INIT");
+			const to = new TIMINGSRC.TimingObject();
 
-		var mcorp_app = MCorp.app(import.meta.env.VITE_MCORP_APP_ID, {
-			anon: true,
-		});
+			var mcorp_app = MCorp.app(import.meta.env.VITE_MCORP_APP_ID, {
+				anon: true,
+			});
 
-		mcorp_app.ready.then(function () {
-			to.timingsrc = mcorp_app.motions["test-timer"];
-			console.log("hello world!", to.query());
-		});
+			mcorp_app.ready.then(function () {
+				to.timingsrc = mcorp_app.motions["test-timer"];
+				console.log("hello world!", to.query());
+			});
 
-		timingObj.current = to;
+			timingObj.current = to;
+		}
 
 		const handleChange = (e) => {
-			console.log("[TIMING OBJ] CHANGE : ", to.query());
+			console.log("[TIMING OBJ] CHANGE : ", timingObj.current.query());
 		};
 
-		to.on("change", handleChange);
+		timingObj.current.on("change", handleChange);
 
 		return () => {
-			if (to) {
-				to.off("change", handleChange);
+			if (timingObj.current) {
+				timingObj.current.off("change", handleChange);
 			}
 		};
 	}, []);

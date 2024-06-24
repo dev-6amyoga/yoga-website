@@ -6,7 +6,7 @@ const {
 	HTTP_OK,
 	HTTP_INTERNAL_SERVER_ERROR,
 } = require("../utils/http_status_codes");
-const { CLASS_UPCOMING } = require("../enums/class_status");
+const { CLASS_UPCOMING, CLASS_ONGOING } = require("../enums/class_status");
 const { User } = require("../models/sql/User");
 
 router.post("/create", async (req, res) => {
@@ -174,9 +174,33 @@ router.post("/start", async (req, res) => {
 
 		const classObj = await ClassMode.findByIdAndUpdate(
 			class_id,
-			{ has_started: true },
+			{ status: CLASS_ONGOING },
 			{ new: true }
 		);
+		res.status(HTTP_OK).json({ classObj });
+	} catch (err) {
+		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+			error: "Failed to start class",
+		});
+	}
+});
+
+router.post("/end", async (req, res) => {
+	try {
+		const { class_id, status } = req.body;
+
+		if (!class_id || !status) {
+			return res.status(HTTP_BAD_REQUEST).json({
+				error: "Missing required fields",
+			});
+		}
+
+		const classObj = await ClassMode.findByIdAndUpdate(
+			class_id,
+			{ status: status },
+			{ new: true }
+		);
+
 		res.status(HTTP_OK).json({ classObj });
 	} catch (err) {
 		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
