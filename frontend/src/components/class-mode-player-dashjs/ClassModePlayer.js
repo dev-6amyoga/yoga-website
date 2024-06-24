@@ -30,17 +30,17 @@ export default function ClassModePlayer({ isStudent }) {
 			timingObj.current = to;
 		}
 
-		const handleChange = (e) => {
-			console.log("[TIMING OBJ] CHANGE : ", timingObj.current.query());
-		};
+		// const handleChange = (e) => {
+		// 	console.log("[TIMING OBJ] CHANGE : ", timingObj.current.query());
+		// };
 
-		timingObj.current.on("change", handleChange);
+		// timingObj.current.on("change", handleChange);
 
-		return () => {
-			if (timingObj.current) {
-				timingObj.current.off("change", handleChange);
-			}
-		};
+		// return () => {
+		// 	if (timingObj.current) {
+		// 		timingObj.current.off("change", handleChange);
+		// 	}
+		// };
 	}, []);
 
 	return (

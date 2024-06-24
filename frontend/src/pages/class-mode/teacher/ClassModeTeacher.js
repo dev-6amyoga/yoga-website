@@ -4,7 +4,9 @@ import { Spacer } from "@geist-ui/core";
 
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { ClassModeAPI } from "../../../api/class-mode.api";
+import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
 import Playlist from "../../../components/Sidebar/Playlist";
 import ClassModePlayer from "../../../components/class-mode-player-dashjs/ClassModePlayer";
 import Attendees from "../../../components/testing/Attendees";
@@ -20,6 +22,7 @@ function ClassModeTeacher() {
 	const { data: classInfo } = useQuery({
 		queryKey: ["classInfo", class_id],
 		queryFn: async () => {
+			console.log("GETTING CLASS INFO");
 			const [res, err] = await ClassModeAPI.postGetClassById(class_id);
 
 			if (err) {
@@ -29,6 +32,7 @@ function ClassModeTeacher() {
 
 			return res.class;
 		},
+		retry: 0,
 	});
 
 	useEffect(() => {
@@ -117,17 +121,18 @@ function ClassModeTeacher() {
 	// }, []);
 
 	return (
-		<main>
-			<div className="max-w-7xl mx-auto py-2 px-1 xl:px-0">
-				<div className="mt-6">
-					{disabled ? (
-						<h1 className="text-2xl text-center">
-							Class has not started yet
-						</h1>
-					) : (
-						<>
-							{/* <ClassInfoTeacher class_id={class_id} /> */}
-							{/* <Button
+		<TeacherPageWrapper>
+			<main>
+				<div className="max-w-7xl mx-auto py-2 px-1 xl:px-0">
+					<div className="mt-6">
+						{disabled ? (
+							<h1 className="text-2xl text-center">
+								Class has not started yet; Tune in later.
+							</h1>
+						) : (
+							<>
+								{/* <ClassInfoTeacher class_id={class_id} /> */}
+								{/* <Button
 							variant="contained"
 							color="primary"
 							onClick={() => {
@@ -142,48 +147,49 @@ function ClassModeTeacher() {
 								: "Open Connection"}
 						</Button> */}
 
-							<div
-								className={
-									fullScreen
-										? ""
-										: "relative video-grid mb-12 w-full gap-2"
-								}>
 								<div
 									className={
 										fullScreen
-											? "absolute w-full h-screen top-0 left-0 right-0 bottom-0 z-[10000]"
-											: "video-area"
+											? ""
+											: "relative video-grid mb-12 w-full gap-2"
 									}>
-									{/* dash video player */}
-									<ClassModePlayer isStudent={false} />
+									<div
+										className={
+											fullScreen
+												? "absolute w-full h-screen top-0 left-0 right-0 bottom-0 z-[10000]"
+												: "video-area"
+										}>
+										{/* dash video player */}
+										<ClassModePlayer isStudent={false} />
+									</div>
+									{!fullScreen ? (
+										<div className="queue-area">
+											<PlaylistSectionsTeacher />
+										</div>
+									) : (
+										<></>
+									)}
 								</div>
-								{!fullScreen ? (
+
+								{fullScreen ? (
 									<div className="queue-area">
 										<PlaylistSectionsTeacher />
 									</div>
 								) : (
 									<></>
 								)}
-							</div>
 
-							{fullScreen ? (
-								<div className="queue-area">
-									<PlaylistSectionsTeacher />
-								</div>
-							) : (
-								<></>
-							)}
+								<Attendees />
 
-							<Attendees />
+								<Spacer h={2} />
 
-							<Spacer h={2} />
-
-							<Playlist />
-						</>
-					)}
+								<Playlist />
+							</>
+						)}
+					</div>
 				</div>
-			</div>
-		</main>
+			</main>
+		</TeacherPageWrapper>
 	);
 }
 
