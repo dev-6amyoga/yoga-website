@@ -7,20 +7,20 @@ import "./MovingText.css";
 import Hero from "./components/Hero";
 
 function StudentHome() {
-	const [mode, setMode] = useState("light");
+  const [mode, setMode] = useState("light");
 
-	const defaultTheme = createTheme({ palette: { mode } });
+  const defaultTheme = createTheme({ palette: { mode } });
 
-	return (
-		<ThemeProvider theme={defaultTheme}>
-			<CssBaseline />
-			<StudentNavMUI />
-			<Hero heading="6AM Yoga Player" />
-			<div className="max-w-7xl mx-auto">
-				<VideoPlayerWrapper />
-			</div>
-		</ThemeProvider>
-	);
+  return (
+    <ThemeProvider theme={defaultTheme}>
+      <CssBaseline />
+      <StudentNavMUI />
+      <Hero heading="6AM Yoga Player" />
+      <div className="max-w-7xl mx-auto">
+        <VideoPlayerWrapper />
+      </div>
+    </ThemeProvider>
+  );
 }
 
 export default StudentHome;
