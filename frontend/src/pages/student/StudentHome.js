@@ -11,6 +11,7 @@ import Hero from "./components/Hero";
 import { toast } from "react-toastify";
 import { LifeBuoy } from "lucide-react";
 import ShakaVideo from "../testing/ShakaVideo";
+import useVideoStore from "../../store/VideoStore";
 
 function StudentHome() {
   const [lastVideoTime, setLastVideoTime] = useState(-1);
@@ -21,9 +22,24 @@ function StudentHome() {
   const enableWebcamButtonRef = useRef(null);
   const [globalMessage, setGlobalMessage] = useState(null);
   const [globalScore, setGlobalScore] = useState(0);
+  const [startDetector, setStartDetector] = useState(false);
   const handleScoreUpdate = (value) => {
     setGlobalScore((prevScore) => prevScore + value);
   };
+  const [videoStarted] = useVideoStore((state) => [state.videoStarted]);
+
+  useEffect(() => {
+    videoStarted ? toast("video started") : toast("video not started");
+    if (videoStarted) {
+      enableCam();
+      const timeoutId = setTimeout(() => {
+        setStartDetector(true);
+        toast("vrikshasana corrector start!");
+      }, 11000); // 12000 milliseconds = 12 seconds
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [videoStarted]);
 
   const LANDMARKS = {
     NOSE: 0,
@@ -80,15 +96,37 @@ function StudentHome() {
     createPoseLandmarker();
   }, []);
 
+  // const startWebcam = () => {
+  //   const constraints = { video: true };
+  //   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+  //     videoRef.current.srcObject = stream;
+  //     videoRef.current.style.display = "block";
+  //     videoRef.current.play();
+  //     videoRef.current.addEventListener("loadeddata", predictWebcam);
+  //   });
+  // };
+
   const startWebcam = () => {
     const constraints = { video: true };
     navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
       videoRef.current.srcObject = stream;
       videoRef.current.style.display = "block";
       videoRef.current.play();
-      videoRef.current.addEventListener("loadeddata", predictWebcam);
+      // videoRef.current.addEventListener("loadeddata", () => {
+      //   if (startDetector) {
+      //     toast("prediction startin!");
+      //     predictWebcam();
+      //   }
+      // });
     });
   };
+
+  useEffect(() => {
+    if (startDetector) {
+      toast("prediction startin!");
+      predictWebcam();
+    }
+  }, [startDetector]);
 
   const detectVrikshasana = (landmarks) => {
     const leftHeelY = landmarks[LANDMARKS.LEFT_HEEL].y;
@@ -357,10 +395,10 @@ function StudentHome() {
     }
     if (webcamRunningRef.current) {
       webcamRunningRef.current = false;
-      enableWebcamButtonRef.current.innerText = "ENABLE PREDICTIONS";
+      // enableWebcamButtonRef.current.innerText = "ENABLE PREDICTIONS";
     } else {
       webcamRunningRef.current = true;
-      enableWebcamButtonRef.current.innerText = "DISABLE PREDICTIONS";
+      // enableWebcamButtonRef.current.innerText = "DISABLE PREDICTIONS";
       startWebcam();
     }
   };
@@ -408,9 +446,9 @@ function StudentHome() {
               </div>
             </Card>
           )} */}
-          <Button ref={enableWebcamButtonRef} onClick={enableCam}>
+          {/* <Button ref={enableWebcamButtonRef} onClick={enableCam}>
             ENABLE PREDICTIONS
-          </Button>
+          </Button> */}
           <div
             style={{
               position: "relative",
