@@ -1,15 +1,22 @@
-import { Edit, ExitToApp, Share } from "@mui/icons-material";
+import { ArrowOutward, Edit, ExitToApp, Share } from "@mui/icons-material";
 import { Avatar, Button, Card, CardContent } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ClassModeAPI } from "../../api/class-mode.api";
+import {
+	CLASS_COMPLETED,
+	CLASS_ONGOING,
+	CLASS_UPCOMING,
+} from "../../enums/class_status";
 import { getFrontendDomain } from "../../utils/getFrontendDomain";
 import TeacherPageWrapper from "../Common/TeacherPageWrapper";
 import "./ClassInfoStudent.css";
 
 export default function ClassInfoTeacher() {
 	const { class_id } = useParams();
+	const queryClient = useQueryClient();
+	const navigate = useNavigate();
 
 	const { data: classInfo } = useQuery({
 		queryKey: ["classInfo", class_id],
@@ -25,8 +32,48 @@ export default function ClassInfoTeacher() {
 		},
 	});
 
-	const handleStartClass = () => {
-		toast.info("Starting class");
+	const handleStartEndClass = async () => {
+		try {
+			if (classInfo?.status === CLASS_UPCOMING) {
+				const [res, err] = await ClassModeAPI.postStartClass(class_id);
+
+				if (err) {
+					console.error(err);
+					toast.error("Failed to start class");
+				} else {
+					queryClient
+						.invalidateQueries(["classInfo", class_id])
+						.then(() => {
+							toast.info("Starting class");
+						})
+						.catch((err) => {
+							console.error(err);
+						});
+				}
+			} else {
+				const [res, err] = await ClassModeAPI.postEndClass(
+					class_id,
+					CLASS_COMPLETED
+				);
+
+				if (err) {
+					console.error(err);
+					toast.error("Failed to end class");
+				} else {
+					queryClient
+						.invalidateQueries(["classInfo", class_id])
+						.then(() => {
+							toast.info("Ending class");
+						})
+						.catch((err) => {
+							console.error(err);
+						});
+				}
+			}
+		} catch (err) {
+			console.error(err);
+			toast.error("Failed to update class");
+		}
 	};
 
 	const handleEditInfo = () => {
@@ -118,12 +165,14 @@ export default function ClassInfoTeacher() {
 						<div className="class-info-student-actions flex flex-col gap-4 justify-center">
 							<Button
 								variant="contained"
-								onClick={handleStartClass}
+								onClick={handleStartEndClass}
 								startIcon={<ExitToApp />}
 								sx={{
 									minWidth: "fit-content",
 								}}>
-								Start Class
+								{classInfo?.status === CLASS_UPCOMING
+									? "Start Class"
+									: "End Class"}
 							</Button>
 							<Button
 								variant="contained"
@@ -144,6 +193,25 @@ export default function ClassInfoTeacher() {
 								startIcon={<Share />}>
 								Share
 							</Button>
+							{classInfo?.status === CLASS_UPCOMING ||
+							classInfo?.status === CLASS_ONGOING ? (
+								<Button
+									sx={{
+										minWidth: "fit-content",
+									}}
+									onClick={() => {
+										navigate(
+											`/testing/class/teacher/${class_id}`
+										);
+									}}
+									variant="contained"
+									color="inherit"
+									startIcon={<ArrowOutward />}>
+									Go to Class
+								</Button>
+							) : (
+								<></>
+							)}
 						</div>
 					</div>
 				</CardContent>
