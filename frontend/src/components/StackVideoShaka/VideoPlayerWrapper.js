@@ -1,5 +1,7 @@
+import { Spacer } from "@geist-ui/core";
 import useVideoStore from "../../store/VideoStore";
 import Playlist from "../Sidebar/Playlist";
+import PoseDetector from "../webcam_component/PoseDetector";
 import PlaylistSections from "./Sections";
 import VideoPlayer from "./VideoPlayer";
 
@@ -22,20 +24,16 @@ export default function VideoPlayerWrapper() {
 				</div>
 				{!fullScreen ? (
 					<div className="queue-area">
-						<PlaylistSections />
+						<PoseDetector />
 					</div>
 				) : (
 					<></>
 				)}
 			</div>
 
-			{fullScreen ? (
-				<div className="queue-area">
-					<PlaylistSections />
-				</div>
-			) : (
-				<></>
-			)}
+			<PlaylistSections />
+
+			<Spacer h={4} />
 
 			<Playlist />
 		</>
