@@ -37,16 +37,21 @@ router.post("/pose-detection", async (req, res) => {
   const { image } = req.body;
   try {
     const vision = await FilesetResolver.forVisionTasks(
-      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
     );
-    const landmarker = await PoseLandmarker.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
-        delegate: "GPU",
-      },
-      runningMode: "IMAGE",
-      numPoses: 2,
-    });
+    const landmarker = await PoseLandmarker.createFromModelPath(
+      vision,
+      "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task"
+    );
+    // const landmarker = await PoseLandmarker.createFromOptions(vision, {
+    //   baseOptions: {
+    //     modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
+    //     delegate: "GPU",
+    //   },
+    //   runningMode: "IMAGE",
+    //   numPoses: 2,
+    // });
+
     const imageBuffer = Buffer.from(image.split(",")[1], "base64");
     const landmarks = await landmarker.detect(imageBuffer);
     const { score, message } = detectVrikshasana(landmarks);
