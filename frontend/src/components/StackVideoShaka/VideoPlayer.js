@@ -46,6 +46,9 @@ function VideoPlayer() {
 		// autoSetCurrentMarkerIdx,
 		setCurrentTime,
 		markersLength,
+
+		videoStarted,
+		setVideoStarted,
 	] = useVideoStore((state) => [
 		state.currentVideo,
 		state.setCurrentVideo,
@@ -62,6 +65,9 @@ function VideoPlayer() {
 		state.setCurrentTime,
 		// state.autoSetCurrentMarkerIdx,
 		state?.markers?.length || 0,
+
+		state.videoStarted,
+		state.setVideoStarted,
 	]);
 
 	// watch history store
@@ -76,6 +82,8 @@ function VideoPlayer() {
 
 	// set player video ref
 	useEffect(() => {
+		setVideoStarted(false);
+
 		if (currentVideo) {
 			console.log("SETTING PLAYER VIDEO CURRENT -> ", currentVideo);
 			playerVideo.current = currentVideo;

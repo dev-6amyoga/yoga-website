@@ -136,6 +136,9 @@ function StreamStackItem({
 		devMode,
 		// fullScreen
 		fullScreen,
+
+		// videoStarted
+		videoStarted,
 	] = useVideoStore((state) => [
 		//
 		state.seekQueue,
@@ -176,6 +179,9 @@ function StreamStackItem({
 		state.devMode,
 		//
 		state.fullScreen,
+
+		//
+		state.videoStarted,
 	]);
 
 	const [popFromQueue, popFromArchive] = usePlaylistStore((state) => [
@@ -741,6 +747,8 @@ function StreamStackItem({
 		const state = useVideoStore.getState();
 		console.log("Can play through...", state.videoState);
 		// tryToPlay();
+
+		if (!state.videoStarted) state.setVideoStarted(true);
 	}, []);
 
 	// set the volume
@@ -1056,7 +1064,7 @@ function StreamStackItem({
 				ref={playerInit}
 				className="custom-shaka w-full h-full"
 			/>
-			{/* {devMode ? (
+			{/* {true ? (
 				<div className="absolute bg-white left-4 top-4 p-2 text-sm flex flex-col">
 					<p>
 						isActive: {String(isActive)} ||{" "}
@@ -1064,6 +1072,7 @@ function StreamStackItem({
 					</p>
 					<p>Video IDX : {video?.idx}</p>
 					<p>videoState: {videoState}</p>
+					<p>videoStarted: {String(videoStarted)}</p>
 					<p>pauseReason: {pauseReason}</p>
 					<p>viewMode: {viewMode}</p>
 					<p>currentMarkerIdx: {currentMarkerIdx}</p>
