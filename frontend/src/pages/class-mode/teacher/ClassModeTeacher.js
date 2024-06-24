@@ -2,16 +2,42 @@ import { useParams } from "react-router-dom";
 
 import { Spacer } from "@geist-ui/core";
 
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { ClassModeAPI } from "../../../api/class-mode.api";
 import Playlist from "../../../components/Sidebar/Playlist";
 import ClassModePlayer from "../../../components/class-mode-player-dashjs/ClassModePlayer";
 import Attendees from "../../../components/testing/Attendees";
-import ClassInfoTeacher from "../../../components/testing/ClassInfoTeacher";
 import PlaylistSectionsTeacher from "../../../components/testing/PlaylistSectionsTeacher";
+import { CLASS_ONGOING } from "../../../enums/class_status";
 import useVideoStore from "../../../store/VideoStore";
 
 function ClassModeTeacher() {
 	const [fullScreen] = useVideoStore((state) => [state.fullScreen]);
+	const [disabled, setDisabled] = useState(true);
 	const { class_id } = useParams();
+
+	const { data: classInfo } = useQuery({
+		queryKey: ["classInfo", class_id],
+		queryFn: async () => {
+			const [res, err] = await ClassModeAPI.postGetClassById(class_id);
+
+			if (err) {
+				console.error(err);
+				toast.error("Failed to fetch class info");
+			}
+
+			return res.class;
+		},
+	});
+
+	useEffect(() => {
+		if (classInfo?.status !== CLASS_ONGOING) {
+			setDisabled(true);
+		} else {
+			setDisabled(false);
+		}
+	}, [classInfo]);
 
 	// const [connectionOpen, setConnectionOpen] = useState(false);
 	// // const [socket, setSocket] = useState(null);
@@ -94,9 +120,14 @@ function ClassModeTeacher() {
 		<main>
 			<div className="max-w-7xl mx-auto py-2 px-1 xl:px-0">
 				<div className="mt-6">
-					<>
-						<ClassInfoTeacher class_id={class_id} />
-						{/* <Button
+					{disabled ? (
+						<h1 className="text-2xl text-center">
+							Class has not started yet
+						</h1>
+					) : (
+						<>
+							{/* <ClassInfoTeacher class_id={class_id} /> */}
+							{/* <Button
 							variant="contained"
 							color="primary"
 							onClick={() => {
@@ -111,44 +142,45 @@ function ClassModeTeacher() {
 								: "Open Connection"}
 						</Button> */}
 
-						<div
-							className={
-								fullScreen
-									? ""
-									: "relative video-grid mb-12 w-full gap-2"
-							}>
 							<div
 								className={
 									fullScreen
-										? "absolute w-full h-screen top-0 left-0 right-0 bottom-0 z-[10000]"
-										: "video-area"
+										? ""
+										: "relative video-grid mb-12 w-full gap-2"
 								}>
-								{/* dash video player */}
-								<ClassModePlayer isStudent={false} />
+								<div
+									className={
+										fullScreen
+											? "absolute w-full h-screen top-0 left-0 right-0 bottom-0 z-[10000]"
+											: "video-area"
+									}>
+									{/* dash video player */}
+									<ClassModePlayer isStudent={false} />
+								</div>
+								{!fullScreen ? (
+									<div className="queue-area">
+										<PlaylistSectionsTeacher />
+									</div>
+								) : (
+									<></>
+								)}
 							</div>
-							{!fullScreen ? (
+
+							{fullScreen ? (
 								<div className="queue-area">
 									<PlaylistSectionsTeacher />
 								</div>
 							) : (
 								<></>
 							)}
-						</div>
 
-						{fullScreen ? (
-							<div className="queue-area">
-								<PlaylistSectionsTeacher />
-							</div>
-						) : (
-							<></>
-						)}
+							<Attendees />
 
-						<Attendees />
+							<Spacer h={2} />
 
-						<Spacer h={2} />
-
-						<Playlist />
-					</>
+							<Playlist />
+						</>
+					)}
 				</div>
 			</div>
 		</main>

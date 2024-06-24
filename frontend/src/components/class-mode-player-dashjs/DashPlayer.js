@@ -1,6 +1,7 @@
 import dashjs from "dashjs";
 import {
 	forwardRef,
+	memo,
 	useCallback,
 	useEffect,
 	useImperativeHandle,
@@ -454,4 +455,4 @@ function DashPlayer(
 	);
 }
 
-export default forwardRef(DashPlayer);
+export default memo(forwardRef(DashPlayer));

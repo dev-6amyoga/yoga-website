@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import StudentNavMUI from "../../../components/Common/StudentNavbar/StudentNavMUI";
 import ClassModePlayer from "../../../components/class-mode-player-dashjs/ClassModePlayer";
@@ -11,75 +10,75 @@ function ClassModeStudent() {
 	const [fullScreen] = useVideoStore((state) => [state.fullScreen]);
 	const { class_id } = useParams();
 
-	const [connectionOpen, setConnectionOpen] = useState(false);
-	const [socket, setSocket] = useState(null);
-	const [queue, setQueue] = useState([]);
-	const [startConnection, setStartConnection] = useState(false);
-	let intervalTimer = useRef(null);
+	// const [connectionOpen, setConnectionOpen] = useState(false);
+	// const [socket, setSocket] = useState(null);
+	// const [queue, setQueue] = useState([]);
+	// const [startConnection, setStartConnection] = useState(false);
+	// let intervalTimer = useRef(null);
 
-	const getSampleStudentReq = (event_type) => {
-		return JSON.stringify({
-			class_id: class_id,
-			type: EVENT_CONTROLS,
-			data: {
-				subtype: "EVENT_CONTROLS_PLAY",
-				data: {},
-				event_time: new Date().toISOString(),
-			},
-		});
-	};
+	// const getSampleStudentReq = (event_type) => {
+	// 	return JSON.stringify({
+	// 		class_id: class_id,
+	// 		type: EVENT_CONTROLS,
+	// 		data: {
+	// 			subtype: "EVENT_CONTROLS_PLAY",
+	// 			data: {},
+	// 			event_time: new Date().toISOString(),
+	// 		},
+	// 	});
+	// };
 
-	useEffect(() => {
-		if (!startConnection) return;
+	// useEffect(() => {
+	// 	if (!startConnection) return;
 
-		const ws = new WebSocket("ws://localhost:4949/student/ws");
-		setSocket(ws);
-		setStartConnection(false);
-	}, [startConnection]);
+	// 	const ws = new WebSocket("ws://localhost:4949/student/ws");
+	// 	setSocket(ws);
+	// 	setStartConnection(false);
+	// }, [startConnection]);
 
-	useEffect(() => {
-		if (socket === null) return;
+	// useEffect(() => {
+	// 	if (socket === null) return;
 
-		const handleOpen = () => {
-			setConnectionOpen(true);
-			// intervalTimer.current = setInterval(() => {
-			// 	socket.send(
+	// 	const handleOpen = () => {
+	// 		setConnectionOpen(true);
+	// 		// intervalTimer.current = setInterval(() => {
+	// 		// 	socket.send(
 
-			// 	);
-			// }, 5000);
+	// 		// 	);
+	// 		// }, 5000);
 
-			socket.send(
-				JSON.stringify({
-					class_id: class_id,
-					student_id: "1",
-				})
-			);
-		};
+	// 		socket.send(
+	// 			JSON.stringify({
+	// 				class_id: class_id,
+	// 				student_id: "1",
+	// 			})
+	// 		);
+	// 	};
 
-		const handleClose = () => {
-			setConnectionOpen(false);
-			clearInterval(intervalTimer.current);
-		};
+	// 	const handleClose = () => {
+	// 		setConnectionOpen(false);
+	// 		clearInterval(intervalTimer.current);
+	// 	};
 
-		const handleMessage = (e) => {
-			const data = JSON.parse(e.data);
-			console.log("Message received: ", data);
-			setQueue((prev) => [...prev, data]);
-		};
+	// 	const handleMessage = (e) => {
+	// 		const data = JSON.parse(e.data);
+	// 		console.log("Message received: ", data);
+	// 		setQueue((prev) => [...prev, data]);
+	// 	};
 
-		socket.addEventListener("open", handleOpen);
-		socket.addEventListener("close", handleClose);
-		socket.addEventListener("message", handleMessage);
+	// 	socket.addEventListener("open", handleOpen);
+	// 	socket.addEventListener("close", handleClose);
+	// 	socket.addEventListener("message", handleMessage);
 
-		return () => {
-			if (socket) {
-				socket.close();
-				socket.removeEventListener("open", handleOpen);
-				socket.removeEventListener("close", handleClose);
-				socket.removeEventListener("message", handleMessage);
-			}
-		};
-	}, [socket]);
+	// 	return () => {
+	// 		if (socket) {
+	// 			socket.close();
+	// 			socket.removeEventListener("open", handleOpen);
+	// 			socket.removeEventListener("close", handleClose);
+	// 			socket.removeEventListener("message", handleMessage);
+	// 		}
+	// 	};
+	// }, [socket]);
 
 	return (
 		<main>
