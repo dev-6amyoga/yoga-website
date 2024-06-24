@@ -1,13 +1,13 @@
 import { useParams } from "react-router-dom";
-// import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
-// import Playlist from "../../components/Sidebar/Playlist";
-// import VideoPlayer from "../../components/StackVideoShaka/VideoPlayer";
-// import Attendees from "../../components/testing/Attendees";
-// import ClassInfoTeacher from "../../components/testing/ClassInfoTeacher";
-// import PlaylistSectionsTeacher from "../../components/testing/PlaylistSectionsTeacher";
+
+import { Spacer } from "@geist-ui/core";
+
+import Playlist from "../../../components/Sidebar/Playlist";
 import ClassModePlayer from "../../../components/class-mode-player-dashjs/ClassModePlayer";
+import Attendees from "../../../components/testing/Attendees";
+import ClassInfoTeacher from "../../../components/testing/ClassInfoTeacher";
+import PlaylistSectionsTeacher from "../../../components/testing/PlaylistSectionsTeacher";
 import useVideoStore from "../../../store/VideoStore";
-import Hero from "../../student/components/Hero";
 
 function ClassModeTeacher() {
 	const [fullScreen] = useVideoStore((state) => [state.fullScreen]);
@@ -92,13 +92,11 @@ function ClassModeTeacher() {
 
 	return (
 		<main>
-			<Hero heading="Class Mode" />
-			{/* <StudentNavMUI />
 			<div className="max-w-7xl mx-auto py-2 px-1 xl:px-0">
 				<div className="mt-6">
 					<>
 						<ClassInfoTeacher class_id={class_id} />
-						<Button
+						{/* <Button
 							variant="contained"
 							color="primary"
 							onClick={() => {
@@ -111,7 +109,7 @@ function ClassModeTeacher() {
 							{connectionOpen
 								? "Close Connection"
 								: "Open Connection"}
-						</Button>
+						</Button> */}
 
 						<div
 							className={
@@ -125,7 +123,8 @@ function ClassModeTeacher() {
 										? "absolute w-full h-screen top-0 left-0 right-0 bottom-0 z-[10000]"
 										: "video-area"
 								}>
-								<VideoPlayer />
+								{/* dash video player */}
+								<ClassModePlayer isStudent={false} />
 							</div>
 							{!fullScreen ? (
 								<div className="queue-area">
@@ -151,10 +150,7 @@ function ClassModeTeacher() {
 						<Playlist />
 					</>
 				</div>
-			</div> */}
-
-			{/* dash video player */}
-			<ClassModePlayer isStudent={false} />
+			</div>
 		</main>
 	);
 }

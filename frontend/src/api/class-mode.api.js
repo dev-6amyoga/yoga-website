@@ -101,4 +101,45 @@ export class ClassModeAPI {
 			return [null, err];
 		}
 	}
+
+	static async postStartClass(class_id) {
+		try {
+			const response = await Fetch({
+				url: "/class-mode/start",
+				method: "POST",
+				data: {
+					class_id: class_id,
+				},
+			});
+
+			if (response.status === 200) {
+				return [response.data, null];
+			} else {
+				return [null, response.data];
+			}
+		} catch (err) {
+			return [null, err];
+		}
+	}
+
+	static async postEndClass(class_id, status) {
+		try {
+			const response = await Fetch({
+				url: "/class-mode/end",
+				method: "POST",
+				data: {
+					class_id: class_id,
+					status: status,
+				},
+			});
+
+			if (response.status === 200) {
+				return [response.data, null];
+			} else {
+				return [null, response.data];
+			}
+		} catch (err) {
+			return [null, err];
+		}
+	}
 }
