@@ -91,6 +91,13 @@ export const useVideoStore = create(
 				return { videoState: vs };
 			}),
 
+		// videoStarted flag is set to true when the video is played for the first time
+		videoStarted: false,
+		setVideoStarted: (vs) =>
+			set(() => {
+				return { videoStarted: vs };
+			}),
+
 		// pauseReason : if the pause is cause by a marker or a normal pause
 		pauseReason: null,
 		setPauseReason: (pauseReason) => {
