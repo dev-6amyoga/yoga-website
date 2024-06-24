@@ -1,13 +1,15 @@
 const mongoose = require("mongoose");
+const { CLASS_UPCOMING } = require("../../enums/class_status");
 
 const classModeSchema = new mongoose.Schema({
 	class_name: String,
 	class_desc: String,
+	teacher_id: Number,
 	start_time: mongoose.Schema.Types.Date,
 	end_time: mongoose.Schema.Types.Date,
 	status: {
 		type: String,
-		default: "",
+		default: CLASS_UPCOMING,
 	},
 	has_teacher_joined: {
 		type: Boolean,

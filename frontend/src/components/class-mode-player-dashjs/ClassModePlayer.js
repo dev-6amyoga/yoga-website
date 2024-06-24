@@ -4,7 +4,7 @@
 import { useEffect, useRef } from "react";
 import DashPlayer from "./DashPlayer";
 
-export default function ClassModePlayer() {
+export default function ClassModePlayer({ isStudent }) {
 	const player = useRef(null);
 
 	const timingObj = useRef(null);
@@ -43,9 +43,17 @@ export default function ClassModePlayer() {
 			<DashPlayer
 				ref={player}
 				timingObjRef={timingObj}
+				isAsanaVideo={true}
+				isStudent={isStudent}
 				className="w-full h-full"
 				src="https://pub-0f821d8aa0b0446cae0613788ad21abc.r2.dev/66534d88d655c7a09791b21c.mpd"
 			/>
+			{/* <ShakaPlayerWrapper
+				timingObjRef={timingObj}
+				isDrm={true}
+				className="w-full h-full"
+				src="https://pub-0f821d8aa0b0446cae0613788ad21abc.r2.dev/66617a16485e980956f9f772.mpd"
+			/> */}
 		</div>
 	);
 }
