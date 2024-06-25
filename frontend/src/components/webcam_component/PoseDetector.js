@@ -470,24 +470,24 @@ export default function PoseDetector() {
       legPositionMessage = "Swap Legs!";
       base_score = 0;
     } else {
-      base_score = 30;
+      base_score = 10;
       nextStep = "Legs correct!";
     }
-    if (base_score === 30) {
+    if (base_score === 10) {
       if (
         leftHeelY === rightAnkleY ||
         Math.abs(leftHeelY - rightAnkleY) < 0.1
       ) {
-        leg_score = 8.75;
+        leg_score = 20;
       } else if (leftHeelY + 0.1 < rightAnkleY && leftHeelY > rightKneeY) {
-        leg_score = 17.5;
+        leg_score = 40;
       }
       if (leftHeelY < rightKneeY) {
         const midLength = (midHipY + rightKneeY) / 4;
         if (leftHeelY > midHipY + midLength) {
-          leg_score = 26.25;
+          leg_score = 60;
         } else {
-          leg_score = 35;
+          leg_score = 60;
         }
       }
 
@@ -495,20 +495,20 @@ export default function PoseDetector() {
         marksMessage += ", Take your arms up";
       } else {
         if (midPalmY < midHipY && midPalmY > midShoulderY) {
-          hand_score = 8.75;
+          hand_score = 10;
         } else if (
           midPalmY < midHipY &&
           midPalmY < midShoulderY &&
           midElbowY > midShoulderY
         ) {
-          hand_score = 17.5;
+          hand_score = 20;
         } else if (
           midPalmY < midHipY &&
           midPalmY < midShoulderY &&
           midElbowY < midShoulderY &&
           midElbowY > midEyeY
         ) {
-          hand_score = 26.25;
+          hand_score = 25;
         } else if (
           midPalmY < midHipY &&
           midPalmY < midShoulderY &&
@@ -516,14 +516,14 @@ export default function PoseDetector() {
           midElbowY < midEyeY
         ) {
           if (Math.abs(leftPalmX - rightPalmX) >= 0.05) {
-            hand_score = 26.25;
+            hand_score = 30;
           } else {
-            hand_score = 35;
+            hand_score = 40;
           }
         }
       }
     }
-    setGlobalScore(base_score + leg_score + hand_score);
+    setGlobalScore(leg_score + hand_score);
 
     // setGlobalMessage(
     //   legPositionMessage + (marksMessage ? ", " + marksMessage : "")
