@@ -312,6 +312,8 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import useVideoStore from "../../store/VideoStore";
+import ScoreCircle from "./ScoreCircle";
+import "./ScoreCircle.css";
 
 const LANDMARKS = {
   NOSE: 0,
@@ -605,9 +607,10 @@ export default function PoseDetector() {
           <div className="grid grid-cols-2">
             <div className="flex flex-col gap-2  p-4">
               <h6 className="uppercase">Score</h6>
-              <Typography variant="h5" component="div">
+              {/* <Typography variant="h5" component="div">
                 {globalScore.toFixed(2)}
-              </Typography>
+              </Typography> */}
+              <ScoreCircle globalScore={globalScore} />
             </div>
             <div className="flex flex-col gap-2 items-start  p-4">
               <h6 className="uppercase">Message</h6>
