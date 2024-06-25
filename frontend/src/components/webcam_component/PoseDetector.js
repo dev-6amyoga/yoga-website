@@ -75,7 +75,7 @@
 //   const workerRef = useRef(null);
 //   useEffect(() => {
 //     if (!workerRef.current) {
-//       workerRef.current = new Worker("landmarker/worker");
+//       workerRef.current = nbu
 //       workerRef.current.onmessage = (message) => {
 //         const { landmarks, message: messageFromWorker } = message.data;
 //         detectVrikshasana(landmarks);
