@@ -3,11 +3,10 @@ import StudentNavMUI from "../../../components/Common/StudentNavbar/StudentNavMU
 import ClassModePlayer from "../../../components/class-mode-player-dashjs/ClassModePlayer";
 import ClassInfoStudent from "../../../components/testing/ClassInfoStudent";
 import PlaylistSectionsStudent from "../../../components/testing/PlaylistSectionsStudent";
-import useVideoStore from "../../../store/VideoStore";
 import Hero from "../../student/components/Hero";
 
 function ClassModeStudent() {
-	const [fullScreen] = useVideoStore((state) => [state.fullScreen]);
+	const [fullScreen] = [false];
 	const { class_id } = useParams();
 
 	// const [connectionOpen, setConnectionOpen] = useState(false);
@@ -93,7 +92,7 @@ function ClassModeStudent() {
 							className={
 								fullScreen
 									? ""
-									: "relative video-grid mb-12 w-full gap-2"
+									: "relative video-grid mb-12 w-full gap-2 border"
 							}>
 							<div
 								className={
