@@ -23,6 +23,14 @@ const classModeSchema = new mongoose.Schema({
 		type: [String],
 		default: [],
 	},
+	actions_queue: {
+		type: mongoose.Schema.Types.Mixed,
+		default: [],
+	},
+	controls_queue: {
+		type: mongoose.Schema.Types.Mixed,
+		default: [],
+	},
 	created_at: {
 		type: Date,
 		default: Date.now,
