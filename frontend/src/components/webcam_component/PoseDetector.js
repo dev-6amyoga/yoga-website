@@ -71,17 +71,33 @@
 //     }
 //   }, [videoStarted]);
 
-//   // Worker setup
+//   // Worker setup, what is it saying
 //   const workerRef = useRef(null);
+
 //   useEffect(() => {
 //     if (!workerRef.current) {
-//       workerRef.current = nbu
+//       console.log("Worker setup");
+//       workerRef.current = new Worker(
+//         new URL("./landmarkerWorker.js", import.meta.url)
+//       );
 //       workerRef.current.onmessage = (message) => {
-//         const { landmarks, message: messageFromWorker } = message.data;
-//         detectVrikshasana(landmarks);
-//         setGlobalMessage(messageFromWorker);
+//         console.log("Worker : message rec", message);
+//         const { type } = message;
+
+//         if (type === "result") {
+//           const { landmarks, message: messageFromWorker } = message.data;
+//           detectVrikshasana(landmarks);
+//           setGlobalMessage(messageFromWorker);
+//         } else if (type === "init-complete") {
+//           console.log("[POSE DETECTOR] init complete");
+//         }
 //       };
+//       console.log("worker ref:", workerRef);
+//       console.log("Worker : sending message");
+//       workerRef.current.postMessage({ type: "init" });
+//       console.log("Worker : sent message :)");
 //     }
+
 //     return () => workerRef.current?.terminate();
 //   }, []);
 
@@ -95,21 +111,31 @@
 //   };
 
 //   useEffect(() => {
-//     if (
-//       startDetector &&
-//       videoRef.current &&
-//       videoRef.current.readyState === 4
-//     ) {
-//       // Send video frame to worker for processing when ready
+//     if (startDetector) {
 //       const sendFrameToWorker = () => {
-//         if (webcamRunningRef.current) {
+//         // const w = videoRef.current.videoWidth;
+//         // const h = videoRef.current.videoHeight;
+//         const w = 360;
+//         const h = 480;
+//         //     const videoHeight = 360;
+//         //     const videoWidth = 480;
+//         if (webcamRunningRef.current && w !== 0 && h !== 0) {
 //           const canvas = document.createElement("canvas");
 //           const ctx = canvas.getContext("2d");
-//           canvas.width = videoRef.current.videoWidth;
-//           canvas.height = videoRef.current.videoHeight;
-//           ctx.drawImage(videoRef.current, 0, 0);
-//           const frame = canvas.toDataURL("image/jpeg", 0.5); // Adjust compression quality as needed
-//           workerRef.current.postMessage({ frame });
+//           canvas.width = w;
+//           canvas.height = h;
+//           ctx.drawImage(videoRef.current, 0, 0, w, h);
+//           // const frame = ctx.getImageData(0, 0, w, h); // Adjust compression quality as needed
+//           const frame = canvas.toDataURL("image/jpeg", 1);
+
+//           workerRef.current.postMessage({
+//             type: "predict",
+//             data: {
+//               imageData: frame,
+//               width: w,
+//               height: h,
+//             },
+//           });
 //           window.requestAnimationFrame(sendFrameToWorker);
 //         }
 //       };
@@ -374,15 +400,14 @@ export default function PoseDetector() {
 
     if (videoStarted) {
       enableCam();
-      const timeoutId = setTimeout(() => {
-        setStartDetector(true);
-        toast("vrikshasana corrector start!");
-      }, 1000); // 12000 milliseconds = 12 seconds
-
-      return () => clearTimeout(timeoutId);
+      // const timeoutId = setTimeout(() => {
+      setStartDetector(true);
+      // }, 1000); // 12000 milliseconds = 12 seconds
+      // return () => clearTimeout(timeoutId);
     }
   }, [videoStarted]);
 
+  // so, we need one file for worker,
   useEffect(() => {
     const createPoseLandmarker = async () => {
       const vision = await FilesetResolver.forVisionTasks(
@@ -420,7 +445,7 @@ export default function PoseDetector() {
 
   useEffect(() => {
     if (startDetector) {
-      toast("prediction startin!");
+      // toast("prediction startin!");
       predictWebcam();
     }
   }, [startDetector]);
