@@ -105,21 +105,21 @@ export default function ManageClasses() {
 					<SortableColumn column={column}>Class Name</SortableColumn>
 				),
 			},
-			{
-				accessorKey: "class_desc",
-				header: ({ column }) => (
-					<SortableColumn column={column}>Description</SortableColumn>
-				),
-				cell: ({ getValue }) => {
-					return (
-						<div>
-							<span className="max-w-[35ch] break-all">
-								{getValue()}
-							</span>
-						</div>
-					);
-				},
-			},
+			// {
+			// 	accessorKey: "class_desc",
+			// 	header: ({ column }) => (
+			// 		<SortableColumn column={column}>Description</SortableColumn>
+			// 	),
+			// 	cell: ({ getValue }) => {
+			// 		return (
+			// 			<div>
+			// 				<span className="max-w-[35ch] break-all">
+			// 					{getValue()}
+			// 				</span>
+			// 			</div>
+			// 		);
+			// 	},
+			// },
 			{
 				accessorKey: "start_time",
 				header: ({ column }) => (
