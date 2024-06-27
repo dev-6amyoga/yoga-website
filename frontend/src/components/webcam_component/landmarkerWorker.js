@@ -79,6 +79,7 @@ const detectVrikshasana = useCallback(
 
     let legPositionMessage = "";
     let marksMessage = "";
+    let handPositionMessage = "";
 
     const roundTo = (number, decimals) => {
       return Number(number.toFixed(decimals));
@@ -106,13 +107,16 @@ const detectVrikshasana = useCallback(
         Math.abs(leftHeelY - rightAnkleY) < 0.1
       ) {
         leg_score = 20;
+        legPositionMessage = "Try and lift your leg to the groin!";
       } else if (leftHeelY + 0.1 < rightAnkleY && leftHeelY > rightKneeY) {
         leg_score = 40;
+        legPositionMessage = "Try and lift your leg to the groin!";
       }
       if (leftHeelY < rightKneeY) {
         const midLength = (midHipY + rightKneeY) / 4;
         if (leftHeelY > midHipY + midLength) {
           leg_score = 60;
+          legPositionMessage = "Try and lift your leg to the groin!";
         } else {
           leg_score = 60;
         }
@@ -123,11 +127,14 @@ const detectVrikshasana = useCallback(
       } else {
         if (midPalmY < midHipY && midPalmY > midShoulderY) {
           hand_score = 10;
+          handPositionMessage = "Try and lift your arms higher and straight";
         } else if (
           midPalmY < midHipY &&
           midPalmY < midShoulderY &&
           midElbowY > midShoulderY
         ) {
+          handPositionMessage = "Try and lift your arms higher and straight";
+
           hand_score = 20;
         } else if (
           midPalmY < midHipY &&
@@ -135,6 +142,8 @@ const detectVrikshasana = useCallback(
           midElbowY < midShoulderY &&
           midElbowY > midEyeY
         ) {
+          handPositionMessage = "Try and lift your arms higher and straight";
+
           hand_score = 25;
         } else if (
           midPalmY < midHipY &&
@@ -143,6 +152,7 @@ const detectVrikshasana = useCallback(
           midElbowY < midEyeY
         ) {
           if (Math.abs(leftPalmX - rightPalmX) >= 0.05) {
+            handPositionMessage = "Join your palms";
             hand_score = 30;
           } else {
             hand_score = 40;
@@ -152,9 +162,7 @@ const detectVrikshasana = useCallback(
     }
     setGlobalScore(leg_score + hand_score);
 
-    // setGlobalMessage(
-    //   legPositionMessage + (marksMessage ? ", " + marksMessage : "")
-    // );
+    setGlobalMessage(legPositionMessage + handPositionMessage);
     // speakMessage(
     //   legPositionMessage + (marksMessage ? ", " + marksMessage : "")
     // );
