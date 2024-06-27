@@ -98,18 +98,20 @@ export default function PoseDetector() {
         return;
 
       // console.log("Drawing landmarks");
-      const canvasElement = canvasRef.current;
 
-      canvasElement.height = 360;
-      canvasElement.width = 480;
+      canvasRef.current.height = 360;
+      canvasRef.current.width = 480;
+
+      canvasCtxRef.current.save()
 
       canvasCtxRef.current.clearRect(
         0,
         0,
-        canvasElement.width,
-        canvasElement.height
+        canvasRef.current.width,
+        canvasRef.current.height
       );
 
+      const ct = performance.now()
       for (const landmark of landmarksRef.current) {
         detectVrikshasana(landmark);
         drawingUtilsRef.current.drawLandmarks(landmark, {
@@ -120,8 +122,10 @@ export default function PoseDetector() {
           PoseLandmarker.POSE_CONNECTIONS
         );
       }
+      console.log("time taken to update : ", performance.now()-ct);
 
       canvasCtxRef.current.restore();
+      
       // console.log("elapsed:", performance.now() - currentTime);
     } catch (error) {
       console.error("Error in handleDrawLandmarks:", error);
@@ -146,7 +150,7 @@ export default function PoseDetector() {
 
             landmarksRef.current = landmarks;
 
-            // window.requestAnimationFrame(handleDrawLandmarks);
+            window.requestAnimationFrame(handleDrawLandmarks);
 
             // setGlobalMessage(messageFromWorker);
           } catch (error) {
@@ -180,8 +184,11 @@ export default function PoseDetector() {
     });
   };
 
+  const sendFrameToWorkerInterval = useRef(null);
+
   useEffect(() => {
     if (startDetector) {
+      
       const sendFrameToWorker = () => {
         // const w = videoRef.current.videoWidth;
         // const h = videoRef.current.videoHeight;
@@ -198,6 +205,8 @@ export default function PoseDetector() {
           const frame = ctx.getImageData(0, 0, w, h);
           // const frame = canvas.toDataURL("image/jpeg", 1);
 
+          if (!workerRef.current) return;
+
           workerRef.current.postMessage({
             type: "predict",
             data: {
@@ -206,14 +215,18 @@ export default function PoseDetector() {
               height: h,
             },
           });
-
-          window.requestAnimationFrame(sendFrameToWorker);
-          window.requestAnimationFrame(handleDrawLandmarks);
         }
       };
-      sendFrameToWorker();
+
+      sendFrameToWorkerInterval.current = setInterval(sendFrameToWorker, 100);
     }
-  }, [startDetector, videoRef]);
+
+    return () => {
+      if (sendFrameToWorkerInterval.current) {
+        clearInterval(sendFrameToWorkerInterval.current);
+      }
+    }
+  }, [startDetector]);
 
   const detectVrikshasana = (landmarks) => {
     const leftHeelY = landmarks[LANDMARKS.LEFT_HEEL].y;
