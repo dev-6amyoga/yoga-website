@@ -392,7 +392,7 @@ self.onmessage = async (event) => {
 		let score = 0;
 		let message = "";
 
-		console.log("SIDE: ", side);
+		// console.log("SIDE: ", side);
 
 		for (const landmark of result.landmarks) {
 			if (side === "left") {
