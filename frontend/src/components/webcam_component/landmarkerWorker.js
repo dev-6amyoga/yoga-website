@@ -220,18 +220,18 @@ const detectVrikshasanaRight = (landmarks) => {
 	}
 	if (base_score === 10) {
 		if (
-			leftHeelY === leftAnkleY ||
-			Math.abs(leftHeelY - leftAnkleY) < 0.1
+			rightHeelY === leftAnkleY ||
+			Math.abs(rightHeelY - leftAnkleY) < 0.1
 		) {
 			leg_score = 20;
 			legPositionMessage = "Try and lift your leg to the groin!";
-		} else if (leftHeelY + 0.1 < leftAnkleY && leftHeelY > leftKneeY) {
+		} else if (rightHeelY + 0.1 < leftAnkleY && rightHeelY > leftKneeY) {
 			leg_score = 40;
 			legPositionMessage = "Try and lift your leg to the groin!";
 		}
-		if (leftHeelY < leftKneeY) {
+		if (rightHeelY < leftKneeY) {
 			const midLength = (midHipY + leftKneeY) / 4;
-			if (leftHeelY > midHipY + midLength) {
+			if (rightHeelY > midHipY + midLength) {
 				leg_score = 60;
 				legPositionMessage = "Try and lift your leg to the groin!";
 			} else {
