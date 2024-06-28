@@ -467,15 +467,6 @@ function DashPlayer(
 						className="bg-white text-black px-4 py-2 rounded-md"
 						onClick={() => {
 							timingObjRef.current.update({
-								position: 1080,
-							});
-						}}>
-						Seek to 18min
-					</button>
-					<button
-						className="bg-white text-black px-4 py-2 rounded-md"
-						onClick={() => {
-							timingObjRef.current.update({
 								position: 0,
 							});
 						}}>
