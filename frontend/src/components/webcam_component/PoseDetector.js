@@ -249,7 +249,8 @@ export default function PoseDetector() {
 						side:
 							poseSide.current < 46000
 								? "left"
-								: poseSide.current > 55000
+								: poseSide.current > 55000 &&
+									  poseSide.current < 90000
 									? "right"
 									: "center",
 					},
