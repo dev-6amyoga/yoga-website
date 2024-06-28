@@ -6,295 +6,344 @@ import ScoreCircle from "./ScoreCircle";
 import "./ScoreCircle.css";
 
 const LANDMARKS = {
-  NOSE: 0,
-  LEFT_EYE_INNER: 1,
-  LEFT_EYE: 2,
-  LEFT_EYE_OUTER: 3,
-  RIGHT_EYE_INNER: 4,
-  RIGHT_EYE: 5,
-  RIGHT_EYE_OUTER: 6,
-  LEFT_EAR: 7,
-  RIGHT_EAR: 8,
-  LEFT_MOUTH: 9,
-  RIGHT_MOUTH: 10,
-  LEFT_SHOULDER: 11,
-  RIGHT_SHOULDER: 12,
-  LEFT_ELBOW: 13,
-  RIGHT_ELBOW: 14,
-  LEFT_WRIST: 15,
-  RIGHT_WRIST: 16,
-  LEFT_PINKY: 17,
-  RIGHT_PINKY: 18,
-  LEFT_INDEX: 19,
-  RIGHT_INDEX: 20,
-  LEFT_THUMB: 21,
-  RIGHT_THUMB: 22,
-  LEFT_HIP: 23,
-  RIGHT_HIP: 24,
-  LEFT_KNEE: 25,
-  RIGHT_KNEE: 26,
-  LEFT_ANKLE: 27,
-  RIGHT_ANKLE: 28,
-  LEFT_HEEL: 29,
-  RIGHT_HEEL: 30,
-  LEFT_FOOT_INDEX: 31,
-  RIGHT_FOOT_INDEX: 32,
+	NOSE: 0,
+	LEFT_EYE_INNER: 1,
+	LEFT_EYE: 2,
+	LEFT_EYE_OUTER: 3,
+	RIGHT_EYE_INNER: 4,
+	RIGHT_EYE: 5,
+	RIGHT_EYE_OUTER: 6,
+	LEFT_EAR: 7,
+	RIGHT_EAR: 8,
+	LEFT_MOUTH: 9,
+	RIGHT_MOUTH: 10,
+	LEFT_SHOULDER: 11,
+	RIGHT_SHOULDER: 12,
+	LEFT_ELBOW: 13,
+	RIGHT_ELBOW: 14,
+	LEFT_WRIST: 15,
+	RIGHT_WRIST: 16,
+	LEFT_PINKY: 17,
+	RIGHT_PINKY: 18,
+	LEFT_INDEX: 19,
+	RIGHT_INDEX: 20,
+	LEFT_THUMB: 21,
+	RIGHT_THUMB: 22,
+	LEFT_HIP: 23,
+	RIGHT_HIP: 24,
+	LEFT_KNEE: 25,
+	RIGHT_KNEE: 26,
+	LEFT_ANKLE: 27,
+	RIGHT_ANKLE: 28,
+	LEFT_HEEL: 29,
+	RIGHT_HEEL: 30,
+	LEFT_FOOT_INDEX: 31,
+	RIGHT_FOOT_INDEX: 32,
 };
 export default function PoseDetector() {
-  // const [lastVideoTime, setLastVideoTime] = useState(-1);
-  const [poseLandmarker, setPoseLandmarker] = useState(null);
-  const webcamRunningRef = useRef(false);
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const canvasCtxRef = useRef(null);
-  const drawingUtilsRef = useRef(null);
+	// const [lastVideoTime, setLastVideoTime] = useState(-1);
+	const [poseLandmarker, setPoseLandmarker] = useState(null);
+	const webcamRunningRef = useRef(false);
+	const videoRef = useRef(null);
+	const canvasRef = useRef(null);
+	const canvasCtxRef = useRef(null);
+	const drawingUtilsRef = useRef(null);
 
-  const enableWebcamButtonRef = useRef(null);
-  const [globalMessage, setGlobalMessage] = useState(null);
-  const [globalScore, setGlobalScore] = useState(0);
-  const [startDetector, setStartDetector] = useState(false);
+	const enableWebcamButtonRef = useRef(null);
+	const [globalMessage, setGlobalMessage] = useState(null);
+	const [globalScore, setGlobalScore] = useState(0);
+	const [startDetector, setStartDetector] = useState(false);
 
-  // Worker setup, what is it saying
-  const workerRef = useRef(null);
+	// Worker setup, what is it saying
+	const workerRef = useRef(null);
 
-  const landmarksRef = useRef(null);
-  const lastVideoTime = useRef(-1);
+	const landmarksRef = useRef(null);
+	const lastVideoTime = useRef(-1);
 
-  const handleScoreUpdate = (value) => {
-    setGlobalScore((prevScore) => prevScore + value);
-  };
-  const [videoStarted] = useVideoStore((state) => [state.videoStarted]);
+	const handleScoreUpdate = (value) => {
+		setGlobalScore((prevScore) => prevScore + value);
+	};
+	const [videoStarted, currentVideo] = useVideoStore((state) => [
+		state.videoStarted,
+		state.currentVideo,
+	]);
 
-  useEffect(() => {
-    // videoStarted ? toast("video started") : toast("video not started");
-    enableCam();
-  }, []);
+	useEffect(() => {
+		// videoStarted ? toast("video started") : toast("video not started");
+		enableCam();
+	}, []);
 
-  // const handleDrawLandmarks = useCallback(async () => {
-  // 	try {
-  // 		let currentTime = performance.now();
-  // 		if (currentTime === lastVideoTime.current) return;
+	const enableScore = useRef(false);
 
-  // 		lastVideoTime.current = currentTime;
+	useEffect(() => {
+		console.log("currentVideo", currentVideo?.video?._id);
 
-  // 		if (
-  // 			!landmarksRef.current ||
-  // 			!canvasRef.current ||
-  // 			!canvasCtxRef.current ||
-  // 			!drawingUtilsRef.current
-  // 		)
-  // 			return;
+		if (
+			currentVideo &&
+			currentVideo?.video?._id === "66784b0997a55a067a4c2f2e"
+		) {
+			console.log("enable score");
+			enableScore.current = true;
+		} else {
+			enableScore.current = false;
+		}
+	}, [currentVideo]);
 
-  // 		// console.log("Drawing landmarks");
+	// const handleDrawLandmarks = useCallback(async () => {
+	// 	try {
+	// 		let currentTime = performance.now();
+	// 		if (currentTime === lastVideoTime.current) return;
 
-  // 		canvasRef.current.height = 360;
-  // 		canvasRef.current.width = 480;
+	// 		lastVideoTime.current = currentTime;
 
-  // 		canvasCtxRef.current.save();
+	// 		if (
+	// 			!landmarksRef.current ||
+	// 			!canvasRef.current ||
+	// 			!canvasCtxRef.current ||
+	// 			!drawingUtilsRef.current
+	// 		)
+	// 			return;
 
-  // 		canvasCtxRef.current.clearRect(
-  // 			0,
-  // 			0,
-  // 			canvasRef.current.width,
-  // 			canvasRef.current.height
-  // 		);
+	// 		// console.log("Drawing landmarks");
 
-  // 		const ct = performance.now();
-  // 		for (const landmark of landmarksRef.current) {
-  // 			detectVrikshasana(landmark);
-  // 			drawingUtilsRef.current.drawLandmarks(landmark, {
-  // 				radius: (data) =>
-  // 					DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1),
-  // 			});
-  // 			drawingUtilsRef.current.drawConnectors(
-  // 				landmark,
-  // 				PoseLandmarker.POSE_CONNECTIONS
-  // 			);
-  // 		}
-  // 		console.log("time taken to update : ", performance.now() - ct);
+	// 		canvasRef.current.height = 360;
+	// 		canvasRef.current.width = 480;
 
-  // 		canvasCtxRef.current.restore();
+	// 		canvasCtxRef.current.save();
 
-  // 		// console.log("elapsed:", performance.now() - currentTime);
-  // 	} catch (error) {
-  // 		console.error("Error in handleDrawLandmarks:", error);
-  // 	}
-  // }, []);
+	// 		canvasCtxRef.current.clearRect(
+	// 			0,
+	// 			0,
+	// 			canvasRef.current.width,
+	// 			canvasRef.current.height
+	// 		);
 
-  useEffect(() => {
-    if (!workerRef.current) {
-      console.log("Worker setup");
-      workerRef.current = new Worker(
-        new URL("./landmarkerWorker.js", import.meta.url)
-      );
+	// 		const ct = performance.now();
+	// 		for (const landmark of landmarksRef.current) {
+	// 			detectVrikshasana(landmark);
+	// 			drawingUtilsRef.current.drawLandmarks(landmark, {
+	// 				radius: (data) =>
+	// 					DrawingUtils.lerp(data.from.z, -0.15, 0.1, 5, 1),
+	// 			});
+	// 			drawingUtilsRef.current.drawConnectors(
+	// 				landmark,
+	// 				PoseLandmarker.POSE_CONNECTIONS
+	// 			);
+	// 		}
+	// 		console.log("time taken to update : ", performance.now() - ct);
 
-      workerRef.current.onmessage = (message) => {
-        // console.log("Worker : message rec");
-        const { type, data, score, message: revMsg } = message.data;
+	// 		canvasCtxRef.current.restore();
 
-        if (type === "result") {
-          try {
-            // const { landmarks, message: messageFromWorker } = data;
-            // console.log("worker : ", landmarks, messageFromWorker);
-            // landmarksRef.current = landmarks;
-            // window.requestAnimationFrame(handleDrawLandmarks);
-            // setGlobalMessage(messageFromWorker);
-            if (useVideoStore.getState().videoStarted) {
-              setGlobalScore(score);
-              setGlobalMessage(revMsg);
-            }
-          } catch (error) {
-            console.error("Error in worker message:", error);
-          }
-        } else if (type === "init-complete") {
-          console.log("[POSE DETECTOR] init complete");
-        }
-      };
-      // console.log("worker ref:", workerRef);
-      // console.log("Worker : sending message");
-      const offscreen = canvasRef.current.transferControlToOffscreen();
+	// 		// console.log("elapsed:", performance.now() - currentTime);
+	// 	} catch (error) {
+	// 		console.error("Error in handleDrawLandmarks:", error);
+	// 	}
+	// }, []);
 
-      workerRef.current.postMessage(
-        {
-          type: "init",
-          canvas: offscreen,
-        },
-        [offscreen]
-      );
+	const setScoreTimeout = useRef(null);
 
-      // console.log("Worker : sent message :)");
-    }
+	useEffect(() => {
+		if (!workerRef.current) {
+			console.log("Worker setup");
+			workerRef.current = new Worker(
+				new URL("./landmarkerWorker.js", import.meta.url)
+			);
 
-    return () => workerRef.current?.terminate();
-  }, []);
+			workerRef.current.onmessage = (message) => {
+				// console.log("Worker : message rec");
+				const { type, data, score, message: revMsg } = message.data;
 
-  const startWebcam = () => {
-    const constraints = { video: true };
-    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-      videoRef.current.srcObject = stream;
-      videoRef.current.style.display = "block";
-      videoRef.current.play();
-    });
-  };
+				if (type === "result") {
+					try {
+						// const { landmarks, message: messageFromWorker } = data;
+						// console.log("worker : ", landmarks, messageFromWorker);
+						// landmarksRef.current = landmarks;
+						// window.requestAnimationFrame(handleDrawLandmarks);
+						// setGlobalMessage(messageFromWorker);
+						if (useVideoStore.getState().videoStarted) {
+							if (
+								setScoreTimeout.current === 20 &&
+								enableScore.current
+							) {
+								setGlobalScore(score);
+								setGlobalMessage(revMsg);
+								setScoreTimeout.current = 0;
+							}
+							setScoreTimeout.current += 1;
+						} else {
+							setGlobalScore(0);
+							setGlobalMessage("---");
+						}
+					} catch (error) {
+						console.error("Error in worker message:", error);
+					}
+				} else if (type === "init-complete") {
+					console.log("[POSE DETECTOR] init complete");
+				}
+			};
+			// console.log("worker ref:", workerRef);
+			// console.log("Worker : sending message");
+			const offscreen = canvasRef.current.transferControlToOffscreen();
 
-  const sendFrameToWorkerInterval = useRef(null);
+			workerRef.current.postMessage(
+				{
+					type: "init",
+					canvas: offscreen,
+				},
+				[offscreen]
+			);
 
-  useEffect(() => {
-    const sendFrameToWorker = () => {
-      // const w = videoRef.current.videoWidth;
-      // const h = videoRef.current.videoHeight;
-      const w = 640;
-      const h = 480;
-      //     const videoHeight = 360;
-      //     const videoWidth = 480;
-      if (webcamRunningRef.current && w !== 0 && h !== 0) {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        canvas.width = w;
-        canvas.height = h;
-        ctx.drawImage(videoRef.current, 0, 0, w, h);
-        const frame = ctx.getImageData(0, 0, w, h);
+			// console.log("Worker : sent message :)");
+		}
 
-        // console.log(canvas.toDataURL("image/jpeg", 1));
+		return () => workerRef.current?.terminate();
+	}, []);
 
-        if (!workerRef.current) return;
+	const startWebcam = () => {
+		const constraints = { video: true };
+		navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+			videoRef.current.srcObject = stream;
+			videoRef.current.style.display = "block";
+			videoRef.current.play();
+		});
+	};
 
-        workerRef.current.postMessage({
-          type: "predict",
-          data: {
-            imageData: frame.data,
-            width: w,
-            height: h,
-          },
-        });
-      }
-    };
+	const sendFrameToWorkerInterval = useRef(null);
+	const poseSide = useRef(0);
 
-    sendFrameToWorkerInterval.current = setInterval(sendFrameToWorker, 100);
+	useEffect(() => {
+		if (!videoStarted) {
+			poseSide.current = 0;
+		}
+	}, []);
 
-    return () => {
-      if (sendFrameToWorkerInterval.current) {
-        clearInterval(sendFrameToWorkerInterval.current);
-      }
-    };
-  }, []);
+	useEffect(() => {
+		const sendFrameToWorker = () => {
+			if (poseSide.current === null) {
+				poseSide.current = 0;
+			}
+			// const w = videoRef.current.videoWidth;
+			// const h = videoRef.current.videoHeight;
+			const w = 640;
+			const h = 480;
+			//     const videoHeight = 360;
+			//     const videoWidth = 480;
+			if (webcamRunningRef.current && w !== 0 && h !== 0) {
+				const canvas = document.createElement("canvas");
+				const ctx = canvas.getContext("2d");
+				canvas.width = w;
+				canvas.height = h;
+				ctx.drawImage(videoRef.current, 0, 0, w, h);
+				const frame = ctx.getImageData(0, 0, w, h);
 
-  const speakMessage = useCallback((message) => {
-    const utterance = new SpeechSynthesisUtterance(message);
-    window.speechSynthesis.speak(utterance);
-  }, []);
+				// console.log(canvas.toDataURL("image/jpeg", 1));
 
-  const enableCam = (event) => {
-    if (webcamRunningRef.current) {
-      webcamRunningRef.current = false;
-    } else {
-      webcamRunningRef.current = true;
-      startWebcam();
-    }
-  };
+				if (!workerRef.current) return;
 
-  return (
-    <>
-      <Card
-        sx={{
-          border: "1px solid",
-          borderColor: "primary.main",
-          background: "linear-gradient(#033363, #021F3B)",
-          borderRadius: "1rem",
-          color: "white",
-        }}
-      >
-        <CardContent>
-          <div className="grid grid-cols-2">
-            <div className="flex flex-col gap-2  p-4">
-              <h6 className="uppercase">Score</h6>
-              {/* <Typography variant="h5" component="div">
+				workerRef.current.postMessage({
+					type: "predict",
+					data: {
+						imageData: frame.data,
+						width: w,
+						height: h,
+						side:
+							poseSide.current < 46000
+								? "left"
+								: poseSide.current > 55000
+									? "right"
+									: "center",
+					},
+				});
+
+				if (useVideoStore.getState().videoStarted) {
+					poseSide.current = poseSide.current + 100;
+					// console.log("poseSide.current", poseSide.current);
+				}
+			}
+		};
+
+		sendFrameToWorkerInterval.current = setInterval(sendFrameToWorker, 100);
+
+		return () => {
+			if (sendFrameToWorkerInterval.current) {
+				clearInterval(sendFrameToWorkerInterval.current);
+			}
+		};
+	}, []);
+
+	const speakMessage = useCallback((message) => {
+		const utterance = new SpeechSynthesisUtterance(message);
+		window.speechSynthesis.speak(utterance);
+	}, []);
+
+	const enableCam = (event) => {
+		if (webcamRunningRef.current) {
+			webcamRunningRef.current = false;
+		} else {
+			webcamRunningRef.current = true;
+			startWebcam();
+		}
+	};
+
+	return (
+		<>
+			<Card
+				sx={{
+					border: "1px solid",
+					borderColor: "primary.main",
+					background: "linear-gradient(#033363, #021F3B)",
+					borderRadius: "1rem",
+					color: "white",
+				}}>
+				<CardContent>
+					<div className="grid grid-cols-2">
+						<div className="flex flex-col gap-2  p-4">
+							<h6 className="uppercase">Score</h6>
+							{/* <Typography variant="h5" component="div">
 								{globalScore.toFixed(2)}
 							</Typography> */}
-              <ScoreCircle globalScore={globalScore} />
-            </div>
-            <div className="flex flex-col gap-2 items-start p-4">
-              <h6 className="uppercase">Message</h6>
-              <Typography variant="p" component="div">
-                {globalMessage ? globalMessage : "---"}
-              </Typography>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+							<ScoreCircle globalScore={globalScore} />
+						</div>
+						<div className="flex flex-col gap-2 items-start p-4">
+							<h6 className="uppercase">Message</h6>
+							<Typography variant="p" component="div">
+								{globalMessage ? globalMessage : "---"}
+							</Typography>
+						</div>
+					</div>
+				</CardContent>
+			</Card>
 
-      <Spacer />
+			<Spacer />
 
-      <div className="border-2 border-gray-950 rounded-lg">
-        <div className="relative w-full min-h-72">
-          <video
-            id="webcam"
-            ref={videoRef}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%", // Maintain 100% to fill parent container
-              height: "100%", // Maintain 100% to fill parent container
-            }}
-            autoPlay
-            muted
-          ></video>
-          <canvas
-            id="output_canvas"
-            ref={canvasRef}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-            }}
-          ></canvas>
-        </div>
-      </div>
-    </>
-  );
+			<div className="border-2 border-gray-950 rounded-lg">
+				<div className="relative w-full min-h-72">
+					<video
+						id="webcam"
+						ref={videoRef}
+						style={{
+							position: "absolute",
+							top: 0,
+							left: 0,
+							width: "100%", // Maintain 100% to fill parent container
+							height: "100%", // Maintain 100% to fill parent container
+						}}
+						autoPlay
+						muted></video>
+					<canvas
+						id="output_canvas"
+						ref={canvasRef}
+						style={{
+							position: "absolute",
+							top: 0,
+							left: 0,
+							width: "100%",
+							height: "100%",
+						}}></canvas>
+				</div>
+			</div>
+		</>
+	);
 }
 
 // import { Spacer } from "@geist-ui/core";
