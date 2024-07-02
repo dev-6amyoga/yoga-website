@@ -4,10 +4,12 @@ import Playlist from "../Sidebar/Playlist";
 import PoseDetector from "../webcam_component/PoseDetector";
 import PlaylistSections from "./Sections";
 import VideoPlayer from "./VideoPlayer";
+import { Button } from "@mui/material";
+import { useState } from "react";
 
 export default function VideoPlayerWrapper() {
   const [fullScreen] = useVideoStore((state) => [state.fullScreen]);
-
+  const [aiVisible, setAiVisible] = useState(false);
   return (
     <>
       <div
@@ -21,13 +23,32 @@ export default function VideoPlayerWrapper() {
           }
         >
           <VideoPlayer />
+          <Button
+            onClick={() => {
+              setAiVisible(!aiVisible);
+            }}
+            variant="contained"
+          >
+            {aiVisible ? "Disable AI Mode" : "Enable AI Mode"}
+          </Button>
         </div>
-        {!fullScreen ? (
+        {/* {!fullScreen ? (
+          // {aiVisible?  (
+          //             <div className="queue-area">
+          //   <PoseDetector />
+          // </div>
+          // ) : <></>}
           <div className="queue-area">
             <PoseDetector />
           </div>
         ) : (
           <></>
+        )} */}
+
+        {aiVisible && (
+          <div className="queue-area">
+            <PoseDetector />
+          </div>
         )}
       </div>
 

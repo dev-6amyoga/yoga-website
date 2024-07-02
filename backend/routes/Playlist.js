@@ -192,6 +192,7 @@ router.post("/playlists/createManifest/:playlistId", async (req, res) => {
       let [combinedManifest, totalDuration, sections] =
         await mpdCombiner.getCombinedManifest();
 
+      // console.log(combinedManifest, totalDuration, sections);
       // save the file to cloudflare
       await R2.cloudflareAddFile(
         `${playlist._id.toString()}.mpd`,
