@@ -5,6 +5,7 @@ import {
 	useQuery,
 	useQueryClient,
 } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useCallback } from "react";
 import ReactDOM from "react-dom/client";
 import "react-phone-number-input/style.css";
@@ -18,6 +19,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useShallow } from "zustand/react/shallow";
 import { AuthAPI } from "./api/auth.api";
+import { UserPlanAPI } from "./api/user-plan.api";
 import { UserAPI } from "./api/user.api";
 import { ROLE_TEACHER } from "./enums/roles";
 import "./index.css";
@@ -108,172 +110,195 @@ function LoginIndex() {
 	);
 
 	const init = useCallback(async () => {
-		const access_token =
-			sessionStorage.getItem("6amyoga_access_token") || accessToken;
-		const refresh_token =
-			sessionStorage.getItem("6amyoga_refresh_token") || refreshToken;
-		if (access_token && refresh_token) {
-			const [verifyData, verifyErr] = await AuthAPI.postVerifyTokens(
-				access_token,
-				refresh_token
-			);
+		console.log("[INIT]");
+		try {
+			const access_token =
+				sessionStorage.getItem("6amyoga_access_token") || accessToken;
+			const refresh_token =
+				sessionStorage.getItem("6amyoga_refresh_token") || refreshToken;
 
-			if (verifyData?.message === "Token verified") {
-				const [userByTokenData, userErr] =
-					await UserAPI.postGetUserByToken(access_token);
+			if (access_token && refresh_token) {
+				console.log("[INIT] Tokens available");
+				const [verifyData, verifyErr] = await AuthAPI.postVerifyTokens(
+					access_token,
+					refresh_token
+				);
 
-				if (userByTokenData) {
-					const userData = userByTokenData.user;
-					setUser(userData);
+				// console.log("[INIT] Verify Tokens", verifyData, verifyErr);
 
-					// tokens
-					setAccessToken(access_token);
-					setRefreshToken(refresh_token);
+				if (verifyData?.message === "Token verified") {
+					const [userByTokenData, userErr] =
+						await UserAPI.postGetUserByToken(access_token);
 
-					// set all roles
-					setRoles(userData?.roles);
+					if (userByTokenData) {
+						const userData = userByTokenData.user;
+						setUser(userData);
 
-					// set current role
-					let currRole = currentRole;
-					// if current role is available, dont change it
-					if (
-						currRole === null ||
-						userData?.roles === null ||
-						userData?.roles === undefined ||
-						!userData?.roles[currRole]
-					) {
-						currRole = Object.keys(userData?.roles)[0];
-						setCurrentRole(currRole);
-					}
+						// tokens
+						setAccessToken(access_token);
+						setRefreshToken(refresh_token);
 
-					// the plan of the current role
+						// set all roles
+						setRoles(userData?.roles);
 
-					if (
-						currRole !== null &&
-						userData?.roles[currRole] &&
-						userData?.roles[currRole].length > 0
-					) {
-						const currPlan = userData?.roles[currRole][0]?.plan;
-						setUserPlan(currPlan);
-					}
-
-					// set all institutes
-					if (
-						currRole !== null &&
-						userData?.roles &&
-						userData?.roles[currRole]
-					) {
-						const ins = userData?.roles[currRole]?.map(
-							(r) => r?.institute
-						);
-						setInstitutes(ins);
-
-						let currInsId = currentInstituteId;
-						// if current institute is available, dont change it
+						// set current role
+						let currRole = currentRole;
+						// if current role is available, dont change it
 						if (
-							currInsId !== null &&
-							ins.findIndex(
-								(i) => i.institute_id === currInsId
-							) !== -1
+							currRole === null ||
+							userData?.roles === null ||
+							userData?.roles === undefined ||
+							!userData?.roles[currRole]
 						) {
-						} else {
-							currInsId = ins[0]?.institute_id;
-							setCurrentInstituteId(currInsId);
+							currRole = Object.keys(userData?.roles)[0];
+							setCurrentRole(currRole);
 						}
 
-						if (currRole === ROLE_TEACHER) {
-							// get current institute, set teacher plan as institute plan
-							// get current institute id
-							if (currInsId) {
-								const [
-									teacherInstitutePlanData,
-									teacherInstitutePlanErr,
-								] =
-									await UserPlanAPI.postUserPlanTeacherInstitutePlan(
-										currInsId
-									);
+						// the plan of the current role
 
-								if (teacherInstitutePlanData) {
-									setUserPlan(res.data?.institute_plan?.plan);
-								}
+						if (
+							currRole !== null &&
+							userData?.roles[currRole] &&
+							userData?.roles[currRole].length > 0
+						) {
+							const currPlan = userData?.roles[currRole][0]?.plan;
+							setUserPlan(currPlan);
+						}
 
-								if (teacherInstitutePlanErr) {
-									toast(
-										"Error getting teacher institute plan",
-										{
-											type: "error",
-										}
-									);
-								}
+						// set all institutes
+						if (
+							currRole !== null &&
+							userData?.roles &&
+							userData?.roles[currRole]
+						) {
+							const ins = userData?.roles[currRole]?.map(
+								(r) => r?.institute
+							);
+							console.log("[INIT] Institutes", ins);
+							setInstitutes(ins);
+
+							let currInsId = currentInstituteId;
+							// if current institute is available, dont change it
+							if (
+								currInsId !== null &&
+								ins &&
+								ins.findIndex((i) => {
+									if (i) {
+										return i.institute_id === currInsId;
+									} else {
+										return false;
+									}
+								}) !== -1
+							) {
+							} else {
+								currInsId = ins[0]?.institute_id;
+								setCurrentInstituteId(currInsId);
 							}
-						} else {
+
+							if (currRole === ROLE_TEACHER) {
+								// get current institute, set teacher plan as institute plan
+								// get current institute id
+								if (currInsId) {
+									const [
+										teacherInstitutePlanData,
+										teacherInstitutePlanErr,
+									] =
+										await UserPlanAPI.postUserPlanTeacherInstitutePlan(
+											currInsId
+										);
+
+									if (teacherInstitutePlanData) {
+										setUserPlan(
+											res.data?.institute_plan?.plan
+										);
+									}
+
+									if (teacherInstitutePlanErr) {
+										toast(
+											"Error getting teacher institute plan",
+											{
+												type: "error",
+											}
+										);
+									}
+								}
+							} else {
+							}
 						}
+
+						sessionStorage.setItem(
+							"6amyoga_access_token",
+							access_token
+						);
+						sessionStorage.setItem(
+							"6amyoga_refresh_token",
+							refresh_token
+						);
 					}
-
-					sessionStorage.setItem(
-						"6amyoga_access_token",
-						access_token
-					);
-					sessionStorage.setItem(
-						"6amyoga_refresh_token",
-						refresh_token
-					);
 				}
-			}
 
-			if (verifyErr) {
-				const errMsg = err?.response?.data?.message;
-				// console.log({ verifyError: errMsg });
-				switch (errMsg) {
-					case "Access token expired":
-						const [res, err] =
-							await AuthAPI.postUserRefreshToken(refresh_token);
-						if (res) {
-							// console.log(
-							// 	"new access token ==> ",
-							// 	res.data.accessToken
-							// );
-							setAccessToken(res.data.accessToken);
-							setRefreshToken(refresh_token);
-							sessionStorage.setItem(
-								"6amyoga_access_token",
-								res.data.accessToken
-							);
-							sessionStorage.setItem(
-								"6amyoga_refresh_token",
-								refresh_token
-							);
-							queryClient.invalidateQueries(["user"]);
-						}
-						if (err) {
-							// console.log(err);
+				if (verifyErr) {
+					const errMsg = verifyErr?.response?.data?.message;
+					// console.log({ verifyError: errMsg });
+					switch (errMsg) {
+						case "Access token expired":
+							const [res, err] =
+								await AuthAPI.postUserRefreshToken(
+									refresh_token
+								);
+							if (res) {
+								// console.log(
+								// 	"new access token ==> ",
+								// 	res.accessToken
+								// );
+								setAccessToken(res.accessToken);
+								setRefreshToken(refresh_token);
+								sessionStorage.setItem(
+									"6amyoga_access_token",
+									res.accessToken
+								);
+								sessionStorage.setItem(
+									"6amyoga_refresh_token",
+									refresh_token
+								);
+								queryClient.invalidateQueries(["user"]);
+							}
+							if (err) {
+								// console.log(err);
+								setAccessToken(null);
+								setRefreshToken(null);
+								sessionStorage.removeItem(
+									"6amyoga_access_token"
+								);
+								sessionStorage.removeItem(
+									"6amyoga_refresh_token"
+								);
+							}
+							break;
+						// refresh token expired
+						// let them login again
+						case "Refresh token expired":
 							setAccessToken(null);
 							setRefreshToken(null);
 							sessionStorage.removeItem("6amyoga_access_token");
 							sessionStorage.removeItem("6amyoga_refresh_token");
-						}
-						break;
-					// refresh token expired
-					// let them login again
-					case "Refresh token expired":
-						setAccessToken(null);
-						setRefreshToken(null);
-						sessionStorage.removeItem("6amyoga_access_token");
-						sessionStorage.removeItem("6amyoga_refresh_token");
-						resetUserState();
-						break;
-					// invalid response, let it go
-					default:
-						setAccessToken(null);
-						setRefreshToken(null);
-						sessionStorage.removeItem("6amyoga_access_token");
-						sessionStorage.removeItem("6amyoga_refresh_token");
-						break;
+							resetUserState();
+							break;
+						// invalid response, let it go
+						default:
+							setAccessToken(null);
+							setRefreshToken(null);
+							sessionStorage.removeItem("6amyoga_access_token");
+							sessionStorage.removeItem("6amyoga_refresh_token");
+							break;
+					}
 				}
+			} else {
+				sessionStorage.setItem("6amyoga_access_token", "");
+				sessionStorage.setItem("6amyoga_refresh_token", "");
 			}
-		} else {
-			sessionStorage.setItem("6amyoga_access_token", "");
-			sessionStorage.setItem("6amyoga_refresh_token", "");
+		} catch (err) {
+			console.log(err);
 		}
 		return null;
 	}, [
@@ -290,12 +315,12 @@ function LoginIndex() {
 		setUserPlan,
 	]);
 
-	// refetch every 5 minute
+	// refetch every 5 minutes
 	useQuery({
 		queryKey: ["user"],
 		queryFn: init,
-		refetchOnMount: "always",
-		refetchOnWindowFocus: "always",
+		refetchOnMount: true,
+		refetchOnWindowFocus: true,
 		refetchOnReconnect: "always",
 		refetchInterval: 1000 * 60 * 5,
 	});
@@ -328,6 +353,7 @@ function Index() {
 					/>
 					<LoginIndex />
 				</GeistProvider>
+				<ReactQueryDevtools initialIsOpen={false} />
 			</QueryClientProvider>
 		</>
 	);

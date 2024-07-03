@@ -7,7 +7,7 @@ export class AuthAPI {
 				url: "/auth/verify-tokens",
 				method: "POST",
 				data: {
-					access_token: token,
+					access_token: access_token,
 					refresh_token: refresh_token,
 				},
 			});
