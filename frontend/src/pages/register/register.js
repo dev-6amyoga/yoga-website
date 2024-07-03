@@ -536,6 +536,16 @@ export default function Register({ switchForm }) {
     sendEmail,
   ]);
 
+  useEffect(() => {
+    if (regVerifyDisabled) {
+      if (role === "STUDENT") {
+        handleStudentRegistration();
+      } else {
+        handleInstituteRegistration();
+      }
+    }
+  }, [regVerifyDisabled]);
+
   const disclaimerAccepted = async () => {
     setDisclaimerModal(false);
     setDisclaimerAcceptedVar(true);

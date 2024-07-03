@@ -76,7 +76,6 @@ export default function LoginGoogle() {
                 jwtToken: jwt_token,
               },
             });
-
             if (response && response?.status === 200) {
               console.log("response is : ", response);
               if (response.data?.message === "User does not exist") {
