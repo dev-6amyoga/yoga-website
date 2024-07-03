@@ -111,10 +111,11 @@ export default function FAQ() {
               gutterBottom
               sx={{ maxWidth: { sm: "100%", md: "70%" } }}
             >
-              Our product distinguishes itself through its adaptability,
-              durability, and innovative features. We prioritize user
-              satisfaction and continually strive to exceed expectations in
-              every aspect.
+              Our product distinguishes itself through the various features we
+              offer, which couple latest technology with high-quality,
+              instructional yoga videos developed based on AYUSH Ministry
+              protocols, SVYASA University processes, and 25 years of yoga
+              teaching expertise.
             </Typography>
           </AccordionDetails>
         </Accordion>
