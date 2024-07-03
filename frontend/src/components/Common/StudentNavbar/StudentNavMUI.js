@@ -388,9 +388,8 @@ import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import MenuItem from "@mui/material/MenuItem";
 import Toolbar from "@mui/material/Toolbar";
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 
@@ -403,12 +402,9 @@ const logoStyle = {
 
 function StudentNavMUI({ mode, toggleColorMode }) {
 	const [open, setOpen] = useState(false);
-	const [activePath, setActivePath] = useState(null);
 
-	useEffect(() => {
-		toast(`activePath changed : ${activePath}`);
-	}, [activePath]);
 	const navigate = useNavigate();
+	const location = useLocation();
 	let user = useUserStore((state) => state.user);
 	const setUser = useUserStore((state) => state.setUser);
 	let userPlan = useUserStore((state) => state.userPlan);
@@ -549,9 +545,6 @@ function StudentNavMUI({ mode, toggleColorMode }) {
 	}, [disabled]);
 
 	const handleNavigate = (path) => {
-		setActivePath(path); // Set the active path
-		// toast(path.title);
-		console.log(path);
 		navigate(path);
 	};
 
@@ -591,7 +584,7 @@ function StudentNavMUI({ mode, toggleColorMode }) {
 						<Box
 							sx={{
 								flexGrow: 1,
-								display: "flex",
+								display: { md: "flex", sm: "none", xs: "none" },
 								alignItems: "center",
 								ml: "-18px",
 								px: 0,
@@ -601,17 +594,13 @@ function StudentNavMUI({ mode, toggleColorMode }) {
 								style={logoStyle}
 								alt="logo of 6AM Yoga"
 							/>
-							<div className="flex flex-row justify-between w-full">
+							<div className="flex flex-row gap-4 justify-between w-full">
 								<div className="flex">
 									{paths.map((path, index) => {
 										return (
 											<MenuItem
 												key={index}
 												onClick={() => {
-													//   toast(path.title);
-													//   setActivePath(path.title);
-													//   toast(activePath);
-													console.log(path.path);
 													return handleNavigate(
 														path.path
 													);
@@ -620,10 +609,11 @@ function StudentNavMUI({ mode, toggleColorMode }) {
 													py: "6px",
 													px: "12px",
 													backgroundColor:
-														activePath ===
-														path.title
-															? "red"
-															: "blue",
+														location.pathname ===
+														path.path
+															? "rgba(153, 189, 247, 0.3)"
+															: "",
+													borderRadius: "1rem",
 												}}
 												disabled={path.props.disabled}>
 												<Typography
@@ -685,15 +675,26 @@ function StudentNavMUI({ mode, toggleColorMode }) {
 						</Box>
 
 						{/* mobile */}
-						<Box sx={{ display: { sm: "", md: "none" } }}>
-							<Button
-								variant="text"
-								color="primary"
-								aria-label="menu"
-								onClick={() => setOpen(true)}
-								sx={{ minWidth: "30px", p: "4px" }}>
-								<MenuIcon />
-							</Button>
+						<Box
+							sx={{
+								display: { sm: "", md: "none" },
+								width: "100%",
+							}}>
+							<div className="w-full flex justify-between">
+								<img
+									src={"/logo_6am.png"}
+									style={logoStyle}
+									alt="logo of 6AM Yoga"
+								/>
+								<Button
+									variant="text"
+									color="primary"
+									aria-label="menu"
+									onClick={() => setOpen(true)}
+									sx={{ minWidth: "30px", p: "4px" }}>
+									<MenuIcon />
+								</Button>
+							</div>
 							<Drawer
 								anchor="right"
 								open={open}
@@ -710,6 +711,7 @@ function StudentNavMUI({ mode, toggleColorMode }) {
 											display: "flex",
 											flexDirection: "column",
 											alignItems: "end",
+											gap: "1rem",
 											flexGrow: 1,
 										}}>
 										{paths.map((path, index) => {
@@ -723,15 +725,12 @@ function StudentNavMUI({ mode, toggleColorMode }) {
 													}
 													sx={{
 														backgroundColor:
-															activePath ===
+															location.pathname ===
 															path.path
-																? "primary.main"
-																: "inherit",
-														color:
-															activePath ===
-															path.path
-																? "white"
-																: "inherit",
+																? "rgba(153, 189, 247, 0.3)"
+																: "",
+														borderRadius: "1rem",
+														transition: `background-color 0.3s ease-in-out`,
 													}}
 													disabled={
 														path.props.disabled
