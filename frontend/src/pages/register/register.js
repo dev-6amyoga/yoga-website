@@ -407,12 +407,11 @@ export default function Register({ switchForm }) {
               We will send an email to <b>{generalInfo?.email_id}</b>
             </p>
             <p>
-              Please click on{" "}
+              To access your account, please click on{" "}
               <Button onClick={sendEmail} disabled={regVerifyDisabled}>
                 Verify
               </Button>{" "}
               <br />
-              to be able to access your account!
             </p>
           </div>
         ) : (

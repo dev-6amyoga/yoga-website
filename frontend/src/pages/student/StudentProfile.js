@@ -91,14 +91,14 @@ function StudentProfile() {
         formData.phone_profile === "" &&
         formData.username_profile === ""
       ) {
-        toast("No changes to commit!");
+        toast("No changes to save!");
       } else if (
         formData.name_profile === userData.name &&
         formData.email_profile === userData.email &&
         formData.phone_profile === userData.phone &&
         formData.username_profile === userData.username
       ) {
-        toast("No changes to commit!");
+        toast("No changes to save!");
       } else {
         setUpdate(true);
         setUpdateData(formData);
