@@ -692,7 +692,6 @@ function StreamStackItem({
 		enableWatchHistory,
 		user,
 		video,
-		flushWatchTimeBufferE,
 		updateWatchTimeBuffer,
 		addToCommittedTs,
 		setCommittedTs,

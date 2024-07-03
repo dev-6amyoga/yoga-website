@@ -83,7 +83,7 @@ router.post("/commit", authenticateToken, async (req, res) => {
 
 	switch (status) {
 		case TRANSACTION_FAILED:
-			if (!order_id || !payment_id) {
+			if (!order_id) {
 				return res.status(HTTP_BAD_REQUEST).json({
 					message: "Missing required fields",
 				});

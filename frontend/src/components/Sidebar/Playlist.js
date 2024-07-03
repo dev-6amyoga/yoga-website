@@ -313,6 +313,7 @@ function Playlist() {
 	const handleAddToQueue = (playlist) => {
 		clearQueue();
 		if (playlist?.playlist_dash_url) {
+			console.log("Adding playlist to queue");
 			addToQueue([playlist]);
 		} else {
 			// addToQueue()

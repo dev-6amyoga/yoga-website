@@ -1,4 +1,4 @@
-import Fetch from "../utils/Fetch";
+import { Fetch } from "../utils/Fetch";
 
 export class UserPlanAPI {
 	static async postUserPlanTeacherInstitutePlan(institute_id) {

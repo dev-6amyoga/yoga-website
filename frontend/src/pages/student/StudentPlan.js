@@ -6,8 +6,6 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import {
 	USER_PLAN_ACTIVE,
-	USER_PLAN_EXPIRED_BY_DATE,
-	USER_PLAN_EXPIRED_BY_USAGE,
 	USER_PLAN_STAGED,
 } from "../../enums/user_plan_status";
 import useUserStore from "../../store/UserStore";
@@ -102,8 +100,9 @@ function StudentPlan() {
 
 	const [loading, setLoading] = useState(false);
 
-	const today = new Date();
-	const formattedDate = today?.toISOString();
+	const [formattedDate, setFormattedDate] = useState(
+		new Date().toISOString()
+	);
 
 	useEffect(() => {
 		if (showCard) {
@@ -178,6 +177,7 @@ function StudentPlan() {
 	};
 
 	const fetchUserPlans = useCallback(async () => {
+		console.log("FETCHING USER PLANS");
 		try {
 			const response = await Fetch({
 				url: "/user-plan/get-user-plan-by-id",
