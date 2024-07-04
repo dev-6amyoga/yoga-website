@@ -61,7 +61,7 @@ function DiscountCouponForm({ handleDiscountCouponFormSubmit }) {
       <Input width="100%" name="discount_coupon">
         <strong>Discount Coupon</strong>
       </Input>
-      <Button htmlType="submit" scale={0.8} width="35%">
+      <Button type="submit" scale={0.8} width="35%">
         Apply
       </Button>
     </form>
@@ -704,8 +704,7 @@ function StudentPlan() {
                 <Spacer />
                 <DiscountCouponForm
                   handleDiscountCouponFormSubmit={
-                    // handleDiscountCouponFormSubmit
-                    demoFunc
+                    handleDiscountCouponFormSubmit
                   }
                 />
                 <Spacer />
