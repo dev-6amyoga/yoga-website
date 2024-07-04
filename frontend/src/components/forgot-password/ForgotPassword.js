@@ -4,10 +4,12 @@ import getFormData from "../../utils/getFormData";
 import { TextField, Button } from "@mui/material";
 import { validatePassword } from "../../utils/formValidation";
 import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function ForgotPassword() {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setToken(() => {
@@ -61,6 +63,7 @@ export default function ForgotPassword() {
             toast("Password updated successfully", {
               type: "success",
             });
+            navigate("/auth");
           } else {
             toast("Error updating password; retry", {
               type: "error",
