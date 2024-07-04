@@ -75,6 +75,8 @@ const corsOptions = {
 		"https://my-yogateacher.6amyoga.com",
 		`${getFrontendDomain()}`,
 		"https://www.my-yogateacher.6amyoga.com",
+		"https://www.ai.6amyoga.com",
+		"https://ai.6amyoga.com",
 		"https://yoga-website-orcin.vercel.app",
 		"http://localhost:3000",
 		"http://localhost:3001",
