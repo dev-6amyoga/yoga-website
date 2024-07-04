@@ -42,9 +42,37 @@ function StudentProfile() {
   const [isEmailUpdate, setIsEmailUpdate] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [updateData, setUpdateData] = useState({});
+  const [allStudents, setAllStudents] = useState([]);
+
+  const [allUsernames, setAllUsernames] = useState([]);
+  const [allEmails, setAllEmails] = useState([]);
+  const [allPhones, setAllPhones] = useState([]);
+
   const closeUpdateHandler = (event) => {
     setUpdate(false);
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await Fetch({
+          url: "/user/get-all-students",
+          method: "GET",
+        });
+        const data = response.data;
+        const usernames = data.users.map((item) => item.username);
+        setAllUsernames(usernames);
+        const phones = data.users.map((item) => item.phone);
+        setAllPhones(phones);
+        const emails = data.users.map((item) => item.email);
+        setAllEmails(emails);
+        setAllStudents(data.users);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     Fetch({
@@ -130,10 +158,19 @@ function StudentProfile() {
           : userData.phone,
     };
 
+    if (allUsernames.includes(updateData.username_profile)) {
+      toast("Username already in use!");
+      return;
+    }
+
     if (updateData.phone_profile) {
       const [validPhone, phoneError] = validatePhone(updateData.phone_profile);
       if (!validPhone) {
         toast(phoneError.message, { type: "error" });
+        return;
+      }
+      if (allPhones.includes(updateData.phone_profile)) {
+        toast("Phone number already in use!");
         return;
       }
     }
@@ -142,6 +179,10 @@ function StudentProfile() {
       const [validEmail, emailError] = validateEmail(updateData.email_profile);
       if (!validEmail) {
         toast(emailError.message, { type: "error" });
+        return;
+      }
+      if (allEmails.includes(updateData.email_profile)) {
+        toast("Email ID already in use!");
         return;
       }
     }
@@ -335,7 +376,7 @@ function StudentProfile() {
       </Dialog>
 
       {/* Email Update Request Card */}
-      {isEmailUpdate && (
+      {/* {isEmailUpdate && (
         <Container maxWidth="sm" sx={{ mt: 4 }}>
           <Card>
             <CardContent>
@@ -349,7 +390,7 @@ function StudentProfile() {
             </CardContent>
           </Card>
         </Container>
-      )}
+      )} */}
     </StudentPageWrapper>
   );
 }
