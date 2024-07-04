@@ -4,6 +4,7 @@ import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
 import { TextField, Button } from "@mui/material";
+import { validatePassword } from "../../../utils/formValidation";
 
 export default function ChangePassword() {
   let user = useUserStore((state) => state.user);
@@ -13,29 +14,40 @@ export default function ChangePassword() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = getFormData(e);
-    // console.log(formData);
+    const new_password = formData.new_password;
+    const conf_new_password = formData.confirm_new_password;
+    if (new_password !== conf_new_password) {
+      toast("The new passwords do not match!");
+      return;
+    }
 
-    Fetch({
-      url: "/user/update-password",
-      method: "POST",
-      data: { ...formData, user_id: user?.user_id },
-    })
-      .then((res) => {
-        if (res && res.status === 200) {
-          toast("Password updated successfully", {
-            type: "success",
-          });
-        } else {
-          toast("Error updating password; retry", {
+    const [is_password_valid, pass_error] = validatePassword(new_password);
+    if (is_password_valid) {
+      Fetch({
+        url: "/user/update-password",
+        method: "POST",
+        data: { ...formData, user_id: user?.user_id },
+      })
+        .then((res) => {
+          if (res && res.status === 200) {
+            toast("Password updated successfully", {
+              type: "success",
+            });
+          } else {
+            toast("Error updating password; retry", {
+              type: "error",
+            });
+          }
+        })
+        .catch((err) => {
+          toast("Error updating password: " + err?.response?.data?.error, {
             type: "error",
           });
-        }
-      })
-      .catch((err) => {
-        toast("Error updating password: " + err?.response?.data?.error, {
-          type: "error",
         });
-      });
+    } else {
+      toast("Password is invalid");
+      return;
+    }
   };
 
   return (
@@ -45,9 +57,6 @@ export default function ChangePassword() {
         onSubmit={handleSubmit}
         style={{ width: "100%" }}
       >
-        {/* <Input.Password width="100%" required name="old_password">
-            Old Password
-          </Input.Password> */}
         <TextField
           fullWidth
           required
@@ -56,6 +65,15 @@ export default function ChangePassword() {
           type="password"
           variant="outlined"
         />
+        <br />
+        <p
+          className={
+            "text-sm border p-2 rounded-lg text-zinc-500 border-red-500"
+          }
+        >
+          Password must be minimum 8 letters and contain atleast 1 number, 1
+          alphabet, 1 special character [!@#$%^&*,?]
+        </p>
         <TextField
           fullWidth
           required
