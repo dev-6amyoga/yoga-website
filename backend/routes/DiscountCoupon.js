@@ -6,386 +6,386 @@ const router = express.Router();
 const { sequelize } = require("../init.sequelize");
 const { DiscountCoupon } = require("../models/sql/DiscountCoupon");
 const {
-	DiscountCouponApplicablePlan,
+  DiscountCouponApplicablePlan,
 } = require("../models/sql/DiscountCouponApplicablePlan");
 const { Plan } = require("../models/sql/Plan");
 const { Op } = require("sequelize");
 const {
-	HTTP_BAD_REQUEST,
-	HTTP_INTERNAL_SERVER_ERROR,
-	HTTP_OK,
+  HTTP_BAD_REQUEST,
+  HTTP_INTERNAL_SERVER_ERROR,
+  HTTP_OK,
 } = require("../utils/http_status_codes");
 
 router.post("/check-plan-mapping", async (req, res) => {
-	const { plan_id, coupon_name } = req.body;
+  const { plan_id, coupon_name } = req.body;
 
-	if (!plan_id || !coupon_name) {
-		return res
-			.status(HTTP_BAD_REQUEST)
-			.json({ message: "Missing required fields" });
-	}
+  if (!plan_id || !coupon_name) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ message: "Missing required fields" });
+  }
 
-	try {
-		const date_now = new Date();
+  try {
+    const date_now = new Date();
 
-		const discount_coupon_applicable_plan =
-			await DiscountCouponApplicablePlan.findOne({
-				include: [
-					{
-						model: DiscountCoupon,
-						where: {
-							coupon_name: coupon_name,
-							validity_from: {
-								[Op.lte]: date_now,
-							},
-							validity_to: {
-								[Op.gte]: date_now,
-							},
-						},
-					},
-					{
-						model: Plan,
-						where: {
-							plan_id: plan_id,
-						},
-					},
-				],
-			});
+    const discount_coupon_applicable_plan =
+      await DiscountCouponApplicablePlan.findOne({
+        include: [
+          {
+            model: DiscountCoupon,
+            where: {
+              coupon_name: coupon_name,
+              validity_from: {
+                [Op.lte]: date_now,
+              },
+              validity_to: {
+                [Op.gte]: date_now,
+              },
+            },
+          },
+          {
+            model: Plan,
+            where: {
+              plan_id: plan_id,
+            },
+          },
+        ],
+      });
 
-		if (!discount_coupon_applicable_plan) {
-			return res
-				.status(HTTP_BAD_REQUEST)
-				.json({ message: "Coupon is not applicable" });
-		}
+    if (!discount_coupon_applicable_plan) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "Coupon is not applicable" });
+    }
 
-		return res.status(HTTP_OK).json({
-			message: "Coupon applicable",
-			discount_coupon: discount_coupon_applicable_plan.discount_coupon,
-		});
-	} catch (error) {
-		return res
-			.status(HTTP_INTERNAL_SERVER_ERROR)
-			.json({ message: "Internal Server Error" });
-	}
+    return res.status(HTTP_OK).json({
+      message: "Coupon applicable",
+      discount_coupon: discount_coupon_applicable_plan.discount_coupon,
+    });
+  } catch (error) {
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
 });
 
 router.post("/create", async (req, res) => {
-	const {
-		coupon_name,
-		coupon_description,
-		discount_percentage,
-		validity_from,
-		validity_to,
-		plan_ids,
-	} = req.body;
+  const {
+    coupon_name,
+    coupon_description,
+    discount_percentage,
+    validity_from,
+    validity_to,
+    plan_ids,
+  } = req.body;
 
-	if (!coupon_name || !validity_from || !validity_to) {
-		return res
-			.status(HTTP_BAD_REQUEST)
-			.json({ message: "Missing required fields" });
-	}
+  if (!coupon_name || !validity_from || !validity_to) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ message: "Missing required fields" });
+  }
 
-	const t = await sequelize.transaction();
+  const t = await sequelize.transaction();
 
-	try {
-		const [discount_coupon, created] = await DiscountCoupon.findOrCreate({
-			where: { coupon_name: coupon_name },
-			defaults: {
-				coupon_name: coupon_name,
-				coupon_description: coupon_description,
-				discount_percentage: discount_percentage,
-				validity_from: new Date(validity_from),
-				validity_to: new Date(validity_to),
-			},
-			transaction: t,
-		});
+  try {
+    const [discount_coupon, created] = await DiscountCoupon.findOrCreate({
+      where: { coupon_name: coupon_name },
+      defaults: {
+        coupon_name: coupon_name,
+        coupon_description: coupon_description,
+        discount_percentage: discount_percentage,
+        validity_from: new Date(validity_from),
+        validity_to: new Date(validity_to),
+      },
+      transaction: t,
+    });
 
-		if (!created) {
-			await t.rollback();
-			return res
-				.status(HTTP_BAD_REQUEST)
-				.json({ message: "Coupon name already exists" });
-		}
+    if (!created) {
+      await t.rollback();
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "Coupon name already exists" });
+    }
 
-		if (plan_ids && plan_ids.length > 0) {
-			const discount_coupon_applicable_plans = plan_ids.map((plan_id) => {
-				return {
-					discount_coupon_id: discount_coupon.discount_coupon_id,
-					plan_id: plan_id,
-				};
-			});
+    if (plan_ids && plan_ids.length > 0) {
+      const discount_coupon_applicable_plans = plan_ids.map((plan_id) => {
+        return {
+          discount_coupon_id: discount_coupon.discount_coupon_id,
+          plan_id: plan_id,
+        };
+      });
 
-			await DiscountCouponApplicablePlan.bulkCreate(
-				discount_coupon_applicable_plans,
-				{ transaction: t }
-			);
-		}
+      await DiscountCouponApplicablePlan.bulkCreate(
+        discount_coupon_applicable_plans,
+        { transaction: t }
+      );
+    }
 
-		await t.commit();
-		return res.status(HTTP_OK).json({ message: "Coupon created" });
-	} catch (err) {
-		console.log(err);
-		await t.rollback();
-		return res
-			.status(HTTP_INTERNAL_SERVER_ERROR)
-			.json({ message: "Internal Server Error" });
-	}
+    await t.commit();
+    return res.status(HTTP_OK).json({ message: "Coupon created" });
+  } catch (err) {
+    console.log(err);
+    await t.rollback();
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
 });
 
 router.post("/add-plan-mapping", async (req, res) => {
-	const { discount_coupon_id, plan_id } = req.body;
+  const { discount_coupon_id, plan_id } = req.body;
 
-	if (!discount_coupon_id || !plan_id) {
-		return res
-			.status(HTTP_BAD_REQUEST)
-			.json({ message: "Missing required fields" });
-	}
+  if (!discount_coupon_id || !plan_id) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ message: "Missing required fields" });
+  }
 
-	const t = await sequelize.transaction();
+  const t = await sequelize.transaction();
 
-	try {
-		const [discount_coupon_applicable_plan, created] =
-			await DiscountCouponApplicablePlan.findOrCreate({
-				where: {
-					discount_coupon_id: discount_coupon_id,
-					plan_id: plan_id,
-				},
-				defaults: {
-					discount_coupon_id: discount_coupon_id,
-					plan_id: plan_id,
-				},
-				transaction: t,
-			});
+  try {
+    const [discount_coupon_applicable_plan, created] =
+      await DiscountCouponApplicablePlan.findOrCreate({
+        where: {
+          discount_coupon_id: discount_coupon_id,
+          plan_id: plan_id,
+        },
+        defaults: {
+          discount_coupon_id: discount_coupon_id,
+          plan_id: plan_id,
+        },
+        transaction: t,
+      });
 
-		// DiscountCouponApplicablePlan.bulkCreate([], {});
+    // DiscountCouponApplicablePlan.bulkCreate([], {});
 
-		if (!created) {
-			await t.rollback();
-			return res
-				.status(HTTP_BAD_REQUEST)
-				.json({ message: "Mapping already exists" });
-		}
+    if (!created) {
+      await t.rollback();
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "Mapping already exists" });
+    }
 
-		await t.commit();
-		return res.status(HTTP_OK).json({ message: "Sucessfully mapped" });
-	} catch (err) {
-		console.log(err);
-		await t.rollback();
-		return res
-			.status(HTTP_INTERNAL_SERVER_ERROR)
-			.json({ message: "Internal Server Error" });
-	}
+    await t.commit();
+    return res.status(HTTP_OK).json({ message: "Sucessfully mapped" });
+  } catch (err) {
+    console.log(err);
+    await t.rollback();
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
 });
 
 router.post("/remove-plan-mapping", async (req, res) => {
-	const { discount_coupon_id, plan_id } = req.body;
+  const { discount_coupon_id, plan_id } = req.body;
 
-	if (!discount_coupon_id || !plan_id) {
-		return res
-			.status(HTTP_BAD_REQUEST)
-			.json({ message: "Missing required fields" });
-	}
+  if (!discount_coupon_id || !plan_id) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ message: "Missing required fields" });
+  }
 
-	const t = await sequelize.transaction();
-	try {
-		const discount_coupon_applicable_plan =
-			await DiscountCouponApplicablePlan.findOne(
-				{
-					where: {
-						discount_coupon_id: discount_coupon_id,
-						plan_id: plan_id,
-					},
-				},
-				{ transaction: t }
-			);
+  const t = await sequelize.transaction();
+  try {
+    const discount_coupon_applicable_plan =
+      await DiscountCouponApplicablePlan.findOne(
+        {
+          where: {
+            discount_coupon_id: discount_coupon_id,
+            plan_id: plan_id,
+          },
+        },
+        { transaction: t }
+      );
 
-		if (!discount_coupon_applicable_plan) {
-			await t.rollback();
-			return res
-				.status(HTTP_BAD_REQUEST)
-				.json({ message: "Mapping does not exist" });
-		}
+    if (!discount_coupon_applicable_plan) {
+      await t.rollback();
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "Mapping does not exist" });
+    }
 
-		await discount_coupon_applicable_plan.destroy({ transaction: t });
+    await discount_coupon_applicable_plan.destroy({ transaction: t });
 
-		await t.commit();
-		return res.status(HTTP_OK).json({ message: "Successfully removed" });
-	} catch (error) {
-		await t.rollback();
-		return res
-			.status(HTTP_INTERNAL_SERVER_ERROR)
-			.json({ message: "Internal Server Error" });
-	}
+    await t.commit();
+    return res.status(HTTP_OK).json({ message: "Successfully removed" });
+  } catch (error) {
+    await t.rollback();
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
 });
 
 router.post("/get-all", async (req, res) => {
-	try {
-		let dcs = await DiscountCoupon.findAll();
+  try {
+    let dcs = await DiscountCoupon.findAll();
 
-		let applicable_plans = await DiscountCouponApplicablePlan.findAll({
-			include: [
-				{
-					model: Plan,
-					attributes: ["plan_id", "name", "plan_user_type"],
-				},
-			],
-		});
+    let applicable_plans = await DiscountCouponApplicablePlan.findAll({
+      include: [
+        {
+          model: Plan,
+          attributes: ["plan_id", "name", "plan_user_type"],
+        },
+      ],
+    });
 
-		let discount_coupons = dcs.map((dc) => {
-			return {
-				...dc.toJSON(),
-				discount_coupon_applicable_plans: applicable_plans.filter(
-					(ap) => ap.discount_coupon_id === dc.discount_coupon_id
-				),
-			};
-		});
+    let discount_coupons = dcs.map((dc) => {
+      return {
+        ...dc.toJSON(),
+        discount_coupon_applicable_plans: applicable_plans.filter(
+          (ap) => ap.discount_coupon_id === dc.discount_coupon_id
+        ),
+      };
+    });
 
-		return res.status(HTTP_OK).json({ discount_coupons });
-	} catch (error) {
-		console.log(error);
-		return res
-			.status(HTTP_INTERNAL_SERVER_ERROR)
-			.json({ message: "Internal Server Error" });
-	}
+    return res.status(HTTP_OK).json({ discount_coupons });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
 });
 
 router.post("/get-by-id", async (req, res) => {
-	const { discount_coupon_id } = req.body;
+  const { discount_coupon_id } = req.body;
 
-	if (!discount_coupon_id) {
-		return res
-			.status(HTTP_BAD_REQUEST)
-			.json({ message: "Missing required fields" });
-	}
+  if (!discount_coupon_id) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ message: "Missing required fields" });
+  }
 
-	try {
-		let discount_coupon = await DiscountCoupon.findOne({
-			where: {
-				discount_coupon_id: discount_coupon_id,
-			},
-		});
+  try {
+    let discount_coupon = await DiscountCoupon.findOne({
+      where: {
+        discount_coupon_id: discount_coupon_id,
+      },
+    });
 
-		if (!discount_coupon) {
-			return res
-				.status(HTTP_BAD_REQUEST)
-				.json({ message: "Coupon does not exist" });
-		}
+    if (!discount_coupon) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "Coupon does not exist" });
+    }
 
-		const discount_coupon_applicable_plans =
-			await DiscountCouponApplicablePlan.findAll({
-				where: {
-					discount_coupon_id: discount_coupon_id,
-				},
-				include: [
-					{
-						model: Plan,
-						attributes: ["plan_id", "name", "plan_user_type"],
-					},
-				],
-			});
+    const discount_coupon_applicable_plans =
+      await DiscountCouponApplicablePlan.findAll({
+        where: {
+          discount_coupon_id: discount_coupon_id,
+        },
+        include: [
+          {
+            model: Plan,
+            attributes: ["plan_id", "name", "plan_user_type"],
+          },
+        ],
+      });
 
-		let dc = {
-			...discount_coupon?.toJSON(),
-			discount_coupon_applicable_plans:
-				discount_coupon_applicable_plans?.map((p) => p.toJSON()) ?? [],
-		};
+    let dc = {
+      ...discount_coupon?.toJSON(),
+      discount_coupon_applicable_plans:
+        discount_coupon_applicable_plans?.map((p) => p.toJSON()) ?? [],
+    };
 
-		// console.log(discount_coupon.discount_coupon_applicable_plans);
+    // console.log(discount_coupon.discount_coupon_applicable_plans);
 
-		return res.status(HTTP_OK).json({ discount_coupon: dc });
-	} catch (error) {
-		return res
-			.status(HTTP_INTERNAL_SERVER_ERROR)
-			.json({ message: "Internal Server Error" });
-	}
+    return res.status(HTTP_OK).json({ discount_coupon: dc });
+  } catch (error) {
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
 });
 
 router.post("/update", async (req, res) => {
-	const {
-		discount_coupon_id,
-		coupon_name,
-		coupon_description,
-		discount_percentage,
-		validity_from,
-		validity_to,
-	} = req.body;
+  const {
+    discount_coupon_id,
+    coupon_name,
+    coupon_description,
+    discount_percentage,
+    validity_from,
+    validity_to,
+  } = req.body;
 
-	if (
-		!discount_coupon_id ||
-		!coupon_name ||
-		!validity_from ||
-		!validity_to ||
-		!discount_percentage
-	) {
-		return res
-			.status(HTTP_BAD_REQUEST)
-			.json({ message: "Missing required fields" });
-	}
+  if (
+    !discount_coupon_id ||
+    !coupon_name ||
+    !validity_from ||
+    !validity_to ||
+    !discount_percentage
+  ) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ message: "Missing required fields" });
+  }
 
-	try {
-		const discount_coupon = await DiscountCoupon.findOne({
-			where: {
-				discount_coupon_id: discount_coupon_id,
-			},
-		});
+  try {
+    const discount_coupon = await DiscountCoupon.findOne({
+      where: {
+        discount_coupon_id: discount_coupon_id,
+      },
+    });
 
-		if (!discount_coupon) {
-			return res
-				.status(HTTP_BAD_REQUEST)
-				.json({ message: "Coupon does not exist" });
-		}
+    if (!discount_coupon) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "Coupon does not exist" });
+    }
 
-		discount_coupon.coupon_name = coupon_name;
-		discount_coupon.coupon_description = coupon_description;
-		discount_coupon.validity_from = validity_from;
-		discount_coupon.validity_to = validity_to;
-		discount_coupon.discount_percentage = discount_percentage;
+    discount_coupon.coupon_name = coupon_name;
+    discount_coupon.coupon_description = coupon_description;
+    discount_coupon.validity_from = validity_from;
+    discount_coupon.validity_to = validity_to;
+    discount_coupon.discount_percentage = discount_percentage;
 
-		await discount_coupon.save();
+    await discount_coupon.save();
 
-		return res.status(HTTP_OK).json({ message: "Coupon updated" });
-	} catch (error) {
-		return res
-			.status(HTTP_INTERNAL_SERVER_ERROR)
-			.json({ message: "Internal Server Error" });
-	}
+    return res.status(HTTP_OK).json({ message: "Coupon updated" });
+  } catch (error) {
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
 });
 
 router.delete("/delete", async (req, res) => {
-	const { discount_coupon_id } = req.body;
+  const { discount_coupon_id } = req.body;
 
-	if (!discount_coupon_id) {
-		return res
-			.status(HTTP_BAD_REQUEST)
-			.json({ message: "Missing required fields" });
-	}
+  if (!discount_coupon_id) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ message: "Missing required fields" });
+  }
 
-	const t = await sequelize.transaction();
-	try {
-		const discount_coupon = await DiscountCoupon.findOne({
-			where: {
-				discount_coupon_id: discount_coupon_id,
-			},
-			transaction: t,
-		});
+  const t = await sequelize.transaction();
+  try {
+    const discount_coupon = await DiscountCoupon.findOne({
+      where: {
+        discount_coupon_id: discount_coupon_id,
+      },
+      transaction: t,
+    });
 
-		if (!discount_coupon) {
-			await t.rollback();
-			return res
-				.status(HTTP_BAD_REQUEST)
-				.json({ message: "Coupon does not exist" });
-		}
+    if (!discount_coupon) {
+      await t.rollback();
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: "Coupon does not exist" });
+    }
 
-		await discount_coupon.destroy({ transaction: t });
+    await discount_coupon.destroy({ transaction: t });
 
-		await t.commit();
-		return res.status(HTTP_OK).json({ message: "Coupon deleted" });
-	} catch (error) {
-		await t.rollback();
-		return res
-			.status(HTTP_INTERNAL_SERVER_ERROR)
-			.json({ message: "Internal Server Error" });
-	}
+    await t.commit();
+    return res.status(HTTP_OK).json({ message: "Coupon deleted" });
+  } catch (error) {
+    await t.rollback();
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal Server Error" });
+  }
 });
 
 module.exports = router;
