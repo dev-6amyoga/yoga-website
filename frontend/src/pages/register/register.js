@@ -223,7 +223,6 @@ export default function Register({ switchForm }) {
   ]);
 
   const handleStudentRegistration = async () => {
-    toast("in handle student regg!");
     Fetch({
       url: "/invite/get-email-verification-by-token",
       method: "POST",
