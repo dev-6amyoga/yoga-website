@@ -1,0 +1,4 @@
+module.exports = {
+	OTP_TARGET_EMAIL: "OTP_TARGET_EMAIL",
+	OTP_TARGET_PHONE: "OTP_TARGET_PHONE",
+};
