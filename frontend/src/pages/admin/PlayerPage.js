@@ -8,6 +8,7 @@ import {
   drawKeypoints,
   drawSkeleton,
 } from "../../components/webcam_component/utilities";
+import ShakaVideo from "../testing/ShakaVideo";
 function PlayerPage() {
   const [position, setPosition] = useState(0);
 
@@ -24,7 +25,7 @@ function PlayerPage() {
       <br />
       <br />
       <div className="mx-auto max-w-7xl">
-        <WebcamComponent
+        {/* <WebcamComponent
           width={640}
           height={480}
           drawKeypoints={drawKeypoints}
@@ -36,6 +37,7 @@ function PlayerPage() {
           <hr />
           <Playlist />
         </div> */}
+        <ShakaVideo />
       </div>
     </AdminPageWrapper>
   );
