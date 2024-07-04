@@ -222,22 +222,23 @@ export default function Register({ switchForm }) {
     clientID,
   ]);
 
-  const handleStudentRegistration = async () => {
-    Fetch({
-      url: "/invite/get-email-verification-by-token",
-      method: "POST",
-      data: { token: token },
-    }).then(async (res) => {
-      if (res.status === 200) {
-        const invite = res.data.invite;
-        if (invite?.is_verified) {
-          setDisclaimerModal(true);
-        } else {
-          toast("Email has not yet been verified!");
-        }
-      }
-    });
-  };
+  // const handleStudentRegistration = async () => {
+  //   toast("in handle student regg!");
+  //   Fetch({
+  //     url: "/invite/get-email-verification-by-token",
+  //     method: "POST",
+  //     data: { token: token },
+  //   }).then(async (res) => {
+  //     if (res.status === 200) {
+  //       const invite = res.data.invite;
+  //       if (invite?.is_verified) {
+  //         setDisclaimerModal(true);
+  //       } else {
+  //         toast("Email has not yet been verified!");
+  //       }
+  //     }
+  //   });
+  // };
 
   const handleInstituteRegistration = async () => {
     Fetch({
@@ -539,6 +540,7 @@ export default function Register({ switchForm }) {
   useEffect(() => {
     if (regVerifyDisabled) {
       if (role === "STUDENT") {
+        // call this continuously for 3 minutes till a status 200 is obtained
         handleStudentRegistration();
       } else {
         handleInstituteRegistration();
