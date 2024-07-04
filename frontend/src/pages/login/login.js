@@ -118,15 +118,11 @@ export default function Login({ switchForm }) {
         setCurrentRole(currRole);
       } else {
         const errorData = response.data;
-        // removeCookie("6amyoga_access_token");
-        // removeCookie("6amyoga_refresh_token");
         sessionStorage.removeItem("6amyoga_access_token");
         sessionStorage.removeItem("6amyoga_refresh_token");
         toast(errorData?.error, { type: "error" });
       }
     } catch (error) {
-      // removeCookie("6amyoga_access_token");
-      // removeCookie("6amyoga_refresh_token");
       sessionStorage.removeItem("6amyoga_access_token");
       sessionStorage.removeItem("6amyoga_refresh_token");
       toast("Error logging in, try again", { type: "error" });
@@ -146,6 +142,15 @@ export default function Login({ switchForm }) {
 
   const emailVerifyFunc = async (e) => {
     toast("verifying email!");
+    const formData = getFormData(e);
+    console.log(formData.email_verify, "FORM DATAA");
+    const response = await Fetch({
+      url: "/user/forgot-password-email",
+      method: "POST",
+      data: {
+        email_id: formData.email_verify,
+      },
+    });
   };
 
   useEffect(() => {
