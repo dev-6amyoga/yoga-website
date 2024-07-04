@@ -1,15 +1,45 @@
-import { useEffect } from "react";
 import { toast } from "react-toastify";
-import useUserStore from "../../../store/UserStore";
-import { Fetch } from "../../../utils/Fetch";
-import getFormData from "../../../utils/getFormData";
+import { Fetch } from "../../utils/Fetch";
+import getFormData from "../../utils/getFormData";
 import { TextField, Button } from "@mui/material";
-import { validatePassword } from "../../../utils/formValidation";
+import { validatePassword } from "../../utils/formValidation";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-export default function ChangePassword() {
-  let user = useUserStore((state) => state.user);
+export default function ForgotPassword() {
+  const [token, setToken] = useState(null);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
-  useEffect(() => {}, [user]);
+  useEffect(() => {
+    setToken(() => {
+      if (location.search.includes("?token=")) {
+        console.log(
+          "IN EMAIL VERIFICATION WITH : ",
+          location.search.split("?token=")[1]
+        );
+        return location.search.split("?token=")[1];
+      } else {
+        return null;
+      }
+    });
+  }, [location]);
+
+  useEffect(() => {
+    if (token) {
+      Fetch({
+        url: "/user/forgot-password-token",
+        method: "POST",
+        data: {
+          token: token,
+        },
+      }).then((res) => {
+        if (res.status === 200) {
+          setUser(res.data.user);
+        }
+      });
+    }
+  }, [token]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -20,11 +50,11 @@ export default function ChangePassword() {
       toast("The new passwords do not match!");
       return;
     }
-
     const [is_password_valid, pass_error] = validatePassword(new_password);
     if (is_password_valid) {
+      toast("Updating Password!");
       Fetch({
-        url: "/user/update-password",
+        url: "/user/forgot-password-update",
         method: "POST",
         data: { ...formData, user_id: user?.user_id },
       })
@@ -33,6 +63,7 @@ export default function ChangePassword() {
             toast("Password updated successfully", {
               type: "success",
             });
+            navigate("/auth");
           } else {
             toast("Error updating password; retry", {
               type: "error",
@@ -57,15 +88,6 @@ export default function ChangePassword() {
         onSubmit={handleSubmit}
         style={{ width: "100%" }}
       >
-        <TextField
-          fullWidth
-          required
-          name="old_password"
-          label="Old Password"
-          type="password"
-          variant="outlined"
-        />
-        <br />
         <p
           className={
             "text-sm border p-2 rounded-lg text-zinc-500 border-red-500"
