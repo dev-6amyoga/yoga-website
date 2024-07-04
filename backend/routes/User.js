@@ -552,6 +552,54 @@ router.post("/forgot-password-token", async (req, res) => {
   return res.status(HTTP_OK).json({ user: user });
 });
 
+router.post("/forgot-password-update", async (req, res) => {
+  const { user_id, new_password, confirm_new_password } = req.body;
+  if (!user_id || !new_password || !confirm_new_password) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Missing required fields" });
+  }
+
+  if (new_password !== confirm_new_password) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: "Passwords do not match" });
+  }
+
+  try {
+    const user = await User.findByPk(user_id);
+
+    if (!user) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ error: "User does not exist" });
+    }
+
+    // hash password
+    const hashedPassword = await bcrypyt.hash(new_password, 10);
+
+    const n = await User.update(
+      { password: hashedPassword },
+      {
+        where: { user_id: user_id },
+      }
+    );
+
+    if (n.length > 0 && n[0] !== 1) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ error: "User does not exist" });
+    }
+
+    return res.status(HTTP_OK).json({ message: "updated successfully" });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: "Failed to update user" });
+  }
+});
+
 router.delete("/delete-by-id", async (req, res) => {
   const { user_id } = req.body;
 

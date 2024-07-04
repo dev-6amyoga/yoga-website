@@ -51,27 +51,27 @@ export default function ForgotPassword() {
     const [is_password_valid, pass_error] = validatePassword(new_password);
     if (is_password_valid) {
       toast("Updating Password!");
-      //   Fetch({
-      //     url: "/user/update-password",
-      //     method: "POST",
-      //     data: { ...formData, user_id: user?.user_id },
-      //   })
-      //     .then((res) => {
-      //       if (res && res.status === 200) {
-      //         toast("Password updated successfully", {
-      //           type: "success",
-      //         });
-      //       } else {
-      //         toast("Error updating password; retry", {
-      //           type: "error",
-      //         });
-      //       }
-      //     })
-      //     .catch((err) => {
-      //       toast("Error updating password: " + err?.response?.data?.error, {
-      //         type: "error",
-      //       });
-      //     });
+      Fetch({
+        url: "/user/forgot-password-update",
+        method: "POST",
+        data: { ...formData, user_id: user?.user_id },
+      })
+        .then((res) => {
+          if (res && res.status === 200) {
+            toast("Password updated successfully", {
+              type: "success",
+            });
+          } else {
+            toast("Error updating password; retry", {
+              type: "error",
+            });
+          }
+        })
+        .catch((err) => {
+          toast("Error updating password: " + err?.response?.data?.error, {
+            type: "error",
+          });
+        });
     } else {
       toast("Password is invalid");
       return;
