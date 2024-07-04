@@ -3,7 +3,11 @@ import { Button, TextField } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { UserAPI } from "../../../api/user.api";
-import { validateEmail, validatePassword } from "../../../utils/formValidation";
+import {
+	validateEmail,
+	validatePassword,
+	validatePhone,
+} from "../../../utils/formValidation";
 import getFormData from "../../../utils/getFormData";
 
 export default function GeneralInformationForm({
@@ -104,10 +108,10 @@ export default function GeneralInformationForm({
 	}, []);
 
 	useEffect(() => {
-		if (usernameError || passwordError || emailError) {
+		if (usernameError || passwordError || emailError || phoneError) {
 			setBlockStep(true);
 		}
-	}, [usernameError, passwordError, emailError, setBlockStep]);
+	}, [usernameError, passwordError, emailError, phoneError, setBlockStep]);
 
 	// check username
 	useEffect(() => {
@@ -238,6 +242,14 @@ export default function GeneralInformationForm({
 					return;
 				}
 
+				const [is_phone_valid, phone_error] = validatePhone(phone);
+
+				if (!is_phone_valid || phone_error) {
+					setPhoneError(phone_error);
+					setLoading(false);
+					return;
+				}
+
 				setPhoneError(null);
 			}
 			setLoading(false);
@@ -282,7 +294,7 @@ export default function GeneralInformationForm({
 			<TextField
 				width="100%"
 				name="phone_no"
-				placeholder="9876543210"
+				placeholder="XXXXXXXXXX"
 				defaultValue={generalInfo?.phone_no}
 				onChange={(e) => {
 					setPhone(e.target.value);
