@@ -47,7 +47,7 @@ export default function Highlights() {
   };
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const [validPhone, phoneError] = validatePhone(formData.query_phone);
+    const [validPhone, phoneError] = await validatePhone(formData.query_phone);
     if (!validPhone) {
       toast(phoneError.message, { type: "error" });
       return;
@@ -61,7 +61,6 @@ export default function Highlights() {
       return;
     }
     toast("Sending Query!");
-    console.log(formData);
     try {
       const response = await Fetch({
         url: "/query/register",
@@ -70,6 +69,12 @@ export default function Highlights() {
       });
       if (response?.status === 200) {
         toast("Query submitted!");
+        setFormData({
+          query_name: "",
+          query_email: "",
+          query_phone: "",
+          query_text: "",
+        });
       } else {
         toast(
           "Could not submit query. An error occured! Kindly contact us directly."
