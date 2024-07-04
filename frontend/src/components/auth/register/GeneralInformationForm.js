@@ -228,6 +228,15 @@ export default function GeneralInformationForm({
 			console.log("Checking phone number");
 			setLoading(true);
 			if (phone) {
+				const [is_phone_valid, phone_error] =
+					await validatePhone(phone);
+
+				if (!is_phone_valid || phone_error) {
+					setPhoneError(phone_error.message);
+					setLoading(false);
+					return;
+				}
+
 				const [check_phone, error] =
 					await UserAPI.postCheckPhoneNumber(phone);
 
@@ -238,14 +247,6 @@ export default function GeneralInformationForm({
 
 				if (check_phone?.exists) {
 					setPhoneError("Phone number exists");
-					setLoading(false);
-					return;
-				}
-
-				const [is_phone_valid, phone_error] = validatePhone(phone);
-
-				if (!is_phone_valid || phone_error) {
-					setPhoneError(phone_error);
 					setLoading(false);
 					return;
 				}
