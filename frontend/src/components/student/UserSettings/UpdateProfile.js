@@ -242,20 +242,7 @@ export default function UpdateProfile() {
             >
               Save Changes
             </Button>
-            <Button
-              // onClick={() => {
-              // 	setIsEditing(false);
-              // 	setFormData({
-              // 		name_profile: "",
-              // 		username_profile: "",
-              // 		email_profile: "",
-              // 		phone_profile: "",
-              // 	});
-              // }}
-              variant="outlined"
-              type="reset"
-              startIcon={<CancelIcon />}
-            >
+            <Button variant="outlined" type="reset" startIcon={<CancelIcon />}>
               Cancel
             </Button>
           </>

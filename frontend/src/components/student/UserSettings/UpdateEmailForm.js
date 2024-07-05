@@ -132,13 +132,19 @@ export function UpdateEmailForm() {
         setIsEmailUpdate(false);
       });
   };
+
   const closeUpdateHandler = (event) => {
     setUpdate(false);
   };
 
+  const handleReset = () => {
+    setIsEditing(false);
+    setEmailError(null);
+  };
+
   return (
     <div>
-      <form onSubmit={handleUpdateEmail}>
+      <form onSubmit={handleUpdateEmail} onReset={handleReset}>
         <TextField
           fullWidth
           name="email_profile"
@@ -194,7 +200,6 @@ export function UpdateEmailForm() {
         </Box>
       </form>
 
-      {/* Update Confirmation Dialog */}
       <Dialog open={update} onClose={closeUpdateHandler}>
         <DialogTitle>Update Profile</DialogTitle>
         <DialogContent>
