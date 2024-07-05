@@ -1,7 +1,7 @@
 import { Tabs } from "@geist-ui/core";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
 import ChangePassword from "../../components/student/UserSettings/ChangePassword";
-import GeneralSettings from "../../components/student/UserSettings/GeneralSettings";
+import GeneralSettings from "../../components/student/UserSettings/UpdateContactDetails";
 import { ROLE_STUDENT } from "../../enums/roles";
 import { withAuth } from "../../utils/withAuth";
 

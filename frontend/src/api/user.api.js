@@ -21,6 +21,27 @@ export class UserAPI {
 		}
 	}
 
+	static async postGetUserByID(user_id) {
+		try {
+			const response = await Fetch({
+				url: "/user/get-by-id",
+				method: "POST",
+				token: true,
+				data: {
+					user_id: user_id,
+				},
+			});
+
+			if (response.status === 200) {
+				return [response.data, null];
+			} else {
+				return [null, response.data];
+			}
+		} catch (err) {
+			return [null, err];
+		}
+	}
+
 	// check if phone number exists in the database
 	static async postCheckPhoneNumber(phone) {
 		try {
