@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
 	ROLE_INSTITUTE_ADMIN,
@@ -29,11 +30,16 @@ export const withAuth = (Component, ...roles) => {
 			state.user,
 			state.currentRole,
 		]);
+
+		const queryClient = useQueryClient();
+
 		const navigate = useNavigate();
 		const location = useLocation();
 		const [show, setShow] = useState(false);
+		const finishedLoading = useRef(false);
 
 		useEffect(() => {
+			// console.log("withAuth : userChanged");
 			// if user is there, check if role is valid
 			if (user) {
 				// console.log(user, "IN WITH AUTH");
@@ -52,6 +58,12 @@ export const withAuth = (Component, ...roles) => {
 				}
 				setShow(true);
 			} else {
+				if (queryClient.isFetching({ queryKey: ["user"] })) {
+					// alert("fetching");
+					console.log("fetching");
+					return;
+				}
+
 				setShow(false);
 				if (location && location.pathname !== "/auth") {
 					navigate("/auth?login=true", {
