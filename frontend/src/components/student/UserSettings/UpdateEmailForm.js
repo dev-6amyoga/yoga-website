@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { UserAPI } from "../../../api/user.api";
 import useUserStore from "../../../store/UserStore";
 import { toast } from "react-toastify";
@@ -106,7 +106,6 @@ export function UpdateEmailForm() {
     const formData = getFormData(e);
     console.log(formData.email_profile);
     console.log(userData);
-    toast("in email save");
     Fetch({
       url: "/update-request/register",
       method: "POST",
@@ -163,11 +162,10 @@ export function UpdateEmailForm() {
             <>
               <Button
                 type="submit"
-                // onClick={handleUpdateEmail}
                 variant="contained"
                 color="primary"
                 startIcon={<SaveIcon />}
-                sx={{ mr: 2 }} // Add right margin to the "Save" button
+                sx={{ mr: 2 }}
                 disabled={emailError !== null}
               >
                 Save Changes
@@ -184,7 +182,6 @@ export function UpdateEmailForm() {
             <Button
               onClick={(e) => {
                 e.preventDefault();
-                toast("setting true");
                 setIsEditing(true);
               }}
               type="button"

@@ -34,7 +34,6 @@ const { GetUserInfo, GetUser } = require("../services/User.service");
 const { hasPermission } = require("../utils/hasPermission");
 
 router.post("/pose-detection", async (req, res) => {
-  console.log("in pose detect");
   const { image } = req.body;
   try {
     const vision = await FilesetResolver.forVisionTasks(
@@ -476,7 +475,6 @@ router.post("/update-profile", async (req, res) => {
 router.post("/update-password", async (req, res) => {
   const { user_id, old_password, new_password, confirm_new_password } =
     req.body;
-  console.log(user_id, old_password, new_password);
   if (!user_id || !old_password || !new_password || !confirm_new_password) {
     return res
       .status(HTTP_BAD_REQUEST)
@@ -538,8 +536,6 @@ const getFrontendDomain = require("../utils/getFrontendDomain");
 router.post("/forgot-password-email", async (req, res) => {
   const { email_id } = req.body;
   const token = tokenUtils.enc_token(email_id);
-  console.log("TOKEN : ", token);
-  console.log(email_id, "for forgot password");
   mailTransporter.sendMail(
     {
       from: "dev.6amyoga@gmail.com",
@@ -565,7 +561,6 @@ router.post("/forgot-password-email", async (req, res) => {
 router.post("/forgot-password-token", async (req, res) => {
   const { token } = req.body;
   const email = tokenUtils.dec_token(token);
-  console.log(email, "for forgot password");
   const t = await sequelize.transaction();
 
   if (!email) {
