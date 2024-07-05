@@ -14,6 +14,7 @@ import calculateTotalPrice from "../../utils/calculateTotalPrice";
 import getFormData from "../../utils/getFormData";
 import RenderRazorpay from "./RenderRazorpay";
 import Pricing from "./components/Pricing";
+import { v5 as uuidV5 } from "uuid";
 
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -315,10 +316,46 @@ function StudentPlan() {
   };
 
   useEffect(() => {
+    const fetchData = async () => {
+      const order_id = `ord_${toBeRegistered.user_id}_${toBeRegistered.validity_from}`;
+
+      FetchRetry({
+        url: "/payment/commit",
+        method: "POST",
+        token: true,
+        data: {
+          user_id: toBeRegistered.user_id,
+          status: "successful",
+          payment_for: "user_plan",
+          payment_method: "manual",
+          amount: toBeRegistered.amount,
+          signature: "n/a",
+          order_id: order_id, //may be unique, check again
+          payment_id: "n/a",
+          currency_id: 1,
+        },
+        n: 10,
+        retryDelayMs: 2000,
+        onRetry: (err) => {
+          console.log(err);
+        },
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            toast("payment commited");
+            registerUserPlan(order_id);
+          }
+        })
+        .catch((err) => {
+          toast(
+            "Something went wrong, try again. Any money debited will be refunded in 5-7 business days.",
+            { type: "error" }
+          );
+        });
+    };
     if (Object.keys(toBeRegistered).length !== 0) {
-      console.log(toBeRegistered);
       if (toBeRegistered.amount === 0) {
-        registerUserPlan("free");
+        fetchData();
       }
     }
   }, [toBeRegistered]);
@@ -387,17 +424,9 @@ function StudentPlan() {
     }
 
     if (userPlanData.amount === 0) {
-      console.log(userPlanData);
       setToBeRegistered(userPlanData);
-
-      // setTimeout(() => {
-      //   console.log(userPlanData);
-      //   console.log(toBeRegistered);
-      //   registerUserPlan("free");
-      // }, 5000);
     } else {
       try {
-        console.log("BUYING : ", userPlanData);
         const response = await Fetch({
           url: "/payment/order",
           method: "POST",
