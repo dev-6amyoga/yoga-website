@@ -131,6 +131,7 @@ export default function Login({ switchForm }) {
 
   useEffect(() => {
     if (user && currentRole) {
+      console.log("navigating to dashboard");
       navigateToDashboard(currentRole, userPlan, navigate);
     }
   }, [user, currentRole, navigate, userPlan]);
@@ -155,6 +156,7 @@ export default function Login({ switchForm }) {
 
   useEffect(() => {
     if (user?.user_id) {
+      console.log("navigating based on id");
       if (type === "student") {
         navigate("/student/free-videos");
       } else if (type === "root") {

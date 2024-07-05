@@ -231,6 +231,7 @@ router.post("/get-update-request-by-token", async (req, res) => {
         message: "Invalid token",
       });
     }
+    console.log(invite);
     return res.status(HTTP_OK).json({
       request: {
         ...invite.toJSON(),
