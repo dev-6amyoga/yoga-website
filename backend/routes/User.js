@@ -507,11 +507,9 @@ router.post("/update-password", async (req, res) => {
     }
 
     if (old_password === new_password) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({
-          error: "New password cannot be the same as previous password!",
-        });
+      return res.status(HTTP_BAD_REQUEST).json({
+        error: "New password cannot be the same as previous password!",
+      });
     }
     // hash password
     const hashedPassword = await bcrypyt.hash(new_password, 10);
@@ -609,6 +607,13 @@ router.post("/forgot-password-update", async (req, res) => {
         .json({ error: "User does not exist" });
     }
 
+    const samePassword = await bcrypyt.compare(new_password, user.password);
+
+    if (samePassword) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ error: "New password cannot be previously used!" });
+    }
     // hash password
     const hashedPassword = await bcrypyt.hash(new_password, 10);
 
