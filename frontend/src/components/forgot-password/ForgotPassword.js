@@ -35,6 +35,7 @@ export default function ForgotPassword() {
         },
       }).then((res) => {
         if (res.status === 200) {
+          console.log(res.data.user);
           setUser(res.data.user);
         }
       });
