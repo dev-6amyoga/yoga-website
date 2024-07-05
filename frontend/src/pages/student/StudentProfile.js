@@ -8,7 +8,7 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
 import ChangePassword from "../../components/student/UserSettings/ChangePassword";
 import UpdateContactDetails from "../../components/student/UserSettings/UpdateContactDetails";
@@ -23,6 +23,10 @@ function StudentProfile() {
   const handleTabChange = (event, newTabIndex) => {
     setTabIndex(newTabIndex);
   };
+
+  useEffect(() => {
+    setTabIndex(0);
+  }, []);
 
   return (
     <StudentPageWrapper>
