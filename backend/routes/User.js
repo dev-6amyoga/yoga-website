@@ -586,6 +586,7 @@ router.post("/forgot-password-token", async (req, res) => {
 
 router.post("/forgot-password-update", async (req, res) => {
   const { user_id, new_password, confirm_new_password } = req.body;
+  console.log(user_id, new_password, confirm_new_password);
   if (!user_id || !new_password || !confirm_new_password) {
     return res
       .status(HTTP_BAD_REQUEST)
@@ -601,6 +602,7 @@ router.post("/forgot-password-update", async (req, res) => {
   try {
     const user = await User.findByPk(user_id);
 
+    console.log(user);
     if (!user) {
       return res
         .status(HTTP_BAD_REQUEST)

@@ -273,7 +273,6 @@ function StudentPlan() {
       setAllPlans(filteredPlans);
     } catch (error) {
       toast("Error fetching plans", { type: "error" });
-      // console.log(error);
     }
   }, []);
 
@@ -282,12 +281,9 @@ function StudentPlan() {
       const response = await Fetch({
         url: "/currency/get-all",
       });
-
       setAllCurrencies(response?.data?.currencies);
-      // console.log("Fetching currencies");
     } catch (error) {
       toast("Error fetching plans", { type: "error" });
-      // console.log(error);
     }
   }, []);
 
@@ -295,12 +291,6 @@ function StudentPlan() {
     if (!discount_coupon) {
       return new Error("Invalid discount coupon");
     }
-
-    // if (discountCoupon && discountCoupon.coupon_name === discount_coupon) {
-    // 	toast("Coupon already applied", { type: "error" });
-    // 	return null;
-    // }
-    // return new Error("Invalid discount coupon");
     try {
       const res = await Fetch({
         url: "/discount-coupon/check-plan-mapping",
@@ -324,24 +314,29 @@ function StudentPlan() {
     }
   };
 
+  useEffect(() => {
+    if (Object.keys(toBeRegistered).length !== 0) {
+      console.log(toBeRegistered);
+      if (toBeRegistered.amount === 0) {
+        registerUserPlan("free");
+      }
+    }
+  }, [toBeRegistered]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!user) {
       toast("Please login to continue", { type: "error" });
       return;
     }
-
     if (!cardData) {
       toast("Please select a plan to continue", { type: "error" });
       return;
     }
-
     if (!selectedCurrency || !selectedCurrencyId) {
       toast("Please select a currency to continue", { type: "error" });
       return;
     }
-
     let userPlanData = {
       cancellation_date: null,
       auto_renewal_enabled: false,
@@ -384,40 +379,48 @@ function StudentPlan() {
       setShowCard(false);
       setToBeRegistered(userPlanData);
     } else {
-      // TODO : referral code
       userPlanData.purchase_date = formattedDate;
       userPlanData.validity_from = formattedDate;
       userPlanData.validity_to = calculateEndDate(cardData.plan_validity_days);
       userPlanData.current_status = USER_PLAN_ACTIVE;
-
       setToBeRegistered(userPlanData);
     }
 
-    try {
-      // console.log("BUYING : ", userPlanData);
-      const response = await Fetch({
-        url: "/payment/order",
-        method: "POST",
-        data: userPlanData,
-        token: true,
-      });
-      if (response?.status === 200) {
-        const razorpayOrder = response.data?.order;
-        if (razorpayOrder && razorpayOrder?.id) {
-          setOrderDetails({
-            orderId: razorpayOrder?.id,
-            currency: razorpayOrder?.currency,
-            amount: razorpayOrder?.amount,
-          });
-          setDisplayRazorpay(true);
-          setLoading(true);
+    if (userPlanData.amount === 0) {
+      console.log(userPlanData);
+      setToBeRegistered(userPlanData);
+
+      // setTimeout(() => {
+      //   console.log(userPlanData);
+      //   console.log(toBeRegistered);
+      //   registerUserPlan("free");
+      // }, 5000);
+    } else {
+      try {
+        console.log("BUYING : ", userPlanData);
+        const response = await Fetch({
+          url: "/payment/order",
+          method: "POST",
+          data: userPlanData,
+          token: true,
+        });
+        if (response?.status === 200) {
+          const razorpayOrder = response.data?.order;
+          if (razorpayOrder && razorpayOrder?.id) {
+            setOrderDetails({
+              orderId: razorpayOrder?.id,
+              currency: razorpayOrder?.currency,
+              amount: razorpayOrder?.amount,
+            });
+            setDisplayRazorpay(true);
+            setLoading(true);
+          }
+        } else {
+          toast(response.data?.message);
         }
-      } else {
-        toast(response.data?.message);
+      } catch (error) {
+        toast("Error setting up order, try again", { type: "error" });
       }
-    } catch (error) {
-      // console.log(error);
-      toast("Error setting up order, try again", { type: "error" });
     }
   };
 
@@ -437,7 +440,6 @@ function StudentPlan() {
     finalUserPlan.transaction_order_id = order_id;
     finalUserPlan.user_type = "STUDENT";
     finalUserPlan.institute_id = null;
-
     FetchRetry({
       url: "/user-plan/register",
       method: "POST",

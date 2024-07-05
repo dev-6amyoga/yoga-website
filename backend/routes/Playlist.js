@@ -207,6 +207,7 @@ router.post("/playlists/createManifest/:playlistId", async (req, res) => {
         process.env.CLOUDFLARE_R2_PUBLIC_URL
       }/${playlist._id.toString()}.mpd`;
 
+      console.log(totalDuration);
       if (totalDuration) {
         playlist.duration = totalDuration;
       }
