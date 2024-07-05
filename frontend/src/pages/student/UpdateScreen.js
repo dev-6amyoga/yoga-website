@@ -14,7 +14,6 @@ export default function UpdateScreen() {
   useEffect(() => {
     setToken(() => {
       if (location.search.includes("?token=")) {
-        toast(location.search.split("?token=")[1]);
         return location.search.split("?token=")[1];
       } else {
         return null;
