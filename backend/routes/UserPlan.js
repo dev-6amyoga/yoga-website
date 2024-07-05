@@ -270,14 +270,34 @@ router.post("/register", authenticateToken, async (req, res) => {
       .status(HTTP_BAD_REQUEST)
       .json({ error: "Missing required fields" });
 
-  if (current_status === USER_PLAN_ACTIVE && !validity_from && !validity_to) {
+  if (
+    current_status === USER_PLAN_ACTIVE &&
+    (validity_from === null ||
+      validity_from === undefined ||
+      validity_to === null ||
+      validity_to === undefined)
+  ) {
+    // if status is active and either valid from or valid to are null;
     return res
       .status(HTTP_BAD_REQUEST)
       .json({ error: "Missing required fields" });
   } else if (current_status === USER_PLAN_STAGED) {
   } else {
-    console.log(validity_from);
-    return res.status(HTTP_BAD_REQUEST).json({ error: "Invalid status" });
+    console.log(
+      "INVALID STATUS",
+      current_status,
+      validity_from,
+      validity_to,
+      current_status === USER_PLAN_ACTIVE,
+      (validity_from === null || validity_from === undefined) &&
+        (validity_to === null || validity_to === undefined)
+    );
+    if (
+      current_status !== USER_PLAN_ACTIVE &&
+      current_status !== USER_PLAN_STAGED
+    ) {
+      return res.status(HTTP_BAD_REQUEST).json({ error: "Invalid status" });
+    }
   }
 
   const user_plan = await UserPlan.findOne({
