@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import { BrowserRouter } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function PageWrapper({ heading, children }) {
   const navigate = useNavigate();
@@ -75,6 +76,9 @@ export default function PageWrapper({ heading, children }) {
             <Tooltip title="Register/Login">
               <Button
                 onClick={() => {
+                  toast("clicked");
+                  // refresh window here
+                  window.location.reload();
                   navigate("/auth");
                 }}
               >
