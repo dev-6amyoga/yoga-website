@@ -1,10 +1,11 @@
-import { Button, TextField } from "@mui/material";
-import { useEffect } from "react";
+import { Button, IconButton, InputAdornment, TextField } from "@mui/material";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import { validatePassword } from "../../../utils/formValidation";
 import getFormData from "../../../utils/getFormData";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function ChangePassword() {
   let user = useUserStore((state) => state.user);
@@ -49,20 +50,50 @@ export default function ChangePassword() {
       return;
     }
   };
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleClickShowNewPassword = () => setShowNewPassword(!showPassword);
+
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
+  const handleClickShowConfirmPassword = () =>
+    setShowConfirmPassword(!showPassword);
+
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   return (
     <form
       className="flex flex-col gap-2"
       onSubmit={handleSubmit}
       style={{ width: "100%" }}
     >
-      <TextField
+      {/* <TextField
         fullWidth
         required
         name="old_password"
         label="Old Password"
         type="password"
         variant="outlined"
+      /> */}
+
+      <TextField
+        label="Old Password"
+        variant="outlined"
+        name="old_password"
+        type={showPassword ? "text" : "password"}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={handleClickShowPassword}
+              >
+                {showPassword ? <Visibility /> : <VisibilityOff />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
       <br />
       <p
@@ -71,23 +102,58 @@ export default function ChangePassword() {
         Password must be minimum 8 letters and contain atleast 1 number, 1
         alphabet, 1 special character [!@#$%^&*,?]
       </p>
-      <TextField
+      {/* <TextField
         fullWidth
         required
         name="new_password"
         label="New Password"
         type="password"
         variant="outlined"
-      />
+      /> */}
       <TextField
+        label="New Password"
+        variant="outlined"
+        name="new_password"
+        type={showNewPassword ? "text" : "password"}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={handleClickShowNewPassword}
+              >
+                {showNewPassword ? <Visibility /> : <VisibilityOff />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
+      {/* <TextField
         fullWidth
         required
         name="confirm_new_password"
         label="Confirm New Password"
         type="password"
         variant="outlined"
+      /> */}
+      <TextField
+        label="Confirm New Password"
+        variant="outlined"
+        name="confirm_new_password"
+        type={showConfirmPassword ? "text" : "password"}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={handleClickShowConfirmPassword}
+              >
+                {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
-
       <div className="flex flex-row gap-2 w-full">
         <Button
           className="flex-1"

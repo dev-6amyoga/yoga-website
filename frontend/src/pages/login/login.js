@@ -204,9 +204,10 @@ export default function Login({ switchForm }) {
             <TextField name="username" label="Username" />
             {/* <TextField type="password" name="password" label="Password" /> */}
             <TextField
-              label="Some label"
+              label="Password"
               variant="outlined"
-              type={showPassword ? "text" : "password"} // <-- This is where the magic happens
+              name="password"
+              type={showPassword ? "text" : "password"}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
