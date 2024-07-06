@@ -141,8 +141,10 @@ export default function Login({ switchForm }) {
     setEmailVerify(true);
   };
 
+  const [verifyShow, setVerifyShow] = useState(false);
   const emailVerifyFunc = async (e) => {
-    toast("verifying email!");
+    e.preventDefault();
+    toast("Please wait!");
     const formData = getFormData(e);
     console.log(formData.email_verify, "FORM DATAA");
     const response = await Fetch({
@@ -152,6 +154,9 @@ export default function Login({ switchForm }) {
         email_id: formData.email_verify,
       },
     });
+    if (response.status === 200) {
+      setVerifyShow(true);
+    }
   };
 
   useEffect(() => {
@@ -225,6 +230,16 @@ export default function Login({ switchForm }) {
         <form onSubmit={emailVerifyFunc} className="flex flex-col gap-4">
           {" "}
           <Typography>Forgot Password</Typography>
+          {verifyShow && (
+            <p
+              className={
+                "text-sm border p-2 rounded-lg text-zinc-500 border-red-500"
+              }
+            >
+              Please check your inbox and spam folders for an email to help you
+              access your account again.
+            </p>
+          )}
           <TextField name="email_verify" label="Enter your Email ID" required />
           <Button type="submit" variant="contained">
             Send Email
