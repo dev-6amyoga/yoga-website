@@ -1,5 +1,6 @@
+import { CircularProgress } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
 	ROLE_INSTITUTE_ADMIN,
@@ -36,48 +37,70 @@ export const withAuth = (Component, ...roles) => {
 		const navigate = useNavigate();
 		const location = useLocation();
 		const [show, setShow] = useState(false);
-		const finishedLoading = useRef(false);
+		const [finishedLoading, setFinishLoading] = useState(false);
+
+		useEffect(() => {
+			const t = setTimeout(() => {
+				setFinishLoading(true);
+			}, 2000);
+
+			return () => {
+				clearTimeout(t);
+			};
+		}, []);
 
 		useEffect(() => {
 			// console.log("withAuth : userChanged");
 			// if user is there, check if role is valid
-			if (user) {
-				// console.log(user, "IN WITH AUTH");
-				// console.log(roles, " IN WITH AUTH");
-				// console.log(currentRole, "IN WITH AUTH");
-				// if role is null, show the component [authenticated+public]
-				if (roles.includes(null)) {
+			if (finishedLoading) {
+				if (user) {
+					// console.log(user, "IN WITH AUTH");
+					// console.log(roles, " IN WITH AUTH");
+					// console.log(currentRole, "IN WITH AUTH");
+					// if role is null, show the component [authenticated+public]
+					if (roles.includes(null)) {
+						setShow(true);
+						return;
+					} else if (!roles.includes(currentRole)) {
+						// if role is not null, and current role is not equal to role, navigate to unauthorized
+						navigate("/unauthorized", {
+							state: { from: location.pathname },
+						});
+						return;
+					}
 					setShow(true);
-					return;
-				} else if (!roles.includes(currentRole)) {
-					// if role is not null, and current role is not equal to role, navigate to unauthorized
-					navigate("/unauthorized", {
-						state: { from: location.pathname },
-					});
-					return;
-				}
-				setShow(true);
-			} else {
-				if (queryClient.isFetching({ queryKey: ["user"] })) {
-					// alert("fetching");
-					console.log("fetching");
-					return;
-				}
+				} else {
+					if (queryClient.isFetching({ queryKey: ["user"] })) {
+						// alert("fetching");
+						console.log("fetching");
+						return;
+					}
 
-				setShow(false);
-				if (location && location.pathname !== "/auth") {
-					navigate("/auth?login=true", {
-						state: { login: true, from: location.pathname },
-					});
+					setShow(false);
+					if (location && location.pathname !== "/auth") {
+						navigate("/auth?login=true", {
+							state: { login: true, from: location.pathname },
+						});
+					}
+					return;
 				}
-				return;
 			}
-		}, [user, currentRole, location, navigate]);
+		}, [user, currentRole, location, navigate, finishedLoading]);
 
 		// useEffect(() => {
 		// 	console.log("withAuth : userChanged");
 		// }, [user]);
 
-		return <>{show ? <Component {...props} /> : <></>}</>;
+		return (
+			<>
+				{show ? (
+					<Component {...props} />
+				) : (
+					<div className="absolute top-0 left-0 right-0 bottom-0 w-full h-full bg-white flex items-center justify-center">
+						<CircularProgress variant="indeterminate" />
+					</div>
+				)}
+			</>
+		);
 	};
 };
