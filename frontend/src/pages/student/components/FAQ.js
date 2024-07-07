@@ -67,7 +67,7 @@ export default function FAQ() {
             </Typography>
           </AccordionDetails>
         </Accordion>
-        <Accordion
+        {/* <Accordion
           expanded={expanded === "panel2"}
           onChange={handleChange("panel2")}
         >
@@ -91,7 +91,7 @@ export default function FAQ() {
               before it elapses. Subscriptions are non-refundable.
             </Typography>
           </AccordionDetails>
-        </Accordion>
+        </Accordion> */}
         <Accordion
           expanded={expanded === "panel3"}
           onChange={handleChange("panel3")}
