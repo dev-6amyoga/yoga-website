@@ -115,6 +115,7 @@ router.post("/get-by-token", async (req, res) => {
 			.json({ error: "Missing required fields" });
 	}
 
+	const t = await sequelize.transaction();
 	try {
 		const [decoded, error] = verifyToken(access_token);
 
@@ -125,24 +126,64 @@ router.post("/get-by-token", async (req, res) => {
 		}
 
 		if (decoded.token_type !== TOKEN_TYPE_ACCESS) {
+			await t.rollback();
 			return res
 				.status(HTTP_BAD_REQUEST)
 				.json({ error: "Invalid access token" });
 		}
 
-		const [user, errorUser] = await GetUserInfo(
-			{
-				user_id: decoded.user.user_id,
+		if (!decoded?.user?.user_id) {
+			await t.rollback();
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "Invalid access token" });
+		}
+
+		// update user plans
+		const uipr = await UserInstitutePlanRole.findAll({
+			where: {
+				user_id: decoded?.user?.user_id,
 			},
+			transaction: t,
+		});
+
+		if (uipr.length === 0) {
+			await t.rollback();
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "User not registered" });
+		}
+
+		for (let i = 0; i < uipr.length; i++) {
+			const u = uipr[i];
+			console.log(
+				"Updating user plan status",
+				decoded?.user?.user_id,
+				u.get("institute_id")
+			);
+			await UpdateUserPlanStatus(
+				decoded?.user?.user_id,
+				u.get("institute_id"),
+				t
+			);
+		}
+
+		let [user, errorUser] = await GetUserInfo(
+			{ user_id: decoded?.user?.user_id },
 			["user_id", "name", "email", "phone"]
 		);
 
 		if (!user || errorUser) {
-			return res.status(HTTP_BAD_REQUEST).json({ error: errorUser });
+			await t.rollback();
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "User does not exist" });
 		}
 
+		await t.commit();
 		return res.status(HTTP_OK).json({ user });
 	} catch (error) {
+		await t.rollback();
 		console.error(error);
 		return res
 			.status(HTTP_INTERNAL_SERVER_ERROR)
@@ -543,6 +584,7 @@ router.post("/update-password", async (req, res) => {
 
 const { mailTransporter } = require("../init.nodemailer");
 const getFrontendDomain = require("../utils/getFrontendDomain");
+const { UpdateUserPlanStatus } = require("../services/UserPlan.service");
 
 router.post("/forgot-password-email", async (req, res) => {
 	const { email_id } = req.body;

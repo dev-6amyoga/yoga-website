@@ -114,59 +114,103 @@ router.post("/login", async (req, res) => {
 			.status(HTTP_BAD_REQUEST)
 			.json({ message: "Missing required fields" });
 
-	// check if user exists
-	let [user, errorUser] = await GetUserInfo({ username });
-
-	console.log(errorUser);
-
-	if (!user || errorUser)
-		return res
-			.status(HTTP_BAD_REQUEST)
-			.json({ error: "User does not exist" });
-
-	// check password
-	const validPassword = await brypt.compare(password, user.password);
-
-	if (!validPassword)
-		return res.status(HTTP_BAD_REQUEST).json({ error: "Invalid password" });
-
-	delete user.password;
-
-	// TODO: check if login history shows different IP
-
-	// check if user has active login token
-	const login_token_history = await LoginToken.findAll({
-		where: {
-			user_id: user?.user_id,
-			refresh_token_expiry_at: {
-				[Op.gt]: new Date(),
-			},
-		},
-	});
-
-	if (login_token_history) {
-		const login_token_history_json = login_token_history.map((lth) =>
-			lth.toJSON()
-		);
-
-		if (
-			login_token_history_json.findIndex((lth) => lth.ip !== clientIp) >
-			-1
-		) {
-			return res
-				.status(HTTP_BAD_REQUEST)
-				.json({ error: "Varying IP Address; One device login only" });
-		}
-	}
-
-	const [accessToken, access_token_creation_at, access_token_expiry_at] =
-		generateAccessToken(user);
-	const [refreshToken, refresh_token_creation_at, refresh_token_expiry_at] =
-		generateRefreshToken(user);
-
 	const t = await sequelize.transaction();
 
 	try {
+		// check if user exists
+		let [user, errorUser] = await GetUserInfo({ username });
+
+		// console.log(errorUser);
+
+		if (!user || errorUser)
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "User does not exist" });
+
+		// check password
+		const validPassword = await brypt.compare(password, user.password);
+
+		if (!validPassword)
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "Invalid password" });
+
+		delete user.password;
+
+		// update user plans
+		const uipr = await UserInstitutePlanRole.findAll({
+			where: {
+				user_id: user.user_id,
+			},
+			transaction: t,
+		});
+
+		if (uipr.length === 0) {
+			await t.rollback();
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ error: "User not registered" });
+		}
+
+		for (let i = 0; i < uipr.length; i++) {
+			const u = uipr[i];
+			console.log(
+				"Updating user plan status",
+				user.user_id,
+				u.get("institute_id")
+			);
+			await UpdateUserPlanStatus(user.user_id, u.get("institute_id"), t);
+		}
+
+		[user, errorUser] = await GetUserInfo({ email });
+
+		if (errorUser) {
+			await t.rollback();
+			return res
+				.status(HTTP_INTERNAL_SERVER_ERROR)
+				.json({ error: errorUser });
+		}
+
+		// TODO: check if login history shows different IP
+
+		// check if user has active login token
+		const login_token_history = await LoginToken.findAll({
+			where: {
+				user_id: user?.user_id,
+				refresh_token_expiry_at: {
+					[Op.gt]: new Date(),
+				},
+			},
+		});
+
+		if (login_token_history) {
+			const login_token_history_json = login_token_history.map((lth) =>
+				lth.toJSON()
+			);
+
+			if (
+				login_token_history_json.findIndex(
+					(lth) => lth.ip !== clientIp
+				) > -1
+			) {
+				return res.status(HTTP_BAD_REQUEST).json({
+					error: "Varying IP Address; One device login only",
+				});
+			}
+		}
+
+		// check if plans should be updated
+
+		const [accessToken, access_token_creation_at, access_token_expiry_at] =
+			generateAccessToken(user);
+		const [
+			refreshToken,
+			refresh_token_creation_at,
+			refresh_token_expiry_at,
+		] = generateRefreshToken(user);
+
+		// console.log(user);
+		// const [_, userPlanUpdateError] = await UpdateUserPlanStatus(user.user_id);
 		// TODO: delete all previous tokens of user from same ip?
 
 		// add current token to login token table
@@ -231,57 +275,95 @@ router.post("/login-google", async (req, res) => {
 				.json({ error: "Invalid Google OAuth token" });
 		}
 
-		// check if user exists
-		let [user, errorUser] = await GetUserInfo({ email });
-
-		if (!user || errorUser)
-			return res.status(HTTP_OK).json({
-				user: { email: email, name: name },
-				message: "User does not exist",
-			});
-
-		// if (user.is_google_login === false) {
-		// 	return res
-		// 		.status(HTTP_BAD_REQUEST)
-		// 		.json({ error: "User not registered using Google" });
-		// }
-
-		// check if user has active login token
-		const login_token_history = await LoginToken.findAll({
-			where: {
-				user_id: user?.user_id,
-				refresh_token_expiry_at: {
-					[Op.gt]: new Date(),
-				},
-			},
-		});
-
-		if (login_token_history) {
-			const login_token_history_json = login_token_history.map((lth) =>
-				lth.toJSON()
-			);
-
-			if (
-				login_token_history_json.findIndex((lth) => lth.ip !== req.ip) >
-				-1
-			) {
-				return res.status(HTTP_BAD_REQUEST).json({
-					error: "Varying IP Address; One device login only",
-				});
-			}
-		}
-
-		const [accessToken, access_token_creation_at, access_token_expiry_at] =
-			generateAccessToken(user);
-		const [
-			refreshToken,
-			refresh_token_creation_at,
-			refresh_token_expiry_at,
-		] = generateRefreshToken(user);
-
 		const t = await sequelize.transaction();
 
 		try {
+			// check if user exists
+			let [user, errorUser] = await GetUserInfo({ email });
+
+			if (!user || errorUser) {
+				await t.rollback();
+				return res.status(HTTP_OK).json({
+					user: { email: email, name: name },
+					message: "User does not exist",
+				});
+			}
+
+			// update user plans
+			const uipr = await UserInstitutePlanRole.findAll({
+				where: {
+					user_id: user.user_id,
+				},
+				transaction: t,
+			});
+
+			if (uipr.length === 0) {
+				await t.rollback();
+				return res
+					.status(HTTP_BAD_REQUEST)
+					.json({ error: "User not registered" });
+			}
+
+			for (let i = 0; i < uipr.length; i++) {
+				const u = uipr[i];
+				console.log(
+					"Updating user plan status",
+					user.user_id,
+					u.get("institute_id")
+				);
+				await UpdateUserPlanStatus(
+					user.user_id,
+					u.get("institute_id"),
+					t
+				);
+			}
+
+			[user, errorUser] = await GetUserInfo({ email });
+
+			// if (user.is_google_login === false) {
+			// 	return res
+			// 		.status(HTTP_BAD_REQUEST)
+			// 		.json({ error: "User not registered using Google" });
+			// }
+
+			// check if user has active login token
+			const login_token_history = await LoginToken.findAll({
+				where: {
+					user_id: user?.user_id,
+					refresh_token_expiry_at: {
+						[Op.gt]: new Date(),
+					},
+				},
+			});
+
+			if (login_token_history) {
+				const login_token_history_json = login_token_history.map(
+					(lth) => lth.toJSON()
+				);
+
+				if (
+					login_token_history_json.findIndex(
+						(lth) => lth.ip !== req.ip
+					) > -1
+				) {
+					return res.status(HTTP_BAD_REQUEST).json({
+						error: "Varying IP Address; One device login only",
+					});
+				}
+			}
+
+			const [
+				accessToken,
+				access_token_creation_at,
+				access_token_expiry_at,
+			] = generateAccessToken(user);
+
+			const [
+				refreshToken,
+				refresh_token_creation_at,
+				refresh_token_expiry_at,
+			] = generateRefreshToken(user);
+
 			// TODO: delete all previous tokens of user from same ip?
 
 			// add current token to login token table
