@@ -4,9 +4,9 @@ const eta = require("eta");
 
 const router = express.Router();
 const {
-  HTTP_BAD_REQUEST,
-  HTTP_OK,
-  HTTP_INTERNAL_SERVER_ERROR,
+	HTTP_BAD_REQUEST,
+	HTTP_OK,
+	HTTP_INTERNAL_SERVER_ERROR,
 } = require("../utils/http_status_codes");
 const WatchTimeLog = require("../models/mongo/WatchTimeLog");
 const WatchTimeQuota = require("../models/mongo/WatchTimeQuota");
@@ -17,64 +17,65 @@ const { USER_PLAN_EXPIRED_BY_USAGE } = require("../enums/user_plan_status");
 const { sequelize } = require("../init.sequelize");
 
 router.post("/update", authenticateToken, async (req, res) => {
-  console.log("WatchTime /update");
-  const { institute_id, watch_time_logs } = req.body;
+	console.log("WatchTime /update");
+	const { institute_id, watch_time_logs, updated_at } = req.body;
 
-  const { user_id } = req.user;
+	const { user_id } = req.user;
 
-  if (!user_id || !watch_time_logs || institute_id === undefined) {
-    console.log("Missing required fields");
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ message: "Missing required fields" });
-  }
+	if (!user_id || !watch_time_logs || institute_id === undefined) {
+		console.log("Missing required fields");
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ message: "Missing required fields" });
+	}
 
-  // console.log(GetCurrentUserPlan(user_id);
+	// console.log(GetCurrentUserPlan(user_id);
 
-  // get user plan
-  console.log("GetCurrentUserPlan");
-  let [user_plan, error] = await GetCurrentUserPlan(user_id, institute_id);
-  // console.log({ user_plan, error });
+	// get user plan
+	console.log("GetCurrentUserPlan");
+	let [user_plan, error] = await GetCurrentUserPlan(user_id, institute_id);
+	// console.log({ user_plan, error });
 
-  if (!user_plan || error) {
-    console.log("User currenly has no active plan");
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ message: error || "User currenly has no active plan" });
-  }
+	if (!user_plan || error) {
+		console.log("User currenly has no active plan");
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ message: error || "User currenly has no active plan" });
+	}
 
-  // user_plan = user_plan.toJSON();
+	// user_plan = user_plan.toJSON();
 
-  // reduce it to unique asana_id, playlist_id
-  let reduced_watch_time = [];
-  let total_watch_time = 0;
+	// reduce it to unique asana_id, playlist_id
+	let reduced_watch_time = [];
+	let total_watch_time = 0;
 
-  watch_time_logs.forEach((wtl) => {
-    const idx = reduced_watch_time.findIndex(
-      (x) => x.asana_id === wtl.asana_id && x.playlist_id === wtl.playlist_id
-    );
+	watch_time_logs.forEach((wtl) => {
+		const idx = reduced_watch_time.findIndex(
+			(x) =>
+				x.asana_id === wtl.asana_id && x.playlist_id === wtl.playlist_id
+		);
 
-    total_watch_time += wtl.timedelta;
+		total_watch_time += wtl.timedelta;
 
-    if (idx === -1) {
-      const { timedelta, ...w } = wtl;
-      w.duration = timedelta;
-      w.created_at = new Date();
-      reduced_watch_time.push(w);
-    } else {
-      if (wtl.timedelta > 0) {
-        if (reduced_watch_time[idx].duration) {
-          reduced_watch_time[idx].duration += wtl.timedelta;
-        } else {
-          reduced_watch_time[idx].duration = wtl.timedelta;
-        }
-      }
-    }
-  });
+		if (idx === -1) {
+			const { timedelta, ...w } = wtl;
+			w.duration = timedelta;
+			w.updated_at = updated_at ?? new Date();
+			reduced_watch_time.push(w);
+		} else {
+			if (wtl.timedelta > 0) {
+				if (reduced_watch_time[idx].duration) {
+					reduced_watch_time[idx].duration += wtl.timedelta;
+				} else {
+					reduced_watch_time[idx].duration = wtl.timedelta;
+				}
+			}
+		}
+	});
 
-  console.log({ reduced_watch_time, total_watch_time });
+	console.log({ reduced_watch_time, total_watch_time });
 
-  /*
+	/*
  {
   user_id,
   asana_id,
@@ -82,112 +83,118 @@ router.post("/update", authenticateToken, async (req, res) => {
   duration
  }
  */
-  // start a db session
-  const session = await WatchTimeLog.startSession();
+	// start a db session
+	const session = await WatchTimeLog.startSession();
 
-  await session.withTransaction(async () => {
-    const promises = [];
-    reduced_watch_time.forEach((wtl) => {
-      // update watch time logs
-      // TODO : make watch time log per day?
-      promises.push(
-        WatchTimeLog.updateOne(
-          {
-            user_id: wtl.user_id,
-            asana_id: wtl.asana_id,
-            playlist_id: wtl.playlist_id,
-          },
-          [
-            {
-              $project: {
-                ...wtl,
-                duration: {
-                  $add: [{ $ifNull: ["$duration", 0] }, wtl.duration],
-                },
-              },
-            },
-          ],
-          { upsert: true }
-        )
-      );
-    });
+	await session.withTransaction(async () => {
+		const promises = [];
+		reduced_watch_time.forEach((wtl) => {
+			// update watch time logs
+			// TODO : make watch time log per day?
+			promises.push(
+				WatchTimeLog.updateOne(
+					{
+						user_id: wtl.user_id,
+						asana_id: wtl.asana_id,
+						playlist_id: wtl.playlist_id,
+					},
+					[
+						{
+							$project: {
+								...wtl,
+								duration: {
+									$add: [
+										{ $ifNull: ["$duration", 0] },
+										wtl.duration,
+									],
+								},
+								created_at: true,
+							},
+						},
+					],
+					{ upsert: true }
+				)
+			);
+		});
 
-    let updatedWatchTimeQuota = await WatchTimeQuota.findOneAndUpdate(
-      {
-        user_plan_id: user_plan?.get("user_plan_id"),
-      },
-      [
-        {
-          $project: {
-            user_plan_id: user_plan?.get("user_plan_id"),
-            quota: {
-              $subtract: ["$quota", total_watch_time],
-            },
-          },
-        },
-      ],
-      { upsert: false, returnDocument: "after", lean: true }
-    );
+		let updatedWatchTimeQuota = await WatchTimeQuota.findOneAndUpdate(
+			{
+				user_plan_id: user_plan?.get("user_plan_id"),
+			},
+			[
+				{
+					$project: {
+						user_plan_id: user_plan?.get("user_plan_id"),
+						quota: {
+							$subtract: ["$quota", total_watch_time],
+						},
+					},
+				},
+			],
+			{ upsert: false, returnDocument: "after", lean: true }
+		);
 
-    console.log({ updatedWatchTimeQuota });
+		// console.log({ updatedWatchTimeQuota });
 
-    if (!updatedWatchTimeQuota) {
-      await session.abortTransaction();
-      session.endSession();
+		if (!updatedWatchTimeQuota) {
+			await session.abortTransaction();
+			session.endSession();
 
-      return res.status(HTTP_BAD_REQUEST).json({
-        message: "Could not update watch time quota",
-      });
-    } else {
-      // TODO : where to commit, do we show extra usage or show lesser usage
-      await session.commitTransaction();
-      if (updatedWatchTimeQuota.quota < 0) {
-        // update expiry
-        const t = await sequelize.transaction();
-        // const up = await UserPlan.findOne({
-        // 	where: { user_plan_id: user_plan.user_plan_id },
-        // });
-        try {
-          user_plan.current_status = USER_PLAN_EXPIRED_BY_USAGE;
-          await user_plan.save();
-          await t.commit();
-          session.endSession();
+			return res.status(HTTP_BAD_REQUEST).json({
+				message: "Could not update watch time quota",
+			});
+		} else {
+			// TODO : where to commit, do we show extra usage or show lesser usage
+			await session.commitTransaction();
+			if (updatedWatchTimeQuota.quota < 0) {
+				// update expiry
+				const t = await sequelize.transaction();
+				// const up = await UserPlan.findOne({
+				// 	where: { user_plan_id: user_plan.user_plan_id },
+				// });
+				try {
+					user_plan.current_status = USER_PLAN_EXPIRED_BY_USAGE;
+					await user_plan.save();
+					await t.commit();
+					session.endSession();
 
-          return res.status(HTTP_BAD_REQUEST).json({
-            message: "Watch time quota exceeded",
-            data: { committed: true },
-          });
-        } catch (err) {
-          console.log(err);
-          await t.rollback();
-          session.endSession();
+					return res.status(HTTP_BAD_REQUEST).json({
+						message: "Watch time quota exceeded",
+						data: { committed: true },
+					});
+				} catch (err) {
+					console.log(err);
+					await t.rollback();
+					session.endSession();
 
-          return res.status(HTTP_BAD_REQUEST).json({
-            message: "Watch time quota exceeded",
-            data: { committed: false },
-          });
-        }
-      }
+					return res.status(HTTP_BAD_REQUEST).json({
+						message: "Watch time quota exceeded",
+						data: { committed: false },
+					});
+				}
+			}
 
-      await Promise.all(promises)
-        .then((values) => {
-          console.log(values);
-          return session.commitTransaction();
-        })
-        .then(() => {
-          session.endSession();
+			await Promise.all(promises)
+				.then((values) => {
+					console.log(values);
+					return session.commitTransaction();
+				})
+				.then(() => {
+					session.endSession();
 
-          return res.status(HTTP_OK).json({ reduced_watch_time });
-        })
-        .catch(async (err) => {
-          console.log(err);
-          await session.abortTransaction();
-          session.endSession();
+					return res.status(HTTP_OK).json({ reduced_watch_time });
+				})
+				.catch(async (err) => {
+					console.log(err);
+					await session.abortTransaction();
+					session.endSession();
 
-          return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ message: err });
-        });
-    }
-  });
+					return res
+						.status(HTTP_INTERNAL_SERVER_ERROR)
+						.json({ message: err });
+				});
+		}
+	});
 });
 
 router.post("/update-teacher", authenticateToken, async (req, res) => {});
@@ -195,150 +202,152 @@ router.post("/update-teacher", authenticateToken, async (req, res) => {});
 router.post("/update-institute", authenticateToken, async (req, res) => {});
 
 router.post("/get-logs", async (req, res) => {
-  const { user_id, from_date, to_date } = req.body;
+	const { user_id, from_date, to_date } = req.body;
 
-  if (!user_id) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ message: "Missing required fields" });
-  }
+	if (!user_id) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ message: "Missing required fields" });
+	}
 
-  try {
-    let watchTimeLog;
-    if (!from_date || !to_date) {
-      watchTimeLog = await WatchTimeLog.find({ user_id });
-    } else {
-      watchTimeLog = await WatchTimeLog.find({
-        user_id,
-        created_at: {
-          $gte: from_date || new Date(),
-          $lte: to_date || new Date(),
-        },
-      });
-    }
-    return res.status(HTTP_OK).json({ watchTimeLog });
-  } catch (err) {
-    console.log(err);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ message: "Something went wrong" });
-  }
+	try {
+		let watchTimeLog;
+		if (!from_date || !to_date) {
+			watchTimeLog = await WatchTimeLog.find({ user_id });
+		} else {
+			watchTimeLog = await WatchTimeLog.find({
+				user_id,
+				created_at: {
+					$gte: from_date || new Date(),
+					$lte: to_date || new Date(),
+				},
+			});
+		}
+		return res.status(HTTP_OK).json({ watchTimeLog });
+	} catch (err) {
+		console.log(err);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ message: "Something went wrong" });
+	}
 });
 
 router.post("/get-stats", async (req, res) => {
-  const { user_id } = req.body;
+	const { user_id } = req.body;
 
-  if (!user_id) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ message: "Missing required fields" });
-  }
+	if (!user_id) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ message: "Missing required fields" });
+	}
 
-  try {
-    let watchTimeLog = await WatchTimeLog.find({
-      user_id,
-    });
+	try {
+		let watchTimeLog = await WatchTimeLog.find({
+			user_id,
+		});
 
-    if (!watchTimeLog) {
-      return res.status(HTTP_OK).json({ watchTimeAll: 0, watchTimeToday: 0 });
-    }
+		if (!watchTimeLog) {
+			return res
+				.status(HTTP_OK)
+				.json({ watchTimeAll: 0, watchTimeToday: 0 });
+		}
 
-    // total of all time
-    let watchTimeAll = watchTimeLog.reduce((acc, wtl) => {
-      return acc + wtl.duration;
-    }, 0);
+		// total of all time
+		let watchTimeAll = watchTimeLog.reduce((acc, wtl) => {
+			return acc + wtl.duration;
+		}, 0);
 
-    // total for today
-    let watchTimeToday = watchTimeLog.reduce((acc, wtl) => {
-      if (wtl.created_at > new Date().setHours(0, 0, 0, 0)) {
-        return acc + wtl.duration;
-      }
-      return acc;
-    }, 0);
+		// total for today
+		let watchTimeToday = watchTimeLog.reduce((acc, wtl) => {
+			if (wtl.created_at > new Date().setHours(0, 0, 0, 0)) {
+				return acc + wtl.duration;
+			}
+			return acc;
+		}, 0);
 
-    return res.status(HTTP_OK).json({
-      watchTimeToday: watchTimeToday,
-      watchTimeAll: watchTimeAll,
-    });
-  } catch (err) {
-    console.log(err);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ message: "Something went wrong" });
-  }
+		return res.status(HTTP_OK).json({
+			watchTimeToday: watchTimeToday,
+			watchTimeAll: watchTimeAll,
+		});
+	} catch (err) {
+		console.log(err);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ message: "Something went wrong" });
+	}
 });
 
 router.post("/get-quota", async (req, res) => {
-  const { user_id } = req.body;
+	const { user_id } = req.body;
 
-  if (!user_id) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ message: "Missing required fields" });
-  }
+	if (!user_id) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ message: "Missing required fields" });
+	}
 
-  try {
-    const [user_plan, error] = await GetCurrentUserPlan(user_id);
+	try {
+		const [user_plan, error] = await GetCurrentUserPlan(user_id);
 
-    if (error) {
-      return res.status(HTTP_BAD_REQUEST).json({ message: error });
-    }
+		if (error) {
+			return res.status(HTTP_BAD_REQUEST).json({ message: error });
+		}
 
-    let quota = await WatchTimeQuota.findOne({
-      user_plan_id: user_plan?.user_plan_id,
-    });
+		let quota = await WatchTimeQuota.findOne({
+			user_plan_id: user_plan?.user_plan_id,
+		});
 
-    if (!quota) {
-      return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-        message: "Could not fetch watch time quota",
-      });
-    }
+		if (!quota) {
+			return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+				message: "Could not fetch watch time quota",
+			});
+		}
 
-    return res.status(HTTP_OK).json({ quota, user_plan });
-  } catch (err) {
-    console.log(err);
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ message: "Something went wrong" });
-  }
+		return res.status(HTTP_OK).json({ quota, user_plan });
+	} catch (err) {
+		console.log(err);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ message: "Something went wrong" });
+	}
 });
 
 router.get("/time-statistics", async (req, res) => {
-  try {
-    const allWatchTime = await WatchTimeLog.find(
-      { asana_id: { $ne: null } },
-      { asana_id: 1, duration: 1, _id: 0 }
-    );
-    const aggregatedData = allWatchTime.reduce((acc, curr) => {
-      const { asana_id, duration } = curr;
-      if (acc[asana_id]) {
-        acc[asana_id].push({ duration });
-      } else {
-        acc[asana_id] = [{ duration }];
-      }
-      return acc;
-    }, {});
+	try {
+		const allWatchTime = await WatchTimeLog.find(
+			{ asana_id: { $ne: null } },
+			{ asana_id: 1, duration: 1, _id: 0 }
+		);
+		const aggregatedData = allWatchTime.reduce((acc, curr) => {
+			const { asana_id, duration } = curr;
+			if (acc[asana_id]) {
+				acc[asana_id].push({ duration });
+			} else {
+				acc[asana_id] = [{ duration }];
+			}
+			return acc;
+		}, {});
 
-    // Convert aggregated data to the desired format
-    const result = Object.keys(aggregatedData).map((asana_id) => ({
-      label: `Asana ${asana_id}`,
-      data: aggregatedData[asana_id],
-    }));
+		// Convert aggregated data to the desired format
+		const result = Object.keys(aggregatedData).map((asana_id) => ({
+			label: `Asana ${asana_id}`,
+			data: aggregatedData[asana_id],
+		}));
 
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+		res.json(result);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
 });
 
 router.get("/all-watch-time-log", async (req, res) => {
-  try {
-    const allWatchHistory = await WatchTimeLog.find();
-    res.json(allWatchHistory);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
-  }
+	try {
+		const allWatchHistory = await WatchTimeLog.find();
+		res.json(allWatchHistory);
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: "Internal server error" });
+	}
 });
 
 module.exports = router;

@@ -593,11 +593,11 @@ function StreamStackItem({
 					}
 				})
 				.catch((err) => {
-					//console.log(err);
-					// localStorage.setItem(
-					// 	"6amyoga_watch_time_logs",
-					// 	JSON.stringify(watch_time_logs)
-					// );
+					console.log(err);
+					localStorage.setItem(
+						"6amyoga_watch_time_logs",
+						JSON.stringify(watch_time_logs)
+					);
 					appendToWatchTimeBuffer(watch_time_logs);
 				});
 
@@ -654,12 +654,12 @@ function StreamStackItem({
 			// 	.catch((err) => {
 			// 		console.log(err);
 			// 	});
-
+			console.log("Starting watch time intervals!");
 			// starting interval timer to flush watch duration buffer
 			flushTimeInterval.current = setInterval(() => {
 				flushWatchTimeBuffer(user?.user_id);
 				// flushWatchTimeBufferE(user?.user_id);
-			}, 10000);
+			}, 7000);
 
 			// starting interval timer to commit time
 			commitTimeInterval.current = setInterval(() => {
@@ -677,7 +677,7 @@ function StreamStackItem({
 				addToCommittedTs(
 					playerRef?.current?.videoElement?.currentTime ?? 0
 				);
-			}, 5000);
+			}, 3500);
 		} else {
 			if (flushTimeInterval.current) {
 				clearInterval(flushTimeInterval.current);
@@ -687,6 +687,17 @@ function StreamStackItem({
 				clearInterval(commitTimeInterval.current);
 			}
 		}
+
+		return () => {
+			console.log("Clearing watch time intervals!");
+			if (flushTimeInterval.current) {
+				clearInterval(flushTimeInterval.current);
+			}
+
+			if (commitTimeInterval.current) {
+				clearInterval(commitTimeInterval.current);
+			}
+		};
 	}, [
 		isActive,
 		enableWatchHistory,
