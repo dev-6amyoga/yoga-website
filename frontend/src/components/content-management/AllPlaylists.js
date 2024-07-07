@@ -101,7 +101,7 @@ function AllPlaylists() {
           toast("Error deleting playlist:", response.status);
         }
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     for (var i = 0; i !== playlist1.length; i++) {
@@ -122,7 +122,7 @@ function AllPlaylists() {
         setLoading(false);
       } catch (error) {
         setLoading(false);
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();
@@ -136,7 +136,7 @@ function AllPlaylists() {
         const data = response?.data;
         setPlaylistAsanas(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();
@@ -150,7 +150,7 @@ function AllPlaylists() {
         const data = response?.data;
         setTransitions(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();
@@ -173,7 +173,7 @@ function AllPlaylists() {
           toast("Error deleting playlist:", response.status);
         }
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     for (var i = 0; i !== playlist1.length; i++) {
@@ -194,7 +194,7 @@ function AllPlaylists() {
         setLoading(false);
       } catch (error) {
         setLoading(false);
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();
@@ -208,7 +208,7 @@ function AllPlaylists() {
         const data = response.data;
         setPlaylistAsanas(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();
@@ -222,7 +222,7 @@ function AllPlaylists() {
         const data = response.data;
         setTransitions(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();
@@ -311,7 +311,7 @@ function AllPlaylists() {
       }
       setDelState(false);
     } catch (error) {
-      toast(error);
+      console.log(error);
     }
   };
 

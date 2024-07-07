@@ -86,7 +86,7 @@ function ViewAllSchedules() {
         console.log("all asanas : ", data);
         setAllAsanas(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();
@@ -101,7 +101,7 @@ function ViewAllSchedules() {
         console.log("all schedules : ", data);
         setAllSchedules(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();

@@ -90,7 +90,7 @@ function AllAsanas() {
         const data = response.data;
         setAllPlaylists(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();
@@ -267,7 +267,7 @@ function AllAsanas() {
         toast("Error updating asana:", response.status);
       }
     } catch (error) {
-      toast(error);
+      console.log(error);
     }
   };
 

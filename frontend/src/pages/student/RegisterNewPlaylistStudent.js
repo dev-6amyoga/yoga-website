@@ -1,23 +1,22 @@
-import
-  {
-    Button,
-    Card,
-    Divider,
-    Grid,
-    Input,
-    Modal,
-    Table,
-    Text,
-  } from "@geist-ui/core"
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { toast } from "react-toastify"
-import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar"
-import { transitionGenerator } from "../../components/transition-generator/TransitionGenerator"
-import useUserStore from "../../store/UserStore"
-import { Fetch } from "../../utils/Fetch"
-import { MonthlyPlaylistChecker } from "../../utils/MonthlyPlaylistChecker"
-import { withAuth } from "../../utils/withAuth"
+import {
+  Button,
+  Card,
+  Divider,
+  Grid,
+  Input,
+  Modal,
+  Table,
+  Text,
+} from "@geist-ui/core";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
+import { transitionGenerator } from "../../components/transition-generator/TransitionGenerator";
+import useUserStore from "../../store/UserStore";
+import { Fetch } from "../../utils/Fetch";
+import { MonthlyPlaylistChecker } from "../../utils/MonthlyPlaylistChecker";
+import { withAuth } from "../../utils/withAuth";
 
 function RegisterNewPlaylistStudent() {
   const navigate = useNavigate();
@@ -56,7 +55,7 @@ function RegisterNewPlaylistStudent() {
         setPlaylistDurationLimit(maxPlaylistDuration.playlist_config_value);
         setPlaylistEditLimit(playlistEditCount.playlist_config_value);
       } catch (err) {
-        toast(err);
+        console.log(err);
       }
     };
     fetchData();
@@ -117,7 +116,7 @@ function RegisterNewPlaylistStudent() {
         const data = response.data;
         setTransitions(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();
@@ -142,7 +141,7 @@ function RegisterNewPlaylistStudent() {
         }
         setUserPlaylists(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     if (user) {
@@ -176,7 +175,7 @@ function RegisterNewPlaylistStudent() {
         const data = response.data;
         setAsanas(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();

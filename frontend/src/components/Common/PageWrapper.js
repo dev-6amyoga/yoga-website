@@ -76,8 +76,6 @@ export default function PageWrapper({ heading, children }) {
             <Tooltip title="Register/Login">
               <Button
                 onClick={() => {
-                  toast("clicked");
-                  // refresh window here
                   window.location.reload();
                   navigate("/auth");
                 }}
