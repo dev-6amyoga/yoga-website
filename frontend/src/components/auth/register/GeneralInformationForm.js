@@ -1,5 +1,12 @@
 // import { useEffect, useState } from "react";
-import { Button, TextField } from "@mui/material";
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { UserAPI } from "../../../api/user.api";
@@ -30,7 +37,7 @@ export default function GeneralInformationForm({
   const [email, setEmail] = useState(generalInfo?.email_id);
   const [emailError, setEmailError] = useState(null);
 
-  const [phone, setPhone] = useState(generalInfo?.phone_no);
+  const [phone, setPhone] = useState(generalInfo?.phone_no || "");
   const [phoneError, setPhoneError] = useState(null);
 
   const [infoSaved, setInfoSaved] = useState(false);
@@ -65,13 +72,8 @@ export default function GeneralInformationForm({
         return;
       }
 
-      // if (!googleInfo) {
-
-      // }
-
       if (formData?.password !== formData?.confirm_password) {
         toast("Passwords do not match");
-        // setPasswordError("Passwords do not match");
         return;
       }
 
@@ -111,7 +113,7 @@ export default function GeneralInformationForm({
     }
   }, [usernameError, passwordError, emailError, phoneError, setBlockStep]);
 
-  // check username
+  // Check username
   useEffect(() => {
     if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
 
@@ -143,14 +145,13 @@ export default function GeneralInformationForm({
     };
   }, [username]);
 
-  // check password
+  // Check password
   useEffect(() => {
     if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
 
     inputErrorDebounce.current = setTimeout(() => {
       setLoading(true);
       if (password && confirmPassword && password !== confirmPassword) {
-        // setPasswordError("Passwords do not match");
         setPasswordError(null);
         setLoading(false);
         return;
@@ -173,7 +174,7 @@ export default function GeneralInformationForm({
     };
   }, [password, confirmPassword]);
 
-  // check email
+  // Check email
   useEffect(() => {
     if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
 
@@ -204,7 +205,7 @@ export default function GeneralInformationForm({
     };
   }, [email]);
 
-  // check phone number
+  // Check phone number
   useEffect(() => {
     if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
 
@@ -243,9 +244,51 @@ export default function GeneralInformationForm({
     };
   }, [phone]);
 
+  const fetchCountryCodes = async () => {
+    const response = await fetch("https://restcountries.com/v3.1/all");
+    const data = await response.json();
+    return data.reduce((acc, country) => {
+      const countryCode =
+        country.idd?.root +
+        (country.idd?.suffixes ? country.idd.suffixes[0] : "");
+      if (countryCode) {
+        acc[country.name.common] = countryCode;
+      }
+      return acc;
+    }, {});
+  };
+
+  const [countryCodes, setCountryCodes] = useState({});
+  const [country, setCountry] = useState("");
+
   useEffect(() => {
-    console.log("GOOGLE INFO : ", googleInfo);
-  }, [googleInfo]);
+    const getCountryCodes = async () => {
+      const codes = await fetchCountryCodes();
+      setCountryCodes(codes);
+    };
+    getCountryCodes();
+  }, []);
+
+  useEffect(() => {
+    console.log("country codes : ", countryCodes);
+  }, [countryCodes]);
+
+  const handleCountryChange = (event) => {
+    const selectedCountry = event.target.value;
+    setCountry(selectedCountry);
+    const countryCode = countryCodes[selectedCountry];
+    if (countryCode) {
+      const existingPhoneNumber = phone.replace(/^\+\d*/, "");
+      setPhone(countryCode + existingPhoneNumber);
+    }
+  };
+
+  const handlePhoneChange = (event) => {
+    const newPhone = event.target.value;
+    const countryCode = countryCodes[country] || "";
+    const phoneNumberWithoutCode = newPhone.replace(countryCode, "");
+    setPhone(countryCode + phoneNumberWithoutCode);
+  };
 
   return (
     <form
@@ -274,74 +317,84 @@ export default function GeneralInformationForm({
         error={emailError ? true : false}
         helperText={emailError ? emailError : " "}
       />
+
+      <FormControl fullWidth>
+        <InputLabel id="country-label">Country</InputLabel>
+        <Select
+          labelId="country-label"
+          value={country}
+          onChange={handleCountryChange}
+          required
+        >
+          {Object.keys(countryCodes).map((countryName) => (
+            <MenuItem key={countryName} value={countryName}>
+              {countryName}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
       <TextField
         width="100%"
         name="phone_no"
         placeholder="XXXXXXXXXX"
-        defaultValue={generalInfo?.phone_no}
-        onChange={(e) => {
-          setPhone(e.target.value);
-        }}
+        value={phone}
+        onChange={handlePhoneChange}
         required
         label="Phone No"
         error={phoneError ? true : false}
         helperText={phoneError ? phoneError : " "}
       />
 
-      <>
-        <TextField
-          width="100%"
-          name="username"
-          placeholder="johnDoe123"
-          defaultValue={generalInfo?.username}
-          onChange={(e) => {
-            setUsername(e.target.value);
-          }}
-          required
-          label="Username"
-          error={usernameError ? true : false}
-          helperText={usernameError ? usernameError : " "}
-        />
-        <p
-          className={`text-sm border p-2 rounded-lg text-zinc-500 ${
-            passwordError ? "border-red-500" : ""
-          }`}
-        >
-          Password must be minimum 8 letters and contain atleast 1 number, 1
-          alphabet, 1 special character [!@#$%^&*,?]
-        </p>
-        <TextField
-          type="password"
-          width="100%"
-          name="password"
-          defaultValue={generalInfo?.password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-          }}
-          title="Password must be minimum 8 letters and contain atleast 1 number, 1 alphabet, 1 special character."
-          required
-          label="Password"
-        />
-        <TextField
-          type="password"
-          width="100%"
-          name="confirm_password"
-          defaultValue={generalInfo?.confirm_password}
-          onChange={(e) => {
-            setConfirmPassword(e.target.value);
-          }}
-          title="Password must be minimum 8 letters and contain atleast 1 number, 1 alphabet, 1 special character."
-          required
-          label="Confirm Password"
-          error={password && confirmPassword && password !== confirmPassword}
-          helperText={
-            password && confirmPassword && password !== confirmPassword
-              ? "Passwords do not match"
-              : " "
-          }
-        />
-      </>
-      {/* )} */}
+      <TextField
+        width="100%"
+        name="username"
+        placeholder="johnDoe123"
+        defaultValue={generalInfo?.username}
+        onChange={(e) => {
+          setUsername(e.target.value);
+        }}
+        required
+        label="Username"
+        error={usernameError ? true : false}
+        helperText={usernameError ? usernameError : " "}
+      />
+      <p
+        className={`text-sm border p-2 rounded-lg text-zinc-500 ${passwordError ? "border-red-500" : ""}`}
+      >
+        Password must be minimum 8 letters and contain at least 1 number, 1
+        alphabet, 1 special character [!@#$%^&*,?]
+      </p>
+      <TextField
+        type="password"
+        width="100%"
+        name="password"
+        defaultValue={generalInfo?.password}
+        onChange={(e) => {
+          setPassword(e.target.value);
+        }}
+        title="Password must be minimum 8 letters and contain at least 1 number, 1 alphabet, 1 special character."
+        required
+        label="Password"
+      />
+      <TextField
+        type="password"
+        width="100%"
+        name="confirm_password"
+        defaultValue={generalInfo?.confirm_password}
+        onChange={(e) => {
+          setConfirmPassword(e.target.value);
+        }}
+        title="Password must be minimum 8 letters and contain at least 1 number, 1 alphabet, 1 special character."
+        required
+        label="Confirm Password"
+        error={password && confirmPassword && password !== confirmPassword}
+        helperText={
+          password && confirmPassword && password !== confirmPassword
+            ? "Passwords do not match"
+            : " "
+        }
+      />
       <Button variant="outlined" type="submit">
         Save Changes
       </Button>
