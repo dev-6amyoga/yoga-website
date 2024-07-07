@@ -461,11 +461,18 @@ function StudentNavMUI({ mode, toggleColorMode }) {
 					data: { user_id: user?.user_id },
 				});
 				const data = response.data;
-				console.log("NAVBAR DATA : ", data);
+				// console.log("NAVBAR DATA : ", data);
 				if (data["userPlan"].length !== 0) {
 					const indexOfActiveUserPlan = data["userPlan"].findIndex(
 						(plan) => plan.current_status === USER_PLAN_ACTIVE
 					);
+
+					if (indexOfActiveUserPlan === -1) {
+						setDisabled(true);
+						setDisabledTailorMade(true);
+						return;
+					}
+
 					setUserPlan(data["userPlan"][indexOfActiveUserPlan]);
 					setPlanId(
 						data["userPlan"][indexOfActiveUserPlan]["plan_id"]

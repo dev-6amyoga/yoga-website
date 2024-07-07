@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
+import PhoneInputWithCountrySelect from "react-phone-number-input";
 import { toast } from "react-toastify";
 import OTPAPI from "../../../api/otp.api";
 import { UserAPI } from "../../../api/user.api";
@@ -261,10 +262,28 @@ export default function UpdatePhoneForm() {
 	return (
 		<div className="w-full">
 			<form
-				className="flex w-full gap-4"
+				className="flex flex-col items-center w-full gap-4"
 				onSubmit={handleUpdatePhone}
 				onReset={handleReset}>
-				<TextField
+				<PhoneInputWithCountrySelect
+					inputComponent={(props) => (
+						<TextField
+							fullWidth
+							name="phone"
+							label={isEditing ? "Phone" : ""}
+							placeholder={userData?.phone}
+							onChange={handleChange}
+							disabled={
+								!isEditing || verified || resendCounter > 0
+							}
+							sx={{ mb: 2 }}
+							helperText={phoneError ? phoneError : " "}
+							error={phoneError ? true : false}
+							{...props}
+						/>
+					)}
+				/>
+				{/* <TextField
 					fullWidth
 					name="phone"
 					label={isEditing ? "Phone" : ""}
@@ -274,7 +293,58 @@ export default function UpdatePhoneForm() {
 					sx={{ mb: 2 }}
 					helperText={phoneError ? phoneError : " "}
 					error={phoneError ? true : false}
-				/>
+				/> */}
+
+				{/* otp form */}
+				{phone && isEditing && !phoneError && !verified ? (
+					<div className="flex flex-col gap-4">
+						<TextField
+							fullWidth
+							label="OTP"
+							placeholder={"XXXXXX"}
+							onChange={(e) => {
+								setOtp(e.target.value);
+							}}
+							size="small"
+							disabled={resendCounter === 0 || verified}
+							error={otpError ? true : false}
+							helperText={otpError ? "Incorrect OTP" : ""}
+						/>
+						<div className="flex flex-row gap-2">
+							<Button
+								onClick={handleOTPSend}
+								disabled={startResendTimer}
+								className="w-full sm:w-auto"
+								variant="contained"
+								sx={{ height: "fit-content" }}>
+								{resendCounter === 0
+									? "Send OTP"
+									: timer === 30
+										? "Resend OTP"
+										: `Resend in ${resendCounter * 30 - timer} seconds`}
+							</Button>
+
+							<Button
+								variant="contained"
+								onClick={handleOTPVerify}
+								className="w-full sm:w-auto"
+								sx={{ height: "fit-content" }}
+								disable={resendCounter === 0}>
+								Verify
+							</Button>
+						</div>
+					</div>
+				) : (
+					<>
+						{isEditing && !phoneError && verified ? (
+							<>
+								<Badge color="success">Verified!</Badge>
+							</>
+						) : (
+							<></>
+						)}
+					</>
+				)}
 
 				<div className="flex gap-2">
 					{!isEditing ? (
@@ -321,57 +391,6 @@ export default function UpdatePhoneForm() {
 					)}
 				</div>
 			</form>
-
-			{/* otp form */}
-			{phone && isEditing && !phoneError && !verified ? (
-				<div className="flex flex-col gap-4">
-					<TextField
-						fullWidth
-						label="OTP"
-						placeholder={"XXXXXX"}
-						onChange={(e) => {
-							setOtp(e.target.value);
-						}}
-						size="small"
-						disabled={resendCounter === 0 || verified}
-						error={otpError ? true : false}
-						helperText={otpError ? "Incorrect OTP" : ""}
-					/>
-					<div className="flex flex-row gap-2">
-						<Button
-							onClick={handleOTPSend}
-							disabled={startResendTimer}
-							className="w-full sm:w-auto"
-							variant="contained"
-							sx={{ height: "fit-content" }}>
-							{resendCounter === 0
-								? "Send OTP"
-								: timer === 30
-									? "Resend OTP"
-									: `Resend in ${resendCounter * 30 - timer} seconds`}
-						</Button>
-
-						<Button
-							variant="contained"
-							onClick={handleOTPVerify}
-							className="w-full sm:w-auto"
-							sx={{ height: "fit-content" }}
-							disable={resendCounter === 0}>
-							Verify
-						</Button>
-					</div>
-				</div>
-			) : (
-				<>
-					{isEditing && !phoneError && verified ? (
-						<>
-							<Badge color="success">Verified!</Badge>
-						</>
-					) : (
-						<></>
-					)}
-				</>
-			)}
 
 			{/* Update Confirmation Dialog */}
 			<Dialog open={update} onClose={closeUpdateHandler}>
