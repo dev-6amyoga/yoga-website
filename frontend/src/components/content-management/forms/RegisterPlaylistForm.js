@@ -63,7 +63,7 @@ function RegisterPlaylistForm() {
           setAsanas(response.data);
           setAllAsanas(response.data);
         } catch (error) {
-          toast(error);
+          console.log(error);
         }
       } else {
         try {
@@ -73,7 +73,7 @@ function RegisterPlaylistForm() {
           setAsanas(response.data);
           setAllAsanas(response.data);
         } catch (error) {
-          toast(error);
+          console.log(error);
         }
       }
     };
@@ -127,7 +127,7 @@ function RegisterPlaylistForm() {
         const data = response.data;
         setTransitions(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();

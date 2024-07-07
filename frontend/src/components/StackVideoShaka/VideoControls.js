@@ -164,10 +164,8 @@ function VideoControls({ handleFullScreen }) {
   const handleViewModeToggle = useCallback(
     (e) => {
       if (e.target.checked) {
-        toast("View Mode: teacher", { type: "success" });
         setViewMode(VIDEO_VIEW_TEACHING_MODE);
       } else {
-        toast("View Mode: student", { type: "success" });
         setViewMode(VIDEO_VIEW_STUDENT_MODE);
       }
     },

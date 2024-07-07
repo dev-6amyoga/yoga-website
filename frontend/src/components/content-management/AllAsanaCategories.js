@@ -42,7 +42,7 @@ function AllAsanaCategories() {
         setCategories(data);
         setFilteredTransitions(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();

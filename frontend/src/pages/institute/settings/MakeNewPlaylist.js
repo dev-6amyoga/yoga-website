@@ -150,7 +150,7 @@ function MakeNewPlaylist() {
         const data = response.data;
         setAsanas(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();

@@ -131,7 +131,7 @@ function RegisterNewSchedule() {
         const data = response.data;
         setAsanas(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();
@@ -171,7 +171,7 @@ function RegisterNewSchedule() {
         const data = response.data;
         setTransitions(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();

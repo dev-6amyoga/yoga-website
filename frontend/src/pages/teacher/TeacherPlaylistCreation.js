@@ -86,7 +86,7 @@ export default function TeacherPlaylistCreation() {
         console.log(data);
         setAsanas(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();

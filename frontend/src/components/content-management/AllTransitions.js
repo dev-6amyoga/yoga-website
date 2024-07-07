@@ -68,7 +68,7 @@ function AllTransitions() {
         setTransitions(data);
         setFilteredTransitions(data);
       } catch (error) {
-        toast(error);
+        console.log(error);
       }
     };
     fetchData();

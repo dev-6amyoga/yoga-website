@@ -49,6 +49,6 @@ export const MonthlyPlaylistChecker = async (user_id, user_type) => {
     }
     return monthlyPlaylistLimit;
   } catch (error) {
-    toast(error);
+    console.log(error);
   }
 };
