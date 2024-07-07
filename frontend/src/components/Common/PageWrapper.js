@@ -76,8 +76,10 @@ export default function PageWrapper({ heading, children }) {
             <Tooltip title="Register/Login">
               <Button
                 onClick={() => {
-                  window.location.reload();
                   navigate("/auth");
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 100); // Adjust the delay as needed
                 }}
               >
                 <PersonIcon style={{ color: "blue" }} />
