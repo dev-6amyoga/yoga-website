@@ -244,6 +244,17 @@ export default function GeneralInformationForm({
     };
   }, [phone]);
 
+  const classifyRegion = (regionCode) => {
+    switch (regionCode) {
+      case "Asia":
+        return "South Asia";
+      case "Europe":
+        return "Europe";
+      default:
+        return "Rest of the World";
+    }
+  };
+
   const fetchCountryCodes = async () => {
     const response = await fetch("https://restcountries.com/v3.1/all");
     const data = await response.json();
@@ -251,6 +262,7 @@ export default function GeneralInformationForm({
       const countryCode =
         country.idd?.root +
         (country.idd?.suffixes ? country.idd.suffixes[0] : "");
+      console.log(country);
       if (countryCode) {
         acc[country.name.common] = countryCode;
       }
