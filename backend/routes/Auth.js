@@ -122,18 +122,22 @@ router.post("/login", async (req, res) => {
 
 		// console.log(errorUser);
 
-		if (!user || errorUser)
+		if (!user || errorUser) {
+			await t.rollback();
 			return res
 				.status(HTTP_BAD_REQUEST)
 				.json({ error: "User does not exist" });
+		}
 
 		// check password
 		const validPassword = await brypt.compare(password, user.password);
 
-		if (!validPassword)
+		if (!validPassword) {
+			await t.rollback();
 			return res
 				.status(HTTP_BAD_REQUEST)
 				.json({ error: "Invalid password" });
+		}
 
 		delete user.password;
 
@@ -154,15 +158,15 @@ router.post("/login", async (req, res) => {
 
 		for (let i = 0; i < uipr.length; i++) {
 			const u = uipr[i];
-			console.log(
-				"Updating user plan status",
-				user.user_id,
-				u.get("institute_id")
-			);
+			// console.log(
+			// 	"Updating user plan status",
+			// 	user.user_id,
+			// 	u.get("institute_id")
+			// );
 			await UpdateUserPlanStatus(user.user_id, u.get("institute_id"), t);
 		}
 
-		[user, errorUser] = await GetUserInfo({ email });
+		[user, errorUser] = await GetUserInfo({ username });
 
 		if (errorUser) {
 			await t.rollback();
@@ -246,6 +250,7 @@ router.post("/login", async (req, res) => {
 		return res.status(HTTP_OK).json({ user, accessToken, refreshToken });
 	} catch (err) {
 		await t.rollback();
+		console.log(err);
 		return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
 			message: "internal server error",
 		});
@@ -306,11 +311,11 @@ router.post("/login-google", async (req, res) => {
 
 			for (let i = 0; i < uipr.length; i++) {
 				const u = uipr[i];
-				console.log(
-					"Updating user plan status",
-					user.user_id,
-					u.get("institute_id")
-				);
+				// console.log(
+				// 	"Updating user plan status",
+				// 	user.user_id,
+				// 	u.get("institute_id")
+				// );
 				await UpdateUserPlanStatus(
 					user.user_id,
 					u.get("institute_id"),
