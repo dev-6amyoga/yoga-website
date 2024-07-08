@@ -54,14 +54,15 @@ export default function ChangePassword() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleClickShowNewPassword = () => setShowNewPassword(!showPassword);
+  const handleClickShowNewPassword = () => setShowNewPassword(!showNewPassword);
 
   const [showNewPassword, setShowNewPassword] = useState(false);
 
-  const handleClickShowConfirmPassword = () =>
-    setShowConfirmPassword(!showPassword);
-
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleClickShowConfirmPassword = () =>
+    setShowConfirmPassword(!showConfirmPassword);
+
   return (
     <form
       className="flex flex-col gap-2"
