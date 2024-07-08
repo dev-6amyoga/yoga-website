@@ -160,20 +160,22 @@ export default function FreeVideos() {
               }}
             >
               {freeVideos.map((video) => (
-                <Card key={video.videoId} sx={{ mb: 2 }}>
-                  <CardContent>
-                    <div className="flex flex-row items-center gap-2">
-                      <Button
-                        variant="contained"
-                        onClick={() => setCurrentVideoId(video.videoId)}
-                        startIcon={<PlayCircleFilledWhiteOutlinedIcon />}
-                      />
-                      <Typography variant="subtitle1" className="truncate">
-                        {video.title}
-                      </Typography>
-                    </div>
-                  </CardContent>
-                </Card>
+                <Button
+                  key={video.videoId}
+                  fullWidth
+                  onClick={() => setCurrentVideoId(video.videoId)}
+                  sx={{ mb: 2 }}
+                >
+                  <Card className="hover-card" sx={{ width: "100%" }}>
+                    <CardContent>
+                      <div className="flex flex-row items-center gap-2">
+                        <Typography variant="subtitle1" className="truncate">
+                          {video.title}
+                        </Typography>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Button>
               ))}
             </Box>
           </Container>

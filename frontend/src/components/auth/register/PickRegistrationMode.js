@@ -2,6 +2,7 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
+import { Button } from "@mui/material";
 
 export default function PickRegistationMode({
   regMode,
@@ -107,19 +108,20 @@ export default function PickRegistationMode({
             }}
           ></GoogleLogin>
         </div>
-
-        <div
-          className={`flex-1 w-full flex items-center gap-2 flex-col px-4 py-2 border rounded-lg 
+        <Button>
+          <div
+            className={`flex-1 w-full flex items-center gap-2 flex-col px-4 py-2 border rounded-lg 
               ${regMode === "NORMAL" ? "border-2 border-blue-500" : ""}
               `}
-          onClick={() => {
-            setGoogleInfo({});
-            setRegMode("NORMAL");
-            handleNextStep();
-          }}
-        >
-          Use Email
-        </div>
+            onClick={() => {
+              setGoogleInfo({});
+              setRegMode("NORMAL");
+              handleNextStep();
+            }}
+          >
+            Use Email
+          </div>
+        </Button>
       </div>
     </form>
   );
