@@ -102,14 +102,18 @@ export function UpdateEmailForm() {
     };
   }, [formData?.email_profile]);
 
+  const [showMessage, setShowMessage] = useState(false);
   const handleUpdateEmail = async (e) => {
     e.preventDefault();
     const formData = getFormData(e);
     console.log(formData.email_profile);
     if (formData.email_profile === currentEmail) {
       toast("No changes to save!");
+      setShowMessage(false);
+      setIsEditing(false);
       return;
     }
+    setIsEditing(false);
     console.log(userData);
     Fetch({
       url: "/update-request/register",
@@ -128,10 +132,11 @@ export function UpdateEmailForm() {
       .then((res) => {
         console.log(res);
         toast("Update sent successfully", { type: "success" });
+        setShowMessage(true);
         setIsEmailUpdate(false);
-        setIsEditing(false);
       })
       .catch((err) => {
+        setShowMessage(false);
         toast(`Error : ${err.response.data.error}`, {
           type: "error",
         });
@@ -165,6 +170,17 @@ export function UpdateEmailForm() {
         onReset={handleReset}
       >
         <Typography>Email ID</Typography>
+
+        {showMessage && (
+          <p
+            className={
+              "text-sm border p-2 rounded-lg text-zinc-500 border-red-500"
+            }
+          >
+            The admin has been notified of your request. Do check your inbox for
+            a mail from us which indicates the success of the updation!
+          </p>
+        )}
         <TextField
           fullWidth
           value={formData.email_profile}
