@@ -186,8 +186,11 @@ function StudentPlan() {
         data: { user_id: user?.user_id },
       });
       const data = response.data;
+      data.userPlan.sort(
+        (a, b) => new Date(a.validity_to) - new Date(b.validity_to)
+      );
 
-      // console.log({ planzzzzzzz: data });
+      console.log(data.userPlan, "is plannnnz");
 
       if (data?.userPlan.length !== 0) {
         const filteredPlans = data.userPlan.filter(

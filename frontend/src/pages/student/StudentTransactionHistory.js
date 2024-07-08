@@ -27,7 +27,11 @@ function StudentTransactionHistory() {
           data: { user_id: user?.user_id },
         });
         const data = response.data;
-        setTransactions(data["all_transaction_for_user"]);
+        console.log("data of transac :", data);
+        data.all_transaction_for_user.sort(
+          (a, b) => new Date(b.payment_date) - new Date(a.payment_date)
+        );
+        setTransactions(data.all_transaction_for_user);
       } catch (error) {
         console.log(error);
       }
