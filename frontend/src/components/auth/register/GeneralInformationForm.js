@@ -297,7 +297,12 @@ export default function GeneralInformationForm({
       setPhone(countryCode);
       return;
     }
-    setPhone(newPhone);
+    console.log(newPhone.length);
+    if (newPhone.length < countryCode.length) {
+      setPhone(countryCode);
+    } else {
+      setPhone(newPhone);
+    }
   };
 
   return (
