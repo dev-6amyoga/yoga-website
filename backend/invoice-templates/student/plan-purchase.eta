@@ -17,10 +17,11 @@ h2 {
   width: 100%;
   max-width: 800px;
   margin: 20px auto;
+  font-size: 0.8rem;
 }
 </style>
 
-<h2>Student Plan Purchase Invoice</h2>
+<h3>Student Plan Purchase Invoice</h2>
 
 <div class="center">
   <p>
