@@ -1,4 +1,10 @@
-import { Button, CircularProgress, TextField } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  IconButton,
+  InputAdornment,
+  TextField,
+} from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +12,7 @@ import { toast } from "react-toastify";
 import { Fetch } from "../../utils/Fetch";
 import { validatePassword } from "../../utils/formValidation";
 import getFormData from "../../utils/getFormData";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function ForgotPassword() {
   const [token, setToken] = useState(null);
@@ -109,6 +116,15 @@ export default function ForgotPassword() {
     }
   };
 
+  const handleClickShowNewPassword = () => setShowNewPassword(!showNewPassword);
+
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleClickShowConfirmPassword = () =>
+    setShowConfirmPassword(!showConfirmPassword);
+
   return (
     <div className="max-w-3xl mx-auto mt-10">
       <h1 className="text-center">Forgot Password</h1>
@@ -133,7 +149,7 @@ export default function ForgotPassword() {
             Password must be minimum 8 letters and contain atleast 1 number, 1
             alphabet, 1 special character [!@#$%^&*,?]
           </p>
-          <TextField
+          {/* <TextField
             fullWidth
             required
             name="new_password"
@@ -148,6 +164,43 @@ export default function ForgotPassword() {
             label="Confirm New Password"
             type="password"
             variant="outlined"
+          /> */}
+
+          <TextField
+            label="New Password"
+            variant="outlined"
+            name="new_password"
+            type={showNewPassword ? "text" : "password"}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowNewPassword}
+                  >
+                    {showNewPassword ? <Visibility /> : <VisibilityOff />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <TextField
+            label="Confirm New Password"
+            variant="outlined"
+            name="confirm_new_password"
+            type={showConfirmPassword ? "text" : "password"}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowConfirmPassword}
+                  >
+                    {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
 
           <div className="flex flex-row gap-2 w-full">

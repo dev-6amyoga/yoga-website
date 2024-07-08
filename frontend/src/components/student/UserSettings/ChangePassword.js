@@ -129,14 +129,6 @@ export default function ChangePassword() {
           ),
         }}
       />
-      {/* <TextField
-        fullWidth
-        required
-        name="confirm_new_password"
-        label="Confirm New Password"
-        type="password"
-        variant="outlined"
-      /> */}
       <TextField
         label="Confirm New Password"
         variant="outlined"
