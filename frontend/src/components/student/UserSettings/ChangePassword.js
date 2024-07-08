@@ -1,5 +1,5 @@
 import { Button, IconButton, InputAdornment, TextField } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
@@ -50,6 +50,39 @@ export default function ChangePassword() {
       return;
     }
   };
+
+  const [password, setPassword] = useState(null);
+  const [confirmPassword, setConfirmPassword] = useState(null);
+  const [passwordError, setPasswordError] = useState(null);
+  const inputErrorDebounce = useRef(null);
+
+  useEffect(() => {
+    console.log(passwordError);
+  }, [passwordError]);
+  // Check password
+
+  useEffect(() => {
+    if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
+
+    inputErrorDebounce.current = setTimeout(() => {
+      if (password && confirmPassword && password !== confirmPassword) {
+        setPasswordError(null);
+        return;
+      } else {
+        const [is_password_valid, pass_error] = validatePassword(password);
+        if (!is_password_valid || pass_error) {
+          setPasswordError(pass_error);
+          return;
+        }
+      }
+
+      setPasswordError(null);
+    }, 500);
+    return () => {
+      if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
+    };
+  }, [password, confirmPassword]);
+
   const handleClickShowPassword = () => setShowPassword(!showPassword);
 
   const [showPassword, setShowPassword] = useState(false);
@@ -98,9 +131,9 @@ export default function ChangePassword() {
       />
       <br />
       <p
-        className={"text-sm border p-2 rounded-lg text-zinc-500 border-red-500"}
+        className={`text-sm border p-2 rounded-lg text-zinc-500 ${passwordError ? "border-red-500" : ""}`}
       >
-        Password must be minimum 8 letters and contain atleast 1 number, 1
+        Password must be minimum 8 letters and contain at least 1 number, 1
         alphabet, 1 special character [!@#$%^&*,?]
       </p>
       {/* <TextField
@@ -116,6 +149,9 @@ export default function ChangePassword() {
         variant="outlined"
         name="new_password"
         type={showNewPassword ? "text" : "password"}
+        onChange={(e) => {
+          setPassword(e.target.value);
+        }}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
@@ -128,12 +164,17 @@ export default function ChangePassword() {
             </InputAdornment>
           ),
         }}
+        // error={passwordError ? true : false}
+        // helperText={passwordError ? passwordError : " "}
       />
       <TextField
         label="Confirm New Password"
         variant="outlined"
         name="confirm_new_password"
         type={showConfirmPassword ? "text" : "password"}
+        onChange={(e) => {
+          setConfirmPassword(e.target.value);
+        }}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
@@ -146,6 +187,8 @@ export default function ChangePassword() {
             </InputAdornment>
           ),
         }}
+        // error={passwordError ? true : false}
+        // helperText={passwordError ? passwordError : " "}
       />
       <div className="flex flex-row gap-2 w-full">
         <Button
