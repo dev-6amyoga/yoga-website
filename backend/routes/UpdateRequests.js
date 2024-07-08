@@ -95,6 +95,7 @@ router.post("/register", async (req, res) => {
     });
   }
 });
+
 router.get("/get-all", async (req, res) => {
   try {
     const updateRequests = await UpdateRequests.findAll();
@@ -106,6 +107,7 @@ router.get("/get-all", async (req, res) => {
     });
   }
 });
+
 router.post("/approve", async (req, res) => {
   const { update_request_id } = req.body;
 
@@ -143,7 +145,7 @@ router.post("/approve", async (req, res) => {
     mailTransporter.sendMail(
       {
         from: "dev.6amyoga@gmail.com",
-        to: updateRequest.old_email,
+        to: updateRequest.new_email,
         subject: "6AM Yoga | Email ID Update",
         html: `
     <p>Welcome to 6AM Yoga!</p>
@@ -183,6 +185,7 @@ router.post("/approve", async (req, res) => {
       .json({ error: "Error approving update request" });
   }
 });
+
 router.post("/reject", async (req, res) => {
   const { update_request_id } = req.body;
   if (!update_request_id) {
@@ -192,9 +195,24 @@ router.post("/reject", async (req, res) => {
   }
   const t = await sequelize.transaction();
   try {
-    const updateRequest = await UpdateRequests.destroy(update_request_id, {
-      transaction: t,
+    console.log(update_request_id);
+
+    const ur = await UpdateRequests.findOne({
+      where: { update_request_id: update_request_id },
     });
+    if (!ur) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        message: "Invalid email request",
+      });
+    }
+
+    const updateRequest = await UpdateRequests.destroy({
+      where: {
+        update_request_id: update_request_id, // Assuming 'update_request_id' is the ID of the record you want to delete
+      },
+      transaction: t, // Assuming 't' is your transaction object
+    });
+
     if (!updateRequest) {
       await t.rollback();
       return res
@@ -202,6 +220,34 @@ router.post("/reject", async (req, res) => {
         .json({ error: "Update request not found" });
     }
     await t.commit();
+    console.log(ur);
+
+    mailTransporter.sendMail(
+      {
+        from: "dev.6amyoga@gmail.com",
+        to: ur.old_email,
+        subject: "6AM Yoga | Email ID Update",
+        html: `
+      <p>Hi ${ur.name}!</p>
+      <p>We received a request from you to update you Email ID. The details are as follows</p>
+      <p>Old Email ID : ${ur.old_email}</p>
+      <p>New Email ID : ${ur.new_email}.</p>
+      <p>This request has been rejected by the admin. For any clarifications, please mail us back, or reach out to us at +919980802351</p>
+      <p>Regards, </p>
+      <p>My Yoga Teacher, 6AM Yoga </p>
+    `,
+      },
+      async (err, info) => {
+        if (err) {
+          console.error(err);
+          res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+            message: "Internal server error; try again",
+          });
+        } else {
+          console.log("Email sent to admin");
+        }
+      }
+    );
     return res
       .status(HTTP_OK)
       .json({ message: "Update request rejected successfully" });
@@ -213,6 +259,7 @@ router.post("/reject", async (req, res) => {
       .json({ error: "Error rejecting update request" });
   }
 });
+
 router.post("/get-update-request-by-token", async (req, res) => {
   const { token } = req.body;
 
