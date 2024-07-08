@@ -14,6 +14,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import PhoneInputWithCountrySelect from "react-phone-number-input";
+// import {} from "react-phone-number-input/input";
 import { toast } from "react-toastify";
 import OTPAPI from "../../../api/otp.api";
 import { UserAPI } from "../../../api/user.api";
@@ -266,6 +267,8 @@ export default function UpdatePhoneForm() {
 				onSubmit={handleUpdatePhone}
 				onReset={handleReset}>
 				<PhoneInputWithCountrySelect
+					value={phone}
+					onChange={setPhone}
 					inputComponent={(props) => (
 						<TextField
 							fullWidth
