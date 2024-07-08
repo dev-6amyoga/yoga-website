@@ -150,7 +150,10 @@ function StudentTransactionHistory() {
 						color="primary"
 						disabled={
 							loading ||
-							rowData?.original?.payment_status !== "succeeded"
+							(rowData?.original?.payment_status !==
+								"successful" &&
+								rowData?.original?.payment_status !==
+									"succeeded")
 						}
 						loading={loading}
 						onClick={() => {
