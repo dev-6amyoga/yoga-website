@@ -7,8 +7,15 @@ import Typography from "@mui/material/Typography";
 import ThumbUpAltRoundedIcon from "@mui/icons-material/ThumbUpAltRounded";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
-import { TextField, Button } from "@mui/material";
-import { useState } from "react";
+import {
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
+import { useEffect, useState } from "react";
 import { validateEmail, validatePhone } from "../../../utils/formValidation";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
@@ -32,12 +39,61 @@ const items = [
 ];
 
 export default function Highlights() {
+  const [phone, setPhone] = useState("");
+  const fetchCountryCodes = async () => {
+    const response = await fetch("https://restcountries.com/v3.1/all");
+    const data = await response.json();
+    return data.reduce((acc, country) => {
+      const countryCode =
+        country.idd?.root +
+        (country.idd?.suffixes ? country.idd.suffixes[0] : "");
+      if (countryCode) {
+        acc[country.name.common] = countryCode;
+      }
+      return acc;
+    }, {});
+  };
+  const [countryCodes, setCountryCodes] = useState({});
+  const [country, setCountry] = useState("");
+  useEffect(() => {
+    const getCountryCodes = async () => {
+      const codes = await fetchCountryCodes();
+      setCountryCodes(codes);
+    };
+    getCountryCodes();
+  }, []);
+  const handleCountryChange = (event) => {
+    const selectedCountry = event.target.value;
+    setCountry(selectedCountry);
+    const countryCode = countryCodes[selectedCountry];
+    if (countryCode) {
+      setPhone(countryCode);
+    }
+  };
+  const handlePhoneChange = (event) => {
+    const newPhone = event.target.value;
+    const countryCode = countryCodes[country] || "";
+    if (
+      newPhone === countryCode &&
+      event.nativeEvent.inputType === "deleteContentBackward"
+    ) {
+      setPhone(countryCode);
+      return;
+    }
+    if (newPhone.length < countryCode.length) {
+      setPhone(countryCode);
+    } else {
+      setPhone(newPhone);
+    }
+  };
+
   const [formData, setFormData] = useState({
     query_name: "",
     query_email: "",
     query_phone: "",
     query_text: "",
   });
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData({
@@ -45,22 +101,24 @@ export default function Highlights() {
       [name]: value,
     });
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const [validPhone, phoneError] = await validatePhone(formData.query_phone);
+    const [validPhone, phoneError] = await validatePhone(phone);
     if (!validPhone) {
       toast(phoneError.message, { type: "error" });
       return;
     }
-    if (!formData.query_phone.startsWith("+91")) {
-      formData.query_phone = "+91" + formData.query_phone;
-    }
+    // if (!formData.query_phone.startsWith("+91")) {
+    //   formData.query_phone = "+91" + formData.query_phone;
+    // }
     const [validEmail, emailError] = validateEmail(formData.query_email);
     if (!validEmail) {
       toast(emailError.message, { type: "error" });
       return;
     }
     toast("Sending Query!");
+    formData.query_phone = phone;
     try {
       const response = await Fetch({
         url: "/query/register",
@@ -212,15 +270,43 @@ export default function Highlights() {
             onChange={handleChange}
           />
 
-          <TextField
+          <FormControl fullWidth>
+            <InputLabel id="country-label">Country</InputLabel>
+            <Select
+              labelId="country-label"
+              value={country}
+              onChange={handleCountryChange}
+              required
+            >
+              {Object.keys(countryCodes).map((countryName) => (
+                <MenuItem key={countryName} value={countryName}>
+                  {countryName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <br />
+
+          {/* <TextField
             name="query_phone"
             label="Phone"
             variant="outlined"
             fullWidth
             value={formData.query_phone}
             onChange={handleChange}
-          />
+          /> */}
 
+          <TextField
+            width="100%"
+            name="query_phone"
+            placeholder="XXXXXXXXXX"
+            value={phone}
+            onChange={handlePhoneChange}
+            required
+            label="Phone"
+            // error={phoneError ? true : false}
+            // helperText={phoneError ? phoneError : " "}
+          />
           <TextField
             name="query_text"
             label="Your Query"
