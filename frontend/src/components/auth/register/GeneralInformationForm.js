@@ -294,16 +294,35 @@ export default function GeneralInformationForm({
     setCountry(selectedCountry);
     const countryCode = countryCodes[selectedCountry];
     if (countryCode) {
-      const existingPhoneNumber = phone.replace(/^\+\d*/, "");
-      setPhone(countryCode + existingPhoneNumber);
+      // const existingPhoneNumber = phone.replace(/^\+\d*/, "");
+      // setPhone(countryCode + existingPhoneNumber);
+      console.log("phone is set 1");
+
+      setPhone(countryCode);
     }
   };
 
   const handlePhoneChange = (event) => {
+    console.l;
     const newPhone = event.target.value;
+    console.log("phone is haha:", newPhone);
     const countryCode = countryCodes[country] || "";
-    const phoneNumberWithoutCode = newPhone.replace(countryCode, "");
-    setPhone(countryCode + phoneNumberWithoutCode);
+
+    // Check if the newPhone is just the country code and backspace is pressed
+    if (
+      newPhone === countryCode &&
+      event.nativeEvent.inputType === "deleteContentBackward"
+    ) {
+      // Do not change the phone state if backspace is pressed when only the country code is present
+      setPhone(countryCode);
+    } else {
+      console.log(newPhone, countryCode);
+      const phoneNumberWithoutCode = newPhone.startsWith(countryCode)
+        ? newPhone.slice(countryCode.length)
+        : newPhone;
+      console.log("phone is set 2");
+      setPhone(countryCode + phoneNumberWithoutCode);
+    }
   };
 
   return (
