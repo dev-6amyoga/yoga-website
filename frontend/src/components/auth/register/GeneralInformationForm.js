@@ -46,13 +46,10 @@ export default function GeneralInformationForm({
     async (e) => {
       e.preventDefault();
       const formData = getFormData(e);
-      console.log(formData);
-
       let [is_email_valid, email_error] = validateEmail(formData?.email_id);
 
       if (!is_email_valid) {
         toast(email_error.message, { type: "warning" });
-        console.log(email_error);
         return;
       }
 
@@ -118,7 +115,6 @@ export default function GeneralInformationForm({
     if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
 
     inputErrorDebounce.current = setTimeout(async () => {
-      console.log("Checking username");
       setLoading(true);
       if (username) {
         const [check_username, error] =
@@ -157,9 +153,6 @@ export default function GeneralInformationForm({
         return;
       } else {
         const [is_password_valid, pass_error] = validatePassword(password);
-
-        console.log(password, confirmPassword, is_password_valid, pass_error);
-
         if (!is_password_valid || pass_error) {
           setPasswordError(pass_error);
           setLoading(false);
@@ -179,7 +172,6 @@ export default function GeneralInformationForm({
     if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
 
     inputErrorDebounce.current = setTimeout(async () => {
-      console.log("Checking email");
       setLoading(true);
       if (email) {
         const [check_email, error] = await UserAPI.postCheckEmail(email);
@@ -210,7 +202,6 @@ export default function GeneralInformationForm({
     if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
 
     inputErrorDebounce.current = setTimeout(async () => {
-      console.log("Checking phone number");
       setLoading(true);
       if (phone) {
         const [is_phone_valid, phone_error] = await validatePhone(phone);
@@ -244,10 +235,6 @@ export default function GeneralInformationForm({
     };
   }, [phone]);
 
-  useEffect(() => {
-    console.log("phone is :", phone);
-  }, [phone]);
-
   const fetchCountryCodes = async () => {
     const response = await fetch("https://restcountries.com/v3.1/all");
     const data = await response.json();
@@ -255,7 +242,6 @@ export default function GeneralInformationForm({
       const countryCode =
         country.idd?.root +
         (country.idd?.suffixes ? country.idd.suffixes[0] : "");
-      console.log(country);
       if (countryCode) {
         acc[country.name.common] = countryCode;
       }
@@ -279,10 +265,6 @@ export default function GeneralInformationForm({
     setCountry(selectedCountry);
     const countryCode = countryCodes[selectedCountry];
     if (countryCode) {
-      // const existingPhoneNumber = phone.replace(/^\+\d*/, "");
-      // setPhone(countryCode + existingPhoneNumber);
-      console.log("phone is set 1");
-
       setPhone(countryCode);
     }
   };
@@ -297,7 +279,6 @@ export default function GeneralInformationForm({
       setPhone(countryCode);
       return;
     }
-    console.log(newPhone.length);
     if (newPhone.length < countryCode.length) {
       setPhone(countryCode);
     } else {
