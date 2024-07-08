@@ -78,18 +78,10 @@ export default function UpdateProfile() {
         setIsEditing(true);
       } else {
         const formData = getFormData(e);
-        console.log(formData);
-        if (
-          formData.name_profile === "" &&
-          formData.email_profile === "" &&
-          formData.phone_profile === "" &&
-          formData.username_profile === ""
-        ) {
+        if (formData.name_profile === "" && formData.email_profile === "") {
           toast("No changes to save!");
         } else if (
           formData.name_profile === userData.name &&
-          formData.email_profile === userData.email &&
-          formData.phone_profile === userData.phone &&
           formData.username_profile === userData.username
         ) {
           toast("No changes to save!");
