@@ -171,6 +171,8 @@ export default function ForgotPassword() {
 	const handleClickShowConfirmPassword = () =>
 		setShowConfirmPassword(!showConfirmPassword);
 
+	const handleDisable = (e) => e.preventDefault();
+
 	return (
 		<div className="max-w-3xl mx-auto mt-10">
 			<h1 className="text-center">Forgot Password</h1>
@@ -214,8 +216,12 @@ export default function ForgotPassword() {
 						name="new_password"
 						type={showNewPassword ? "text" : "password"}
 						onChange={(e) => setPassword(e.target.value)}
+						onCut={handleDisable}
+						onCopy={handleDisable}
+						onPaste={handleDisable}
 						error={passwordError ? true : false}
 						helperText={passwordError ? passwordError : " "}
+						required
 						InputProps={{
 							endAdornment: (
 								<InputAdornment position="end">
@@ -238,10 +244,14 @@ export default function ForgotPassword() {
 						name="confirm_new_password"
 						type={showConfirmPassword ? "text" : "password"}
 						onChange={(e) => setConfirmPassword(e.target.value)}
+						onCut={handleDisable}
+						onCopy={handleDisable}
+						onPaste={handleDisable}
 						error={confirmPasswordError ? true : false}
 						helperText={
 							confirmPasswordError ? confirmPasswordError : " "
 						}
+						required
 						InputProps={{
 							endAdornment: (
 								<InputAdornment position="end">
