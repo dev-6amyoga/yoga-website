@@ -12,7 +12,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import PhoneInputWithCountrySelect from "react-phone-number-input";
 // import {} from "react-phone-number-input/input";
 import { toast } from "react-toastify";
@@ -21,6 +21,10 @@ import { UserAPI } from "../../../api/user.api";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import { validatePhone } from "../../../utils/formValidation";
+
+const CustomTextField = forwardRef((props, ref) => {
+	return <TextField inputRef={ref} {...props} />;
+});
 
 export default function UpdatePhoneForm() {
 	const user = useUserStore((state) => state.user);
@@ -268,23 +272,22 @@ export default function UpdatePhoneForm() {
 				onReset={handleReset}>
 				<PhoneInputWithCountrySelect
 					value={phone}
-					onChange={setPhone}
-					inputComponent={(props) => (
-						<TextField
-							fullWidth
-							name="phone"
-							label={isEditing ? "Phone" : ""}
-							placeholder={userData?.phone}
-							onChange={handleChange}
-							disabled={
-								!isEditing || verified || resendCounter > 0
-							}
-							sx={{ mb: 2 }}
-							helperText={phoneError ? phoneError : " "}
-							error={phoneError ? true : false}
-							{...props}
-						/>
-					)}
+					onChange={(val) => {
+						console.log(val);
+						setPhone(val);
+					}}
+					disabled={!isEditing || verified || resendCounter > 0}
+					limitMaxLength={true}
+					numberInputProps={{
+						fullWidth: true,
+						name: "phone",
+						label: isEditing ? "Phone" : "",
+						placeholder: userData?.phone,
+						sx: { mb: 2 },
+						helperText: phoneError ? phoneError : " ",
+						error: phoneError ? true : false,
+					}}
+					inputComponent={CustomTextField}
 				/>
 				{/* <TextField
 					fullWidth
