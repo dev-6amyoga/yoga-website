@@ -129,6 +129,7 @@ export function UpdateEmailForm() {
         console.log(res);
         toast("Update sent successfully", { type: "success" });
         setIsEmailUpdate(false);
+        setIsEditing(false);
       })
       .catch((err) => {
         toast(`Error : ${err.response.data.error}`, {

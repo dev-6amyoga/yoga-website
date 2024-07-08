@@ -244,17 +244,6 @@ export default function GeneralInformationForm({
     };
   }, [phone]);
 
-  const classifyRegion = (regionCode) => {
-    switch (regionCode) {
-      case "Asia":
-        return "South Asia";
-      case "Europe":
-        return "Europe";
-      default:
-        return "Rest of the World";
-    }
-  };
-
   useEffect(() => {
     console.log("phone is :", phone);
   }, [phone]);
@@ -285,10 +274,6 @@ export default function GeneralInformationForm({
     getCountryCodes();
   }, []);
 
-  useEffect(() => {
-    console.log("country codes : ", countryCodes);
-  }, [countryCodes]);
-
   const handleCountryChange = (event) => {
     const selectedCountry = event.target.value;
     setCountry(selectedCountry);
@@ -303,26 +288,16 @@ export default function GeneralInformationForm({
   };
 
   const handlePhoneChange = (event) => {
-    console.l;
     const newPhone = event.target.value;
-    console.log("phone is haha:", newPhone);
     const countryCode = countryCodes[country] || "";
-
-    // Check if the newPhone is just the country code and backspace is pressed
     if (
       newPhone === countryCode &&
       event.nativeEvent.inputType === "deleteContentBackward"
     ) {
-      // Do not change the phone state if backspace is pressed when only the country code is present
       setPhone(countryCode);
-    } else {
-      console.log(newPhone, countryCode);
-      const phoneNumberWithoutCode = newPhone.startsWith(countryCode)
-        ? newPhone.slice(countryCode.length)
-        : newPhone;
-      console.log("phone is set 2");
-      setPhone(countryCode + phoneNumberWithoutCode);
+      return;
     }
+    setPhone(newPhone);
   };
 
   return (
