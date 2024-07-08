@@ -626,7 +626,7 @@ function RegisterPlaylistForm() {
             <Collapse title={categoryData.category} key={index}>
               <Table data={categoryData.asanas} className="bg-white">
                 <Table.Column prop="asana_name" label="Asana Name" />
-                <Table.Column
+                {/* <Table.Column
                   prop="language"
                   label="Language"
                   render={(data) => {
@@ -635,7 +635,7 @@ function RegisterPlaylistForm() {
                     }
                     return data.language;
                   }}
-                />
+                /> */}
                 <Table.Column
                   prop="nobreak_asana"
                   label="No Break?"

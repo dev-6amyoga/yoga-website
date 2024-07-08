@@ -799,9 +799,7 @@ function AllPlaylists() {
                                   key={asanaOption.id}
                                   value={asanaOption.asana_name}
                                 >
-                                  {asanaOption.asana_name +
-                                    " " +
-                                    asanaOption.language}
+                                  {asanaOption.asana_name}{" "}
                                 </Select.Option>
                               ))}
                             </Select>
