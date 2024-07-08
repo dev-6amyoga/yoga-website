@@ -16,6 +16,8 @@ import UpdateProfile from "../../components/student/UserSettings/UpdateProfile";
 import { ROLE_STUDENT } from "../../enums/roles";
 import useUserStore from "../../store/UserStore";
 import { withAuth } from "../../utils/withAuth";
+import { UpdateEmailForm } from "../../components/student/UserSettings/UpdateEmailForm";
+import UpdatePhoneForm from "../../components/student/UserSettings/UpdatePhoneForm";
 
 function StudentProfile() {
   const user = useUserStore((state) => state.user);
@@ -51,7 +53,8 @@ function StudentProfile() {
 
           <Tabs value={tabIndex} onChange={handleTabChange} centered>
             <Tab label="Profile" />
-            <Tab label="Contact Details" />
+            <Tab label="Change Email" />
+            <Tab label="Change Phone" />
             <Tab label="Change Password" />
           </Tabs>
 
@@ -65,10 +68,9 @@ function StudentProfile() {
             }}
           >
             {tabIndex === 0 && <UpdateProfile />}
-
-            {tabIndex === 1 && <UpdateContactDetails />}
-
-            {tabIndex === 2 && <ChangePassword />}
+            {tabIndex === 1 && <UpdateEmailForm />}
+            {tabIndex === 2 && <UpdatePhoneForm />}
+            {tabIndex === 3 && <ChangePassword />}
           </Box>
         </Card>
       </Container>
