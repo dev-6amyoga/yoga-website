@@ -185,6 +185,7 @@ router.post("/login", async (req, res) => {
 					[Op.gt]: new Date(),
 				},
 			},
+			transaction: t,
 		});
 
 		if (login_token_history) {

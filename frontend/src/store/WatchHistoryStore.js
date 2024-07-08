@@ -101,10 +101,10 @@ const useWatchHistoryStore = create((set, get) => ({
 			})
 			.catch((err) => {
 				console.log(err);
-				// localStorage.setItem(
-				// 	"6amyoga_watch_time_logs",
-				// 	JSON.stringify(watch_time_logs)
-				// );
+				localStorage.setItem(
+					"6amyoga_watch_time_logs",
+					JSON.stringify(watch_time_logs)
+				);
 				set((state) => ({
 					watchTimeBuffer: [
 						...state.watchTimeBuffer,
