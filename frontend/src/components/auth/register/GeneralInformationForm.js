@@ -235,10 +235,24 @@ export default function GeneralInformationForm({
     };
   }, [phone]);
 
+  // const fetchCountryCodes = async () => {
+  //   const response = await fetch("https://restcountries.com/v3.1/all");
+  //   const data = await response.json();
+  //   return data.reduce((acc, country) => {
+  //     const countryCode =
+  //       country.idd?.root +
+  //       (country.idd?.suffixes ? country.idd.suffixes[0] : "");
+  //     if (countryCode) {
+  //       acc[country.name.common] = countryCode;
+  //     }
+  //     return acc;
+  //   }, {});
+  // };
+
   const fetchCountryCodes = async () => {
     const response = await fetch("https://restcountries.com/v3.1/all");
     const data = await response.json();
-    return data.reduce((acc, country) => {
+    const countryCodes = data.reduce((acc, country) => {
       const countryCode =
         country.idd?.root +
         (country.idd?.suffixes ? country.idd.suffixes[0] : "");
@@ -247,6 +261,15 @@ export default function GeneralInformationForm({
       }
       return acc;
     }, {});
+
+    const sortedCountryCodes = Object.keys(countryCodes)
+      .sort()
+      .reduce((acc, country) => {
+        acc[country] = countryCodes[country];
+        return acc;
+      }, {});
+
+    return sortedCountryCodes;
   };
 
   const [countryCodes, setCountryCodes] = useState({});
