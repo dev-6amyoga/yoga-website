@@ -439,7 +439,7 @@ function StudentPlan() {
 
   const subscribePlan = async (data) => {
     if (data.plan) {
-      toast("Customized plan selected");
+      toast("Sending enquiry!");
       let finalData = {};
       const selectedNeeds = data.selectedNeeds;
       const otherNeed = data.otherNeed;
@@ -452,8 +452,9 @@ function StudentPlan() {
         data: finalData,
       });
 
-      // if (res.status === 200) {
-      // }
+      if (res.status === 200) {
+        toast(res.data.message);
+      }
       return;
     }
     setShowCard(true);
