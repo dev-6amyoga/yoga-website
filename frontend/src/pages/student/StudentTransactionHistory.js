@@ -27,30 +27,13 @@ function StudentTransactionHistory() {
           method: "POST",
           data: { user_id: user?.user_id },
         });
-        console.log(data);
-        const data = response.data;
-        setTransactions(data["all_transaction_for_user"]);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    if (user) {
-      fetchData();
-    }
-  }, [user]);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await Fetch({
-          url: "/transaction/get-transaction-by-user-id",
-          method: "POST",
-          data: { user_id: user?.user_id },
-        });
         const data = response.data;
         console.log("data of transac :", data);
         data.all_transaction_for_user.sort(
           (a, b) => new Date(b.payment_date) - new Date(a.payment_date)
         );
+        console.log("data of transac :", data);
+
         setTransactions(data.all_transaction_for_user);
       } catch (error) {
         console.log(error);
