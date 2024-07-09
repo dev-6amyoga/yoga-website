@@ -1,5 +1,12 @@
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -8,8 +15,21 @@ import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
 export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
+  const [selectedNeeds, setSelectedNeeds] = useState([]);
+  const [otherNeed, setOtherNeed] = useState("");
+
+  const handleNeedsChange = (event) => {
+    setSelectedNeeds(event.target.value);
+  };
+
+  const handleOtherNeedChange = (event) => {
+    setOtherNeed(event.target.value);
+  };
+
   return (
     <div className="my-10 grid w-full grid-cols-1 place-content-center place-items-center gap-4 md:grid-cols-3 lg:gap-8">
       {allPlans?.map((plan) => {
@@ -26,67 +46,44 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                 gap: 4,
                 width: "100%",
                 border:
-                  plan.plan_validity_days === 90 ? "1px solid" : undefined,
+                  plan.name === "Customized Plan" ? "1px solid" : undefined,
                 borderColor:
-                  plan.plan_validity_days === 90 ? "primary.main" : undefined,
+                  plan.name === "Customized Plan" ? "primary.main" : undefined,
                 background:
-                  plan.plan_validity_days === 90
+                  plan.name === "Customized Plan"
                     ? "linear-gradient(#033363, #021F3B)"
                     : undefined,
               }}
             >
               <CardContent>
-                {/* name */}
                 <Box
                   sx={{
                     mb: 1,
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    color: plan.plan_validity_days === 90 ? "grey.100" : "",
+                    color: plan.name === "Customized Plan" ? "grey.100" : "",
                   }}
                 >
                   <Typography component="h3" variant="h6">
                     {plan.name}
                   </Typography>
-
-                  {plan.plan_validity_days === 90 && (
-                    <Chip
-                      icon={<AutoAwesomeIcon />}
-                      label={"Recommended"}
-                      size="small"
-                      sx={{
-                        background: (theme) =>
-                          theme.palette.mode === "light" ? "" : "none",
-                        backgroundColor: "primary.contrastText",
-                        "& .MuiChip-label": {
-                          color: "primary.dark",
-                        },
-                        "& .MuiChip-icon": {
-                          color: "primary.dark",
-                        },
-                      }}
-                    />
-                  )}
                 </Box>
-
-                {/* pricing */}
                 <Box
                   sx={{
                     display: "flex",
                     alignItems: "baseline",
                     color:
-                      plan.plan_validity_days === 90 ? "grey.50" : undefined,
+                      plan.name === "Customized Plan" ? "grey.50" : undefined,
                   }}
                 >
-                  <Typography component="h3" variant="h3">
-                    {selectedCurrency} {selectedPricing.denomination}
-                  </Typography>
-                  {/* <Typography component="h3" variant="h6">
-											&nbsp; per month
-										</Typography> */}
+                  {plan.description !==
+                    "Tailor made playlists as per your requirement" && (
+                    <Typography component="h3" variant="h3">
+                      {selectedCurrency} {selectedPricing.denomination}
+                    </Typography>
+                  )}
                 </Box>
-
                 <Divider
                   sx={{
                     my: 2,
@@ -94,19 +91,33 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                     borderColor: "grey.500",
                   }}
                 />
-
                 {[
                   {
                     name: `Validity for ${plan.plan_validity_days} Days`,
-                    enable: true,
+                    enable:
+                      true &&
+                      plan.description !==
+                        "Tailor made playlists as per your requirement",
                   },
                   {
                     name: `${plan.watch_time_limit / 3600} hours watch time`,
-                    enable: true,
+                    enable:
+                      true &&
+                      plan.description !==
+                        "Tailor made playlists as per your requirement",
                   },
                   {
                     name: "Play 6AM Yoga playlists",
-                    enable: plan.has_basic_playlist,
+                    enable:
+                      plan.has_basic_playlist &&
+                      plan.description !==
+                        "Tailor made playlists as per your requirement",
+                  },
+                  {
+                    name: "Tailor made playlists as per your requirement",
+                    enable:
+                      plan.description ===
+                      "Tailor made playlists as per your requirement",
                   },
                   {
                     name: "Create custom curated playlists",
@@ -128,7 +139,7 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                           sx={{
                             width: 20,
                             color:
-                              plan.plan_validity_days === 90
+                              plan.name === "Customized Plan"
                                 ? "primary.light"
                                 : "primary.main",
                           }}
@@ -138,7 +149,7 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                           variant="subtitle2"
                           sx={{
                             color:
-                              plan.plan_validity_days === 90
+                              plan.name === "Customized Plan"
                                 ? "grey.200"
                                 : undefined,
                           }}
@@ -151,18 +162,110 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                     )}
                   </Box>
                 ))}
-              </CardContent>
 
+                {plan.name === "Customized Plan" && (
+                  <>
+                    <FormControl fullWidth sx={{ mt: 2 }}>
+                      <InputLabel
+                        sx={{
+                          color: "grey.200",
+                        }}
+                        id="yoga-needs-label"
+                      >
+                        Select Your Yoga Needs
+                      </InputLabel>
+                      <Select
+                        sx={{
+                          color: "grey.200",
+                          ".MuiOutlinedInput-notchedOutline": {
+                            borderColor: "grey.200",
+                          },
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "grey.200",
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "grey.200",
+                          },
+                          ".MuiSvgIcon-root ": {
+                            fill: "grey.200 !important",
+                          },
+                        }}
+                        labelId="yoga-needs-label"
+                        multiple
+                        value={selectedNeeds}
+                        onChange={handleNeedsChange}
+                        renderValue={(selected) => selected.join(", ")}
+                      >
+                        <MenuItem value="Knee Pain">Knee Pain</MenuItem>
+                        <MenuItem value="Back Pain">Back Pain</MenuItem>
+                        <MenuItem value="Neck Pain">Neck Pain</MenuItem>
+                        <MenuItem value="Pre Natal Yoga">
+                          Pre Natal Yoga
+                        </MenuItem>
+                      </Select>
+                    </FormControl>
+                    <TextField
+                      fullWidth
+                      sx={{
+                        mt: 2,
+                        ".MuiInputBase-input": {
+                          color: "grey.200",
+                        },
+                        ".MuiInputLabel-root": {
+                          color: "grey.200",
+                        },
+                        ".MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline":
+                          {
+                            borderColor: "grey.200",
+                          },
+                        "&:hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline":
+                          {
+                            borderColor: "grey.200",
+                          },
+                        "&.Mui-focused .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline":
+                          {
+                            borderColor: "grey.200",
+                          },
+                      }}
+                      label="Other Needs"
+                      value={otherNeed}
+                      onChange={handleOtherNeedChange}
+                    />
+                  </>
+                )}
+              </CardContent>
               <CardActions>
-                <Button
-                  fullWidth
-                  variant={
-                    plan.plan_validity_days === 90 ? "contained" : "outlined"
-                  }
-                  onClick={() => subscribePlan(plan)}
-                >
-                  Purchase
-                </Button>
+                {plan.name !== "Customized Plan" && (
+                  <Button
+                    fullWidth
+                    variant={
+                      plan.name === "Customized Plan" ? "contained" : "outlined"
+                    }
+                    onClick={() => subscribePlan(plan)}
+                  >
+                    Purchase
+                  </Button>
+                )}
+                {plan.name === "Customized Plan" && (
+                  <Button
+                    fullWidth
+                    variant={
+                      plan.name === "Customized Plan" ? "contained" : "outlined"
+                    }
+                    onClick={() => {
+                      toast("hello");
+                      const data = {
+                        selectedNeeds: selectedNeeds,
+                        otherNeed: otherNeed,
+                        plan: plan,
+                      };
+                      console.log(data);
+                      subscribePlan(data);
+                    }}
+                  >
+                    Enquire
+                  </Button>
+                )}
               </CardActions>
             </Card>
           </>

@@ -15,6 +15,7 @@ const {
   PLAN_USER_TYPE_STUDENT,
   PLAN_USER_TYPE_INSTITUTE,
 } = require("../enums/plan_user_type");
+const { mailTransporter } = require("../init.nodemailer");
 
 router.get("/get-all", async (req, res) => {
   try {
@@ -347,7 +348,45 @@ router.delete("/deletePlan/:plan_id", async (req, res) => {
   }
 });
 
-router.post("/add-pricing", async (req, res) => {});
+router.post("/custom-plan-enquiry", async (req, res) => {
+  const { user, selectedNeeds, otherNeed } = req.body;
+  console.log(user, selectedNeeds, otherNeed);
+
+  mailTransporter.sendMail(
+    {
+      from: "dev.6amyoga@gmail.com",
+      to: "992351@gmail.com",
+      subject: "6AM Yoga | Customized Plan Request",
+      html: `
+      <p>Greetings,</p>
+      <p>We received a request for a customized plan to be generated for a user with the following details : </p>
+      
+      <p>Name : ${user.name}</p>
+      <p>Email ID : ${user.email}.</p>
+      <p>Phone Number : ${user.phone}.</p>
+
+      <p>The specifications of their request are as follows : </p>
+      <p>Customizations required : ${selectedNeeds}</p>
+      <p>Other Needs : ${otherNeed}</p>
+
+      <p>Kindly contact them at the earliest! </p>
+
+      <p>Regards, </p>
+      <p>My Yoga Teacher, 6AM Yoga </p>
+    `,
+    },
+    async (err, info) => {
+      if (err) {
+        console.error(err);
+        res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+          message: "Internal server error; try again",
+        });
+      } else {
+        console.log("Email sent to admin");
+      }
+    }
+  );
+});
 
 router.post("/update-pricing", async (req, res) => {});
 

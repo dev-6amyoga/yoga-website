@@ -73,34 +73,26 @@ function StudentPlan() {
   const [allPlans, setAllPlans] = useState([]);
   const [showCard, setShowCard] = useState(false);
   const [cardData, setCardData] = useState(null);
-
   const [price, setPrice] = useState(0);
   const [discountCouponApplied, setDiscountCouponApplied] = useState(false);
   const [discountCoupon, setDiscountCoupon] = useState(null);
-
   const [displayRazorpay, setDisplayRazorpay] = useState(false);
   const [orderDetails, setOrderDetails] = useState({
     orderId: null,
     currency: null,
     amount: null,
   });
-
   const [myPlans, setMyPlans] = useState([]);
   const [currentStatus, setCurrentStatus] = useState("");
   const [validityFromDate, setValidityFromDate] = useState("");
   // const [selectedValidity, setSelectedValidity] = useState(30);
-
   const [currencies, setAllCurrencies] = useState([]);
   const [selectedCurrency, setSelectedCurrency] = useState("INR");
   const [selectedCurrencyId, setSelectedCurrencyId] = useState(1);
-
   const [planId, setPlanId] = useState(-1);
   const [toBeRegistered, setToBeRegistered] = useState({});
-
   const [invalidCountry, setInvalidCountry] = useState(false);
-
   const [loading, setLoading] = useState(false);
-
   const [formattedDate, setFormattedDate] = useState(new Date().toISOString());
 
   useEffect(() => {
@@ -175,7 +167,6 @@ function StudentPlan() {
   };
 
   const fetchUserPlans = useCallback(async () => {
-    console.log("FETCHING USER PLANS");
     try {
       const response = await Fetch({
         url: "/user-plan/get-user-plan-by-id",
@@ -266,6 +257,7 @@ function StudentPlan() {
       const filteredPlans = response.data?.plans?.filter(
         (plan) => plan.plan_user_type === "STUDENT"
       );
+      console.log("filtered plans : ", filteredPlans);
       setAllPlans(filteredPlans);
     } catch (error) {
       toast("Error fetching plans", { type: "error" });
@@ -446,6 +438,24 @@ function StudentPlan() {
   };
 
   const subscribePlan = async (data) => {
+    if (data.plan) {
+      toast("Customized plan selected");
+      let finalData = {};
+      const selectedNeeds = data.selectedNeeds;
+      const otherNeed = data.otherNeed;
+      finalData["user"] = user;
+      finalData["selectedNeeds"] = selectedNeeds;
+      finalData["otherNeed"] = otherNeed;
+      const res = await Fetch({
+        url: "/plan/custom-plan-enquiry",
+        method: "POST",
+        data: finalData,
+      });
+
+      // if (res.status === 200) {
+      // }
+      return;
+    }
     setShowCard(true);
     setCardData(data);
     setDiscountCouponApplied(false);
