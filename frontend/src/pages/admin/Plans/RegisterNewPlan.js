@@ -17,6 +17,9 @@ import {
   Checkbox,
   Button,
   Typography,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 
 function RegisterNewPlan() {
@@ -149,47 +152,104 @@ function RegisterNewPlan() {
 
   const isSelected = (id) => selectedStudents.indexOf(id) !== -1;
 
+  const [selectedMode, setSelectedMode] = useState(null);
+  const handleModeChange = (event) => {
+    setSelectedMode(event.target.value);
+  };
+
+  const [selectedNeeds, setSelectedNeeds] = useState([]);
+  const handleNeedsChange = (event) => {
+    setSelectedNeeds(event.target.value);
+  };
   return (
     <AdminPageWrapper heading="Plan Management - Register New Plan">
       <Card>
         <Text h3>Register New Plan</Text>
         <hr />
         <Spacer h={1} />
+
         <form className="flex flex-col gap-1" onSubmit={handleSubmit}>
-          <Typography h5>Plan Name:</Typography>
-          <Input width="100%" id="plan_name"></Input>
+          <Typography variant="h5">Plan Name:</Typography>
+          <Input fullWidth id="plan_name" />
           <br />
-          <Typography> Allow Playlist Creation</Typography>
+          <Typography>Allow Playlist Creation</Typography>
           <Checkbox
             id="institute_playlist_creation"
             checked={isChecked}
             onChange={handleCheckboxChange}
           />
           <br />
-
-          <Typography h5>Institute Playlist Count:</Typography>
-          <Input width="100%" id="institute_playlist_count"></Input>
+          <Typography variant="h5">Institute Playlist Count:</Typography>
+          <Input fullWidth id="institute_playlist_count" />
           <br />
-
-          <Typography h5>Self Voice Enabled?</Typography>
-          <Select placeholder="Yes" onChange={handler} id="self_voice">
-            <Select.Option value="Yes"> Yes </Select.Option>
-            <Select.Option value="No"> No </Select.Option>
+          <Typography variant="h5">Self Voice Enabled?</Typography>
+          <Select placeholder="Yes" onChange={handleModeChange} id="self_voice">
+            <MenuItem value="Yes">Yes</MenuItem>
+            <MenuItem value="No">No</MenuItem>
           </Select>
           <br />
-
-          <Typography h5>Teacher Count:</Typography>
-          <Input width="100%" id="teacher_count"></Input>
+          <Typography variant="h5">Teacher Count:</Typography>
+          <Input fullWidth id="teacher_count" />
           <br />
-
-          <Typography h5>User Type</Typography>
-          <Select placeholder="institute" onChange={handler1} id="user_type">
-            <Select.Option value="student"> Student </Select.Option>
-            <Select.Option value="institute"> Institute </Select.Option>
+          <Typography variant="h5">User Type</Typography>
+          <Select
+            placeholder="institute"
+            onChange={handleModeChange}
+            id="user_type"
+          >
+            <MenuItem value="student">Student</MenuItem>
+            <MenuItem value="institute">Institute</MenuItem>
           </Select>
-
           <br />
-
+          <Button
+            value="general"
+            variant={selectedMode === "general" ? "contained" : "outlined"}
+            onClick={handleModeChange}
+          >
+            General
+          </Button>
+          <Button
+            value="customization"
+            variant={
+              selectedMode === "customization" ? "contained" : "outlined"
+            }
+            onClick={handleModeChange}
+          >
+            Customization
+          </Button>
+          {selectedMode === "customization" && (
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              <InputLabel sx={{ color: "grey.200" }} id="yoga-needs-label">
+                Select Your Yoga Needs
+              </InputLabel>
+              <Select
+                sx={{
+                  color: "grey.200",
+                  ".MuiOutlinedInput-notchedOutline": {
+                    borderColor: "grey.200",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "grey.200",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "grey.200",
+                  },
+                  ".MuiSvgIcon-root": { fill: "grey.200 !important" },
+                }}
+                labelId="yoga-needs-label"
+                multiple
+                value={selectedNeeds}
+                onChange={handleNeedsChange}
+                renderValue={(selected) => selected.join(", ")}
+              >
+                <MenuItem value="Knee Pain">Knee Pain</MenuItem>
+                <MenuItem value="Back Pain">Back Pain</MenuItem>
+                <MenuItem value="Neck Pain">Neck Pain</MenuItem>
+                <MenuItem value="Pre Natal Yoga">Pre Natal Yoga</MenuItem>
+              </Select>
+            </FormControl>
+          )}
+          <br />
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
@@ -209,14 +269,14 @@ function RegisterNewPlan() {
                   </TableCell>
                   <TableCell>Name</TableCell>
                   <TableCell>Email</TableCell>
-                  {/* Add more columns as needed */}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {allStudents.map((student) => {
-                  const isItemSelected = isSelected(
-                    student.user_id || student.institute_id
-                  );
+                  const isItemSelected =
+                    selectedStudents.indexOf(
+                      student.user_id || student.institute_id
+                    ) !== -1;
                   return (
                     <TableRow
                       key={student.user_id || student.institute_id}
@@ -248,8 +308,7 @@ function RegisterNewPlan() {
             </Button>
           </TableContainer>
           <br />
-
-          <Button htmlType="submit">Submit</Button>
+          <Button type="submit">Submit</Button>
         </form>
       </Card>
     </AdminPageWrapper>
