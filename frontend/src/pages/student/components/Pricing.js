@@ -253,7 +253,6 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                       plan.name === "Customized Plan" ? "contained" : "outlined"
                     }
                     onClick={() => {
-                      toast("hello");
                       const data = {
                         selectedNeeds: selectedNeeds,
                         otherNeed: otherNeed,

@@ -382,7 +382,9 @@ router.post("/custom-plan-enquiry", async (req, res) => {
           message: "Internal server error; try again",
         });
       } else {
-        console.log("Email sent to admin");
+        res.status(HTTP_OK).json({
+          message: "Enquiry sent to admin!",
+        });
       }
     }
   );
