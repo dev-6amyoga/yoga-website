@@ -694,6 +694,17 @@ function StudentPlan() {
         </div>
       )}
 
+      {customPlanSent && (
+        <p
+          className={
+            "text-sm border p-2 rounded-lg text-zinc-500 border-red-500"
+          }
+        >
+          Your request has been recorded! Our admin will reach out to you within
+          24 hours.
+        </p>
+      )}
+
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-center pt-4">
         {invalidCountry ? (
           <Alert variant="outlined" severity="warning">
