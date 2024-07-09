@@ -94,6 +94,7 @@ function StudentPlan() {
   const [invalidCountry, setInvalidCountry] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formattedDate, setFormattedDate] = useState(new Date().toISOString());
+  const [customPlanSent, setCustomPlanSent] = useState(false);
 
   useEffect(() => {
     if (showCard) {
@@ -454,6 +455,7 @@ function StudentPlan() {
 
       if (res.status === 200) {
         toast(res.data.message);
+        setCustomPlanSent(true);
       }
       return;
     }

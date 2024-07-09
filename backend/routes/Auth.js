@@ -154,7 +154,7 @@ router.post("/login", async (req, res) => {
         .json({ error: "User not registered" });
     }
 
-    let t = new Date();
+    let t_date = new Date();
     for (let i = 0; i < uipr.length; i++) {
       const u = uipr[i];
       // console.log(
@@ -165,12 +165,16 @@ router.post("/login", async (req, res) => {
       await UpdateUserPlanStatus(user.user_id, u.get("institute_id"), t);
     }
 
-    console.log("elapsed time to update plan status: ", new Date() - t, "ms");
-    t = new Date();
+    console.log(
+      "elapsed time to update plan status: ",
+      new Date() - t_date,
+      "ms"
+    );
+    t_date = new Date();
 
     [user, errorUser] = await GetUserInfo({ username });
 
-    console.log("elapsed time to plan status: ", new Date() - t, "ms");
+    console.log("elapsed time to  plan status: ", new Date() - t_date, "ms");
 
     if (errorUser) {
       await t.rollback();
