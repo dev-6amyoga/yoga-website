@@ -15,7 +15,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { validateEmail, validatePhone } from "../../../utils/formValidation";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
@@ -101,6 +101,45 @@ export default function Highlights() {
       [name]: value,
     });
   };
+
+  const inputErrorDebounce = useRef(null);
+  const [phoneError, setPhoneError] = useState(null);
+
+  useEffect(() => {
+    if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
+
+    inputErrorDebounce.current = setTimeout(async () => {
+      console.log("Checking phone number");
+
+      if (phone) {
+        const [is_phone_valid, phone_error] = await validatePhone(phone);
+
+        if (!is_phone_valid || phone_error) {
+          setPhoneError(phone_error.message);
+
+          return;
+        }
+
+        const [check_phone, error] = await UserAPI.postCheckPhoneNumber(phone);
+
+        if (error) {
+          toast(error.message, { type: "warning" });
+          return;
+        }
+
+        if (check_phone?.exists) {
+          setPhoneError("Phone number exists");
+
+          return;
+        }
+      }
+      setPhoneError(null);
+    }, 500);
+
+    return () => {
+      if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
+    };
+  }, [phone]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -304,8 +343,8 @@ export default function Highlights() {
             onChange={handlePhoneChange}
             required
             label="Phone"
-            // error={phoneError ? true : false}
-            // helperText={phoneError ? phoneError : " "}
+            error={phoneError ? true : false}
+            helperText={phoneError ? phoneError : " "}
           />
           <TextField
             name="query_text"
