@@ -431,101 +431,103 @@ function StudentPlan() {
     }
 
     if (customCardData) {
-      // let userPlanData = {
-      //   cancellation_date: null,
-      //   auto_renewal_enabled: false,
-      //   user_id: user?.user_id,
-      //   plan_id: customCardData?.custom_plan_id,
-      //   discount_coupon_id:
-      //     discountCoupon && discountCouponApplied
-      //       ? discountCoupon.discount_coupon_id
-      //       : null,
-      //   referral_code_id: null,
-      //   amount: calculateTotalPrice(
-      //     price,
-      //     selectedCurrency,
-      //     true,
-      //     18,
-      //     discountCoupon
-      //   ),
-      //   currency: selectedCurrency,
-      //   user_type: "STUDENT",
-      // };
+      let userPlanData = {
+        cancellation_date: null,
+        auto_renewal_enabled: false,
+        user_id: user?.user_id,
+        plan_id: customCardData?.custom_plan_id,
+        discount_coupon_id:
+          discountCoupon && discountCouponApplied
+            ? discountCoupon.discount_coupon_id
+            : null,
+        referral_code_id: null,
+        amount: calculateTotalPrice(
+          price,
+          selectedCurrency,
+          true,
+          18,
+          discountCoupon
+        ),
+        currency: selectedCurrency,
+        user_type: "STUDENT",
+      };
     }
-    // let userPlanData = {
-    //   cancellation_date: null,
-    //   auto_renewal_enabled: false,
-    //   user_id: user?.user_id,
-    //   plan_id: cardData?.plan_id,
-    //   discount_coupon_id:
-    //     discountCoupon && discountCouponApplied
-    //       ? discountCoupon.discount_coupon_id
-    //       : null,
-    //   referral_code_id: null,
-    //   amount: calculateTotalPrice(
-    //     price,
-    //     selectedCurrency,
-    //     true,
-    //     18,
-    //     discountCoupon
-    //   ),
-    //   currency: selectedCurrency,
-    //   user_type: "STUDENT",
-    // };
-    // if (planId !== -1) {
-    //   if (currentStatus !== USER_PLAN_ACTIVE) {
-    //     toast(
-    //       "You have an active plan! If you purchase a new plan, it will be staged."
-    //     );
-    //   }
+    if (cardData) {
+      let userPlanData = {
+        cancellation_date: null,
+        auto_renewal_enabled: false,
+        user_id: user?.user_id,
+        plan_id: cardData?.plan_id,
+        discount_coupon_id:
+          discountCoupon && discountCouponApplied
+            ? discountCoupon.discount_coupon_id
+            : null,
+        referral_code_id: null,
+        amount: calculateTotalPrice(
+          price,
+          selectedCurrency,
+          true,
+          18,
+          discountCoupon
+        ),
+        currency: selectedCurrency,
+        user_type: "STUDENT",
+      };
+      if (planId !== -1) {
+        if (currentStatus !== USER_PLAN_ACTIVE) {
+          toast(
+            "You have an active plan! If you purchase a new plan, it will be staged."
+          );
+        }
 
-    //   // validity will start from the end of the previous plan
-    //   const validityToDate = calculateEndDate(cardData.plan_validity_days);
+        // validity will start from the end of the previous plan
+        const validityToDate = calculateEndDate(cardData.plan_validity_days);
+        userPlanData.purchase_date = formattedDate;
+        userPlanData.validity_from = validityFromDate;
+        userPlanData.validity_to = validityToDate;
+        userPlanData.current_status = currentStatus;
 
-    //   console.log({ validityFromDate, validityToDate });
-    //   userPlanData.purchase_date = formattedDate;
-    //   userPlanData.validity_from = validityFromDate;
-    //   userPlanData.validity_to = validityToDate;
-    //   userPlanData.current_status = currentStatus;
+        setShowCard(false);
+        setToBeRegistered(userPlanData);
+      } else {
+        userPlanData.purchase_date = formattedDate;
+        userPlanData.validity_from = formattedDate;
+        userPlanData.validity_to = calculateEndDate(
+          cardData.plan_validity_days
+        );
+        userPlanData.current_status = USER_PLAN_ACTIVE;
+        setToBeRegistered(userPlanData);
+      }
 
-    //   setShowCard(false);
-    //   setToBeRegistered(userPlanData);
-    // } else {
-    //   userPlanData.purchase_date = formattedDate;
-    //   userPlanData.validity_from = formattedDate;
-    //   userPlanData.validity_to = calculateEndDate(cardData.plan_validity_days);
-    //   userPlanData.current_status = USER_PLAN_ACTIVE;
-    //   setToBeRegistered(userPlanData);
-    // }
-
-    // if (userPlanData.amount === 0) {
-    //   setToBeRegistered(userPlanData);
-    // } else {
-    //   try {
-    //     const response = await Fetch({
-    //       url: "/payment/order",
-    //       method: "POST",
-    //       data: userPlanData,
-    //       token: true,
-    //     });
-    //     if (response?.status === 200) {
-    //       const razorpayOrder = response.data?.order;
-    //       if (razorpayOrder && razorpayOrder?.id) {
-    //         setOrderDetails({
-    //           orderId: razorpayOrder?.id,
-    //           currency: razorpayOrder?.currency,
-    //           amount: razorpayOrder?.amount,
-    //         });
-    //         setDisplayRazorpay(true);
-    //         setLoading(true);
-    //       }
-    //     } else {
-    //       toast(response.data?.message);
-    //     }
-    //   } catch (error) {
-    //     toast("Error setting up order, try again", { type: "error" });
-    //   }
-    // }
+      if (userPlanData.amount === 0) {
+        setToBeRegistered(userPlanData);
+      } else {
+        try {
+          const response = await Fetch({
+            url: "/payment/order",
+            method: "POST",
+            data: userPlanData,
+            token: true,
+          });
+          if (response?.status === 200) {
+            const razorpayOrder = response.data?.order;
+            if (razorpayOrder && razorpayOrder?.id) {
+              setOrderDetails({
+                orderId: razorpayOrder?.id,
+                currency: razorpayOrder?.currency,
+                amount: razorpayOrder?.amount,
+              });
+              setDisplayRazorpay(true);
+              setLoading(true);
+            }
+          } else {
+            toast(response.data?.message);
+          }
+        } catch (error) {
+          toast("Error setting up order, try again", { type: "error" });
+        }
+      }
+    }
   };
 
   const subscribePlan = async (data) => {
