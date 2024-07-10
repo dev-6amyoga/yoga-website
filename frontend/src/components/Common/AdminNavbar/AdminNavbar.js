@@ -119,6 +119,10 @@ const paths = [
         path: "/admin/plan/view-all",
         title: "View All Plans",
       },
+      {
+        path: "/admin/custom-plan/create",
+        title: "Create Custom Plan",
+      },
     ],
   },
   { path: "/admin/discount-management", title: "Discount Management" },
