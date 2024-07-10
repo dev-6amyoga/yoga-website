@@ -72,12 +72,12 @@ function StudentPlan() {
   let user = useUserStore((state) => state.user);
   const [allPlans, setAllPlans] = useState([]);
   const [showCard, setShowCard] = useState(false);
+  const [showCustomCard, setShowCustomCard] = useState(false);
   const [cardData, setCardData] = useState(null);
-
+  const [customCardData, setCustomCardData] = useState(null);
   const [price, setPrice] = useState(0);
   const [discountCouponApplied, setDiscountCouponApplied] = useState(false);
   const [discountCoupon, setDiscountCoupon] = useState(null);
-
   const [displayRazorpay, setDisplayRazorpay] = useState(false);
   const [orderDetails, setOrderDetails] = useState({
     orderId: null,
@@ -105,27 +105,6 @@ function StudentPlan() {
 
   const [customPlanSent, setCustomPlanSent] = useState(false);
   const [customPlansForUser, setCustomPlansForUser] = useState([]);
-
-  const CustomPlanCard = ({ plan }) => {
-    return (
-      <Card>
-        <CardContent>
-          <Typography variant="h5" component="h2">
-            {plan.plan_name}
-          </Typography>
-          <Typography color="textSecondary" gutterBottom>
-            Plan ID: {plan.custom_playlist_id}
-          </Typography>
-          <Typography variant="body2" component="p">
-            Validity: {plan.validity_from} to {plan.validity_to}
-          </Typography>
-          <Typography variant="body2" component="p">
-            Selected Needs: {plan.selectedNeeds.join(", ")}
-          </Typography>
-        </CardContent>
-      </Card>
-    );
-  };
 
   useEffect(() => {
     if (showCard) {
@@ -299,9 +278,6 @@ function StudentPlan() {
     }
   }, [user, formattedDate]);
 
-  useEffect(() => {
-    console.log(allPlans);
-  }, [allPlans]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -556,9 +532,20 @@ function StudentPlan() {
       }
       return;
     }
+    console.log("data is : ", data);
 
     if (data.plan_name) {
       console.log("being sent custom plan :", data);
+      setCustomCardData(data);
+      setShowCustomCard(true);
+      setDiscountCouponApplied(false);
+      setDiscountCoupon(null);
+      const selectedPricing = Number(data.prices[0][selectedCurrencyId]);
+      setPrice(selectedPricing);
+
+      //   const pricing = data.prices.find(
+      //     (p) => p.currency.short_tag === selectedCurrency
+      //   );
       return;
     }
 
@@ -831,6 +818,141 @@ function StudentPlan() {
         )}
 
         <Divider />
+
+        <Modal
+          visible={showCustomCard}
+          onClose={() => setShowCustomCard(false)}
+        >
+          <Modal.Content>
+            {customCardData ? (
+              <>
+                <h3>{customCardData.plan_name}</h3>
+
+                <Divider />
+                <Spacer />
+                <p>
+                  <strong>Price</strong>
+                  <br />
+                  {customCardData ? (
+                    <>
+                      <span>{selectedCurrency}</span> <span>{price}</span>{" "}
+                      {discountCouponApplied ? (
+                        <span className="text-green-600">
+                          - {(price * discountCoupon.discount_percentage) / 100}
+                        </span>
+                      ) : (
+                        <></>
+                      )}{" "}
+                      {selectedCurrency === "INR" ? (
+                        <span>+ 18% GST</span>
+                      ) : (
+                        <></>
+                      )}{" "}
+                      {selectedCurrency === "INR" || discountCouponApplied ? (
+                        <>
+                          <span> = </span>{" "}
+                          <span>
+                            {calculateTotalPrice(
+                              price,
+                              selectedCurrency,
+                              true,
+                              18,
+                              discountCoupon,
+                              1
+                            )}
+                          </span>
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                      <br />
+                      {discountCouponApplied ? (
+                        <span className="rounded-full bg-green-600 px-2 py-1 text-sm text-white">
+                          Coupon Applied : {discountCoupon.coupon_name} |{" "}
+                          {discountCoupon?.discount_percentage}
+                          {"%"}
+                          OFF
+                          <button
+                            className="mx-2 rounded-full border-0 bg-red-500 px-1"
+                            onClick={() => {
+                              setDiscountCouponApplied(false);
+                              setDiscountCoupon(null);
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </span>
+                      ) : (
+                        <></>
+                      )}
+                    </>
+                  ) : (
+                    ""
+                  )}
+                </p>
+                <Spacer />
+                <DiscountCouponForm
+                  handleDiscountCouponFormSubmit={
+                    handleDiscountCouponFormSubmit
+                  }
+                />
+                <Spacer />
+                <Divider />
+                <Spacer />
+                <h5>Validity</h5>
+                <Spacer />
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-row gap-2">
+                    <p className="flex flex-1 flex-col items-center rounded-lg border p-2 text-sm">
+                      <span className="font-medium">Plan Start Date</span>
+                      <span className="text-center">
+                        {new Date(
+                          customCardData.validity_from
+                        ).toLocaleString()}
+                      </span>
+                    </p>
+
+                    <p className="flex flex-1 flex-col items-center rounded-lg border p-2 text-sm">
+                      <span className="font-medium">Plan End Date</span>
+                      <span className="text-center">
+                        {new Date(customCardData.validity_to).toLocaleString()}
+                      </span>
+                    </p>
+                  </div>
+
+                  <p className="flex flex-1 flex-col items-center rounded-lg border p-2 text-sm">
+                    <span className="font-medium">Watch Hours Limit</span>
+                    <span className="text-center">
+                      <>{customCardData?.watchHours} Hours</>
+                    </span>
+                  </p>
+                </div>
+                <Spacer />
+                <Divider />
+                <Spacer />
+                <Button
+                  onClick={handleSubmit}
+                  fullWidth
+                  variant="contained"
+                  disabled={loading}
+                >
+                  {loading ? "..." : "Purchase"}
+                </Button>
+              </>
+            ) : (
+              <></>
+            )}
+          </Modal.Content>
+          <Modal.Action
+            onClick={() => {
+              setShowCard(false);
+              setCardData(null);
+              setDisplayRazorpay(false);
+            }}
+          >
+            Close
+          </Modal.Action>
+        </Modal>
 
         <Modal visible={showCard} onClose={() => setShowCard(false)}>
           <Modal.Content>
