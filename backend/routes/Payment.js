@@ -73,6 +73,7 @@ router.post("/commit", authenticateToken, async (req, res) => {
 		order_id,
 		payment_id,
 		currency_id,
+		discount_coupon_id,
 	} = req.body;
 
 	if (user_id === null || user_id === undefined || !status) {
@@ -151,6 +152,7 @@ router.post("/commit", authenticateToken, async (req, res) => {
 				transaction_signature: signature,
 				user_id: user_id,
 				currency_id: currency_id,
+				discount_coupon_id: discount_coupon_id ?? null,
 			},
 			{ transaction: t }
 		);
