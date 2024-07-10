@@ -105,6 +105,7 @@ function StudentPlan() {
 
   const [customPlanSent, setCustomPlanSent] = useState(false);
   const [customPlansForUser, setCustomPlansForUser] = useState([]);
+  const [currentCustomUserPlans, setCurrentCustomUserPlans] = useState([]);
 
   useEffect(() => {
     if (showCard) {
@@ -300,6 +301,27 @@ function StudentPlan() {
     }
   }, [user]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await Fetch({
+          url: `/customUserPlan/getCustomUserPlansByUser/${user.user_id}`,
+          method: "GET",
+        });
+        if (res.status === 200) {
+          if (res.data.plans) {
+            setCurrentCustomUserPlans(res.data.plans);
+          }
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
+
   // get all student plans
   const fetchPlans = useCallback(async () => {
     try {
@@ -436,6 +458,7 @@ function StudentPlan() {
         auto_renewal_enabled: false,
         user_id: user?.user_id,
         plan_id: customCardData?.custom_plan_id,
+        purchase_date: formattedDate,
         discount_coupon_id:
           discountCoupon && discountCouponApplied
             ? discountCoupon.discount_coupon_id
@@ -450,8 +473,35 @@ function StudentPlan() {
         ),
         currency: selectedCurrency,
         user_type: "STUDENT",
+        validity_from: customCardData.validity_from,
+        validity_to: customCardData.validity_to,
+        custom_plan: true,
       };
+
+      const existingPlan = currentCustomUserPlans.find(
+        (plan) => plan.plan_id === customCardData?.custom_plan_id
+      );
+      if (existingPlan) {
+        const existingValidityFrom = new Date(existingPlan.validity_to);
+        const userValidityFrom = new Date(userPlanData.validity_from);
+        const userValidityTo = new Date(userPlanData.validity_to);
+        const diffTime = Math.abs(userValidityTo - userValidityFrom);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        userPlanData.validity_from = existingValidityFrom
+          .toISOString()
+          .split("T")[0];
+        const newValidityTo = new Date(existingValidityFrom);
+        newValidityTo.setDate(newValidityTo.getDate() + diffDays);
+        userPlanData.validity_to = newValidityTo.toISOString().split("T")[0];
+        userPlanData.current_status = USER_PLAN_STAGED;
+      } else {
+        userPlanData.current_status = USER_PLAN_ACTIVE;
+      }
+      setToBeRegistered(userPlanData);
+
+      console.log(currentCustomUserPlans);
     }
+
     if (cardData) {
       let userPlanData = {
         cancellation_date: null,
@@ -479,14 +529,12 @@ function StudentPlan() {
             "You have an active plan! If you purchase a new plan, it will be staged."
           );
         }
-
         // validity will start from the end of the previous plan
         const validityToDate = calculateEndDate(cardData.plan_validity_days);
         userPlanData.purchase_date = formattedDate;
         userPlanData.validity_from = validityFromDate;
         userPlanData.validity_to = validityToDate;
         userPlanData.current_status = currentStatus;
-
         setShowCard(false);
         setToBeRegistered(userPlanData);
       } else {
