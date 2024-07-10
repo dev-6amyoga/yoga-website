@@ -370,14 +370,6 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                       name: plan.selectedNeeds.map((x) => x + ","),
                       enable: true,
                     },
-                    // {
-                    //   name: `Valid from ${plan.validity_from}`,
-                    //   enable: true,
-                    // },
-                    // {
-                    //   name: `Valid till ${plan.validity_to}`,
-                    //   enable: true,
-                    // },
                     {
                       name: `Validity: ${formatDate(plan.validity_from)} to ${formatDate(plan.validity_to)}`,
                       enable: true,
