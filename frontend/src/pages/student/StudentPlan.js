@@ -477,7 +477,6 @@ function StudentPlan() {
         validity_to: customCardData.validity_to,
         custom_plan: true,
       };
-
       const existingPlan = currentCustomUserPlans.find(
         (plan) => plan.plan_id === customCardData?.custom_plan_id
       );
@@ -498,8 +497,36 @@ function StudentPlan() {
         userPlanData.current_status = USER_PLAN_ACTIVE;
       }
       setToBeRegistered(userPlanData);
+      if (userPlanData.amount === 0) {
+        setToBeRegistered(userPlanData);
+      } else {
+        try {
+          const response = await Fetch({
+            url: "/payment/order",
+            method: "POST",
+            data: userPlanData,
+            token: true,
+          });
+          if (response?.status === 200) {
+            const razorpayOrder = response.data?.order;
+            if (razorpayOrder && razorpayOrder?.id) {
+              setOrderDetails({
+                orderId: razorpayOrder?.id,
+                currency: razorpayOrder?.currency,
+                amount: razorpayOrder?.amount,
+              });
+              setDisplayRazorpay(true);
+              setLoading(true);
+            }
+          } else {
+            toast(response.data?.message);
+          }
+        } catch (error) {
+          toast("Error setting up order, try again", { type: "error" });
+        }
+      }
 
-      console.log(currentCustomUserPlans);
+      //   console.log(currentCustomUserPlans);
     }
 
     if (cardData) {
@@ -628,14 +655,20 @@ function StudentPlan() {
   };
 
   const registerUserPlan = async (order_id) => {
-    const finalUserPlan = { ...toBeRegistered };
+    // account for custom plan here
 
+    if (toBeRegistered.custom_plan) {
+      toast("Registering custom plan!");
+      console.log("REG custom plan :", order_id);
+      console.log("REG custom plan :", toBeRegistered);
+
+      return;
+    }
+    const finalUserPlan = { ...toBeRegistered };
     finalUserPlan.transaction_order_id = order_id;
     finalUserPlan.user_type = "STUDENT";
     finalUserPlan.institute_id = null;
-
     console.log({ finalUserPlan });
-
     FetchRetry({
       url: "/user-plan/register",
       method: "POST",
