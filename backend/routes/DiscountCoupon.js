@@ -73,7 +73,7 @@ router.post("/check-plan-mapping", authenticateToken, async (req, res) => {
 			},
 		});
 
-		console.log(transactions);
+		// console.log(transactions);
 
 		if (transactions.length > 0) {
 			return res
