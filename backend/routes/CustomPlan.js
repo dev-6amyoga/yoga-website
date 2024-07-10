@@ -72,10 +72,12 @@ router.get("/getCustomPlansByUser/:user_id", async (req, res) => {
     const userId = parseInt(req.params.user_id);
     const customPlans = await CustomPlan.find({ students: userId });
     if (customPlans.length > 0) {
-      res.status(HTTP_OK).json(customPlans);
+      res
+        .status(HTTP_OK)
+        .json({ plans: customPlans, message: "Custom plans for user exist" });
     } else {
-      res.status(HTTP_NOT_FOUND).json({
-        error: "No custom plans found for the given user ID",
+      res.status(HTTP_OK).json({
+        message: "No custom plans found for the given user ID",
       });
     }
   } catch (error) {
