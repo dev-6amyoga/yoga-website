@@ -66,6 +66,7 @@ const UpdateUserPlanStatus = async (
 	let t = transaction ?? (await sequelize.transaction());
 
 	try {
+		// USER PLAN ------------------>
 		// get active plan
 		const activePlan = await UserPlan.findOne({
 			where: {
@@ -95,7 +96,7 @@ const UpdateUserPlanStatus = async (
 
 			// check if plan is to be expired by usage;
 			const watchTimeQuota = await WatchTimeQuota.find({
-				user_plan_id: activePlan.get("user_plan_id"),
+				user_plan_id: String(activePlan.get("user_plan_id")),
 			});
 
 			if (watchTimeQuota.quota < 0) {
@@ -139,6 +140,8 @@ const UpdateUserPlanStatus = async (
 				await stagedPlan.save({ transaction: t });
 			}
 		}
+
+		// TODO : CUSTOM PLAN ------------------>
 
 		if (transaction === null) {
 			await t.commit();

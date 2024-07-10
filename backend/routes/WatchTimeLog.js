@@ -22,6 +22,7 @@ router.post("/update", authenticateToken, async (req, res) => {
 
 	const { user_id } = req.user;
 
+	// validate request
 	if (!user_id || !watch_time_logs || institute_id === undefined) {
 		console.log("Missing required fields");
 		return res
@@ -32,7 +33,7 @@ router.post("/update", authenticateToken, async (req, res) => {
 	// console.log(GetCurrentUserPlan(user_id);
 
 	// get user plan
-	console.log("GetCurrentUserPlan");
+	// console.log("GetCurrentUserPlan");
 	let [user_plan, error] = await GetCurrentUserPlan(user_id, institute_id);
 	// console.log({ user_plan, error });
 
@@ -42,8 +43,6 @@ router.post("/update", authenticateToken, async (req, res) => {
 			.status(HTTP_BAD_REQUEST)
 			.json({ message: error || "User currenly has no active plan" });
 	}
-
-	// user_plan = user_plan.toJSON();
 
 	// reduce it to unique asana_id, playlist_id
 	let reduced_watch_time = [];
