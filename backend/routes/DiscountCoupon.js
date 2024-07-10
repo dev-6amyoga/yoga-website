@@ -60,7 +60,7 @@ router.post("/check-plan-mapping", authenticateToken, async (req, res) => {
 		if (!discount_coupon_applicable_plan) {
 			return res
 				.status(HTTP_BAD_REQUEST)
-				.json({ message: "Coupon is not applicable" });
+				.json({ error: "Coupon is not applicable" });
 		}
 
 		// check if the coupon has been used
@@ -73,10 +73,12 @@ router.post("/check-plan-mapping", authenticateToken, async (req, res) => {
 			},
 		});
 
+		console.log(transactions);
+
 		if (transactions.length > 0) {
 			return res
 				.status(HTTP_BAD_REQUEST)
-				.json({ message: "Coupon already used" });
+				.json({ error: "Coupon already used" });
 		}
 
 		return res.status(HTTP_OK).json({

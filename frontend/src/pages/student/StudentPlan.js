@@ -360,6 +360,7 @@ function StudentPlan() {
 					order_id: order_id, //may be unique, check again
 					payment_id: "n/a",
 					currency_id: 1,
+					discount_coupon_id: toBeRegistered.discount_coupon_id,
 				},
 				n: 10,
 				retryDelayMs: 2000,
@@ -533,6 +534,8 @@ function StudentPlan() {
 		finalUserPlan.transaction_order_id = order_id;
 		finalUserPlan.user_type = "STUDENT";
 		finalUserPlan.institute_id = null;
+
+		console.log({ finalUserPlan });
 
 		FetchRetry({
 			url: "/user-plan/register",
@@ -966,6 +969,11 @@ function StudentPlan() {
 				onErrorCallback={registerErrorCallback}
 				displayRazorpay={displayRazorpay}
 				setDisplayRazorpay={setDisplayRazorpay}
+				discount_coupon_id={
+					discountCouponApplied
+						? discountCoupon?.discount_coupon_id
+						: null
+				}
 			/>
 		</>
 	);
