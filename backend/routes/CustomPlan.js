@@ -13,13 +13,13 @@ router.post("/addCustomPlan", async (req, res) => {
     const maxIdCustomPlan = await CustomPlan.findOne(
       {},
       {},
-      { sort: { custom_playlist_id: -1 } }
+      { sort: { custom_plan_id: -1 } }
     );
     const newCustomPlanId = maxIdCustomPlan
-      ? maxIdCustomPlan.custom_playlist_id + 1
+      ? maxIdCustomPlan.custom_plan_id + 1
       : 1;
 
-    requestData.custom_playlist_id = newCustomPlanId;
+    requestData.custom_plan_id = newCustomPlanId;
     const newCustomPlan = new CustomPlan(requestData);
     const saveCustomPlan = await newCustomPlan.save();
     res.status(HTTP_OK).json(saveCustomPlan);

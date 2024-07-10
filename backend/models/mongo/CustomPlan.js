@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const customPlanSchema = new mongoose.Schema({
-  custom_playlist_id: Number,
+  custom_plan_id: Number,
   plan_name: String,
   validity_from: Date,
   validity_to: Date,
