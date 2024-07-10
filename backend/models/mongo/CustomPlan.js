@@ -1,16 +1,17 @@
 const mongoose = require("mongoose");
 
 const customPlanSchema = new mongoose.Schema({
-  user_id: Number,
-  user_name: String,
-  creation_date: Date,
-  phone_number: String,
-  email_id: String,
-  username: String,
-  password: String,
-  user_type: String,
-  institute_id: Number,
-  institute_name: String,
+  custom_playlist_id: Number,
+  plan_name: String,
+  validity_from: Date,
+  validity_to: Date,
+  selectedNeeds: [String],
+  prices: [mongoose.Schema.Types.Mixed],
+  playlists: [mongoose.Schema.Types.Mixed],
+  planValidity: Number,
+  students: [Number],
+  institutes: [Number],
+  watchHours: Number,
 });
 
 const CustomPlan = mongoose.model(

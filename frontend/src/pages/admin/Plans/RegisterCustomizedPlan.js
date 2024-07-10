@@ -26,6 +26,7 @@ import { ROLE_ROOT } from "../../../enums/roles";
 import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
 import AllPlaylists from "../../../components/content-management/AllPlaylists";
+import { toast } from "react-toastify";
 
 function RegisterNewCustomizedPlan() {
   const [selectedNeeds, setSelectedNeeds] = useState([]);
@@ -38,8 +39,15 @@ function RegisterNewCustomizedPlan() {
   const [selectedInstitutes, setSelectedInstitutes] = useState([]);
   const [watchHours, setWatchHours] = useState(null);
   const [planValidity, setPlanValidity] = useState(null);
-  const [prices, setPrices] = useState({});
+  const [prices, setPrices] = useState([]);
   const [chosenPlaylists, setChosenPlaylists] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredPlaylists = searchQuery
+    ? allPlaylists.filter((playlist) =>
+        playlist.playlist_name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : allPlaylists;
 
   const handleAddPlaylist = (playlist) => {
     if (!chosenPlaylists.find((p) => p.playlist_id === playlist.playlist_id)) {
@@ -52,6 +60,7 @@ function RegisterNewCustomizedPlan() {
       chosenPlaylists.filter((playlist) => playlist.playlist_id !== playlistId)
     );
   };
+
   const handleNeedsChange = (event) => {
     setSelectedNeeds(event.target.value);
   };
@@ -143,11 +152,26 @@ function RegisterNewCustomizedPlan() {
     formData["planValidity"] = Number(planValidity);
     if (userType === "student") {
       formData["students"] = selectedStudents;
+      formData["institutes"] = [];
     } else if (userType === "institute") {
       formData["institutes"] = selectedInstitutes;
+      formData["students"] = [];
     }
     formData["prices"] = prices;
-    console.log(formData);
+    formData["playlists"] = chosenPlaylists;
+    try {
+      const res = await Fetch({
+        url: "/customPlan/addCustomPlan",
+        method: "POST",
+        data: formData,
+      });
+
+      if (res.status === 200) {
+        toast("New custom plan registered successfully!");
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const handleSelectAllStudents = (event) => {
@@ -212,14 +236,6 @@ function RegisterNewCustomizedPlan() {
       [currency]: value,
     });
   };
-
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const filteredPlaylists = searchQuery
-    ? allPlaylists.filter((playlist) =>
-        playlist.playlist_name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : allPlaylists;
 
   return (
     <AdminPageWrapper heading="Plan Management - Register Customized Plan">
