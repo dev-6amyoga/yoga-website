@@ -22,6 +22,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import html2pdf from "html2pdf.js";
 import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
 import { ROLE_STUDENT } from "../../enums/roles";
 import { withAuth } from "../../utils/withAuth";
@@ -698,6 +699,36 @@ function StudentPlan() {
 		}
 	};
 
+	const downloadInvoice = async (response) => {
+		try {
+			const dataBuffer = new Blob([response.data], {
+				type: "text/html;charset=utf-8;",
+			});
+
+			const htmlString = await dataBuffer.text();
+
+			var opt = {
+				margin: 0.25,
+				image: { type: "png", quality: 1 },
+				html2canvas: { scale: 0.85 },
+				jsPDF: {
+					unit: "in",
+					format: "A4",
+					orientation: "portrait",
+				},
+			};
+
+			const doc = html2pdf()
+				.set(opt)
+				.from(htmlString)
+				.toPdf()
+				.save("6AMYOGA_plan_purchase.pdf");
+		} catch (err) {
+			toast(err);
+			console.error(err);
+		}
+	};
+
 	const registerUserPlan = async (order_id) => {
 		// account for custom plan here
 
@@ -731,17 +762,20 @@ function StudentPlan() {
 							data: JSON.stringify({
 								user_id: finalUserPlan.user_id,
 								transaction_order_id: order_id,
-								plan_type: "CUSTOM",
+								plan_type: "CUSTOM_PLAN",
 							}),
 							n: 2,
 							retryDelayMs: 2000,
 						})
 							.then((responseInvoice) => {
 								if (responseInvoice.status === 200) {
-									toast("Invoice mailed successfully", {
+									toast("Invoice generated successfully", {
 										type: "success",
 									});
 								}
+								return downloadInvoice(responseInvoice);
+							})
+							.then((res) => {
 								setShowCustomCard(false);
 								setCustomCardData(null);
 								setLoading(false);
@@ -752,7 +786,7 @@ function StudentPlan() {
 								setCustomCardData(null);
 								setLoading(false);
 								toast(
-									"Error mailing invoice; Download invoice in Transaction History",
+									"Error downloading invoice; Download invoice in Transaction History",
 									{ type: "error" }
 								);
 							});
@@ -819,6 +853,10 @@ function StudentPlan() {
 									type: "success",
 								});
 							}
+
+							return downloadInvoice(responseInvoice);
+						})
+						.then((res) => {
 							setShowCard(false);
 							setCardData(null);
 							setLoading(false);

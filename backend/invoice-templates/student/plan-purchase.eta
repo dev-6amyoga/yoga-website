@@ -74,22 +74,32 @@ h2 {
     <tbody>
       <tr>
         <td>
-          <strong><%= it.plan.name %></strong>
-          <br /><br/>
-          <small>
-            <strong>Plan Description : </strong>
-            <br />
-            <% if (it.plan.has_basic_playlist) { %>
-              <p>This plan has a basic playlist.</p>
-            <% } else { %>
-              <p>This plan does not have a basic playlist.</p>
-            <% } %>
-            <% if (it.plan.has_playlist_creation) { %>
-              <p>This plan has playlist creation option.</p>
-            <% } else { %>
-              <p>This plan does not have playlist creation option.</p>
-            <% } %>
-          </small>
+        <% if (it.plan.plan_type === "CUSTOM_PLAN") { %>
+              <strong><%= it.plan.plan_name %></strong>
+              <br /><br/>
+              <small>
+                <strong>Plan Description : </strong>
+                <br />
+                <p>Personalized playlist of curated content.</p>
+              </small>
+          <% } else { %>
+            <strong><%= it.plan.name %></strong>
+            <br /><br/>
+            <small>
+              <strong>Plan Description : </strong>
+              <br />
+              <% if (it.plan.has_basic_playlist) { %>
+                <p>This plan has a basic playlist.</p>
+              <% } else { %>
+                <p>This plan does not have a basic playlist.</p>
+              <% } %>
+              <% if (it.plan.has_playlist_creation) { %>
+                <p>This plan has playlist creation option.</p>
+              <% } else { %>
+                <p>This plan does not have playlist creation option.</p>
+              <% } %>
+            </small>
+          <% } %>  
         </td>
         <td>
           INR <%=it.plan_pricing?.denomination %> 
