@@ -84,8 +84,7 @@ function Playlist() {
           method: "GET",
         });
         if (res.status === 200) {
-          console.log(res.data, "valalalal");
-          return res.data.playlists;
+          return res.data;
         } else {
           console.log(`Failed to fetch custom plan with id ${planId}`);
           return null;
@@ -115,16 +114,82 @@ function Playlist() {
             );
 
             setCurrentCustomUserPlans(sortedPlans);
-
-            console.log("valalalal", sortedPlans);
             const playlistsPromises = sortedPlans.map(async (plan) => {
               const planId = plan.custom_plan_id;
               return fetchCustomPlanDetails(planId);
             });
 
             const playlistsData = await Promise.all(playlistsPromises);
-            console.log("valalalal are : ", playlistsData);
-            setCustomPlaylists(playlistsData.filter((p) => p !== null)); // Remove null entries
+            const today1 = new Date();
+
+            let activePlaylists = [];
+            for (var i = 0; i !== playlistsData.flat().length; i++) {
+              let planiD = playlistsData.flat()[i]._id;
+              let playlistsInternal = playlistsData.flat()[i].playlists;
+              let matchingUserPlan = sortedPlans.find(
+                (plan) => plan.custom_plan_id === planiD
+              );
+
+              if (!matchingUserPlan) continue;
+
+              let startDate = new Date(matchingUserPlan.validity_from);
+              let endDate = new Date(matchingUserPlan.validity_to);
+              let daysSinceStart =
+                Math.floor((today1 - startDate) / (1000 * 60 * 60 * 24)) + 1;
+              for (var j = 0; j !== playlistsInternal.length; j++) {
+                let playlistId = Number(Object.keys(playlistsInternal[j])[0]);
+                let active = Object.values(playlistsInternal[j]);
+                let activeFrom = active[0][0];
+                let activeTo = active[0][1];
+                if (
+                  daysSinceStart >= activeFrom &&
+                  daysSinceStart <= activeTo
+                ) {
+                  if (today1 < endDate) {
+                    console.log(`Playlist ID ${playlistId} is active today.`);
+                    activePlaylists.push(playlistId);
+                  }
+                }
+              }
+            }
+
+            const uniqueActivePlaylists = [
+              ...new Set(activePlaylists.filter((p) => p !== null)),
+            ];
+
+            const fetchPlaylistById = async (playlistId) => {
+              try {
+                const response = await Fetch({
+                  url: `/content/playlists/getPlaylistById/${playlistId}`,
+                  method: "GET",
+                });
+                if (response.status === 200) {
+                  console.log(response.data);
+                  return response.data;
+                } else {
+                  toast("error");
+                }
+                // if (!response.ok) {
+                //   throw new Error(
+                //     `Error fetching playlist with ID ${playlistId}`
+                //   );
+                // }
+                // return await response.json();
+              } catch (error) {
+                console.error(error);
+                return null;
+              }
+            };
+
+            const playlistDetailsPromises =
+              uniqueActivePlaylists.map(fetchPlaylistById);
+            const playlistDetails = await Promise.all(playlistDetailsPromises);
+
+            const validPlaylistDetails = playlistDetails.filter(
+              (playlist) => playlist !== null
+            );
+            console.log(validPlaylistDetails);
+            setCustomPlaylists(validPlaylistDetails);
           }
         }
       } catch (err) {
@@ -637,6 +702,17 @@ function Playlist() {
           name={"6AM Yoga Curated Playlists"}
           desc={"Choose from curated playlists to practice."}
           playlists={playlists}
+          query={query}
+          handleAddToQueue={handleAddToQueue}
+          showDetails={showDetails}
+          show={true}
+          isFuture={false}
+        />
+
+        <PlaylistList
+          name={"Custom Playlists"}
+          desc={"Choose from custom playlists to practice."}
+          playlists={customPlaylists}
           query={query}
           handleAddToQueue={handleAddToQueue}
           showDetails={showDetails}

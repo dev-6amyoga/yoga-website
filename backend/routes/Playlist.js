@@ -75,6 +75,24 @@ router.put("/playlists/updatePlaylist/:playlistId", async (req, res) => {
   }
 });
 
+router.get("/playlists/getPlaylistById/:playlistId", async (req, res) => {
+  const playlistId = req.params.playlistId;
+  try {
+    const existingPlaylist = await Playlist.findOne({
+      playlist_id: playlistId,
+    });
+    if (!existingPlaylist) {
+      return res.status(HTTP_NOT_FOUND).json({ error: "Playlist not found" });
+    }
+    res.status(HTTP_OK).json(existingPlaylist);
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to update Playlist",
+    });
+  }
+});
+
 router.delete("/playlists/deletePlaylist/:playlistId", async (req, res) => {
   const playlistId = req.params.playlistId;
   try {
