@@ -17,6 +17,7 @@ const { Plan } = require("../models/sql/Plan");
 const { sequelize } = require("../init.sequelize");
 const { timeout } = require("../utils/promise_timeout");
 const { validate_email } = require("../utils/validate_email");
+const { mailTransporter } = require("../init.nodemailer");
 
 const {
   generateAccessToken,
@@ -619,6 +620,70 @@ router.post("/register", async (req, res) => {
     );
 
     await timeout(t.commit(), 5000, new Error("timeout; try again"));
+
+    mailTransporter.sendMail(
+      {
+        from: "dev.6amyoga@gmail.com",
+        to: "992351@gmail.com",
+        subject: "6AM Yoga | New User Registration",
+        html: `
+      <p>Greetings,</p>
+      <p>You received a new registration on ai.6amyoga.com ! Congratulations :) The users' details are as follows : </p>
+      
+      <p>Name : ${name}</p>
+      <p>Email ID : ${email_id}.</p>
+      <p>Phone Number : ${phone_no}.</p>
+
+      <p>Regards, </p>
+      <p>My Yoga Teacher, 6AM Yoga </p>
+    `,
+      },
+      async (err, info) => {
+        if (err) {
+          console.error(err);
+          res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+            message: "Internal server error; try again",
+          });
+        } else {
+          res.status(HTTP_OK).json({
+            message: "Registration mail sent to admin!",
+          });
+        }
+      }
+    );
+
+    mailTransporter.sendMail(
+      {
+        from: "dev.6amyoga@gmail.com",
+        to: email_id,
+        subject: "6AM Yoga | Successful Registration",
+        html: `
+      <p>Greetings,</p>
+      <p>Your registration at ai.6amyoga.com was successful. These are the details we received : </p>
+      
+      <p>Name : ${name}</p>
+      <p>Email ID : ${email_id}.</p>
+      <p>Phone Number : ${phone_no}.</p>
+      <p>Username : ${username}.</p>
+
+
+      <p>Regards, </p>
+      <p>My Yoga Teacher, 6AM Yoga </p>
+    `,
+      },
+      async (err, info) => {
+        if (err) {
+          console.error(err);
+          res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+            message: "Internal server error; try again",
+          });
+        } else {
+          res.status(HTTP_OK).json({
+            message: "Registration mail sent to admin!",
+          });
+        }
+      }
+    );
 
     return res.status(HTTP_OK).json({ user: newUser });
   } catch (error) {
