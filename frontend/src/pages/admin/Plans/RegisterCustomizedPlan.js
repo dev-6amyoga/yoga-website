@@ -69,9 +69,15 @@ function RegisterNewCustomizedPlan() {
     setAllocations(newAllocations);
   };
 
-  const handlePlaylistSelect = (index, playlist) => {
+  // const handlePlaylistSelect = (index, playlist) => {
+  //   const newAllocations = [...allocations];
+  //   newAllocations[index].playlist = playlist;
+  //   setAllocations(newAllocations);
+  // };
+
+  const handlePlaylistSelect = (index, playlist_id) => {
     const newAllocations = [...allocations];
-    newAllocations[index].playlist = playlist;
+    newAllocations[index] = { ...newAllocations[index], playlist_id };
     setAllocations(newAllocations);
   };
 
@@ -623,7 +629,7 @@ function RegisterNewCustomizedPlan() {
           <Card key={index} style={{ marginTop: "16px" }}>
             <CardContent>
               <Grid container spacing={2} alignItems="center">
-                <Grid item xs={12} md={4}>
+                {/* <Grid item xs={12} md={4}>
                   <Select
                     fullWidth
                     value={
@@ -651,7 +657,31 @@ function RegisterNewCustomizedPlan() {
                       </MenuItem>
                     ))}
                   </Select>
+                </Grid> */}
+
+                <Grid item xs={12} md={4}>
+                  <Select
+                    fullWidth
+                    value={allocation.playlist_id || ""}
+                    onChange={(e) =>
+                      handlePlaylistSelect(index, e.target.value)
+                    }
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>
+                      Select Playlist
+                    </MenuItem>
+                    {filteredPlaylists.map((playlist) => (
+                      <MenuItem
+                        key={playlist.playlist_id}
+                        value={playlist.playlist_id}
+                      >
+                        {playlist.playlist_name}
+                      </MenuItem>
+                    ))}
+                  </Select>
                 </Grid>
+
                 <Grid item xs={12} md={3}>
                   <Select
                     fullWidth
