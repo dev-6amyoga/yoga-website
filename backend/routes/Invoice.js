@@ -16,6 +16,8 @@ const { User } = require("../models/sql/User");
 const { UserPlan } = require("../models/sql/UserPlan");
 const { PlanPricing } = require("../models/sql/PlanPricing");
 const HTMLToPDF = require("html-pdf-node");
+const CustomUserPlan = require("../models/mongo/CustomUserPlan");
+const CustomPlan = require("../models/mongo/CustomPlan");
 
 const router = express.Router();
 
@@ -202,7 +204,7 @@ router.post("/student/plan", async (req, res) => {
 });
 
 router.post("/student/mail-invoice", async (req, res) => {
-	const { user_id, transaction_order_id } = req.body;
+	const { user_id, transaction_order_id, plan_type } = req.body;
 
 	if (!user_id || !transaction_order_id) {
 		return res
@@ -225,46 +227,82 @@ router.post("/student/mail-invoice", async (req, res) => {
 	if (!user) {
 		return res.status(HTTP_BAD_REQUEST).json({ message: "User not found" });
 	}
-	const userPlan = await UserPlan.findOne({
-		where: { transaction_order_id: transaction_order_id, user_id: user_id },
-	});
-	if (!userPlan) {
-		return res
-			.status(HTTP_BAD_REQUEST)
-			.json({ message: "User plan not found" });
-	}
 
-	const plan = await Plan.findOne({
-		where: { plan_id: userPlan.plan_id },
-	});
-	if (!plan) {
-		return res
-			.status(HTTP_BAD_REQUEST)
-			.json({ message: "Plan details not found" });
-	}
+	let details = null;
 
-	const pricing = await PlanPricing.findOne({
-		where: { plan_id: userPlan.plan_id, currency_id: 1 },
-	});
-	if (!pricing) {
-		return res
-			.status(HTTP_BAD_REQUEST)
-			.json({ message: "Pricing details not found" });
-	}
+	if (plan_type === "CUSTOM_PLAN") {
+		const userPlan = await CustomUserPlan.findOne({
+			transaction_order_id: transaction_order_id,
+			user_id: user_id,
+		});
 
-	const details = {
-		user: user.toJSON(),
-		transaction: transaction.toJSON(),
-		user_plan: userPlan.toJSON(),
-		plan: plan.toJSON(),
-		plan_pricing: pricing.toJSON(),
-	};
+		if (!userPlan) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ message: "User plan not found" });
+		}
+
+		// console.log(userPlan.custom_plan_id);
+
+		const plan = await CustomPlan.findOne({
+			_id: userPlan.custom_plan_id,
+		});
+
+		// console.log(plan.prices);
+
+		details = {
+			user: user.toJSON(),
+			transaction: transaction.toJSON(),
+			user_plan: userPlan.toJSON(),
+			plan: { ...plan.toJSON(), plan_type: "CUSTOM_PLAN" },
+			plan_pricing: { denomination: plan.prices[0][1] },
+		};
+	} else {
+		const userPlan = await UserPlan.findOne({
+			where: {
+				transaction_order_id: transaction_order_id,
+				user_id: user_id,
+			},
+		});
+		if (!userPlan) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ message: "User plan not found" });
+		}
+
+		const plan = await Plan.findOne({
+			where: { plan_id: userPlan.plan_id },
+		});
+		if (!plan) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ message: "Plan details not found" });
+		}
+
+		const pricing = await PlanPricing.findOne({
+			where: { plan_id: userPlan.plan_id, currency_id: 1 },
+		});
+		if (!pricing) {
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ message: "Pricing details not found" });
+		}
+
+		details = {
+			user: user.toJSON(),
+			transaction: transaction.toJSON(),
+			user_plan: userPlan.toJSON(),
+			plan: plan.toJSON(),
+			plan_pricing: pricing.toJSON(),
+		};
+	}
 
 	const content = await renderer.renderAsync(
 		"/student/plan-purchase",
 		details
 	);
 
+	/*
 	HTMLToPDF.generatePdf(
 		{ content: content },
 		{ format: "A4", printBackground: true, preferCSSPageSize: true }
@@ -304,5 +342,8 @@ router.post("/student/mail-invoice", async (req, res) => {
 			console.log(err);
 			return res.status(500).send();
 		});
+	*/
+
+	return res.status(200).send(content);
 });
 module.exports = router;
