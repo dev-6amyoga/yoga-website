@@ -8,7 +8,7 @@ const customUserPlanSchema = new mongoose.Schema({
 	current_status: String,
 	auto_renewal_enabled: Boolean,
 	user_id: Number,
-	custom_plan_id: Number,
+	custom_plan_id: String,
 	user_type: String,
 	created: {
 		type: mongoose.Schema.Types.Date,

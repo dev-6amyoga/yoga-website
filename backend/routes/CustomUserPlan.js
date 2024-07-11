@@ -5,11 +5,16 @@ const {
 	HTTP_OK,
 	HTTP_NOT_FOUND,
 	HTTP_INTERNAL_SERVER_ERROR,
+	HTTP_BAD_REQUEST,
 } = require("../utils/http_status_codes");
 const { authenticateToken } = require("../utils/jwt");
 const CustomPlan = require("../models/mongo/CustomPlan");
+const {
+	USER_PLAN_ACTIVE,
+	USER_PLAN_STAGED,
+} = require("../enums/user_plan_status");
 
-router.post("/addCustomUserPlan", authenticateToken, async (req, res) => {
+router.post("/register", authenticateToken, async (req, res) => {
 	try {
 		const {
 			plan_id,
@@ -33,6 +38,8 @@ router.post("/addCustomUserPlan", authenticateToken, async (req, res) => {
 
 		const { user_id } = req.user;
 
+		console.log(req.body);
+
 		// check request body
 
 		if (
@@ -45,6 +52,7 @@ router.post("/addCustomUserPlan", authenticateToken, async (req, res) => {
 			!transaction_order_id ||
 			!user_type
 		) {
+			console.log("Missing required fields1");
 			return res
 				.status(HTTP_BAD_REQUEST)
 				.json({ message: "Missing required fields" });
@@ -52,6 +60,7 @@ router.post("/addCustomUserPlan", authenticateToken, async (req, res) => {
 
 		// mongodb object id is string
 		if (typeof plan_id !== "string") {
+			console.log("Missing required fields2");
 			return res.status(HTTP_BAD_REQUEST).json({
 				message: "Invalid plan_id",
 			});
@@ -64,6 +73,7 @@ router.post("/addCustomUserPlan", authenticateToken, async (req, res) => {
 				validity_to === null ||
 				validity_to === undefined)
 		) {
+			console.log("Missing required fields3");
 			// if status is active and either valid from or valid to are null;
 			return res
 				.status(HTTP_BAD_REQUEST)
@@ -110,7 +120,7 @@ router.post("/addCustomUserPlan", authenticateToken, async (req, res) => {
 
 		// create new custom user plan
 		const newCustomPlan = new CustomUserPlan({
-			custom_plan_id,
+			custom_plan_id: plan_id,
 			user_id,
 			purchase_date,
 			validity_from,
@@ -138,7 +148,7 @@ router.get("/getCustomUserPlansByUser/:user_id", async (req, res) => {
 		const customUserPlans = await CustomUserPlan.find({ user_id: userId });
 		if (customUserPlans.length > 0) {
 			res.status(HTTP_OK).json({
-				plans: customPlans,
+				plans: customUserPlans,
 				message: "Custom plans for user exist",
 			});
 		} else {
