@@ -992,7 +992,7 @@ function StudentPlan() {
 
       {currentCustomUserPlans && currentCustomUserPlans.length > 0 && (
         <div className="mx-auto max-w-7xl">
-          <h4>Plan History</h4>
+          <h4>Custom Plan History</h4>
 
           <TableContainer component={Paper} sx={{ margin: "2rem 0" }}>
             <Table sx={{ minWidth: 650 }} aria-label="simple table">

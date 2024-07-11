@@ -8,6 +8,7 @@ import useUserStore from "../../store/UserStore";
 import { withAuth } from "../../utils/withAuth";
 import "./MovingText.css";
 import Hero from "./components/Hero";
+import { Fetch } from "../../utils/Fetch";
 
 function StudentHome() {
   const [mode, setMode] = useState("light");
@@ -19,10 +20,63 @@ function StudentHome() {
     state.userPlan,
   ]);
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const res = await Fetch({
+  //       url: `/customUserPlan/getCustomUserPlansByUser/${user.user_id}`,
+  //       token: true,
+  //       method: "GET",
+  //     });
+  //     if (res.status === 200) {
+  //       if (res.data.plans) {
+  //         const today = new Date();
+  //         const validPlans = res.data.plans.filter(
+  //           (plan) => new Date(plan.validity_to) > today
+  //         );
+
+  //         const sortedPlans = validPlans.sort(
+  //           (a, b) => new Date(b.created.$date) - new Date(a.created.$date)
+  //         );
+  //         if (sortedPlans.length > 0) {
+  //           setHasPlan(true);
+  //         } else {
+  //           setHasPlan(false);
+  //         }
+  //       }
+  //     }
+  //   };
+  //   fetchData();
+  // }, [user]);
+
   // check if user has plan
   const [hasPlan, setHasPlan] = useState(false);
 
   useEffect(() => {
+    const fetchData = async () => {
+      const res = await Fetch({
+        url: `/customUserPlan/getCustomUserPlansByUser/${user.user_id}`,
+        token: true,
+        method: "GET",
+      });
+      if (res.status === 200) {
+        if (res.data.plans) {
+          const today = new Date();
+          const validPlans = res.data.plans.filter(
+            (plan) => new Date(plan.validity_to) > today
+          );
+
+          const sortedPlans = validPlans.sort(
+            (a, b) => new Date(b.created.$date) - new Date(a.created.$date)
+          );
+          if (sortedPlans.length > 0) {
+            setHasPlan(true);
+          } else {
+            setHasPlan(false);
+          }
+        }
+      }
+    };
+
     if (
       user !== null &&
       user !== undefined &&
@@ -36,7 +90,9 @@ function StudentHome() {
           return;
         }
       }
-      setHasPlan(false);
+      fetchData();
+    } else {
+      fetchData();
     }
   }, [user, userPlan]);
 
