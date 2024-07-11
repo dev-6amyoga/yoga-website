@@ -466,7 +466,7 @@ function StudentPlan() {
 				cancellation_date: null,
 				auto_renewal_enabled: false,
 				user_id: user?.user_id,
-				plan_id: customCardData?.custom_plan_id,
+				plan_id: customCardData?._id,
 				purchase_date: formattedDate,
 				discount_coupon_id:
 					discountCoupon && discountCouponApplied
@@ -485,47 +485,8 @@ function StudentPlan() {
 				validity_from: customCardData.validity_from,
 				validity_to: customCardData.validity_to,
 				custom_plan: true,
+				current_status: customCardData.current_status,
 			};
-
-			// check if user has an existing plan with same id
-			// currentCustomUserPlans is sorted by created date, so the first element is the latest
-			// SAME ID IS ACTIVE => STAGED
-			const existingPlan = currentCustomUserPlans.find(
-				(plan) =>
-					plan.custom_plan_id === customCardData?.custom_plan_id &&
-					(plan.current_status === USER_PLAN_ACTIVE ||
-						plan.current_status === USER_PLAN_STAGED)
-			);
-
-			if (existingPlan) {
-				const existingValidityFrom = new Date(existingPlan.validity_to);
-				const userValidityFrom = new Date(userPlanData.validity_from);
-				const userValidityTo = new Date(userPlanData.validity_to);
-
-				userPlanData.validity_from = existingValidityFrom.toISOString();
-
-				const newValidityTo = new Date(existingValidityFrom);
-
-				newValidityTo.setDate(
-					newValidityTo.getDate() + customCardData.planValidity
-				);
-
-				userPlanData.validity_to = newValidityTo.toISOString();
-
-				userPlanData.current_status = USER_PLAN_STAGED;
-			} else {
-				userPlanData.validity_from = new Date().toISOString();
-
-				const validityToDate = new Date(userPlanData.validity_from);
-
-				validityToDate.setDate(
-					validityToDate.getDate() + customCardData.planValidity
-				);
-
-				userPlanData.validity_to = validityToDate.toISOString();
-
-				userPlanData.current_status = USER_PLAN_ACTIVE;
-			}
 
 			setToBeRegistered(userPlanData);
 
@@ -667,17 +628,75 @@ function StudentPlan() {
 
 		if (data.plan_name) {
 			console.log("being sent custom plan :", data);
-			setCustomCardData(data);
-			setShowCustomCard(true);
-			setDiscountCouponApplied(false);
-			setDiscountCoupon(null);
-			const selectedPricing = Number(data.prices[0][selectedCurrencyId]);
-			setPrice(selectedPricing);
+			// check if user has an existing plan with same id
+			// currentCustomUserPlans is sorted by created date, so the first element is the latest
+			// SAME ID IS ACTIVE => STAGED
+			try {
+				let finalCustomCardData = { ...data };
 
-			//   const pricing = data.prices.find(
-			//     (p) => p.currency.short_tag === selectedCurrency
-			//   );
-			return;
+				const existingPlan = currentCustomUserPlans.find(
+					(plan) =>
+						plan.custom_plan_id ===
+							finalCustomCardData?.custom_plan_id &&
+						(plan.current_status === USER_PLAN_ACTIVE ||
+							plan.current_status === USER_PLAN_STAGED)
+				);
+
+				if (existingPlan) {
+					const existingValidityFrom = new Date(
+						existingPlan.validity_to
+					);
+					// const userValidityFrom = new Date(userPlanData.validity_from);
+					// const userValidityTo = new Date(userPlanData.validity_to);
+
+					finalCustomCardData.validity_from =
+						existingValidityFrom.toISOString();
+
+					const newValidityTo = new Date(existingValidityFrom);
+
+					newValidityTo.setDate(
+						newValidityTo.getDate() + data.planValidity
+					);
+
+					finalCustomCardData.validity_to =
+						newValidityTo.toISOString();
+
+					finalCustomCardData.current_status = USER_PLAN_STAGED;
+				} else {
+					finalCustomCardData.validity_from =
+						new Date().toISOString();
+
+					const validityToDate = new Date(
+						finalCustomCardData.validity_from
+					);
+
+					validityToDate.setDate(
+						validityToDate.getDate() + data.planValidity
+					);
+
+					finalCustomCardData.validity_to =
+						validityToDate.toISOString();
+
+					finalCustomCardData.current_status = USER_PLAN_ACTIVE;
+				}
+
+				setCustomCardData(finalCustomCardData);
+				setShowCustomCard(true);
+				setDiscountCouponApplied(false);
+				setDiscountCoupon(null);
+				const selectedPricing = Number(
+					data.prices[0][selectedCurrencyId]
+				);
+				setPrice(selectedPricing);
+				console.log("hello, reached the end");
+
+				//   const pricing = data.prices.find(
+				//     (p) => p.currency.short_tag === selectedCurrency
+				//   );
+				return;
+			} catch (error) {
+				console.log(error);
+			}
 		}
 
 		setShowCard(true);
@@ -694,13 +713,85 @@ function StudentPlan() {
 		// account for custom plan here
 
 		if (toBeRegistered.custom_plan) {
+			let finalUserPlan = { ...toBeRegistered };
+			finalUserPlan.transaction_order_id = order_id;
+			finalUserPlan.user_type = "STUDENT";
+			finalUserPlan.institute_id = null;
 			toast("Registering custom plan!");
 			console.log("REG custom plan :", order_id);
-			console.log("REG custom plan :", toBeRegistered);
+			console.log("REG custom plan :", finalUserPlan);
+
+			FetchRetry({
+				url: "/customUserPlan/register",
+				method: "POST",
+				token: true,
+				data: finalUserPlan,
+				n: 5,
+			})
+				.then((response) => {
+					if (response?.status === 200) {
+						toast("Plan subscribed successfully", {
+							type: "success",
+						});
+
+						//invoice download here!! order_id, toBeRegistered.user_id
+						/*
+						FetchRetry({
+							url: "/invoice/student/mail-invoice",
+							method: "POST",
+							data: JSON.stringify({
+								user_id: finalUserPlan.user_id,
+								transaction_order_id: order_id,
+							}),
+							n: 2,
+							retryDelayMs: 2000,
+						})
+							.then((responseInvoice) => {
+								if (responseInvoice.status === 200) {
+									toast("Invoice mailed successfully", {
+										type: "success",
+									});
+								}
+								setShowCard(false);
+								setCardData(null);
+								setLoading(false);
+							})
+							.catch((error) => {
+								// console.log(error);
+								setShowCard(false);
+								setCardData(null);
+								toast(
+									"Error mailing invoice; Download invoice in Transaction History",
+									{ type: "error" }
+								);
+								setLoading(false);
+							});
+              fetchUserPlans();
+              */
+						setShowCustomCard(false);
+						setCustomCardData(null);
+						setLoading(false);
+					} else {
+						toast(response?.data?.message);
+						setShowCustomCard(false);
+						setCustomCardData(null);
+						setLoading(false);
+					}
+				})
+				.catch((err) => {
+					console.log(err);
+					toast(
+						"Error subscribing plan; Incase money has been debited from your account, it will be refunded within 4 to 5 business days! Please try again!",
+						{ type: "error" }
+					);
+					setShowCustomCard(false);
+					setCustomCardData(null);
+					setLoading(false);
+				});
 
 			return;
 		}
-		const finalUserPlan = { ...toBeRegistered };
+		let finalUserPlan = { ...toBeRegistered };
 		finalUserPlan.transaction_order_id = order_id;
 		finalUserPlan.user_type = "STUDENT";
 		finalUserPlan.institute_id = null;
