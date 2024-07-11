@@ -857,6 +857,10 @@ function StudentPlan() {
     );
   };
 
+  useEffect(() => {
+    console.log("kkkk", currentCustomUserPlans);
+  }, [currentCustomUserPlans]);
+
   const continentNames = {
     AF: "Africa",
     AN: "Antarctica",
@@ -924,7 +928,7 @@ function StudentPlan() {
       <StudentNavMUI />
       <Hero heading="Plans" />
       <div className="mx-auto max-w-7xl">
-        {planId === -1 ? (
+        {planId === -1 && currentCustomUserPlans.length === 0 ? (
           <Alert variant="outlined" severity="info">
             Please purchase a subscription to unlock all features!
           </Alert>
@@ -957,7 +961,7 @@ function StudentPlan() {
               </TableHead>
               {/* customPlansForUser */}
               <TableBody>
-                {myPlans.map((row) => (
+                {myPlans?.map((row) => (
                   <TableRow
                     key={row?.id}
                     sx={{
@@ -980,7 +984,33 @@ function StudentPlan() {
                     {/* <TableCell>{row?.current_status}</TableCell> */}
                   </TableRow>
                 ))}
-                {currentCustomUserPlans.map((row) => (
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+      )}
+
+      {currentCustomUserPlans && currentCustomUserPlans.length > 0 && (
+        <div className="mx-auto max-w-7xl">
+          <h4>Plan History</h4>
+
+          <TableContainer component={Paper} sx={{ margin: "2rem 0" }}>
+            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+              <TableHead
+                sx={{
+                  bgcolor: "linear-gradient(#033363, #021F3B)",
+                }}
+              >
+                <TableRow>
+                  <TableCell>Plan Name</TableCell>
+                  <TableCell>Validity From</TableCell>
+                  <TableCell>Validity To</TableCell>
+                  {/* <TableCell>Status</TableCell> */}
+                </TableRow>
+              </TableHead>
+              {/* customPlansForUser */}
+              <TableBody>
+                {currentCustomUserPlans?.map((row) => (
                   <TableRow
                     key={row?.custom_plan_id}
                     sx={{
