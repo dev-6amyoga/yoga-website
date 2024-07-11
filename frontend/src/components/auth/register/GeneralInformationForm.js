@@ -46,6 +46,16 @@ export default function GeneralInformationForm({
 		async (e) => {
 			e.preventDefault();
 			const formData = getFormData(e);
+
+			// VALIDATE NAME
+			if (formData.name.length < 4) {
+				toast("Name must be at least 4 characters", {
+					type: "warning",
+				});
+				return;
+			}
+
+			// VALIDATE EMAIL
 			let [is_email_valid, email_error] = validateEmail(
 				formData?.email_id
 			);
@@ -71,6 +81,7 @@ export default function GeneralInformationForm({
 				return;
 			}
 
+			// VALIDATE PASSWORD
 			if (formData?.password !== formData?.confirm_password) {
 				toast("Passwords do not match");
 				return;
@@ -86,10 +97,41 @@ export default function GeneralInformationForm({
 				return;
 			}
 
+			// VALIDATE PHONE NUMBER
+
+			const [is_phone_valid, phone_error] = await validatePhone(
+				formData.phone_no
+			);
+
+			if (!is_phone_valid || phone_error) {
+				toast(phone_error.message, { type: "warning" });
+				return;
+			}
+
+			// VALIDATE USERNAME
+			let [username, username_error] = await UserAPI.postCheckUsername(
+				formData.username
+			);
+
+			if (username.exists) {
+				toast("Username already exists", { type: "warning" });
+				return;
+			}
+
+			if (username_error) {
+				toast(username_error.message, { type: "warning" });
+				return;
+			}
+
 			setPasswordError(null);
+			setEmailError(null);
+			setUsernameError(null);
+			setPhoneError(null);
 
 			setGeneralInfo(formData);
+
 			setInfoSaved(true);
+
 			toast("Progress saved!", { type: "success" });
 			handleNextStep();
 		},
