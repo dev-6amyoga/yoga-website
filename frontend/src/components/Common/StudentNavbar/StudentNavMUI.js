@@ -461,7 +461,6 @@ function StudentNavMUI({ mode, toggleColorMode }) {
           data: { user_id: user?.user_id },
         });
         const data = response.data;
-        // console.log("NAVBAR DATA : ", data);
         if (data["userPlan"].length !== 0) {
           const indexOfActiveUserPlan = data["userPlan"].findIndex(
             (plan) => plan.current_status === USER_PLAN_ACTIVE
@@ -491,6 +490,28 @@ function StudentNavMUI({ mode, toggleColorMode }) {
             setDisabled(true);
           }
         } else {
+          const res = await Fetch({
+            url: `/customUserPlan/getCustomUserPlansByUser/${user.user_id}`,
+            token: true,
+            method: "GET",
+          });
+          if (res.status === 200) {
+            if (res.data.plans) {
+              const today = new Date();
+              const validPlans = res.data.plans.filter(
+                (plan) => new Date(plan.validity_to) > today
+              );
+
+              const sortedPlans = validPlans.sort(
+                (a, b) => new Date(b.created.$date) - new Date(a.created.$date)
+              );
+              if (sortedPlans.length > 0) {
+                setDisabled(false);
+              } else {
+                setDisabled(true);
+              }
+            }
+          }
           setDisabled(true);
           setDisabledTailorMade(true);
         }
