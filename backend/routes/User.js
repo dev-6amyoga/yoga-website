@@ -654,7 +654,12 @@ const { UpdateUserPlanStatus } = require("../services/UserPlan.service");
 router.post("/forgot-password-email", async (req, res) => {
   const { email_id } = req.body;
   const token = tokenUtils.enc_token(email_id);
-
+  const user = await User.findOne({
+    where: { email: email_id },
+  });
+  if (!user) {
+    return res.status(HTTP_OK).json({ error: "User does not exist" });
+  }
   mailTransporter.sendMail(
     {
       from: "dev.6amyoga@gmail.com",

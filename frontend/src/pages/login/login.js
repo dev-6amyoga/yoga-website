@@ -153,9 +153,7 @@ export default function Login({ switchForm }) {
 
   const emailVerifyFunc = async (e) => {
     e.preventDefault();
-    toast("Please wait!");
     const formData = getFormData(e);
-    console.log(formData.email_verify, "FORM DATAA");
     const response = await Fetch({
       url: "/user/forgot-password-email",
       method: "POST",
@@ -165,6 +163,10 @@ export default function Login({ switchForm }) {
     });
 
     if (response.status === 200) {
+      if (response.data.error) {
+        toast("User does not exist with the provided email id!");
+        return;
+      }
       setVerifyShow(true);
     }
   };
