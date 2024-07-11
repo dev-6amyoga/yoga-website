@@ -8,7 +8,7 @@ import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
 import PlaylistList from "./PlaylistList";
 
-function Playlist() {
+function Playlist({ page }) {
 	const [modalState, setModalState] = useState(false);
 	const [asana_details, setAsanaDetails] = useState([]);
 	const appendToAsanaDetails = (newItem) => {
@@ -85,6 +85,7 @@ function Playlist() {
 					token: true,
 					method: "GET",
 				});
+
 				if (res.status === 200) {
 					return res.data;
 				} else {
@@ -533,12 +534,12 @@ function Playlist() {
 				console.log(error);
 			}
 		};
-		if (userPlan) {
+		if (userPlan || page === "testing") {
 			fetchData();
 		} else {
 			setPlaylists([]);
 		}
-	}, [user_id, currentInstituteId]);
+	}, [user_id, currentInstituteId, page, userPlan]);
 
 	const handleAddToQueue = (playlist) => {
 		clearQueue();
