@@ -23,6 +23,7 @@ function Playlist() {
     asana_ids: [],
     playlist_mode: "",
   });
+
   const [isInstitute, setIsInstitute] = useState(false);
   const [isTeacher, setIsTeacher] = useState(false);
   const [isPersonal, setIsPersonal] = useState(false);
@@ -30,6 +31,8 @@ function Playlist() {
   const [teacherPlaylists, setTeacherPlaylists] = useState([]);
   const [madeForTeacher, setMadeForTeacher] = useState([]);
   const [playlists, setPlaylists] = useState([]);
+
+  const [customPlaylists, setCustomPlaylists] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, institutes, currentInstituteId, currentRole] = useUserStore(
@@ -40,6 +43,100 @@ function Playlist() {
       state.currentRole,
     ])
   );
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const res = await Fetch({
+  //         url: `/customUserPlan/getCustomUserPlansByUser/${user.user_id}`,
+  //         token: true,
+  //         method: "GET",
+  //       });
+  //       if (res.status === 200) {
+  //         if (res.data.plans) {
+  //           const today = new Date();
+  //           const validPlans = res.data.plans.filter(
+  //             (plan) => new Date(plan.validity_to) > today
+  //           );
+  //           console.log(validPlans, "are valid");
+  //           setCurrentCustomUserPlans(
+  //             validPlans.sort(
+  //               (a, b) => new Date(b.created_at) - new Date(a.created_at)
+  //             )
+  //           );
+  //         }
+  //       }
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //   };
+  //   if (user) {
+  //     fetchData();
+  //   }
+  // }, [user]);
+
+  useEffect(() => {
+    const fetchCustomPlanDetails = async (planId) => {
+      try {
+        const res = await Fetch({
+          url: `/customPlan/getCustomPlanById/${planId}`,
+          token: true,
+          method: "GET",
+        });
+        if (res.status === 200) {
+          console.log(res.data, "valalalal");
+          return res.data.playlists;
+        } else {
+          console.log(`Failed to fetch custom plan with id ${planId}`);
+          return null;
+        }
+      } catch (err) {
+        console.log(err);
+        return null;
+      }
+    };
+
+    const fetchData = async () => {
+      try {
+        const res = await Fetch({
+          url: `/customUserPlan/getCustomUserPlansByUser/${user.user_id}`,
+          token: true,
+          method: "GET",
+        });
+        if (res.status === 200) {
+          if (res.data.plans) {
+            const today = new Date();
+            const validPlans = res.data.plans.filter(
+              (plan) => new Date(plan.validity_to) > today
+            );
+
+            const sortedPlans = validPlans.sort(
+              (a, b) => new Date(b.created.$date) - new Date(a.created.$date)
+            );
+
+            setCurrentCustomUserPlans(sortedPlans);
+
+            console.log("valalalal", sortedPlans);
+            const playlistsPromises = sortedPlans.map(async (plan) => {
+              const planId = plan.custom_plan_id;
+              return fetchCustomPlanDetails(planId);
+            });
+
+            const playlistsData = await Promise.all(playlistsPromises);
+            console.log("valalalal are : ", playlistsData);
+            setCustomPlaylists(playlistsData.filter((p) => p !== null)); // Remove null entries
+          }
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
+
   const user_id = user?.user_id;
   const [currentInstitute, setCurrentInstitute] = useState(null);
   const [allAsanas, setAllAsanas] = useState([]);
@@ -56,6 +153,34 @@ function Playlist() {
 
   const [query, setQuery] = useState("");
   const searchTimeout = useRef(null);
+  const [currentCustomUserPlans, setCurrentCustomUserPlans] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await Fetch({
+          url: `/customUserPlan/getCustomUserPlansByUser/${user.user_id}`,
+          token: true,
+          method: "GET",
+        });
+        if (res.status === 200) {
+          if (res.data.plans) {
+            // sort desc order of created time
+            setCurrentCustomUserPlans(
+              res.data.plans.sort(
+                (a, b) => new Date(b.created_at) - new Date(a.created_at)
+              )
+            );
+          }
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (currentInstituteId) {

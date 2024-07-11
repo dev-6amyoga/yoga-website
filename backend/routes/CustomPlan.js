@@ -67,6 +67,25 @@ router.get("/getAllCustomPlans", async (req, res) => {
   }
 });
 
+router.get("/getCustomPlanById/:planId", async (req, res) => {
+  try {
+    const planId = req.params.planId;
+    const customPlan = await CustomPlan.findById(planId);
+    if (customPlan) {
+      res.status(HTTP_OK).json(customPlan);
+    } else {
+      res.status(HTTP_NOT_FOUND).json({
+        error: "Custom plan not found",
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching custom plan:", error);
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: "Failed to fetch custom plan",
+    });
+  }
+});
+
 router.get("/getCustomPlansByUser/:user_id", async (req, res) => {
   try {
     const userId = parseInt(req.params.user_id);
