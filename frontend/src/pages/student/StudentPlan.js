@@ -980,7 +980,7 @@ function StudentPlan() {
                     {/* <TableCell>{row?.current_status}</TableCell> */}
                   </TableRow>
                 ))}
-                {customPlansForUser.map((row) => (
+                {currentCustomUserPlans.map((row) => (
                   <TableRow
                     key={row?.custom_plan_id}
                     sx={{
@@ -988,7 +988,9 @@ function StudentPlan() {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row?.plan_name}
+                      {customPlansForUser.find(
+                        (obj) => obj._id === row?.custom_plan_id
+                      )?.plan_name || "Plan not found"}
                     </TableCell>
                     <TableCell>
                       {row?.validity_from
