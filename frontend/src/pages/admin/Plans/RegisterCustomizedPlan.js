@@ -18,6 +18,8 @@ import {
   Tooltip,
   CardContent,
   Card,
+  Grid,
+  IconButton,
 } from "@mui/material";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { useEffect, useState } from "react";
@@ -27,6 +29,7 @@ import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
 import AllPlaylists from "../../../components/content-management/AllPlaylists";
 import { toast } from "react-toastify";
+import { Add, Remove } from "@mui/icons-material";
 
 function RegisterNewCustomizedPlan() {
   const [selectedNeeds, setSelectedNeeds] = useState([]);
@@ -34,6 +37,8 @@ function RegisterNewCustomizedPlan() {
   const [currencies, setCurrencies] = useState([]);
   const [allStudents, setAllStudents] = useState([]);
   const [allInstitutes, setAllInstitutes] = useState([]);
+  const [allocations, setAllocations] = useState([]);
+
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [allPlaylists, setAllPlaylists] = useState([]);
   const [selectedInstitutes, setSelectedInstitutes] = useState([]);
@@ -42,6 +47,40 @@ function RegisterNewCustomizedPlan() {
   const [prices, setPrices] = useState([]);
   const [chosenPlaylists, setChosenPlaylists] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [numberOfDays, setNumberOfDays] = useState(10);
+
+  const handleAddPlaylist = (playlist) => {
+    setChosenPlaylists([...chosenPlaylists, playlist]);
+  };
+
+  const handleRemovePlaylist = (playlistId) => {
+    setChosenPlaylists(
+      chosenPlaylists.filter((p) => p.playlist_id !== playlistId)
+    );
+  };
+
+  const handleAddAllocation = () => {
+    setAllocations([
+      ...allocations,
+      { playlist: null, startDay: "", endDay: "" },
+    ]);
+  };
+
+  const handleRemoveAllocation = (index) => {
+    setAllocations(allocations.filter((_, i) => i !== index));
+  };
+
+  const handleAllocationChange = (index, field, value) => {
+    const newAllocations = [...allocations];
+    newAllocations[index][field] = value;
+    setAllocations(newAllocations);
+  };
+
+  const handlePlaylistSelect = (index, playlist) => {
+    const newAllocations = [...allocations];
+    newAllocations[index].playlist = playlist;
+    setAllocations(newAllocations);
+  };
 
   const filteredPlaylists = searchQuery
     ? allPlaylists.filter((playlist) =>
@@ -49,17 +88,17 @@ function RegisterNewCustomizedPlan() {
       )
     : allPlaylists;
 
-  const handleAddPlaylist = (playlist) => {
-    if (!chosenPlaylists.find((p) => p.playlist_id === playlist.playlist_id)) {
-      setChosenPlaylists([...chosenPlaylists, playlist]);
-    }
-  };
+  // const handleAddPlaylist = (playlist) => {
+  //   if (!chosenPlaylists.find((p) => p.playlist_id === playlist.playlist_id)) {
+  //     setChosenPlaylists([...chosenPlaylists, playlist]);
+  //   }
+  // };
 
-  const handleRemovePlaylist = (playlistId) => {
-    setChosenPlaylists(
-      chosenPlaylists.filter((playlist) => playlist.playlist_id !== playlistId)
-    );
-  };
+  // const handleRemovePlaylist = (playlistId) => {
+  //   setChosenPlaylists(
+  //     chosenPlaylists.filter((playlist) => playlist.playlist_id !== playlistId)
+  //   );
+  // };
 
   const handleNeedsChange = (event) => {
     setSelectedNeeds(event.target.value);
@@ -484,27 +523,7 @@ function RegisterNewCustomizedPlan() {
           <MenuItem value="50">50 Hours</MenuItem>
         </Select>
         <br />
-        {/* <Typography>Plan Start Date</Typography>
-        <br />
 
-        <TextField
-          label="Validity From"
-          type="datetime-local"
-          name="validity_from"
-          InputLabelProps={{
-            shrink: true,
-          }}
-        />
-        <Typography>Plan End Date</Typography>
-        <br />
-        <TextField
-          label="Validity To"
-          type="datetime-local"
-          name="validity_to"
-          InputLabelProps={{
-            shrink: true,
-          }}
-        /> */}
         <Typography>Number of days</Typography>
 
         <Select
@@ -539,7 +558,7 @@ function RegisterNewCustomizedPlan() {
           />
         ))}
         <br />
-        <Typography>Choose Playlist(s) to allocate to the plan</Typography>
+        {/* <Typography>Choose Playlist(s) to allocate to the plan</Typography>
         <br />
         <div className="mb-4">
           <TextField
@@ -591,15 +610,147 @@ function RegisterNewCustomizedPlan() {
           <Card>
             {" "}
             {chosenPlaylists.map((playlist) => (
-              //   <Card key={playlist.playlist_id} className="mb-2">
               <CardContent>
                 <Typography>{playlist.playlist_name}</Typography>
               </CardContent>
-              //   </Card>
             ))}
           </Card>
         </div>
+        <br /> */}
+        <Typography>Choose Playlist(s) to allocate to the plan</Typography>
         <br />
+        {/* <div className="mb-4">
+          <TextField
+            label="Search Playlists"
+            variant="outlined"
+            fullWidth
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div> */}
+        {/* <div className="flex flex-col items-center gap-4 px-4 pb-4 max-h-72 overflow-x-auto">
+          {filteredPlaylists.map((playlist) => {
+            const isAdded = chosenPlaylists.some(
+              (p) => p.playlist_id === playlist.playlist_id
+            );
+
+            return (
+              <div
+                key={playlist.playlist_id}
+                id={playlist.playlist_id}
+                className={
+                  "w-80 border flex-shrink-0 flex flex-col items-center gap-2 p-2 hover:cursor-pointer hover:bg-blue-100 transition-colors bg-blue-100"
+                }
+              >
+                <div className="flex flex-col gap-1">
+                  <Tooltip title={playlist.playlist_name}>
+                    <p className="font-medium text-sm">
+                      {playlist.playlist_name.substring(0, 45)}..
+                    </p>
+                  </Tooltip>
+                  <Button
+                    variant="contained"
+                    onClick={() =>
+                      isAdded
+                        ? handleRemovePlaylist(playlist.playlist_id)
+                        : handleAddPlaylist(playlist)
+                    }
+                  >
+                    {isAdded ? "Remove" : "Add"}
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div> */}
+        <br />
+        <Typography>Allocate Playlists to Days</Typography>
+        <Button
+          variant="outlined"
+          startIcon={<Add />}
+          onClick={handleAddAllocation}
+        >
+          Add Allocation
+        </Button>
+        {allocations.map((allocation, index) => (
+          <Card key={index} style={{ marginTop: "16px" }}>
+            <CardContent>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={12} md={4}>
+                  <Select
+                    fullWidth
+                    value={
+                      allocation.playlist ? allocation.playlist.playlist_id : ""
+                    }
+                    onChange={(e) =>
+                      handlePlaylistSelect(
+                        index,
+                        filteredPlaylists.find(
+                          (p) => p.playlist_id === e.target.value
+                        )
+                      )
+                    }
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>
+                      Select Playlist
+                    </MenuItem>
+                    {filteredPlaylists.map((playlist) => (
+                      <MenuItem
+                        key={playlist.playlist_id}
+                        value={playlist.playlist_id}
+                      >
+                        {playlist.playlist_name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Start Day"
+                    value={allocation.startDay}
+                    onChange={(e) =>
+                      handleAllocationChange(index, "startDay", e.target.value)
+                    }
+                    inputProps={{ min: 1, max: numberOfDays }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="End Day"
+                    value={allocation.endDay}
+                    onChange={(e) =>
+                      handleAllocationChange(index, "endDay", e.target.value)
+                    }
+                    inputProps={{ min: 1, max: numberOfDays }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={2}>
+                  <IconButton onClick={() => handleRemoveAllocation(index)}>
+                    <Remove />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        ))}
+        <br />
+        {/* <div>
+          <Typography>Chosen Playlists</Typography>
+          <Card>
+            {chosenPlaylists.map((playlist) => (
+              <CardContent key={playlist.playlist_id}>
+                <Typography>{playlist.playlist_name}</Typography>
+              </CardContent>
+            ))}
+          </Card>
+        </div> */}
+        <br />
+
         <Button
           type="submit"
           variant="contained"
