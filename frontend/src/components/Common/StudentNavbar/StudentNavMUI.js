@@ -505,6 +505,7 @@ function StudentNavMUI({ mode, toggleColorMode }) {
               const sortedPlans = validPlans.sort(
                 (a, b) => new Date(b.created.$date) - new Date(a.created.$date)
               );
+              console.log(sortedPlans, "are sorted");
               if (sortedPlans.length > 0) {
                 setDisabled(false);
               } else {
@@ -512,8 +513,9 @@ function StudentNavMUI({ mode, toggleColorMode }) {
               }
             }
           }
-          setDisabled(true);
-          setDisabledTailorMade(true);
+
+          // setDisabled(true);
+          // setDisabledTailorMade(true);
         }
       } catch (error) {
         setDisabled(true);
