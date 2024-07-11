@@ -459,9 +459,6 @@ function StudentPlan() {
     }
 
     if (customCardData) {
-      console.log("validity from : ", customCardData.validity_from);
-      console.log("validity to : ", customCardData.validity_to);
-
       let userPlanData = {
         cancellation_date: null,
         auto_renewal_enabled: false,

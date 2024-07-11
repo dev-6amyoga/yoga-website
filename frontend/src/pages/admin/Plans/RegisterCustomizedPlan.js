@@ -270,17 +270,8 @@ function RegisterNewCustomizedPlan() {
           label="Enter Plan Name"
           variant="outlined"
           fullWidth
-          //   value={formData.query_name}
-          //   onChange={handleChange}
         />
-        {/* <TextField
-          name="query_email"
-          label="Email"
-          variant="outlined"
-          fullWidth
-          value={formData.query_email}
-          onChange={handleChange}
-        /> */}
+
         <br />
         <Typography>Choose Plan Requirements</Typography>
         <FormControl fullWidth>
@@ -485,12 +476,7 @@ function RegisterNewCustomizedPlan() {
         )}
         <br />
         <Typography>Watch Hours</Typography>
-        <Select
-          fullWidth
-          //   placeholder="institute"
-          onChange={handleWatchChange}
-          id="watch_hours"
-        >
+        <Select fullWidth onChange={handleWatchChange} id="watch_hours">
           <MenuItem value="10">10 Hours</MenuItem>
           <MenuItem value="20">20 Hours</MenuItem>
           <MenuItem value="30">30 Hours</MenuItem>
@@ -498,7 +484,7 @@ function RegisterNewCustomizedPlan() {
           <MenuItem value="50">50 Hours</MenuItem>
         </Select>
         <br />
-        <Typography>Plan Start Date</Typography>
+        {/* <Typography>Plan Start Date</Typography>
         <br />
 
         <TextField
@@ -518,7 +504,9 @@ function RegisterNewCustomizedPlan() {
           InputLabelProps={{
             shrink: true,
           }}
-        />
+        /> */}
+        <Typography>Number of days</Typography>
+
         <Select
           fullWidth
           //   placeholder="institute"
