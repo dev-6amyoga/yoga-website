@@ -35,14 +35,16 @@ function Playlist() {
   const [customPlaylists, setCustomPlaylists] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [user, institutes, currentInstituteId, currentRole] = useUserStore(
-    useShallow((state) => [
-      state.user,
-      state.institutes,
-      state.currentInstituteId,
-      state.currentRole,
-    ])
-  );
+  const [user, userPlan, institutes, currentInstituteId, currentRole] =
+    useUserStore(
+      useShallow((state) => [
+        state.user,
+        state.userPlan,
+        state.institutes,
+        state.currentInstituteId,
+        state.currentRole,
+      ])
+    );
 
   // useEffect(() => {
   //   const fetchData = async () => {
@@ -484,7 +486,11 @@ function Playlist() {
         console.log(error);
       }
     };
-    fetchData();
+    if (userPlan) {
+      fetchData();
+    } else {
+      setPlaylists([]);
+    }
   }, [user_id, currentInstituteId]);
 
   const handleAddToQueue = (playlist) => {
