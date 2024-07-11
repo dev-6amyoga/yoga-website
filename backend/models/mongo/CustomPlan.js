@@ -3,8 +3,6 @@ const mongoose = require("mongoose");
 const customPlanSchema = new mongoose.Schema({
   custom_plan_id: Number,
   plan_name: String,
-  validity_from: Date,
-  validity_to: Date,
   selectedNeeds: [String],
   prices: [mongoose.Schema.Types.Mixed],
   playlists: [mongoose.Schema.Types.Mixed],

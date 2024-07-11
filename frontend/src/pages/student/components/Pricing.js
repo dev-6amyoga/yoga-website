@@ -371,7 +371,7 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                       enable: true,
                     },
                     {
-                      name: `Validity: ${formatDate(plan.validity_from)} to ${formatDate(plan.validity_to)}`,
+                      name: `Validity: ${plan.planValidity} days`,
                       enable: true,
                     },
                     {
