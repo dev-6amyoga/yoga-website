@@ -1,8 +1,10 @@
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import {
+  Checkbox,
   FormControl,
   InputLabel,
+  ListItemText,
   MenuItem,
   Select,
   TextField,
@@ -212,10 +214,16 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
 
                   {plan.name === "Customized Plan" && (
                     <>
-                      <FormControl fullWidth sx={{ mt: 2 }}>
+                      {/* <FormControl fullWidth sx={{ mt: 2 }}>
                         <InputLabel
                           sx={{
                             color: "grey.200",
+                            "&.Mui-focused": {
+                              display: "none",
+                            },
+                            "&.MuiFormLabel-filled": {
+                              display: "none",
+                            },
                           }}
                           id="yoga-needs-label"
                         >
@@ -250,7 +258,67 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                             Pre Natal Yoga
                           </MenuItem>
                         </Select>
+                      </FormControl> */}
+
+                      <FormControl fullWidth sx={{ mt: 2 }}>
+                        <InputLabel
+                          sx={{
+                            color: "grey.200",
+                            "&.Mui-focused": {
+                              display: "none",
+                            },
+                            "&.MuiFormLabel-filled": {
+                              display: "none",
+                            },
+                          }}
+                          id="yoga-needs-label"
+                        >
+                          Select Your Yoga Needs
+                        </InputLabel>
+                        <Select
+                          sx={{
+                            color: "grey.200",
+                            ".MuiOutlinedInput-notchedOutline": {
+                              borderColor: "grey.200",
+                            },
+                            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "grey.200",
+                            },
+                            "&:hover .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "grey.200",
+                            },
+                            ".MuiSvgIcon-root ": {
+                              fill: "grey.200 !important",
+                            },
+                          }}
+                          labelId="yoga-needs-label"
+                          multiple
+                          value={selectedNeeds}
+                          onChange={handleNeedsChange}
+                          renderValue={(selected) => selected.join(", ")}
+                        >
+                          {[
+                            "Knee Pain",
+                            "Back Pain",
+                            "Neck Pain",
+                            "Pre Natal Yoga",
+                          ].map((need) => (
+                            <MenuItem key={need} value={need}>
+                              <Checkbox
+                                checked={selectedNeeds.indexOf(need) > -1}
+                                sx={{
+                                  color: "grey.200",
+                                  "&.Mui-checked": {
+                                    color: "grey.200",
+                                  },
+                                }}
+                              />
+                              <ListItemText primary={need} />
+                            </MenuItem>
+                          ))}
+                        </Select>
                       </FormControl>
+
                       <TextField
                         fullWidth
                         sx={{
@@ -260,6 +328,9 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                           },
                           ".MuiInputLabel-root": {
                             color: "grey.200",
+                            "&.Mui-focused": {
+                              display: "none",
+                            },
                           },
                           ".MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline":
                             {
