@@ -955,9 +955,10 @@ function StudentPlan() {
                   <TableCell>Plan Name</TableCell>
                   <TableCell>Validity From</TableCell>
                   <TableCell>Validity To</TableCell>
-                  <TableCell>Status</TableCell>
+                  {/* <TableCell>Status</TableCell> */}
                 </TableRow>
               </TableHead>
+              {/* customPlansForUser */}
               <TableBody>
                 {myPlans.map((row) => (
                   <TableRow
@@ -979,7 +980,30 @@ function StudentPlan() {
                         ? new Date(row?.validity_to).toDateString()
                         : ""}
                     </TableCell>
-                    <TableCell>{row?.current_status}</TableCell>
+                    {/* <TableCell>{row?.current_status}</TableCell> */}
+                  </TableRow>
+                ))}
+                {customPlansForUser.map((row) => (
+                  <TableRow
+                    key={row?.custom_plan_id}
+                    sx={{
+                      "&:last-child td, &:last-child th": { border: 0 },
+                    }}
+                  >
+                    <TableCell component="th" scope="row">
+                      {row?.plan_name}
+                    </TableCell>
+                    <TableCell>
+                      {row?.validity_from
+                        ? new Date(row?.validity_from).toDateString()
+                        : ""}
+                    </TableCell>
+                    <TableCell>
+                      {row?.validity_to
+                        ? new Date(row?.validity_to).toDateString()
+                        : ""}
+                    </TableCell>
+                    {/* <TableCell>{row?.current_status}</TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>
