@@ -93,15 +93,15 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                   gap: 4,
                   width: "100%",
                   border:
-                    plan.name === "Customized Plan" ? "1px solid" : undefined,
+                    plan.name === "Customized Plan" ? "1px solid" : "1px solid",
                   borderColor:
                     plan.name === "Customized Plan"
                       ? "primary.main"
-                      : undefined,
+                      : "primary.main",
                   background:
                     plan.name === "Customized Plan"
                       ? "linear-gradient(#033363, #021F3B)"
-                      : undefined,
+                      : "linear-gradient(#033363, #021F3B)",
                 }}
               >
                 <CardContent>
@@ -111,7 +111,10 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
-                      color: plan.name === "Customized Plan" ? "grey.100" : "",
+                      color:
+                        plan.name === "Customized Plan"
+                          ? "grey.100"
+                          : "grey.100",
                     }}
                   >
                     <Typography component="h3" variant="h6">
@@ -123,7 +126,7 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                       display: "flex",
                       alignItems: "baseline",
                       color:
-                        plan.name === "Customized Plan" ? "grey.50" : undefined,
+                        plan.name === "Customized Plan" ? "grey.50" : "grey.50",
                     }}
                   >
                     {plan.description !==
@@ -218,7 +221,7 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                               color:
                                 plan.name === "Customized Plan"
                                   ? "primary.light"
-                                  : "primary.main",
+                                  : "primary.light",
                             }}
                           />
                           <Typography
@@ -228,7 +231,7 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                               color:
                                 plan.name === "Customized Plan"
                                   ? "grey.200"
-                                  : undefined,
+                                  : "grey.200",
                             }}
                           >
                             {feature.name}
@@ -387,7 +390,7 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                       variant={
                         plan.name === "Customized Plan"
                           ? "contained"
-                          : "outlined"
+                          : "contained"
                       }
                       onClick={() => subscribePlan(plan)}
                     >
