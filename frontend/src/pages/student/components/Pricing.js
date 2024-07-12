@@ -155,8 +155,22 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                         plan.description !==
                           "Tailor made playlists as per your requirement",
                     },
+                    // {
+                    //   name: "Play 6AM Yoga playlists",
+                    //   enable:
+                    //     plan.has_basic_playlist &&
+                    //     plan.description !==
+                    //       "Tailor made playlists as per your requirement",
+                    // },
                     {
-                      name: "Play 6AM Yoga playlists",
+                      name: "Monthly yoga sequence having warm up, suryanamaskara, yogasanas and pranayama (75 min/day)",
+                      enable:
+                        plan.has_basic_playlist &&
+                        plan.description !==
+                          "Tailor made playlists as per your requirement",
+                    },
+                    {
+                      name: "Special sequences for pranayama, neck pain, back pain, etc.",
                       enable:
                         plan.has_basic_playlist &&
                         plan.description !==
