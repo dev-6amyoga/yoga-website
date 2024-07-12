@@ -170,7 +170,14 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                           "Tailor made playlists as per your requirement",
                     },
                     {
-                      name: "Special sequences for pranayama, neck pain, back pain, etc.",
+                      name: "Exclusive Pranayama Sessions (20 min)",
+                      enable:
+                        plan.has_basic_playlist &&
+                        plan.description !==
+                          "Tailor made playlists as per your requirement",
+                    },
+                    {
+                      name: "Yoga for back strengthening",
                       enable:
                         plan.has_basic_playlist &&
                         plan.description !==
