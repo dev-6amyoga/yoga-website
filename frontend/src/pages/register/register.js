@@ -694,9 +694,7 @@ export default function Register({ switchForm }) {
 			</GoogleOAuthProvider>
 
 			{/* T&C Modal */}
-			<Modal
-				visible={disclaimerModal}
-				onClose={() => setDisclaimerModal(() => false)}>
+			<Modal visible={disclaimerModal} disableBackdropClick={true}>
 				<Modal.Title>Disclaimer</Modal.Title>
 				<Modal.Content>
 					<Card shadow>

@@ -347,7 +347,7 @@ function Index() {
 					{/* <CssBaseline /> */}
 					<RouterProvider router={router} />
 					<ToastContainer
-						autoClose={5000}
+						autoClose={3000}
 						newestOnTop={true}
 						pauseOnHover={true}
 					/>
