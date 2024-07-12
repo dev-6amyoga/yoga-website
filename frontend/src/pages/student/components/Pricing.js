@@ -177,7 +177,14 @@ export default function Pricing({ allPlans, subscribePlan, selectedCurrency }) {
                           "Tailor made playlists as per your requirement",
                     },
                     {
-                      name: "Yoga for back strengthening",
+                      name: "Yoga for back strengthening (30 min)",
+                      enable:
+                        plan.has_basic_playlist &&
+                        plan.description !==
+                          "Tailor made playlists as per your requirement",
+                    },
+                    {
+                      name: "Yoga for knee strengthening (20 min)",
                       enable:
                         plan.has_basic_playlist &&
                         plan.description !==
