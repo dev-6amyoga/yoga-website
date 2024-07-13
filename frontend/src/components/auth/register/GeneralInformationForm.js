@@ -132,7 +132,7 @@ export default function GeneralInformationForm({
 
 			setInfoSaved(true);
 
-			toast("Progress saved!", { type: "success" });
+			toast("Saved!", { type: "success" });
 			handleNextStep();
 		},
 		[generalInfo, googleInfo, handleNextStep, setGeneralInfo]
@@ -160,7 +160,7 @@ export default function GeneralInformationForm({
 			clearTimeout(inputErrorDebounce.current);
 
 		inputErrorDebounce.current = setTimeout(async () => {
-			setLoading(true);
+			// setLoading(true);
 			if (username) {
 				const [check_username, error] =
 					await UserAPI.postCheckUsername(username);
@@ -172,13 +172,13 @@ export default function GeneralInformationForm({
 
 				if (check_username?.exists) {
 					setUsernameError("Username exists");
-					setLoading(false);
+					// setLoading(false);
 					return;
 				}
 
 				setUsernameError(null);
 			}
-			setLoading(false);
+			// setLoading(false);
 		}, 500);
 
 		return () => {
@@ -193,17 +193,17 @@ export default function GeneralInformationForm({
 			clearTimeout(inputErrorDebounce.current);
 
 		inputErrorDebounce.current = setTimeout(() => {
-			setLoading(true);
+			// setLoading(true);
 			if (password && confirmPassword && password !== confirmPassword) {
 				setPasswordError(null);
-				setLoading(false);
+				// setLoading(false);
 				return;
 			} else {
 				const [is_password_valid, pass_error] =
 					validatePassword(password);
 				if (!is_password_valid || pass_error) {
 					setPasswordError(pass_error);
-					setLoading(false);
+					// setLoading(false);
 					return;
 				}
 			}
@@ -222,7 +222,7 @@ export default function GeneralInformationForm({
 			clearTimeout(inputErrorDebounce.current);
 
 		inputErrorDebounce.current = setTimeout(async () => {
-			setLoading(true);
+			// setLoading(true);
 			if (email) {
 				const [check_email, error] =
 					await UserAPI.postCheckEmail(email);
@@ -234,13 +234,13 @@ export default function GeneralInformationForm({
 
 				if (check_email?.exists) {
 					setEmailError("Email exists");
-					setLoading(false);
+					// setLoading(false);
 					return;
 				}
 
 				setEmailError(null);
 			}
-			setLoading(false);
+			// setLoading(false);
 		}, 500);
 
 		return () => {
@@ -255,14 +255,14 @@ export default function GeneralInformationForm({
 			clearTimeout(inputErrorDebounce.current);
 
 		inputErrorDebounce.current = setTimeout(async () => {
-			setLoading(true);
+			// setLoading(true);
 			if (phone) {
 				const [is_phone_valid, phone_error] =
 					await validatePhone(phone);
 
 				if (!is_phone_valid || phone_error) {
 					setPhoneError(phone_error.message);
-					setLoading(false);
+					// setLoading(false);
 					return;
 				}
 
@@ -276,13 +276,13 @@ export default function GeneralInformationForm({
 
 				if (check_phone?.exists) {
 					setPhoneError("Phone number exists");
-					setLoading(false);
+					// setLoading(false);
 					return;
 				}
 
 				setPhoneError(null);
 			}
-			setLoading(false);
+			// setLoading(false);
 		}, 500);
 
 		return () => {
@@ -479,7 +479,7 @@ export default function GeneralInformationForm({
 						: " "
 				}
 			/>
-			<Button variant="outlined" type="submit">
+			<Button variant="contained" type="submit">
 				Save Changes
 			</Button>
 		</form>
