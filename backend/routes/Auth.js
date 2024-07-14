@@ -205,31 +205,24 @@ router.post("/login", async (req, res) => {
 
 		startTime = new Date();
 		// check if user has active login token
-		const login_token_history = await LoginToken.findAll({
+		const login_token_history = await LoginToken.findOne({
 			where: {
 				user_id: user?.user_id,
 				refresh_token_expiry_at: {
 					[Op.gt]: new Date(),
 				},
+				ip: clientIp,
 			},
 			transaction: t,
 		});
 
 		if (login_token_history) {
-			const login_token_history_json = login_token_history.map((lth) =>
-				lth.toJSON()
-			);
-
-			if (
-				login_token_history_json.findIndex(
-					(lth) => lth.ip !== clientIp
-				) > -1
-			) {
-				return res.status(HTTP_BAD_REQUEST).json({
-					error: "Varying IP Address; One device login only",
-				});
-			}
+			await t.rollback();
+			return res.status(HTTP_BAD_REQUEST).json({
+				error: "Varying IP Address; One device login only",
+			});
 		}
+
 		console.log(
 			"elapsed time to get login token history: ",
 			new Date() - startTime
@@ -297,6 +290,8 @@ router.post("/login", async (req, res) => {
 
 router.post("/login-google", async (req, res) => {
 	const { client_id, jwtToken } = req.body;
+	const clientIp = req.clientIp;
+
 	try {
 		let startTime = new Date();
 		const userInfo = await auth.verify(client_id, jwtToken);
@@ -395,29 +390,22 @@ router.post("/login-google", async (req, res) => {
 
 			startTime = new Date();
 			// check if user has active login token
-			const login_token_history = await LoginToken.findAll({
+			const login_token_history = await LoginToken.findOne({
 				where: {
 					user_id: user?.user_id,
 					refresh_token_expiry_at: {
 						[Op.gt]: new Date(),
 					},
+					ip: clientIp,
 				},
+				transaction: t,
 			});
 
 			if (login_token_history) {
-				const login_token_history_json = login_token_history.map(
-					(lth) => lth.toJSON()
-				);
-
-				if (
-					login_token_history_json.findIndex(
-						(lth) => lth.ip !== req.ip
-					) > -1
-				) {
-					return res.status(HTTP_BAD_REQUEST).json({
-						error: "Varying IP Address; One device login only",
-					});
-				}
+				await t.rollback();
+				return res.status(HTTP_BAD_REQUEST).json({
+					error: "Varying IP Address; One device login only",
+				});
 			}
 
 			console.log(
