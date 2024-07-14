@@ -261,33 +261,41 @@ router.post("/login", async (req, res) => {
 
 		startTime = new Date();
 		// add current token to login token table
-		await LoginToken.create(
-			{
-				access_token: accessToken,
-				refresh_token: refreshToken,
-				access_token_creation_at,
-				access_token_expiry_at,
-				refresh_token_creation_at,
-				refresh_token_expiry_at,
-				ip: clientIp,
-				user_id: user?.user_id,
-			},
-			{ transaction: t }
+		const promises = [];
+
+		promises.push(
+			LoginToken.create(
+				{
+					access_token: accessToken,
+					refresh_token: refreshToken,
+					access_token_creation_at,
+					access_token_expiry_at,
+					refresh_token_creation_at,
+					refresh_token_expiry_at,
+					ip: clientIp,
+					user_id: user?.user_id,
+				},
+				{ transaction: t }
+			)
 		);
 
 		// add login history
-		await LoginHistory.create(
-			{
-				user_id: user?.user_id,
-				ip: clientIp || null,
-				user_agent:
-					req.get("User-Agent") || req?.useragent?.source || null,
-				platform: req?.useragent?.platform,
-				os: req?.useragent?.os,
-				browser: req?.useragent?.browser,
-			},
-			{ transaction: t }
+		promises.push(
+			LoginHistory.create(
+				{
+					user_id: user?.user_id,
+					ip: clientIp || null,
+					user_agent:
+						req.get("User-Agent") || req?.useragent?.source || null,
+					platform: req?.useragent?.platform,
+					os: req?.useragent?.os,
+					browser: req?.useragent?.browser,
+				},
+				{ transaction: t }
+			)
 		);
+
+		await Promise.all(promises);
 
 		console.log(
 			"elapsed time to create login token: ",
