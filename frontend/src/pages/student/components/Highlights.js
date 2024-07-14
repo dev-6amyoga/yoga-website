@@ -149,6 +149,7 @@ export default function Highlights() {
     };
   }, [phone]);
 
+  const [showMessage, setShowMessage] = useState(false);
   const handleSubmit = async (event) => {
     event.preventDefault();
     const [validPhone, phoneError] = await validatePhone(phone);
@@ -174,6 +175,7 @@ export default function Highlights() {
       });
       if (response?.status === 200) {
         toast("Query submitted!");
+        setShowMessage(true);
         setFormData({
           query_name: "",
           query_email: "",
@@ -274,6 +276,15 @@ export default function Highlights() {
         <Typography component="h2" variant="h4">
           Submit your query here!
         </Typography>
+        {showMessage && (
+          <p
+            className={
+              "text-sm border p-2 rounded-lg text-zinc-500 border-red-500"
+            }
+          >
+            Thank you for your query. We will get back to you within 24 hours!
+          </p>
+        )}
         <Box
           component="form"
           onSubmit={handleSubmit}
