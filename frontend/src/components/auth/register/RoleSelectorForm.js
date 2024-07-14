@@ -1,4 +1,4 @@
-import { UserCheck } from "@geist-ui/icons";
+import { Briefcase, UserCheck } from "@geist-ui/icons";
 
 export default function RoleSelectorForm({ role, setRole, handleNextStep }) {
   return (
@@ -20,18 +20,19 @@ export default function RoleSelectorForm({ role, setRole, handleNextStep }) {
         </div>
 
         {/* enable for institute */}
-        {/* <div
+        <div
           className={`flex items-center gap-2 flex-col p-8 border rounded-lg ${
             role === "INSTITUTE_OWNER" ? "border-blue-500" : ""
           }`}
-          onClick={() => {
-            setRole("INSTITUTE_OWNER");
-            handleNextStep();
-          }}
+          disabled
+          // onClick={() => {
+          //   setRole("INSTITUTE_OWNER");
+          //   handleNextStep();
+          // }}
         >
           <Briefcase />
           Institute
-        </div> */}
+        </div>
       </div>
     </form>
   );
