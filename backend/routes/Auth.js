@@ -190,7 +190,10 @@ router.post("/login", async (req, res) => {
 		);
 
 		startTime = new Date();
-		[user, errorUser] = await GetUserInfo({ username });
+		[user, errorUser] = await GetUserInfo(
+			{ username },
+			{ username, name, email, phone, is_google_login, last_login }
+		);
 
 		console.log("elapsed time to  plan status: ", new Date() - startTime);
 
@@ -248,6 +251,7 @@ router.post("/login", async (req, res) => {
 		// const [_, userPlanUpdateError] = await UpdateUserPlanStatus(user.user_id);
 		// TODO: delete all previous tokens of user from same ip?
 
+		startTime = new Date();
 		// add current token to login token table
 		await LoginToken.create(
 			{
@@ -277,7 +281,19 @@ router.post("/login", async (req, res) => {
 			{ transaction: t }
 		);
 
+		console.log(
+			"elapsed time to create login token: ",
+			new Date() - startTime
+		);
+
+		startTime = new Date();
 		await t.commit();
+
+		console.log(
+			"elapsed time to commit transaction: ",
+			new Date() - startTime
+		);
+
 		return res.status(HTTP_OK).json({ user, accessToken, refreshToken });
 	} catch (err) {
 		await t.rollback();
@@ -324,7 +340,10 @@ router.post("/login-google", async (req, res) => {
 		try {
 			// check if user exists
 			startTime = new Date();
-			let [user, errorUser] = await GetUserInfo({ email });
+			let [user, errorUser] = await GetUserInfo(
+				{ email },
+				{ username, name, email, phone, is_google_login, last_login }
+			);
 
 			console.log(
 				"elapsed time to get user info: ",
