@@ -129,7 +129,10 @@ router.post("/login", async (req, res) => {
 	try {
 		let startTime = new Date();
 		// check if user exists
-		let [user, errorUser] = await GetUserInfo({ username });
+		let [user, errorUser] = await GetUserInfo({ username }, [
+			"user_id",
+			"password",
+		]);
 		console.log("elapsed time to get user info: ", new Date() - startTime);
 
 		// console.log(errorUser);
@@ -190,10 +193,15 @@ router.post("/login", async (req, res) => {
 		);
 
 		startTime = new Date();
-		[user, errorUser] = await GetUserInfo(
-			{ username },
-			{ username, name, email, phone, is_google_login, last_login }
-		);
+		[user, errorUser] = await GetUserInfo({ username }, [
+			"user_id",
+			"username",
+			"name",
+			"email",
+			"phone",
+			"is_google_login",
+			"last_login",
+		]);
 
 		console.log("elapsed time to  plan status: ", new Date() - startTime);
 
@@ -340,10 +348,10 @@ router.post("/login-google", async (req, res) => {
 		try {
 			// check if user exists
 			startTime = new Date();
-			let [user, errorUser] = await GetUserInfo(
-				{ email },
-				{ username, name, email, phone, is_google_login, last_login }
-			);
+			let [user, errorUser] = await GetUserInfo({ email }, [
+				"user_id",
+				"password",
+			]);
 
 			console.log(
 				"elapsed time to get user info: ",
@@ -399,7 +407,15 @@ router.post("/login-google", async (req, res) => {
 				new Date() - startTime
 			);
 
-			[user, errorUser] = await GetUserInfo({ email });
+			[user, errorUser] = await GetUserInfo({ email }, [
+				"user_id",
+				"username",
+				"name",
+				"email",
+				"phone",
+				"is_google_login",
+				"last_login",
+			]);
 
 			// if (user.is_google_login === false) {
 			// 	return res
