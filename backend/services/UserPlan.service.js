@@ -105,9 +105,13 @@ const UpdateUserPlanStatus = async (
 			}
 
 			// check if plan is to be expired by usage;
-			const watchTimeQuota = await WatchTimeQuota.find({
-				user_plan_id: String(activePlan.get("user_plan_id")),
-			});
+			const watchTimeQuota = await WatchTimeQuota.find(
+				{
+					user_plan_id: String(activePlan.get("user_plan_id")),
+				},
+				{},
+				{ session: mt }
+			);
 
 			if (watchTimeQuota.quota < 0) {
 				activePlan.set("current_status", USER_PLAN_EXPIRED_BY_USAGE);
@@ -139,10 +143,11 @@ const UpdateUserPlanStatus = async (
 						as: "plan",
 					},
 				],
+				transaction: t,
 			});
 
 			if (stagedPlan) {
-				console.log("Promoting staged plan to active plan", stagedPlan);
+				console.log("Promoting staged plan to active plan");
 				stagedPlan.set("current_status", USER_PLAN_ACTIVE);
 				stagedPlan.set("validity_from", now);
 
@@ -157,15 +162,22 @@ const UpdateUserPlanStatus = async (
 
 				await stagedPlan.save({ transaction: t });
 
-				// TODO : update watch time quota for newly active plan
-				await WatchTimeQuota.create({
-					user_plan_id: String(
-						stagedPlan.get("plan").get("user_plan_id")
-					),
-					quota: stagedPlan.get("plan").get("watch_time_limit"),
-				});
+				// update watch time quota for newly active plan
+				await WatchTimeQuota.create(
+					[
+						{
+							user_plan_id: String(
+								stagedPlan.get("plan").get("user_plan_id")
+							),
+							quota: stagedPlan
+								.get("plan")
+								.get("watch_time_limit"),
+						},
+					],
+					{ session: mt }
+				);
 
-				// TODO : update UIPR for newly active plan
+				// update UIPR for newly active plan
 				const x = await UserInstitutePlanRole.update(
 					{
 						user_plan_id: stagedPlan.get("user_plan_id"),
@@ -195,25 +207,28 @@ const UpdateUserPlanStatus = async (
 		// TODO : might need to take into consideration the different custom plan ids
 
 		console.log("Updating custom user plan status");
-		let activeCustomUserPlans = await CustomUserPlan.aggregate([
-			{
-				$match: {
-					user_id,
-					current_status: USER_PLAN_ACTIVE,
+		let activeCustomUserPlans = await CustomUserPlan.aggregate(
+			[
+				{
+					$match: {
+						user_id,
+						current_status: USER_PLAN_ACTIVE,
+					},
 				},
-			},
-			{
-				$lookup: {
-					from: "custom_plan",
-					localField: "custom_plan_id",
-					foreignField: "_id",
-					as: "custom_plan",
+				{
+					$lookup: {
+						from: "custom_plan",
+						localField: "custom_plan_id",
+						foreignField: "_id",
+						as: "custom_plan",
+					},
 				},
-			},
-			{
-				$unwind: "$custom_plan",
-			},
-		]);
+				{
+					$unwind: "$custom_plan",
+				},
+			],
+			{ session: mt }
+		);
 
 		if (activeCustomUserPlans.length > 0) {
 			// for each custom plan id, check if it is expired, if yes, promote staged to active
@@ -237,17 +252,19 @@ const UpdateUserPlanStatus = async (
 				// check if plan is to be expired by date;
 				if (customUserPlanvalidity_to < now) {
 					// set status to expired
-					const x = await CustomUserPlan.update(
+					const x = await CustomUserPlan.updateOne(
+						{
+							user_id,
+							custom_plan_id: mongoose.Schema.Types.ObjectId(
+								customUserPlan.custom_plan_id
+							),
+							current_status: USER_PLAN_ACTIVE,
+						},
 						{
 							current_status: USER_PLAN_EXPIRED_BY_DATE,
 						},
 						{
-							transaction: t,
-							where: {
-								user_id,
-								custom_plan_id: customUserPlan.custom_plan_id,
-								current_status: USER_PLAN_ACTIVE,
-							},
+							session: mt,
 						}
 					);
 				}
@@ -260,19 +277,19 @@ const UpdateUserPlanStatus = async (
 
 				if (watchTimeQuota.quota <= 0) {
 					// set status to expired
-					const x = await CustomUserPlan.update(
+					const x = await CustomUserPlan.updateOne(
+						{
+							user_id,
+							custom_plan_id: mongoose.Schema.Types.ObjectId(
+								customUserPlan.custom_plan_id
+							),
+							current_status: USER_PLAN_ACTIVE,
+						},
 						{
 							current_status: USER_PLAN_EXPIRED_BY_USAGE,
 						},
 						{
-							transaction: t,
-							where: {
-								user_id,
-								custom_plan_id: mongoose.Schema.Types.ObjectId(
-									customUserPlan.custom_plan_id
-								),
-								current_status: USER_PLAN_ACTIVE,
-							},
+							session: mt,
 						}
 					);
 				}
@@ -297,7 +314,9 @@ const UpdateUserPlanStatus = async (
 
 				// promote staged to active if any
 				const stagedCustomUserPlan = await CustomUserPlan.findOne(
-					filter
+					filter,
+					{},
+					{ session: mt }
 				);
 
 				stagedCustomUserPlan.set("current_status", USER_PLAN_ACTIVE);
@@ -318,12 +337,19 @@ const UpdateUserPlanStatus = async (
 				await stagedCustomUserPlan.save({ session: mt });
 
 				// update watch time quota for newly active plan
-				await WatchTimeQuota.create({
-					user_plan_id: String(
-						stagedPlan.get("plan").get("user_plan_id")
-					),
-					quota: stagedPlan.get("plan").get("watch_time_limit"),
-				});
+				await WatchTimeQuota.create(
+					[
+						{
+							user_plan_id: String(
+								stagedPlan.get("plan").get("user_plan_id")
+							),
+							quota: stagedPlan
+								.get("plan")
+								.get("watch_time_limit"),
+						},
+					],
+					{ session: mt }
+				);
 
 				// update UIPR for newly active plan
 				const x = await UserInstitutePlanRole.update(
