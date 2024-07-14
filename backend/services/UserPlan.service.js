@@ -223,15 +223,16 @@ const UpdateUserPlanStatus = async (
 			for (let i = 0; i < activeCustomUserPlans.length; i++) {
 				const customUserPlan = activeCustomUserPlans[i];
 
+				// check if custom plan id has already been processed
 				if (
 					processedCustomPlanIds.includes(
-						customUserPlancustom_plan_id
+						customUserPlan.custom_plan_id
 					)
 				) {
 					continue;
 				}
 
-				processedCustomPlanIds.push(customUserPlancustom_plan_id);
+				processedCustomPlanIds.push(customUserPlan.custom_plan_id);
 
 				// check if plan is to be expired by date;
 				if (customUserPlanvalidity_to < now) {
@@ -244,7 +245,7 @@ const UpdateUserPlanStatus = async (
 							transaction: t,
 							where: {
 								user_id,
-								custom_plan_id: customUserPlancustom_plan_id,
+								custom_plan_id: customUserPlan.custom_plan_id,
 								current_status: USER_PLAN_ACTIVE,
 							},
 						}
