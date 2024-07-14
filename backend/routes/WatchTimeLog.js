@@ -10,7 +10,11 @@ const {
 } = require("../utils/http_status_codes");
 const WatchTimeLog = require("../models/mongo/WatchTimeLog");
 const WatchTimeQuota = require("../models/mongo/WatchTimeQuota");
-const { GetCurrentUserPlan } = require("../services/UserPlan.service");
+const {
+	GetCurrentUserPlan,
+	GetPlanForWatchQuotaDeduction,
+	UpdateUserPlanStatus,
+} = require("../services/UserPlan.service");
 const { UserPlan } = require("../models/sql/UserPlan");
 const { authenticateToken } = require("../utils/jwt");
 const { USER_PLAN_EXPIRED_BY_USAGE } = require("../enums/user_plan_status");
@@ -303,6 +307,65 @@ router.post("/get-quota", async (req, res) => {
 		}
 
 		return res.status(HTTP_OK).json({ quota, user_plan });
+	} catch (err) {
+		console.log(err);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ message: "Something went wrong" });
+	}
+});
+
+router.post("/get-plan", async (req, res) => {
+	const { user_id, institute_id = null, playlist_id } = req.body;
+
+	if (
+		user_id === null ||
+		user_id === undefined ||
+		playlist_id === null ||
+		playlist_id === undefined
+	) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ message: "Missing required fields" });
+	}
+
+	try {
+		const [plan, error] = await GetPlanForWatchQuotaDeduction(
+			user_id,
+			institute_id,
+			playlist_id
+		);
+
+		if (error) {
+			return res.status(HTTP_BAD_REQUEST).json({ message: error });
+		}
+
+		return res.status(HTTP_OK).json({ plan });
+	} catch (err) {
+		console.log(err);
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ message: "Something went wrong" });
+	}
+});
+
+router.post("/update-userplan", async (req, res) => {
+	const { user_id } = req.body;
+
+	if (!user_id) {
+		return res
+			.status(HTTP_BAD_REQUEST)
+			.json({ message: "Missing required fields" });
+	}
+
+	try {
+		const [user_plan, error] = await UpdateUserPlanStatus(user_id, null);
+
+		if (error) {
+			return res.status(HTTP_BAD_REQUEST).json({ message: error });
+		}
+
+		return res.status(HTTP_OK).json({ user_plan });
 	} catch (err) {
 		console.log(err);
 		return res
