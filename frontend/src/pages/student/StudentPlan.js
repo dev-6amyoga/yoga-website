@@ -760,7 +760,17 @@ function StudentPlan() {
                 }
                 return downloadInvoice(responseInvoice);
               })
-              .then((res) => {
+              .then(async (res) => {
+                const res1 = await Fetch({
+                  url: "/invoice/student/notify-admin",
+                  method: "POST",
+                  token: true,
+                  data: {
+                    user_id: finalUserPlan.user_id,
+                    transaction_order_id: order_id,
+                    plan_type: "CUSTOM_PLAN",
+                  },
+                });
                 setShowCustomCard(false);
                 setCustomCardData(null);
                 setLoading(false);
@@ -842,7 +852,16 @@ function StudentPlan() {
 
               return downloadInvoice(responseInvoice);
             })
-            .then((res) => {
+            .then(async (res) => {
+              const res1 = await Fetch({
+                url: "/invoice/student/notify-admin",
+                method: "POST",
+                token: true,
+                data: {
+                  user_id: finalUserPlan.user_id,
+                  transaction_order_id: order_id,
+                },
+              });
               setShowCard(false);
               setCardData(null);
               setLoading(false);
