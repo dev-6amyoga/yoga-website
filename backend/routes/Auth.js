@@ -129,7 +129,10 @@ router.post("/login", async (req, res) => {
 	try {
 		let startTime = new Date();
 		// check if user exists
-		let [user, errorUser] = await GetUserInfo({ username });
+		let [user, errorUser] = await GetUserInfo({ username }, [
+			"user_id",
+			"password",
+		]);
 		console.log("elapsed time to get user info: ", new Date() - startTime);
 
 		// console.log(errorUser);
@@ -174,15 +177,12 @@ router.post("/login", async (req, res) => {
 		}
 
 		startTime = new Date();
-		for (let i = 0; i < uipr.length; i++) {
-			const u = uipr[i];
-			// console.log(
-			// 	"Updating user plan status",
-			// 	user.user_id,
-			// 	u.get("institute_id")
-			// );
-			await UpdateUserPlanStatus(user.user_id, u.get("institute_id"), t);
-		}
+
+		await Promise.all(
+			uipr.map((u) => {
+				UpdateUserPlanStatus(user.user_id, u.get("institute_id"), t);
+			})
+		);
 
 		console.log(
 			"elapsed time to update plan status: ",
@@ -190,7 +190,15 @@ router.post("/login", async (req, res) => {
 		);
 
 		startTime = new Date();
-		[user, errorUser] = await GetUserInfo({ username });
+		[user, errorUser] = await GetUserInfo({ username }, [
+			"user_id",
+			"username",
+			"name",
+			"email",
+			"phone",
+			"is_google_login",
+			"last_login",
+		]);
 
 		console.log("elapsed time to  plan status: ", new Date() - startTime);
 
@@ -205,31 +213,24 @@ router.post("/login", async (req, res) => {
 
 		startTime = new Date();
 		// check if user has active login token
-		const login_token_history = await LoginToken.findAll({
+		const login_token_history = await LoginToken.findOne({
 			where: {
 				user_id: user?.user_id,
 				refresh_token_expiry_at: {
 					[Op.gt]: new Date(),
 				},
+				ip: clientIp,
 			},
 			transaction: t,
 		});
 
 		if (login_token_history) {
-			const login_token_history_json = login_token_history.map((lth) =>
-				lth.toJSON()
-			);
-
-			if (
-				login_token_history_json.findIndex(
-					(lth) => lth.ip !== clientIp
-				) > -1
-			) {
-				return res.status(HTTP_BAD_REQUEST).json({
-					error: "Varying IP Address; One device login only",
-				});
-			}
+			await t.rollback();
+			return res.status(HTTP_BAD_REQUEST).json({
+				error: "Varying IP Address; One device login only",
+			});
 		}
+
 		console.log(
 			"elapsed time to get login token history: ",
 			new Date() - startTime
@@ -255,36 +256,50 @@ router.post("/login", async (req, res) => {
 		// const [_, userPlanUpdateError] = await UpdateUserPlanStatus(user.user_id);
 		// TODO: delete all previous tokens of user from same ip?
 
+		startTime = new Date();
 		// add current token to login token table
-		await LoginToken.create(
-			{
-				access_token: accessToken,
-				refresh_token: refreshToken,
-				access_token_creation_at,
-				access_token_expiry_at,
-				refresh_token_creation_at,
-				refresh_token_expiry_at,
-				ip: clientIp,
-				user_id: user?.user_id,
-			},
-			{ transaction: t }
+		// add to login history
+		await Promise.all([
+			LoginToken.create(
+				{
+					access_token: accessToken,
+					refresh_token: refreshToken,
+					access_token_creation_at,
+					access_token_expiry_at,
+					refresh_token_creation_at,
+					refresh_token_expiry_at,
+					ip: clientIp,
+					user_id: user?.user_id,
+				},
+				{ transaction: t }
+			),
+			LoginHistory.create(
+				{
+					user_id: user?.user_id,
+					ip: clientIp || null,
+					user_agent:
+						req.get("User-Agent") || req?.useragent?.source || null,
+					platform: req?.useragent?.platform,
+					os: req?.useragent?.os,
+					browser: req?.useragent?.browser,
+				},
+				{ transaction: t }
+			),
+		]);
+
+		console.log(
+			"elapsed time to create login token: ",
+			new Date() - startTime
 		);
 
-		// add login history
-		await LoginHistory.create(
-			{
-				user_id: user?.user_id,
-				ip: clientIp || null,
-				user_agent:
-					req.get("User-Agent") || req?.useragent?.source || null,
-				platform: req?.useragent?.platform,
-				os: req?.useragent?.os,
-				browser: req?.useragent?.browser,
-			},
-			{ transaction: t }
-		);
-
+		startTime = new Date();
 		await t.commit();
+
+		console.log(
+			"elapsed time to commit transaction: ",
+			new Date() - startTime
+		);
+
 		return res.status(HTTP_OK).json({ user, accessToken, refreshToken });
 	} catch (err) {
 		await t.rollback();
@@ -297,6 +312,8 @@ router.post("/login", async (req, res) => {
 
 router.post("/login-google", async (req, res) => {
 	const { client_id, jwtToken } = req.body;
+	const clientIp = req.clientIp;
+
 	try {
 		let startTime = new Date();
 		const userInfo = await auth.verify(client_id, jwtToken);
@@ -329,7 +346,10 @@ router.post("/login-google", async (req, res) => {
 		try {
 			// check if user exists
 			startTime = new Date();
-			let [user, errorUser] = await GetUserInfo({ email });
+			let [user, errorUser] = await GetUserInfo({ email }, [
+				"user_id",
+				"password",
+			]);
 
 			console.log(
 				"elapsed time to get user info: ",
@@ -366,26 +386,30 @@ router.post("/login-google", async (req, res) => {
 			}
 
 			startTime = new Date();
-			for (let i = 0; i < uipr.length; i++) {
-				const u = uipr[i];
-				// console.log(
-				// 	"Updating user plan status",
-				// 	user.user_id,
-				// 	u.get("institute_id")
-				// );
-				await UpdateUserPlanStatus(
-					user.user_id,
-					u.get("institute_id"),
-					t
-				);
-			}
+			await Promise.all(
+				uipr.map((u) => {
+					UpdateUserPlanStatus(
+						user.user_id,
+						u.get("institute_id"),
+						t
+					);
+				})
+			);
 
 			console.log(
 				"elapsed time to update user plans: ",
 				new Date() - startTime
 			);
 
-			[user, errorUser] = await GetUserInfo({ email });
+			[user, errorUser] = await GetUserInfo({ email }, [
+				"user_id",
+				"username",
+				"name",
+				"email",
+				"phone",
+				"is_google_login",
+				"last_login",
+			]);
 
 			// if (user.is_google_login === false) {
 			// 	return res
@@ -395,29 +419,22 @@ router.post("/login-google", async (req, res) => {
 
 			startTime = new Date();
 			// check if user has active login token
-			const login_token_history = await LoginToken.findAll({
+			const login_token_history = await LoginToken.findOne({
 				where: {
 					user_id: user?.user_id,
 					refresh_token_expiry_at: {
 						[Op.gt]: new Date(),
 					},
+					ip: clientIp,
 				},
+				transaction: t,
 			});
 
 			if (login_token_history) {
-				const login_token_history_json = login_token_history.map(
-					(lth) => lth.toJSON()
-				);
-
-				if (
-					login_token_history_json.findIndex(
-						(lth) => lth.ip !== req.ip
-					) > -1
-				) {
-					return res.status(HTTP_BAD_REQUEST).json({
-						error: "Varying IP Address; One device login only",
-					});
-				}
+				await t.rollback();
+				return res.status(HTTP_BAD_REQUEST).json({
+					error: "Varying IP Address; One device login only",
+				});
 			}
 
 			console.log(
@@ -446,35 +463,46 @@ router.post("/login-google", async (req, res) => {
 			// TODO: delete all previous tokens of user from same ip?
 
 			// add current token to login token table
-			await LoginToken.create(
-				{
-					access_token: accessToken,
-					refresh_token: refreshToken,
-					access_token_creation_at,
-					access_token_expiry_at,
-					refresh_token_creation_at,
-					refresh_token_expiry_at,
-					ip: req.ip,
-					user_id: user?.user_id,
-				},
-				{ transaction: t }
-			);
-
 			// add login history
-			await LoginHistory.create(
-				{
-					user_id: user?.user_id,
-					ip: req.ip || null,
-					user_agent:
-						req.get("User-Agent") || req?.useragent?.source || null,
-					platform: req?.useragent?.platform,
-					os: req?.useragent?.os,
-					browser: req?.useragent?.browser,
-				},
-				{ transaction: t }
-			);
+
+			startTime = new Date();
+			await Promise.all([
+				LoginToken.create(
+					{
+						access_token: accessToken,
+						refresh_token: refreshToken,
+						access_token_creation_at,
+						access_token_expiry_at,
+						refresh_token_creation_at,
+						refresh_token_expiry_at,
+						ip: clientIp,
+						user_id: user?.user_id,
+					},
+					{ transaction: t }
+				),
+				LoginHistory.create(
+					{
+						user_id: user?.user_id,
+						ip: clientIp || null,
+						user_agent:
+							req.get("User-Agent") ||
+							req?.useragent?.source ||
+							null,
+						platform: req?.useragent?.platform,
+						os: req?.useragent?.os,
+						browser: req?.useragent?.browser,
+					},
+					{ transaction: t }
+				),
+			]);
 
 			await t.commit();
+
+			console.log(
+				"elapsed time to create login token: ",
+				new Date() - startTime
+			);
+
 			return res
 				.status(HTTP_OK)
 				.json({ user, accessToken, refreshToken });
