@@ -520,4 +520,5 @@ router.post("/student/notify-admin", async (req, res) => {
     );
   }
 });
+
 module.exports = router;
