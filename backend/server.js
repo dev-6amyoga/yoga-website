@@ -176,8 +176,10 @@ app.get("/info", async (req, res) => {
 	});
 });
 
-app.get("/", (req, res) => {
-	return res.send(`Hello!`);
+app.get("/error", async (req, res) => {
+	return res.status(500).json({
+		message: "Error.",
+	});
 });
 
 app.use("/content", asanaRouter);
