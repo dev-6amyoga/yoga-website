@@ -258,7 +258,7 @@ router.post("/login", async (req, res) => {
 
 		startTime = new Date();
 		// add current token to login token table
-
+		// add to login history
 		await Promise.all([
 			LoginToken.create(
 				{
@@ -386,19 +386,15 @@ router.post("/login-google", async (req, res) => {
 			}
 
 			startTime = new Date();
-			for (let i = 0; i < uipr.length; i++) {
-				const u = uipr[i];
-				// console.log(
-				// 	"Updating user plan status",
-				// 	user.user_id,
-				// 	u.get("institute_id")
-				// );
-				await UpdateUserPlanStatus(
-					user.user_id,
-					u.get("institute_id"),
-					t
-				);
-			}
+			await Promise.all(
+				uipr.map((u) => {
+					UpdateUserPlanStatus(
+						user.user_id,
+						u.get("institute_id"),
+						t
+					);
+				})
+			);
 
 			console.log(
 				"elapsed time to update user plans: ",
@@ -467,35 +463,46 @@ router.post("/login-google", async (req, res) => {
 			// TODO: delete all previous tokens of user from same ip?
 
 			// add current token to login token table
-			await LoginToken.create(
-				{
-					access_token: accessToken,
-					refresh_token: refreshToken,
-					access_token_creation_at,
-					access_token_expiry_at,
-					refresh_token_creation_at,
-					refresh_token_expiry_at,
-					ip: req.ip,
-					user_id: user?.user_id,
-				},
-				{ transaction: t }
-			);
-
 			// add login history
-			await LoginHistory.create(
-				{
-					user_id: user?.user_id,
-					ip: req.ip || null,
-					user_agent:
-						req.get("User-Agent") || req?.useragent?.source || null,
-					platform: req?.useragent?.platform,
-					os: req?.useragent?.os,
-					browser: req?.useragent?.browser,
-				},
-				{ transaction: t }
-			);
+
+			startTime = new Date();
+			await Promise.all([
+				LoginToken.create(
+					{
+						access_token: accessToken,
+						refresh_token: refreshToken,
+						access_token_creation_at,
+						access_token_expiry_at,
+						refresh_token_creation_at,
+						refresh_token_expiry_at,
+						ip: clientIp,
+						user_id: user?.user_id,
+					},
+					{ transaction: t }
+				),
+				LoginHistory.create(
+					{
+						user_id: user?.user_id,
+						ip: clientIp || null,
+						user_agent:
+							req.get("User-Agent") ||
+							req?.useragent?.source ||
+							null,
+						platform: req?.useragent?.platform,
+						os: req?.useragent?.os,
+						browser: req?.useragent?.browser,
+					},
+					{ transaction: t }
+				),
+			]);
 
 			await t.commit();
+
+			console.log(
+				"elapsed time to create login token: ",
+				new Date() - startTime
+			);
+
 			return res
 				.status(HTTP_OK)
 				.json({ user, accessToken, refreshToken });
