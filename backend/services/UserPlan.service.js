@@ -250,7 +250,7 @@ const UpdateUserPlanStatus = async (
 				processedCustomPlanIds.push(customUserPlan.custom_plan_id);
 
 				// check if plan is to be expired by date;
-				if (customUserPlanvalidity_to < now) {
+				if (new Date(customUserPlan.validity_to) < now) {
 					// set status to expired
 					const x = await CustomUserPlan.updateOne(
 						{
