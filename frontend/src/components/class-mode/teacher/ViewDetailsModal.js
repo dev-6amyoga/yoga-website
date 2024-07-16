@@ -195,7 +195,7 @@ export default function ViewDetailsModal({
 							startIcon={<ArrowOutward />}
 							onClick={() => {
 								window.open(
-									`${getFrontendDomain()}/testing/class/teacher/${activeClassModalData._id}/info`,
+									`${getFrontendDomain()}/teacher/class/${activeClassModalData._id}/info`,
 									"_blank"
 								);
 							}}>
@@ -206,7 +206,7 @@ export default function ViewDetailsModal({
 							startIcon={<ArrowOutward />}
 							onClick={() => {
 								window.open(
-									`${getFrontendDomain()}/testing/class/student/${activeClassModalData._id}/info`,
+									`${getFrontendDomain()}/student/class/${activeClassModalData._id}/info`,
 									"_blank"
 								);
 							}}>

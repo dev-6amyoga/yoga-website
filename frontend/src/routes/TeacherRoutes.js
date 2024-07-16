@@ -1,27 +1,45 @@
-import TeacherHome from "../pages/teacher/TeacherHome";
-import InvitePage from "../pages/teacher/invite/Index";
-import TeacherPlaylist from "../pages/teacher/TeacherPlaylist";
+import ClassInfoTeacher from "../pages/class-mode/teacher/ClassInfoTeacher";
+import ClassModeTeacher from "../pages/class-mode/teacher/ClassModeTeacher";
 import SelfAudioUpload from "../pages/teacher/SelfAudioUpload";
+import TeacherHome from "../pages/teacher/TeacherHome";
+import TeacherPlaylist from "../pages/teacher/TeacherPlaylist";
 import TeacherPlaylistCreation from "../pages/teacher/TeacherPlaylistCreation";
+import TeacherManageClasses from "../pages/teacher/class/Manage";
+import InvitePage from "../pages/teacher/invite/Index";
+
 export const TeacherRoutes = [
-  {
-    path: "/teacher",
-    element: <TeacherHome />,
-  },
-  {
-    path: "/teacher/invite",
-    element: <InvitePage />,
-  },
-  {
-    path: "/teacher/playlist",
-    element: <TeacherPlaylist />,
-  },
-  {
-    path: "/teacher/self-audio-upload",
-    element: <SelfAudioUpload />,
-  },
-  {
-    path: "/teacher/make-playlist",
-    element: <TeacherPlaylistCreation />,
-  },
+	{
+		path: "/teacher",
+		element: <TeacherHome />,
+	},
+	{
+		path: "/teacher/invite",
+		element: <InvitePage />,
+	},
+	{
+		path: "/teacher/playlist",
+		element: <TeacherPlaylist />,
+	},
+	{
+		path: "/teacher/self-audio-upload",
+		element: <SelfAudioUpload />,
+	},
+	{
+		path: "/teacher/make-playlist",
+		element: <TeacherPlaylistCreation />,
+	},
+
+	// class mode
+	{
+		path: "/teacher/class/manage",
+		element: <TeacherManageClasses />,
+	},
+	{
+		path: "/teacher/class/:class_id/info",
+		element: <ClassInfoTeacher />,
+	},
+	{
+		path: "/teacher/class/:class_id",
+		element: <ClassModeTeacher />,
+	},
 ];

@@ -1,119 +1,220 @@
-import { useParams } from "react-router-dom";
-
-import { Card, Spacer, Text } from "@geist-ui/core";
-import { useEffect, useState } from "react";
+import { ArrowOutward, Edit, ExitToApp, Share } from "@mui/icons-material";
+import { Avatar, Button, Card, CardContent } from "@mui/material";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
-import { Fetch } from "../../utils/Fetch";
+import { ClassModeAPI } from "../../../api/class-mode.api";
 
-export default function ClassInfoStudent() {
+import {
+	CLASS_COMPLETED,
+	CLASS_ONGOING,
+	CLASS_UPCOMING,
+} from "../../enums/class_status";
+import { getFrontendDomain } from "../../utils/getFrontendDomain";
+import TeacherPageWrapper from "../Common/TeacherPageWrapper";
+import "./ClassInfoStudent.css";
+
+export default function ClassInfoTeacher() {
 	const { class_id } = useParams();
-	const [classDetails, setClassDetails] = useState(null);
-	const [timeRemaining, setTimeRemaining] = useState(null);
+	const queryClient = useQueryClient();
+	const navigate = useNavigate();
 
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const response = await Fetch({
-					url: "/class-mode/get-class-by-id",
-					method: "POST",
-					data: JSON.stringify({ class_id: class_id }),
-				});
-				if (response?.status === 200) {
-					const data = await response.data;
-					console.log(data.classObj);
-					setClassDetails(data.classObj);
-				} else {
-					console.log("Failed to create new class");
-				}
-			} catch (error) {
-				toast("Error while making the request:", error);
+	const { data: classInfo } = useQuery({
+		queryKey: ["classInfo", class_id],
+		queryFn: async () => {
+			const [res, err] = await ClassModeAPI.postGetClassById(class_id);
+
+			if (err) {
+				console.error(err);
+				toast.error("Failed to fetch class info");
 			}
-		};
-		fetchData();
-	}, [class_id]);
 
-	useEffect(() => {
-		let countdownInterval;
-		if (classDetails) {
-			const updateCountdown = () => {
-				const [startHours, startMinutes] = classDetails.start_time
-					.split(":")
-					.map(Number);
-				const [endHours, endMinutes] = classDetails.end_time
-					.split(":")
-					.map(Number);
-				const now = new Date();
-				const currentHours = now.getHours();
-				const currentMinutes = now.getMinutes();
-				const currentSeconds = now.getSeconds();
+			return res.class;
+		},
+	});
 
-				const totalStartSeconds = startHours * 3600 + startMinutes * 60;
-				const totalEndSeconds = endHours * 3600 + endMinutes * 60;
-				const currentTotalSeconds =
-					currentHours * 3600 + currentMinutes * 60 + currentSeconds;
+	const handleStartEndClass = async () => {
+		try {
+			if (classInfo?.status === CLASS_UPCOMING) {
+				const [res, err] = await ClassModeAPI.postStartClass(class_id);
 
-				if (currentTotalSeconds > totalEndSeconds) {
-					setTimeRemaining("Class has ended!");
-					clearInterval(countdownInterval);
-				} else if (currentTotalSeconds >= totalStartSeconds) {
-					setTimeRemaining("Class has started!");
-					clearInterval(countdownInterval);
+				if (err) {
+					console.error(err);
+					toast.error("Failed to start class");
 				} else {
-					const totalSecondsRemaining =
-						totalStartSeconds - currentTotalSeconds;
-					const hours = Math.floor(totalSecondsRemaining / 3600);
-					const minutes = Math.floor(
-						(totalSecondsRemaining - hours * 3600) / 60
-					);
-					const seconds =
-						totalSecondsRemaining - hours * 3600 - minutes * 60;
-					setTimeRemaining(`${hours}h ${minutes}m ${seconds}s`);
+					queryClient
+						.invalidateQueries(["classInfo", class_id])
+						.then(() => {
+							toast.info("Starting class");
+						})
+						.catch((err) => {
+							console.error(err);
+						});
 				}
-			};
+			} else {
+				const [res, err] = await ClassModeAPI.postEndClass(
+					class_id,
+					CLASS_COMPLETED
+				);
 
-			updateCountdown();
-			countdownInterval = setInterval(updateCountdown, 1000);
+				if (err) {
+					console.error(err);
+					toast.error("Failed to end class");
+				} else {
+					queryClient
+						.invalidateQueries(["classInfo", class_id])
+						.then(() => {
+							toast.info("Ending class");
+						})
+						.catch((err) => {
+							console.error(err);
+						});
+				}
+			}
+		} catch (err) {
+			console.error(err);
+			toast.error("Failed to update class");
 		}
-		return () => clearInterval(countdownInterval); // Cleanup
-	}, [classDetails]);
+	};
+
+	const handleEditInfo = () => {
+		toast.info("Editing class info");
+	};
+
+	const handleShare = () => {
+		// Copy to clipboard
+
+		navigator.clipboard.writeText(
+			`${getFrontendDomain()}/testing/class/student/${class_id}/info`
+		);
+		toast.info("Link copied to clipboard");
+	};
 
 	return (
-		<TeacherPageWrapper heading="Class Info Teacher">
-			<div className="elements">
-				{classDetails && (
-					<Card hoverable>
-						<div className="flex flex-col items-center">
-							<div className="flex flex-col items-center">
-								<Text>
-									Class Name : {classDetails.class_name}
-								</Text>
-								<Text>
-									Start Time : {classDetails.start_time}
-								</Text>
-								<Text>End Time : {classDetails.end_time}</Text>
-							</div>
-							<Spacer />
-							<Card type="warning" width="50%" hoverable>
-								<div className="flex flex-col items-center">
-									<Text h3>Time Remaining</Text>
-									<div
-										style={{
-											fontSize: "32px",
-											fontWeight: "bold",
-											fontFamily: "'Roboto', sans-serif",
-											color: "white", // Text color
-										}}>
-										<span style={{ fontSize: "40px" }}>
-											{timeRemaining}
-										</span>
-									</div>
-								</div>
-							</Card>
+		<TeacherPageWrapper heading="Class Info">
+			<Card
+				sx={{
+					border: "1px solid",
+					borderColor: "primary.main",
+					background: "linear-gradient(#033363, #021F3B)",
+					borderRadius: "1rem",
+					margin: "2rem 0",
+				}}>
+				<CardContent>
+					<div className="class-info-student">
+						{/* info */}
+						<div className="class-info-student-title">
+							<h3 className="text-white">
+								{class_id} | {classInfo?.class_name}
+							</h3>
+							<p className="class-info-student-desc text-y-white text-sm">
+								{classInfo?.class_desc}
+							</p>
 						</div>
-					</Card>
-				)}
-			</div>
+
+						<div className="class-info-student-teacher text-white flex flex-col gap-2 py-1">
+							<div className="flex flex-row gap-2 items-center">
+								<Avatar>{classInfo?.teacher?.name[0]}</Avatar>
+								{classInfo?.teacher?.name}
+							</div>
+						</div>
+
+						<div className="class-info-student-info flex flex-row gap-8 text-sm text-white">
+							<div>
+								<p className="font-medium">Start Time</p>
+								<p>
+									{new Date(
+										classInfo?.start_time
+									).toLocaleString()}
+								</p>
+							</div>
+							<div>
+								<p className="font-medium">End Time</p>
+								<p>
+									{new Date(
+										classInfo?.end_time
+									).toLocaleString()}
+								</p>
+							</div>
+							<div>
+								<p className="font-medium">Duration</p>
+								<p>
+									{classInfo?.end_time &&
+									classInfo?.start_time
+										? (new Date(classInfo.end_time) -
+												new Date(
+													classInfo.start_time
+												)) /
+											1000 /
+											60
+										: 0}
+									minutes
+								</p>
+							</div>
+
+							<div>
+								<p className="font-medium">Attendees</p>
+								<p className="flex flex-row gap-1 items-center">
+									<span
+										className={`w-2 h-2 rounded-full bg-green-500`}></span>
+									{classInfo?.attendees?.length}
+								</p>
+							</div>
+						</div>
+
+						{/* actions */}
+						<div className="class-info-student-actions flex flex-col gap-4 justify-center">
+							<Button
+								variant="contained"
+								onClick={handleStartEndClass}
+								startIcon={<ExitToApp />}
+								sx={{
+									minWidth: "fit-content",
+								}}>
+								{classInfo?.status === CLASS_UPCOMING
+									? "Start Class"
+									: "End Class"}
+							</Button>
+							<Button
+								variant="contained"
+								onClick={handleEditInfo}
+								startIcon={<Edit />}
+								sx={{
+									minWidth: "fit-content",
+								}}>
+								Edit Info
+							</Button>
+							<Button
+								sx={{
+									minWidth: "fit-content",
+								}}
+								onClick={handleShare}
+								variant="contained"
+								color="inherit"
+								startIcon={<Share />}>
+								Share
+							</Button>
+							{classInfo?.status === CLASS_UPCOMING ||
+							classInfo?.status === CLASS_ONGOING ? (
+								<Button
+									sx={{
+										minWidth: "fit-content",
+									}}
+									onClick={() => {
+										navigate(`/teacher/class/${class_id}`);
+									}}
+									variant="contained"
+									color="inherit"
+									startIcon={<ArrowOutward />}>
+									Go to Class
+								</Button>
+							) : (
+								<></>
+							)}
+						</div>
+					</div>
+				</CardContent>
+			</Card>
 		</TeacherPageWrapper>
 	);
 }
