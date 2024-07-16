@@ -1,3 +1,5 @@
+import ClassInfoStudent from "../pages/class-mode/student/ClassInfoStudent";
+import ClassModeStudent from "../pages/class-mode/student/ClassModeStudent";
 import AboutUs from "../pages/student/AboutUs";
 import ContactUs from "../pages/student/ContactUs";
 import FreeVideos from "../pages/student/FreeVideos";
@@ -59,5 +61,15 @@ export const StudentRoutes = [
 	{
 		path: "/student/watch-history",
 		element: <StudentWatchHistory />,
+	},
+
+	// class mode
+	{
+		path: "/student/class/:class_id/info",
+		element: <ClassInfoStudent />,
+	},
+	{
+		path: "/student/class/:class_id",
+		element: <ClassModeStudent />,
 	},
 ];

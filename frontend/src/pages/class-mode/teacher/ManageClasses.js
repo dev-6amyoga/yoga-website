@@ -3,11 +3,11 @@ import { Button } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { DataTable } from "../../../components/Common/DataTable/DataTable";
 import SortableColumn from "../../../components/Common/DataTable/SortableColumn";
 import RegisterNewClass from "../../../components/class-mode/teacher/RegisterClassForm";
 import ViewDetailsModal from "../../../components/class-mode/teacher/ViewDetailsModal";
+import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 
 export default function ManageClasses() {
@@ -36,13 +36,6 @@ export default function ManageClasses() {
 					let tempInactiveClasses = [];
 					let current_time = new Date();
 					for (var i = 0; i !== response.data.length; i++) {
-						// let days = allClasses[i]["days"];
-						// if (days.includes(today)) {
-						// 	tempActiveClasses.push(allClasses[i]);
-						// } else {
-						// 	tempInactiveClasses.push(allClasses[i]);
-						// }
-
 						let start_time = new Date(response.data[i].start_time);
 						let end_time = new Date(response.data[i].end_time);
 
@@ -65,6 +58,8 @@ export default function ManageClasses() {
 			}
 		},
 	});
+
+	const user = useUserStore((state) => state.user);
 
 	const handleButtonClick = (rowData) => {
 		const now = new Date();
@@ -167,9 +162,9 @@ export default function ManageClasses() {
 	);
 
 	return (
-		<AdminPageWrapper heading="Manage Classes">
-			<div>
-				<Button onClick={() => setRegVisible(true)}>
+		<div>
+			<div className="mb-10">
+				<Button onClick={() => setRegVisible(true)} variant="contained">
 					Register New Class
 				</Button>
 			</div>
@@ -202,6 +197,6 @@ export default function ManageClasses() {
 				setActiveClassModal={setActiveClassModal}
 				refetchClasses={refetchClasses}
 			/>
-		</AdminPageWrapper>
+		</div>
 	);
 }

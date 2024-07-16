@@ -116,8 +116,10 @@ function TeacherNavbar() {
 							}>
 							Self Audio Upload
 						</Button>
-						<Button>About Us</Button>
-						<Button>Contact Us</Button>
+						<Button
+							onClick={() => navigate("/teacher/class/manage")}>
+							Manage Classes
+						</Button>
 						<hr />
 						<Button icon={<User />} type="success" ghost>
 							{user?.name.split(" ")[0]}

@@ -200,9 +200,7 @@ export default function ClassInfoTeacher() {
 										minWidth: "fit-content",
 									}}
 									onClick={() => {
-										navigate(
-											`/testing/class/teacher/${class_id}`
-										);
+										navigate(`/teacher/class/${class_id}`);
 									}}
 									variant="contained"
 									color="inherit"

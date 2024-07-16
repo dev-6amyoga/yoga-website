@@ -1,37 +1,30 @@
-import { useParams } from "react-router-dom";
-
-import { Card, Spacer, Text } from "@geist-ui/core";
+import { ExitToApp, Share } from "@mui/icons-material";
+import { Avatar, Button, Card, CardContent } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import StudentPageWrapper from "../../../components/Common/StudentPageWrapper";
-import { Fetch } from "../../utils/Fetch";
+import { CLASS_ONGOING, CLASS_UPCOMING } from "../../../enums/class_status";
+import { getFrontendDomain } from "../../../utils/getFrontendDomain";
 
 export default function ClassInfoStudent() {
 	const { class_id } = useParams();
-	const [classDetails, setClassDetails] = useState(null);
+	// const [classDetails, setClassDetails] = useState(null);
 	const [timeRemaining, setTimeRemaining] = useState(null);
 
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const response = await Fetch({
-					url: "/class-mode/get-class-by-id",
-					method: "POST",
-					data: JSON.stringify({ class_id: class_id }),
-				});
-				if (response?.status === 200) {
-					const data = await response.data;
-					console.log(data.classObj);
-					setClassDetails(data.classObj);
-				} else {
-					console.log("Failed to create new class");
-				}
-			} catch (error) {
-				toast("Error while making the request:", error);
+	const { data: classDetails } = useQuery({
+		queryKey: ["classInfo", class_id],
+		queryFn: async () => {
+			const [res, err] = await ClassModeAPI.postGetClassById(class_id);
+
+			if (err) {
+				console.error(err);
+				toast.error("Failed to fetch class info");
 			}
-		};
-		fetchData();
-	}, [class_id]);
+
+			return res.class;
+		},
+	});
 
 	useEffect(() => {
 		let countdownInterval;
@@ -78,39 +71,132 @@ export default function ClassInfoStudent() {
 		return () => clearInterval(countdownInterval); // Cleanup
 	}, [classDetails]);
 
+	const handleMarkAttendance = async () => {
+		toast.info(classDetails.status);
+	};
+
+	const handleShare = () => {
+		// Copy to clipboard
+
+		navigator.clipboard.writeText(
+			`${getFrontendDomain()}/student/class/${class_id}/info`
+		);
+		toast.info("Link copied to clipboard");
+	};
+
 	return (
 		<StudentPageWrapper heading="Class Info Student">
 			<div className="elements">
 				{classDetails && (
-					<Card hoverable>
-						<div className="flex flex-col items-center">
-							<div className="flex flex-col items-center">
-								<Text>
-									Class Name : {classDetails.class_name}
-								</Text>
-								<Text>
-									Start Time : {classDetails.start_time}
-								</Text>
-								<Text>End Time : {classDetails.end_time}</Text>
-							</div>
-							<Spacer />
-							<Card type="warning" width="50%" hoverable>
-								<div className="flex flex-col items-center">
-									<Text h3>Time Remaining</Text>
-									<div
-										style={{
-											fontSize: "32px",
-											fontWeight: "bold",
-											fontFamily: "'Roboto', sans-serif",
-											color: "white", // Text color
-										}}>
-										<span style={{ fontSize: "40px" }}>
-											{timeRemaining}
-										</span>
+					<Card
+						sx={{
+							border: "1px solid",
+							borderColor: "primary.main",
+							background: "linear-gradient(#033363, #021F3B)",
+							borderRadius: "1rem",
+							margin: "2rem 0",
+						}}>
+						<CardContent>
+							<div className="class-info-student">
+								{/* info */}
+								<div className="class-info-student-title">
+									<h3 className="text-white">
+										{class_id} | {classDetails.class_name}
+									</h3>
+									<p className="class-info-student-desc text-y-white text-sm max-w-xl break-all">
+										{classDetails.class_desc}
+									</p>
+								</div>
+
+								<div className="class-info-student-teacher text-white flex flex-col gap-2 py-1">
+									<div className="flex flex-row gap-2 items-center">
+										<Avatar>
+											{classDetails?.teacher?.name[0]}
+										</Avatar>
+										{classDetails.teacher.name}
 									</div>
 								</div>
-							</Card>
-						</div>
+
+								<div className="class-info-student-info flex flex-col md:flex-row gap-8 text-sm text-white">
+									<div>
+										<p className="font-medium">
+											Start Time
+										</p>
+										<p>
+											{new Date(
+												classDetails.start_time
+											).toLocaleString()}
+										</p>
+									</div>
+									<div>
+										<p className="font-medium">End Time</p>
+										<p>
+											{new Date(
+												classDetails.end_time
+											).toLocaleString()}
+										</p>
+									</div>
+									<div>
+										<p className="font-medium">Duration</p>
+										<p>
+											{classDetails?.end_time &&
+											classDetails?.start_time
+												? (new Date(
+														classDetails.end_time
+													) -
+														new Date(
+															classDetails.start_time
+														)) /
+													1000 /
+													60
+												: 0}{" "}
+											minutes
+										</p>
+									</div>
+
+									{/* <div>
+										<p className="font-medium">Attendees</p>
+										<p className="flex flex-row gap-1 items-center">
+											<span
+												className={`w-2 h-2 rounded-full bg-green-500`}></span>
+											{classDetails.attendees}
+										</p>
+									</div> */}
+								</div>
+
+								{/* actions */}
+								<div className="class-info-student-actions flex flex-col gap-4 justify-center">
+									<Button
+										variant="contained"
+										startIcon={<ExitToApp />}
+										sx={{
+											minWidth: "fit-content",
+										}}
+										onClick={handleMarkAttendance}
+										disabled={
+											classDetails?.status !==
+											CLASS_ONGOING
+										}>
+										Join Class
+									</Button>
+									<Button
+										sx={{
+											minWidth: "fit-content",
+										}}
+										variant="contained"
+										startIcon={<Share />}
+										disabled={
+											classDetails?.status !==
+												CLASS_ONGOING &&
+											classDetails.status !==
+												CLASS_UPCOMING
+										}
+										onClick={handleShare}>
+										Share
+									</Button>
+								</div>
+							</div>
+						</CardContent>
 					</Card>
 				)}
 			</div>
