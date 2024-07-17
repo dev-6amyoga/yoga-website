@@ -1,3 +1,5 @@
+import { toast } from "react-toastify";
+
 export const TransitionEndClosingPrayerSitting = async (
   start_category,
   break_status_start,
@@ -7,7 +9,9 @@ export const TransitionEndClosingPrayerSitting = async (
   drm_status
 ) => {
   if (!start_category) {
-    // first video
+    //Feet Apart Hands Loose Standing Transition Front
+    //Standing To Sitting Transition
+    //Pranayama Start Sitting
   }
   if (start_category === "Closing Prayer Sitting") {
     if (start_video.namaskara_end === true) {
