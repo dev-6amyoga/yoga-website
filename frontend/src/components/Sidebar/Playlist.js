@@ -542,7 +542,7 @@ function Playlist({ page }) {
 	}, [user_id, currentInstituteId, page, userPlan]);
 
 	const handleAddToQueue = (playlist) => {
-		clearQueue();
+		// clearQueue();
 		if (playlist?.playlist_dash_url) {
 			console.log("Adding playlist to queue");
 			addToQueue([playlist]);

@@ -248,7 +248,7 @@ function VideoPlayer() {
 								</Button>
 							</div>
 						) : (
-							<div className="relative h-full w-full flex flex-row">
+							<div className="relative h-full w-full">
 								{queue.length > 0 ? (
 									<>
 										{queue

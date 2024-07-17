@@ -1069,7 +1069,7 @@ function StreamStackItem({
 
 	return (
 		<div
-			className={`relative h-full w-full ${isActive ? "block" : "block"}`}>
+			className={`relative h-full w-full ${isActive ? "block" : "invisible"}`}>
 			<ShakaPlayer
 				ref={playerInit}
 				className="custom-shaka w-full h-full"
