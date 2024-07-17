@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
-import { transitionGenerator } from "../../../components/transition-generator/TransitionGenerator";
+// import { transitionGenerator } from "../../../components/transition-generator/TransitionFunction";
 import { ROLE_ROOT } from "../../../enums/roles";
 import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
