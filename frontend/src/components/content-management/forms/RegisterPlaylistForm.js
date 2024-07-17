@@ -42,15 +42,14 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
 import { ArrowDown, ArrowUp } from "@geist-ui/icons";
+import { TransitionEndStanding } from "../../transition-generator/transition-generator-helpers/TransitionEndStanding";
+import { TransitionEndSitting } from "../../transition-generator/transition-generator-helpers/TransitionEndSitting";
+import { TransitionEndSupine } from "../../transition-generator/transition-generator-helpers/TransitionEndSupine";
+import { TransitionEndProne } from "../../transition-generator/transition-generator-helpers/TransitionEndProne";
 function RegisterPlaylistForm() {
   const navigate = useNavigate();
-
   const [asanas, setAsanas] = useState([]);
-  const [allAsanas, setAllAsanas] = useState([]);
-  const [showTeacherMode, setShowTeacherMode] = useState(false);
-  const [showDrm, setShowDrm] = useState(false);
   const [transitions, setTransitions] = useState([]);
-  const [playlistMode, setPlaylistMode] = useState("");
 
   const predefinedOrder = [
     "Starting Prayer Standing",
@@ -66,18 +65,7 @@ function RegisterPlaylistForm() {
     "Special",
     "Closing Prayer Sitting",
   ];
-
   const [sortedAsanas, setSortedAsanas] = useState([]);
-  const [playlist_temp, setPlaylistTemp] = useState([]);
-  const [modalState, setModalState] = useState(false);
-  const [playlistName, setPlaylistName] = useState(false);
-  const [modalData, setModalData] = useState({
-    rowData: {
-      asana_name: "",
-    },
-    count: "",
-  });
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -85,7 +73,6 @@ function RegisterPlaylistForm() {
           url: "/content/video/getAllAsanas",
         });
         setAsanas(response.data);
-        setAllAsanas(response.data);
       } catch (error) {
         console.log(error);
       }
@@ -94,28 +81,18 @@ function RegisterPlaylistForm() {
   }, []);
 
   useEffect(() => {
-    if (showDrm == true) {
-      let filteredAsanas = [];
-      for (var entry in allAsanas) {
-        if (allAsanas[entry].drm_video === true) {
-          filteredAsanas.push(allAsanas[entry]);
-        } else {
-          continue;
-        }
+    const fetchData = async () => {
+      try {
+        const response = await Fetch({
+          url: "/content/video/getAllTransitions",
+        });
+        setTransitions(response.data);
+      } catch (error) {
+        console.log(error);
       }
-      setAsanas(filteredAsanas);
-    } else {
-      let filteredAsanas = [];
-      for (var entry in allAsanas) {
-        if (allAsanas[entry].drm_video === false) {
-          filteredAsanas.push(allAsanas[entry]);
-        } else {
-          continue;
-        }
-      }
-      setAsanas(filteredAsanas);
-    }
-  }, [showDrm, showTeacherMode]);
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const s1 = asanas.sort((a, b) => {
@@ -127,51 +104,26 @@ function RegisterPlaylistForm() {
     setSortedAsanas(s1);
   }, [asanas]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await Fetch({
-          url: "/content/video/getAllTransitions",
-        });
-        const data = response.data;
-        setTransitions(data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  async function getRowDataById(asana_id) {
-    try {
-      const response = await Fetch({
-        url: "/content/get-asana-by-id",
-        method: "POST",
-        data: {
-          asana_id: asana_id,
-        },
-      });
-
-      if (response?.status === 200) {
-        return response.data;
-      }
-    } catch (err) {
-      console.log(err);
-      throw err;
-    }
-  }
-
   const [playlistCurrent, setPlaylistCurrent] = useState([]);
-  // const transitionFunction = (lastId, rowData) => {
-  //   // Implement the transition function logic here
-  //   console.log("Transition function called with:", lastId, rowData);
-  // };
 
-  const addToPlaylist = (rowData) => {
+  const addToPlaylist = async (rowData) => {
     toast(rowData.asana_name);
 
     if (playlistCurrent.length === 0) {
-      transitionGenerator(null, rowData);
+      // transitionGenerator(null, rowData);
+      // toast(rowData.asana_category);
+      if (rowData.asana_category === "Sitting") {
+        let t1 = TransitionEndSitting(
+          null,
+          null,
+          rowData.nobreak_asana,
+          null,
+          rowData,
+          rowData.drm_video,
+          transitions
+        );
+        console.log(t1);
+      }
     } else {
       const lastId = playlistCurrent[playlistCurrent.length - 1];
       transitionGenerator(lastId, rowData);
@@ -180,85 +132,12 @@ function RegisterPlaylistForm() {
     setPlaylistCurrent([...playlistCurrent, rowData.id]);
   };
 
-  const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    setModalData({ ...modalData, [id]: value });
-  };
-
-  const updateData = () => {
-    const x = document.getElementById("asana_count_playlist").value;
-    for (var entry in playlist_temp) {
-      if (
-        playlist_temp[entry].rowData.asana_name === modalData.rowData.asana_name
-      ) {
-        playlist_temp[entry].count = x;
-      }
-    }
-    setModalState(false);
-  };
-
-  const renderAction2 = (value, rowData, index) => {
-    // const inputId = `asana_count_${rowData.id}`;
-    return (
-      <div>
-        Hi
-        {/* <Input width="50%" id={inputId} placeholder="1" />
-        <Button
-          type="warning"
-          auto
-          scale={1 / 3}
-          font="12px"
-          onClick={() => addToPlaylist(rowData)}
-        >
-          Add
-        </Button> */}
-      </div>
-    );
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const playlist_name = document.querySelector("#playlist_name").value;
     const playlist_sequence = {};
     playlist_sequence["playlist_name"] = playlist_name;
     playlist_sequence["asana_ids"] = [];
-
-    playlist_temp.map((item) => {
-      const asana_id_playlist =
-        item["rowData"]["id"] || item["rowData"]["transition_id"];
-      const asana_count = Number(item["count"]);
-      for (let i = 0; i < asana_count; i++) {
-        playlist_sequence["asana_ids"].push(asana_id_playlist);
-      }
-    });
-    playlist_sequence["duration"] = totalDuration;
-    const response1 = await Fetch({
-      url: "/content/get-asana-by-id",
-      method: "POST",
-      data: {
-        asana_id:
-          playlist_sequence["asana_ids"][
-            playlist_sequence["asana_ids"].length - 1
-          ],
-      },
-    });
-    if (response1?.status === 200) {
-      if (response1.data.asana_category === "Prayer Sitting") {
-        const matchingTransition1 = transitions.find((transition) => {
-          return (
-            transition.transition_video_name === "Prayer Sitting Full Unlock"
-          );
-        });
-        playlist_sequence["asana_ids"].push(matchingTransition1.transition_id);
-      }
-      if (response1.data.asana_category === "Prayer Standing") {
-        const matchingTransition1 = transitions.find((transition) => {
-          return transition.transition_video_name === "Prayer Standing End";
-        });
-        playlist_sequence["asana_ids"].push(matchingTransition1.transition_id);
-      }
-    }
-    playlist_sequence["playlist_mode"] = playlistMode;
     //insert modal here
     try {
       const response = await Fetch({
@@ -277,256 +156,12 @@ function RegisterPlaylistForm() {
     }
   };
 
-  const renderAction = (value, rowData, index) => {
-    const handleDelete = () => {
-      setPlaylistTemp((prevSchedule) => {
-        const currentIndex = prevSchedule.findIndex(
-          (entry) => entry === rowData
-        );
-        const prevAsanaIndex = prevSchedule
-          .slice(0, currentIndex)
-          .reverse()
-          .findIndex((entry) => {
-            return (
-              entry.rowData?.asana_name && !entry.rowData?.transition_video_name
-            );
-          });
-        const prevAsana =
-          prevAsanaIndex !== -1
-            ? prevSchedule[currentIndex - prevAsanaIndex - 1]
-            : null;
-        const nextAsanaIndex = prevSchedule
-          .slice(currentIndex + 1)
-          .findIndex((entry) => entry.rowData?.asana_name);
-        const startIndex =
-          prevAsanaIndex !== -1 ? currentIndex - prevAsanaIndex : 0;
-        const endIndex =
-          nextAsanaIndex !== -1 ? currentIndex + 1 + nextAsanaIndex : undefined;
-        const nextAsana =
-          nextAsanaIndex !== -1
-            ? prevSchedule[currentIndex + 1 + nextAsanaIndex]
-            : null;
-        const filteredSchedule = prevSchedule.filter(
-          (_, index) =>
-            index < startIndex || (endIndex !== undefined && index >= endIndex)
-        );
-        let updatedSchedule = [];
-        if (prevAsana === null && nextAsana !== null) {
-          const x = transitionGenerator(
-            "start",
-            nextAsana.rowData,
-            transitions
-          );
-          if (x.length !== 0) {
-            updatedSchedule = [
-              ...x.map((item) => ({ rowData: item, count: 1 })),
-              ...filteredSchedule,
-            ];
-          }
-        }
-        if (prevAsana !== null && nextAsana === null) {
-          updatedSchedule = filteredSchedule;
-        }
-        if (prevAsana === null && nextAsana === null) {
-          updatedSchedule = filteredSchedule;
-        }
-        if (prevAsana !== null && nextAsana !== null) {
-          const x = transitionGenerator(
-            prevAsana.rowData,
-            nextAsana.rowData,
-            transitions
-          );
-          updatedSchedule = [
-            ...filteredSchedule.slice(
-              0,
-              filteredSchedule.findIndex((entry) => entry === prevAsana) + 1
-            ),
-            ...x.map((item) => ({ rowData: item, count: 1 })),
-            ...filteredSchedule.slice(
-              filteredSchedule.findIndex((entry) => entry === nextAsana)
-            ),
-          ];
-        }
-        return updatedSchedule;
-      });
-    };
-    const handleUpdate = async () => {
-      setModalData(rowData);
-      setModalState(true);
-    };
-
-    return (
-      <div>
-        <Button
-          type="error"
-          auto
-          scale={1 / 5}
-          font="12px"
-          onClick={handleDelete}
-        >
-          Remove
-        </Button>
-        <Button
-          type="warning"
-          auto
-          scale={1 / 5}
-          font="12px"
-          onClick={() => handleUpdate(Number(rowData.id))}
-        >
-          Update
-        </Button>
-      </div>
-    );
-  };
-
-  const asanaIcons = (value, rowData, index) => {
-    const upClicked = async () => {
-      let updated_sequence = [];
-      const idsArray = playlist_temp.map((rowData) => {
-        const id = rowData.rowData.transition_id || rowData.rowData.id;
-        return id;
-      });
-      const filteredArray = idsArray.filter((element) =>
-        Number.isInteger(element)
-      );
-      const currentIndex = filteredArray.indexOf(rowData.rowData.id);
-      if (currentIndex > 0) {
-        const temp = filteredArray[currentIndex - 1];
-        filteredArray[currentIndex - 1] = filteredArray[currentIndex];
-        filteredArray[currentIndex] = temp;
-      }
-      console.log(filteredArray);
-      for (let i = 0; i < filteredArray.length; i++) {
-        let prevAsanaId;
-        if (i === 0) {
-          prevAsanaId = "start";
-        } else {
-          prevAsanaId = filteredArray[i - 1];
-        }
-        const nextAsanaId = filteredArray[i];
-        try {
-          let prevAsanaRowData;
-          if (prevAsanaId === "start") {
-            prevAsanaRowData = "start";
-          } else {
-            prevAsanaRowData = await getRowDataById(prevAsanaId);
-          }
-          const nextAsanaRowData = await getRowDataById(nextAsanaId);
-          const x = transitionGenerator(
-            prevAsanaRowData,
-            nextAsanaRowData,
-            transitions
-          );
-          if (prevAsanaId === "start") {
-            if (x.length > 0) {
-              updated_sequence.push(...x);
-            }
-            updated_sequence.push(nextAsanaId);
-          } else {
-            if (x.length > 0) {
-              updated_sequence.push(...x);
-            }
-
-            updated_sequence.push(nextAsanaId);
-          }
-        } catch (err) {
-          console.log(err);
-        }
-      }
-      console.log("UPDATED : ", updated_sequence, playlist_temp);
-      setPlaylistTemp(updated_sequence);
-      let x = "Up clicked!" + rowData.rowData.asana_name;
-      toast(x);
-    };
-
-    const downClicked = async () => {
-      let updated_sequence = [];
-      const idsArray = playlist_temp.map((rowData) => {
-        const id = rowData.rowData.transition_id || rowData.rowData.id;
-        return id;
-      });
-      const filteredArray = idsArray.filter((element) =>
-        Number.isInteger(element)
-      );
-      const currentIndex = filteredArray.indexOf(rowData.rowData.id);
-      if (currentIndex < filteredArray.length - 1 && currentIndex !== -1) {
-        const temp = filteredArray[currentIndex + 1];
-        filteredArray[currentIndex + 1] = filteredArray[currentIndex];
-        filteredArray[currentIndex] = temp;
-      }
-      console.log(filteredArray);
-      for (let i = 0; i < filteredArray.length; i++) {
-        let prevAsanaId;
-        if (i === 0) {
-          prevAsanaId = "start";
-        } else {
-          prevAsanaId = filteredArray[i - 1];
-        }
-        const nextAsanaId = filteredArray[i];
-        try {
-          let prevAsanaRowData;
-          if (prevAsanaId === "start") {
-            prevAsanaRowData = "start";
-          } else {
-            prevAsanaRowData = await getRowDataById(prevAsanaId);
-          }
-          const nextAsanaRowData = await getRowDataById(nextAsanaId);
-          const x = transitionGenerator(
-            prevAsanaRowData,
-            nextAsanaRowData,
-            transitions
-          );
-          if (prevAsanaId === "start") {
-            if (x.length > 0) {
-              updated_sequence.push(...x);
-            }
-            updated_sequence.push(nextAsanaId);
-          } else {
-            // updated_sequence.push(prevAsanaId);
-            if (x.length > 0) {
-              updated_sequence.push(...x);
-            }
-            updated_sequence.push(nextAsanaId);
-          }
-        } catch (err) {
-          console.log(err);
-        }
-      }
-
-      console.log("UPDATED : ", updated_sequence, playlist_temp);
-      setPlaylistTemp(updated_sequence);
-      let x = "Down clicked!" + rowData.rowData.asana_name;
-      toast(x);
-    };
-
-    return (
-      <div>
-        <Button type="success" scale={1 / 8} onClick={upClicked}>
-          <ArrowUp />
-        </Button>
-        <Button type="success" scale={1 / 8} onClick={downClicked}>
-          <ArrowDown />
-        </Button>
-      </div>
-    );
-  };
-
   const filteredAsanasByCategory = predefinedOrder.map((category) => {
     return {
       category: category,
       asanas: sortedAsanas.filter((asana) => asana.asana_category === category),
     };
   });
-
-  const [totalDuration, setTotalDuration] = useState(0);
-
-  useEffect(() => {
-    const newTotalDuration = playlist_temp.reduce(
-      (sum, asana) => sum + (asana.rowData.duration || 0) * asana.count,
-      0
-    );
-    setTotalDuration(newTotalDuration);
-  }, [playlist_temp, playlist_temp.map((asana) => asana.count)]);
 
   const [teacherModeFilter, setTeacherModeFilter] = useState(false);
   const [drmVideoFilter, setDrmVideoFilter] = useState(false);
