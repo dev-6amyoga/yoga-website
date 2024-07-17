@@ -42,51 +42,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
 import { ArrowDown, ArrowUp } from "@geist-ui/icons";
-import { makeStyles } from "@mui/styles";
 function RegisterPlaylistForm() {
   const navigate = useNavigate();
-
-  const useStyles = makeStyles({
-    root: {
-      flexGrow: 1,
-      padding: 16,
-    },
-    gridContainer: {
-      display: "grid",
-      gridTemplateColumns: "repeat(3, 1fr)",
-      gap: 16,
-    },
-    flexRow: {
-      display: "flex",
-      alignItems: "center",
-    },
-    card: {
-      padding: 16,
-      marginBottom: 16,
-    },
-    form: {
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: 16,
-    },
-    table: {
-      minWidth: 650,
-    },
-    tableCell: {
-      width: "20%",
-    },
-    modalContent: {
-      position: "absolute",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      width: 400,
-      backgroundColor: "#fff",
-      padding: 24,
-      boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
-    },
-  });
 
   const [asanas, setAsanas] = useState([]);
   const [allAsanas, setAllAsanas] = useState([]);
@@ -560,8 +517,6 @@ function RegisterPlaylistForm() {
       asanas: sortedAsanas.filter((asana) => asana.asana_category === category),
     };
   });
-
-  const classes = useStyles();
 
   const [totalDuration, setTotalDuration] = useState(0);
 
