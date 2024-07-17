@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
 import "./RegisterVideoForm.css";
-
+import RegVideoHelper from "./RegVideoHelper";
 function RegisterVideoForm() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
@@ -44,10 +44,6 @@ function RegisterVideoForm() {
     }
   };
 
-  useEffect(() => {
-    console.log("drm video set : ", drmVideo);
-    console.log("teacherMode set : ", teacherMode);
-  }, [drmVideo, teacherMode]);
   const hello = (value) => {
     if (value.length === 0) {
       setWithAudio(false);
@@ -259,240 +255,247 @@ function RegisterVideoForm() {
     }
   };
   return (
-    <form
-      className="flex flex-col gap-1 border-2 p-4 rounded-md mx-auto bg-white"
-      onSubmit={handleSubmit}
-    >
-      <Text h3>Register New Video</Text>
-      <Input width="100%" name="asana_name">
-        Asana Name
-      </Input>
-      <Input width="100%" name="asana_desc">
-        Description
-      </Input>
-      <Text h6>Category</Text>
-      <Select
-        placeholder="Choose Category"
-        onChange={handler4}
-        name="asana_category"
-      >
-        {categories &&
-          categories.map((x) => (
-            <Select.Option key={x.asana_category_id} value={x.asana_category}>
-              {x.asana_category}
-            </Select.Option>
-          ))}
-      </Select>
-      <Text h6>Type</Text>
-      <Select
-        value={asana_type}
-        placeholder="Choose Asana Type"
-        onChange={handler_type}
-        name="asana_type"
-      >
-        <Select.Option value="Single">Single</Select.Option>
-        <Select.Option value="Combination">Combination</Select.Option>
-      </Select>
-      <Text h6>Asana Difficulty</Text>
-      <Select
-        multiple
-        placeholder="Choose Difficulty"
-        onChange={handleDifficulty}
-        name="asana_difficulty"
-      >
-        <Select.Option key="Beginner" value="Beginner">
-          Beginner
-        </Select.Option>
-        <Select.Option key="Intermediate" value="Intermediate">
-          Intermediate
-        </Select.Option>
-        <Select.Option key="Advanced" value="Advanced">
-          Advanced
-        </Select.Option>
-      </Select>
-      <Input width="100%" id="asana_videoID" name="asana_videoID">
-        Cloudflare Video ID
-      </Input>
-      <Input width="100%" id="asana_hls_url" name="asana_hls_url">
-        HLS URL
-      </Input>
-      <Input width="100%" id="asana_dash_url" name="asana_dash_url">
-        DASH URL
-      </Input>
-      <Text>Language</Text>
-      <Select
-        placeholder="Choose Language"
-        value={selectedLanguage}
-        onChange={handleLanguageChange}
-        id="asana_language"
-        name="asana_language"
-      >
-        {tableLanguages &&
-          tableLanguages.map((language) => (
-            <Select.Option key={language.language_id} value={language.language}>
-              {language.language}
-            </Select.Option>
-          ))}
-      </Select>
-      <br />
-      <Text h5>AI Asana </Text>
-      <Checkbox.Group value={[]} onChange={aiSetter} name="ai">
-        <Checkbox value="ai_transition">AI</Checkbox>
-        <Checkbox value="non_ai_transition">Non AI</Checkbox>
-        <Checkbox value="both">Both</Checkbox>
-      </Checkbox.Group>
-      <Text h5>Audio Settings </Text>
-      <Checkbox.Group value={[]} onChange={hello} name="audio_settings">
-        <Checkbox value="with_audio">With Audio?</Checkbox>
-        <Checkbox value="muted">Muted?</Checkbox>
-        <Checkbox value="with_timer">With Timer?</Checkbox>
-      </Checkbox.Group>
-      <Text h5>DRM Video</Text>
-      <ButtonGroup type="warning" ghost>
-        <Button
-          onClick={() => {
-            setDrmVideo(true);
-          }}
-        >
-          Yes
-        </Button>
-        <Button
-          onClick={() => {
-            setDrmVideo(false);
-          }}
-        >
-          No
-        </Button>
-      </ButtonGroup>
+    <div>
+      <RegVideoHelper
+        categories={categories}
+        tableLanguages={tableLanguages}
+        handleSubmit={handleSubmit}
+      />
+    </div>
+    // <form
+    //   className="flex flex-col gap-1 border-2 p-4 rounded-md mx-auto bg-white"
+    //   onSubmit={handleSubmit}
+    // >
+    //   <Text h3>Register New Video</Text>
+    //   <Input width="100%" name="asana_name">
+    //     Asana Name
+    //   </Input>
+    //   <Input width="100%" name="asana_desc">
+    //     Description
+    //   </Input>
+    //   <Text h6>Category</Text>
+    //   <Select
+    //     placeholder="Choose Category"
+    //     onChange={handler4}
+    //     name="asana_category"
+    //   >
+    //     {categories &&
+    //       categories.map((x) => (
+    //         <Select.Option key={x.asana_category_id} value={x.asana_category}>
+    //           {x.asana_category}
+    //         </Select.Option>
+    //       ))}
+    //   </Select>
+    //   <Text h6>Type</Text>
+    //   <Select
+    //     value={asana_type}
+    //     placeholder="Choose Asana Type"
+    //     onChange={handler_type}
+    //     name="asana_type"
+    //   >
+    //     <Select.Option value="Single">Single</Select.Option>
+    //     <Select.Option value="Combination">Combination</Select.Option>
+    //   </Select>
+    //   <Text h6>Asana Difficulty</Text>
+    //   <Select
+    //     multiple
+    //     placeholder="Choose Difficulty"
+    //     onChange={handleDifficulty}
+    //     name="asana_difficulty"
+    //   >
+    //     <Select.Option key="Beginner" value="Beginner">
+    //       Beginner
+    //     </Select.Option>
+    //     <Select.Option key="Intermediate" value="Intermediate">
+    //       Intermediate
+    //     </Select.Option>
+    //     <Select.Option key="Advanced" value="Advanced">
+    //       Advanced
+    //     </Select.Option>
+    //   </Select>
+    //   <Input width="100%" id="asana_videoID" name="asana_videoID">
+    //     Cloudflare Video ID
+    //   </Input>
+    //   <Input width="100%" id="asana_hls_url" name="asana_hls_url">
+    //     HLS URL
+    //   </Input>
+    //   <Input width="100%" id="asana_dash_url" name="asana_dash_url">
+    //     DASH URL
+    //   </Input>
+    //   <Text>Language</Text>
+    //   <Select
+    //     placeholder="Choose Language"
+    //     value={selectedLanguage}
+    //     onChange={handleLanguageChange}
+    //     id="asana_language"
+    //     name="asana_language"
+    //   >
+    //     {tableLanguages &&
+    //       tableLanguages.map((language) => (
+    //         <Select.Option key={language.language_id} value={language.language}>
+    //           {language.language}
+    //         </Select.Option>
+    //       ))}
+    //   </Select>
+    //   <br />
+    //   <Text h5>AI Asana </Text>
+    //   <Checkbox.Group value={[]} onChange={aiSetter} name="ai">
+    //     <Checkbox value="ai_transition">AI</Checkbox>
+    //     <Checkbox value="non_ai_transition">Non AI</Checkbox>
+    //     <Checkbox value="both">Both</Checkbox>
+    //   </Checkbox.Group>
+    //   <Text h5>Audio Settings </Text>
+    //   <Checkbox.Group value={[]} onChange={hello} name="audio_settings">
+    //     <Checkbox value="with_audio">With Audio?</Checkbox>
+    //     <Checkbox value="muted">Muted?</Checkbox>
+    //     <Checkbox value="with_timer">With Timer?</Checkbox>
+    //   </Checkbox.Group>
+    //   <Text h5>DRM Video</Text>
+    //   <ButtonGroup type="warning" ghost>
+    //     <Button
+    //       onClick={() => {
+    //         setDrmVideo(true);
+    //       }}
+    //     >
+    //       Yes
+    //     </Button>
+    //     <Button
+    //       onClick={() => {
+    //         setDrmVideo(false);
+    //       }}
+    //     >
+    //       No
+    //     </Button>
+    //   </ButtonGroup>
 
-      <Text h5>Teacher Mode</Text>
-      <ButtonGroup type="warning" ghost>
-        <Button
-          onClick={() => {
-            setTeacherMode(true);
-          }}
-        >
-          Yes
-        </Button>
-        <Button
-          onClick={() => {
-            setTeacherMode(false);
-          }}
-        >
-          No
-        </Button>
-      </ButtonGroup>
+    //   <Text h5>Teacher Mode</Text>
+    //   <ButtonGroup type="warning" ghost>
+    //     <Button
+    //       onClick={() => {
+    //         setTeacherMode(true);
+    //       }}
+    //     >
+    //       Yes
+    //     </Button>
+    //     <Button
+    //       onClick={() => {
+    //         setTeacherMode(false);
+    //       }}
+    //     >
+    //       No
+    //     </Button>
+    //   </ButtonGroup>
 
-      <Divider />
-      <Text h5>No Break Asana</Text>
-      <Checkbox.Group value={[]} onChange={hello1} name="nobreak_asana">
-        <Checkbox value="true">No break asana?</Checkbox>
-      </Checkbox.Group>
-      <Text h5>Asana Stithi Start</Text>
-      <Select
-        placeholder="Choose Asana Starting Stithi"
-        onChange={handleAsanaStithiStart}
-      >
-        <Select.Option key="stithi" value="stithi">
-          Stithi
-        </Select.Option>
-        <Select.Option key="relax" value="relax">
-          Relax
-        </Select.Option>
-      </Select>
-      <br />
-      <Text h5>Asana Stithi End</Text>
-      <Select
-        placeholder="Choose Asana Starting Stithi"
-        onChange={handleAsanaStithiEnd}
-      >
-        <Select.Option key="stithi" value="stithi">
-          Stithi
-        </Select.Option>
-        <Select.Option key="relax" value="relax">
-          Relax
-        </Select.Option>
-      </Select>
-      <br />
-      <Text h5>Person Starting Position</Text>
-      <Select
-        placeholder="Choose Person Starting Position"
-        onChange={handlePersonStart}
-      >
-        <Select.Option key="Front" value="Front">
-          Front
-        </Select.Option>
-        <Select.Option key="Left" value="Left">
-          Left
-        </Select.Option>
-        <Select.Option key="Right" value="Right">
-          Right
-        </Select.Option>
-        <Select.Option key="Back" value="Back">
-          Back
-        </Select.Option>
-        <Select.Option key="Diagonal" value="Diagonal">
-          Diagonal
-        </Select.Option>
-      </Select>
-      <br />
-      <Text h5>Person Ending Position</Text>
-      <Select
-        placeholder="Choose Person Starting Position"
-        onChange={handlePersonEnd}
-      >
-        <Select.Option key="Front" value="Front">
-          Front
-        </Select.Option>
-        <Select.Option key="Left" value="Left">
-          Left
-        </Select.Option>
-        <Select.Option key="Right" value="Right">
-          Right
-        </Select.Option>
-        <Select.Option key="Back" value="Back">
-          Back
-        </Select.Option>
-        <Select.Option key="Diagonal" value="Diagonal">
-          Diagonal
-        </Select.Option>
-      </Select>
-      <br />
-      <Text h5>Mat Starting Position</Text>
-      <Select
-        placeholder="Choose Mat Starting Position"
-        onChange={handleMatStart}
-      >
-        <Select.Option key="Front" value="Front">
-          Front
-        </Select.Option>
-        <Select.Option key="Side" value="Side">
-          Side
-        </Select.Option>
-        <Select.Option key="Diagonal" value="Diagonal">
-          Diagonal
-        </Select.Option>
-      </Select>
-      <br />
-      <Text h5>Mat Ending Position</Text>
-      <Select
-        placeholder="Choose Mat Starting Position"
-        onChange={handleMatEnd}
-      >
-        <Select.Option key="Front" value="Front">
-          Front
-        </Select.Option>
-        <Select.Option key="Side" value="Side">
-          Side
-        </Select.Option>
-        <Select.Option key="Diagonal" value="Diagonal">
-          Diagonal
-        </Select.Option>
-      </Select>
-      <br />
-      {/* <Button onClick={markerNavigate}>Add Markers</Button> */}
-      <Button htmlType="submit">Submit</Button>
-    </form>
+    //   <Divider />
+    //   <Text h5>No Break Asana</Text>
+    //   <Checkbox.Group value={[]} onChange={hello1} name="nobreak_asana">
+    //     <Checkbox value="true">No break asana?</Checkbox>
+    //   </Checkbox.Group>
+    //   <Text h5>Asana Stithi Start</Text>
+    //   <Select
+    //     placeholder="Choose Asana Starting Stithi"
+    //     onChange={handleAsanaStithiStart}
+    //   >
+    //     <Select.Option key="stithi" value="stithi">
+    //       Stithi
+    //     </Select.Option>
+    //     <Select.Option key="relax" value="relax">
+    //       Relax
+    //     </Select.Option>
+    //   </Select>
+    //   <br />
+    //   <Text h5>Asana Stithi End</Text>
+    //   <Select
+    //     placeholder="Choose Asana Starting Stithi"
+    //     onChange={handleAsanaStithiEnd}
+    //   >
+    //     <Select.Option key="stithi" value="stithi">
+    //       Stithi
+    //     </Select.Option>
+    //     <Select.Option key="relax" value="relax">
+    //       Relax
+    //     </Select.Option>
+    //   </Select>
+    //   <br />
+    //   <Text h5>Person Starting Position</Text>
+    //   <Select
+    //     placeholder="Choose Person Starting Position"
+    //     onChange={handlePersonStart}
+    //   >
+    //     <Select.Option key="Front" value="Front">
+    //       Front
+    //     </Select.Option>
+    //     <Select.Option key="Left" value="Left">
+    //       Left
+    //     </Select.Option>
+    //     <Select.Option key="Right" value="Right">
+    //       Right
+    //     </Select.Option>
+    //     <Select.Option key="Back" value="Back">
+    //       Back
+    //     </Select.Option>
+    //     <Select.Option key="Diagonal" value="Diagonal">
+    //       Diagonal
+    //     </Select.Option>
+    //   </Select>
+    //   <br />
+    //   <Text h5>Person Ending Position</Text>
+    //   <Select
+    //     placeholder="Choose Person Starting Position"
+    //     onChange={handlePersonEnd}
+    //   >
+    //     <Select.Option key="Front" value="Front">
+    //       Front
+    //     </Select.Option>
+    //     <Select.Option key="Left" value="Left">
+    //       Left
+    //     </Select.Option>
+    //     <Select.Option key="Right" value="Right">
+    //       Right
+    //     </Select.Option>
+    //     <Select.Option key="Back" value="Back">
+    //       Back
+    //     </Select.Option>
+    //     <Select.Option key="Diagonal" value="Diagonal">
+    //       Diagonal
+    //     </Select.Option>
+    //   </Select>
+    //   <br />
+    //   <Text h5>Mat Starting Position</Text>
+    //   <Select
+    //     placeholder="Choose Mat Starting Position"
+    //     onChange={handleMatStart}
+    //   >
+    //     <Select.Option key="Front" value="Front">
+    //       Front
+    //     </Select.Option>
+    //     <Select.Option key="Side" value="Side">
+    //       Side
+    //     </Select.Option>
+    //     <Select.Option key="Diagonal" value="Diagonal">
+    //       Diagonal
+    //     </Select.Option>
+    //   </Select>
+    //   <br />
+    //   <Text h5>Mat Ending Position</Text>
+    //   <Select
+    //     placeholder="Choose Mat Starting Position"
+    //     onChange={handleMatEnd}
+    //   >
+    //     <Select.Option key="Front" value="Front">
+    //       Front
+    //     </Select.Option>
+    //     <Select.Option key="Side" value="Side">
+    //       Side
+    //     </Select.Option>
+    //     <Select.Option key="Diagonal" value="Diagonal">
+    //       Diagonal
+    //     </Select.Option>
+    //   </Select>
+    //   <br />
+    //   {/* <Button onClick={markerNavigate}>Add Markers</Button> */}
+    //   <Button htmlType="submit">Submit</Button>
+    // </form>
   );
 }
 

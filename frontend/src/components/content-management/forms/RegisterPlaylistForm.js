@@ -1,51 +1,119 @@
+// import {
+//   Button,
+//   Card,
+//   Collapse,
+//   Divider,
+//   Input,
+//   Modal,
+//   Spacer,
+//   Table,
+//   Text,
+//   Toggle,
+// } from "@geist-ui/core";
 import {
-  Button,
   Card,
-  Collapse,
   Divider,
-  Input,
-  Modal,
-  Spacer,
+  TextField,
+  Button,
   Table,
-  Text,
-  Toggle,
-} from "@geist-ui/core";
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Switch,
+  Typography,
+  Collapse,
+  Modal,
+  IconButton,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  AccordionActions,
+  Paper,
+  FormControlLabel,
+  Checkbox,
+} from "@mui/material";
+
+import { transitionGenerator } from "../../transition-generator/TransitionGenerator";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
-import { transitionGenerator } from "../../transition-generator/TransitionGenerator";
 import { ArrowDown, ArrowUp } from "@geist-ui/icons";
+import { makeStyles } from "@mui/styles";
 function RegisterPlaylistForm() {
   const navigate = useNavigate();
+
+  const useStyles = makeStyles({
+    root: {
+      flexGrow: 1,
+      padding: 16,
+    },
+    gridContainer: {
+      display: "grid",
+      gridTemplateColumns: "repeat(3, 1fr)",
+      gap: 16,
+    },
+    flexRow: {
+      display: "flex",
+      alignItems: "center",
+    },
+    card: {
+      padding: 16,
+      marginBottom: 16,
+    },
+    form: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 16,
+    },
+    table: {
+      minWidth: 650,
+    },
+    tableCell: {
+      width: "20%",
+    },
+    modalContent: {
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      width: 400,
+      backgroundColor: "#fff",
+      padding: 24,
+      boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
+    },
+  });
+
   const [asanas, setAsanas] = useState([]);
   const [allAsanas, setAllAsanas] = useState([]);
   const [showTeacherMode, setShowTeacherMode] = useState(false);
   const [showDrm, setShowDrm] = useState(false);
   const [transitions, setTransitions] = useState([]);
   const [playlistMode, setPlaylistMode] = useState("");
+
   const predefinedOrder = [
     "Starting Prayer Standing",
-    "Starting Prayer Sitting",
-    "Surynamaskara With Prefix-Suffix",
-    "Suryanamaskara Without Prefix-Suffix",
+    "Surynamaskara Non Stithi",
+    "Suryanamaskara Stithi",
     "Standing",
     "Sitting",
     "Supine",
     "Prone",
-    "Inversion",
-    "Special",
     "Vajrasana",
     "Pranayama Prayer",
     "Pranayama",
-    "Closing Prayer Standing",
+    "Special",
     "Closing Prayer Sitting",
   ];
 
   const [sortedAsanas, setSortedAsanas] = useState([]);
   const [playlist_temp, setPlaylistTemp] = useState([]);
   const [modalState, setModalState] = useState(false);
-
+  const [playlistName, setPlaylistName] = useState(false);
   const [modalData, setModalData] = useState({
     rowData: {
       asana_name: "",
@@ -55,35 +123,22 @@ function RegisterPlaylistForm() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (showTeacherMode == true) {
-        try {
-          const response = await Fetch({
-            url: "/content/video/getTeacherAsanas",
-          });
-          setAsanas(response.data);
-          setAllAsanas(response.data);
-        } catch (error) {
-          console.log(error);
-        }
-      } else {
-        try {
-          const response = await Fetch({
-            url: "/content/video/getNonTeacherAsanas",
-          });
-          setAsanas(response.data);
-          setAllAsanas(response.data);
-        } catch (error) {
-          console.log(error);
-        }
+      try {
+        const response = await Fetch({
+          url: "/content/video/getAllAsanas",
+        });
+        setAsanas(response.data);
+        setAllAsanas(response.data);
+      } catch (error) {
+        console.log(error);
       }
     };
     fetchData();
-  }, [showTeacherMode]);
+  }, []);
 
   useEffect(() => {
     if (showDrm == true) {
       let filteredAsanas = [];
-      console.log(allAsanas, "IN SHOW DRM TRUE BEFORE");
       for (var entry in allAsanas) {
         if (allAsanas[entry].drm_video === true) {
           filteredAsanas.push(allAsanas[entry]);
@@ -91,11 +146,9 @@ function RegisterPlaylistForm() {
           continue;
         }
       }
-      console.log(filteredAsanas, "IN SHOW DRM TRUE AFTER");
       setAsanas(filteredAsanas);
     } else {
       let filteredAsanas = [];
-      console.log(allAsanas, "IN SHOW DRM FALSE BEFORE");
       for (var entry in allAsanas) {
         if (allAsanas[entry].drm_video === false) {
           filteredAsanas.push(allAsanas[entry]);
@@ -103,7 +156,6 @@ function RegisterPlaylistForm() {
           continue;
         }
       }
-      console.log(filteredAsanas, "IN SHOW DRM TRUE AFTER");
       setAsanas(filteredAsanas);
     }
   }, [showDrm, showTeacherMode]);
@@ -152,85 +204,23 @@ function RegisterPlaylistForm() {
     }
   }
 
+  const [playlistCurrent, setPlaylistCurrent] = useState([]);
+  // const transitionFunction = (lastId, rowData) => {
+  //   // Implement the transition function logic here
+  //   console.log("Transition function called with:", lastId, rowData);
+  // };
+
   const addToPlaylist = (rowData) => {
-    let manifestURL = rowData.asana_dash_url;
-    let asana_mode = rowData.teacher_mode;
-    console.log(asana_mode);
-    if (playlist_temp.length > 0) {
-      console.log(playlist_temp[playlist_temp.length - 1].rowData.teacher_mode);
-      if (
-        playlist_temp[playlist_temp.length - 1].rowData.teacher_mode === true
-      ) {
-        setPlaylistMode("Teacher");
-        if (asana_mode === false) {
-          toast(
-            "You cannot insert Normal Mode Asanas in a Teacher Mode Playlist"
-          );
-          return;
-        }
-      }
-      if (
-        playlist_temp[playlist_temp.length - 1].rowData.teacher_mode === false
-      ) {
-        setPlaylistMode("Normal");
-        if (asana_mode === true) {
-          toast(
-            "You cannot insert Teacher Mode Asanas in a Normal Mode Playlist"
-          );
-          return;
-        }
-      }
+    toast(rowData.asana_name);
+
+    if (playlistCurrent.length === 0) {
+      transitionGenerator(null, rowData);
+    } else {
+      const lastId = playlistCurrent[playlistCurrent.length - 1];
+      transitionGenerator(lastId, rowData);
     }
 
-    var count = document.getElementById(`asana_count_${rowData.id}`).value;
-    if (count === "") {
-      count = 1;
-    } else if (
-      isNaN(count) ||
-      !Number.isInteger(Number(count)) ||
-      Number(count) < 1
-    ) {
-      toast("Invalid count entered. Please try again.");
-      return;
-    } else {
-      count = Number(count);
-    }
-    if (playlist_temp.length === 0) {
-      const x = transitionGenerator(
-        "start",
-        rowData,
-        transitions,
-        showTeacherMode
-      );
-      if (x.length !== 0) {
-        setPlaylistTemp((prev) => [
-          ...prev,
-          ...x.map((item) => ({ rowData: item, count: 1 })),
-        ]);
-      }
-    } else {
-      let startVideo = playlist_temp[playlist_temp.length - 1].rowData;
-      let endVideo = rowData;
-      const x = transitionGenerator(
-        startVideo,
-        endVideo,
-        transitions,
-        showTeacherMode
-      );
-      if (x.length !== 0) {
-        setPlaylistTemp((prev) => [
-          ...prev,
-          ...x.map((item) => ({ rowData: item, count: 1 })),
-        ]);
-      }
-    }
-    setPlaylistTemp((prevPlaylist) => [
-      ...prevPlaylist,
-      {
-        rowData: rowData,
-        count: count,
-      },
-    ]);
+    setPlaylistCurrent([...playlistCurrent, rowData.id]);
   };
 
   const handleInputChange = (e) => {
@@ -251,10 +241,11 @@ function RegisterPlaylistForm() {
   };
 
   const renderAction2 = (value, rowData, index) => {
-    const inputId = `asana_count_${rowData.id}`;
+    // const inputId = `asana_count_${rowData.id}`;
     return (
       <div>
-        <Input width="50%" id={inputId} placeholder="1" />
+        Hi
+        {/* <Input width="50%" id={inputId} placeholder="1" />
         <Button
           type="warning"
           auto
@@ -263,7 +254,7 @@ function RegisterPlaylistForm() {
           onClick={() => addToPlaylist(rowData)}
         >
           Add
-        </Button>
+        </Button> */}
       </div>
     );
   };
@@ -431,29 +422,6 @@ function RegisterPlaylistForm() {
     );
   };
 
-  // const asanaIcons = (value, rowData, index) => {
-  //   const upClicked = () => {
-  //     console.log(playlist_temp);
-  //     let x = "Up clicked!" + rowData.rowData.asana_name;
-  //     toast(x);
-  //   };
-  //   const downClicked = () => {
-  //     console.log(playlist_temp);
-  //     let x = "Down clicked!" + rowData.rowData.asana_name;
-  //     toast(x);
-  //   };
-  //   return (
-  //     <div>
-  //       <Button type="success" scale={1 / 8} onClick={upClicked}>
-  //         <ArrowUp />
-  //       </Button>
-  //       <Button type="success" scale={1 / 8} onClick={downClicked}>
-  //         <ArrowDown />
-  //       </Button>
-  //     </div>
-  //   );
-  // };
-
   const asanaIcons = (value, rowData, index) => {
     const upClicked = async () => {
       let updated_sequence = [];
@@ -593,6 +561,8 @@ function RegisterPlaylistForm() {
     };
   });
 
+  const classes = useStyles();
+
   const [totalDuration, setTotalDuration] = useState(0);
 
   useEffect(() => {
@@ -603,160 +573,256 @@ function RegisterPlaylistForm() {
     setTotalDuration(newTotalDuration);
   }, [playlist_temp, playlist_temp.map((asana) => asana.count)]);
 
+  const [teacherModeFilter, setTeacherModeFilter] = useState(false);
+  const [drmVideoFilter, setDrmVideoFilter] = useState(false);
+  const handleTeacherModeFilterChange = (event) => {
+    setTeacherModeFilter(event.target.checked);
+  };
+
+  const handleDrmVideoFilterChange = (event) => {
+    setDrmVideoFilter(event.target.checked);
+  };
+
+  const filteredCategories = filteredAsanasByCategory
+    .map((category) => ({
+      ...category,
+      asanas: category.asanas.filter((asana) => {
+        return (
+          (!teacherModeFilter || asana.teacher_mode === teacherModeFilter) &&
+          (!drmVideoFilter || asana.drm_video === drmVideoFilter)
+        );
+      }),
+    }))
+    .filter((category) => category.asanas.length > 0);
+
   return (
-    <div className="">
-      <div className="grid grid-cols-3 gap-4">
-        <div className="flex flex-row">
-          <Toggle
-            initialChecked={showTeacherMode}
-            onChange={() => setShowTeacherMode((prevMode) => !prevMode)}
+    <div>
+      <div>
+        {/* Filter Options */}
+        <div className="filter-options flex flex-col gap-4 mb-4">
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={teacherModeFilter}
+                onChange={handleTeacherModeFilterChange}
+                name="teacherMode"
+                color="primary"
+              />
+            }
+            label="Teacher Mode"
           />
-          <Text h6>{showTeacherMode ? "Teacher Mode" : "Normal Mode"}</Text>
-        </div>
-        <div className="flex flex-row">
-          <Toggle
-            initialChecked={showDrm}
-            onChange={() => setShowDrm((prevMode) => !prevMode)}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={drmVideoFilter}
+                onChange={handleDrmVideoFilterChange}
+                name="drmVideo"
+                color="primary"
+              />
+            }
+            label="DRM Video"
           />
-          <Text h6>{showDrm ? "DRM Videos" : "Non DRM Videos"}</Text>
         </div>
-        <Spacer />
-        <Collapse.Group className="col-span-2 col-start-1">
-          {filteredAsanasByCategory.map((categoryData, index) => (
-            <Collapse title={categoryData.category} key={index}>
-              <Table data={categoryData.asanas} className="bg-white">
-                <Table.Column prop="asana_name" label="Asana Name" />
-                {/* <Table.Column
-                  prop="language"
-                  label="Language"
-                  render={(data) => {
-                    if (data === "") {
-                      return "No Audio";
-                    }
-                    return data.language;
-                  }}
-                /> */}
-                <Table.Column
-                  prop="nobreak_asana"
-                  label="No Break?"
-                  render={(data) => {
-                    if (data) {
-                      return "Yes";
-                    } else {
-                      return "No";
-                    }
-                  }}
-                />
-                <Table.Column prop="asana_category" label="Category" />
-                <Table.Column
-                  prop="in_playlist"
-                  label="Add To Playlist"
-                  width={150}
-                  render={renderAction2}
-                />
-              </Table>
-            </Collapse>
-          ))}
-        </Collapse.Group>
 
-        <Card width={40}>
-          <Table data={playlist_temp}>
-            <Table.Column
-              prop="rowData.asana_name"
-              label="Asana Name"
-              render={(_, rowData) => {
-                return (
-                  <p>
-                    {rowData.rowData.asana_name
-                      ? rowData.rowData.asana_name
-                      : rowData.rowData.transition_video_name || ""}
-                  </p>
-                );
-              }}
-            />
-            <Table.Column
-              prop="rowData.asana_category"
-              label="Category"
-              render={(_, rowData) => {
-                return <p>{rowData.rowData.asana_category}</p>;
-              }}
-            />
-            <Table.Column
-              prop="rowData.teacher_mode"
-              label="Mode"
-              render={(_, rowData) => {
-                return (
-                  <p>{rowData.rowData.teacher_mode ? "Teacher" : "Normal"}</p>
-                );
-              }}
-            />
-            <Table.Column prop="count" label="Count" />
-            <Table.Column
-              prop="reorder"
-              label="Reorder"
-              width={150}
-              render={(value, rowData, index) => {
-                if (rowData.rowData?.asana_name) {
-                  return asanaIcons(value, rowData, index);
-                } else {
-                  return null;
-                }
-              }}
-            />
-
-            <Table.Column
-              prop="operations"
-              label="ACTIONS"
-              width={150}
-              render={(value, rowData) => {
-                if (rowData.rowData?.asana_name) {
-                  return renderAction(value, rowData);
-                } else {
-                  return null;
-                }
-              }}
-            />
-          </Table>
-          <Divider />
-          <form
-            className="my-10 flex-col items-center justify-center space-y-10"
-            onSubmit={handleSubmit}
-          >
-            <Input width="100%" id="playlist_name">
-              Playlist Name
-            </Input>
-            <br />
-            <br />
-            <Text>
-              Playlist Duration : {(totalDuration / 60).toFixed(2)} minutes
-            </Text>
-
-            <Button htmlType="submit">Submit</Button>
-          </form>
-        </Card>
+        <div>
+          {filteredCategories.map((x, index) => {
+            return (
+              <Accordion className="flex flex-col gap-2">
+                <AccordionSummary
+                  expandIcon={<ExpandMore />}
+                  aria-controls="panel1-content"
+                  id="panel1-header"
+                >
+                  {x.category}
+                </AccordionSummary>
+                <AccordionDetails>
+                  {/* {x.asanas.map((x) => {
+                    return <div>{x.asana_name}</div>;
+                  })} */}
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Asana Name</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {x.asanas.map((asana, idx) => (
+                          <TableRow key={idx}>
+                            <TableCell>{asana.asana_name}</TableCell>
+                            <Button
+                              variant="contained"
+                              onClick={() => {
+                                addToPlaylist(asana);
+                              }}
+                            >
+                              Add
+                            </Button>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </AccordionDetails>
+              </Accordion>
+            );
+          })}
+        </div>
       </div>
-
-      <Modal visible={modalState} onClose={() => setModalState(false)}>
-        <Modal.Title>Update</Modal.Title>
-        <Modal.Subtitle>{modalData.rowData.asana_name}</Modal.Subtitle>
-        <Modal.Content>
-          <form>
-            <Input
-              width="100%"
-              id="asana_count_playlist"
-              placeholder={modalData.count}
-              onChange={handleInputChange}
-            >
-              Count
-            </Input>
-          </form>
-        </Modal.Content>
-        <Modal.Action passive onClick={() => setModalState(false)}>
-          Cancel
-        </Modal.Action>
-        <Modal.Action onClick={updateData}>Update</Modal.Action>
-      </Modal>
     </div>
+    // <div className="">
+    //   <div className="grid grid-cols-3 gap-4">
+    //     <div className="flex flex-row">
+    //       <Toggle
+    //         initialChecked={showTeacherMode}
+    //         onChange={() => setShowTeacherMode((prevMode) => !prevMode)}
+    //       />
+    //       <Text h6>{showTeacherMode ? "Teacher Mode" : "Normal Mode"}</Text>
+    //     </div>
+    //     <div className="flex flex-row">
+    //       <Toggle
+    //         initialChecked={showDrm}
+    //         onChange={() => setShowDrm((prevMode) => !prevMode)}
+    //       />
+    //       <Text h6>{showDrm ? "DRM Videos" : "Non DRM Videos"}</Text>
+    //     </div>
+    //     <Spacer />
+    //     <Collapse.Group className="col-span-2 col-start-1">
+    //       {filteredAsanasByCategory.map((categoryData, index) => (
+    //         <Collapse title={categoryData.category} key={index}>
+    //           <Table data={categoryData.asanas} className="bg-white">
+    //             <Table.Column prop="asana_name" label="Asana Name" />
+    //             {/* <Table.Column
+    //               prop="language"
+    //               label="Language"
+    //               render={(data) => {
+    //                 if (data === "") {
+    //                   return "No Audio";
+    //                 }
+    //                 return data.language;
+    //               }}
+    //             /> */}
+    //             <Table.Column
+    //               prop="nobreak_asana"
+    //               label="No Break?"
+    //               render={(data) => {
+    //                 if (data) {
+    //                   return "Yes";
+    //                 } else {
+    //                   return "No";
+    //                 }
+    //               }}
+    //             />
+    //             <Table.Column prop="asana_category" label="Category" />
+    //             <Table.Column
+    //               prop="in_playlist"
+    //               label="Add To Playlist"
+    //               width={150}
+    //               render={renderAction2}
+    //             />
+    //           </Table>
+    //         </Collapse>
+    //       ))}
+    //     </Collapse.Group>
+
+    //     <Card width={40}>
+    //       <Table data={playlist_temp}>
+    //         <Table.Column
+    //           prop="rowData.asana_name"
+    //           label="Asana Name"
+    //           render={(_, rowData) => {
+    //             return (
+    //               <p>
+    //                 {rowData.rowData.asana_name
+    //                   ? rowData.rowData.asana_name
+    //                   : rowData.rowData.transition_video_name || ""}
+    //               </p>
+    //             );
+    //           }}
+    //         />
+    //         <Table.Column
+    //           prop="rowData.asana_category"
+    //           label="Category"
+    //           render={(_, rowData) => {
+    //             return <p>{rowData.rowData.asana_category}</p>;
+    //           }}
+    //         />
+    //         <Table.Column
+    //           prop="rowData.teacher_mode"
+    //           label="Mode"
+    //           render={(_, rowData) => {
+    //             return (
+    //               <p>{rowData.rowData.teacher_mode ? "Teacher" : "Normal"}</p>
+    //             );
+    //           }}
+    //         />
+    //         <Table.Column prop="count" label="Count" />
+    //         <Table.Column
+    //           prop="reorder"
+    //           label="Reorder"
+    //           width={150}
+    //           render={(value, rowData, index) => {
+    //             if (rowData.rowData?.asana_name) {
+    //               return asanaIcons(value, rowData, index);
+    //             } else {
+    //               return null;
+    //             }
+    //           }}
+    //         />
+
+    //         <Table.Column
+    //           prop="operations"
+    //           label="ACTIONS"
+    //           width={150}
+    //           render={(value, rowData) => {
+    //             if (rowData.rowData?.asana_name) {
+    //               return renderAction(value, rowData);
+    //             } else {
+    //               return null;
+    //             }
+    //           }}
+    //         />
+    //       </Table>
+    //       <Divider />
+    //       <form
+    //         className="my-10 flex-col items-center justify-center space-y-10"
+    //         onSubmit={handleSubmit}
+    //       >
+    //         <Input width="100%" id="playlist_name">
+    //           Playlist Name
+    //         </Input>
+    //         <br />
+    //         <br />
+    //         <Text>
+    //           Playlist Duration : {(totalDuration / 60).toFixed(2)} minutes
+    //         </Text>
+
+    //         <Button htmlType="submit">Submit</Button>
+    //       </form>
+    //     </Card>
+    //   </div>
+
+    //   <Modal visible={modalState} onClose={() => setModalState(false)}>
+    //     <Modal.Title>Update</Modal.Title>
+    //     <Modal.Subtitle>{modalData.rowData.asana_name}</Modal.Subtitle>
+    //     <Modal.Content>
+    //       <form>
+    //         <Input
+    //           width="100%"
+    //           id="asana_count_playlist"
+    //           placeholder={modalData.count}
+    //           onChange={handleInputChange}
+    //         >
+    //           Count
+    //         </Input>
+    //       </form>
+    //     </Modal.Content>
+    //     <Modal.Action passive onClick={() => setModalState(false)}>
+    //       Cancel
+    //     </Modal.Action>
+    //     <Modal.Action onClick={updateData}>Update</Modal.Action>
+    //   </Modal>
+    // </div>
   );
 }
 
