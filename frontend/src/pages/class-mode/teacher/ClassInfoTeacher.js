@@ -5,20 +5,24 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ClassModeAPI } from "../../../api/class-mode.api";
 
+import { Spacer } from "@geist-ui/core";
+import DisplayWatchTime from "../../../components/Common/DisplayWatchTime";
 import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
+import ViewDetailsModal from "../../../components/class-mode/teacher/ViewDetailsModal";
 import {
 	CLASS_COMPLETED,
 	CLASS_ONGOING,
 	CLASS_UPCOMING,
 } from "../../../enums/class_status";
 import { getFrontendDomain } from "../../../utils/getFrontendDomain";
+import { useState } from "react";
 
 export default function ClassInfoTeacher() {
 	const { class_id } = useParams();
 	const queryClient = useQueryClient();
 	const navigate = useNavigate();
 
-	const { data: classInfo } = useQuery({
+	const { data: classInfo, refetch: refetchClass } = useQuery({
 		queryKey: ["classInfo", class_id],
 		queryFn: async () => {
 			const [res, err] = await ClassModeAPI.postGetClassById(class_id);
@@ -31,6 +35,8 @@ export default function ClassInfoTeacher() {
 			return res.class;
 		},
 	});
+
+	const [showEditForm, setShowEditForm] = useState(false);
 
 	const handleStartEndClass = async () => {
 		try {
@@ -91,6 +97,35 @@ export default function ClassInfoTeacher() {
 
 	return (
 		<TeacherPageWrapper heading="Class Info">
+			<div className="flex flex-row gap-4 my-4">
+				<Card
+					sx={{
+						flex: 1,
+					}}>
+					<CardContent>
+						<p className="font-medium">Starts In</p>
+						<div className="text-2xl text-center">
+							<DisplayWatchTime
+								endTs={new Date(classInfo?.start_time)}
+							/>
+						</div>
+					</CardContent>
+				</Card>
+				<Card
+					sx={{
+						flex: 1,
+					}}>
+					<CardContent>
+						<p className="font-medium">Ends In</p>
+						<div className="text-2xl">
+							<DisplayWatchTime
+								endTs={new Date(classInfo?.end_time)}
+							/>
+						</div>
+					</CardContent>
+				</Card>
+			</div>
+			<Spacer />
 			<Card
 				sx={{
 					border: "1px solid",
@@ -106,7 +141,7 @@ export default function ClassInfoTeacher() {
 							<h3 className="text-white">
 								{class_id} | {classInfo?.class_name}
 							</h3>
-							<p className="class-info-student-desc text-y-white text-sm">
+							<p className="class-info-student-desc text-y-white text-sm max-w-2xl break-all">
 								{classInfo?.class_desc}
 							</p>
 						</div>
@@ -118,51 +153,53 @@ export default function ClassInfoTeacher() {
 							</div>
 						</div>
 
-						<div className="class-info-student-info flex flex-row gap-8 text-sm text-white">
-							<div>
-								<p className="font-medium">Start Time</p>
-								<p>
-									{new Date(
+						<div className="class-info-student-info flex flex-col gap-8 text-sm text-white">
+							<div className="flex flex-row gap-8">
+								<div>
+									<p className="font-medium">Start Time</p>
+									<p>
+										{new Date(
+											classInfo?.start_time
+										).toLocaleString()}
+									</p>
+								</div>
+								<div>
+									<p className="font-medium">End Time</p>
+									<p>
+										{new Date(
+											classInfo?.end_time
+										).toLocaleString()}
+									</p>
+								</div>
+								<div>
+									<p className="font-medium">Duration</p>
+									<p>
+										{classInfo?.end_time &&
 										classInfo?.start_time
-									).toLocaleString()}
-								</p>
-							</div>
-							<div>
-								<p className="font-medium">End Time</p>
-								<p>
-									{new Date(
-										classInfo?.end_time
-									).toLocaleString()}
-								</p>
-							</div>
-							<div>
-								<p className="font-medium">Duration</p>
-								<p>
-									{classInfo?.end_time &&
-									classInfo?.start_time
-										? (new Date(classInfo.end_time) -
-												new Date(
-													classInfo.start_time
-												)) /
-											1000 /
-											60
-										: 0}
-									minutes
-								</p>
-							</div>
+											? (new Date(classInfo.end_time) -
+													new Date(
+														classInfo.start_time
+													)) /
+												1000 /
+												60
+											: 0}
+										minutes
+									</p>
+								</div>
 
-							<div>
-								<p className="font-medium">Attendees</p>
-								<p className="flex flex-row gap-1 items-center">
-									<span
-										className={`w-2 h-2 rounded-full bg-green-500`}></span>
-									{classInfo?.attendees?.length}
-								</p>
+								<div>
+									<p className="font-medium">Attendees</p>
+									<p className="flex flex-row gap-1 items-center">
+										<span
+											className={`w-2 h-2 rounded-full bg-green-500`}></span>
+										{classInfo?.attendees?.length}
+									</p>
+								</div>
 							</div>
 						</div>
 
 						{/* actions */}
-						<div className="class-info-student-actions flex flex-col gap-4 justify-center">
+						<div className="class-info-student-actions grid grid-cols-2 gap-4 justify-center">
 							<Button
 								variant="contained"
 								onClick={handleStartEndClass}
@@ -212,6 +249,13 @@ export default function ClassInfoTeacher() {
 							)}
 						</div>
 					</div>
+
+					<ViewDetailsModal
+						activeClassModalData={classInfo}
+						activeClassModal={showEditForm}
+						setActiveClassModal={setShowEditForm}
+						refetchClasses={refetchClass}
+					/>
 				</CardContent>
 			</Card>
 		</TeacherPageWrapper>

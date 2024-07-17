@@ -105,7 +105,7 @@ export default function ClassInfoStudent() {
 									<h3 className="text-white">
 										{class_id} | {classDetails.class_name}
 									</h3>
-									<p className="class-info-student-desc text-y-white text-sm max-w-xl break-all">
+									<p className="class-info-student-desc text-y-white text-sm max-w-2xl break-all">
 										{classDetails.class_desc}
 									</p>
 								</div>

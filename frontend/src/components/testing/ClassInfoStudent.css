@@ -1,9 +1,11 @@
 .class-info-student {
 	display: grid;
 	grid-template-columns: 1fr 0.5fr;
-	grid-template-rows: repeat(2, 1fr);
+	grid-template-rows: repeat(4, minmax(fit-content, 1fr));
 	grid-template-areas:
 		"class-info-student-title class-info-student-title class-info-student-teacher"
+		"class-info-student-info class-info-student-info class-info-student-actions"
+		"class-info-student-info class-info-student-info class-info-student-actions"
 		"class-info-student-info class-info-student-info class-info-student-actions";
 	gap: 1rem;
 }
