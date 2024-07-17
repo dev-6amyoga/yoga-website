@@ -24,7 +24,7 @@ import { ROLE_ROOT } from "../../enums/roles";
 import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
 import AdminPageWrapper from "../Common/AdminPageWrapper";
-import { transitionGenerator } from "../transition-generator/TransitionGenerator";
+// import { transitionGenerator } from "../transition-generator/TransitionFunction";
 
 function AllPlaylists() {
   const [delState, setDelState] = useState(false);
@@ -264,11 +264,11 @@ function AllPlaylists() {
     const asanaData1 = playlistAsanas.find(
       (asana) => asana.id === filteredAsanaIds[0]
     );
-    const transitionResult = transitionGenerator(
-      "start",
-      asanaData1,
-      transitions
-    );
+    // const transitionResult = transitionGenerator(
+    //   "start",
+    //   asanaData1,
+    //   transitions
+    // );
     transitionResult?.forEach((element) => {
       resultArray.push(element.transition_id);
     });
@@ -281,11 +281,11 @@ function AllPlaylists() {
         (asana) => asana.id === filteredAsanaIds[i + 1]
       );
       if (asanaData2 && asanaData3) {
-        const result = transitionGenerator(asanaData2, asanaData3, transitions);
-        result?.forEach((element) => {
-          resultArray.push(element.transition_id);
-        });
-        resultArray.push(asanaData3.id);
+        // const result = transitionGenerator(asanaData2, asanaData3, transitions);
+        // result?.forEach((element) => {
+        //   resultArray.push(element.transition_id);
+        // });
+        // resultArray.push(asanaData3.id);
       } else {
         console.error("Asana data not found for IDs:");
       }
@@ -410,14 +410,14 @@ function AllPlaylists() {
     const asanaData1 = playlistAsanas.find(
       (asana) => asana.id === nowOrderAsanaIds[0]
     );
-    const transitionResult = transitionGenerator(
-      "start",
-      asanaData1,
-      transitions
-    );
-    transitionResult?.forEach((element) => {
-      resultArray.push(element.transition_id);
-    });
+    // const transitionResult = transitionGenerator(
+    //   "start",
+    //   asanaData1,
+    //   transitions
+    // );
+    // transitionResult?.forEach((element) => {
+    //   resultArray.push(element.transition_id);
+    // });
     resultArray.push(asanaData1.id);
     for (let i = 0; i < nowOrderAsanaIds.length - 1; i++) {
       const asanaData2 = playlistAsanas.find(
@@ -427,11 +427,11 @@ function AllPlaylists() {
         (asana) => asana.id === nowOrderAsanaIds[i + 1]
       );
       if (asanaData2 && asanaData3) {
-        const result = transitionGenerator(asanaData2, asanaData3, transitions);
-        result?.forEach((element) => {
-          resultArray.push(element.transition_id);
-        });
-        resultArray.push(asanaData3.id);
+        // const result = transitionGenerator(asanaData2, asanaData3, transitions);
+        // result?.forEach((element) => {
+        //   resultArray.push(element.transition_id);
+        // });
+        // resultArray.push(asanaData3.id);
       } else {
         console.error("Asana data not found for IDs:");
       }
@@ -453,15 +453,15 @@ function AllPlaylists() {
     const asanaData1 = playlistAsanas.find(
       (asana) => asana.id === filteredList[0]
     );
-    const transitionResult = transitionGenerator(
-      "start",
-      asanaData1,
-      transitions
-    );
-    transitionResult?.forEach((element) => {
-      resultArray.push(element.transition_id);
-    });
-    resultArray.push(asanaData1.id);
+    // const transitionResult = transitionGenerator(
+    //   "start",
+    //   asanaData1,
+    //   transitions
+    // );
+    // transitionResult?.forEach((element) => {
+    //   resultArray.push(element.transition_id);
+    // });
+    // resultArray.push(asanaData1.id);
     for (let i = 0; i < filteredList.length - 1; i++) {
       const asanaData2 = playlistAsanas.find(
         (asana) => asana.id === filteredList[i]
@@ -470,11 +470,11 @@ function AllPlaylists() {
         (asana) => asana.id === filteredList[i + 1]
       );
       if (asanaData2 && asanaData3) {
-        const result = transitionGenerator(asanaData2, asanaData3, transitions);
-        result?.forEach((element) => {
-          resultArray.push(element.transition_id);
-        });
-        resultArray.push(asanaData3.id);
+        // const result = transitionGenerator(asanaData2, asanaData3, transitions);
+        // result?.forEach((element) => {
+        //   resultArray.push(element.transition_id);
+        // });
+        // resultArray.push(asanaData3.id);
       } else {
         console.error("Asana data not found for IDs:");
       }
