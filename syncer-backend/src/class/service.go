@@ -2,6 +2,7 @@ package class
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"syncer-backend/src/events"
 
@@ -17,7 +18,7 @@ func NewClass() (*ClassModel, error) {
 // add to mongo db
 func AddToActionsQueue(db *mongo.Client, classId string, action events.QueueEvent) error {
 	// Get the collection you want to update from
-	collection := db.Database("db_name").Collection("class")
+	collection := db.Database("YogaWebsite").Collection("class_mode")
 
 	objId, _ := primitive.ObjectIDFromHex(classId)
 
@@ -40,6 +41,7 @@ func AddToActionsQueue(db *mongo.Client, classId string, action events.QueueEven
 	matchedCount, modifiedCount := result.MatchedCount, result.ModifiedCount
 	if matchedCount == 0 {
 		fmt.Println("No documents matched the filter.")
+		return errors.New("No documents matched the filter")
 	} else if modifiedCount == 1 {
 		fmt.Println("Successfully updated one document.")
 	} else {

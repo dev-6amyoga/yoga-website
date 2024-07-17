@@ -51,12 +51,23 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			return
 		}
 
+		eventData, err := json.Marshal(event.Data)
+
+		if err != nil {
+			conn.WriteJSON(events.EventTeacherResponse{
+				Status:  events.EVENT_STATUS_NACK,
+				Message: "Error marshalling event data",
+			})
+			s.logger.Error("Error marshalling event data:", err)
+			return
+		}
+
 		// switch on the event type
 		switch event.Type {
 		case events.EVENT_QUEUE:
-			s.logger.Infof("Received event: %s", event.Type)
 			queueEvent := events.QueueEvent{}
-			err = json.Unmarshal(message, &queueEvent)
+			err = json.Unmarshal(eventData, &queueEvent)
+			s.logger.Infof("Received event: %s %v", event.Type, queueEvent)
 
 			if err != nil {
 				conn.WriteJSON(events.EventTeacherResponse{

@@ -52,7 +52,7 @@ const (
 
 type QueueEvent struct {
 	SubType   QueueEventType `json:"subtype"`
-	Data      interface{}    `json:"-"`
+	Data      interface{}    `json:"data"`
 	EventTime string         `json:"event_time"`
 }
 
