@@ -1,4 +1,4 @@
-export const TransitionEndSitting = async (
+export const TransitionEndSupine = async (
   start_category,
   break_status_start,
   break_status_end,
@@ -14,19 +14,26 @@ export const TransitionEndSitting = async (
       if (start_video.namaskara_end === true) {
         //Prayer Sitting Namaskara Unlock
         //Pranayama Unlock Legs
+        //Turn Mat Front To Side Sitting Transition
+        //Sitting To Supine Transition
       } else {
         //Pranayama Unlock Legs
+        //Turn Mat Front To Side Sitting Transition
+        //Sitting To Supine Transition
       }
     }
     if (break_status_end === "No Break") {
       if (start_video.namaskara_end === true) {
         //Prayer Sitting Namaskara Unlock
         //Pranayama Unlock Legs
-        //Feet Together Hands Side Sitting Transition
+        //Turn Mat Front To Side Sitting Transition
+        //Sitting To Supine Transition
+        //Arms Overhead Feet Together Supine Transition
       } else {
         //Pranayama Unlock Legs
-        //Sitting To Standing Transition
-        //Feet Together Hands Side Sitting Transition
+        //Turn Mat Front To Side Sitting Transition
+        //Sitting To Supine Transition
+        //Arms Overhead Feet Together Supine Transition
       }
     }
   }
@@ -34,12 +41,14 @@ export const TransitionEndSitting = async (
   if (start_category === "Closing Prayer Standing") {
     if (break_status_end === "Break") {
       // Prayer End Standing
-      //Standing To Sitting Transition
+      // Turn Mat Front To Side Standing Transition
+      // Standing To Supine Transition
     }
     if (break_status_end === "No Break") {
       // Prayer End Standing
-      //Standing To Sitting Transition
-      //Feet Together Hands Side Sitting Transition
+      // Turn Mat Front To Side Standing Transition
+      // Standing To Supine Transition
+      // Arms Overhead Feet Together Supine Transition
     }
   }
 
