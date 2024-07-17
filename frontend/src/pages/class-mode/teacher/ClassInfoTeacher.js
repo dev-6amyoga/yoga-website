@@ -5,14 +5,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ClassModeAPI } from "../../../api/class-mode.api";
 
+import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
 import {
 	CLASS_COMPLETED,
 	CLASS_ONGOING,
 	CLASS_UPCOMING,
-} from "../../enums/class_status";
-import { getFrontendDomain } from "../../utils/getFrontendDomain";
-import TeacherPageWrapper from "../Common/TeacherPageWrapper";
-import "./ClassInfoStudent.css";
+} from "../../../enums/class_status";
+import { getFrontendDomain } from "../../../utils/getFrontendDomain";
 
 export default function ClassInfoTeacher() {
 	const { class_id } = useParams();
