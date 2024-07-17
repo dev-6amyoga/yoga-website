@@ -111,35 +111,72 @@ function TeacherSocket() {
 				{connectionOpen ? "Close Connection" : "Open Connection"}
 			</button>
 
-			<div className="flex flex-row gap-4 border">
-				{eventTypes.queue.map((e) => {
-					return (
-						<button
-							className="p-2 border border-gray-300 rounded-lg"
-							key={e}
-							onClick={() => {
-								if (socket) {
-									socket.send(
-										JSON.stringify({
-											class_id: "123",
-											type: EVENT_QUEUE,
-											data: {
-												subtype: e,
-												data: {},
-												event_time:
-													new Date().toISOString(),
-											},
-										})
-									);
-								}
-							}}>
-							{e}
-						</button>
-					);
-				})}
+			<div className="flex flex-row flex-wrap gap-4 border my-4 p-4">
+				<button
+					className="p-2 border border-gray-300 rounded-lg"
+					onClick={() => {
+						if (socket) {
+							socket.send(
+								JSON.stringify({
+									class_id: "669696ff64e3c7c397cd62f0",
+									type: EVENT_QUEUE,
+									data: {
+										subtype: EVENT_QUEUE_PUSH,
+										data: {
+											video_id: "1234",
+										},
+										event_time: new Date().toISOString(),
+									},
+								})
+							);
+						}
+					}}>
+					{EVENT_QUEUE_PUSH}
+				</button>
+				<button
+					className="p-2 border border-gray-300 rounded-lg"
+					onClick={() => {
+						if (socket) {
+							socket.send(
+								JSON.stringify({
+									class_id: "669696ff64e3c7c397cd62f0",
+									type: EVENT_QUEUE,
+									data: {
+										subtype: EVENT_QUEUE_POP,
+										data: {
+											video_id: "1234",
+											idx: 0,
+										},
+										event_time: new Date().toISOString(),
+									},
+								})
+							);
+						}
+					}}>
+					{EVENT_QUEUE_POP}
+				</button>
+				<button
+					className="p-2 border border-gray-300 rounded-lg"
+					onClick={() => {
+						if (socket) {
+							socket.send(
+								JSON.stringify({
+									class_id: "669696ff64e3c7c397cd62f0",
+									type: EVENT_QUEUE,
+									data: {
+										subtype: EVENT_QUEUE_CLEAR,
+										data: {},
+										event_time: new Date().toISOString(),
+									},
+								})
+							);
+						}
+					}}>
+					{EVENT_QUEUE_CLEAR}
+				</button>
 			</div>
 
-			<div className="flex flex-row flex-wrap gap-4 border">
+			<div className="flex flex-row flex-wrap gap-4 border my-4 p-4">
 				{eventTypes.controls.map((e) => {
 					return (
 						<button
@@ -149,7 +186,8 @@ function TeacherSocket() {
 								if (socket) {
 									socket.send(
 										JSON.stringify({
-											class_id: "123",
+											class_id:
+												"669696ff64e3c7c397cd62f0",
 											type: EVENT_CONTROLS,
 											data: {
 												subtype: e,
@@ -167,7 +205,7 @@ function TeacherSocket() {
 				})}
 			</div>
 
-			<div className="flex flex-row gap-4 border">
+			<div className="flex flex-row flex-wrap gap-4 border my-4 p-4">
 				{eventTypes.timer.map((e) => {
 					return (
 						<button
@@ -177,7 +215,8 @@ function TeacherSocket() {
 								if (socket) {
 									socket.send(
 										JSON.stringify({
-											class_id: "123",
+											class_id:
+												"669696ff64e3c7c397cd62f0",
 											type: EVENT_TIMER,
 											data: {
 												current_time: 3.123,
@@ -218,7 +257,7 @@ function StudentSocket() {
 
 	const getSampleStudentReq = (event_type) => {
 		return JSON.stringify({
-			class_id: "123",
+			class_id: "669696ff64e3c7c397cd62f0",
 			type: EVENT_CONTROLS,
 			data: {
 				subtype: "EVENT_CONTROLS_PLAY",
@@ -249,7 +288,7 @@ function StudentSocket() {
 
 			socket.send(
 				JSON.stringify({
-					class_id: "123",
+					class_id: "669696ff64e3c7c397cd62f0",
 					student_id: "1",
 				})
 			);
