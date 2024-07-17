@@ -102,11 +102,11 @@ export const TransitionEndSitting = async (
       //Feet Together Hands Side Sitting Transition
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
-      // Feet Apart Hands Back Sitting Transition
+      //Feet Apart Hands Loose Standing Transition Front
       // Standing To Sitting Transition
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
-      // Feet Apart Hands Back Sitting Transition
+      //Feet Apart Hands Loose Standing Transition Front
       // Standing To Sitting Transition
       //Feet Together Hands Side Sitting Transition
     }
