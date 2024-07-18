@@ -134,7 +134,7 @@ function RegisterPlaylistForm() {
         let t1 = await TransitionEndSitting(
           null,
           null,
-          rowData.nobreak_asana,
+          rowData.nobreak_asana ? "No Break" : "Break",
           null,
           rowData,
           rowData.drm_video,
@@ -147,7 +147,7 @@ function RegisterPlaylistForm() {
         let t1 = await TransitionEndPranayama(
           null,
           null,
-          rowData.nobreak_asana,
+          rowData.nobreak_asana ? "No Break" : "Break",
           null,
           rowData,
           rowData.drm_video,
@@ -160,7 +160,7 @@ function RegisterPlaylistForm() {
         let t1 = await TransitionEndClosingPrayerSitting(
           null,
           null,
-          rowData.nobreak_asana,
+          rowData.nobreak_asana ? "No Break" : "Break",
           null,
           rowData,
           rowData.drm_video,
@@ -173,7 +173,7 @@ function RegisterPlaylistForm() {
         let t1 = await TransitionEndClosingPrayerStanding(
           null,
           null,
-          rowData.nobreak_asana,
+          rowData.nobreak_asana ? "No Break" : "Break",
           null,
           rowData,
           rowData.drm_video,
@@ -186,7 +186,7 @@ function RegisterPlaylistForm() {
         let t1 = await TransitionEndStartingPrayerStanding(
           null,
           null,
-          rowData.nobreak_asana,
+          rowData.nobreak_asana ? "No Break" : "Break",
           null,
           rowData,
           rowData.drm_video,
@@ -199,7 +199,7 @@ function RegisterPlaylistForm() {
         let t1 = await TransitionEndStartingPrayerSitting(
           null,
           null,
-          rowData.nobreak_asana,
+          rowData.nobreak_asana ? "No Break" : "Break",
           null,
           rowData,
           rowData.drm_video,
@@ -212,7 +212,7 @@ function RegisterPlaylistForm() {
         let t1 = await TransitionEndPranayamaPrayer(
           null,
           null,
-          rowData.nobreak_asana,
+          rowData.nobreak_asana ? "No Break" : "Break",
           null,
           rowData,
           rowData.drm_video,
@@ -225,7 +225,7 @@ function RegisterPlaylistForm() {
         let t1 = await TransitionEndStanding(
           null,
           null,
-          rowData.nobreak_asana,
+          rowData.nobreak_asana ? "No Break" : "Break",
           null,
           rowData,
           rowData.drm_video,
@@ -238,7 +238,7 @@ function RegisterPlaylistForm() {
         let t1 = await TransitionEndSupine(
           null,
           null,
-          rowData.nobreak_asana,
+          rowData.nobreak_asana ? "No Break" : "Break",
           null,
           rowData,
           rowData.drm_video,
@@ -251,7 +251,7 @@ function RegisterPlaylistForm() {
         let t1 = await TransitionEndProne(
           null,
           null,
-          rowData.nobreak_asana,
+          rowData.nobreak_asana ? "No Break" : "Break",
           null,
           rowData,
           rowData.drm_video,
@@ -264,7 +264,7 @@ function RegisterPlaylistForm() {
         let t1 = await TransitionEndSpecial(
           null,
           null,
-          rowData.nobreak_asana,
+          rowData.nobreak_asana ? "No Break" : "Break",
           null,
           rowData,
           rowData.drm_video,
@@ -277,7 +277,7 @@ function RegisterPlaylistForm() {
         let t1 = await TransitionEndSuryanamaskaraStithi(
           null,
           null,
-          rowData.nobreak_asana,
+          rowData.nobreak_asana ? "No Break" : "Break",
           null,
           rowData,
           rowData.drm_video,
@@ -290,7 +290,7 @@ function RegisterPlaylistForm() {
         let t1 = await TransitionEndSuryanamaskaraNonStithi(
           null,
           null,
-          rowData.nobreak_asana,
+          rowData.nobreak_asana ? "No Break" : "Break",
           null,
           rowData,
           rowData.drm_video,
@@ -303,7 +303,7 @@ function RegisterPlaylistForm() {
         let t1 = await TransitionEndVajrasana(
           null,
           null,
-          rowData.nobreak_asana,
+          rowData.nobreak_asana ? "No Break" : "Break",
           null,
           rowData,
           rowData.drm_video,
@@ -322,8 +322,8 @@ function RegisterPlaylistForm() {
           if (rowData.asana_category === "Sitting") {
             let t1 = await TransitionEndSitting(
               prevAsana.asana_category,
-              prevAsana.nobreak_asana,
-              rowData.nobreak_asana,
+              prevAsana.nobreak_asana ? "No Break" : "Break",
+              rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
               rowData,
               rowData.drm_video,
@@ -336,8 +336,8 @@ function RegisterPlaylistForm() {
           if (rowData.asana_category === "Pranayama") {
             let t1 = await TransitionEndPranayama(
               prevAsana.asana_category,
-              prevAsana.nobreak_asana,
-              rowData.nobreak_asana,
+              prevAsana.nobreak_asana ? "No Break" : "Break",
+              rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
               rowData,
               rowData.drm_video,
@@ -349,8 +349,8 @@ function RegisterPlaylistForm() {
           if (rowData.asana_category === "Closing Prayer Sitting") {
             let t1 = await TransitionEndClosingPrayerSitting(
               prevAsana.asana_category,
-              prevAsana.nobreak_asana,
-              rowData.nobreak_asana,
+              prevAsana.nobreak_asana ? "No Break" : "Break",
+              rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
               rowData,
               rowData.drm_video,
@@ -362,8 +362,8 @@ function RegisterPlaylistForm() {
           if (rowData.asana_category === "Closing Prayer Standing") {
             let t1 = await TransitionEndClosingPrayerStanding(
               prevAsana.asana_category,
-              prevAsana.nobreak_asana,
-              rowData.nobreak_asana,
+              prevAsana.nobreak_asana ? "No Break" : "Break",
+              rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
               rowData,
               rowData.drm_video,
@@ -375,8 +375,8 @@ function RegisterPlaylistForm() {
           if (rowData.asana_category === "Starting Prayer Standing") {
             let t1 = await TransitionEndStartingPrayerStanding(
               prevAsana.asana_category,
-              prevAsana.nobreak_asana,
-              rowData.nobreak_asana,
+              prevAsana.nobreak_asana ? "No Break" : "Break",
+              rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
               rowData,
               rowData.drm_video,
@@ -388,8 +388,8 @@ function RegisterPlaylistForm() {
           if (rowData.asana_category === "Starting Prayer Sitting") {
             let t1 = await TransitionEndStartingPrayerSitting(
               prevAsana.asana_category,
-              prevAsana.nobreak_asana,
-              rowData.nobreak_asana,
+              prevAsana.nobreak_asana ? "No Break" : "Break",
+              rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
               rowData,
               rowData.drm_video,
@@ -401,8 +401,8 @@ function RegisterPlaylistForm() {
           if (rowData.asana_category === "Pranayama Prayer") {
             let t1 = await TransitionEndPranayamaPrayer(
               prevAsana.asana_category,
-              prevAsana.nobreak_asana,
-              rowData.nobreak_asana,
+              prevAsana.nobreak_asana ? "No Break" : "Break",
+              rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
               rowData,
               rowData.drm_video,
@@ -415,8 +415,8 @@ function RegisterPlaylistForm() {
           if (rowData.asana_category === "Standing") {
             let t1 = await TransitionEndStanding(
               prevAsana.asana_category,
-              prevAsana.nobreak_asana,
-              rowData.nobreak_asana,
+              prevAsana.nobreak_asana ? "No Break" : "Break",
+              rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
               rowData,
               rowData.drm_video,
@@ -428,8 +428,8 @@ function RegisterPlaylistForm() {
           if (rowData.asana_category === "Supine") {
             let t1 = await TransitionEndSupine(
               prevAsana.asana_category,
-              prevAsana.nobreak_asana,
-              rowData.nobreak_asana,
+              prevAsana.nobreak_asana ? "No Break" : "Break",
+              rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
               rowData,
               rowData.drm_video,
@@ -441,8 +441,8 @@ function RegisterPlaylistForm() {
           if (rowData.asana_category === "Prone") {
             let t1 = await TransitionEndProne(
               prevAsana.asana_category,
-              prevAsana.nobreak_asana,
-              rowData.nobreak_asana,
+              prevAsana.nobreak_asana ? "No Break" : "Break",
+              rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
               rowData,
               rowData.drm_video,
@@ -454,8 +454,8 @@ function RegisterPlaylistForm() {
           if (rowData.asana_category === "Special") {
             let t1 = await TransitionEndSpecial(
               prevAsana.asana_category,
-              prevAsana.nobreak_asana,
-              rowData.nobreak_asana,
+              prevAsana.nobreak_asana ? "No Break" : "Break",
+              rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
               rowData,
               rowData.drm_video,
@@ -467,8 +467,8 @@ function RegisterPlaylistForm() {
           if (rowData.asana_category === "Suryanamaskara Stithi") {
             let t1 = await TransitionEndSuryanamaskaraStithi(
               prevAsana.asana_category,
-              prevAsana.nobreak_asana,
-              rowData.nobreak_asana,
+              prevAsana.nobreak_asana ? "No Break" : "Break",
+              rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
               rowData,
               rowData.drm_video,
@@ -480,8 +480,8 @@ function RegisterPlaylistForm() {
           if (rowData.asana_category === "Suryanamaskara Non Stithi") {
             let t1 = await TransitionEndSuryanamaskaraNonStithi(
               prevAsana.asana_category,
-              prevAsana.nobreak_asana,
-              rowData.nobreak_asana,
+              prevAsana.nobreak_asana ? "No Break" : "Break",
+              rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
               rowData,
               rowData.drm_video,
@@ -493,8 +493,8 @@ function RegisterPlaylistForm() {
           if (rowData.asana_category === "Vajrasana") {
             let t1 = await TransitionEndVajrasana(
               prevAsana.asana_category,
-              prevAsana.nobreak_asana,
-              rowData.nobreak_asana,
+              prevAsana.nobreak_asana ? "No Break" : "Break",
+              rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
               rowData,
               rowData.drm_video,

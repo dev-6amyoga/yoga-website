@@ -36,7 +36,7 @@ export const TransitionEndSitting = async (
         transition.transition_video_name === "Sitting Position Transition"
     );
     let t2 = null;
-    if (break_status_end) {
+    if (break_status_end === "No Break") {
       const transition_2 = filteredTransitions.filter(
         (transition) =>
           transition.transition_video_name ===
