@@ -27,7 +27,7 @@ export default function ViewDetailsModal({
 	activeClassModal,
 	activeClassModalData,
 	setActiveClassModal,
-	refetchClasses,
+	refetchClasses = () => {},
 }) {
 	const [dirty, setDirty] = useState(false);
 

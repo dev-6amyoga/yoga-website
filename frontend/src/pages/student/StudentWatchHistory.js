@@ -8,31 +8,13 @@ import Typography from "@mui/material/Typography";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import DisplayWatchTime from "../../components/Common/DisplayWatchTime";
 import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
 import { ROLE_STUDENT } from "../../enums/roles";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
 import Hero from "./components/Hero";
-
-function DisplayWatchTime({ hh, mm, ss }) {
-	return (
-		<div className="grid grid-cols-3">
-			<p className="flex flex-col items-center gap-2">
-				<span className="font-mono text-5xl">{hh}</span>
-				<span>Hours</span>
-			</p>
-			<p className="flex flex-col items-center gap-2">
-				<span className="font-mono text-5xl">{mm}</span>
-				<span>Minutes</span>
-			</p>
-			<p className="flex flex-col items-center gap-2">
-				<span className="font-mono text-5xl">{ss}</span>
-				<span>Seconds</span>
-			</p>
-		</div>
-	);
-}
 
 function StudentWatchHistory() {
 	const user = useUserStore((state) => state.user);

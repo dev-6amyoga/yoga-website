@@ -3,9 +3,11 @@ package server
 import (
 	"context"
 	"net/http"
+	"os"
 	"syncer-backend/src/timer"
 
 	"github.com/gorilla/websocket"
+	"github.com/joho/godotenv"
 	"github.com/puzpuzpuz/xsync"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -13,6 +15,13 @@ import (
 )
 
 func NewServer() *Server {
+	// read env vars
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		panic(err)
+	}
+
 	// logger
 	l, err := zap.NewDevelopment()
 
@@ -33,7 +42,7 @@ func NewServer() *Server {
 
 	client, err := mongo.Connect(
 		context.Background(),
-		options.Client().ApplyURI("mongodb://localhost:27017").SetBSONOptions(bsonOpts),
+		options.Client().ApplyURI(os.Getenv("DB_URL")).SetBSONOptions(bsonOpts),
 	)
 
 	if err != nil {
