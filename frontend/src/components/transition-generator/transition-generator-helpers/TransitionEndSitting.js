@@ -33,13 +33,13 @@ export const TransitionEndSitting = async (
     );
     const transition_1 = filteredTransitions.filter(
       (transition) =>
-        transition.transition_name === "Sitting Position Transition"
+        transition.transition_video_name === "Sitting Position Transition"
     );
     let t2 = null;
     if (break_status_end) {
       const transition_2 = filteredTransitions.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       t2 = getUniqueTransition(transition_2);
@@ -48,10 +48,10 @@ export const TransitionEndSitting = async (
     t1 = getUniqueTransition(transition_1);
     const result = [];
     if (t1) {
-      result.push(t1);
+      result.push(t1.transition_id);
     }
     if (t2) {
-      result.push(t2);
+      result.push(t2.transition_id);
     }
     console.log(result);
     return result;
@@ -70,10 +70,12 @@ export const TransitionEndSitting = async (
       if (start_video.namaskara_end === true) {
         const transition_1 = filteredTransitions_all.filter(
           (transition) =>
-            transition.transition_name === "Prayer Sitting Namaskara Unlock"
+            transition.transition_video_name ===
+            "Prayer Sitting Namaskara Unlock"
         );
         const transition_2 = filteredTransitions_all.filter(
-          (transition) => transition.transition_name === "Pranayama Unlock Legs"
+          (transition) =>
+            transition.transition_video_name === "Pranayama Unlock Legs"
         );
         let t1 = getUniqueTransition(transition_1);
         let t2 = getUniqueTransition(transition_2);
@@ -87,7 +89,8 @@ export const TransitionEndSitting = async (
         return result;
       } else {
         const transition_1 = filteredTransitions_all.filter(
-          (transition) => transition.transition_name === "Pranayama Unlock Legs"
+          (transition) =>
+            transition.transition_video_name === "Pranayama Unlock Legs"
         );
         let t1 = getUniqueTransition(transition_1);
         const result = [];
@@ -101,14 +104,16 @@ export const TransitionEndSitting = async (
       if (start_video.namaskara_end === true) {
         const transition_1 = filteredTransitions_all.filter(
           (transition) =>
-            transition.transition_name === "Prayer Sitting Namaskara Unlock"
+            transition.transition_video_name ===
+            "Prayer Sitting Namaskara Unlock"
         );
         const transition_2 = filteredTransitions_all.filter(
-          (transition) => transition.transition_name === "Pranayama Unlock Legs"
+          (transition) =>
+            transition.transition_video_name === "Pranayama Unlock Legs"
         );
         const transition_3 = filteredTransitions_all.filter(
           (transition) =>
-            transition.transition_name ===
+            transition.transition_video_name ===
             "Feet Together Hands Side Sitting Transition"
         );
         let t1 = getUniqueTransition(transition_1);
@@ -127,11 +132,12 @@ export const TransitionEndSitting = async (
         return result;
       } else {
         const transition_1 = filteredTransitions_all.filter(
-          (transition) => transition.transition_name === "Pranayama Unlock Legs"
+          (transition) =>
+            transition.transition_video_name === "Pranayama Unlock Legs"
         );
         const transition_2 = filteredTransitions_all.filter(
           (transition) =>
-            transition.transition_name ===
+            transition.transition_video_name ===
             "Feet Together Hands Side Sitting Transition"
         );
         let t1 = getUniqueTransition(transition_1);
@@ -151,11 +157,12 @@ export const TransitionEndSitting = async (
   if (start_category === "Closing Prayer Standing") {
     if (break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
-        (transition) => transition.transition_name === "Prayer End Standing"
+        (transition) =>
+          transition.transition_video_name === "Prayer End Standing"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Standing To Sitting Transition"
+          transition.transition_video_name === "Standing To Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
       let t2 = getUniqueTransition(transition_2);
@@ -170,15 +177,16 @@ export const TransitionEndSitting = async (
     }
     if (break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
-        (transition) => transition.transition_name === "Prayer End Standing"
+        (transition) =>
+          transition.transition_video_name === "Prayer End Standing"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Standing To Sitting Transition"
+          transition.transition_video_name === "Standing To Sitting Transition"
       );
       const transition_3 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -203,10 +211,12 @@ export const TransitionEndSitting = async (
       if (start_video.namaskara_end === true) {
         const transition_1 = filteredTransitions_all.filter(
           (transition) =>
-            transition.transition_name === "Prayer Sitting Namaskara Unlock"
+            transition.transition_video_name ===
+            "Prayer Sitting Namaskara Unlock"
         );
         const transition_2 = filteredTransitions_all.filter(
-          (transition) => transition.transition_name === "Pranayama Unlock Legs"
+          (transition) =>
+            transition.transition_video_name === "Pranayama Unlock Legs"
         );
         let t1 = getUniqueTransition(transition_1);
         let t2 = getUniqueTransition(transition_2);
@@ -220,7 +230,8 @@ export const TransitionEndSitting = async (
         return result;
       } else {
         const transition_1 = filteredTransitions_all.filter(
-          (transition) => transition.transition_name === "Pranayama Unlock Legs"
+          (transition) =>
+            transition.transition_video_name === "Pranayama Unlock Legs"
         );
         let t1 = getUniqueTransition(transition_1);
         const result = [];
@@ -234,14 +245,16 @@ export const TransitionEndSitting = async (
       if (start_video.namaskara_end === true) {
         const transition_1 = filteredTransitions_all.filter(
           (transition) =>
-            transition.transition_name === "Prayer Sitting Namaskara Unlock"
+            transition.transition_video_name ===
+            "Prayer Sitting Namaskara Unlock"
         );
         const transition_2 = filteredTransitions_all.filter(
-          (transition) => transition.transition_name === "Pranayama Unlock Legs"
+          (transition) =>
+            transition.transition_video_name === "Pranayama Unlock Legs"
         );
         const transition_3 = filteredTransitions_all.filter(
           (transition) =>
-            transition.transition_name ===
+            transition.transition_video_name ===
             "Feet Together Hands Side Sitting Transition"
         );
         let t1 = getUniqueTransition(transition_1);
@@ -260,11 +273,12 @@ export const TransitionEndSitting = async (
         return result;
       } else {
         const transition_1 = filteredTransitions_all.filter(
-          (transition) => transition.transition_name === "Pranayama Unlock Legs"
+          (transition) =>
+            transition.transition_video_name === "Pranayama Unlock Legs"
         );
         const transition_2 = filteredTransitions_all.filter(
           (transition) =>
-            transition.transition_name ===
+            transition.transition_video_name ===
             "Feet Together Hands Side Sitting Transition"
         );
         let t1 = getUniqueTransition(transition_1);
@@ -284,11 +298,12 @@ export const TransitionEndSitting = async (
   if (start_category === "Starting Prayer Standing") {
     if (break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
-        (transition) => transition.transition_name === "Prayer End Standing"
+        (transition) =>
+          transition.transition_video_name === "Prayer End Standing"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Standing To Sitting Transition"
+          transition.transition_video_name === "Standing To Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
       let t2 = getUniqueTransition(transition_2);
@@ -303,15 +318,16 @@ export const TransitionEndSitting = async (
     }
     if (break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
-        (transition) => transition.transition_name === "Prayer End Standing"
+        (transition) =>
+          transition.transition_video_name === "Prayer End Standing"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Standing To Sitting Transition"
+          transition.transition_video_name === "Standing To Sitting Transition"
       );
       const transition_3 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -335,12 +351,12 @@ export const TransitionEndSitting = async (
     if (break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Apart Hands Loose Standing Transition Front"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Standing To Sitting Transition"
+          transition.transition_video_name === "Standing To Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
       let t2 = getUniqueTransition(transition_2);
@@ -356,16 +372,16 @@ export const TransitionEndSitting = async (
     if (break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Apart Hands Loose Standing Transition Front"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Standing To Sitting Transition"
+          transition.transition_video_name === "Standing To Sitting Transition"
       );
       const transition_3 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -389,12 +405,12 @@ export const TransitionEndSitting = async (
     if (break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Suryanamaskara Non AI Non Stithi Suffix"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Standing To Sitting Transition"
+          transition.transition_video_name === "Standing To Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
       let t2 = getUniqueTransition(transition_2);
@@ -410,16 +426,16 @@ export const TransitionEndSitting = async (
     if (break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Suryanamaskara Non AI Non Stithi Suffix"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Standing To Sitting Transition"
+          transition.transition_video_name === "Standing To Sitting Transition"
       );
       const transition_3 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -443,7 +459,7 @@ export const TransitionEndSitting = async (
     if (break_status_start === "Break" && break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Standing To Sitting Transition"
+          transition.transition_video_name === "Standing To Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
       const result = [];
@@ -455,11 +471,11 @@ export const TransitionEndSitting = async (
     if (break_status_start === "Break" && break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Standing To Sitting Transition"
+          transition.transition_video_name === "Standing To Sitting Transition"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -476,12 +492,12 @@ export const TransitionEndSitting = async (
     if (break_status_start === "No Break" && break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Apart Hands Loose Standing Transition Front"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Standing To Sitting Transition"
+          transition.transition_video_name === "Standing To Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
       let t2 = getUniqueTransition(transition_2);
@@ -497,16 +513,16 @@ export const TransitionEndSitting = async (
     if (break_status_start === "No Break" && break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Apart Hands Loose Standing Transition Front"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Standing To Sitting Transition"
+          transition.transition_video_name === "Standing To Sitting Transition"
       );
       const transition_3 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -533,7 +549,7 @@ export const TransitionEndSitting = async (
     if (break_status_start === "Break" && break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -546,7 +562,7 @@ export const TransitionEndSitting = async (
     if (break_status_start === "No Break" && break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Apart Hands Back Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -565,11 +581,11 @@ export const TransitionEndSitting = async (
     if (break_status_start === "Break" && break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Supine To Sitting Transition"
+          transition.transition_video_name === "Supine To Sitting Transition"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Turn Mat Side To Front Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -586,16 +602,16 @@ export const TransitionEndSitting = async (
     if (break_status_start === "Break" && break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Supine To Sitting Transition"
+          transition.transition_video_name === "Supine To Sitting Transition"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Turn Mat Side To Front Sitting Transition"
       );
       const transition_3 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -616,16 +632,16 @@ export const TransitionEndSitting = async (
     if (break_status_start === "No Break" && break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Arms Down Feet Apart Supine Transition"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Supine To Sitting Transition"
+          transition.transition_video_name === "Supine To Sitting Transition"
       );
       const transition_3 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Turn Mat Side To Front Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -646,21 +662,21 @@ export const TransitionEndSitting = async (
     if (break_status_start === "No Break" && break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Arms Down Feet Apart Supine Transition"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Supine To Sitting Transition"
+          transition.transition_video_name === "Supine To Sitting Transition"
       );
       const transition_3 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Turn Mat Side To Front Sitting Transition"
       );
       const transition_4 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -688,11 +704,11 @@ export const TransitionEndSitting = async (
     if (break_status_start === "Break" && break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Prone To Sitting Transition"
+          transition.transition_video_name === "Prone To Sitting Transition"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Turn Mat Side To Front Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -709,16 +725,16 @@ export const TransitionEndSitting = async (
     if (break_status_start === "Break" && break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Prone To Sitting Transition"
+          transition.transition_video_name === "Prone To Sitting Transition"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Turn Mat Side To Front Sitting Transition"
       );
       const transition_3 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -739,16 +755,16 @@ export const TransitionEndSitting = async (
     if (break_status_start === "No Break" && break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Fold Hands Feet Apart Prone Transition"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Supine To Sitting Transition"
+          transition.transition_video_name === "Supine To Sitting Transition"
       );
       const transition_3 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Turn Mat Side To Front Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -769,21 +785,21 @@ export const TransitionEndSitting = async (
     if (break_status_start === "No Break" && break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Fold Hands Feet Apart Prone Transition"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Supine To Sitting Transition"
+          transition.transition_video_name === "Supine To Sitting Transition"
       );
       const transition_3 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Turn Mat Side To Front Sitting Transition"
       );
       const transition_4 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -811,7 +827,7 @@ export const TransitionEndSitting = async (
     if (break_status_start === "Break" && break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Vajra To Sitting Transition"
+          transition.transition_video_name === "Vajra To Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
       const result = [];
@@ -823,11 +839,11 @@ export const TransitionEndSitting = async (
     if (break_status_start === "Break" && break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Vajra To Sitting Transition"
+          transition.transition_video_name === "Vajra To Sitting Transition"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -844,11 +860,12 @@ export const TransitionEndSitting = async (
     if (break_status_start === "No Break" && break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Vajrasana Dyanmudra To Relax Position"
+          transition.transition_video_name ===
+          "Vajrasana Dyanmudra To Relax Position"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Vajra To Sitting Transition"
+          transition.transition_video_name === "Vajra To Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
       let t2 = getUniqueTransition(transition_2);
@@ -864,15 +881,16 @@ export const TransitionEndSitting = async (
     if (break_status_start === "No Break" && break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Vajrasana Dyanmudra To Relax Position"
+          transition.transition_video_name ===
+          "Vajrasana Dyanmudra To Relax Position"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Vajra To Sitting Transition"
+          transition.transition_video_name === "Vajra To Sitting Transition"
       );
       const transition_3 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -905,10 +923,12 @@ export const TransitionEndSitting = async (
     if (break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Pranayama Inhale Hands Up Exhale Down"
+          transition.transition_video_name ===
+          "Pranayama Inhale Hands Up Exhale Down"
       );
       const transition_2 = filteredTransitions_all.filter(
-        (transition) => transition.transition_name === "Pranayama Unlock Legs"
+        (transition) =>
+          transition.transition_video_name === "Pranayama Unlock Legs"
       );
       let t1 = getUniqueTransition(transition_1);
       let t2 = getUniqueTransition(transition_2);
@@ -924,14 +944,16 @@ export const TransitionEndSitting = async (
     if (break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name === "Pranayama Inhale Hands Up Exhale Down"
+          transition.transition_video_name ===
+          "Pranayama Inhale Hands Up Exhale Down"
       );
       const transition_2 = filteredTransitions_all.filter(
-        (transition) => transition.transition_name === "Pranayama Unlock Legs"
+        (transition) =>
+          transition.transition_video_name === "Pranayama Unlock Legs"
       );
       const transition_3 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -955,7 +977,7 @@ export const TransitionEndSitting = async (
     if (break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Apart Hands Back Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
@@ -969,12 +991,12 @@ export const TransitionEndSitting = async (
     if (break_status_end === "No Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Apart Hands Back Sitting Transition"
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_name ===
+          transition.transition_video_name ===
           "Feet Together Hands Side Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
