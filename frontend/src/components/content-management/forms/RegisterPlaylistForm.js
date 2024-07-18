@@ -35,6 +35,15 @@ import { TransitionEndSitting } from "../../transition-generator/transition-gene
 import { TransitionEndSupine } from "../../transition-generator/transition-generator-helpers/TransitionEndSupine";
 import { TransitionEndProne } from "../../transition-generator/transition-generator-helpers/TransitionEndProne";
 import { TransitionEndPranayama } from "../../transition-generator/transition-generator-helpers/TransitionEndPranayama";
+import { TransitionEndClosingPrayerSitting } from "../../transition-generator/transition-generator-helpers/TransitionEndClosingPrayerSitting";
+import { TransitionEndClosingPrayerStanding } from "../../transition-generator/transition-generator-helpers/TransitionEndClosingPrayerStanding";
+import { TransitionEndStartingPrayerStanding } from "../../transition-generator/transition-generator-helpers/TransitionEndStartingPrayerStanding";
+import { TransitionEndStartingPrayerSitting } from "../../transition-generator/transition-generator-helpers/TransitionEndStartingPrayerSitting";
+import { TransitionEndPranayamaPrayer } from "../../transition-generator/transition-generator-helpers/TransitionEndPranayamaPrayer";
+import { TransitionEndSpecial } from "../../transition-generator/transition-generator-helpers/TransitionEndSpecial";
+import { TransitionEndSuryanamaskaraStithi } from "../../transition-generator/transition-generator-helpers/TransitionEndSuryanamaskaraStithi";
+import { TransitionEndSuryanamaskaraNonStithi } from "../../transition-generator/transition-generator-helpers/TransitionEndSuryanamaskaraNonStithi";
+import { TransitionEndVajrasana } from "../../transition-generator/transition-generator-helpers/TransitionEndVajrasana";
 
 function RegisterPlaylistForm() {
   const navigate = useNavigate();
@@ -147,6 +156,163 @@ function RegisterPlaylistForm() {
         t1 = t1.filter((element) => element !== undefined);
         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
       }
+      if (rowData.asana_category === "Closing Prayer Sitting") {
+        let t1 = await TransitionEndClosingPrayerSitting(
+          null,
+          null,
+          rowData.nobreak_asana,
+          null,
+          rowData,
+          rowData.drm_video,
+          transitions
+        );
+        t1 = t1.filter((element) => element !== undefined);
+        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+      }
+      if (rowData.asana_category === "Closing Prayer Standing") {
+        let t1 = await TransitionEndClosingPrayerStanding(
+          null,
+          null,
+          rowData.nobreak_asana,
+          null,
+          rowData,
+          rowData.drm_video,
+          transitions
+        );
+        t1 = t1.filter((element) => element !== undefined);
+        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+      }
+      if (rowData.asana_category === "Starting Prayer Standing") {
+        let t1 = await TransitionEndStartingPrayerStanding(
+          null,
+          null,
+          rowData.nobreak_asana,
+          null,
+          rowData,
+          rowData.drm_video,
+          transitions
+        );
+        t1 = t1.filter((element) => element !== undefined);
+        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+      }
+      if (rowData.asana_category === "Starting Prayer Sitting") {
+        let t1 = await TransitionEndStartingPrayerSitting(
+          null,
+          null,
+          rowData.nobreak_asana,
+          null,
+          rowData,
+          rowData.drm_video,
+          transitions
+        );
+        t1 = t1.filter((element) => element !== undefined);
+        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+      }
+      if (rowData.asana_category === "Pranayama Prayer") {
+        let t1 = await TransitionEndPranayamaPrayer(
+          null,
+          null,
+          rowData.nobreak_asana,
+          null,
+          rowData,
+          rowData.drm_video,
+          transitions
+        );
+        t1 = t1.filter((element) => element !== undefined);
+        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+      }
+      if (rowData.asana_category === "Standing") {
+        let t1 = await TransitionEndStanding(
+          null,
+          null,
+          rowData.nobreak_asana,
+          null,
+          rowData,
+          rowData.drm_video,
+          transitions
+        );
+        t1 = t1.filter((element) => element !== undefined);
+        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+      }
+      if (rowData.asana_category === "Supine") {
+        let t1 = await TransitionEndSupine(
+          null,
+          null,
+          rowData.nobreak_asana,
+          null,
+          rowData,
+          rowData.drm_video,
+          transitions
+        );
+        t1 = t1.filter((element) => element !== undefined);
+        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+      }
+      if (rowData.asana_category === "Prone") {
+        let t1 = await TransitionEndProne(
+          null,
+          null,
+          rowData.nobreak_asana,
+          null,
+          rowData,
+          rowData.drm_video,
+          transitions
+        );
+        t1 = t1.filter((element) => element !== undefined);
+        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+      }
+      if (rowData.asana_category === "Special") {
+        let t1 = await TransitionEndSpecial(
+          null,
+          null,
+          rowData.nobreak_asana,
+          null,
+          rowData,
+          rowData.drm_video,
+          transitions
+        );
+        t1 = t1.filter((element) => element !== undefined);
+        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+      }
+      if (rowData.asana_category === "Suryanamaskara Stithi") {
+        let t1 = await TransitionEndSuryanamaskaraStithi(
+          null,
+          null,
+          rowData.nobreak_asana,
+          null,
+          rowData,
+          rowData.drm_video,
+          transitions
+        );
+        t1 = t1.filter((element) => element !== undefined);
+        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+      }
+      if (rowData.asana_category === "Suryanamaskara Non Stithi") {
+        let t1 = await TransitionEndSuryanamaskaraNonStithi(
+          null,
+          null,
+          rowData.nobreak_asana,
+          null,
+          rowData,
+          rowData.drm_video,
+          transitions
+        );
+        t1 = t1.filter((element) => element !== undefined);
+        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+      }
+      if (rowData.asana_category === "Vajrasana") {
+        let t1 = await TransitionEndVajrasana(
+          null,
+          null,
+          rowData.nobreak_asana,
+          null,
+          rowData,
+          rowData.drm_video,
+          transitions
+        );
+        console.log(t1);
+        t1 = t1.filter((element) => element !== undefined);
+        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+      }
     } else {
       const lastId = playlistCurrent[playlistCurrent.length - 1];
       if (Number.isInteger(lastId)) {
@@ -177,7 +343,163 @@ function RegisterPlaylistForm() {
               rowData.drm_video,
               transitions
             );
+            t1 = t1.filter((element) => element !== undefined);
+            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+          }
+          if (rowData.asana_category === "Closing Prayer Sitting") {
+            let t1 = await TransitionEndClosingPrayerSitting(
+              prevAsana.asana_category,
+              prevAsana.nobreak_asana,
+              rowData.nobreak_asana,
+              prevAsana,
+              rowData,
+              rowData.drm_video,
+              transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+          }
+          if (rowData.asana_category === "Closing Prayer Standing") {
+            let t1 = await TransitionEndClosingPrayerStanding(
+              prevAsana.asana_category,
+              prevAsana.nobreak_asana,
+              rowData.nobreak_asana,
+              prevAsana,
+              rowData,
+              rowData.drm_video,
+              transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+          }
+          if (rowData.asana_category === "Starting Prayer Standing") {
+            let t1 = await TransitionEndStartingPrayerStanding(
+              prevAsana.asana_category,
+              prevAsana.nobreak_asana,
+              rowData.nobreak_asana,
+              prevAsana,
+              rowData,
+              rowData.drm_video,
+              transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+          }
+          if (rowData.asana_category === "Starting Prayer Sitting") {
+            let t1 = await TransitionEndStartingPrayerSitting(
+              prevAsana.asana_category,
+              prevAsana.nobreak_asana,
+              rowData.nobreak_asana,
+              prevAsana,
+              rowData,
+              rowData.drm_video,
+              transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+          }
+          if (rowData.asana_category === "Pranayama Prayer") {
+            let t1 = await TransitionEndPranayamaPrayer(
+              prevAsana.asana_category,
+              prevAsana.nobreak_asana,
+              rowData.nobreak_asana,
+              prevAsana,
+              rowData,
+              rowData.drm_video,
+              transitions
+            );
             console.log(t1);
+            t1 = t1.filter((element) => element !== undefined);
+            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+          }
+          if (rowData.asana_category === "Standing") {
+            let t1 = await TransitionEndStanding(
+              prevAsana.asana_category,
+              prevAsana.nobreak_asana,
+              rowData.nobreak_asana,
+              prevAsana,
+              rowData,
+              rowData.drm_video,
+              transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+          }
+          if (rowData.asana_category === "Supine") {
+            let t1 = await TransitionEndSupine(
+              prevAsana.asana_category,
+              prevAsana.nobreak_asana,
+              rowData.nobreak_asana,
+              prevAsana,
+              rowData,
+              rowData.drm_video,
+              transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+          }
+          if (rowData.asana_category === "Prone") {
+            let t1 = await TransitionEndProne(
+              prevAsana.asana_category,
+              prevAsana.nobreak_asana,
+              rowData.nobreak_asana,
+              prevAsana,
+              rowData,
+              rowData.drm_video,
+              transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+          }
+          if (rowData.asana_category === "Special") {
+            let t1 = await TransitionEndSpecial(
+              prevAsana.asana_category,
+              prevAsana.nobreak_asana,
+              rowData.nobreak_asana,
+              prevAsana,
+              rowData,
+              rowData.drm_video,
+              transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+          }
+          if (rowData.asana_category === "Suryanamaskara Stithi") {
+            let t1 = await TransitionEndSuryanamaskaraStithi(
+              prevAsana.asana_category,
+              prevAsana.nobreak_asana,
+              rowData.nobreak_asana,
+              prevAsana,
+              rowData,
+              rowData.drm_video,
+              transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+          }
+          if (rowData.asana_category === "Suryanamaskara Non Stithi") {
+            let t1 = await TransitionEndSuryanamaskaraNonStithi(
+              prevAsana.asana_category,
+              prevAsana.nobreak_asana,
+              rowData.nobreak_asana,
+              prevAsana,
+              rowData,
+              rowData.drm_video,
+              transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+          }
+          if (rowData.asana_category === "Vajrasana") {
+            let t1 = await TransitionEndVajrasana(
+              prevAsana.asana_category,
+              prevAsana.nobreak_asana,
+              rowData.nobreak_asana,
+              prevAsana,
+              rowData,
+              rowData.drm_video,
+              transitions
+            );
             t1 = t1.filter((element) => element !== undefined);
             setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
           }
