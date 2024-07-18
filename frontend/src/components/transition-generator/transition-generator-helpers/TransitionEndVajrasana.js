@@ -39,7 +39,7 @@ export const TransitionEndVajrasana = async (
   };
 
   if (!start_category) {
-    if (break_status_end) {
+    if (break_status_end === "No Break") {
       let res = handleTransition([
         "Feet Apart Hands Back Sitting Transition",
         "Sitting To Vajra Transition",
