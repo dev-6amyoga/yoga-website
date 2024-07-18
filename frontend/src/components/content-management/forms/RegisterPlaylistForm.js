@@ -1,15 +1,3 @@
-// import {
-//   Button,
-//   Card,
-//   Collapse,
-//   Divider,
-//   Input,
-//   Modal,
-//   Spacer,
-//   Table,
-//   Text,
-//   Toggle,
-// } from "@geist-ui/core";
 import {
   Card,
   Divider,
@@ -46,11 +34,12 @@ import { TransitionEndStanding } from "../../transition-generator/transition-gen
 import { TransitionEndSitting } from "../../transition-generator/transition-generator-helpers/TransitionEndSitting";
 import { TransitionEndSupine } from "../../transition-generator/transition-generator-helpers/TransitionEndSupine";
 import { TransitionEndProne } from "../../transition-generator/transition-generator-helpers/TransitionEndProne";
+import { TransitionEndPranayama } from "../../transition-generator/transition-generator-helpers/TransitionEndPranayama";
+
 function RegisterPlaylistForm() {
   const navigate = useNavigate();
   const [asanas, setAsanas] = useState([]);
   const [transitions, setTransitions] = useState([]);
-
   const predefinedOrder = [
     "Starting Prayer Standing",
     "Surynamaskara Non Stithi",
@@ -106,14 +95,34 @@ function RegisterPlaylistForm() {
 
   const [playlistCurrent, setPlaylistCurrent] = useState([]);
 
-  const addToPlaylist = async (rowData) => {
-    toast(rowData.asana_name);
+  const fetchAsanaById = async (id) => {
+    try {
+      const response = await Fetch({
+        url: "/content/get-asana-by-id",
+        method: "POST",
+        data: {
+          asana_id: id,
+        },
+      });
+      if (response.status === 200) {
+        return response.data;
+      } else {
+        return null;
+      }
+    } catch (err) {
+      return null;
+    }
+  };
 
+  useEffect(() => {
+    console.log(playlistCurrent, "is p");
+  }, [playlistCurrent]);
+
+  const addToPlaylist = async (rowData) => {
+    console.log(playlistCurrent.length);
     if (playlistCurrent.length === 0) {
-      // transitionGenerator(null, rowData);
-      // toast(rowData.asana_category);
       if (rowData.asana_category === "Sitting") {
-        let t1 = TransitionEndSitting(
+        let t1 = await TransitionEndSitting(
           null,
           null,
           rowData.nobreak_asana,
@@ -122,14 +131,61 @@ function RegisterPlaylistForm() {
           rowData.drm_video,
           transitions
         );
-        console.log(t1);
+        t1 = t1.filter((element) => element !== undefined);
+        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+      }
+      if (rowData.asana_category === "Pranayama") {
+        let t1 = await TransitionEndPranayama(
+          null,
+          null,
+          rowData.nobreak_asana,
+          null,
+          rowData,
+          rowData.drm_video,
+          transitions
+        );
+        t1 = t1.filter((element) => element !== undefined);
+        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
       }
     } else {
       const lastId = playlistCurrent[playlistCurrent.length - 1];
-      transitionGenerator(lastId, rowData);
+      if (Number.isInteger(lastId)) {
+        let prevAsana = await fetchAsanaById(lastId);
+        console.log(prevAsana);
+        if (prevAsana) {
+          if (rowData.asana_category === "Sitting") {
+            let t1 = await TransitionEndSitting(
+              prevAsana.asana_category,
+              prevAsana.nobreak_asana,
+              rowData.nobreak_asana,
+              prevAsana,
+              rowData,
+              rowData.drm_video,
+              transitions
+            );
+            console.log(t1);
+            t1 = t1.filter((element) => element !== undefined);
+            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+          }
+          if (rowData.asana_category === "Pranayama") {
+            let t1 = await TransitionEndPranayama(
+              prevAsana.asana_category,
+              prevAsana.nobreak_asana,
+              rowData.nobreak_asana,
+              prevAsana,
+              rowData,
+              rowData.drm_video,
+              transitions
+            );
+            console.log(t1);
+            t1 = t1.filter((element) => element !== undefined);
+            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+          }
+        }
+      } else {
+        toast("Last ID is not an integer");
+      }
     }
-
-    setPlaylistCurrent([...playlistCurrent, rowData.id]);
   };
 
   const handleSubmit = async (e) => {
