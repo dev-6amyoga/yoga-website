@@ -1,20 +1,29 @@
+const getUniqueTransition = (transition_1) => {
+  let highestTransition_1;
+  if (transition_1.length > 0) {
+    highestTransition_1 = transition_1.reduce((max, current) => {
+      const maxId = parseInt(max.transition_id.split("_")[1]);
+      const currentId = parseInt(current.transition_id.split("_")[1]);
+      return currentId > maxId ? current : max;
+    });
+  } else {
+    highestTransition_1 = transition_1;
+  }
+  return highestTransition_1;
+};
+
 export const TransitionEndVajrasana = async (
   start_category,
   break_status_start,
   break_status_end,
   start_video,
   end_video,
-  drm_status
+  drm_status,
+  transitions
 ) => {
-  if (!start_category) {
-    // first video
-  }
-
   const filteredTransitions_all = transitions.filter(
     (transition) =>
       transition.drm_transition === drm_status &&
-      transition.asana_category_start === start_category &&
-      transition.asana_category_end === "Vajrasana" &&
       transition.teacher_mode === end_video.teacher_mode
   );
 
@@ -22,12 +31,33 @@ export const TransitionEndVajrasana = async (
     return transitions
       .map((transition) => {
         const filtered = filteredTransitions_all.filter(
-          (transitions) => transitions.transi === transition
+          (transitions) => transitions.transition_video_name === transition
         );
         return getUniqueTransition(filtered);
       })
       .filter(Boolean);
   };
+
+  if (!start_category) {
+    if (break_status_end) {
+      let res = handleTransition([
+        "Feet Apart Hands Back Sitting Transition",
+        "Sitting To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    } else {
+      let res = handleTransition([
+        "Feet Apart Hands Back Sitting Transition",
+        "Sitting To Vajra Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
+  }
 
   if (start_category === "Closing Prayer Sitting") {
     if (break_status_end === "Break") {

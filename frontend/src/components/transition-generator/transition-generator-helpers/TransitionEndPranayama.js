@@ -240,14 +240,24 @@ export const TransitionEndPranayama = async (
   };
 
   if (start_category === "Closing Prayer Sitting") {
+    const filteredTransitions = transitions.filter(
+      (transition) =>
+        transition.drm_transition === drm_status &&
+        transition.asana_category_end === "Pranayama" &&
+        transition.teacher_mode === end_video.teacher_mode
+    );
+    let pending_2 = pranayamaFinder(end_video, filteredTransitions);
     if (start_video.namaskara_end === true) {
       let pending_1 = handleTransition(["Prayer Sitting Namaskara Unlock"]);
-      let pending_2 = pranayamaFinder(end_video);
-      console.log(pending_1, pending_2);
+      let new_res = [...pending_2, ...pending_1];
+      new_res = new_res.filter((element) => element !== undefined);
+      new_res = new_res.map((transition) => transition.transition_id);
+      return new_res;
     } else {
-      let pending_2 = pranayamaFinder(end_video);
-      console.log(pending_2);
-      //   return [];
+      let new_res = [...pending_2];
+      new_res = new_res.filter((element) => element !== undefined);
+      new_res = new_res.map((transition) => transition.transition_id);
+      return new_res;
     }
   }
 

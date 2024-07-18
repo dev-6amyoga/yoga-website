@@ -60,7 +60,6 @@ export const TransitionEndSitting = async (
   const filteredTransitions_all = transitions.filter(
     (transition) =>
       transition.drm_transition === drm_status &&
-      transition.asana_category_start === start_category &&
       transition.asana_category_end === "Sitting" &&
       transition.teacher_mode === end_video.teacher_mode
   );
