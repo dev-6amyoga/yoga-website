@@ -9,127 +9,185 @@ export const TransitionEndSuryanamaskaraStithi = async (
   if (!start_category) {
     // first video
   }
+
+  const filteredTransitions_all = transitions.filter(
+    (transition) =>
+      transition.drm_transition === drm_status &&
+      transition.asana_category_start === start_category &&
+      transition.asana_category_end === "Suryanamaskara Stithi" &&
+      transition.teacher_mode === end_video.teacher_mode
+  );
+
+  const handleTransition = (names) => {
+    return names
+      .map((name) => {
+        const filtered = filteredTransitions_all.filter(
+          (transition) => transition.transition_name === name
+        );
+        return getUniqueTransition(filtered);
+      })
+      .filter(Boolean);
+  };
+
   if (start_category === "Closing Prayer Sitting") {
     if (start_video.namaskara_end === true) {
-      //Prayer Sitting Namaskara Unlock
-      //Pranayama Unlock Legs
-      // Sitting To Standing Transition
-      //Suryanamaskara Preparation And Mantra Stithi Type
+      return handleTransition([
+        "Prayer Sitting Namaskara Unlock",
+        "Pranayama Unlock Legs",
+        "Sitting To Standing Transition",
+        "Suryanamaskara Preparation And Mantra Stithi Type",
+      ]);
     } else {
-      //Pranayama Unlock Legs
-      //Sitting To Standing Transition
-      // Suryanamaskara Preparation And Mantra Stithi Type
+      return handleTransition([
+        "Pranayama Unlock Legs",
+        "Sitting To Standing Transition",
+        "Suryanamaskara Preparation And Mantra Stithi Type",
+      ]);
     }
   }
 
   if (start_category === "Closing Prayer Standing") {
-    // Prayer End Standing
-    // Suryanamaskara Preparation And Mantra Stithi Type
+    return handleTransition([
+      "Prayer End Standing",
+      "Suryanamaskara Preparation And Mantra Stithi Type",
+    ]);
   }
 
   if (start_category === "Starting Prayer Sitting") {
-    //Pranayama Inhale Hands Up Exhale Down
-    //Pranayama Unlock Legs
-    //Sitting To Standing Transition
-    //Suryanamaskara Preparation And Mantra Stithi Type
+    return handleTransition([
+      "Pranayama Inhale Hands Up Exhale Down",
+      "Pranayama Unlock Legs",
+      "Sitting To Standing Transition",
+      "Suryanamaskara Preparation And Mantra Stithi Type",
+    ]);
   }
 
   if (start_category === "Starting Prayer Standing") {
-    //Prayer End Standing
-    //Suryanamaskara Preparation And Mantra Stithi Type
+    return handleTransition([
+      "Prayer End Standing",
+      "Suryanamaskara Preparation And Mantra Stithi Type",
+    ]);
   }
 
   if (start_category === "Suryanamaskara Stithi") {
-    // nothing
+    return [];
   }
 
   if (start_category === "Suryanamaskara Non Stithi") {
-    // Suryanamaskara Non AI Non Stithi Suffix
-    // Suryanamaskara Preparation And Mantra Stithi Type
+    return handleTransition([
+      "Suryanamaskara Non AI Non Stithi Suffix",
+      "Suryanamaskara Preparation And Mantra Stithi Type",
+    ]);
   }
 
   if (start_category === "Standing") {
     if (break_status_start === "Break") {
-      // Suryanamaskara Preparation And Mantra Stithi Type
+      return handleTransition([
+        "Suryanamaskara Preparation And Mantra Stithi Type",
+      ]);
     }
 
     if (break_status_start === "No Break") {
-      //Feet Apart Hands Loose Standing Transition Front
-      // Suryanamaskara Preparation And Mantra Stithi Type
+      return handleTransition([
+        "Feet Apart Hands Loose Standing Transition Front",
+        "Suryanamaskara Preparation And Mantra Stithi Type",
+      ]);
     }
   }
 
   if (start_category === "Sitting") {
     if (break_status_start === "Break") {
-      // Sitting To Standing Transition
-      // Suryanamaskara Preparation And Mantra Stithi Type
+      return handleTransition([
+        "Sitting To Standing Transition",
+        "Suryanamaskara Preparation And Mantra Stithi Type",
+      ]);
     }
     if (break_status_start === "No Break") {
-      //Feet Apart Hands Back Sitting Transition
-      // Sitting To Standing Transition
-      // Suryanamaskara Preparation And Mantra Stithi Type
+      return handleTransition([
+        "Feet Apart Hands Back Sitting Transition",
+        "Sitting To Standing Transition",
+        "Suryanamaskara Preparation And Mantra Stithi Type",
+      ]);
     }
   }
 
   if (start_category === "Supine") {
     if (break_status_start === "Break") {
-      //Supine To Standing Transition
-      //Turn Mat Side To Front Standing Transition
-      //Suryanamaskara Preparation And Mantra Stithi Type
+      return handleTransition([
+        "Supine To Standing Transition",
+        "Turn Mat Side To Front Standing Transition",
+        "Suryanamaskara Preparation And Mantra Stithi Type",
+      ]);
     }
 
     if (break_status_start === "No Break") {
-      //Arms Down Feet Apart Supine Transition
-      //Supine To Standing Transition
-      //Turn Mat Side To Front Standing Transition
-      // Suryanamaskara Preparation And Mantra Stithi Type
+      return handleTransition([
+        "Arms Down Feet Apart Supine Transition",
+        "Supine To Standing Transition",
+        "Turn Mat Side To Front Standing Transition",
+        "Suryanamaskara Preparation And Mantra Stithi Type",
+      ]);
     }
   }
 
   if (start_category === "Prone") {
     if (break_status_start === "Break") {
-      //Prone To Standing Transition
-      //Turn Mat Side To Front Standing Transition
-      //Suryanamaskara Preparation And Mantra Stithi Type
+      return handleTransition([
+        "Prone To Standing Transition",
+        "Turn Mat Side To Front Standing Transition",
+        "Suryanamaskara Preparation And Mantra Stithi Type",
+      ]);
     }
 
     if (break_status_start === "No Break") {
-      //Fold Hands Feet Apart Prone Transition
-      //Prone To Standing Transition
-      //Turn Mat Side To Front Standing Transition
-      //Suryanamaskara Preparation And Mantra Stithi Type
+      return handleTransition([
+        "Fold Hands Feet Apart Prone Transition",
+        "Prone To Standing Transition",
+        "Turn Mat Side To Front Standing Transition",
+        "Suryanamaskara Preparation And Mantra Stithi Type",
+      ]);
     }
   }
 
   if (start_category === "Vajrasana") {
     if (break_status_start === "Break") {
-      // Vajra To Standing Transition
-      //Suryanamaskara Preparation And Mantra Stithi Type
+      return handleTransition([
+        "Vajra To Standing Transition",
+        "Suryanamaskara Preparation And Mantra Stithi Type",
+      ]);
     }
     if (break_status_start === "No Break") {
-      // Vajrasana Dyanmudra To Relax Position
-      // Vajra To Standing Transition
-      //Suryanamaskara Preparation And Mantra Stithi Type
+      return handleTransition([
+        "Vajrasana Dyanmudra To Relax Position",
+        "Vajra To Standing Transition",
+        "Suryanamaskara Preparation And Mantra Stithi Type",
+      ]);
     }
   }
 
   if (start_category === "Pranayama") {
     if (break_status_end === "Break") {
+      return handleTransition([]);
     }
 
     if (break_status_end === "No Break") {
+      return handleTransition([]);
     }
   }
 
   if (start_category === "Pranayama Prayer") {
-    //Pranayama Inhale Hands Up Exhale Down
-    //Pranayama Unlock Legs
-    //Sitting To Standing Transition
-    // Suryanamaskara Preparation And Mantra Stithi Type
+    return handleTransition([
+      "Pranayama Inhale Hands Up Exhale Down",
+      "Pranayama Unlock Legs",
+      "Sitting To Standing Transition",
+      "Suryanamaskara Preparation And Mantra Stithi Type",
+    ]);
   }
 
   if (start_category === "Special") {
-    //Feet Apart Hands Loose Standing Transition Front
-    // Suryanamaskara Preparation And Mantra Stithi Type
+    return handleTransition([
+      "Feet Apart Hands Loose Standing Transition Front",
+      "Suryanamaskara Preparation And Mantra Stithi Type",
+    ]);
   }
 };

@@ -9,220 +9,306 @@ export const TransitionEndVajrasana = async (
   if (!start_category) {
     // first video
   }
+
+  const filteredTransitions_all = transitions.filter(
+    (transition) =>
+      transition.drm_transition === drm_status &&
+      transition.asana_category_start === start_category &&
+      transition.asana_category_end === "Vajrasana" &&
+      transition.teacher_mode === end_video.teacher_mode
+  );
+
+  const handleTransition = (transitions) => {
+    return transitions
+      .map((transition) => {
+        const filtered = filteredTransitions_all.filter(
+          (transitions) => transitions.transi === transition
+        );
+        return getUniqueTransition(filtered);
+      })
+      .filter(Boolean);
+  };
+
   if (start_category === "Closing Prayer Sitting") {
     if (break_status_end === "Break") {
       if (start_video.namaskara_end === true) {
-        //Prayer Sitting Namaskara Unlock
-        //Pranayama Unlock Legs
-        // Sitting To Vajra Transition
+        return handleTransition([
+          "Prayer Sitting Namaskara Unlock",
+          "Pranayama Unlock Legs",
+          "Sitting To Vajra Transition",
+        ]);
       } else {
-        //Pranayama Unlock Legs
-        // Sitting To Vajra Transition
+        return handleTransition([
+          "Pranayama Unlock Legs",
+          "Sitting To Vajra Transition",
+        ]);
       }
     }
     if (break_status_end === "No Break") {
       if (start_video.namaskara_end === true) {
-        //Prayer Sitting Namaskara Unlock
-        //Pranayama Unlock Legs
-        //Sitting To Vajra Transition
-        //Vajrasana Relax To Dyanmudra Position
+        return handleTransition([
+          "Prayer Sitting Namaskara Unlock",
+          "Pranayama Unlock Legs",
+          "Sitting To Vajra Transition",
+          "Vajrasana Relax To Dyanmudra Position",
+        ]);
       } else {
-        //Pranayama Unlock Legs
-        //Sitting To Vajra Transition
-        //Vajrasana Relax To Dyanmudra Position
+        return handleTransition([
+          "Pranayama Unlock Legs",
+          "Sitting To Vajra Transition",
+          "Vajrasana Relax To Dyanmudra Position",
+        ]);
       }
     }
   }
 
   if (start_category === "Closing Prayer Standing") {
     if (break_status_end === "Break") {
-      // Prayer End Standing
-      //Standing To Vajra Transition
+      return handleTransition([
+        "Prayer End Standing",
+        "Standing To Vajra Transition",
+      ]);
     }
     if (break_status_end === "No Break") {
-      // Prayer End Standing
-      //Standing To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Prayer End Standing",
+        "Standing To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
   }
 
   if (start_category === "Starting Prayer Sitting") {
     if (break_status_end === "Break") {
-      //Prayer Sitting Namaskara Unlock
-      //Pranayama Unlock Legs
-      //Sitting To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Prayer Sitting Namaskara Unlock",
+        "Pranayama Unlock Legs",
+        "Sitting To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
     if (break_status_end === "No Break") {
-      //Prayer Sitting Namaskara Unlock
-      //Pranayama Unlock Legs
-      //Sitting To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Prayer Sitting Namaskara Unlock",
+        "Pranayama Unlock Legs",
+        "Sitting To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
   }
 
   if (start_category === "Starting Prayer Standing") {
     if (break_status_end === "Break") {
-      // Prayer End Standing
-      //Standing To Vajra Transition
+      return handleTransition([
+        "Prayer End Standing",
+        "Standing To Vajra Transition",
+      ]);
     }
     if (break_status_end === "No Break") {
-      // Prayer End Standing
-      //Standing To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Prayer End Standing",
+        "Standing To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
   }
 
   if (start_category === "Suryanamaskara Stithi") {
     if (break_status_end === "Break") {
-      //Feet Apart Hands Loose Standing Transition Front
-      //Standing To Vajra Transition
+      return handleTransition([
+        "Feet Apart Hands Loose Standing Transition Front",
+        "Standing To Vajra Transition",
+      ]);
     }
 
     if (break_status_end === "No Break") {
-      //Feet Apart Hands Loose Standing Transition Front
-      //Sitting To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Feet Apart Hands Loose Standing Transition Front",
+        "Sitting To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
   }
 
   if (start_category === "Suryanamaskara Non Stithi") {
     if (break_status_end === "Break") {
-      //Suryanamaskara Non AI Non Stithi Suffix
-      //Standing To Vajra Transition
+      return handleTransition([
+        "Suryanamaskara Non AI Non Stithi Suffix",
+        "Standing To Vajra Transition",
+      ]);
     }
 
     if (break_status_end === "No Break") {
-      //Suryanamaskara Non AI Non Stithi Suffix
-      //Sitting To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Suryanamaskara Non AI Non Stithi Suffix",
+        "Sitting To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
   }
 
   if (start_category === "Standing") {
     if (break_status_start === "Break" && break_status_end === "Break") {
-      //Standing To Vajra Transition
+      return handleTransition(["Standing To Vajra Transition"]);
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
-      //Standing To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Standing To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
-      //Feet Apart Hands Loose Standing Transition Front
-      //Standing To Vajra Transition
+      return handleTransition([
+        "Feet Apart Hands Loose Standing Transition Front",
+        "Standing To Vajra Transition",
+      ]);
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
-      //Feet Apart Hands Loose Standing Transition Front
-      //Standing To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Feet Apart Hands Loose Standing Transition Front",
+        "Standing To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
   }
 
   if (start_category === "Sitting") {
     if (break_status_start === "Break" && break_status_end === "Break") {
-      //Sitting To Vajra Transition
+      return handleTransition(["Sitting To Vajra Transition"]);
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
-      //Sitting To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Sitting To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
-      //Feet Apart Hands Back Sitting Transition
-      //Sitting To Vajra Transition
+      return handleTransition([
+        "Feet Apart Hands Back Sitting Transition",
+        "Sitting To Vajra Transition",
+      ]);
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
-      //Feet Apart Hands Back Sitting Transition
-      //Sitting To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Feet Apart Hands Back Sitting Transition",
+        "Sitting To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
   }
 
   if (start_category === "Supine") {
     if (break_status_start === "Break" && break_status_end === "Break") {
-      //Supine To Vajra Transition
+      return handleTransition(["Supine To Vajra Transition"]);
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
-      //Supine To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Supine To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
-      //Arms Down Feet Apart Supine Transition
-      //Supine To Vajra Transition
+      return handleTransition([
+        "Arms Down Feet Apart Supine Transition",
+        "Supine To Vajra Transition",
+      ]);
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
-      //Arms Down Feet Apart Supine Transition
-      //Supine To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Arms Down Feet Apart Supine Transition",
+        "Supine To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
   }
 
   if (start_category === "Prone") {
     if (break_status_start === "Break" && break_status_end === "Break") {
-      //Prone To Vajra Transition
+      return handleTransition(["Prone To Vajra Transition"]);
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
-      //Prone To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Prone To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
-      //Fold Hands Feet Apart Prone Transition
-      //Prone To Vajra Transition
+      return handleTransition([
+        "Fold Hands Feet Apart Prone Transition",
+        "Prone To Vajra Transition",
+      ]);
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
-      //Fold Hands Feet Apart Prone Transition
-      //Prone To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Fold Hands Feet Apart Prone Transition",
+        "Prone To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
   }
 
   if (start_category === "Vajrasana") {
     if (break_status_start === "Break" && break_status_end === "Break") {
-      // nothing
+      // Handle this case if needed
+      return [];
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
-      // Vajrasana Relax To Dyanmudra Position
+      return handleTransition(["Vajrasana Relax To Dyanmudra Position"]);
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
-      // Vajrasana Dyanmudra To Relax Position
+      return handleTransition(["Vajrasana Dyanmudra To Relax Position"]);
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
-      // nothing
+      // Handle this case if needed
+      return [];
     }
   }
 
   if (start_category === "Pranayama") {
     if (break_status_end === "Break") {
+      // Handle Break state for Pranayama if needed
+      return [];
     }
 
     if (break_status_end === "No Break") {
+      // Handle No Break state for Pranayama if needed
+      return [];
     }
   }
 
   if (start_category === "Pranayama Prayer") {
     if (break_status_end === "Break") {
-      //Pranayama Inhale Hands Up Exhale Down
-      //Pranayama Unlock Legs
-      //Sitting To Vajra Transition
+      return handleTransition([
+        "Pranayama Inhale Hands Up Exhale Down",
+        "Pranayama Unlock Legs",
+        "Sitting To Vajra Transition",
+      ]);
     }
 
     if (break_status_end === "No Break") {
-      //Pranayama Inhale Hands Up Exhale Down
-      //Pranayama Unlock Legs
-      //Sitting To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Pranayama Inhale Hands Up Exhale Down",
+        "Pranayama Unlock Legs",
+        "Sitting To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
   }
 
   if (start_category === "Special") {
     if (break_status_end === "Break") {
-      //Feet Apart Hands Back Sitting Transition
-      //Sitting To Vajra Transition
+      return handleTransition([
+        "Feet Apart Hands Back Sitting Transition",
+        "Sitting To Vajra Transition",
+      ]);
     }
 
     if (break_status_end === "No Break") {
-      //Feet Apart Hands Back Sitting Transition
-      //Sitting To Vajra Transition
-      //Vajrasana Relax To Dyanmudra Position
+      return handleTransition([
+        "Feet Apart Hands Back Sitting Transition",
+        "Sitting To Vajra Transition",
+        "Vajrasana Relax To Dyanmudra Position",
+      ]);
     }
   }
 };
