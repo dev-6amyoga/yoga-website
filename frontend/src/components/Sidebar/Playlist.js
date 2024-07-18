@@ -541,10 +541,10 @@ function Playlist({ page }) {
 		}
 	}, [user_id, currentInstituteId, page, userPlan]);
 
-	const handleAddToQueue = (playlist) => {
+	const handleAddToQueue = (playlist, playlist_type) => {
 		// clearQueue();
 		if (playlist?.playlist_dash_url) {
-			console.log("Adding playlist to queue");
+			console.log("Adding playlist to queue", playlist);
 			addToQueue([playlist]);
 		} else {
 			// addToQueue()

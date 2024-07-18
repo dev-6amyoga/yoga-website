@@ -38,7 +38,7 @@ const useWatchHistoryStore = create((set, get) => ({
 		});
 	},
 	updateWatchTimeBuffer: (wh) => {
-		console.log(get());
+		// console.log(get());
 		const timedelta = wh.currentTime - get().committedTs;
 		// console.log({ timedelta });
 
@@ -76,7 +76,7 @@ const useWatchHistoryStore = create((set, get) => ({
 		});
 	},
 
-	flushWatchTimeBuffer: async (user_id) => {
+	flushWatchTimeBuffer: async (user_id, playlist_id = null) => {
 		const watch_time_logs = get().watchTimeBuffer;
 
 		// console.log({ watch_time_logs });
@@ -92,6 +92,7 @@ const useWatchHistoryStore = create((set, get) => ({
 				user_id: user_id,
 				watch_time_logs,
 				institute_id: null,
+				playlist_id,
 			},
 		})
 			.then((res) => {

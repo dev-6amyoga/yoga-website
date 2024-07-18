@@ -54,6 +54,65 @@ const GetCurrentUserPlan = async (user_id, insitute_id) => {
 	}
 };
 
+const GetCurrentCustomUserPlans = async (user_id) => {
+	let custom_user_plans = null,
+		error = null;
+
+	const mt = await mongoose.startSession();
+
+	mt.startTransaction();
+
+	try {
+		let custom_user_plans = await CustomUserPlan.aggregate(
+			[
+				{
+					$match: {
+						user_id,
+						current_status: USER_PLAN_ACTIVE,
+					},
+				},
+				{
+					$lookup: {
+						from: "custom_plan",
+						localField: "custom_plan_id",
+						foreignField: "_id",
+						as: "plan",
+						pipeline: [
+							{
+								$project: {
+									prices: 0,
+									students: 0,
+									institutes: 0,
+								},
+							},
+						],
+					},
+				},
+				{
+					$unwind: "$plan",
+				},
+			],
+			{ session: mt }
+		);
+
+		if (!custom_user_plans) {
+			await mt.abortTransaction();
+			error = "User does not have a custom plan";
+			return [null, error];
+		}
+
+		// let plans = custom_user_plans.map(plan => {
+		// 	return plan.toJson()
+		// })
+
+		await mt.commitTransaction();
+		return [custom_user_plans, error];
+	} catch (err) {
+		await mt.abortTransaction();
+		return [null, err];
+	}
+};
+
 const UpdateUserPlanStatus = async (
 	user_id,
 	institute_id,
@@ -98,14 +157,14 @@ const UpdateUserPlanStatus = async (
 
 		if (activePlan) {
 			// check if plan is to be expired by date;
-			if (activePlan.get("validity_to") < now) {
+			if (new Date(activePlan.get("validity_to")) < now) {
 				activePlan.set("current_status", USER_PLAN_EXPIRED_BY_DATE);
 				await activePlan.save({ transaction: t });
 				expired = true;
 			}
 
 			// check if plan is to be expired by usage;
-			const watchTimeQuota = await WatchTimeQuota.find(
+			const watchTimeQuota = await WatchTimeQuota.findOne(
 				{
 					user_plan_id: String(activePlan.get("user_plan_id")),
 				},
@@ -113,7 +172,18 @@ const UpdateUserPlanStatus = async (
 				{ session: mt }
 			);
 
-			if (watchTimeQuota.quota < 0) {
+			if (watchTimeQuota === null || watchTimeQuota === undefined) {
+				if (transaction === null) {
+					await t.rollback();
+				}
+
+				if (mongo_session === null) {
+					await mt.abortTransaction();
+				}
+				return [null, "Failed to get watch time quota"];
+			}
+
+			if (watchTimeQuota.quota <= 0) {
 				activePlan.set("current_status", USER_PLAN_EXPIRED_BY_USAGE);
 				await activePlan.save({ transaction: t });
 				expired = true;
@@ -267,13 +337,35 @@ const UpdateUserPlanStatus = async (
 							session: mt,
 						}
 					);
+
+					if (x[0] === 0) {
+						if (transaction === null) {
+							await t.rollback();
+						}
+
+						if (mongo_session === null) {
+							await mt.abortTransaction();
+						}
+						return [null, "Failed to update custom user plan"];
+					}
 				}
 
 				// check if plan is to be expired by usage;
 
-				const watchTimeQuota = await WatchTimeQuota.find({
-					user_plan_id: String(customUserPlan._id),
+				const watchTimeQuota = await WatchTimeQuota.findOne({
+					user_plan_id: customUserPlan._id.toString(),
 				});
+
+				if (watchTimeQuota === null || watchTimeQuota === undefined) {
+					if (transaction === null) {
+						await t.rollback();
+					}
+
+					if (mongo_session === null) {
+						await mt.abortTransaction();
+					}
+					return [null, "Failed to get watch time quota"];
+				}
 
 				if (watchTimeQuota.quota <= 0) {
 					// set status to expired
@@ -292,20 +384,42 @@ const UpdateUserPlanStatus = async (
 							session: mt,
 						}
 					);
+
+					if (x[0] === 0) {
+						if (transaction === null) {
+							await t.rollback();
+						}
+
+						if (mongo_session === null) {
+							await mt.abortTransaction();
+						}
+						return [null, "Failed to update custom user plan"];
+					}
 				}
 
 				// if plan is expired, promote staged to active
 
-				const filter = {
-					user_id,
-					custom_plan_id: mongoose.Schema.Types.ObjectId(
-						customUserPlan.custom_plan_id
-					),
-					current_status: USER_PLAN_STAGED,
-				};
+				const filter = [
+					{
+						$match: {
+							user_id,
+							custom_plan_id: customUserPlan.custom_plan_id,
+							current_status: USER_PLAN_STAGED,
+						},
+
+						$lookup: {
+							from: "custom_plan",
+							localField: "custom_plan_id",
+							foreignField: "_id",
+							as: "plan",
+						},
+
+						$unwind: "$plan",
+					},
+				];
 
 				if (customPlan) {
-					filter["purchase_date"] = {
+					filter["$match"]["purchase_date"] = {
 						$gt: mongoose.Schema.Types.Date(
 							customUserPlan.purchase_date
 						),
@@ -313,11 +427,12 @@ const UpdateUserPlanStatus = async (
 				}
 
 				// promote staged to active if any
-				const stagedCustomUserPlan = await CustomUserPlan.findOne(
+				const stagedCustomUserPlans = await CustomUserPlan.aggregate(
 					filter,
-					{},
 					{ session: mt }
 				);
+
+				const stagedCustomUserPlan = stagedCustomUserPlans[0];
 
 				stagedCustomUserPlan.set("current_status", USER_PLAN_ACTIVE);
 				stagedCustomUserPlan.set("validity_from", now.toISOString());
@@ -326,7 +441,7 @@ const UpdateUserPlanStatus = async (
 
 				validity_to.setDate(
 					validity_to.getDate() +
-						customUserPlan.custom_plan.planValidity
+						stagedCustomUserPlan.get("plan").get("planValidity")
 				);
 
 				stagedCustomUserPlan.set(
@@ -341,11 +456,17 @@ const UpdateUserPlanStatus = async (
 					[
 						{
 							user_plan_id: String(
-								stagedPlan.get("plan").get("user_plan_id")
+								stagedCustomUserPlan
+									.get("plan")
+									.get("custom_plan_id")
+									.toString()
 							),
-							quota: stagedPlan
-								.get("plan")
-								.get("watch_time_limit"),
+							quota:
+								stagedCustomUserPlan
+									.get("plan")
+									.get("watchHours") *
+								60 *
+								60,
 						},
 					],
 					{ session: mt }
@@ -384,7 +505,7 @@ const UpdateUserPlanStatus = async (
 			await mt.endSession();
 		}
 
-		return [null, null];
+		return ["success", null];
 	} catch (err) {
 		console.log(err);
 		if (transaction === null) {
@@ -412,11 +533,13 @@ const GetPlanForWatchQuotaDeduction = async (
 	const t = await sequelize.transaction();
 	const mt = mongo_transaction ?? (await mongoose.startSession());
 
-	mt.startTransaction();
+	if (!mt.inTransaction()) {
+		mt.startTransaction();
+	}
 
 	// const now = new Date();
 	try {
-		// get active user plan sorted by time
+		// USER PLANS : get active user plan sorted by time
 		const activePlans = await UserPlan.findAll({
 			where: {
 				user_id,
@@ -424,60 +547,14 @@ const GetPlanForWatchQuotaDeduction = async (
 			},
 			order: [["validity_to", "ASC"]],
 			transaction: t,
+			include: [
+				{
+					model: Plan,
+					attributes: ["plan_id", "watch_time_limit"],
+				},
+			],
 		});
 
-		// console.log(activePlans);
-
-		// get active custom plans sorted by time where playlist id is allowed
-		const activeCustomPlans = await CustomUserPlan.aggregate([
-			{
-				$match: {
-					user_id: user_id,
-					current_status: USER_PLAN_ACTIVE,
-				},
-			},
-			{
-				$lookup: {
-					from: "custom_plan",
-					localField: "custom_plan_id",
-					foreignField: "_id",
-					as: "custom_plan",
-				},
-			},
-			{
-				$unwind: {
-					path: "$custom_plan",
-					includeArrayIndex: "string",
-					preserveNullAndEmptyArrays: true,
-				},
-			},
-			{
-				$match: {
-					"custom_plan.playlists": {
-						$elemMatch: {
-							[playlist_id]: { $exists: true },
-						},
-					},
-				},
-			},
-		]);
-
-		// if no plans, return error
-		if (activePlans.length === 0 && activeCustomPlans.length === 0) {
-			if (sequelize_transaction === null) {
-				await t.rollback();
-			}
-
-			if (mongo_transaction === null) {
-				await mt.abortTransaction();
-			}
-
-			return [null, "No active plans found"];
-		}
-
-		// console.log(activePlans.length, activeCustomPlans.length);
-
-		// if active plans found, return the first one
 		if (activePlans.length > 0) {
 			if (sequelize_transaction === null) {
 				await t.commit();
@@ -490,18 +567,60 @@ const GetPlanForWatchQuotaDeduction = async (
 			return [activePlans[0].toJSON(), null];
 		}
 
-		// if active custom plans found, return the first one
-		// if (activeCustomPlans.length > 0) {
-		// 	if (sequelize_transaction === null) {
-		// 		await t.commit();
-		// 	}
+		// console.log(activePlans);
 
-		// 	if (mongo_transaction === null) {
-		// 		await mt.commitTransaction();
-		// 	}
+		// CUSTOM USER PLANS : get active custom plans sorted by time where playlist id is allowed
+		if (playlist_id) {
+			const activeCustomPlans = await CustomUserPlan.aggregate([
+				{
+					$match: {
+						user_id: user_id,
+						current_status: USER_PLAN_ACTIVE,
+					},
+				},
+				{
+					$lookup: {
+						from: "custom_plan",
+						localField: "custom_plan_id",
+						foreignField: "_id",
+						as: "plan",
+					},
+				},
+				{
+					$unwind: {
+						path: "$plan",
+						includeArrayIndex: "string",
+						preserveNullAndEmptyArrays: true,
+					},
+				},
+				{
+					$match: {
+						"custom_plan.playlists": {
+							$elemMatch: {
+								[playlist_id]: { $exists: true },
+							},
+						},
+					},
+				},
+			]);
 
-		// 	return [activeCustomPlans[0], null];
-		// }
+			console.log(activePlans.length, activeCustomPlans.length);
+
+			// if active plans found, return the first one
+
+			// if active custom plans found, return the first one
+			if (activeCustomPlans.length > 0) {
+				if (sequelize_transaction === null) {
+					await t.commit();
+				}
+
+				if (mongo_transaction === null) {
+					await mt.commitTransaction();
+				}
+
+				return [activeCustomPlans[0], null];
+			}
+		}
 
 		if (sequelize_transaction === null) {
 			await t.rollback();
@@ -511,7 +630,7 @@ const GetPlanForWatchQuotaDeduction = async (
 		}
 		return [null, "No active plans found"];
 	} catch (err) {
-		return [null, err];
+		return [null, err.message];
 	}
 };
 
@@ -519,4 +638,5 @@ module.exports = {
 	GetCurrentUserPlan,
 	UpdateUserPlanStatus,
 	GetPlanForWatchQuotaDeduction,
+	GetCurrentCustomUserPlans,
 };
