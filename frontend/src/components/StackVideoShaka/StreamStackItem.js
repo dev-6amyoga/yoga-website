@@ -657,7 +657,7 @@ function StreamStackItem({
 			console.log("Starting watch time intervals!");
 			// starting interval timer to flush watch duration buffer
 			flushTimeInterval.current = setInterval(() => {
-				flushWatchTimeBuffer(user?.user_id);
+				flushWatchTimeBuffer(user?.user_id, video?.video?.playlist_id);
 				// flushWatchTimeBufferE(user?.user_id);
 			}, 7000);
 
