@@ -418,11 +418,10 @@ const UpdateUserPlanStatus = async (
 					},
 				];
 
-				if (customPlan) {
+				if (customUserPlan) {
+					console.log(customUserPlan);
 					filter["$match"]["purchase_date"] = {
-						$gt: mongoose.Schema.Types.Date(
-							customUserPlan.purchase_date
-						),
+						$gt: customUserPlan.purchase_date,
 					};
 				}
 

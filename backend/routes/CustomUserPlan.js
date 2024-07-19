@@ -200,4 +200,46 @@ router.get("/getCustomUserPlansByUser/:user_id", async (req, res) => {
 //   }
 // });
 
+router.get("/admin-stats/users-per-plan", async (req, res) => {
+	try {
+		const pipeline = [
+			{
+				$group: {
+					_id: "$custom_plan_id",
+					count: { $sum: 1 },
+				},
+			},
+			{
+				$lookup: {
+					from: "custom_plan",
+					localField: "_id",
+					foreignField: "_id",
+					as: "plan",
+				},
+			},
+			{
+				$unwind: "$plan",
+			},
+			{
+				$project: {
+					_id: 0,
+					plan_name: "$plan.plan_name",
+					plan_id: "$plan._id",
+					"Users per Plan": "$count",
+					count: 1,
+				},
+			},
+		];
+
+		const usersPerPlan = await CustomUserPlan.aggregate(pipeline);
+
+		res.status(HTTP_OK).json({ usersPerPlan });
+	} catch (error) {
+		console.error("Error fetching user per plan:", error);
+		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+			error: "Failed to fetch user per plan",
+		});
+	}
+});
+
 module.exports = router;
