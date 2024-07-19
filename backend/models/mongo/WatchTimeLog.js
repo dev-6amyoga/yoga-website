@@ -13,6 +13,10 @@ const watchTimeLogSchema = new mongoose.Schema({
 		type: mongoose.Schema.Types.Number,
 		default: null,
 	},
+	user_plan_id: {
+		type: mongoose.Schema.Types.String,
+		default: null,
+	},
 	duration: {
 		type: mongoose.Schema.Types.Number,
 		required: true,

@@ -323,6 +323,8 @@ function LoginIndex() {
 		refetchOnWindowFocus: true,
 		refetchOnReconnect: "always",
 		refetchInterval: 1000 * 60 * 5,
+		retry: 3,
+		retryDelay: 1000 * 4,
 	});
 
 	return <></>;

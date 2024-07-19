@@ -28,6 +28,9 @@ function StudentWatchHistory() {
 	const [watchTimeQuota, setWatchTimeQuota] = useState(0);
 	const [activePlan, setActivePlan] = useState(null);
 
+	const [userPlan, setUserPlan] = useState(null);
+	const [customUserPlans, setCustomUserPlans] = useState([]);
+
 	useEffect(() => {
 		setCustomerCode(import.meta.env.VITE_CLOUDFLARE_CUSTOMER_CODE);
 	}, []);
@@ -94,7 +97,10 @@ function StudentWatchHistory() {
 						res.data?.user_plan?.plan?.watch_time_limit
 					);
 					setActivePlan(res.data?.user_plan?.plan?.name);
-					setWatchTimeQuota(res.data?.quota?.quota);
+					setWatchTimeQuota(res.data?.user_plan?.quota);
+
+					setUserPlan(res.data?.user_plan);
+					setCustomUserPlans(res.data?.custom_user_plans);
 				}
 			})
 			.catch((err) => {
@@ -130,9 +136,10 @@ function StudentWatchHistory() {
 	}, [watchTimeToday]);
 
 	function convertSecondsToHMS(totalSeconds) {
+		console.log({ totalSeconds });
 		const hours = Math.floor(totalSeconds / 3600);
 		const minutes = Math.floor((totalSeconds % 3600) / 60);
-		const seconds = totalSeconds % 60;
+		const seconds = (totalSeconds % 60).toFixed();
 		return { hours, minutes, seconds };
 	}
 
@@ -142,10 +149,8 @@ function StudentWatchHistory() {
 	}
 
 	const formatHMS = useMemo(() => {
-		const done =
-			watchTimeQuota > 0
-				? subtractTimes(watchTimeQuota, watchTimeAll)
-				: { hours: 0, minutes: 0, seconds: 0 };
+		// console.log({ activePlan });
+		const done = convertSecondsToHMS(userPlan?.quota);
 		const { hours, minutes, seconds } = done;
 		// console.log(done, watchTimeQuota, watchTimeAll);
 
@@ -153,41 +158,52 @@ function StudentWatchHistory() {
 		const mm = String(minutes).padStart(2, "0");
 		const ss = String(seconds).padStart(2, "0");
 		return <DisplayWatchTime hh={hh} mm={mm} ss={ss} />;
-	}, [watchTimeLimit, watchTimeAll]);
+	}, [watchTimeLimit, watchTimeAll, userPlan]);
 
 	// const [pendingAllTime, setPendingAllTime] = useState(null);
 	// const done = subtractTimes(watchTimeLimit, watchTimeAll);
 	// const pendingTime = formatHMS(done);
 
-	const userTestimonials = [
-		{
-			name: "All Time",
-			testimonial: watchTimeAllString,
-		},
-		{
-			name: "Today",
-			testimonial: watchTimeTodayString,
-		},
-		// {
-		//   name: "Quota",
-		//   testimonial: activePlan ? (
-		//     <p className="flex flex-col items-center gap-2">
-		//       <span className="font-mono text-5xl">
-		//         {(getMongoDecimalValue(watchTimeQuota) / 3600).toFixed(2)} /{" "}
-		//         {(watchTimeLimit / 3600).toFixed(2)}
-		//       </span>
-		//       <span>Hours</span>
-		//     </p>
-		//   ) : (
-		//     // Display for no active plan
-		//     <p>No Active Plan</p>
-		//   ),
-		// },
-		{
-			name: "Pending Time",
-			testimonial: formatHMS,
-		},
-	];
+	const userTestimonials = useMemo(
+		() => [
+			{
+				name: "All Time",
+				testimonial: watchTimeAllString,
+			},
+			{
+				name: "Today",
+				testimonial: watchTimeTodayString,
+			},
+			{
+				name: activePlan,
+				testimonial: formatHMS,
+			},
+
+			...customUserPlans.map((plan) => {
+				console.log(plan.quota);
+				const { hours, minutes, seconds } = convertSecondsToHMS(
+					plan.quota
+				);
+
+				const hh = String(hours).padStart(2, "0");
+				const mm = String(minutes).padStart(2, "0");
+				const ss = String(seconds).padStart(2, "0");
+
+				return {
+					name: plan.plan.plan_name,
+					testimonial: <DisplayWatchTime hh={hh} mm={mm} ss={ss} />,
+				};
+			}),
+		],
+		[
+			watchTimeAllString,
+			watchTimeTodayString,
+			activePlan,
+			formatHMS,
+			customUserPlans,
+		]
+	);
+
 	const [mode, setMode] = useState("light");
 
 	const defaultTheme = createTheme({ palette: { mode } });
@@ -218,7 +234,7 @@ function StudentWatchHistory() {
 							item
 							xs={12}
 							sm={6}
-							md={4}
+							md={6}
 							key={index}
 							sx={{ display: "flex" }}>
 							<Card

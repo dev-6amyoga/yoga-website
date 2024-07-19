@@ -14,15 +14,18 @@ const {
 	GetCurrentUserPlan,
 	GetPlanForWatchQuotaDeduction,
 	UpdateUserPlanStatus,
+	GetCurrentCustomUserPlans,
 } = require("../services/UserPlan.service");
 const { UserPlan } = require("../models/sql/UserPlan");
 const { authenticateToken } = require("../utils/jwt");
 const { USER_PLAN_EXPIRED_BY_USAGE } = require("../enums/user_plan_status");
 const { sequelize } = require("../init.sequelize");
+const { default: mongoose } = require("mongoose");
+const { x } = require("pdfkit");
 
 router.post("/update", authenticateToken, async (req, res) => {
 	console.log("WatchTime /update");
-	const { institute_id, watch_time_logs, updated_at } = req.body;
+	const { institute_id, watch_time_logs, updated_at, playlist_id } = req.body;
 
 	const { user_id } = req.user;
 
@@ -35,61 +38,71 @@ router.post("/update", authenticateToken, async (req, res) => {
 	}
 
 	// console.log(GetCurrentUserPlan(user_id);
+	const session = await WatchTimeLog.startSession();
+	session.startTransaction();
 
-	// get user plan
-	// console.log("GetCurrentUserPlan");
-	let [user_plan, error] = await GetCurrentUserPlan(user_id, institute_id);
-	// console.log({ user_plan, error });
-
-	if (!user_plan || error) {
-		console.log("User currenly has no active plan");
-		return res
-			.status(HTTP_BAD_REQUEST)
-			.json({ message: error || "User currenly has no active plan" });
-	}
-
-	// reduce it to unique asana_id, playlist_id
-	let reduced_watch_time = [];
-	let total_watch_time = 0;
-
-	watch_time_logs.forEach((wtl) => {
-		const idx = reduced_watch_time.findIndex(
-			(x) =>
-				x.asana_id === wtl.asana_id && x.playlist_id === wtl.playlist_id
+	try {
+		// get user plan
+		// console.log("GetCurrentUserPlan");
+		let [user_plan, error] = await GetPlanForWatchQuotaDeduction(
+			user_id,
+			institute_id,
+			playlist_id,
+			null,
+			session
 		);
+		// console.log({ user_plan, error });
 
-		total_watch_time += wtl.timedelta;
+		if (!user_plan || error) {
+			console.log("User currenly has no active plan");
+			await session.abortTransaction();
+			await session.endSession();
+			return res
+				.status(HTTP_BAD_REQUEST)
+				.json({ message: error || "User currenly has no active plan" });
+		}
 
-		if (idx === -1) {
-			const { timedelta, ...w } = wtl;
-			w.duration = timedelta;
-			w.updated_at = updated_at ?? new Date();
-			reduced_watch_time.push(w);
-		} else {
-			if (wtl.timedelta > 0) {
-				if (reduced_watch_time[idx].duration) {
-					reduced_watch_time[idx].duration += wtl.timedelta;
-				} else {
-					reduced_watch_time[idx].duration = wtl.timedelta;
+		// reduce it to unique asana_id, playlist_id
+		let reduced_watch_time = [];
+		let total_watch_time = 0;
+
+		watch_time_logs.forEach((wtl) => {
+			const idx = reduced_watch_time.findIndex(
+				(x) =>
+					x.asana_id === wtl.asana_id &&
+					x.playlist_id === wtl.playlist_id
+			);
+
+			total_watch_time += wtl.timedelta;
+
+			if (idx === -1) {
+				const { timedelta, ...w } = wtl;
+				w.duration = timedelta;
+				w.updated_at = updated_at ?? new Date();
+				reduced_watch_time.push(w);
+			} else {
+				if (wtl.timedelta > 0) {
+					if (reduced_watch_time[idx].duration) {
+						reduced_watch_time[idx].duration += wtl.timedelta;
+					} else {
+						reduced_watch_time[idx].duration = wtl.timedelta;
+					}
 				}
 			}
+		});
+
+		// console.log({ reduced_watch_time, total_watch_time });
+
+		/*
+		{
+			user_id,
+			asana_id,
+			playlist_id,
+			duration
 		}
-	});
+		*/
+		// start a db session
 
-	console.log({ reduced_watch_time, total_watch_time });
-
-	/*
- {
-  user_id,
-  asana_id,
-  playlist_id,
-  duration
- }
- */
-	// start a db session
-	const session = await WatchTimeLog.startSession();
-
-	await session.withTransaction(async () => {
 		const promises = [];
 		reduced_watch_time.forEach((wtl) => {
 			// update watch time logs
@@ -100,6 +113,7 @@ router.post("/update", authenticateToken, async (req, res) => {
 						user_id: wtl.user_id,
 						asana_id: wtl.asana_id,
 						playlist_id: wtl.playlist_id,
+						user_plan_id: user_plan?.user_plan_id,
 					},
 					[
 						{
@@ -120,16 +134,22 @@ router.post("/update", authenticateToken, async (req, res) => {
 			);
 		});
 
+		let quota =
+			user_plan?.plan?.watch_time_limit || user_plan?.plan?.watchHours;
+
 		let updatedWatchTimeQuota = await WatchTimeQuota.findOneAndUpdate(
 			{
-				user_plan_id: user_plan?.get("user_plan_id"),
+				user_plan_id: user_plan?.user_plan_id,
 			},
 			[
 				{
 					$project: {
-						user_plan_id: user_plan?.get("user_plan_id"),
+						user_plan_id: user_plan?.user_plan_id,
 						quota: {
-							$subtract: ["$quota", total_watch_time],
+							$subtract: [
+								{ $ifNull: ["$quota", quota] },
+								total_watch_time,
+							],
 						},
 					},
 				},
@@ -141,7 +161,7 @@ router.post("/update", authenticateToken, async (req, res) => {
 
 		if (!updatedWatchTimeQuota) {
 			await session.abortTransaction();
-			session.endSession();
+			await session.endSession();
 
 			return res.status(HTTP_BAD_REQUEST).json({
 				message: "Could not update watch time quota",
@@ -159,7 +179,7 @@ router.post("/update", authenticateToken, async (req, res) => {
 					user_plan.current_status = USER_PLAN_EXPIRED_BY_USAGE;
 					await user_plan.save();
 					await t.commit();
-					session.endSession();
+					await session.endSession();
 
 					return res.status(HTTP_BAD_REQUEST).json({
 						message: "Watch time quota exceeded",
@@ -168,7 +188,7 @@ router.post("/update", authenticateToken, async (req, res) => {
 				} catch (err) {
 					console.log(err);
 					await t.rollback();
-					session.endSession();
+					await session.endSession();
 
 					return res.status(HTTP_BAD_REQUEST).json({
 						message: "Watch time quota exceeded",
@@ -177,27 +197,20 @@ router.post("/update", authenticateToken, async (req, res) => {
 				}
 			}
 
-			await Promise.all(promises)
-				.then((values) => {
-					console.log(values);
-					return session.commitTransaction();
-				})
-				.then(() => {
-					session.endSession();
+			await Promise.all(promises);
 
-					return res.status(HTTP_OK).json({ reduced_watch_time });
-				})
-				.catch(async (err) => {
-					console.log(err);
-					await session.abortTransaction();
-					session.endSession();
+			await session.commitTransaction();
 
-					return res
-						.status(HTTP_INTERNAL_SERVER_ERROR)
-						.json({ message: err });
-				});
+			await session.endSession();
+
+			return res.status(HTTP_OK).json({ reduced_watch_time });
 		}
-	});
+	} catch (error) {
+		await session.abortTransaction();
+		await session.endSession();
+		console.log(error);
+		return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ message: error });
+	}
 });
 
 router.post("/update-teacher", authenticateToken, async (req, res) => {});
@@ -290,15 +303,36 @@ router.post("/get-quota", async (req, res) => {
 	}
 
 	try {
-		const [user_plan, error] = await GetCurrentUserPlan(user_id);
+		let [user_plan, error] = await GetCurrentUserPlan(user_id);
+
+		user_plan = user_plan?.toJSON();
 
 		if (error) {
 			return res.status(HTTP_BAD_REQUEST).json({ message: error });
 		}
 
-		let quota = await WatchTimeQuota.findOne({
-			user_plan_id: user_plan?.user_plan_id,
-		});
+		let [custom_user_plans, error2] = await GetCurrentCustomUserPlans(
+			user_id
+		);
+
+		// custom_user_plans = custom_user_plans.map((x) => x.toJson());
+
+		if (error2) {
+			return res.status(HTTP_BAD_REQUEST).json({ message: error2 });
+		}
+
+		let quota = await WatchTimeQuota.find(
+			{
+				user_plan_id: {
+					$in: [
+						String(user_plan?.user_plan_id),
+						...custom_user_plans.map((p) => p._id),
+					],
+				},
+			},
+			{},
+			{ lean: true }
+		);
 
 		if (!quota) {
 			return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
@@ -306,7 +340,33 @@ router.post("/get-quota", async (req, res) => {
 			});
 		}
 
-		return res.status(HTTP_OK).json({ quota, user_plan });
+		quota = quota.map((x) => {
+			return {
+				...x,
+				quota: +x.quota.toString(),
+			};
+		});
+
+		// map of user plan ids and their quotas
+
+		quota.forEach((q) => {
+			// console.log(q.user_plan_id);
+			if (mongoose.isValidObjectId(q.user_plan_id)) {
+				let idx = custom_user_plans.findIndex(
+					(x) => x._id.toString() === q.user_plan_id
+				);
+				if (idx !== -1) {
+					custom_user_plans[idx].quota = q.quota;
+				}
+				// console.log(idx, custom_user_plans);
+			} else {
+				if (user_plan) {
+					user_plan.quota = q.quota;
+				}
+			}
+		});
+
+		return res.status(HTTP_OK).json({ user_plan, custom_user_plans });
 	} catch (err) {
 		console.log(err);
 		return res
