@@ -1,550 +1,376 @@
+const getUniqueTransition = (transition_1) => {
+  let highestTransition_1;
+  if (transition_1.length > 0) {
+    highestTransition_1 = transition_1.reduce((max, current) => {
+      const maxId = parseInt(max.transition_id.split("_")[1]);
+      const currentId = parseInt(current.transition_id.split("_")[1]);
+      return currentId > maxId ? current : max;
+    });
+  } else {
+    highestTransition_1 = transition_1;
+  }
+  return highestTransition_1;
+};
+
 export const TransitionEndSupine = async (
   start_category,
   break_status_start,
   break_status_end,
   start_video,
   end_video,
-  drm_status
+  drm_status,
+  transitions
 ) => {
-  if (!start_category) {
-    // first video
-  }
   const filteredTransitions_all = transitions.filter(
     (transition) =>
       transition.drm_transition === drm_status &&
-      transition.asana_category_start === start_category &&
-      transition.asana_category_end === "Supine" &&
       transition.teacher_mode === end_video.teacher_mode
   );
+
+  const handleTransition = (transitions) => {
+    return transitions
+      .map((transition) => {
+        const filtered = filteredTransitions_all.filter(
+          (transitions) => transitions.transition_video_name === transition
+        );
+        return getUniqueTransition(filtered);
+      })
+      .filter(Boolean);
+  };
+  if (!start_category) {
+    if (break_status_end === "Break") {
+      let res = handleTransition([
+        "Feet Apart Hands Back Sitting Transition",
+        "Turn Mat Front To Side Sitting Transition",
+        "Sitting To Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
+    if (break_status_end === "No Break") {
+      let res = handleTransition([
+        "Feet Apart Hands Back Sitting Transition",
+        "Turn Mat Front To Side Sitting Transition",
+        "Sitting To Supine Transition",
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
+  }
 
   if (start_category === "Closing Prayer Sitting") {
     if (break_status_end === "Break") {
       if (start_video.namaskara_end) {
-        const transition_1 = filteredTransitions_all.filter(
-          (transition) =>
-            transition.transition_name === "Prayer Sitting Namaskara Unlock"
-        );
-        const transition_2 = filteredTransitions_all.filter(
-          (transition) => transition.transition_name === "Pranayama Unlock Legs"
-        );
-        const transition_3 = filteredTransitions_all.filter(
-          (transition) =>
-            transition.transition_name ===
-            "Turn Mat Front To Side Sitting Transition"
-        );
-        const transition_4 = filteredTransitions_all.filter(
-          (transition) =>
-            transition.transition_name === "Sitting To Supine Transition"
-        );
-        let t1 = getUniqueTransition(transition_1);
-        let t2 = getUniqueTransition(transition_2);
-        let t3 = getUniqueTransition(transition_3);
-        let t4 = getUniqueTransition(transition_4);
-        const result = [t1, t2, t3, t4].filter(Boolean);
-        return result;
+        let res = handleTransition([
+          "Prayer Sitting Namaskara Unlock",
+          "Pranayama Unlock Legs",
+          "Turn Mat Front To Side Sitting Transition",
+          "Sitting To Supine Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
       } else {
-        const transition_1 = filteredTransitions_all.filter(
-          (transition) => transition.transition_name === "Pranayama Unlock Legs"
-        );
-        const transition_2 = filteredTransitions_all.filter(
-          (transition) =>
-            transition.transition_name ===
-            "Turn Mat Front To Side Sitting Transition"
-        );
-        const transition_3 = filteredTransitions_all.filter(
-          (transition) =>
-            transition.transition_name === "Sitting To Supine Transition"
-        );
-        let t1 = getUniqueTransition(transition_1);
-        let t2 = getUniqueTransition(transition_2);
-        let t3 = getUniqueTransition(transition_3);
-        const result = [t1, t2, t3].filter(Boolean);
-        return result;
+        let res = handleTransition([
+          "Pranayama Unlock Legs",
+          "Turn Mat Front To Side Sitting Transition",
+          "Sitting To Supine Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
       }
     }
     if (break_status_end === "No Break") {
       if (start_video.namaskara_end) {
-        const transition_1 = filteredTransitions_all.filter(
-          (transition) =>
-            transition.transition_name === "Prayer Sitting Namaskara Unlock"
-        );
-        const transition_2 = filteredTransitions_all.filter(
-          (transition) => transition.transition_name === "Pranayama Unlock Legs"
-        );
-        const transition_3 = filteredTransitions_all.filter(
-          (transition) =>
-            transition.transition_name ===
-            "Turn Mat Front To Side Sitting Transition"
-        );
-        const transition_4 = filteredTransitions_all.filter(
-          (transition) =>
-            transition.transition_name === "Sitting To Supine Transition"
-        );
-        const transition_5 = filteredTransitions_all.filter(
-          (transition) =>
-            transition.transition_name ===
-            "Arms Overhead Feet Together Supine Transition"
-        );
-        let t1 = getUniqueTransition(transition_1);
-        let t2 = getUniqueTransition(transition_2);
-        let t3 = getUniqueTransition(transition_3);
-        let t4 = getUniqueTransition(transition_4);
-        let t5 = getUniqueTransition(transition_5);
-        const result = [t1, t2, t3, t4, t5].filter(Boolean);
-        return result;
+        let res = handleTransition([
+          "Prayer Sitting Namaskara Unlock",
+          "Pranayama Unlock Legs",
+          "Turn Mat Front To Side Sitting Transition",
+          "Sitting To Supine Transition",
+          "Arms Overhead Feet Together Supine Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
       } else {
-        const transition_1 = filteredTransitions_all.filter(
-          (transition) => transition.transition_name === "Pranayama Unlock Legs"
-        );
-        const transition_2 = filteredTransitions_all.filter(
-          (transition) =>
-            transition.transition_name ===
-            "Turn Mat Front To Side Sitting Transition"
-        );
-        const transition_3 = filteredTransitions_all.filter(
-          (transition) =>
-            transition.transition_name === "Sitting To Supine Transition"
-        );
-        const transition_4 = filteredTransitions_all.filter(
-          (transition) =>
-            transition.transition_name ===
-            "Arms Overhead Feet Together Supine Transition"
-        );
-        let t1 = getUniqueTransition(transition_1);
-        let t2 = getUniqueTransition(transition_2);
-        let t3 = getUniqueTransition(transition_3);
-        let t4 = getUniqueTransition(transition_4);
-        const result = [t1, t2, t3, t4].filter(Boolean);
-        return result;
+        let res = handleTransition([
+          "Pranayama Unlock Legs",
+          "Turn Mat Front To Side Sitting Transition",
+          "Sitting To Supine Transition",
+          "Arms Overhead Feet Together Supine Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
       }
     }
   }
 
   if (start_category === "Closing Prayer Standing") {
     if (break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) => transition.transition_name === "Prayer End Standing"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Standing Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Standing To Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [t1, t2, t3].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Prayer End Standing",
+        "Turn Mat Front To Side Standing Transition",
+        "Standing To Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) => transition.transition_name === "Prayer End Standing"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Standing Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Standing To Supine Transition"
-      );
-      const transition_4 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      let t4 = getUniqueTransition(transition_4);
-      const result = [t1, t2, t3, t4].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Prayer End Standing",
+        "Turn Mat Front To Side Standing Transition",
+        "Standing To Supine Transition",
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Starting Prayer Sitting") {
     if (break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Prayer Sitting Namaskara Unlock"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) => transition.transition_name === "Pranayama Unlock Legs"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Sitting Transition"
-      );
-      const transition_4 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Sitting To Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      let t4 = getUniqueTransition(transition_4);
-      const result = [t1, t2, t3, t4].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Prayer Sitting Namaskara Unlock",
+        "Pranayama Unlock Legs",
+        "Turn Mat Front To Side Sitting Transition",
+        "Sitting To Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Prayer Sitting Namaskara Unlock"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) => transition.transition_name === "Pranayama Unlock Legs"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Sitting Transition"
-      );
-      const transition_4 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition.transition_name ===
-          "Sitting To Supine Transition"
-      );
-      const transition_5 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      let t4 = getUniqueTransition(transition_4);
-      let t5 = getUniqueTransition(transition_5);
-      const result = [t1, t2, t3, t4, t5].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Prayer Sitting Namaskara Unlock",
+        "Pranayama Unlock Legs",
+        "Turn Mat Front To Side Sitting Transition",
+        "Sitting To Supine Transition",
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Starting Prayer Standing") {
     if (break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) => transition.transition_name === "Prayer End Standing"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Standing Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Standing To Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [t1, t2, t3].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Prayer End Standing",
+        "Turn Mat Front To Side Standing Transition",
+        "Standing To Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) => transition.transition_name === "Prayer End Standing"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Standing Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Standing To Supine Transition"
-      );
-      const transition_4 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      let t4 = getUniqueTransition(transition_4);
-      const result = [t1, t2, t3, t4].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Prayer End Standing",
+        "Turn Mat Front To Side Standing Transition",
+        "Standing To Supine Transition",
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Suryanamaskara Stithi") {
     if (break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Feet Apart Hands Loose Standing Transition Front"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Standing Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Standing To Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [t1, t2, t3].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Feet Apart Hands Loose Standing Transition Front",
+        "Turn Mat Front To Side Standing Transition",
+        "Standing To Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Feet Apart Hands Loose Standing Transition Front"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Standing Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Standing To Supine Transition"
-      );
-      const transition_4 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      let t4 = getUniqueTransition(transition_4);
-      const result = [t1, t2, t3, t4].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Feet Apart Hands Loose Standing Transition Front",
+        "Turn Mat Front To Side Standing Transition",
+        "Standing To Supine Transition",
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Suryanamaskara Non Stithi") {
     if (break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Suryanamaskara Non AI Non Stithi Suffix"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Standing Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Standing To Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [t1, t2, t3].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Suryanamaskara Non AI Non Stithi Suffix",
+        "Turn Mat Front To Side Standing Transition",
+        "Standing To Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Suryanamaskara Non AI Non Stithi Suffix"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Standing Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Standing To Supine Transition"
-      );
-      const transition_4 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      let t4 = getUniqueTransition(transition_4);
-      const result = [t1, t2, t3, t4].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Suryanamaskara Non AI Non Stithi Suffix",
+        "Turn Mat Front To Side Standing Transition",
+        "Standing To Supine Transition",
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Standing") {
     if (break_status_start === "Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Standing Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Standing To Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      const result = [t1, t2].filter(Boolean);
-      return result;
+      if (start_video.person_starting_position === "Left") {
+        let res = handleTransition([
+          "Feet Together Hands Tight Standing Side Transition",
+          "Jump Side To Front Transition",
+          "Feet Apart Hands Loose Standing Transition Front",
+          "Turn Mat Front To Side Standing Transition",
+          "Standing To Supine Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
+      if (start_video.person_starting_position === "Front") {
+        let res = handleTransition([
+          "Turn Mat Front To Side Standing Transition",
+          "Standing To Supine Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Standing Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Standing To Supine Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [t1, t2, t3].filter(Boolean);
-      return result;
+      if (start_video.person_starting_position === "Left") {
+        let res = handleTransition([
+          "Feet Together Hands Tight Standing Side Transition",
+          "Jump Side To Front Transition",
+          "Feet Apart Hands Loose Standing Transition Front",
+          "Turn Mat Front To Side Standing Transition",
+          "Standing To Supine Transition",
+          "Arms Overhead Feet Together Supine Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
+      if (start_video.person_starting_position === "Front") {
+        let res = handleTransition([
+          "Turn Mat Front To Side Standing Transition",
+          "Standing To Supine Transition",
+          "Arms Overhead Feet Together Supine Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Feet Apart Hands Loose Standing Transition Front"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Standing Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Standing To Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [t1, t2, t3].filter(Boolean);
-      return result;
+      if (start_video.person_starting_position === "Left") {
+        let res = handleTransition([
+          "Jump Side To Front Transition",
+          "Feet Apart Hands Loose Standing Transition Front",
+          "Turn Mat Front To Side Standing Transition",
+          "Standing To Supine Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
+      if (start_video.person_starting_position === "Front") {
+        let res = handleTransition([
+          "Feet Apart Hands Loose Standing Transition Front",
+          "Turn Mat Front To Side Standing Transition",
+          "Standing To Supine Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Feet Apart Hands Loose Standing Transition Front"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Standing Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Standing To Supine Transition"
-      );
-      const transition_4 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      let t4 = getUniqueTransition(transition_4);
-      const result = [t1, t2, t3, t4].filter(Boolean);
-      return result;
+      if (start_video.person_starting_position === "Left") {
+        let res = handleTransition([
+          "Jump Side To Front Transition",
+          "Feet Apart Hands Loose Standing Transition Front",
+          "Turn Mat Front To Side Standing Transition",
+          "Standing To Supine Transition",
+          "Arms Overhead Feet Together Supine Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
+      if (start_video.person_starting_position === "Front") {
+        let res = handleTransition([
+          "Feet Apart Hands Loose Standing Transition Front",
+          "Turn Mat Front To Side Standing Transition",
+          "Standing To Supine Transition",
+          "Arms Overhead Feet Together Supine Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
     }
   }
 
   if (start_category === "Sitting") {
     if (break_status_start === "Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Sitting Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Sitting To Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      const result = [t1, t2].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Turn Mat Front To Side Sitting Transition",
+        "Sitting To Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Sitting Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Sitting To Supine Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [t1, t2, t3].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Turn Mat Front To Side Sitting Transition",
+        "Sitting To Supine Transition",
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Feet Apart Hands Back Sitting Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Sitting Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Sitting To Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [t1, t2, t3].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Feet Apart Hands Back Sitting Transition",
+        "Turn Mat Front To Side Sitting Transition",
+        "Sitting To Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Feet Apart Hands Back Sitting Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Sitting Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Sitting To Supine Transition"
-      );
-      const transition_4 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      let t4 = getUniqueTransition(transition_4);
-      const result = [t1, t2, t3, t4].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Feet Apart Hands Back Sitting Transition",
+        "Turn Mat Front To Side Sitting Transition",
+        "Sitting To Supine Transition",
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
@@ -553,24 +379,18 @@ export const TransitionEndSupine = async (
       return [];
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      const result = [t1].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Down Feet Apart Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      const result = [t1].filter(Boolean);
-      return result;
+      let res = handleTransition(["Arms Down Feet Apart Supine Transition"]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
       return [];
@@ -579,215 +399,330 @@ export const TransitionEndSupine = async (
 
   if (start_category === "Prone") {
     if (break_status_start === "Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Prone To Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      const result = [t1].filter(Boolean);
-      return result;
+      let res = handleTransition(["Prone To Supine Transition"]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Prone To Supine Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      const result = [t1, t2].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Prone To Supine Transition",
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Fold Hands Feet Apart Prone Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Prone To Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      const result = [t1, t2].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Fold Hands Feet Apart Prone Transition",
+        "Prone To Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Fold Hands Feet Apart Prone Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Prone To Supine Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [t1, t2, t3].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Fold Hands Feet Apart Prone Transition",
+        "Prone To Supine Transition",
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Vajrasana") {
     if (break_status_start === "Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Vajra To Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      const result = [t1].filter(Boolean);
-      return result;
+      let res = handleTransition(["Vajra To Supine Transition"]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Vajra To Supine Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      const result = [t1, t2].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Vajra To Supine Transition",
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Vajrasana Dyanmudra To Relax Position"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Vajra To Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      const result = [t1, t2].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Vajrasana Dyanmudra To Relax Position",
+        "Vajra To Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Vajrasana Dyanmudra To Relax Position"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Vajra To Supine Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [t1, t2, t3].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Vajrasana Dyanmudra To Relax Position",
+        "Vajra To Supine Transition",
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Pranayama") {
+    let res1;
     if (break_status_end === "Break") {
-      return [];
+      if (start_video.person_starting_position === "Front") {
+        res1 = handleTransition([
+          "Pranayama Unlock Legs",
+          "Sitting To Standing Transition",
+          "Turn Mat Front To Side Standing Transition",
+        ]);
+      }
+      if (start_video.person_starting_position === "Left") {
+        res1 = handleTransition([
+          "Pranayama Unlock Legs",
+          "Sitting To Standing Transition",
+          "Turn Mat Front To Side Standing Transition",
+          "Person Transit Front To Left",
+        ]);
+      }
     }
     if (break_status_end === "No Break") {
-      return [];
+      if (start_video.person_starting_position === "Front") {
+        res1 = handleTransition([
+          "Pranayama Unlock Legs",
+          "Sitting To Standing Transition",
+          "Turn Mat Front To Side Standing Transition",
+          "Feet Together Hands Tight Standing Transition Front",
+        ]);
+      }
+      if (start_video.person_starting_position === "Left") {
+        res1 = handleTransition([
+          "Pranayama Unlock Legs",
+          "Sitting To Standing Transition",
+          "Turn Mat Front To Side Standing Transition",
+          "Person Transit Front To Left",
+          "Feet Together Hands Tight Standing Side Transition",
+        ]);
+      }
+    }
+    if (start_video.vibhagiya) {
+      if (start_video.vibhagiya === "Abdomen") {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          let transition_ind = filteredTransitions_all[i];
+          if (
+            transition_ind.transition_video_name
+              .toLowerCase()
+              .indexOf("stomach") !== -1
+          ) {
+            res.push(transition_ind);
+          }
+        }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
+        return new_res;
+      }
+      if (start_video.vibhagiya === "Clavicular") {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          let transition_ind = filteredTransitions_all[i];
+          if (
+            transition_ind.transition_video_name
+              .toLowerCase()
+              .indexOf("clavicular") !== -1
+          ) {
+            res.push(transition_ind);
+          }
+        }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
+        return new_res;
+      }
+      if (start_video.vibhagiya === "Thoracic") {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          let transition_ind = filteredTransitions_all[i];
+          if (
+            transition_ind.transition_video_name
+              .toLowerCase()
+              .indexOf("thoracic") !== -1
+          ) {
+            res.push(transition_ind);
+          }
+        }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
+        return new_res;
+      }
+      if (start_video.vibhagiya === "Final") {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          let transition_ind = filteredTransitions_all[i];
+          if (
+            transition_ind.transition_video_name
+              .toLowerCase()
+              .indexOf("jalandhara") !== -1
+          ) {
+            res.push(transition_ind);
+          }
+        }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
+        return new_res;
+      }
+    } else {
+      if (pranayama.omkara) {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          if (filteredTransitions_all[i]) {
+            let transition_ind = filteredTransitions_all[i];
+            if (
+              transition_ind.transition_video_name
+                .toLowerCase()
+                .indexOf("om") !== -1 &&
+              transition_ind.transition_video_name
+                .toLowerCase()
+                .indexOf("chanting") !== -1
+            ) {
+              res.push(transition_ind);
+            }
+          }
+        }
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        return new_res;
+      } else {
+        if (pranayama.nose_lock_start && pranayama.nose_lock_end) {
+          let res = [];
+          for (var i = 0; i !== filteredTransitions_all.length; i++) {
+            let transition_ind = filteredTransitions_all[i];
+            if (
+              transition_ind.transition_video_name
+                .toLowerCase()
+                .indexOf("nasika") !== -1
+            ) {
+              res.push(transition_ind);
+            }
+          }
+          res = res.filter((transition) =>
+            transition.transition_video_name.toLowerCase().includes("unlock")
+          );
+          let new_res = [...res, ...pending_2];
+          new_res = new_res.filter((element) => element !== undefined);
+          return new_res;
+        } else {
+          if (pranayama.chin_lock_start && pranayama.chin_lock_end) {
+            let res = [];
+            for (var i = 0; i !== filteredTransitions_all.length; i++) {
+              let transition_ind = filteredTransitions_all[i];
+              if (
+                transition_ind.transition_video_name
+                  .toLowerCase()
+                  .indexOf("jalandhara") !== -1
+              ) {
+                res.push(transition_ind);
+              }
+            }
+            res = res.filter((transition) =>
+              transition.transition_video_name.toLowerCase().includes("unlock")
+            );
+            let new_res = [...res, ...pending_2];
+            new_res = new_res.filter((element) => element !== undefined);
+            return new_res;
+          } else {
+            if (pranayama.shanmuga_start && pranayama.shanmuga_end) {
+              // add bhramari lock and unlock
+              let res = [];
+              for (var i = 0; i !== filteredTransitions_all.length; i++) {
+                let transition_ind = filteredTransitions_all[i];
+                if (
+                  transition_ind.transition_video_name
+                    .toLowerCase()
+                    .indexOf("bhramari") !== -1
+                ) {
+                  res.push(transition_ind);
+                }
+              }
+              res = res.filter((transition) =>
+                transition.transition_video_name
+                  .toLowerCase()
+                  .includes("unlock")
+              );
+              let new_res = [...res, ...pending_2];
+              new_res = new_res.filter((element) => element !== undefined);
+              return new_res;
+            } else {
+              let new_res = [...pending_2];
+              new_res = new_res.filter((element) => element !== undefined);
+              return new_res;
+            }
+          }
+        }
+      }
     }
   }
 
   if (start_category === "Pranayama Prayer") {
     if (break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Pranayama Inhale Hands Up Exhale Down"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) => transition.transition_name === "Pranayama Unlock Legs"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Sitting Transition"
-      );
-      const transition_4 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Sitting To Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      let t4 = getUniqueTransition(transition_4);
-      const result = [t1, t2, t3, t4].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Pranayama Inhale Hands Up Exhale Down",
+        "Pranayama Unlock Legs",
+        "Turn Mat Front To Side Sitting Transition",
+        "Sitting To Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Pranayama Inhale Hands Up Exhale Down"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) => transition.transition_name === "Pranayama Unlock Legs"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Turn Mat Front To Side Sitting Transition"
-      );
-      const transition_4 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name === "Sitting To Supine Transition"
-      );
-      const transition_5 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      let t4 = getUniqueTransition(transition_4);
-      let t5 = getUniqueTransition(transition_5);
-      const result = [t1, t2, t3, t4, t5].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Pranayama Inhale Hands Up Exhale Down",
+        "Pranayama Unlock Legs",
+        "Turn Mat Front To Side Sitting Transition",
+        "Sitting To Supine Transition",
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Special") {
     if (break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Down Feet Apart Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      const result = [t1, t2, t3, t4, t5].filter(Boolean);
-      return result;
+      let res = handleTransition(["Arms Down Feet Apart Supine Transition"]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
 
     if (break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_name ===
-          "Arms Overhead Feet Together Supine Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      const result = [t1, t2, t3, t4, t5].filter(Boolean);
-      return result;
+      let res = handleTransition([
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 };
