@@ -579,4 +579,29 @@ router.post("/get-user-plan-by-details", async (req, res) => {
 	}
 });
 
+router.get("/admin-stats/users-per-plan", async (req, res) => {
+	try {
+		const usersPerPlan = await UserPlan.findAll({
+			attributes: [
+				"plan_id",
+				[sequelize.fn("COUNT", "plan_id"), "Users per Plan"],
+			],
+			include: [
+				{
+					model: Plan,
+					foreignKey: "plan_id",
+					attributes: ["name"],
+				},
+			],
+			group: ["user_plan.plan_id", "plan.plan_id"],
+		});
+		res.status(HTTP_OK).json({ usersPerPlan });
+	} catch (error) {
+		console.error("Error fetching users per plan:", error);
+		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+			error: "Internal Server Error",
+		});
+	}
+});
+
 module.exports = router;

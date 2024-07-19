@@ -6,6 +6,7 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { AreaChart } from "@tremor/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import DisplayWatchTime from "../../components/Common/DisplayWatchTime";
@@ -22,6 +23,7 @@ function StudentWatchHistory() {
 
 	const [watchTimeAll, setWatchTimeAll] = useState(0);
 	const [watchTimeToday, setWatchTimeToday] = useState(0);
+	const [watchTimePerMonth, setWatchTimePerMonth] = useState([]);
 
 	const [customerCode, setCustomerCode] = useState("");
 	const [watchTimeLimit, setWatchTimeLimit] = useState(0);
@@ -69,8 +71,10 @@ function StudentWatchHistory() {
 		})
 			.then((res) => {
 				if (res.status === 200) {
+					console.log(res.data?.watchTimePerMonth);
 					setWatchTimeAll(res.data?.watchTimeAll ?? 0);
 					setWatchTimeToday(res.data?.watchTimeToday ?? 0);
+					setWatchTimePerMonth(res.data?.watchTimePerMonth ?? []);
 				}
 			})
 			.catch((err) => {
@@ -208,6 +212,9 @@ function StudentWatchHistory() {
 
 	const defaultTheme = createTheme({ palette: { mode } });
 
+	const watchTimePerMonthValueFormatter = (val) =>
+		`${(val / 60).toFixed(2)} minutes`;
+
 	return (
 		<ThemeProvider theme={defaultTheme}>
 			<CssBaseline />
@@ -228,6 +235,23 @@ function StudentWatchHistory() {
 
 					// border: "1px solid lightgray",
 				}}>
+				<div className="bg-white w-full p-4 rounded-lg">
+					<h4>Watch Time Per Month</h4>
+					<AreaChart
+						data={watchTimePerMonth}
+						index="_id"
+						categories={["Watch Time per Month"]}
+						allowDecimals={true}
+						colors={["blue"]}
+						valueFormatter={watchTimePerMonthValueFormatter}
+						showLegend={true}
+						showYAxis={true}
+						showGradient={false}
+						startEndOnly={true}
+						className="mt-6 h-64"
+						yAxisWidth={125}
+					/>
+				</div>
 				<Grid container spacing={2}>
 					{userTestimonials.map((testimonial, index) => (
 						<Grid
@@ -287,39 +311,6 @@ function StudentWatchHistory() {
           Refresh
         </Button> */}
 			</Container>
-
-			{/* 
-			<section className="my-8">
-				<h2>Watch History</h2>
-				<div className="my-4 grid grid-cols-1 gap-2 md:grid-cols-2">
-					{watchHistory?.map((wh) => (
-						<Note key={wh?.history?._id} label={false}>
-							<div className="flex flex-row items-start gap-4">
-								<img
-									src={`https://customer-${customerCode}.cloudflarestream.com/${wh.asana?.asana_videoID}/thumbnails/thumbnail.jpg?time=1s?height=150`}
-									alt={
-										wh.asana
-											? wh.asana?.asana_name
-											: wh._id + "video"
-									}
-									className="h-24 rounded-xl"
-								/>
-								<div>
-									<p className="text-base font-bold">
-										{wh?.asana?.asana_name}
-									</p>
-									<p className="text-sm text-zinc-700">
-										{wh?.asana?.asana_desc}
-									</p>
-									<p className="">
-										{new Date(wh.created_at).toDateString()}
-									</p>
-								</div>
-							</div>
-						</Note>
-					))}
-				</div>
-			</section> */}
 		</ThemeProvider>
 	);
 }

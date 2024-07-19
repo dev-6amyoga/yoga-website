@@ -22,6 +22,10 @@ const { USER_PLAN_EXPIRED_BY_USAGE } = require("../enums/user_plan_status");
 const { sequelize } = require("../init.sequelize");
 const { default: mongoose } = require("mongoose");
 const { x } = require("pdfkit");
+const {
+	GetWatchTimePerYearMonthStats,
+	GetCurrentMonthUsage,
+} = require("../services/WatchTimeLog.service");
 
 router.post("/update", authenticateToken, async (req, res) => {
 	console.log("WatchTime /update");
@@ -281,9 +285,20 @@ router.post("/get-stats", async (req, res) => {
 			return acc;
 		}, 0);
 
+		let [watchTimePerMonth, error] = await GetWatchTimePerYearMonthStats(
+			user_id
+		);
+
+		if (error) {
+			return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+				message: "something went wrong",
+			});
+		}
+
 		return res.status(HTTP_OK).json({
 			watchTimeToday: watchTimeToday,
 			watchTimeAll: watchTimeAll,
+			watchTimePerMonth,
 		});
 	} catch (err) {
 		console.log(err);
@@ -434,6 +449,18 @@ router.post("/update-userplan", async (req, res) => {
 	}
 });
 
+router.get("/all-watch-time-log", async (req, res) => {
+	try {
+		const allWatchHistory = await WatchTimeLog.find();
+		res.json(allWatchHistory);
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: "Internal server error" });
+	}
+});
+
+// ADMIN stats
+
 router.get("/time-statistics", async (req, res) => {
 	try {
 		const allWatchTime = await WatchTimeLog.find(
@@ -462,13 +489,50 @@ router.get("/time-statistics", async (req, res) => {
 	}
 });
 
-router.get("/all-watch-time-log", async (req, res) => {
+router.get("/admin-stats/current-month-usage", async (req, res) => {
 	try {
-		const allWatchHistory = await WatchTimeLog.find();
-		res.json(allWatchHistory);
+		const [currentMonthUsage, error] = await GetCurrentMonthUsage();
+
+		if (error) {
+			return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+				message: error,
+			});
+		}
+
+		return res.status(HTTP_OK).json({ currentMonthUsage });
 	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: "Internal server error" });
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ message: error.message });
+	}
+});
+
+router.get("/admin-stats/per-month-usage", async (req, res) => {
+	try {
+		const [watchTimePerMonth, error] =
+			await GetWatchTimePerYearMonthStats();
+
+		if (error) {
+			return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+				message: error,
+			});
+		}
+
+		return res.status(HTTP_OK).json({ watchTimePerMonth });
+	} catch (error) {
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ message: error.message });
+	}
+});
+
+router.get("/admin-stats/unused-hours", async (req, res) => {
+	try {
+		return res.status(HTTP_OK).json({ data: [] });
+	} catch (error) {
+		return res
+			.status(HTTP_INTERNAL_SERVER_ERROR)
+			.json({ message: error.message });
 	}
 });
 
