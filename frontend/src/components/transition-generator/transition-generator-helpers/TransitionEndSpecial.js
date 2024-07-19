@@ -1,3 +1,17 @@
+const getUniqueTransition = (transition_1) => {
+  let highestTransition_1;
+  if (transition_1.length > 0) {
+    highestTransition_1 = transition_1.reduce((max, current) => {
+      const maxId = parseInt(max.transition_id.split("_")[1]);
+      const currentId = parseInt(current.transition_id.split("_")[1]);
+      return currentId > maxId ? current : max;
+    });
+  } else {
+    highestTransition_1 = transition_1;
+  }
+  return highestTransition_1;
+};
+
 export const TransitionEndSpecial = async (
   start_category,
   break_status_start,
@@ -6,60 +20,375 @@ export const TransitionEndSpecial = async (
   end_video,
   drm_status
 ) => {
+  const filteredTransitions_all = transitions.filter(
+    (transition) =>
+      transition.drm_transition === drm_status &&
+      transition.teacher_mode === end_video.teacher_mode
+  );
+
+  const handleTransition = (transitions) => {
+    return transitions
+      .map((transition) => {
+        const filtered = filteredTransitions_all.filter(
+          (transitions) => transitions.transition_video_name === transition
+        );
+        return getUniqueTransition(filtered);
+      })
+      .filter(Boolean);
+  };
   if (!start_category) {
-    return [];
+    let res = handleTransition(["Sitting Position Transition"]);
+    res = res.map((transition) => transition.transition_id);
+    res = res.filter((element) => element !== undefined);
+    return res;
   }
 
   if (start_category === "Closing Prayer Sitting") {
-    return [];
+    if (start_video.namaskara_end === true) {
+      let res = handleTransition([
+        "Prayer Sitting Namaskara Unlock",
+        "Pranayama Unlock Legs",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    } else {
+      let res = handleTransition(["Pranayama Unlock Legs"]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
   }
 
   if (start_category === "Closing Prayer Standing") {
-    return [];
+    let res = handleTransition([
+      "Prayer End Standing",
+      "Standing To Sitting Transition",
+    ]);
+    res = res.map((transition) => transition.transition_id);
+    res = res.filter((element) => element !== undefined);
+    return res;
   }
 
   if (start_category === "Starting Prayer Sitting") {
-    return [];
+    let res = handleTransition([
+      "Prayer Sitting Namaskara Unlock",
+      "Pranayama Unlock Legs",
+    ]);
+    res = res.map((transition) => transition.transition_id);
+    res = res.filter((element) => element !== undefined);
+    return res;
   }
 
   if (start_category === "Starting Prayer Standing") {
-    return [];
+    let res = handleTransition([
+      "Prayer End Standing",
+      "Standing To Sitting Transition",
+    ]);
+    res = res.map((transition) => transition.transition_id);
+    res = res.filter((element) => element !== undefined);
+    return res;
   }
 
   if (start_category === "Suryanamaskara Stithi") {
-    return [];
+    let res = handleTransition([
+      "Feet Apart Hands Loose Standing Transition Front",
+      "Standing To Sitting Transition",
+    ]);
+    res = res.map((transition) => transition.transition_id);
+    res = res.filter((element) => element !== undefined);
+    return res;
   }
 
   if (start_category === "Suryanamaskara Non Stithi") {
-    return [];
+    let res = handleTransition([
+      "Suryanamaskara Non AI Non Stithi Suffix",
+      "Standing To Sitting Transition",
+    ]);
+    res = res.map((transition) => transition.transition_id);
+    res = res.filter((element) => element !== undefined);
+    return res;
   }
 
   if (start_category === "Standing") {
-    return [];
+    if (break_status_start === "Break") {
+      let res = handleTransition(["Standing To Sitting Transition"]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
+    if (break_status_start === "No Break") {
+      let res = handleTransition([
+        "Feet Apart Hands Loose Standing Transition Front",
+        "Standing To Sitting Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
   }
 
   if (start_category === "Sitting") {
-    return [];
+    if (break_status_start === "Break") {
+      return [];
+    }
+    if (break_status_start === "No Break") {
+      let res = handleTransition([
+        "Feet Together Hands Side Sitting Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
   }
 
   if (start_category === "Supine") {
-    return [];
+    if (break_status_start === "Break") {
+      let res = handleTransition([
+        "Supine To Sitting Transition",
+        "Turn Mat Side To Front Sitting Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
+    if (break_status_start === "No Break") {
+      let res = handleTransition([
+        "Arms Down Feet Apart Supine Transition",
+        "Supine To Sitting Transition",
+        "Turn Mat Side To Front Sitting Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
   }
 
   if (start_category === "Prone") {
-    return [];
+    if (break_status_start === "Break") {
+      let res = handleTransition([
+        "Prone To Sitting Transition",
+        "Turn Mat Side To Front Sitting Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
+    if (break_status_start === "No Break") {
+      let res = handleTransition([
+        "Fold Hands Feet Apart Prone Transition",
+        "Prone To Sitting Transition",
+        "Turn Mat Side To Front Sitting Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
   }
 
   if (start_category === "Vajrasana") {
-    return [];
+    if (break_status_start === "Break") {
+      let res = handleTransition(["Vajra To Sitting Transition"]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
+    if (break_status_start === "No Break") {
+      let res = handleTransition([
+        "Vajrasana Dyanmudra To Relax Position",
+        "Vajra To Sitting Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
   }
 
   if (start_category === "Pranayama") {
-    return [];
+    let res1;
+    res1 = handleTransition(["Pranayama Unlock Legs"]);
+    const pending_2 = res1;
+    if (start_video.vibhagiya) {
+      if (start_video.vibhagiya === "Abdomen") {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          let transition_ind = filteredTransitions_all[i];
+          if (
+            transition_ind.transition_video_name
+              .toLowerCase()
+              .indexOf("stomach") !== -1
+          ) {
+            res.push(transition_ind);
+          }
+        }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
+        return new_res;
+      }
+      if (start_video.vibhagiya === "Clavicular") {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          let transition_ind = filteredTransitions_all[i];
+          if (
+            transition_ind.transition_video_name
+              .toLowerCase()
+              .indexOf("clavicular") !== -1
+          ) {
+            res.push(transition_ind);
+          }
+        }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
+        return new_res;
+      }
+      if (start_video.vibhagiya === "Thoracic") {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          let transition_ind = filteredTransitions_all[i];
+          if (
+            transition_ind.transition_video_name
+              .toLowerCase()
+              .indexOf("thoracic") !== -1
+          ) {
+            res.push(transition_ind);
+          }
+        }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
+        return new_res;
+      }
+      if (start_video.vibhagiya === "Final") {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          let transition_ind = filteredTransitions_all[i];
+          if (
+            transition_ind.transition_video_name
+              .toLowerCase()
+              .indexOf("jalandhara") !== -1
+          ) {
+            res.push(transition_ind);
+          }
+        }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
+        return new_res;
+      }
+    } else {
+      if (pranayama.omkara) {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          if (filteredTransitions_all[i]) {
+            let transition_ind = filteredTransitions_all[i];
+            if (
+              transition_ind.transition_video_name
+                .toLowerCase()
+                .indexOf("om") !== -1 &&
+              transition_ind.transition_video_name
+                .toLowerCase()
+                .indexOf("chanting") !== -1
+            ) {
+              res.push(transition_ind);
+            }
+          }
+        }
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        return new_res;
+      } else {
+        if (pranayama.nose_lock_start && pranayama.nose_lock_end) {
+          let res = [];
+          for (var i = 0; i !== filteredTransitions_all.length; i++) {
+            let transition_ind = filteredTransitions_all[i];
+            if (
+              transition_ind.transition_video_name
+                .toLowerCase()
+                .indexOf("nasika") !== -1
+            ) {
+              res.push(transition_ind);
+            }
+          }
+          res = res.filter((transition) =>
+            transition.transition_video_name.toLowerCase().includes("unlock")
+          );
+          let new_res = [...res, ...pending_2];
+          new_res = new_res.filter((element) => element !== undefined);
+          return new_res;
+        } else {
+          if (pranayama.chin_lock_start && pranayama.chin_lock_end) {
+            let res = [];
+            for (var i = 0; i !== filteredTransitions_all.length; i++) {
+              let transition_ind = filteredTransitions_all[i];
+              if (
+                transition_ind.transition_video_name
+                  .toLowerCase()
+                  .indexOf("jalandhara") !== -1
+              ) {
+                res.push(transition_ind);
+              }
+            }
+            res = res.filter((transition) =>
+              transition.transition_video_name.toLowerCase().includes("unlock")
+            );
+            let new_res = [...res, ...pending_2];
+            new_res = new_res.filter((element) => element !== undefined);
+            return new_res;
+          } else {
+            if (pranayama.shanmuga_start && pranayama.shanmuga_end) {
+              // add bhramari lock and unlock
+              let res = [];
+              for (var i = 0; i !== filteredTransitions_all.length; i++) {
+                let transition_ind = filteredTransitions_all[i];
+                if (
+                  transition_ind.transition_video_name
+                    .toLowerCase()
+                    .indexOf("bhramari") !== -1
+                ) {
+                  res.push(transition_ind);
+                }
+              }
+              res = res.filter((transition) =>
+                transition.transition_video_name
+                  .toLowerCase()
+                  .includes("unlock")
+              );
+              let new_res = [...res, ...pending_2];
+              new_res = new_res.filter((element) => element !== undefined);
+              return new_res;
+            } else {
+              let new_res = [...pending_2];
+              new_res = new_res.filter((element) => element !== undefined);
+              return new_res;
+            }
+          }
+        }
+      }
+    }
   }
 
   if (start_category === "Pranayama Prayer") {
-    return [];
+    let res = handleTransition([
+      "Pranayama Inhale Hands Up Exhale Down",
+      "Pranayama Unlock Legs",
+    ]);
+    res = res.map((transition) => transition.transition_id);
+    res = res.filter((element) => element !== undefined);
+    return res;
   }
 
   if (start_category === "Special") {

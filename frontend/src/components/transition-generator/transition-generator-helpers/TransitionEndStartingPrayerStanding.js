@@ -1,3 +1,16 @@
+const getUniqueTransition = (transition_1) => {
+  let highestTransition_1;
+  if (transition_1.length > 0) {
+    highestTransition_1 = transition_1.reduce((max, current) => {
+      const maxId = parseInt(max.transition_id.split("_")[1]);
+      const currentId = parseInt(current.transition_id.split("_")[1]);
+      return currentId > maxId ? current : max;
+    });
+  } else {
+    highestTransition_1 = transition_1;
+  }
+  return highestTransition_1;
+};
 export const TransitionEndStartingPrayerStanding = async (
   start_category,
   break_status_start,
@@ -6,14 +19,9 @@ export const TransitionEndStartingPrayerStanding = async (
   end_video,
   drm_status
 ) => {
-  if (!start_category) {
-    // first video
-  }
   const filteredTransitions_all = transitions.filter(
     (transition) =>
       transition.drm_transition === drm_status &&
-      transition.asana_category_start === start_category &&
-      transition.asana_category_end === "Starting Prayer Standing" &&
       transition.teacher_mode === end_video.teacher_mode
   );
 
@@ -21,27 +29,43 @@ export const TransitionEndStartingPrayerStanding = async (
     return transitions
       .map((transition) => {
         const filtered = filteredTransitions_all.filter(
-          (t) => t.transi === transition
+          (transitions) => transitions.transition_video_name === transition
         );
         return getUniqueTransition(filtered);
       })
       .filter(Boolean);
   };
 
+  if (!start_category) {
+    let res = handleTransition([
+      "Feet Apart Hands Loose Standing Transition Front",
+      "Prayer Start Standing",
+    ]);
+    res = res.map((transition) => transition.transition_id);
+    res = res.filter((element) => element !== undefined);
+    return res;
+  }
+
   if (start_category === "Closing Prayer Sitting") {
     if (start_video.namaskara_end === true) {
-      return handleTransition([
+      let res = handleTransition([
         "Prayer Sitting Namaskara Unlock",
         "Pranayama Unlock Legs",
         "Sitting To Standing Transition",
         "Prayer Start Standing",
       ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     } else {
-      return handleTransition([
+      let res = handleTransition([
         "Pranayama Unlock Legs",
         "Sitting To Standing Transition",
         "Prayer Start Standing",
       ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
@@ -50,12 +74,15 @@ export const TransitionEndStartingPrayerStanding = async (
   }
 
   if (start_category === "Starting Prayer Sitting") {
-    return handleTransition([
+    let res = handleTransition([
       "Pranayama Inhale Hands Up Exhale Down",
       "Pranayama Unlock Legs",
       "Sitting To Standing Transition",
       "Prayer Start Standing",
     ]);
+    res = res.map((transition) => transition.transition_id);
+    res = res.filter((element) => element !== undefined);
+    return res;
   }
 
   if (start_category === "Starting Prayer Standing") {
@@ -63,99 +90,134 @@ export const TransitionEndStartingPrayerStanding = async (
   }
 
   if (start_category === "Suryanamaskara Stithi") {
-    return handleTransition([
+    let res = handleTransition([
       "Feet Apart Hands Loose Standing Transition Front",
-      "Prayer Start Standing",
     ]);
+    res = res.map((transition) => transition.transition_id);
+    res = res.filter((element) => element !== undefined);
+    return res;
   }
 
   if (start_category === "Suryanamaskara Non Stithi") {
-    return handleTransition([
+    let res = handleTransition([
       "Suryanamaskara Non AI Non Stithi Suffix",
       "Prayer Start Standing",
     ]);
+    res = res.map((transition) => transition.transition_id);
+    res = res.filter((element) => element !== undefined);
+    return res;
   }
 
   if (start_category === "Standing") {
     if (break_status_start === "Break") {
-      return handleTransition(["Prayer Start Standing"]);
+      let res = handleTransition(["Prayer Start Standing"]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
 
     if (break_status_start === "No Break") {
-      return handleTransition([
+      let res = handleTransition([
         "Feet Apart Hands Loose Standing Transition Front",
         "Prayer Start Standing",
       ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Sitting") {
     if (break_status_start === "Break") {
-      return handleTransition([
+      let res = handleTransition([
         "Sitting To Standing Transition",
         "Prayer Start Standing",
       ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_start === "No Break") {
-      return handleTransition([
+      let res = handleTransition([
         "Feet Apart Hands Back Sitting Transition",
         "Sitting To Standing Transition",
         "Prayer Start Standing",
       ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Supine") {
     if (break_status_start === "Break") {
-      return handleTransition([
+      let res = handleTransition([
         "Supine To Standing Transition",
         "Turn Mat Side To Front Standing Transition",
         "Prayer Start Standing",
       ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
 
     if (break_status_start === "No Break") {
-      return handleTransition([
+      let res = handleTransition([
         "Arms Down Feet Apart Supine Transition",
         "Supine To Standing Transition",
         "Turn Mat Side To Front Standing Transition",
         "Prayer Start Standing",
       ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Prone") {
     if (break_status_start === "Break") {
-      return handleTransition([
+      let res = handleTransition([
         "Prone To Standing Transition",
         "Turn Mat Side To Front Standing Transition",
         "Prayer Start Standing",
       ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
 
     if (break_status_start === "No Break") {
-      return handleTransition([
+      let res = handleTransition([
         "Fold Hands Feet Apart Prone Transition",
         "Prone To Standing Transition",
         "Turn Mat Side To Front Standing Transition",
         "Prayer Start Standing",
       ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Vajrasana") {
     if (break_status_start === "Break") {
-      return handleTransition([
+      let res = handleTransition([
         "Vajra To Standing Transition",
         "Prayer Start Standing",
       ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     if (break_status_start === "No Break") {
-      return handleTransition([
+      let res = handleTransition([
         "Vajrasana Dyanmudra To Relax Position",
         "Vajra To Standing Transition",
         "Prayer Start Standing",
       ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
@@ -170,18 +232,24 @@ export const TransitionEndStartingPrayerStanding = async (
   }
 
   if (start_category === "Pranayama Prayer") {
-    return handleTransition([
+    let res = handleTransition([
       "Pranayama Inhale Hands Up Exhale Down",
       "Pranayama Unlock Legs",
       "Sitting To Standing Transition",
       "Prayer Start Standing",
     ]);
+    res = res.map((transition) => transition.transition_id);
+    res = res.filter((element) => element !== undefined);
+    return res;
   }
 
   if (start_category === "Special") {
-    return handleTransition([
+    let res = handleTransition([
       "Feet Apart Hands Loose Standing Transition Front",
       "Prayer Start Standing",
     ]);
+    res = res.map((transition) => transition.transition_id);
+    res = res.filter((element) => element !== undefined);
+    return res;
   }
 };
