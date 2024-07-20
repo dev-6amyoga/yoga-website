@@ -18,7 +18,8 @@ export const TransitionEndSpecial = async (
   break_status_end,
   start_video,
   end_video,
-  drm_status
+  drm_status,
+  transitions
 ) => {
   const filteredTransitions_all = transitions.filter(
     (transition) =>
