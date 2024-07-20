@@ -21,6 +21,9 @@ import {
   Paper,
   FormControlLabel,
   Checkbox,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 
 import { transitionGenerator } from "../../transition-generator/TransitionGenerator";
@@ -29,7 +32,6 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
-import { ArrowDown, ArrowUp } from "@geist-ui/icons";
 import { TransitionEndStanding } from "../../transition-generator/transition-generator-helpers/TransitionEndStanding";
 import { TransitionEndSitting } from "../../transition-generator/transition-generator-helpers/TransitionEndSitting";
 import { TransitionEndSupine } from "../../transition-generator/transition-generator-helpers/TransitionEndSupine";
@@ -49,6 +51,15 @@ function RegisterPlaylistForm() {
   const navigate = useNavigate();
   const [asanas, setAsanas] = useState([]);
   const [transitions, setTransitions] = useState([]);
+  const [names, setNames] = useState([]);
+  const [playlistCurrent, setPlaylistCurrent] = useState([]);
+  const [teacherModeFilter, setTeacherModeFilter] = useState(false);
+  const [drmVideoFilter, setDrmVideoFilter] = useState(false);
+  const handleTeacherModeFilterChange = (event) => {
+    setTeacherModeFilter(event.target.checked);
+  };
+  const [sortedAsanas, setSortedAsanas] = useState([]);
+
   const predefinedOrder = [
     "Starting Prayer Standing",
     "Surynamaskara Non Stithi",
@@ -63,7 +74,6 @@ function RegisterPlaylistForm() {
     "Special",
     "Closing Prayer Sitting",
   ];
-  const [sortedAsanas, setSortedAsanas] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -93,6 +103,21 @@ function RegisterPlaylistForm() {
   }, []);
 
   useEffect(() => {
+    const newNames = playlistCurrent.map((id) => {
+      if (typeof id === "string") {
+        const transition = transitions.find((t) => t.transition_id === id);
+        return transition
+          ? transition.transition_video_name
+          : "Unknown Transition";
+      } else {
+        const asana = asanas.find((a) => a.id === id);
+        return asana ? asana.asana_name : "Unknown Asana";
+      }
+    });
+    setNames(newNames);
+  }, [playlistCurrent, asanas, transitions]);
+
+  useEffect(() => {
     const s1 = asanas.sort((a, b) => {
       return (
         predefinedOrder.indexOf(a.asana_category) -
@@ -101,8 +126,6 @@ function RegisterPlaylistForm() {
     });
     setSortedAsanas(s1);
   }, [asanas]);
-
-  const [playlistCurrent, setPlaylistCurrent] = useState([]);
 
   const fetchAsanaById = async (id) => {
     try {
@@ -541,12 +564,6 @@ function RegisterPlaylistForm() {
     };
   });
 
-  const [teacherModeFilter, setTeacherModeFilter] = useState(false);
-  const [drmVideoFilter, setDrmVideoFilter] = useState(false);
-  const handleTeacherModeFilterChange = (event) => {
-    setTeacherModeFilter(event.target.checked);
-  };
-
   const handleDrmVideoFilterChange = (event) => {
     setDrmVideoFilter(event.target.checked);
   };
@@ -566,7 +583,6 @@ function RegisterPlaylistForm() {
   return (
     <div>
       <div>
-        {/* Filter Options */}
         <div className="filter-options flex flex-col gap-4 mb-4">
           <FormControlLabel
             control={
@@ -636,161 +652,18 @@ function RegisterPlaylistForm() {
             );
           })}
         </div>
+
+        <div>
+          <List>
+            {names.map((name, index) => (
+              <ListItem key={index}>
+                <ListItemText primary={name} />
+              </ListItem>
+            ))}
+          </List>
+        </div>
       </div>
     </div>
-    // <div className="">
-    //   <div className="grid grid-cols-3 gap-4">
-    //     <div className="flex flex-row">
-    //       <Toggle
-    //         initialChecked={showTeacherMode}
-    //         onChange={() => setShowTeacherMode((prevMode) => !prevMode)}
-    //       />
-    //       <Text h6>{showTeacherMode ? "Teacher Mode" : "Normal Mode"}</Text>
-    //     </div>
-    //     <div className="flex flex-row">
-    //       <Toggle
-    //         initialChecked={showDrm}
-    //         onChange={() => setShowDrm((prevMode) => !prevMode)}
-    //       />
-    //       <Text h6>{showDrm ? "DRM Videos" : "Non DRM Videos"}</Text>
-    //     </div>
-    //     <Spacer />
-    //     <Collapse.Group className="col-span-2 col-start-1">
-    //       {filteredAsanasByCategory.map((categoryData, index) => (
-    //         <Collapse title={categoryData.category} key={index}>
-    //           <Table data={categoryData.asanas} className="bg-white">
-    //             <Table.Column prop="asana_name" label="Asana Name" />
-    //             {/* <Table.Column
-    //               prop="language"
-    //               label="Language"
-    //               render={(data) => {
-    //                 if (data === "") {
-    //                   return "No Audio";
-    //                 }
-    //                 return data.language;
-    //               }}
-    //             /> */}
-    //             <Table.Column
-    //               prop="nobreak_asana"
-    //               label="No Break?"
-    //               render={(data) => {
-    //                 if (data) {
-    //                   return "Yes";
-    //                 } else {
-    //                   return "No";
-    //                 }
-    //               }}
-    //             />
-    //             <Table.Column prop="asana_category" label="Category" />
-    //             <Table.Column
-    //               prop="in_playlist"
-    //               label="Add To Playlist"
-    //               width={150}
-    //               render={renderAction2}
-    //             />
-    //           </Table>
-    //         </Collapse>
-    //       ))}
-    //     </Collapse.Group>
-
-    //     <Card width={40}>
-    //       <Table data={playlist_temp}>
-    //         <Table.Column
-    //           prop="rowData.asana_name"
-    //           label="Asana Name"
-    //           render={(_, rowData) => {
-    //             return (
-    //               <p>
-    //                 {rowData.rowData.asana_name
-    //                   ? rowData.rowData.asana_name
-    //                   : rowData.rowData.transition_video_name || ""}
-    //               </p>
-    //             );
-    //           }}
-    //         />
-    //         <Table.Column
-    //           prop="rowData.asana_category"
-    //           label="Category"
-    //           render={(_, rowData) => {
-    //             return <p>{rowData.rowData.asana_category}</p>;
-    //           }}
-    //         />
-    //         <Table.Column
-    //           prop="rowData.teacher_mode"
-    //           label="Mode"
-    //           render={(_, rowData) => {
-    //             return (
-    //               <p>{rowData.rowData.teacher_mode ? "Teacher" : "Normal"}</p>
-    //             );
-    //           }}
-    //         />
-    //         <Table.Column prop="count" label="Count" />
-    //         <Table.Column
-    //           prop="reorder"
-    //           label="Reorder"
-    //           width={150}
-    //           render={(value, rowData, index) => {
-    //             if (rowData.rowData?.asana_name) {
-    //               return asanaIcons(value, rowData, index);
-    //             } else {
-    //               return null;
-    //             }
-    //           }}
-    //         />
-
-    //         <Table.Column
-    //           prop="operations"
-    //           label="ACTIONS"
-    //           width={150}
-    //           render={(value, rowData) => {
-    //             if (rowData.rowData?.asana_name) {
-    //               return renderAction(value, rowData);
-    //             } else {
-    //               return null;
-    //             }
-    //           }}
-    //         />
-    //       </Table>
-    //       <Divider />
-    //       <form
-    //         className="my-10 flex-col items-center justify-center space-y-10"
-    //         onSubmit={handleSubmit}
-    //       >
-    //         <Input width="100%" id="playlist_name">
-    //           Playlist Name
-    //         </Input>
-    //         <br />
-    //         <br />
-    //         <Text>
-    //           Playlist Duration : {(totalDuration / 60).toFixed(2)} minutes
-    //         </Text>
-
-    //         <Button htmlType="submit">Submit</Button>
-    //       </form>
-    //     </Card>
-    //   </div>
-
-    //   <Modal visible={modalState} onClose={() => setModalState(false)}>
-    //     <Modal.Title>Update</Modal.Title>
-    //     <Modal.Subtitle>{modalData.rowData.asana_name}</Modal.Subtitle>
-    //     <Modal.Content>
-    //       <form>
-    //         <Input
-    //           width="100%"
-    //           id="asana_count_playlist"
-    //           placeholder={modalData.count}
-    //           onChange={handleInputChange}
-    //         >
-    //           Count
-    //         </Input>
-    //       </form>
-    //     </Modal.Content>
-    //     <Modal.Action passive onClick={() => setModalState(false)}>
-    //       Cancel
-    //     </Modal.Action>
-    //     <Modal.Action onClick={updateData}>Update</Modal.Action>
-    //   </Modal>
-    // </div>
   );
 }
 
