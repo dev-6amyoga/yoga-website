@@ -31,6 +31,8 @@ router.post("/update", authenticateToken, async (req, res) => {
 	console.log("WatchTime /update");
 	const { institute_id, watch_time_logs, updated_at, playlist_id } = req.body;
 
+	console.log(req.body);
+
 	const { user_id } = req.user;
 
 	// validate request
@@ -65,6 +67,8 @@ router.post("/update", authenticateToken, async (req, res) => {
 				.status(HTTP_BAD_REQUEST)
 				.json({ message: error || "User currenly has no active plan" });
 		}
+
+		console.log("User plan found", user_plan);
 
 		// reduce it to unique asana_id, playlist_id
 		let reduced_watch_time = [];
@@ -105,7 +109,6 @@ router.post("/update", authenticateToken, async (req, res) => {
 			duration
 		}
 		*/
-		// start a db session
 
 		const promises = [];
 		reduced_watch_time.forEach((wtl) => {
@@ -141,14 +144,17 @@ router.post("/update", authenticateToken, async (req, res) => {
 		let quota =
 			user_plan?.plan?.watch_time_limit || user_plan?.plan?.watchHours;
 
+		let user_plan_id = user_plan?.user_plan_id || user_plan?._id;
+
 		let updatedWatchTimeQuota = await WatchTimeQuota.findOneAndUpdate(
 			{
-				user_plan_id: user_plan?.user_plan_id,
+				user_plan_id: mongoose.isValidObjectId(user_plan_id)
+					? new mongoose.Types.ObjectId(user_plan_id).toString()
+					: String(user_plan_id),
 			},
 			[
 				{
 					$project: {
-						user_plan_id: user_plan?.user_plan_id,
 						quota: {
 							$subtract: [
 								{ $ifNull: ["$quota", quota] },
