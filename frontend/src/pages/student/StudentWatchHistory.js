@@ -168,8 +168,8 @@ function StudentWatchHistory() {
 	// const done = subtractTimes(watchTimeLimit, watchTimeAll);
 	// const pendingTime = formatHMS(done);
 
-	const userTestimonials = useMemo(
-		() => [
+	const userTestimonials = useMemo(() => {
+		let testimonials = [
 			{
 				name: "All Time",
 				testimonial: watchTimeAllString,
@@ -178,13 +178,18 @@ function StudentWatchHistory() {
 				name: "Today",
 				testimonial: watchTimeTodayString,
 			},
-			{
+		];
+
+		if (activePlan) {
+			testimonials.push({
 				name: activePlan,
 				testimonial: formatHMS,
-			},
+			});
+		}
 
-			...customUserPlans.map((plan) => {
-				console.log(plan.quota);
+		if (customUserPlans.length > 0) {
+			customUserPlans.forEach((plan) => {
+				// console.log(plan.quota);
 				const { hours, minutes, seconds } = convertSecondsToHMS(
 					plan.quota
 				);
@@ -193,20 +198,21 @@ function StudentWatchHistory() {
 				const mm = String(minutes).padStart(2, "0");
 				const ss = String(seconds).padStart(2, "0");
 
-				return {
-					name: plan.plan.plan_name,
+				testimonials.push({
+					name: `Time Left : ${plan.plan.plan_name}`,
 					testimonial: <DisplayWatchTime hh={hh} mm={mm} ss={ss} />,
-				};
-			}),
-		],
-		[
-			watchTimeAllString,
-			watchTimeTodayString,
-			activePlan,
-			formatHMS,
-			customUserPlans,
-		]
-	);
+				});
+			});
+		}
+
+		return testimonials;
+	}, [
+		watchTimeAllString,
+		watchTimeTodayString,
+		activePlan,
+		formatHMS,
+		customUserPlans,
+	]);
 
 	const [mode, setMode] = useState("light");
 
