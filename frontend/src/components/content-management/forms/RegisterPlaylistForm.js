@@ -24,6 +24,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  ListItemSecondaryAction,
 } from "@mui/material";
 
 import { transitionGenerator } from "../../transition-generator/TransitionGenerator";
@@ -580,6 +581,58 @@ function RegisterPlaylistForm() {
     }))
     .filter((category) => category.asanas.length > 0);
 
+  const filterAsanas = (playlist) => {
+    return playlist.filter((id) => typeof id === "number");
+  };
+
+  const handleUp = async (index) => {
+    toast(index);
+    if (
+      index > 0 &&
+      typeof playlistCurrent[index] === "number" &&
+      typeof playlistCurrent[index - 1] === "number"
+    ) {
+      const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
+      console.log(asanasOnlyPlaylist);
+      const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
+      [asanasOnlyPlaylist[asanaIndex - 1], asanasOnlyPlaylist[asanaIndex]] = [
+        asanasOnlyPlaylist[asanaIndex],
+        asanasOnlyPlaylist[asanaIndex - 1],
+      ];
+      console.log(asanasOnlyPlaylist);
+      //   await recalculateTransitions(asanasOnlyPlaylist);
+    }
+  };
+
+  const handleDown = async (index) => {
+    toast(index);
+
+    // if (
+    //   index < playlistCurrent.length - 1 &&
+    //   typeof playlistCurrent[index] === "number" &&
+    //   typeof playlistCurrent[index + 1] === "number"
+    // ) {
+    //   const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
+    //   const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
+    //   [asanasOnlyPlaylist[asanaIndex + 1], asanasOnlyPlaylist[asanaIndex]] =
+    //     [
+    //       asanasOnlyPlaylist[asanaIndex],
+    //       asanasOnlyPlaylist[asanaIndex + 1],
+    //     ];
+    //   await recalculateTransitions(asanasOnlyPlaylist);
+    // }
+  };
+
+  const handleDelete = async (index) => {
+    toast(index);
+
+    // if (typeof playlistCurrent[index] === "number") {
+    //   const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
+    //   const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
+    //   asanasOnlyPlaylist.splice(asanaIndex, 1);
+    //   await recalculateTransitions(asanasOnlyPlaylist);
+    // }
+  };
   return (
     <div>
       <div>
@@ -608,59 +661,69 @@ function RegisterPlaylistForm() {
           />
         </div>
 
-        <div>
-          {filteredCategories.map((x, index) => {
-            return (
-              <Accordion className="flex flex-col gap-2">
-                <AccordionSummary
-                  expandIcon={<ExpandMore />}
-                  aria-controls="panel1-content"
-                  id="panel1-header"
-                >
-                  {x.category}
-                </AccordionSummary>
-                <AccordionDetails>
-                  {/* {x.asanas.map((x) => {
+        <div className="flex flex-row gap-3">
+          <div>
+            {filteredCategories.map((x, index) => {
+              return (
+                <Accordion className="flex flex-col gap-2">
+                  <AccordionSummary
+                    expandIcon={<ExpandMore />}
+                    aria-controls="panel1-content"
+                    id="panel1-header"
+                  >
+                    {x.category}
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    {/* {x.asanas.map((x) => {
                     return <div>{x.asana_name}</div>;
                   })} */}
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Asana Name</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {x.asanas.map((asana, idx) => (
-                          <TableRow key={idx}>
-                            <TableCell>{asana.asana_name}</TableCell>
-                            <Button
-                              variant="contained"
-                              onClick={() => {
-                                addToPlaylist(asana);
-                              }}
-                            >
-                              Add
-                            </Button>
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Asana Name</TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </AccordionDetails>
-              </Accordion>
-            );
-          })}
-        </div>
-
-        <div>
-          <List>
-            {names.map((name, index) => (
-              <ListItem key={index}>
-                <ListItemText primary={name} />
-              </ListItem>
-            ))}
-          </List>
+                        </TableHead>
+                        <TableBody>
+                          {x.asanas.map((asana, idx) => (
+                            <TableRow key={idx}>
+                              <TableCell>{asana.asana_name}</TableCell>
+                              <Button
+                                variant="contained"
+                                onClick={() => {
+                                  addToPlaylist(asana);
+                                }}
+                              >
+                                Add
+                              </Button>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </AccordionDetails>
+                </Accordion>
+              );
+            })}
+          </div>
+          <div>
+            <List>
+              {names.map((name, index) => (
+                <ListItem key={index}>
+                  <ListItemText primary={name} />
+                  {typeof playlistCurrent[index] === "number" && (
+                    <ListItemSecondaryAction>
+                      <Button onClick={() => handleUp(index)}>Up</Button>
+                      <Button onClick={() => handleDown(index)}>Down</Button>
+                      <Button onClick={() => handleDelete(index)}>
+                        Delete
+                      </Button>
+                    </ListItemSecondaryAction>
+                  )}
+                </ListItem>
+              ))}
+            </List>
+          </div>
         </div>
       </div>
     </div>
