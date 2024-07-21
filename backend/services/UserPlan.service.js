@@ -625,7 +625,7 @@ const GetPlanForWatchQuotaDeduction = async (
 				},
 				{
 					$match: {
-						"custom_plan.playlists": {
+						"plan.playlists": {
 							$elemMatch: {
 								[playlist_id]: { $exists: true },
 							},
