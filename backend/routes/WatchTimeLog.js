@@ -146,11 +146,19 @@ router.post("/update", authenticateToken, async (req, res) => {
 
 		let user_plan_id = user_plan?.user_plan_id || user_plan?._id;
 
+		// console.log(user_plan_id, {
+		// 	user_plan_id:
+		// 		typeof user_plan_id === "number"
+		// 			? String(user_plan_id)
+		// 			: new mongoose.Types.ObjectId(user_plan_id).toString(),
+		// });
+
 		let updatedWatchTimeQuota = await WatchTimeQuota.findOneAndUpdate(
 			{
-				user_plan_id: mongoose.isValidObjectId(user_plan_id)
-					? new mongoose.Types.ObjectId(user_plan_id).toString()
-					: String(user_plan_id),
+				user_plan_id:
+					typeof user_plan_id === "number"
+						? String(user_plan_id)
+						: new mongoose.Types.ObjectId(user_plan_id).toString(),
 			},
 			[
 				{
@@ -162,6 +170,7 @@ router.post("/update", authenticateToken, async (req, res) => {
 								total_watch_time,
 							],
 						},
+						__v: true,
 					},
 				},
 			],
@@ -329,7 +338,7 @@ router.post("/get-quota", async (req, res) => {
 
 		user_plan = user_plan?.toJSON();
 
-		if (error) {
+		if (error && error !== "User does not have a plan") {
 			return res.status(HTTP_BAD_REQUEST).json({ message: error });
 		}
 
