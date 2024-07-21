@@ -101,7 +101,14 @@ const useWatchHistoryStore = create((set, get) => ({
 				}
 			})
 			.catch((err) => {
-				console.log(err);
+				console.log(err, err?.response?.data?.message);
+
+				if (
+					err?.response?.data?.message ===
+					"Could not update watch time quota"
+				) {
+				}
+
 				localStorage.setItem(
 					"6amyoga_watch_time_logs",
 					JSON.stringify(watch_time_logs)
