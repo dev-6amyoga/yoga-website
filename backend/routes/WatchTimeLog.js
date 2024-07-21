@@ -155,6 +155,7 @@ router.post("/update", authenticateToken, async (req, res) => {
 			[
 				{
 					$project: {
+						user_plan_id: true,
 						quota: {
 							$subtract: [
 								{ $ifNull: ["$quota", quota] },
