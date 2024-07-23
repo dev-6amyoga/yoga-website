@@ -124,7 +124,7 @@ function LoginIndex() {
 			const refresh_token =
 				cookies[SIXAMYOGA_REFRESH_TOKEN] || refreshToken;
 
-			console.log("[INIT] Tokens", access_token, refresh_token);
+			// console.log("[INIT] Tokens", access_token, refresh_token);
 
 			if (access_token && refresh_token) {
 				console.log("[INIT] Tokens available");
