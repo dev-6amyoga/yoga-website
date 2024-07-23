@@ -23,11 +23,11 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import html2pdf from "html2pdf.js";
+import { useNavigate } from "react-router-dom";
 import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
 import { ROLE_STUDENT } from "../../enums/roles";
 import { withAuth } from "../../utils/withAuth";
 import Hero from "./components/Hero";
-import { useNavigate } from "react-router-dom";
 
 const allowedCountriesCurrencyMap = {
 	IND: "INR",
@@ -377,7 +377,7 @@ function StudentPlan() {
 			console.log(
 				discount_coupon,
 				isCustom,
-				isCustom ? customCardData.custom_plan_id : cardData.plan_id
+				isCustom ? customCardData._id : cardData.plan_id
 			);
 			const res = await Fetch({
 				url: "/discount-coupon/check-plan-mapping",
@@ -386,7 +386,7 @@ function StudentPlan() {
 				data: {
 					coupon_name: discount_coupon,
 					is_custom_plan: isCustom,
-					plan_id: isCustom ? 12 : cardData.plan_id,
+					plan_id: isCustom ? customCardData._id : cardData.plan_id,
 				},
 			});
 
@@ -398,7 +398,7 @@ function StudentPlan() {
 			}
 			return new Error(res?.data?.message);
 		} catch (err) {
-			// console.log(err);
+			console.log(err);
 			if (err?.response?.data?.error) {
 				return new Error(err?.response?.data?.error);
 			} else {

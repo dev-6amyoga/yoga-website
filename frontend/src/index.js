@@ -287,8 +287,8 @@ function LoginIndex() {
 								// console.log(err);
 								setAccessToken(null);
 								setRefreshToken(null);
-								removeCookie(SIXAMYOGA_ACCESS_TOKEN);
-								removeCookie(SIXAMYOGA_REFRESH_TOKEN);
+								// removeCookie(SIXAMYOGA_ACCESS_TOKEN);
+								// removeCookie(SIXAMYOGA_REFRESH_TOKEN);
 							}
 							break;
 						// refresh token expired
