@@ -158,7 +158,7 @@ router.post("/update", authenticateToken, async (req, res) => {
 				user_plan_id:
 					typeof user_plan_id === "number"
 						? String(user_plan_id)
-						: new mongoose.Types.ObjectId(user_plan_id).toString(),
+						: new mongoose.Schema.Types.ObjectId(user_plan_id).toString(),
 			},
 			[
 				{

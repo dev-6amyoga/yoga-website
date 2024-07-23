@@ -11,7 +11,9 @@ export default function ApplicablePlansForm({
 	getUpdatedCoupon,
 }) {
 	const [plans, setPlans] = useState([]);
-	const [selectedPlans, setSelectedPlans] = useState(null);
+	const [selectedPlans, setSelectedPlans] = useState([]);
+	const [selectedCustomPlans, setSelectedCustomPlans] = useState([]);
+	const [customPlans, setCustomPlans] = useState([]);
 	// FULLDISCOUNT100;
 
 	useEffect(() => {
@@ -31,100 +33,139 @@ export default function ApplicablePlansForm({
 
 	useEffect(() => {
 		// get all custom plans
+		const fetchCustomPlans = () => {
+			Fetch({
+				url: "/customPlan/getAllCustomPlans",
+			})
+				.then((res) => {
+					setCustomPlans(res.data?.custom_plans ?? []);
+				})
+				.catch((err) => {
+					toast("Error fetching custom plans", { type: "error" });
+				});
+		};
+
+		fetchCustomPlans();
 	}, []);
 
-	useEffect(() => {
-		console.log(plans);
-	}, [plans]);
+	// useEffect(() => {
+	// 	console.log(plans);
+	// }, [plans]);
 
-	const handleSelectPlan = (val) => {
-		setSelectedPlans(val);
-	};
+	// useEffect(() => {
+	// 	if (selectedPlans != null) {
+	// 		let promises = [];
+	// 		selectedPlans.forEach((pid) => {
+	// 			promises.push(
+	// 				Fetch({
+	// 					url: "/discount-coupon/add-plan-mapping",
+	// 					method: "POST",
+	// 					data: {
+	// 						discount_coupon_id: coupon?.discount_coupon_id,
+	// 						plan_id: pid,
+	// 					},
+	// 				})
+	// 					.then((res) => {
+	// 						toast(res?.data?.message, { type: "success" });
+	// 					})
+	// 					.catch((err) => {
+	// 						console.log(err);
+	// 						toast(err?.response?.data?.message, {
+	// 							type: "error",
+	// 						});
+	// 					})
+	// 			);
+	// 		});
 
-	useEffect(() => {
-		if (selectedPlans != null) {
-			let promises = [];
-			selectedPlans.forEach((pid) => {
-				promises.push(
-					Fetch({
-						url: "/discount-coupon/add-plan-mapping",
-						method: "POST",
-						data: {
-							discount_coupon_id: coupon?.discount_coupon_id,
-							plan_id: pid,
-						},
-					})
-						.then((res) => {
-							toast(res?.data?.message, { type: "success" });
-						})
-						.catch((err) => {
-							console.log(err);
-							toast(err?.response?.data?.message, {
-								type: "error",
-							});
-						})
-				);
-			});
-
-			Promise.all(promises)
-				.then((values) => {})
-				.catch((err) => {});
-			getUpdatedCoupon(coupon?.discount_coupon_id);
-		}
-	}, [selectedPlans]);
+	// 		Promise.all(promises)
+	// 			.then((values) => {})
+	// 			.catch((err) => {});
+	// 		getUpdatedCoupon(coupon?.discount_coupon_id);
+	// 	}
+	// }, [selectedPlans]);
 
 	const handleAddPlanMapping = (e) => {
 		e.preventDefault();
 
-		if (!selectedPlans) {
+		if (
+			selectedPlans === null ||
+			selectedCustomPlans === null ||
+			(selectedPlans.length === 0 && selectedCustomPlans.length === 0)
+		) {
 			toast("Please select a plan", { type: "error" });
 			return;
 		}
-		let promises = [];
-		if (selectedPlans.includes("all-plans")) {
-			setSelectedPlans(plans.map((plan) => String(plan?.plan_id)));
-		}
-		console.log(selectedPlans);
-		if (selectedPlans.includes("all-plans")) {
-			console.log("oh no");
-		} else {
-			console.log("oh yes");
-			selectedPlans.forEach((pid) => {
-				promises.push(
-					Fetch({
-						url: "/discount-coupon/add-plan-mapping",
-						method: "POST",
-						data: {
-							discount_coupon_id: coupon?.discount_coupon_id,
-							plan_id: pid,
-						},
-					})
-						.then((res) => {
-							toast(res?.data?.message, { type: "success" });
-						})
-						.catch((err) => {
-							console.log(err);
-							toast(err?.response?.data?.message, {
-								type: "error",
-							});
-						})
-				);
-			});
 
-			Promise.all(promises)
-				.then((values) => {})
-				.catch((err) => {});
-			getUpdatedCoupon(coupon?.discount_coupon_id);
+		let promises = [];
+
+		let finalPlans = [];
+
+		if (selectedPlans.includes("all-plans")) {
+			finalPlans = [
+				...plans.map((plan) => ({
+					plan_id: plan?.plan_id,
+					is_custom_plan: false,
+				})),
+			];
+		} else {
+			finalPlans = [
+				...selectedPlans.map((pid) => ({
+					plan_id: pid,
+					is_custom_plan: false,
+				})),
+			];
 		}
+
+		if (selectedCustomPlans.includes("all-custom-plans")) {
+			finalPlans = [
+				...finalPlans,
+				...customPlans.map((plan) => ({
+					plan_id: String(plan?._id),
+					is_custom_plan: true,
+				})),
+			];
+		} else {
+			finalPlans = [
+				...finalPlans,
+				...selectedCustomPlans.map((pid) => ({
+					plan_id: pid,
+					is_custom_plan: true,
+				})),
+			];
+		}
+
+		finalPlans.forEach((plan) => {
+			promises.push(
+				Fetch({
+					url: "/discount-coupon/add-plan-mapping",
+					method: "POST",
+					data: {
+						discount_coupon_id: coupon?.discount_coupon_id,
+						plan_id: plan.plan_id,
+						is_custom_plan: plan.is_custom_plan,
+					},
+				})
+			);
+		});
+
+		Promise.all(promises)
+			.then((values) => {
+				getUpdatedCoupon(coupon?.discount_coupon_id);
+			})
+			.catch((err) => {
+				console.log(err);
+				toast.error("Failed to add plan mapping");
+			});
 	};
 
-	const handleRemovePlanMapping = (plan_id) => {
+	const handleRemovePlanMapping = (plan_id, is_custom_plan = false) => {
 		Fetch({
 			url: "/discount-coupon/remove-plan-mapping",
 			method: "POST",
 			data: {
 				discount_coupon_id: coupon?.discount_coupon_id,
 				plan_id: plan_id,
+				is_custom_plan,
 			},
 		})
 			.then((res) => {
@@ -135,6 +176,7 @@ export default function ApplicablePlansForm({
 				toast(err.response?.data?.message, { type: "error" });
 			});
 	};
+
 	const handleDownload = (data1) => {
 		const csv = Papa.unparse(data1);
 		const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -149,6 +191,7 @@ export default function ApplicablePlansForm({
 			document.body.removeChild(link);
 		}
 	};
+
 	return (
 		<Modal visible={visible} onClose={() => setVisible(false)}>
 			<Modal.Title>Applicable Plans</Modal.Title>
@@ -196,7 +239,58 @@ export default function ApplicablePlansForm({
 							/>
 						</Table>
 					) : (
-						<p>No applicable plans</p>
+						<p className="text-sm">No applicable plans</p>
+					)}
+					<Divider />
+
+					<h4>Current Custom Plans</h4>
+					{coupon.discount_coupon_applicable_custom_plans &&
+					coupon.discount_coupon_applicable_custom_plans.length >
+						0 ? (
+						<Table
+							data={
+								coupon.discount_coupon_applicable_custom_plans
+							}>
+							<Table.Column
+								prop="plan._id"
+								label="Plan ID"
+								render={(val, row, idx) => (
+									<p>{row?.plan?._id}</p>
+								)}
+							/>
+							<Table.Column
+								prop="plan.plan_name"
+								label="Plan Name"
+								render={(val, row, idx) => (
+									<p>{row?.plan?.plan_name}</p>
+								)}
+							/>
+							{/* <Table.Column
+								prop="plan.plan_user_type"
+								label="Plan User Type"
+								render={(val, row, idx) => (
+									<p>{row?.plan?.plan_user_type}</p>
+								)}
+							/> */}
+							<Table.Column
+								label="Actions"
+								render={(val, row, idx) => (
+									<Button
+										scale={0.4}
+										width={0.4}
+										onClick={() =>
+											handleRemovePlanMapping(
+												row.plan._id,
+												true
+											)
+										}>
+										Remove
+									</Button>
+								)}
+							/>
+						</Table>
+					) : (
+						<p className="text-sm">No applicable custom plans</p>
 					)}
 				</div>
 
@@ -209,18 +303,37 @@ export default function ApplicablePlansForm({
 					<Select
 						multiple
 						placeholder="Choose Plan"
-						onChange={handleSelectPlan}>
+						onChange={(val) => setSelectedPlans(val)}>
 						<Select.Option key="all-plans" value="all-plans">
 							All Plans
 						</Select.Option>
 						{plans?.map((plan) => (
 							<Select.Option
 								key={"plan" + plan?.plan_id}
-								value={String(plan?.plan_id)}>
+								value={plan?.plan_id}>
 								{plan?.name} [id: {plan?.plan_id}]
 							</Select.Option>
 						))}
 					</Select>
+
+					<Select
+						multiple
+						placeholder="Choose Custom Plan"
+						onChange={(val) => setSelectedCustomPlans(val)}>
+						<Select.Option
+							key="all-custom-plans"
+							value="all-custom-plans">
+							All Custom Plans
+						</Select.Option>
+						{customPlans?.map((plan) => (
+							<Select.Option
+								key={"custom-plan" + plan?._id}
+								value={String(plan?._id)}>
+								{plan?.plan_name} [id: {plan?._id}]
+							</Select.Option>
+						))}
+					</Select>
+
 					<Button htmlType="submit">Add Plan</Button>
 				</form>
 			</Modal.Content>
