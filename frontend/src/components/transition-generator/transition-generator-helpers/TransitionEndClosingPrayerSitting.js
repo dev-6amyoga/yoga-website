@@ -222,7 +222,7 @@ export const TransitionEndClosingPrayerSitting = async (
   }
 
   if (start_category === "Pranayama") {
-    let res1 = handleTransition(["Pranayama Inhale Arms Up Exhale Namaskara"]);
+    // let res1 = handleTransition(["Pranayama Inhale Arms Up Exhale Namaskara"]);
     const pending_2 = res1;
     if (start_video.vibhagiya) {
       if (start_video.vibhagiya === "Abdomen") {
@@ -306,7 +306,7 @@ export const TransitionEndClosingPrayerSitting = async (
         return new_res;
       }
     } else {
-      if (pranayama.omkara) {
+      if (start_video.omkara) {
         let res = [];
         for (var i = 0; i !== filteredTransitions_all.length; i++) {
           if (filteredTransitions_all[i]) {
@@ -325,9 +325,11 @@ export const TransitionEndClosingPrayerSitting = async (
         }
         let new_res = [...res, ...pending_2];
         new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
+
         return new_res;
       } else {
-        if (pranayama.nose_lock_start && pranayama.nose_lock_end) {
+        if (start_video.nose_lock_start && start_video.nose_lock_end) {
           let res = [];
           for (var i = 0; i !== filteredTransitions_all.length; i++) {
             let transition_ind = filteredTransitions_all[i];
@@ -344,9 +346,11 @@ export const TransitionEndClosingPrayerSitting = async (
           );
           let new_res = [...res, ...pending_2];
           new_res = new_res.filter((element) => element !== undefined);
+          new_res = new_res.map((transition) => transition.transition_id);
+
           return new_res;
         } else {
-          if (pranayama.chin_lock_start && pranayama.chin_lock_end) {
+          if (start_video.chin_lock_start && start_video.chin_lock_end) {
             let res = [];
             for (var i = 0; i !== filteredTransitions_all.length; i++) {
               let transition_ind = filteredTransitions_all[i];
@@ -363,9 +367,10 @@ export const TransitionEndClosingPrayerSitting = async (
             );
             let new_res = [...res, ...pending_2];
             new_res = new_res.filter((element) => element !== undefined);
+            new_res = new_res.map((transition) => transition.transition_id);
             return new_res;
           } else {
-            if (pranayama.shanmuga_start && pranayama.shanmuga_end) {
+            if (start_video.shanmuga_start && start_video.shanmuga_end) {
               // add bhramari lock and unlock
               let res = [];
               for (var i = 0; i !== filteredTransitions_all.length; i++) {
@@ -385,10 +390,14 @@ export const TransitionEndClosingPrayerSitting = async (
               );
               let new_res = [...res, ...pending_2];
               new_res = new_res.filter((element) => element !== undefined);
+              new_res = new_res.map((transition) => transition.transition_id);
               return new_res;
             } else {
+              console.log(pending_2);
               let new_res = [...pending_2];
+              console.log(new_res);
               new_res = new_res.filter((element) => element !== undefined);
+              new_res = new_res.map((transition) => transition.transition_id);
               return new_res;
             }
           }
