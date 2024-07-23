@@ -127,7 +127,7 @@ function StudentPlan() {
     const formData = getFormData(e);
 
     const discount_coupon = formData?.discount_coupon;
-
+    console.log(discount_coupon);
     const error = await validateDiscountCoupon(discount_coupon);
 
     if (error) {
@@ -361,16 +361,30 @@ function StudentPlan() {
 
   const validateDiscountCoupon = async (discount_coupon) => {
     if (!discount_coupon) {
+      console.log("invalid ya!");
       return new Error("Invalid discount coupon");
     }
     try {
+      console.log("fetching now");
+      let isCustom = false;
+      if (showCustomCard) {
+        isCustom = true;
+      } else if (showCard) {
+        isCustom = false;
+      }
+      console.log(
+        discount_coupon,
+        isCustom,
+        isCustom ? customCardData.custom_plan_id : cardData.plan_id
+      );
       const res = await Fetch({
         url: "/discount-coupon/check-plan-mapping",
         method: "POST",
         token: true,
         data: {
           coupon_name: discount_coupon,
-          plan_id: cardData.plan_id,
+          custom_plan: isCustom,
+          plan_id: isCustom ? 12 : cardData.plan_id,
         },
       });
 

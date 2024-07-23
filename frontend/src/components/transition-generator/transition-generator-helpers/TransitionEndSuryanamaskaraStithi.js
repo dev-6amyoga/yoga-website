@@ -110,7 +110,8 @@ export const TransitionEndSuryanamaskaraStithi = async (
   if (start_category === "Suryanamaskara Non Stithi") {
     let res = handleTransition([
       "Suryanamaskara Non AI Non Stithi Suffix",
-      "Suryanamaskara Preparation And Mantra Stithi Type",
+      "Feet Apart Hands Loose Standing Transition Front",
+      "Feet Together Hands Tight Standing Transition Front",
     ]);
     res = res.map((transition) => transition.transition_id);
     res = res.filter((element) => element !== undefined);
