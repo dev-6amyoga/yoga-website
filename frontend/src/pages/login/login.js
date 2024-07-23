@@ -16,7 +16,13 @@ import {
 	Typography,
 } from "@mui/material";
 import Button from "@mui/material/Button";
+import { add } from "date-fns";
+import { useCookies } from "react-cookie";
 import LoginGoogle from "../../components/auth/LoginGoogle";
+import {
+	SIXAMYOGA_ACCESS_TOKEN,
+	SIXAMYOGA_REFRESH_TOKEN,
+} from "../../enums/cookies";
 import getFormData from "../../utils/getFormData";
 
 export default function Login({ switchForm }) {
@@ -29,6 +35,11 @@ export default function Login({ switchForm }) {
 	const [emailVerify, setEmailVerify] = useState(false);
 	const [forgotPasswordVisible, setForgotPasswordVisible] = useState(false);
 	const [searchParams, setSearchParams] = useSearchParams();
+
+	const [cookies, setCookie, removeCookie] = useCookies([
+		SIXAMYOGA_ACCESS_TOKEN,
+		SIXAMYOGA_REFRESH_TOKEN,
+	]);
 
 	const [
 		user,
@@ -119,24 +130,29 @@ export default function Login({ switchForm }) {
 				);
 				setInstitutes(ins);
 				setCurrentInstituteId(ins[0]?.institute_id);
-				sessionStorage.setItem(
-					"6amyoga_access_token",
-					userData?.accessToken
-				);
-				sessionStorage.setItem(
-					"6amyoga_refresh_token",
-					userData?.refreshToken
-				);
+
+				const access_token = userData?.accessToken;
+				const refresh_token = userData?.refreshToken;
+
+				setCookie(SIXAMYOGA_ACCESS_TOKEN, access_token, {
+					expires: add(new Date(), { hours: 1, minutes: 59 }),
+				});
+
+				setCookie(SIXAMYOGA_REFRESH_TOKEN, refresh_token, {
+					expires: add(new Date(), { hours: 11, minutes: 45 }),
+				});
+
 				setCurrentRole(currRole);
 			} else {
 				const errorData = response.data;
-				sessionStorage.removeItem("6amyoga_access_token");
-				sessionStorage.removeItem("6amyoga_refresh_token");
+				removeCookie(SIXAMYOGA_ACCESS_TOKEN);
+				removeCookie(SIXAMYOGA_REFRESH_TOKEN);
+
 				toast(errorData?.error, { type: "error" });
 			}
 		} catch (error) {
-			sessionStorage.removeItem("6amyoga_access_token");
-			sessionStorage.removeItem("6amyoga_refresh_token");
+			removeCookie(SIXAMYOGA_ACCESS_TOKEN);
+			removeCookie(SIXAMYOGA_REFRESH_TOKEN);
 			// alert(import.meta.env.VITE_BACKEND_DOMAIN);
 			// alert(error?.message);
 			toast("Error!", { type: "error" });

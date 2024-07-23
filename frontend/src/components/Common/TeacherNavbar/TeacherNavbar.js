@@ -6,6 +6,10 @@ import { useNavigate } from "react-router-dom";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import RoleShifter from "../RoleShifter";
+import {
+	SIXAMYOGA_ACCESS_TOKEN,
+	SIXAMYOGA_REFRESH_TOKEN,
+} from "../../../enums/cookies";
 
 function TeacherNavbar() {
 	const [open, setOpen] = useState(false);
@@ -35,6 +39,11 @@ function TeacherNavbar() {
 		state.resetUserState,
 	]);
 
+	const [cookies, setCookie, removeCookie] = useCookies([
+		SIXAMYOGA_ACCESS_TOKEN,
+		SIXAMYOGA_REFRESH_TOKEN,
+	]);
+
 	const handleLogout = () => {
 		Fetch({
 			url: "/auth/logout",
@@ -42,15 +51,15 @@ function TeacherNavbar() {
 			token: true,
 		})
 			.then((res) => {
-				sessionStorage.removeItem("6amyoga_access_token");
-				sessionStorage.removeItem("6amyoga_refresh_token");
+				removeCookie(SIXAMYOGA_ACCESS_TOKEN);
+				removeCookie(SIXAMYOGA_REFRESH_TOKEN);
 				resetUserState();
 				navigate("/auth");
 			})
 			.catch((err) => {
 				console.log("Logout Error:", err);
-				sessionStorage.removeItem("6amyoga_access_token");
-				sessionStorage.removeItem("6amyoga_refresh_token");
+				removeCookie(SIXAMYOGA_ACCESS_TOKEN);
+				removeCookie(SIXAMYOGA_REFRESH_TOKEN);
 				resetUserState();
 				navigate("/auth");
 			});

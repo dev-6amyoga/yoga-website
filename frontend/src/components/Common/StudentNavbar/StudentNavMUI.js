@@ -390,8 +390,13 @@ import MenuItem from "@mui/material/MenuItem";
 import Toolbar from "@mui/material/Toolbar";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
+import { useCookies } from "react-cookie";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import {
+	SIXAMYOGA_ACCESS_TOKEN,
+	SIXAMYOGA_REFRESH_TOKEN,
+} from "../../../enums/cookies";
 import { USER_PLAN_ACTIVE } from "../../../enums/user_plan_status";
 import useUserStore from "../../../store/UserStore";
 import { Fetch, FetchRetry } from "../../../utils/Fetch";
@@ -448,6 +453,11 @@ function StudentNavMUI({ mode, toggleColorMode }) {
 
 	const resetUserState = useUserStore((state) => state.resetUserState);
 
+	const [cookies, setCookie, removeCookie] = useCookies([
+		SIXAMYOGA_ACCESS_TOKEN,
+		SIXAMYOGA_REFRESH_TOKEN,
+	]);
+
 	const handleLogout = async () => {
 		try {
 			const res = await FetchRetry({
@@ -458,8 +468,9 @@ function StudentNavMUI({ mode, toggleColorMode }) {
 			});
 
 			if (res.status === 200) {
-				sessionStorage.removeItem("6amyoga_access_token");
-				sessionStorage.removeItem("6amyoga_refresh_token");
+				removeCookie(SIXAMYOGA_ACCESS_TOKEN);
+				removeCookie(SIXAMYOGA_REFRESH_TOKEN);
+
 				resetUserState();
 				navigate("/auth");
 			} else {
