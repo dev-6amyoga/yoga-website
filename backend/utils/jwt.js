@@ -27,7 +27,7 @@ function generateAccessToken(user) {
 			{ token_type: TOKEN_TYPE_ACCESS, user: user },
 			JWT_TOKEN_SECRET,
 			{
-				expiresIn: "1h",
+				expiresIn: "3h",
 			}
 		),
 		now,
@@ -48,7 +48,7 @@ function generateRefreshToken(user) {
 			{ token_type: TOKEN_TYPE_REFRESH, user: user },
 			JWT_TOKEN_SECRET,
 			{
-				expiresIn: "12h",
+				expiresIn: "24h",
 			}
 		),
 		now,

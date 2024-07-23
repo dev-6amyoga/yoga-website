@@ -1,6 +1,6 @@
 import { Fetch } from "../utils/Fetch";
 
-export class ClassModeAPI {
+export class ClassAPI {
 	static async postCreateClass(
 		class_name,
 		class_desc,
@@ -10,7 +10,7 @@ export class ClassModeAPI {
 	) {
 		try {
 			const response = await Fetch({
-				url: "/class-mode/create",
+				url: "/class/create",
 				method: "POST",
 				data: {
 					class_name: class_name,
@@ -42,7 +42,7 @@ export class ClassModeAPI {
 	) {
 		try {
 			const response = await Fetch({
-				url: "/class-mode/update",
+				url: "/class/update",
 				method: "POST",
 				data: {
 					class_id: class_id,
@@ -68,7 +68,7 @@ export class ClassModeAPI {
 	static async postGetClassById(class_id) {
 		try {
 			const response = await Fetch({
-				url: "/class-mode/get-by-id",
+				url: "/class/get-by-id",
 				method: "POST",
 				data: {
 					class_id: class_id,
@@ -88,7 +88,7 @@ export class ClassModeAPI {
 	static async postGetClasses() {
 		try {
 			const response = await Fetch({
-				url: "/class-mode/get-all",
+				url: "/class/get-all",
 				method: "POST",
 			});
 
@@ -105,7 +105,7 @@ export class ClassModeAPI {
 	static async postStartClass(class_id) {
 		try {
 			const response = await Fetch({
-				url: "/class-mode/start",
+				url: "/class/start",
 				method: "POST",
 				data: {
 					class_id: class_id,
@@ -125,7 +125,7 @@ export class ClassModeAPI {
 	static async postEndClass(class_id, status) {
 		try {
 			const response = await Fetch({
-				url: "/class-mode/end",
+				url: "/class/end",
 				method: "POST",
 				data: {
 					class_id: class_id,

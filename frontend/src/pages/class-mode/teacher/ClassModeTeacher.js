@@ -5,7 +5,7 @@ import { Spacer } from "@geist-ui/core";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { ClassModeAPI } from "../../../api/class-mode.api";
+import { ClassAPI } from "../../../api/class.api";
 import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
 import Playlist from "../../../components/Sidebar/Playlist";
 import ClassModePlayer from "../../../components/class-mode-player-dashjs/ClassModePlayer";
@@ -23,7 +23,7 @@ function ClassModeTeacher() {
 		queryKey: ["classInfo", class_id],
 		queryFn: async () => {
 			console.log("GETTING CLASS INFO");
-			const [res, err] = await ClassModeAPI.postGetClassById(class_id);
+			const [res, err] = await ClassAPI.postGetClassById(class_id);
 
 			if (err) {
 				console.error(err);

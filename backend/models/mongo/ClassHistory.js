@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 const { CLASS_UPCOMING } = require("../../enums/class_status");
 
-const classModeSchema = new mongoose.Schema({
+const classHistorySchema = new mongoose.Schema({
+	class_metadata_id: mongoose.Schema.Types.ObjectId,
 	class_name: String,
 	class_desc: String,
 	teacher_id: Number,
@@ -31,6 +32,10 @@ const classModeSchema = new mongoose.Schema({
 		type: mongoose.Schema.Types.Mixed,
 		default: [],
 	},
+	watch_history: {
+		type: mongoose.Schema.Types.Mixed,
+		default: [],
+	},
 	created_at: {
 		type: Date,
 		default: Date.now,
@@ -41,6 +46,10 @@ const classModeSchema = new mongoose.Schema({
 	},
 });
 
-const ClassMode = mongoose.model("ClassMode", classModeSchema, "class_mode");
+const ClassHistory = mongoose.model(
+	"ClassHistory",
+	classHistorySchema,
+	"class_history"
+);
 
-module.exports = ClassMode;
+// module.exports = Class;

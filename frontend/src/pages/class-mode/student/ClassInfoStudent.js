@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { ClassModeAPI } from "../../../api/class-mode.api";
+import { ClassAPI } from "../../../api/class.api";
 import StudentPageWrapper from "../../../components/Common/StudentPageWrapper";
 import { CLASS_ONGOING, CLASS_UPCOMING } from "../../../enums/class_status";
 import { getFrontendDomain } from "../../../utils/getFrontendDomain";
@@ -17,7 +17,7 @@ export default function ClassInfoStudent() {
 	const { data: classDetails } = useQuery({
 		queryKey: ["classInfo", class_id],
 		queryFn: async () => {
-			const [res, err] = await ClassModeAPI.postGetClassById(class_id);
+			const [res, err] = await ClassAPI.postGetClassById(class_id);
 
 			if (err) {
 				console.error(err);

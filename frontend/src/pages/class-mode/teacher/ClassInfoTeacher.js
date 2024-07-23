@@ -3,9 +3,10 @@ import { Avatar, Button, Card, CardContent } from "@mui/material";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { ClassModeAPI } from "../../../api/class-mode.api";
+import { ClassAPI } from "../../../api/class.api";
 
 import { Spacer } from "@geist-ui/core";
+import { useState } from "react";
 import DisplayWatchTime from "../../../components/Common/DisplayWatchTime";
 import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
 import ViewDetailsModal from "../../../components/class-mode/teacher/ViewDetailsModal";
@@ -15,7 +16,6 @@ import {
 	CLASS_UPCOMING,
 } from "../../../enums/class_status";
 import { getFrontendDomain } from "../../../utils/getFrontendDomain";
-import { useState } from "react";
 
 export default function ClassInfoTeacher() {
 	const { class_id } = useParams();
@@ -25,7 +25,7 @@ export default function ClassInfoTeacher() {
 	const { data: classInfo, refetch: refetchClass } = useQuery({
 		queryKey: ["classInfo", class_id],
 		queryFn: async () => {
-			const [res, err] = await ClassModeAPI.postGetClassById(class_id);
+			const [res, err] = await ClassAPI.postGetClassById(class_id);
 
 			if (err) {
 				console.error(err);
@@ -41,7 +41,7 @@ export default function ClassInfoTeacher() {
 	const handleStartEndClass = async () => {
 		try {
 			if (classInfo?.status === CLASS_UPCOMING) {
-				const [res, err] = await ClassModeAPI.postStartClass(class_id);
+				const [res, err] = await ClassAPI.postStartClass(class_id);
 
 				if (err) {
 					console.error(err);
@@ -57,7 +57,7 @@ export default function ClassInfoTeacher() {
 						});
 				}
 			} else {
-				const [res, err] = await ClassModeAPI.postEndClass(
+				const [res, err] = await ClassAPI.postEndClass(
 					class_id,
 					CLASS_COMPLETED
 				);

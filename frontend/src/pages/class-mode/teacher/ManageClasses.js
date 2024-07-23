@@ -1,19 +1,39 @@
-import { Card, Divider, Text } from "@geist-ui/core";
 import { Button } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
+import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { useNavigate } from "react-router-dom";
-import { DataTable } from "../../../components/Common/DataTable/DataTable";
 import SortableColumn from "../../../components/Common/DataTable/SortableColumn";
 import RegisterNewClass from "../../../components/class-mode/teacher/RegisterClassForm";
 import ViewDetailsModal from "../../../components/class-mode/teacher/ViewDetailsModal";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 
+import format from "date-fns/format";
+import getDay from "date-fns/getDay";
+import { enGB, enIN } from "date-fns/locale";
+import enUS from "date-fns/locale/en-US";
+import parse from "date-fns/parse";
+import startOfWeek from "date-fns/startOfWeek";
+
+const locales = {
+	"en-US": enUS,
+	"en-IN": enIN,
+	"en-GB": enGB,
+};
+
+const localizer = dateFnsLocalizer({
+	format,
+	parse,
+	startOfWeek,
+	getDay,
+	locales,
+});
+
 export default function ManageClasses() {
 	// const [allClasses, setAllClasses] = useState(null);
 	const navigate = useNavigate();
-	const [regVisible, setRegVisible] = useState(false);
+	const [regVisible, setRegVisible] = useState(true);
 
 	const [today, setToday] = useState("");
 	const [activeClasses, setActiveClasses] = useState([]);
@@ -57,6 +77,7 @@ export default function ManageClasses() {
 				return [];
 			}
 		},
+		enabled: false,
 	});
 
 	const user = useUserStore((state) => state.user);
@@ -171,22 +192,32 @@ export default function ManageClasses() {
 
 			<RegisterNewClass visible={regVisible} setVisible={setRegVisible} />
 
-			<div className="elements">
-				<Card hoverable>
+			{/* <div className="grid grid-cols-2 gap-2">
+				<Card>
 					<Text h5>Today's Classes</Text>
 					<DataTable
 						columns={columnsDataTable}
 						data={activeClasses || []}
 						refetch={refetchClasses}></DataTable>
 				</Card>
-				<Divider />
-				<Card hoverable>
+				<Card>
 					<Text h5>Upcoming/Expired Classes</Text>
 					<DataTable
 						columns={columnsDataTable}
 						data={inactiveClasses || []}
 						refetch={refetchClasses}></DataTable>
 				</Card>
+			</div> */}
+
+			<div className="my-10">
+				<Calendar
+					localizer={localizer}
+					events={[]}
+					startAccessor="start"
+					endAccessor="end"
+					defaultView="month"
+					style={{ height: 1000 }}
+				/>
 			</div>
 
 			<ViewDetailsModal
