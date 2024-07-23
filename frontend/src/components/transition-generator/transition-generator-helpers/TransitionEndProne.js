@@ -320,14 +320,16 @@ export const TransitionEndProne = async (
 
   if (start_category === "Supine") {
     if (break_status_start === "Break" && break_status_end === "Break") {
-      let res = handleTransition(["Supine To Prone Transition"]);
+      let res = handleTransition([
+        "Supine To Prone Transition With Prone Breath",
+      ]);
       res = res.map((transition) => transition.transition_id);
       res = res.filter((element) => element !== undefined);
       return res;
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
       let res = handleTransition([
-        "Supine To Prone Transition",
+        "Supine To Prone Transition With Prone Breath",
         "Arms Straight Feet Together Prone Transition",
       ]);
       res = res.map((transition) => transition.transition_id);
@@ -337,7 +339,7 @@ export const TransitionEndProne = async (
     if (break_status_start === "No Break" && break_status_end === "Break") {
       let res = handleTransition([
         "Arms Down Feet Apart Supine Transition",
-        "Supine To Prone Transition",
+        "Supine To Prone Transition With Prone Breath",
       ]);
       res = res.map((transition) => transition.transition_id);
       res = res.filter((element) => element !== undefined);
@@ -346,7 +348,7 @@ export const TransitionEndProne = async (
     if (break_status_start === "No Break" && break_status_end === "No Break") {
       let res = handleTransition([
         "Arms Down Feet Apart Supine Transition",
-        "Supine To Prone Transition",
+        "Supine To Prone Transition With Prone Breath",
         "Arms Straight Feet Together Prone Transition",
       ]);
       res = res.map((transition) => transition.transition_id);

@@ -1196,57 +1196,30 @@ export const TransitionEndPranayama = async (
   }
 
   if (start_category === "Pranayama Prayer") {
-    if (break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Pranayama Inhale Hands Up Exhale Down"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name === "Pranayama Unlock Legs"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      if (t2) {
-        result.push(t2);
-      }
-      return result;
+    const filteredTransitions = transitions.filter(
+      (transition) =>
+        transition.drm_transition === drm_status &&
+        transition.teacher_mode === end_video.teacher_mode
+    );
+    const transition_1 = filteredTransitions_all.filter(
+      (transition) =>
+        transition.transition_video_name ===
+        "Pranayama Inhale Hands Up Exhale Down"
+    );
+    console.log(transition_1);
+    let t1 = getUniqueTransition(transition_1);
+    console.log(t1);
+    let pending_2 = pranayamaFinder(end_video, filteredTransitions);
+    const result = [];
+    if (t1) {
+      result.push(t1);
     }
-    if (break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Pranayama Inhale Hands Up Exhale Down"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name === "Pranayama Unlock Legs"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Feet Together Hands Side Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      if (t2) {
-        result.push(t2);
-      }
-      if (t3) {
-        result.push(t3);
-      }
-      return result;
-    }
+    console.log(t1);
+    return result;
+
+    // let new_res = [...result, ...pending_2];
+    // new_res = new_res.filter((element) => element !== undefined);
+    // new_res = new_res.map((transition) => transition.transition_id);
   }
 
   if (start_category === "Special") {
