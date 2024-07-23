@@ -1,49 +1,50 @@
-# import re
-# import os
+import re
+import os
 
-# def extract_quoted_words_from_files(js_file_paths):
-#     all_quoted_words = []
+def extract_quoted_words_from_files(js_file_paths):
+    all_quoted_words = []
 
-#     for js_file_path in js_file_paths:
-#         if os.path.isfile(js_file_path):
-#             with open(js_file_path, 'r') as file:
-#                 js_content = file.read()
-#                 # Regular expression to match words within single or double quotes
-#                 quoted_words = re.findall(r'["\'](.*?)["\']', js_content)
-#                 all_quoted_words.extend(quoted_words)
-#         else:
-#             print(f"File not found: {js_file_path}")
+    for js_file_path in js_file_paths:
+        if os.path.isfile(js_file_path):
+            with open(js_file_path, 'r') as file:
+                js_content = file.read()
+                # Regular expression to match words within single or double quotes
+                quoted_words = re.findall(r'["\'](.*?)["\']', js_content)
+                all_quoted_words.extend(quoted_words)
+        else:
+            print(f"File not found: {js_file_path}")
 
-#     return all_quoted_words
+    return all_quoted_words
 
 # # Example usage
-# js_file_paths = ["TransitionEndSpecial.js",
-# "TransitionEndStanding.js",
-# "TransitionEndStartingPrayerSitting.js",
-# "TransitionEndStartingPrayerStanding.js",
-# "TransitionEndSupine.js",
-# "TransitionEndSuryanamaskaraNonStithi.js",
-# "TransitionEndSuryanamaskaraStithi.js",
-# "TransitionEndVajrasana.js",
-# "TransitionEndClosingPrayerSitting.js",
-# "TransitionEndClosingPrayerStanding.js",
-# "TransitionEndPranayama.js",
-# "TransitionEndPranayamaPrayer.js",
-# "TransitionEndProne.js",
-# "TransitionEndSitting.js"]
+js_file_paths = ["TransitionEndSpecial.js",
+"TransitionEndStanding.js",
+"TransitionEndStartingPrayerSitting.js",
+"TransitionEndStartingPrayerStanding.js",
+"TransitionEndSupine.js",
+"TransitionEndSuryanamaskaraNonStithi.js",
+"TransitionEndSuryanamaskaraStithi.js",
+"TransitionEndVajrasana.js",
+"TransitionEndClosingPrayerSitting.js",
+"TransitionEndClosingPrayerStanding.js",
+"TransitionEndPranayama.js",
+"TransitionEndPranayamaPrayer.js",
+"TransitionEndProne.js",
+"TransitionEndSitting.js"]
 # all_words = list(set(extract_quoted_words_from_files(js_file_paths)))
-# print(all_words)
 
 import json
 
 # Example list
 # example_list = ['Pranayama Start Sitting', 'Pranayama Unlock Legs', 'Arms Straight Feet Together Prone Transition', 'Vajrasana Relax To Dyanmudra Position', 'Turn Mat Side To Front Standing Transition',  'Standing To Supine Transition', 'Vajrasana Dyanmudra To Relax Position', 'Arms Overhead Feet Together Supine Transition', 'Pranayama Inhale Arms Up Exhale Namaskara', 'Prone To Supine Transition', 'Prone To Standing Transition', 'Sitting To Supine Transition', 'Prone To Vajra Transition', 'Vajra To Supine Transition', 'Pranayama Inhale Hands Up Exhale Down',  'Feet Apart Hands Back Sitting Transition', 'Fold Hands Feet Apart Prone Transition', 'Feet Apart Hands Loose Standing Transition Front', 'Supine To Prone Transition', 'Turn Mat Side To Front Sitting Transition', 'Feet Together Hands Tight Standing Side Transition', 'Prayer Start Standing', 'Turn Mat Front To Side Sitting Transition', 'Feet Together Hands Tight Standing Transition Front', 'Sitting Position Transition', 'Turn Mat Front To Side Standing Transition', 'Standing To Prone Transition', 'Prayer End Standing', 'Standing To Vajra Transition', 'Closing Prayer Standing', 'Suryanamaskara Non AI Non Stithi Prefix', 'Suryanamaskara Preparation And Mantra Stithi Type', 'Supine To Sitting Transition', 'Starting Prayer Sitting', 'Prone To Sitting Transition', 'Sitting To Prone Transition', 'Feet Together Hands Side Sitting Transition','Pranayama Legs Lock', 'Vajra To Standing Transition', 'Prayer Sitting Namaskara Unlock', 'Vajra To Prone Transition', 'Supine To Vajra Transition', 'Sitting To Vajra Transition', 'Suryanamaskara Non AI Non Stithi Suffix', 'Standing To Sitting Transition', 'Suryanamaskara Preparation And Mantra Non Stithi', 'Person Transit Front To Left', 'Supine To Standing Transition', 'Feet Apart Hands Loose Standing Transition Side', 'Starting Prayer Standing', 'Closing Prayer Sitting', 'Vajra To Sitting Transition', 'Sitting To Standing Transition', 'Suryanamaskara Non Stithi', 'Arms Down Feet Apart Supine Transition', 'Suryanamaskara Stithi', 'Jump Side To Front Transition']
 
-example_list = ['Feet Apart Hands Loose Standing Transition Front', 'Feet Apart Hands Loose Standing Transition Side', 'Feet Together Hands Side Sitting Transition', 'Pranayama Inhale Arms Up Exhale Namaskara', 'Pranayama Unlock Legs', 'Pranayama Legs Lock', 'Prayer Sitting Namaskara Unlock', 'Prone To Sitting Transition', 'Prone To Standing Transition', 'Prone To Supine Transition', 'Sitting Position Transition', 'Sitting To Prone Transition', 'Sitting To Standing Transition', 'Sitting To Vajra Transition', 'Standing To Prone Transition', 'Standing To Supine Transition', 'Supine To Prone Transition', 'Supine To Sitting Transition', 'Supine To Standing Transition', 'Supine To Vajra Transition', 'Suryanamaskara Preparation And Mantra Non Stithi', 'Turn Mat Front To Side Sitting Transition', 'Turn Mat Front To Side Standing Transition', 'Turn Mat Side To Front Sitting Transition', 'Turn Mat Side To Front Standing Transition', 'Vajra To Prone Transition', 'Vajra To Standing Transition', 'Vajrasana Dyanmudra To Relax Position']
+# example_list = ['Feet Apart Hands Loose Standing Transition Front', 'Feet Apart Hands Loose Standing Transition Side', 'Feet Together Hands Side Sitting Transition', 'Pranayama Inhale Arms Up Exhale Namaskara', 'Pranayama Unlock Legs', 'Pranayama Legs Lock', 'Prayer Sitting Namaskara Unlock', 'Prone To Sitting Transition', 'Prone To Standing Transition', 'Prone To Supine Transition', 'Sitting Position Transition', 'Sitting To Prone Transition', 'Sitting To Standing Transition', 'Sitting To Vajra Transition', 'Standing To Prone Transition', 'Standing To Supine Transition', 'Supine To Prone Transition', 'Supine To Sitting Transition', 'Supine To Standing Transition', 'Supine To Vajra Transition', 'Suryanamaskara Preparation And Mantra Non Stithi', 'Turn Mat Front To Side Sitting Transition', 'Turn Mat Front To Side Standing Transition', 'Turn Mat Side To Front Sitting Transition', 'Turn Mat Side To Front Standing Transition', 'Vajra To Prone Transition', 'Vajra To Standing Transition', 'Vajrasana Dyanmudra To Relax Position']
 # Convert list to JSON string
-json_string = json.dumps(example_list, indent=4)
 
-# Print JSON string
+all_words = ['Standing To Vajra Transition', 'Vajrasana', 'Suryanamaskara Preparation And Mantra Non Stithi', 'om', 'Turn Mat Front To Side Sitting Transition', 'Pranayama Inhale Hands Up Exhale Down', 'Pranayama Start Sitting', 'Turn Mat Front To Side Standing Transition', 'Supine To Standing Transition', 'Supine To Prone Transition', 'Sitting To Prone Transition', 'Sitting To Vajra Transition', 'Prone To Vajra Transition', 'Suryanamaskara Stithi', 'Arms Overhead Feet Together Supine Transition', 'Prayer Sitting Namaskara Unlock', 'Feet Together Hands Tight Standing Transition Front', 'Vajrasana Dyanmudra To Relax Position', 'Pranayama Inhale Arms Up Exhale Namaskara', 'Feet Together Hands Tight Standing Side Transition', 'Starting Prayer Standing', 'Prone To Standing Transition', 'thoracic', 'Feet Together Hands Side Sitting Transition', 'Feet Apart Hands Loose Standing Transition Front', 'Pranayama Unlock Legs', 'Fold Hands Feet Apart Prone Transition', 'Prayer Start Standing', 'Pranayama Legs Lock', 'Sitting To Standing Transition', 'Suryanamaskara Preparation And Mantra Stithi Type', 'Feet Apart Hands Loose Standing Transition Side', 'Standing To Prone Transition', 'Sitting', 'Arms Straight Feet Together Prone Transition', 'stomach', 'Supine To Sitting Transition', 'bhramari', 'Starting Prayer Sitting', 'Sitting To Supine Transition', 'react-toastify', 'Closing Prayer Standing', 'Suryanamaskara Non Stithi', 'Left', 'Turn Mat Side To Front Sitting Transition', 'Suryanamaskara Non AI Non Stithi Suffix', 'Standing To Sitting Transition', 'is omkara', 'Clavicular', 'Arms Down Feet Apart Supine Transition', 'Thoracic', 'Pranayama', 'Final', 'Vajra To Supine Transition', 'chanting', 'Vajra To Standing Transition', 'Prone To Supine Transition', 'nasika', 'Prone To Sitting Transition', '_', 'Closing Prayer Sitting', 'Prone', 'Feet Apart Hands Back Sitting Transition', 'Supine To Vajra Transition', 'Vajra To Prone Transition', 'unlock', 'Standing', 'Suryanamaskara Non AI Non Stithi Prefix', 'jalandhara', 'Person Transit Front To Left', 'Jump Side To Front Transition', 'Front', 'Vajrasana Relax To Dyanmudra Position', 'Turn Mat Side To Front Standing Transition', 'Supine', 'Abdomen', 'Sitting Position Transition', 'Break', 'Special', 'Vajra To Sitting Transition', 'Standing To Supine Transition', 'Standing Position Transition', 'No Break', 'Prayer End Standing', 'Pranayama Prayer', 'clavicular']
+json_string = json.dumps(all_words, indent=4)
+
+# # Print JSON string
 print(json_string)
 
 

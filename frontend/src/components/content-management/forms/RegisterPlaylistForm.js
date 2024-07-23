@@ -56,14 +56,15 @@ function RegisterPlaylistForm() {
   const [playlistCurrent, setPlaylistCurrent] = useState([]);
   const [teacherModeFilter, setTeacherModeFilter] = useState(false);
   const [drmVideoFilter, setDrmVideoFilter] = useState(false);
+  const [sortedAsanas, setSortedAsanas] = useState([]);
   const handleTeacherModeFilterChange = (event) => {
     setTeacherModeFilter(event.target.checked);
   };
-  const [sortedAsanas, setSortedAsanas] = useState([]);
 
   const predefinedOrder = [
     "Starting Prayer Standing",
-    "Surynamaskara Non Stithi",
+    "Starting Prayer Sitting",
+    "Suryanamaskara Non Stithi",
     "Suryanamaskara Stithi",
     "Standing",
     "Sitting",
@@ -75,6 +76,7 @@ function RegisterPlaylistForm() {
     "Special",
     "Closing Prayer Sitting",
   ];
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -152,7 +154,6 @@ function RegisterPlaylistForm() {
   }, [playlistCurrent]);
 
   const addToPlaylist = async (rowData) => {
-    console.log(playlistCurrent.length);
     if (playlistCurrent.length === 0) {
       if (rowData.asana_category === "Sitting") {
         let t1 = await TransitionEndSitting(
@@ -345,7 +346,10 @@ function RegisterPlaylistForm() {
         if (prevAsana) {
           if (rowData.asana_category === "Sitting") {
             let t1 = await TransitionEndSitting(
-              prevAsana.asana_category,
+              // prevAsana.asana_category,
+              "end_category" in prevAsana
+                ? prevAsana.end_category
+                : prevAsana.asana_category,
               prevAsana.nobreak_asana ? "No Break" : "Break",
               rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
@@ -359,7 +363,10 @@ function RegisterPlaylistForm() {
           }
           if (rowData.asana_category === "Pranayama") {
             let t1 = await TransitionEndPranayama(
-              prevAsana.asana_category,
+              // prevAsana.asana_category,
+              "end_category" in prevAsana
+                ? prevAsana.end_category
+                : prevAsana.asana_category,
               prevAsana.nobreak_asana ? "No Break" : "Break",
               rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
@@ -372,7 +379,10 @@ function RegisterPlaylistForm() {
           }
           if (rowData.asana_category === "Closing Prayer Sitting") {
             let t1 = await TransitionEndClosingPrayerSitting(
-              prevAsana.asana_category,
+              // prevAsana.asana_category,
+              "end_category" in prevAsana
+                ? prevAsana.end_category
+                : prevAsana.asana_category,
               prevAsana.nobreak_asana ? "No Break" : "Break",
               rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
@@ -385,7 +395,10 @@ function RegisterPlaylistForm() {
           }
           if (rowData.asana_category === "Closing Prayer Standing") {
             let t1 = await TransitionEndClosingPrayerStanding(
-              prevAsana.asana_category,
+              // prevAsana.asana_category,
+              "end_category" in prevAsana
+                ? prevAsana.end_category
+                : prevAsana.asana_category,
               prevAsana.nobreak_asana ? "No Break" : "Break",
               rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
@@ -398,7 +411,10 @@ function RegisterPlaylistForm() {
           }
           if (rowData.asana_category === "Starting Prayer Standing") {
             let t1 = await TransitionEndStartingPrayerStanding(
-              prevAsana.asana_category,
+              // prevAsana.asana_category,
+              "end_category" in prevAsana
+                ? prevAsana.end_category
+                : prevAsana.asana_category,
               prevAsana.nobreak_asana ? "No Break" : "Break",
               rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
@@ -411,7 +427,10 @@ function RegisterPlaylistForm() {
           }
           if (rowData.asana_category === "Starting Prayer Sitting") {
             let t1 = await TransitionEndStartingPrayerSitting(
-              prevAsana.asana_category,
+              // prevAsana.asana_category,
+              "end_category" in prevAsana
+                ? prevAsana.end_category
+                : prevAsana.asana_category,
               prevAsana.nobreak_asana ? "No Break" : "Break",
               rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
@@ -424,7 +443,10 @@ function RegisterPlaylistForm() {
           }
           if (rowData.asana_category === "Pranayama Prayer") {
             let t1 = await TransitionEndPranayamaPrayer(
-              prevAsana.asana_category,
+              // prevAsana.asana_category,
+              "end_category" in prevAsana
+                ? prevAsana.end_category
+                : prevAsana.asana_category,
               prevAsana.nobreak_asana ? "No Break" : "Break",
               rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
@@ -438,7 +460,10 @@ function RegisterPlaylistForm() {
           }
           if (rowData.asana_category === "Standing") {
             let t1 = await TransitionEndStanding(
-              prevAsana.asana_category,
+              // prevAsana.asana_category,
+              "end_category" in prevAsana
+                ? prevAsana.end_category
+                : prevAsana.asana_category,
               prevAsana.nobreak_asana ? "No Break" : "Break",
               rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
@@ -451,7 +476,10 @@ function RegisterPlaylistForm() {
           }
           if (rowData.asana_category === "Supine") {
             let t1 = await TransitionEndSupine(
-              prevAsana.asana_category,
+              // prevAsana.asana_category,
+              "end_category" in prevAsana
+                ? prevAsana.end_category
+                : prevAsana.asana_category,
               prevAsana.nobreak_asana ? "No Break" : "Break",
               rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
@@ -464,7 +492,10 @@ function RegisterPlaylistForm() {
           }
           if (rowData.asana_category === "Prone") {
             let t1 = await TransitionEndProne(
-              prevAsana.asana_category,
+              // prevAsana.asana_category,
+              "end_category" in prevAsana
+                ? prevAsana.end_category
+                : prevAsana.asana_category,
               prevAsana.nobreak_asana ? "No Break" : "Break",
               rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
@@ -477,7 +508,10 @@ function RegisterPlaylistForm() {
           }
           if (rowData.asana_category === "Special") {
             let t1 = await TransitionEndSpecial(
-              prevAsana.asana_category,
+              // prevAsana.asana_category,
+              "end_category" in prevAsana
+                ? prevAsana.end_category
+                : prevAsana.asana_category,
               prevAsana.nobreak_asana ? "No Break" : "Break",
               rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
@@ -490,7 +524,10 @@ function RegisterPlaylistForm() {
           }
           if (rowData.asana_category === "Suryanamaskara Stithi") {
             let t1 = await TransitionEndSuryanamaskaraStithi(
-              prevAsana.asana_category,
+              // prevAsana.asana_category,
+              "end_category" in prevAsana
+                ? prevAsana.end_category
+                : prevAsana.asana_category,
               prevAsana.nobreak_asana ? "No Break" : "Break",
               rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
@@ -503,7 +540,10 @@ function RegisterPlaylistForm() {
           }
           if (rowData.asana_category === "Suryanamaskara Non Stithi") {
             let t1 = await TransitionEndSuryanamaskaraNonStithi(
-              prevAsana.asana_category,
+              // prevAsana.asana_category,
+              "end_category" in prevAsana
+                ? prevAsana.end_category
+                : prevAsana.asana_category,
               prevAsana.nobreak_asana ? "No Break" : "Break",
               rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
@@ -516,7 +556,10 @@ function RegisterPlaylistForm() {
           }
           if (rowData.asana_category === "Vajrasana") {
             let t1 = await TransitionEndVajrasana(
-              prevAsana.asana_category,
+              // prevAsana.asana_category,
+              "end_category" in prevAsana
+                ? prevAsana.end_category
+                : prevAsana.asana_category,
               prevAsana.nobreak_asana ? "No Break" : "Break",
               rowData.nobreak_asana ? "No Break" : "Break",
               prevAsana,
@@ -583,6 +626,59 @@ function RegisterPlaylistForm() {
 
   const filterAsanas = (playlist) => {
     return playlist.filter((id) => typeof id === "number");
+  };
+
+  const recalculateTransitions = async (asanasOnlyPlaylist) => {
+    let recalculatedPlaylist = [];
+    for (let i = 0; i < asanasOnlyPlaylist.length; i++) {
+      const currentId = asanasOnlyPlaylist[i];
+      if (typeof currentId === "number") {
+        if (i === 0) {
+          console.log(currentId);
+          const curAsana = await fetchAsanaById(currentId);
+          console.log(curAsana);
+          // transitionFunction(null, currentId)
+          // const newTransitions = await TransitionEndSitting(
+          //   null,
+          //   currentId,
+          //   "Break",
+          //   null,
+          //   { id: currentId },
+          //   false,
+          //   transitions
+          // );
+          // recalculatedPlaylist = [
+          //   ...recalculatedPlaylist,
+          //   ...newTransitions.filter((el) => el !== undefined),
+          // ];
+        } else {
+          const previousId = asanasOnlyPlaylist[i - 1];
+          if (typeof previousId === "number") {
+            console.log(previousId, currentId);
+            const curAsana = await fetchAsanaById(currentId);
+            const prevAsana = await fetchAsanaById(previousId);
+            console.log(curAsana, prevAsana);
+
+            // transitionFunction(previousId, currentId)
+            // const newTransitions = await TransitionEndSitting(
+            //   previousId,
+            //   currentId,
+            //   "Break",
+            //   null,
+            //   { id: currentId },
+            //   false,
+            //   transitions
+            // );
+            // recalculatedPlaylist = [
+            //   ...recalculatedPlaylist,
+            //   ...newTransitions.filter((el) => el !== undefined),
+            // ];
+          }
+        }
+        recalculatedPlaylist.push(currentId);
+      }
+    }
+    setPlaylistCurrent(recalculatedPlaylist);
   };
 
   const handleUp = async (index) => {
@@ -729,5 +825,4 @@ function RegisterPlaylistForm() {
     </div>
   );
 }
-
 export default RegisterPlaylistForm;

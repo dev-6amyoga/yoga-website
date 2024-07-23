@@ -41,16 +41,14 @@ export const TransitionEndStanding = async (
   if (!start_category) {
     if (break_status_end === "Break") {
       if (end_video.person_starting_position === "Front") {
-        let res = handleTransition([
-          "Feet Apart Hands Loose Standing Transition Front",
-        ]);
+        let res = handleTransition(["Standing Position Transition"]);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
         return res;
       }
       if (end_video.person_starting_position === "Left") {
         let res = handleTransition([
-          "Feet Apart Hands Loose Standing Transition Front",
+          "Standing Position Transition",
           "Person Transit Front To Left",
         ]);
         res = res.map((transition) => transition.transition_id);
@@ -61,7 +59,7 @@ export const TransitionEndStanding = async (
     if (break_status_end === "No Break") {
       if (end_video.person_starting_position === "Front") {
         let res = handleTransition([
-          "Feet Apart Hands Loose Standing Transition Front",
+          "Standing Position Transition",
           "Feet Together Hands Tight Standing Transition Front",
         ]);
         res = res.map((transition) => transition.transition_id);
@@ -70,7 +68,7 @@ export const TransitionEndStanding = async (
       }
       if (end_video.person_starting_position === "Left") {
         let res = handleTransition([
-          "Feet Apart Hands Loose Standing Transition Front",
+          "Standing Position Transition",
           "Person Transit Front To Left",
           "Feet Together Hands Tight Standing Side Transition",
         ]);
@@ -361,7 +359,10 @@ export const TransitionEndStanding = async (
   if (start_category === "Suryanamaskara Non Stithi") {
     if (break_status_end === "Break") {
       if (end_video.person_starting_position === "Front") {
-        let res = handleTransition(["Suryanamaskara Non AI Non Stithi Suffix"]);
+        let res = handleTransition([
+          "Suryanamaskara Non AI Non Stithi Suffix",
+          "Feet Apart Hands Loose Standing Transition Front",
+        ]);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
         return res;
@@ -369,6 +370,7 @@ export const TransitionEndStanding = async (
       if (end_video.person_starting_position === "Left") {
         let res = handleTransition([
           "Suryanamaskara Non AI Non Stithi Suffix",
+          "Feet Apart Hands Loose Standing Transition Front",
           "Person Transit Front To Left",
         ]);
         res = res.map((transition) => transition.transition_id);
@@ -380,6 +382,7 @@ export const TransitionEndStanding = async (
       if (end_video.person_starting_position === "Front") {
         let res = handleTransition([
           "Suryanamaskara Non AI Non Stithi Suffix",
+          "Feet Apart Hands Loose Standing Transition Front",
           "Feet Together Hands Tight Standing Transition Front",
         ]);
         res = res.map((transition) => transition.transition_id);
@@ -389,6 +392,7 @@ export const TransitionEndStanding = async (
       if (end_video.person_starting_position === "Left") {
         let res = handleTransition([
           "Suryanamaskara Non AI Non Stithi Suffix",
+          "Feet Apart Hands Loose Standing Transition Front",
           "Person Transit Front To Left",
           "Feet Together Hands Tight Standing Side Transition",
         ]);

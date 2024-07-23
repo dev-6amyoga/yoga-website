@@ -12,6 +12,7 @@ export default function ApplicablePlansForm({
 }) {
   const [plans, setPlans] = useState([]);
   const [selectedPlans, setSelectedPlans] = useState(null);
+  // FULLDISCOUNT100;
 
   useEffect(() => {
     const fetchPlans = () => {
@@ -31,13 +32,13 @@ export default function ApplicablePlansForm({
   useEffect(() => {
     console.log(plans);
   }, [plans]);
+
   const handleSelectPlan = (val) => {
     setSelectedPlans(val);
   };
 
   useEffect(() => {
-    if (selectedPlans != null && selectedPlans.length === 41) {
-      console.log(selectedPlans);
+    if (selectedPlans != null) {
       let promises = [];
       selectedPlans.forEach((pid) => {
         promises.push(
