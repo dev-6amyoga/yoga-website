@@ -14,7 +14,7 @@ export const Fetch = async ({
 	let h = { ...headers };
 
 	if (token !== null && token !== undefined && token === true) {
-		console.log("TOKEN : ", useUserStore.getState());
+		// console.log("TOKEN : ", useUserStore.getState());
 		if (!useUserStore.getState().accessToken) {
 			throw new Error("No token found");
 		}

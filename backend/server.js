@@ -63,7 +63,7 @@ const queryRouter = require("./routes/Queries");
 const updateRequestsRouter = require("./routes/UpdateRequests");
 const playlistConfigsRouter = require("./routes/PlaylistConfigs");
 const playbackRouter = require("./routes/Playback");
-const classModeRouter = require("./routes/ClassMode");
+const classRouter = require("./routes/Class");
 const postureRouter = require("./routes/Posture");
 const otpRouter = require("./routes/OTP");
 
@@ -209,7 +209,7 @@ app.use("/query", queryRouter);
 app.use("/update-request", updateRequestsRouter);
 app.use("/playlist-configs", playlistConfigsRouter);
 app.use("/playback", playbackRouter);
-app.use("/class-mode", classModeRouter);
+app.use("/class", classRouter);
 app.use("/posture", postureRouter);
 app.use("/otp", otpRouter);
 app.use("/customPlan", customPlanRouter);

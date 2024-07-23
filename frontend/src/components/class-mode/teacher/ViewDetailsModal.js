@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { ClassModeAPI } from "../../../api/class-mode.api";
 import {
 	CLASS_CANCELLED,
 	CLASS_COMPLETED,
@@ -54,7 +53,7 @@ export default function ViewDetailsModal({
 			end_time = activeClassModalData.end_time;
 		}
 
-		const [res, err] = await ClassModeAPI.postUpdateClass(
+		const [res, err] = await ClassAPI.postUpdateClass(
 			activeClassModalData._id,
 			formData.class_name,
 			formData.class_desc,

@@ -3,7 +3,7 @@ import { Avatar, Button, Card, CardContent } from "@mui/material";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { ClassModeAPI } from "../../api/class-mode.api";
+import { ClassAPI } from "../../api/class.api";
 import {
 	CLASS_COMPLETED,
 	CLASS_ONGOING,
@@ -21,7 +21,7 @@ export default function ClassInfoTeacher() {
 	const { data: classInfo } = useQuery({
 		queryKey: ["classInfo", class_id],
 		queryFn: async () => {
-			const [res, err] = await ClassModeAPI.postGetClassById(class_id);
+			const [res, err] = await ClassAPI.postGetClassById(class_id);
 
 			if (err) {
 				console.error(err);
@@ -35,7 +35,7 @@ export default function ClassInfoTeacher() {
 	const handleStartEndClass = async () => {
 		try {
 			if (classInfo?.status === CLASS_UPCOMING) {
-				const [res, err] = await ClassModeAPI.postStartClass(class_id);
+				const [res, err] = await ClassAPI.postStartClass(class_id);
 
 				if (err) {
 					console.error(err);
@@ -51,7 +51,7 @@ export default function ClassInfoTeacher() {
 						});
 				}
 			} else {
-				const [res, err] = await ClassModeAPI.postEndClass(
+				const [res, err] = await ClassAPI.postEndClass(
 					class_id,
 					CLASS_COMPLETED
 				);

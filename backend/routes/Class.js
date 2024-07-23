@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const ClassMode = require("../models/mongo/ClassMode");
+const Class = require("../models/mongo/ClassHistory");
 const {
 	HTTP_BAD_REQUEST,
 	HTTP_OK,
@@ -12,7 +12,7 @@ const { User } = require("../models/sql/User");
 router.post("/create", async (req, res) => {
 	try {
 		const {
-			class_name,
+			default_class_name,
 			class_desc,
 			teacher_id,
 			start_time,
