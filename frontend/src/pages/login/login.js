@@ -22,6 +22,8 @@ import LoginGoogle from "../../components/auth/LoginGoogle";
 import {
 	SIXAMYOGA_ACCESS_TOKEN,
 	SIXAMYOGA_REFRESH_TOKEN,
+	accessTimeExpiry,
+	refreshTimeExpiry,
 } from "../../enums/cookies";
 import getFormData from "../../utils/getFormData";
 
@@ -135,11 +137,11 @@ export default function Login({ switchForm }) {
 				const refresh_token = userData?.refreshToken;
 
 				setCookie(SIXAMYOGA_ACCESS_TOKEN, access_token, {
-					expires: add(new Date(), { hours: 1, minutes: 59 }),
+					expires: add(new Date(), accessTimeExpiry),
 				});
 
 				setCookie(SIXAMYOGA_REFRESH_TOKEN, refresh_token, {
-					expires: add(new Date(), { hours: 11, minutes: 45 }),
+					expires: add(new Date(), refreshTimeExpiry),
 				});
 
 				setCurrentRole(currRole);

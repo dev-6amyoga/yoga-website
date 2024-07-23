@@ -19,6 +19,8 @@ import { Card } from "../../components/ui/card";
 import {
 	SIXAMYOGA_ACCESS_TOKEN,
 	SIXAMYOGA_REFRESH_TOKEN,
+	accessTimeExpiry,
+	refreshTimeExpiry,
 } from "../../enums/cookies";
 import useUserStore from "../../store/UserStore";
 import { Fetch, FetchRetry } from "../../utils/Fetch";
@@ -354,17 +356,11 @@ export default function Register({ switchForm }) {
 				setCurrentInstituteId(ins[0]?.institute_id);
 
 				setCookie(SIXAMYOGA_ACCESS_TOKEN, userData?.accessToken, {
-					expires: add(new Date(), {
-						hours: 1,
-						minutes: 59,
-					}),
+					expires: add(new Date(), accessTimeExpiry),
 				});
 
 				setCookie(SIXAMYOGA_REFRESH_TOKEN, userData?.refreshToken, {
-					expires: add(new Date(), {
-						hours: 11,
-						minutes: 59,
-					}),
+					expires: add(new Date(), refreshTimeExpiry),
 				});
 
 				setCurrentRole(currRole);

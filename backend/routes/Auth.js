@@ -310,15 +310,13 @@ router.post("/login", async (req, res) => {
 			new Date() - startTime
 		);
 
-		return res
-			.status(HTTP_OK)
-			.json({
-				user,
-				accessToken,
-				refreshToken,
-				access_token_expiry_at,
-				refresh_token_expiry_at,
-			});
+		return res.status(HTTP_OK).json({
+			user,
+			accessToken,
+			refreshToken,
+			accessTokenExpiryAt: access_token_expiry_at,
+			refreshTokenExpiryAt: refresh_token_expiry_at,
+		});
 	} catch (err) {
 		await t.rollback();
 		console.log(err);
@@ -534,8 +532,8 @@ router.post("/login-google", async (req, res) => {
 				user,
 				accessToken,
 				refreshToken,
-				access_token_expiry_at,
-				refresh_token_expiry_at,
+				accessTokenExpiryAt: access_token_expiry_at,
+				refreshTokenExpiryAt: refresh_token_expiry_at,
 			});
 		} catch (err) {
 			await t.rollback();
@@ -627,7 +625,10 @@ router.post("/refresh-token", async (req, res) => {
 		prev_login_token.access_token_expiry_at = access_token_expiry_at;
 		await prev_login_token.save({ transaction: t });
 		await t.commit();
-		return res.status(HTTP_OK).json({ accessToken });
+		return res.status(HTTP_OK).json({
+			accessToken,
+			accessTokenExpiryAt: access_token_expiry_at,
+		});
 	} catch (error) {
 		console.error(error);
 		await t.rollback();
