@@ -25,6 +25,10 @@ import {
   ListItem,
   ListItemText,
   ListItemSecondaryAction,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 
 import { transitionGenerator } from "../../transition-generator/TransitionGenerator";
@@ -729,6 +733,21 @@ function RegisterPlaylistForm() {
     //   await recalculateTransitions(asanasOnlyPlaylist);
     // }
   };
+
+  const [playlistName, setPlaylistName] = useState("");
+  const [playlistStartDate, setPlaylistStartDate] = useState("");
+  const [playlistEndDate, setPlaylistEndDate] = useState("");
+  const [playlistType, setPlaylistType] = useState("");
+
+  const handleAddPlaylist = () => {
+    console.log({
+      playlistName,
+      playlistStartDate,
+      playlistEndDate,
+      playlistType,
+    });
+  };
+
   return (
     <div>
       <div>
@@ -757,33 +776,78 @@ function RegisterPlaylistForm() {
           />
         </div>
 
+        <div className="flex flex-col gap-4 mb-4">
+          <TextField
+            label="Playlist Name"
+            value={playlistName}
+            onChange={(e) => setPlaylistName(e.target.value)}
+            fullWidth
+          />
+          <TextField
+            label="Validity Start Date"
+            type="date"
+            value={playlistStartDate}
+            onChange={(e) => setPlaylistStartDate(e.target.value)}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            fullWidth
+          />
+          <TextField
+            label="Validity End Date"
+            type="date"
+            value={playlistEndDate}
+            onChange={(e) => setPlaylistEndDate(e.target.value)}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            fullWidth
+          />
+          <FormControl fullWidth>
+            <InputLabel>Playlist Type</InputLabel>
+            <Select
+              value={playlistType}
+              onChange={(e) => setPlaylistType(e.target.value)}
+            >
+              <MenuItem value="student">Student</MenuItem>
+              <MenuItem value="teacher">Teacher</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+              <MenuItem value="disabled">Disabled</MenuItem>
+            </Select>
+          </FormControl>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAddPlaylist}
+          >
+            Add Playlist
+          </Button>
+        </div>
+
         <div className="flex flex-row gap-3">
           <div>
-            {filteredCategories.map((x, index) => {
-              return (
-                <Accordion className="flex flex-col gap-2">
-                  <AccordionSummary
-                    expandIcon={<ExpandMore />}
-                    aria-controls="panel1-content"
-                    id="panel1-header"
-                  >
-                    {x.category}
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    {/* {x.asanas.map((x) => {
-                    return <div>{x.asana_name}</div>;
-                  })} */}
-                    <TableContainer component={Paper}>
-                      <Table>
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Asana Name</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {x.asanas.map((asana, idx) => (
-                            <TableRow key={idx}>
-                              <TableCell>{asana.asana_name}</TableCell>
+            {filteredCategories.map((x, index) => (
+              <Accordion key={index} className="flex flex-col gap-2">
+                <AccordionSummary
+                  expandIcon={<ExpandMore />}
+                  aria-controls="panel1-content"
+                  id="panel1-header"
+                >
+                  {x.category}
+                </AccordionSummary>
+                <AccordionDetails>
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Asana Name</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {x.asanas.map((asana, idx) => (
+                          <TableRow key={idx}>
+                            <TableCell>{asana.asana_name}</TableCell>
+                            <TableCell>
                               <Button
                                 variant="contained"
                                 onClick={() => {
@@ -792,15 +856,15 @@ function RegisterPlaylistForm() {
                               >
                                 Add
                               </Button>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </AccordionDetails>
-                </Accordion>
-              );
-            })}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </AccordionDetails>
+              </Accordion>
+            ))}
           </div>
           <div>
             <List>
@@ -823,6 +887,100 @@ function RegisterPlaylistForm() {
         </div>
       </div>
     </div>
+
+    // <div>
+    //   <div>
+    //     <div className="filter-options flex flex-col gap-4 mb-4">
+    //       <FormControlLabel
+    //         control={
+    //           <Checkbox
+    //             checked={teacherModeFilter}
+    //             onChange={handleTeacherModeFilterChange}
+    //             name="teacherMode"
+    //             color="primary"
+    //           />
+    //         }
+    //         label="Teacher Mode"
+    //       />
+    //       <FormControlLabel
+    //         control={
+    //           <Checkbox
+    //             checked={drmVideoFilter}
+    //             onChange={handleDrmVideoFilterChange}
+    //             name="drmVideo"
+    //             color="primary"
+    //           />
+    //         }
+    //         label="DRM Video"
+    //       />
+    //     </div>
+
+    //     <div className="flex flex-row gap-3">
+    //       <div>
+    //         {filteredCategories.map((x, index) => {
+    //           return (
+    //             <Accordion className="flex flex-col gap-2">
+    //               <AccordionSummary
+    //                 expandIcon={<ExpandMore />}
+    //                 aria-controls="panel1-content"
+    //                 id="panel1-header"
+    //               >
+    //                 {x.category}
+    //               </AccordionSummary>
+    //               <AccordionDetails>
+    //                 {/* {x.asanas.map((x) => {
+    //                 return <div>{x.asana_name}</div>;
+    //               })} */}
+    //                 <TableContainer component={Paper}>
+    //                   <Table>
+    //                     <TableHead>
+    //                       <TableRow>
+    //                         <TableCell>Asana Name</TableCell>
+    //                       </TableRow>
+    //                     </TableHead>
+    //                     <TableBody>
+    //                       {x.asanas.map((asana, idx) => (
+    //                         <TableRow key={idx}>
+    //                           <TableCell>{asana.asana_name}</TableCell>
+    //                           <Button
+    //                             variant="contained"
+    //                             onClick={() => {
+    //                               addToPlaylist(asana);
+    //                             }}
+    //                           >
+    //                             Add
+    //                           </Button>
+    //                         </TableRow>
+    //                       ))}
+    //                     </TableBody>
+    //                   </Table>
+    //                 </TableContainer>
+    //               </AccordionDetails>
+    //             </Accordion>
+    //           );
+    //         })}
+    //       </div>
+    //       <div>
+    //         <List>
+    //           {names.map((name, index) => (
+    //             <ListItem key={index}>
+    //               <ListItemText primary={name} />
+    //               {typeof playlistCurrent[index] === "number" && (
+    //                 <ListItemSecondaryAction>
+    //                   <Button onClick={() => handleUp(index)}>Up</Button>
+    //                   <Button onClick={() => handleDown(index)}>Down</Button>
+    //                   <Button onClick={() => handleDelete(index)}>
+    //                     Delete
+    //                   </Button>
+    //                 </ListItemSecondaryAction>
+    //               )}
+    //             </ListItem>
+    //           ))}
+    //         </List>
+    //       </div>
+    //     </div>
+    //   </div>
+    // </div>
   );
 }
 export default RegisterPlaylistForm;
