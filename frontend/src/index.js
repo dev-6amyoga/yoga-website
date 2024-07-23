@@ -27,6 +27,7 @@ import { UserAPI } from "./api/user.api";
 import {
 	SIXAMYOGA_ACCESS_TOKEN,
 	SIXAMYOGA_REFRESH_TOKEN,
+	accessTimeExpiry,
 } from "./enums/cookies";
 import { ROLE_TEACHER } from "./enums/roles";
 import "./index.css";
@@ -270,10 +271,10 @@ function LoginIndex() {
 									SIXAMYOGA_ACCESS_TOKEN,
 									res.accessToken,
 									{
-										expires: add(new Date(), {
-											hours: 1,
-											minutes: 59,
-										}),
+										expires: add(
+											new Date(),
+											accessTimeExpiry
+										),
 									}
 								);
 								// sessionStorage.setItem(

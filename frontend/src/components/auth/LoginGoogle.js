@@ -8,6 +8,8 @@ import { useShallow } from "zustand/react/shallow";
 import {
 	SIXAMYOGA_ACCESS_TOKEN,
 	SIXAMYOGA_REFRESH_TOKEN,
+	accessTimeExpiry,
+	refreshTimeExpiry,
 } from "../../enums/cookies";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
@@ -122,10 +124,10 @@ export default function LoginGoogle() {
 									SIXAMYOGA_ACCESS_TOKEN,
 									userData?.accessToken,
 									{
-										expires: add(new Date(), {
-											hours: 1,
-											minutes: 59,
-										}),
+										expires: add(
+											new Date(),
+											accessTimeExpiry
+										),
 									}
 								);
 
@@ -133,10 +135,10 @@ export default function LoginGoogle() {
 									SIXAMYOGA_REFRESH_TOKEN,
 									userData?.refreshToken,
 									{
-										expires: add(new Date(), {
-											hours: 11,
-											minutes: 45,
-										}),
+										expires: add(
+											new Date(),
+											refreshTimeExpiry
+										),
 									}
 								);
 
