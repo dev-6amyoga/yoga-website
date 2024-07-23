@@ -30,13 +30,16 @@ export const TransitionEndSupine = async (
   const handleTransition = (transitions) => {
     return transitions
       .map((transition) => {
+        console.log(transition);
         const filtered = filteredTransitions_all.filter(
           (transitions) => transitions.transition_video_name === transition
         );
+        console.log(filtered);
         return getUniqueTransition(filtered);
       })
       .filter(Boolean);
   };
+
   if (!start_category) {
     if (break_status_end === "Break") {
       let res = handleTransition([
