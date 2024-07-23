@@ -125,6 +125,7 @@ export const TransitionEndPranayama = async (
       } else {
         if (pranayama.nose_lock_start && pranayama.nose_lock_end) {
           let res = [];
+          console.log(pranayama);
           for (var i = 0; i !== filteredTransitions_all.length; i++) {
             let transition_ind = filteredTransitions_all[i];
             if (
@@ -139,6 +140,7 @@ export const TransitionEndPranayama = async (
             (transition) =>
               !transition.transition_video_name.toLowerCase().includes("unlock")
           );
+          console.log(res);
           return res;
         } else {
           if (pranayama.chin_lock_start && pranayama.chin_lock_end) {
@@ -184,6 +186,7 @@ export const TransitionEndPranayama = async (
               return res;
             } else {
               // return nothing
+              console.log("nothing");
               return [];
             }
           }
@@ -1015,13 +1018,12 @@ export const TransitionEndPranayama = async (
   }
 
   if (start_category === "Pranayama") {
-    const filteredTransitions = transitions.filter(
+    const filteredTransitions_all = transitions.filter(
       (transition) =>
         transition.drm_transition === drm_status &&
-        transition.asana_category_end === "Pranayama" &&
         transition.teacher_mode === end_video.teacher_mode
     );
-    let pending_2 = pranayamaFinder(end_video, filteredTransitions);
+    let pending_2 = pranayamaFinder(end_video, filteredTransitions_all);
     if (start_video.vibhagiya) {
       if (start_video.vibhagiya === "Abdomen") {
         let res = [];
@@ -1104,7 +1106,7 @@ export const TransitionEndPranayama = async (
         return new_res;
       }
     } else {
-      if (pranayama.omkara) {
+      if (start_video.omkara) {
         let res = [];
         for (var i = 0; i !== filteredTransitions_all.length; i++) {
           if (filteredTransitions_all[i]) {
@@ -1123,9 +1125,11 @@ export const TransitionEndPranayama = async (
         }
         let new_res = [...res, ...pending_2];
         new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
+
         return new_res;
       } else {
-        if (pranayama.nose_lock_start && pranayama.nose_lock_end) {
+        if (start_video.nose_lock_start && start_video.nose_lock_end) {
           let res = [];
           for (var i = 0; i !== filteredTransitions_all.length; i++) {
             let transition_ind = filteredTransitions_all[i];
@@ -1142,9 +1146,11 @@ export const TransitionEndPranayama = async (
           );
           let new_res = [...res, ...pending_2];
           new_res = new_res.filter((element) => element !== undefined);
+          new_res = new_res.map((transition) => transition.transition_id);
+
           return new_res;
         } else {
-          if (pranayama.chin_lock_start && pranayama.chin_lock_end) {
+          if (start_video.chin_lock_start && start_video.chin_lock_end) {
             let res = [];
             for (var i = 0; i !== filteredTransitions_all.length; i++) {
               let transition_ind = filteredTransitions_all[i];
@@ -1161,9 +1167,10 @@ export const TransitionEndPranayama = async (
             );
             let new_res = [...res, ...pending_2];
             new_res = new_res.filter((element) => element !== undefined);
+            new_res = new_res.map((transition) => transition.transition_id);
             return new_res;
           } else {
-            if (pranayama.shanmuga_start && pranayama.shanmuga_end) {
+            if (start_video.shanmuga_start && start_video.shanmuga_end) {
               // add bhramari lock and unlock
               let res = [];
               for (var i = 0; i !== filteredTransitions_all.length; i++) {
@@ -1183,10 +1190,14 @@ export const TransitionEndPranayama = async (
               );
               let new_res = [...res, ...pending_2];
               new_res = new_res.filter((element) => element !== undefined);
+              new_res = new_res.map((transition) => transition.transition_id);
               return new_res;
             } else {
+              console.log(pending_2);
               let new_res = [...pending_2];
+              console.log(new_res);
               new_res = new_res.filter((element) => element !== undefined);
+              new_res = new_res.map((transition) => transition.transition_id);
               return new_res;
             }
           }
@@ -1201,7 +1212,7 @@ export const TransitionEndPranayama = async (
         transition.drm_transition === drm_status &&
         transition.teacher_mode === end_video.teacher_mode
     );
-    const transition_1 = filteredTransitions_all.filter(
+    const transition_1 = filteredTransitions.filter(
       (transition) =>
         transition.transition_video_name ===
         "Pranayama Inhale Hands Up Exhale Down"
@@ -1210,16 +1221,16 @@ export const TransitionEndPranayama = async (
     let t1 = getUniqueTransition(transition_1);
     console.log(t1);
     let pending_2 = pranayamaFinder(end_video, filteredTransitions);
+    console.log(pending_2);
     const result = [];
     if (t1) {
       result.push(t1);
     }
     console.log(t1);
-    return result;
-
-    // let new_res = [...result, ...pending_2];
-    // new_res = new_res.filter((element) => element !== undefined);
-    // new_res = new_res.map((transition) => transition.transition_id);
+    let new_res = [...result, ...pending_2];
+    new_res = new_res.filter((element) => element !== undefined);
+    new_res = new_res.map((transition) => transition.transition_id);
+    return new_res;
   }
 
   if (start_category === "Special") {
