@@ -1,8 +1,13 @@
 import { Button, Divider, Drawer, Select, Spacer } from "@geist-ui/core";
 import { Menu, Plus } from "@geist-ui/icons";
 import { memo, useEffect, useState } from "react";
+import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import {
+	SIXAMYOGA_ACCESS_TOKEN,
+	SIXAMYOGA_REFRESH_TOKEN,
+} from "../../../enums/cookies";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import RoleShifter from "../RoleShifter";
@@ -32,12 +37,17 @@ function InstituteNavbar() {
 		state.userPlan,
 	]);
 
-	console.log({ userPlan });
+	// console.log({ userPlan });
 
 	const handleInstituteSelection = (value) => {
 		console.log("Selected Institute:", value);
 		setCurrentInstituteId(parseInt(value));
 	};
+
+	const [cookies, setCookie, removeCookie] = useCookies([
+		SIXAMYOGA_ACCESS_TOKEN,
+		SIXAMYOGA_REFRESH_TOKEN,
+	]);
 
 	const resetUserState = useUserStore((state) => state.resetUserState);
 	const handleLogout = () => {
@@ -47,15 +57,15 @@ function InstituteNavbar() {
 			token: true,
 		})
 			.then((res) => {
-				sessionStorage.removeItem("6amyoga_access_token");
-				sessionStorage.removeItem("6amyoga_refresh_token");
+				removeCookie(SIXAMYOGA_ACCESS_TOKEN);
+				removeCookie(SIXAMYOGA_REFRESH_TOKEN);
 				resetUserState();
 				navigate("/auth");
 			})
 			.catch((err) => {
 				console.log("Logout Error:", err);
-				sessionStorage.removeItem("6amyoga_access_token");
-				sessionStorage.removeItem("6amyoga_refresh_token");
+				removeCookie(SIXAMYOGA_ACCESS_TOKEN);
+				removeCookie(SIXAMYOGA_REFRESH_TOKEN);
 				resetUserState();
 				navigate("/auth");
 			});

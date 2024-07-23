@@ -6,8 +6,10 @@ import {
 	useQueryClient,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { add } from "date-fns";
 import { useCallback } from "react";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import { CookiesProvider, useCookies } from "react-cookie";
 import ReactDOM from "react-dom/client";
 import "react-phone-number-input/style.css";
 import {
@@ -22,6 +24,10 @@ import { useShallow } from "zustand/react/shallow";
 import { AuthAPI } from "./api/auth.api";
 import { UserPlanAPI } from "./api/user-plan.api";
 import { UserAPI } from "./api/user.api";
+import {
+	SIXAMYOGA_ACCESS_TOKEN,
+	SIXAMYOGA_REFRESH_TOKEN,
+} from "./enums/cookies";
 import { ROLE_TEACHER } from "./enums/roles";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
@@ -68,10 +74,10 @@ const router = createBrowserRouter([
 ]);
 
 function LoginIndex() {
-	// const [cookies, setCookie, removeCookie] = useCookies([
-	// 	"6amyoga_access_token",
-	// 	"6amyoga_refresh_token",
-	// ]);
+	const [cookies, setCookie, removeCookie] = useCookies([
+		SIXAMYOGA_ACCESS_TOKEN,
+		SIXAMYOGA_REFRESH_TOKEN,
+	]);
 	const queryClient = useQueryClient();
 
 	const [
@@ -113,10 +119,11 @@ function LoginIndex() {
 	const init = useCallback(async () => {
 		console.log("[INIT]");
 		try {
-			const access_token =
-				sessionStorage.getItem("6amyoga_access_token") || accessToken;
+			const access_token = cookies[SIXAMYOGA_ACCESS_TOKEN] || accessToken;
 			const refresh_token =
-				sessionStorage.getItem("6amyoga_refresh_token") || refreshToken;
+				cookies[SIXAMYOGA_REFRESH_TOKEN] || refreshToken;
+
+			console.log("[INIT] Tokens", access_token, refresh_token);
 
 			if (access_token && refresh_token) {
 				console.log("[INIT] Tokens available");
@@ -227,14 +234,18 @@ function LoginIndex() {
 							}
 						}
 
-						sessionStorage.setItem(
-							"6amyoga_access_token",
-							access_token
-						);
-						sessionStorage.setItem(
-							"6amyoga_refresh_token",
-							refresh_token
-						);
+						// setCookie(SIXAMYOGA_ACCESS_TOKEN, access_token, {
+						// 	expires: add(new Date(), {
+						// 		hours: 1,
+						// 		minutes: 59,
+						// 	}),
+						// });
+						// setCookie(SIXAMYOGA_REFRESH_TOKEN, refresh_token, {
+						// 	expires: add(new Date(), {
+						// 		hours: 11,
+						// 		minutes: 45,
+						// 	}),
+						// });
 					}
 				}
 
@@ -254,26 +265,29 @@ function LoginIndex() {
 								// );
 								setAccessToken(res.accessToken);
 								setRefreshToken(refresh_token);
-								sessionStorage.setItem(
-									"6amyoga_access_token",
-									res.accessToken
+
+								setCookie(
+									SIXAMYOGA_ACCESS_TOKEN,
+									res.accessToken,
+									{
+										expires: add(new Date(), {
+											hours: 1,
+											minutes: 59,
+										}),
+									}
 								);
-								sessionStorage.setItem(
-									"6amyoga_refresh_token",
-									refresh_token
-								);
+								// sessionStorage.setItem(
+								// 	"6amyoga_refresh_token",
+								// 	refresh_token
+								// );
 								queryClient.invalidateQueries(["user"]);
 							}
 							if (err) {
 								// console.log(err);
 								setAccessToken(null);
 								setRefreshToken(null);
-								sessionStorage.removeItem(
-									"6amyoga_access_token"
-								);
-								sessionStorage.removeItem(
-									"6amyoga_refresh_token"
-								);
+								removeCookie(SIXAMYOGA_ACCESS_TOKEN);
+								removeCookie(SIXAMYOGA_REFRESH_TOKEN);
 							}
 							break;
 						// refresh token expired
@@ -281,25 +295,26 @@ function LoginIndex() {
 						case "Refresh token expired":
 							setAccessToken(null);
 							setRefreshToken(null);
-							sessionStorage.removeItem("6amyoga_access_token");
-							sessionStorage.removeItem("6amyoga_refresh_token");
+							removeCookie(SIXAMYOGA_ACCESS_TOKEN);
+							removeCookie(SIXAMYOGA_REFRESH_TOKEN);
 							resetUserState();
 							break;
 						// invalid response, let it go
 						default:
 							setAccessToken(null);
 							setRefreshToken(null);
-							sessionStorage.removeItem("6amyoga_access_token");
-							sessionStorage.removeItem("6amyoga_refresh_token");
+							removeCookie(SIXAMYOGA_ACCESS_TOKEN);
+							removeCookie(SIXAMYOGA_REFRESH_TOKEN);
 							break;
 					}
 				}
 			} else {
-				sessionStorage.setItem("6amyoga_access_token", "");
-				sessionStorage.setItem("6amyoga_refresh_token", "");
+				removeCookie(SIXAMYOGA_ACCESS_TOKEN);
+				removeCookie(SIXAMYOGA_REFRESH_TOKEN);
 			}
 		} catch (err) {
 			console.log(err);
+			throw err;
 		}
 		return null;
 	}, [
@@ -314,6 +329,7 @@ function LoginIndex() {
 		setCurrentRole,
 		setRoles,
 		setUserPlan,
+		cookies,
 	]);
 
 	// refetch every 5 minutes
@@ -343,8 +359,15 @@ function Index() {
 
 	//   const theme = useTheme();
 
+	// console.log("DOMAIN : ", import.meta.env.VITE_FRONTEND_DOMAIN);
+
 	return (
-		<>
+		<CookiesProvider
+			defaultSetOptions={{
+				path: "/",
+				sameSite: "lax",
+				// domain: import.meta.env.VITE_FRONTEND_DOMAIN,
+			}}>
 			<QueryClientProvider client={queryClient}>
 				<GeistProvider>
 					{/* <CssBaseline /> */}
@@ -358,7 +381,7 @@ function Index() {
 				</GeistProvider>
 				<ReactQueryDevtools initialIsOpen={false} />
 			</QueryClientProvider>
-		</>
+		</CookiesProvider>
 	);
 }
 

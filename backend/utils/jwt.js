@@ -20,14 +20,14 @@ function generateAccessToken(user) {
 	const now = new Date();
 
 	const exp = new Date();
-	exp.setHours(exp.getHours() + 1);
+	exp.setHours(exp.getHours() + 2);
 
 	return [
 		jwt.sign(
 			{ token_type: TOKEN_TYPE_ACCESS, user: user },
 			JWT_TOKEN_SECRET,
 			{
-				expiresIn: "3h",
+				expiresIn: "2h",
 			}
 		),
 		now,
@@ -48,7 +48,7 @@ function generateRefreshToken(user) {
 			{ token_type: TOKEN_TYPE_REFRESH, user: user },
 			JWT_TOKEN_SECRET,
 			{
-				expiresIn: "24h",
+				expiresIn: "12h",
 			}
 		),
 		now,
