@@ -116,7 +116,6 @@ export default function ViewDetailsModal({
 							</FormControl>
 
 							<div className="mb-4">
-								{" "}
 								<p className="text-sm text-gray-600">
 									Start Time (Previously :{" "}
 									{new Date(

@@ -43,6 +43,111 @@ function ClassModeTeacher() {
 		}
 	}, [classInfo]);
 
+	// connect to socket
+	const [connectionOpen, setConnectionOpen] = useState(false);
+	const [socket, setSocket] = useState(null);
+	const [queue, setQueue] = useState([]);
+	const [startConnection, setStartConnection] = useState(true);
+	let intervalTimer = useRef(null);
+
+	useEffect(() => {
+		if (!startConnection) return;
+
+		const ws = new WebSocket("ws://localhost:4000/ws/class/teacher/");
+		setSocket(ws);
+		setStartConnection(false);
+	}, [startConnection]);
+
+	useEffect(() => {
+		if (socket === null) return;
+
+		const handleOpen = () => {
+			setConnectionOpen(true);
+			// intervalTimer.current = setInterval(() => {
+			// 	socket.send(
+
+			// 	);
+			// }, 5000);
+		};
+
+		const handleClose = () => {
+			setConnectionOpen(false);
+			clearInterval(intervalTimer.current);
+		};
+
+		const handleMessage = (e) => {
+			console.log("Message received: ", e.data);
+			const data = JSON.parse(e.data);
+			setQueue((prev) => [...prev, data]);
+		};
+
+		socket.addEventListener("open", handleOpen);
+		socket.addEventListener("close", handleClose);
+		socket.addEventListener("message", handleMessage);
+
+		return () => {
+			if (socket) {
+				socket.close();
+				socket.removeEventListener("open", handleOpen);
+				socket.removeEventListener("close", handleClose);
+				socket.removeEventListener("message", handleMessage);
+			}
+		};
+	}, [socket]);
+
+	const handleAddToQueue = (playlist) => {
+		// send request to socket
+		/* 
+      PUSH
+        {
+          class_id: class_id,
+          type: "EVENT_QUEUE",
+          data: {
+            subtype: "EVENT_QUEUE_PUSH",
+            data: {
+              video_id: video_id,
+            },
+          },
+          event_time: new Date().toISOString(),
+        }
+    */
+	};
+
+	const handlePopFromQueue = (playlist, idx) => {
+		// send request to socket
+		/*
+    POP
+        {
+          class_id: class_id,
+          type: "EVENT_QUEUE",
+          data: {
+            subtype: "EVENT_QUEUE_POP",
+            data: {
+              video_id: video_id,
+              idx: idx,
+            },
+          },
+          event_time: new Date().toISOString(),
+        }
+    */
+	};
+
+	const handleClearQueue = () => {
+		// send request to socket
+		/*
+    CLEAR
+        {
+          class_id: class_id,
+          type: "EVENT_QUEUE",
+          data: {
+            subtype: "EVENT_QUEUE_CLEAR",
+            data: {},
+          },
+          event_time: new Date().toISOString(),
+        }
+    */
+	};
+
 	return (
 		<TeacherPageWrapper>
 			<main>
@@ -106,7 +211,7 @@ function ClassModeTeacher() {
 
 								<Spacer h={2} />
 
-								<Playlist />
+								<Playlist onAddQueue={handleAddToQueue} />
 							</>
 						)}
 					</div>
