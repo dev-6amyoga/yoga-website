@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
 import { ROLE_STUDENT } from "../../../enums/roles";
+import { toast } from "react-toastify";
 function ViewMyClasses() {
   const [mode, setMode] = React.useState("light");
   const defaultTheme = createTheme({ palette: { mode } });
@@ -48,6 +49,12 @@ function ViewMyClasses() {
       minute: "2-digit",
     });
     return `${date} ${time}`;
+  };
+
+  const joinClass = (class_id) => {
+    console.log(class_id);
+    toast("Joining class..." + String(class_id));
+    window.open(`/student/class/${class_id}/info`, "_blank");
   };
 
   return (
@@ -104,7 +111,13 @@ function ViewMyClasses() {
                     {/* <TableCell>{classItem.status}</TableCell> */}
                     <TableCell>{classItem.teacher.name}</TableCell>
                     <TableCell align="right">
-                      <Button variant="contained" color="primary">
+                      <Button
+                        onClick={() => {
+                          joinClass(classItem._id);
+                        }}
+                        variant="contained"
+                        color="primary"
+                      >
                         Join
                       </Button>
                     </TableCell>
