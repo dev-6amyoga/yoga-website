@@ -1,8 +1,4 @@
-const express = require('express')
-
-const router = express.Router()
-
-router.ws('/teacher', (ws) => {
+const handleTeacherConnection = (ws) => {
   ws.on('message', (msg) => {
     // parse message
 
@@ -12,12 +8,15 @@ router.ws('/teacher', (ws) => {
 
     // find class history object
   })
-})
+}
 
-router.ws('/student', (ws) => {
+const handleStudentConnection = (ws) => {
   ws.on('message', (msg) => {
     console.log('[WS] /student : ping', msg)
   })
-})
+}
 
-module.exports = router
+module.exports = {
+  handleTeacherConnection,
+  handleStudentConnection,
+}
