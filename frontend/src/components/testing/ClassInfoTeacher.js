@@ -123,7 +123,7 @@ export default function ClassInfoTeacher() {
 								<p className="font-medium">Start Time</p>
 								<p>
 									{new Date(
-										classInfo?.start_time
+										classInfo?.onetime_class_start_time
 									).toLocaleString()}
 								</p>
 							</div>
@@ -131,18 +131,20 @@ export default function ClassInfoTeacher() {
 								<p className="font-medium">End Time</p>
 								<p>
 									{new Date(
-										classInfo?.end_time
+										classInfo?.onetime_class_end_time
 									).toLocaleString()}
 								</p>
 							</div>
 							<div>
 								<p className="font-medium">Duration</p>
 								<p>
-									{classInfo?.end_time &&
-									classInfo?.start_time
-										? (new Date(classInfo.end_time) -
+									{classInfo?.onetime_class_end_time &&
+									classInfo?.onetime_class_start_time
+										? (new Date(
+												classInfo.onetime_class_end_time
+											) -
 												new Date(
-													classInfo.start_time
+													classInfo.onetime_class_start_time
 												)) /
 											1000 /
 											60

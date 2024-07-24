@@ -11,13 +11,6 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import {
-	CLASS_CANCELLED,
-	CLASS_COMPLETED,
-	CLASS_EXPIRED,
-	CLASS_ONGOING,
-	CLASS_UPCOMING,
-} from "../../../enums/class_status";
 import getFormData from "../../../utils/getFormData";
 import { getFrontendDomain } from "../../../utils/getFrontendDomain";
 import Timer from "../../Common/Timer";
@@ -80,7 +73,7 @@ export default function ViewDetailsModal({
 			<Modal.Title>{activeClassModalData?.class_name}</Modal.Title>
 			<Modal.Subtitle>
 				<Timer
-					endTime={activeClassModalData?.end_time}
+					endTime={activeClassModalData?.onetime_class_end_time}
 					onEndTitle="Past Due Date"
 				/>
 			</Modal.Subtitle>
@@ -111,11 +104,9 @@ export default function ViewDetailsModal({
 									label="Status"
 									defaultValue={activeClassModalData?.status}>
 									{[
-										CLASS_UPCOMING,
-										CLASS_ONGOING,
-										CLASS_COMPLETED,
-										CLASS_CANCELLED,
-										CLASS_EXPIRED,
+										"CLASS_METADATA_DRAFT",
+										"CLASS_METADATA_ACTIVE",
+										"CLASS_METADATA_INACTIVE",
 									].map((status) => (
 										<MenuItem value={status}>
 											{status}
@@ -160,21 +151,30 @@ export default function ViewDetailsModal({
 								variant="contained">
 								Submit
 							</Button>
+							<Button
+								type="button"
+								className="w-full"
+								onClick={() => {
+									setDirty(false);
+								}}
+								variant="outlined">
+								Cancel
+							</Button>
 						</form>
 					) : (
 						<div className="flex flex-col">
 							<Text>
 								Start Time :{" "}
-								{activeClassModalData?.start_time &&
+								{activeClassModalData?.onetime_class_start_time &&
 									new Date(
-										activeClassModalData.start_time
+										activeClassModalData.onetime_class_start_time
 									).toLocaleString()}
 							</Text>
 							<Text>
 								End Time :{" "}
-								{activeClassModalData?.end_time &&
+								{activeClassModalData?.onetime_class_end_time &&
 									new Date(
-										activeClassModalData.end_time
+										activeClassModalData.onetime_class_end_time
 									).toLocaleString()}
 							</Text>
 							{/* <Text>Days: {activeClassModalData.days.join(", ")}</Text> */}
@@ -182,7 +182,7 @@ export default function ViewDetailsModal({
 								Description : {activeClassModalData?.class_desc}
 							</Text>
 
-							<Text>Status : {activeClassModalData?.status}</Text>
+							{/* <Text>Status : {activeClassModalData?.status}</Text> */}
 						</div>
 					)}
 					<Spacer />
