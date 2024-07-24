@@ -584,7 +584,7 @@ function StudentNavMUI({ mode, toggleColorMode }) {
         },
       },
       {
-        path: "/student/contact-us",
+        path: "/student/class/my-classes",
         title: "Your Classes",
         props: {
           disabled: false,

@@ -12,64 +12,69 @@ import StudentSettings from "../pages/student/StudentSettings";
 import StudentTransactionHistory from "../pages/student/StudentTransactionHistory";
 import StudentWatchHistory from "../pages/student/StudentWatchHistory";
 import ViewAllPlaylists from "../pages/student/ViewAllPlaylists";
+import ViewMyClasses from "../pages/student/class-mode/ViewMyClasses";
 export const StudentRoutes = [
-	{
-		path: "/student/playlist-view",
-		element: <StudentHome />,
-	},
-	{
-		path: "/student/contact-us",
-		element: <ContactUs />,
-	},
-	{
-		path: "/student/about-us",
-		element: <AboutUs />,
-	},
+  {
+    path: "/student/playlist-view",
+    element: <StudentHome />,
+  },
+  {
+    path: "/student/class/my-classes",
+    element: <ViewMyClasses />,
+  },
+  {
+    path: "/student/contact-us",
+    element: <ContactUs />,
+  },
+  {
+    path: "/student/about-us",
+    element: <AboutUs />,
+  },
 
-	{
-		path: "/student/purchase-a-plan",
-		element: <StudentPlan />,
-	},
-	{
-		path: "/student/free-videos",
-		element: <FreeVideos />,
-	},
-	{
-		path: "/student",
-		element: <StudentMain />,
-	},
-	{
-		path: "/student/register-new-playlist",
-		element: <RegisterNewPlaylistStudent />,
-	},
-	{
-		path: "/student/view-all-playlists",
-		element: <ViewAllPlaylists />,
-	},
-	{
-		path: "/student/my-profile",
-		element: <StudentProfile />,
-	},
-	{
-		path: "/student/settings",
-		element: <StudentSettings />,
-	},
-	{
-		path: "/student/transactions",
-		element: <StudentTransactionHistory />,
-	},
-	{
-		path: "/student/watch-history",
-		element: <StudentWatchHistory />,
-	},
+  {
+    path: "/student/purchase-a-plan",
+    element: <StudentPlan />,
+  },
+  {
+    path: "/student/free-videos",
+    element: <FreeVideos />,
+  },
+  {
+    path: "/student",
+    element: <StudentMain />,
+  },
+  {
+    path: "/student/register-new-playlist",
+    element: <RegisterNewPlaylistStudent />,
+  },
+  {
+    path: "/student/view-all-playlists",
+    element: <ViewAllPlaylists />,
+  },
+  {
+    path: "/student/my-profile",
+    element: <StudentProfile />,
+  },
+  {
+    path: "/student/settings",
+    element: <StudentSettings />,
+  },
+  {
+    path: "/student/transactions",
+    element: <StudentTransactionHistory />,
+  },
+  {
+    path: "/student/watch-history",
+    element: <StudentWatchHistory />,
+  },
 
-	// class mode
-	{
-		path: "/student/class/:class_id/info",
-		element: <ClassInfoStudent />,
-	},
-	{
-		path: "/student/class/:class_id",
-		element: <ClassModeStudent />,
-	},
+  // class mode
+  {
+    path: "/student/class/:class_id/info",
+    element: <ClassInfoStudent />,
+  },
+  {
+    path: "/student/class/:class_id",
+    element: <ClassModeStudent />,
+  },
 ];
