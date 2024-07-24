@@ -2,14 +2,15 @@ import { Button, Drawer } from "@geist-ui/core";
 import { Menu, User } from "@geist-ui/icons";
 // import { stringify } from "query-string/base";
 import { memo, useEffect, useState } from "react";
+import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
-import useUserStore from "../../../store/UserStore";
-import { Fetch } from "../../../utils/Fetch";
-import RoleShifter from "../RoleShifter";
 import {
 	SIXAMYOGA_ACCESS_TOKEN,
 	SIXAMYOGA_REFRESH_TOKEN,
 } from "../../../enums/cookies";
+import useUserStore from "../../../store/UserStore";
+import { Fetch } from "../../../utils/Fetch";
+import RoleShifter from "../RoleShifter";
 
 function TeacherNavbar() {
 	const [open, setOpen] = useState(false);

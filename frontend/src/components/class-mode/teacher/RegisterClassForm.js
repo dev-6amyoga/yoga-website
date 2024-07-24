@@ -15,6 +15,8 @@ import { Button } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { ClassAPI } from "../../../api/class.api";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
@@ -226,20 +228,41 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 			});
 		}
 
-		// const [res, err] = await ClassModeAPI.postCreateClass(
-		// 	formData.class_name,
-		// 	formData.class_desc,
-		// 	4,
-		// 	new Date(formData.start_time).toISOString(),
-		// 	new Date(formData.end_time).toISOString()
-		// );
+		const onetime_class_start_time =
+			classType === CLASS_TYPE_ONETIME
+				? new Date(formData.start_time).toISOString()
+				: null;
+		const onetime_class_end_time =
+			classType === CLASS_TYPE_ONETIME
+				? new Date(formData.end_time).toISOString()
+				: null;
+		const recurring_class_end_time =
+			classType === CLASS_TYPE_RECURRING ? formData.end_time : null;
+		const recurring_class_start_time =
+			classType === CLASS_TYPE_RECURRING ? formData.start_time : null;
 
-		// if (err) {
-		// 	toast.error("Error updating class");
-		// 	return;
-		// }
+		const [res, err] = await ClassAPI.postCreateClass(
+			formData.class_name,
+			formData.class_desc,
+			classType,
+			classType === CLASS_TYPE_ONETIME ? null : recurranceType,
+			weeklyRecurranceDays,
+			onetime_class_start_time,
+			onetime_class_end_time,
+			recurring_class_start_time,
+			recurring_class_end_time,
+			4,
+			allowedStudents.map((s) => s.email)
+		);
 
-		// setVisible(false);
+		if (err) {
+			toast.error("Error updating class");
+			return;
+		} else {
+			toast.success("Class updated successfully");
+		}
+
+		setVisible(false);
 	};
 
 	return (
