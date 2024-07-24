@@ -8,38 +8,38 @@ import TeacherManageClasses from "../pages/teacher/class/Manage";
 import InvitePage from "../pages/teacher/invite/Index";
 
 export const TeacherRoutes = [
-	{
-		path: "/teacher",
-		element: <TeacherHome />,
-	},
-	{
-		path: "/teacher/invite",
-		element: <InvitePage />,
-	},
-	{
-		path: "/teacher/playlist",
-		element: <TeacherPlaylist />,
-	},
-	{
-		path: "/teacher/self-audio-upload",
-		element: <SelfAudioUpload />,
-	},
-	{
-		path: "/teacher/make-playlist",
-		element: <TeacherPlaylistCreation />,
-	},
+  {
+    path: "/teacher",
+    element: <TeacherHome />,
+  },
+  {
+    path: "/teacher/invite",
+    element: <InvitePage />,
+  },
+  {
+    path: "/teacher/playlist",
+    element: <TeacherPlaylist />,
+  },
+  {
+    path: "/teacher/self-audio-upload",
+    element: <SelfAudioUpload />,
+  },
+  {
+    path: "/teacher/make-playlist",
+    element: <TeacherPlaylistCreation />,
+  },
 
-	// class mode
-	{
-		path: "/teacher/class/manage",
-		element: <TeacherManageClasses />,
-	},
-	{
-		path: "/teacher/class/:class_id/info",
-		element: <ClassInfoTeacher />,
-	},
-	{
-		path: "/teacher/class/:class_id",
-		element: <ClassModeTeacher />,
-	},
+  // class mode
+  {
+    path: "/teacher/class/manage",
+    element: <TeacherManageClasses />,
+  },
+  {
+    path: "/teacher/class/:class_id/info",
+    element: <ClassInfoTeacher />,
+  },
+  {
+    path: "/teacher/class/:class_id",
+    element: <ClassModeTeacher />,
+  },
 ];
