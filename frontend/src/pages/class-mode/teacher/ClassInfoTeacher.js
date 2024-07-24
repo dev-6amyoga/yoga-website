@@ -10,11 +10,7 @@ import { useState } from "react";
 import DisplayWatchTime from "../../../components/Common/DisplayWatchTime";
 import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
 import ViewDetailsModal from "../../../components/class-mode/teacher/ViewDetailsModal";
-import {
-	CLASS_COMPLETED,
-	CLASS_ONGOING,
-	CLASS_UPCOMING,
-} from "../../../enums/class_status";
+import { CLASS_COMPLETED, CLASS_UPCOMING } from "../../../enums/class_status";
 import { getFrontendDomain } from "../../../utils/getFrontendDomain";
 
 export default function ClassInfoTeacher() {
@@ -106,7 +102,11 @@ export default function ClassInfoTeacher() {
 						<p className="font-medium">Starts In</p>
 						<div className="text-2xl text-center">
 							<DisplayWatchTime
-								endTs={new Date(classInfo?.start_time)}
+								endTs={
+									new Date(
+										classInfo?.onetime_class_start_time
+									)
+								}
 							/>
 						</div>
 					</CardContent>
@@ -119,7 +119,9 @@ export default function ClassInfoTeacher() {
 						<p className="font-medium">Ends In</p>
 						<div className="text-2xl">
 							<DisplayWatchTime
-								endTs={new Date(classInfo?.end_time)}
+								endTs={
+									new Date(classInfo?.onetime_class_end_time)
+								}
 							/>
 						</div>
 					</CardContent>
@@ -159,7 +161,7 @@ export default function ClassInfoTeacher() {
 									<p className="font-medium">Start Time</p>
 									<p>
 										{new Date(
-											classInfo?.start_time
+											classInfo?.onetime_class_start_time
 										).toLocaleString()}
 									</p>
 								</div>
@@ -167,7 +169,7 @@ export default function ClassInfoTeacher() {
 									<p className="font-medium">End Time</p>
 									<p>
 										{new Date(
-											classInfo?.end_time
+											classInfo?.onetime_class_end_time
 										).toLocaleString()}
 									</p>
 								</div>
@@ -175,10 +177,12 @@ export default function ClassInfoTeacher() {
 									<p className="font-medium">Duration</p>
 									<p>
 										{classInfo?.end_time &&
-										classInfo?.start_time
-											? (new Date(classInfo.end_time) -
+										classInfo?.onetime_class_start_time
+											? (new Date(
+													classInfo.onetime_class_end_time
+												) -
 													new Date(
-														classInfo.start_time
+														classInfo.onetime_class_start_time
 													)) /
 												1000 /
 												60
@@ -230,23 +234,18 @@ export default function ClassInfoTeacher() {
 								startIcon={<Share />}>
 								Share
 							</Button>
-							{classInfo?.status === CLASS_UPCOMING ||
-							classInfo?.status === CLASS_ONGOING ? (
-								<Button
-									sx={{
-										minWidth: "fit-content",
-									}}
-									onClick={() => {
-										navigate(`/teacher/class/${class_id}`);
-									}}
-									variant="contained"
-									color="inherit"
-									startIcon={<ArrowOutward />}>
-									Go to Class
-								</Button>
-							) : (
-								<></>
-							)}
+							<Button
+								sx={{
+									minWidth: "fit-content",
+								}}
+								onClick={() => {
+									navigate(`/teacher/class/${class_id}`);
+								}}
+								variant="contained"
+								color="inherit"
+								startIcon={<ArrowOutward />}>
+								Go to Class
+							</Button>
 						</div>
 					</div>
 

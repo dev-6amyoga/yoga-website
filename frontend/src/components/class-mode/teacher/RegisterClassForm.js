@@ -21,13 +21,14 @@ import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
 
-const CLASS_TYPE_ONETIME = "CLASS_TYPE_ONETIME",
-	CLASS_TYPE_RECURRING = "CLASS_TYPE_RECURRING";
-
-const CLASS_RECURRANCE_TYPE_DAILY = "CLASS_RECURRANCE_TYPE_DAILY",
-	CLASS_RECURRANCE_TYPE_WEEKLY = "CLASS_RECURRANCE_TYPE_WEEKLY",
-	CLASS_RECURRANCE_TYPE_FORTNIGHTLY = "CLASS_RECURRANCE_TYPE_FORTNIGHTLY",
-	CLASS_RECURRANCE_TYPE_MONTHLY = "CLASS_RECURRANCE_TYPE_MONTHLY";
+import {
+	CLASS_RECURRANCE_TYPE_DAILY,
+	CLASS_RECURRANCE_TYPE_FORTNIGHTLY,
+	CLASS_RECURRANCE_TYPE_MONTHLY,
+	CLASS_RECURRANCE_TYPE_WEEKLY,
+	CLASS_TYPE_ONETIME,
+	CLASS_TYPE_RECURRING,
+} from "../../../enums/class_types";
 
 export default function RegisterNewClass({ visible = false, setVisible }) {
 	const [days, setDays] = useState(null);

@@ -9,12 +9,15 @@ import ViewDetailsModal from "../../../components/class-mode/teacher/ViewDetails
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 
+import { Text } from "@geist-ui/core";
 import format from "date-fns/format";
 import getDay from "date-fns/getDay";
 import { enGB, enIN } from "date-fns/locale";
 import enUS from "date-fns/locale/en-US";
 import parse from "date-fns/parse";
 import startOfWeek from "date-fns/startOfWeek";
+import { DataTable } from "../../../components/Common/DataTable/DataTable";
+import { CLASS_TYPE_ONETIME } from "../../../enums/class_types";
 
 const locales = {
 	"en-US": enUS,
@@ -46,7 +49,7 @@ export default function ManageClasses() {
 		queryKey: ["allClasses"],
 		queryFn: async () => {
 			const response = await Fetch({
-				url: "/class-mode/get-all",
+				url: "/class/teacher/get-all",
 				method: "GET",
 			});
 			// console.log(response);
@@ -55,17 +58,27 @@ export default function ManageClasses() {
 					let tempActiveClasses = [];
 					let tempInactiveClasses = [];
 					let current_time = new Date();
-					for (var i = 0; i !== response.data.length; i++) {
-						let start_time = new Date(response.data[i].start_time);
-						let end_time = new Date(response.data[i].end_time);
 
-						if (
-							start_time <= current_time &&
-							current_time <= end_time
-						) {
-							tempActiveClasses.push(response.data[i]);
-						} else {
-							tempInactiveClasses.push(response.data[i]);
+					for (var i = 0; i !== response.data.length; i++) {
+						let classInfo = response.data[i];
+
+						if (classInfo.class_type === CLASS_TYPE_ONETIME) {
+							console.log(classInfo._id);
+							let start_time = new Date(
+								classInfo.onetime_class_start_time
+							);
+							let end_time = new Date(
+								classInfo.onetime_class_end_time
+							);
+
+							if (
+								start_time <= current_time &&
+								current_time <= end_time
+							) {
+								tempActiveClasses.push(classInfo);
+							} else {
+								tempInactiveClasses.push(classInfo);
+							}
 						}
 					}
 					setActiveClasses(tempActiveClasses);
@@ -107,6 +120,10 @@ export default function ManageClasses() {
 		}
 	}, [activeClassModal]);
 
+	useEffect(() => {
+		console.log({ allClasses });
+	}, [allClasses]);
+
 	const columnsDataTable = useMemo(
 		() => [
 			{
@@ -137,7 +154,7 @@ export default function ManageClasses() {
 			// 	},
 			// },
 			{
-				accessorKey: "start_time",
+				accessorKey: "onetime_class_start_time",
 				header: ({ column }) => (
 					<SortableColumn column={column}>Start Time</SortableColumn>
 				),
@@ -150,7 +167,7 @@ export default function ManageClasses() {
 				},
 			},
 			{
-				accessorKey: "end_time",
+				accessorKey: "onetime_class_end_time",
 				header: ({ column }) => (
 					<SortableColumn column={column}>End Time</SortableColumn>
 				),
@@ -192,22 +209,22 @@ export default function ManageClasses() {
 
 			<RegisterNewClass visible={regVisible} setVisible={setRegVisible} />
 
-			{/* <div className="grid grid-cols-2 gap-2">
-				<Card>
+			<div className="flex flex-col gap-2">
+				<div>
 					<Text h5>Today's Classes</Text>
 					<DataTable
 						columns={columnsDataTable}
 						data={activeClasses || []}
 						refetch={refetchClasses}></DataTable>
-				</Card>
-				<Card>
+				</div>
+				<div>
 					<Text h5>Upcoming/Expired Classes</Text>
 					<DataTable
 						columns={columnsDataTable}
 						data={inactiveClasses || []}
 						refetch={refetchClasses}></DataTable>
-				</Card>
-			</div> */}
+				</div>
+			</div>
 
 			<div className="my-10">
 				<Calendar
