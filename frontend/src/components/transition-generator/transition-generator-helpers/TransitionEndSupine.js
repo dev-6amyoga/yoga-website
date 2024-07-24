@@ -513,6 +513,7 @@ export const TransitionEndSupine = async (
         ]);
       }
     }
+    pending_2 = res1;
     if (start_video.vibhagiya) {
       if (start_video.vibhagiya === "Abdomen") {
         let res = [];
@@ -614,6 +615,7 @@ export const TransitionEndSupine = async (
         }
         let new_res = [...res, ...pending_2];
         new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
         return new_res;
       } else {
         if (start_video.nose_lock_start && start_video.nose_lock_end) {
@@ -633,6 +635,8 @@ export const TransitionEndSupine = async (
           );
           let new_res = [...res, ...pending_2];
           new_res = new_res.filter((element) => element !== undefined);
+          new_res = new_res.map((transition) => transition.transition_id);
+
           return new_res;
         } else {
           if (start_video.chin_lock_start && start_video.chin_lock_end) {
@@ -652,6 +656,8 @@ export const TransitionEndSupine = async (
             );
             let new_res = [...res, ...pending_2];
             new_res = new_res.filter((element) => element !== undefined);
+            new_res = new_res.map((transition) => transition.transition_id);
+
             return new_res;
           } else {
             if (start_video.shanmuga_start && start_video.shanmuga_end) {
@@ -674,10 +680,13 @@ export const TransitionEndSupine = async (
               );
               let new_res = [...res, ...pending_2];
               new_res = new_res.filter((element) => element !== undefined);
+              new_res = new_res.map((transition) => transition.transition_id);
+
               return new_res;
             } else {
               let new_res = [...pending_2];
               new_res = new_res.filter((element) => element !== undefined);
+              new_res = new_res.map((transition) => transition.transition_id);
               return new_res;
             }
           }

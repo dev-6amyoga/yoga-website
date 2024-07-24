@@ -40,6 +40,16 @@ function ViewMyClasses() {
     fetchData();
   }, []);
 
+  const formatDate = (dateString) => {
+    const options = { year: "numeric", month: "numeric", day: "numeric" };
+    const date = new Date(dateString).toLocaleDateString(undefined, options);
+    const time = new Date(dateString).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    return `${date} ${time}`;
+  };
+
   return (
     <ThemeProvider theme={defaultTheme}>
       <CssBaseline />
@@ -85,8 +95,12 @@ function ViewMyClasses() {
                     <TableCell>{classItem.class_name}</TableCell>
                     <TableCell>{classItem.class_desc}</TableCell>
                     {/* <TableCell>{classItem.class_type}</TableCell> */}
-                    <TableCell>{classItem.onetime_class_start_time}</TableCell>
-                    <TableCell>{classItem.onetime_class_end_time}</TableCell>
+                    <TableCell>
+                      {formatDate(classItem.onetime_class_start_time)}
+                    </TableCell>
+                    <TableCell>
+                      {formatDate(classItem.onetime_class_end_time)}
+                    </TableCell>
                     {/* <TableCell>{classItem.status}</TableCell> */}
                     <TableCell>{classItem.teacher.name}</TableCell>
                     <TableCell align="right">
