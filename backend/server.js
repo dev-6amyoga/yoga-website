@@ -1,8 +1,6 @@
 const express = require('express')
 const requestIp = require('request-ip')
 
-const app = express()
-
 const mongoose = require('mongoose')
 const cors = require('cors')
 const morgan = require('morgan')
@@ -35,38 +33,42 @@ glob.sync('./models/mongo/*.js').forEach((file) => {
 })
 
 // routers
-const asanaRouter = require('./routes/Asana')
-const authRouter = require('./routes/Auth')
-const instituteRouter = require('./routes/Institute')
-const userRouter = require('./routes/User')
-const playlistRouter = require('./routes/Playlist')
-const scheduleRouter = require('./routes/Schedule')
-const planRouter = require('./routes/Plan')
-const userPlanRouter = require('./routes/UserPlan')
-const currencyRouter = require('./routes/Currency')
-const referralCodeRouter = require('./routes/ReferralCode')
-const userPlaylistRouter = require('./routes/PlaylistUser')
-const inviteRouter = require('./routes/Invite')
-const customPlanRouter = require('./routes/CustomPlan')
-const paymentRouter = require('./routes/Payment')
-const userInstituteRouter = require('./routes/UserInstitute')
-const discountCouponRouter = require('./routes/DiscountCoupon')
-const transactionRouter = require('./routes/Transaction')
-const teacherPlaylistRouter = require('./routes/TeacherPlaylist')
-const userInstitutePlanRoleRouter = require('./routes/UserInstitutePlanRole')
-const institutePlaylistRouter = require('./routes/InstitutePlaylist')
-const planPricingRouter = require('./routes/PlanPricing')
-const invoiceRouter = require('./routes/Invoice')
-const watchHistoryRouter = require('./routes/WatchHistory')
-const watchTimeLogRouter = require('./routes/WatchTimeLog')
-const customUserPlanRouter = require('./routes/CustomUserPlan')
-const queryRouter = require('./routes/Queries')
-const updateRequestsRouter = require('./routes/UpdateRequests')
-const playlistConfigsRouter = require('./routes/PlaylistConfigs')
-const playbackRouter = require('./routes/Playback')
-const classRouter = require('./routes/Class')
-const postureRouter = require('./routes/Posture')
-const otpRouter = require('./routes/OTP')
+const asanaRouter = require('./routes/Asana.js')
+const authRouter = require('./routes/Auth.js')
+const instituteRouter = require('./routes/Institute.js')
+const userRouter = require('./routes/User.js')
+const playlistRouter = require('./routes/Playlist.js')
+const scheduleRouter = require('./routes/Schedule.js')
+const planRouter = require('./routes/Plan.js')
+const userPlanRouter = require('./routes/UserPlan.js')
+const currencyRouter = require('./routes/Currency.js')
+const referralCodeRouter = require('./routes/ReferralCode.js')
+const userPlaylistRouter = require('./routes/PlaylistUser.js')
+const inviteRouter = require('./routes/Invite.js')
+const customPlanRouter = require('./routes/CustomPlan.js')
+const paymentRouter = require('./routes/Payment.js')
+const userInstituteRouter = require('./routes/UserInstitute.js')
+const discountCouponRouter = require('./routes/DiscountCoupon.js')
+const transactionRouter = require('./routes/Transaction.js')
+const teacherPlaylistRouter = require('./routes/TeacherPlaylist.js')
+const userInstitutePlanRoleRouter = require('./routes/UserInstitutePlanRole.js')
+const institutePlaylistRouter = require('./routes/InstitutePlaylist.js')
+const planPricingRouter = require('./routes/PlanPricing.js')
+const invoiceRouter = require('./routes/Invoice.js')
+const watchHistoryRouter = require('./routes/WatchHistory.js')
+const watchTimeLogRouter = require('./routes/WatchTimeLog.js')
+const customUserPlanRouter = require('./routes/CustomUserPlan.js')
+const queryRouter = require('./routes/Queries.js')
+const updateRequestsRouter = require('./routes/UpdateRequests.js')
+const playlistConfigsRouter = require('./routes/PlaylistConfigs.js')
+const playbackRouter = require('./routes/Playback.js')
+const classRouter = require('./routes/Class.js')
+const postureRouter = require('./routes/Posture.js')
+const otpRouter = require('./routes/OTP.js')
+
+// ws routers
+
+const classWsRouter = require('./websocket-routes/Class.js')
 
 // DEV : sample data creation
 // const { bulkCreateSampleData } = require('./sample_data')
@@ -91,6 +93,9 @@ const corsOptions = {
   ],
   optionSuccessStatus: 200,
 }
+
+const app = express()
+var expressWs = require('express-ws')(app)
 
 // allow everything
 // const corsOptions = {
@@ -215,6 +220,9 @@ app.use('/posture', postureRouter)
 app.use('/otp', otpRouter)
 app.use('/customPlan', customPlanRouter)
 app.use('/customUserPlan', customUserPlanRouter)
+
+// ws routers
+app.use('/ws/class', classWsRouter)
 
 const port = parseInt(process.env.PORT, 10)
 
