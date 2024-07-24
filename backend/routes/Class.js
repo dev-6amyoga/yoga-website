@@ -155,6 +155,8 @@ router.post('/update', async (req, res) => {
 
 router.get('/student/get-all', async (req, res) => {
   try {
+    const classes1 = await Class.find()
+    console.log(classes1)
     const classes = await Class.find(
       {
         class_type: CLASS_TYPE_ONETIME,
@@ -169,6 +171,7 @@ router.get('/student/get-all', async (req, res) => {
         has_teacher_joined: 0,
       }
     )
+    console.log(classes)
 
     for (let i = 0; i < classes.length; i += 1) {
       const classObj = classes[i].toJSON()
