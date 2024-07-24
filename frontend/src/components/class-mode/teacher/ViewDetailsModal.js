@@ -119,7 +119,10 @@ export default function ViewDetailsModal({
               <div className="mb-4">
                 <p className="text-sm text-gray-600">
                   Start Time (Previously :{" "}
-                  {new Date(activeClassModalData.start_time).toLocaleString()})
+                  {new Date(
+                    activeClassModalData.onetime_class_start_time
+                  ).toLocaleString()}
+                  )
                 </p>
                 <input
                   type="datetime-local"
@@ -130,7 +133,10 @@ export default function ViewDetailsModal({
               <div className="mb-4">
                 <p className="text-sm text-gray-600">
                   End Time (Previously :{" "}
-                  {new Date(activeClassModalData.end_time).toLocaleString()})
+                  {new Date(
+                    activeClassModalData.onetime_class_end_time
+                  ).toLocaleString()}
+                  )
                 </p>
                 <input
                   type="datetime-local"
