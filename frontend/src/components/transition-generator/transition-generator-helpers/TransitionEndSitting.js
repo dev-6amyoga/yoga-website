@@ -350,6 +350,7 @@ export const TransitionEndSitting = async (
     if (break_status_start === "No Break" && break_status_end === "Break") {
       let res = handleTransition([
         "Fold Hands Feet Apart Prone Transition",
+        "Prone To Sitting Transition",
         "Turn Mat Side To Front Sitting Transition",
       ]);
       res = res.map((transition) => transition.transition_id);
