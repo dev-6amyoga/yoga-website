@@ -10,198 +10,175 @@ import { CLASS_ONGOING, CLASS_UPCOMING } from "../../../enums/class_status";
 import { getFrontendDomain } from "../../../utils/getFrontendDomain";
 
 export default function ClassInfoStudent() {
-	const { class_id } = useParams();
-	// const [classDetails, setClassDetails] = useState(null);
-	const [timeRemaining, setTimeRemaining] = useState(null);
+  const { class_id } = useParams();
+  const [timeRemaining, setTimeRemaining] = useState(null);
 
-	const { data: classDetails } = useQuery({
-		queryKey: ["classInfo", class_id],
-		queryFn: async () => {
-			const [res, err] = await ClassAPI.postGetClassById(class_id);
+  const { data: classDetails } = useQuery({
+    queryKey: ["classInfo", class_id],
+    queryFn: async () => {
+      const [res, err] = await ClassAPI.postGetClassById(class_id);
+      console.log(res);
+      if (err) {
+        console.error(err);
+        toast.error("Failed to fetch class info");
+      }
 
-			if (err) {
-				console.error(err);
-				toast.error("Failed to fetch class info");
-			}
+      return res.class;
+    },
+  });
 
-			return res.class;
-		},
-	});
+  useEffect(() => {
+    let countdownInterval;
+    if (classDetails) {
+      const updateCountdown = () => {
+        const [startHours, startMinutes] = classDetails.onetime_class_start_time
+          .split(":")
+          .map(Number);
+        const [endHours, endMinutes] = classDetails.onetime_class_end_time
+          .split(":")
+          .map(Number);
+        const now = new Date();
+        const currentHours = now.getHours();
+        const currentMinutes = now.getMinutes();
+        const currentSeconds = now.getSeconds();
 
-	useEffect(() => {
-		let countdownInterval;
-		if (classDetails) {
-			const updateCountdown = () => {
-				const [startHours, startMinutes] = classDetails.start_time
-					.split(":")
-					.map(Number);
-				const [endHours, endMinutes] = classDetails.end_time
-					.split(":")
-					.map(Number);
-				const now = new Date();
-				const currentHours = now.getHours();
-				const currentMinutes = now.getMinutes();
-				const currentSeconds = now.getSeconds();
+        const totalStartSeconds = startHours * 3600 + startMinutes * 60;
+        const totalEndSeconds = endHours * 3600 + endMinutes * 60;
+        const currentTotalSeconds =
+          currentHours * 3600 + currentMinutes * 60 + currentSeconds;
 
-				const totalStartSeconds = startHours * 3600 + startMinutes * 60;
-				const totalEndSeconds = endHours * 3600 + endMinutes * 60;
-				const currentTotalSeconds =
-					currentHours * 3600 + currentMinutes * 60 + currentSeconds;
+        if (currentTotalSeconds > totalEndSeconds) {
+          setTimeRemaining("Class has ended!");
+          clearInterval(countdownInterval);
+        } else if (currentTotalSeconds >= totalStartSeconds) {
+          setTimeRemaining("Class has started!");
+          clearInterval(countdownInterval);
+        } else {
+          const totalSecondsRemaining = totalStartSeconds - currentTotalSeconds;
+          const hours = Math.floor(totalSecondsRemaining / 3600);
+          const minutes = Math.floor(
+            (totalSecondsRemaining - hours * 3600) / 60
+          );
+          const seconds = totalSecondsRemaining - hours * 3600 - minutes * 60;
+          setTimeRemaining(`${hours}h ${minutes}m ${seconds}s`);
+        }
+      };
 
-				if (currentTotalSeconds > totalEndSeconds) {
-					setTimeRemaining("Class has ended!");
-					clearInterval(countdownInterval);
-				} else if (currentTotalSeconds >= totalStartSeconds) {
-					setTimeRemaining("Class has started!");
-					clearInterval(countdownInterval);
-				} else {
-					const totalSecondsRemaining =
-						totalStartSeconds - currentTotalSeconds;
-					const hours = Math.floor(totalSecondsRemaining / 3600);
-					const minutes = Math.floor(
-						(totalSecondsRemaining - hours * 3600) / 60
-					);
-					const seconds =
-						totalSecondsRemaining - hours * 3600 - minutes * 60;
-					setTimeRemaining(`${hours}h ${minutes}m ${seconds}s`);
-				}
-			};
+      updateCountdown();
+      countdownInterval = setInterval(updateCountdown, 1000);
+    }
+    return () => clearInterval(countdownInterval); // Cleanup
+  }, [classDetails]);
 
-			updateCountdown();
-			countdownInterval = setInterval(updateCountdown, 1000);
-		}
-		return () => clearInterval(countdownInterval); // Cleanup
-	}, [classDetails]);
+  const handleMarkAttendance = async () => {
+    toast.info(classDetails.status);
+  };
 
-	const handleMarkAttendance = async () => {
-		toast.info(classDetails.status);
-	};
+  const handleShare = () => {
+    // Copy to clipboard
 
-	const handleShare = () => {
-		// Copy to clipboard
+    navigator.clipboard.writeText(
+      `${getFrontendDomain()}/student/class/${class_id}/info`
+    );
+    toast.info("Link copied to clipboard");
+  };
 
-		navigator.clipboard.writeText(
-			`${getFrontendDomain()}/student/class/${class_id}/info`
-		);
-		toast.info("Link copied to clipboard");
-	};
+  return (
+    <StudentPageWrapper heading="Class Info Student">
+      <div className="elements">
+        {classDetails && (
+          <Card
+            sx={{
+              border: "1px solid",
+              borderColor: "primary.main",
+              background: "linear-gradient(#033363, #021F3B)",
+              borderRadius: "1rem",
+              margin: "2rem 0",
+            }}
+          >
+            <CardContent>
+              <div className="class-info-student">
+                {/* info */}
+                <div className="class-info-student-title">
+                  <h3 className="text-white">{classDetails.class_name}</h3>
+                  <p className="class-info-student-desc text-y-white text-sm max-w-2xl break-all">
+                    {classDetails.class_desc}
+                  </p>
+                </div>
 
-	return (
-		<StudentPageWrapper heading="Class Info Student">
-			<div className="elements">
-				{classDetails && (
-					<Card
-						sx={{
-							border: "1px solid",
-							borderColor: "primary.main",
-							background: "linear-gradient(#033363, #021F3B)",
-							borderRadius: "1rem",
-							margin: "2rem 0",
-						}}>
-						<CardContent>
-							<div className="class-info-student">
-								{/* info */}
-								<div className="class-info-student-title">
-									<h3 className="text-white">
-										{class_id} | {classDetails.class_name}
-									</h3>
-									<p className="class-info-student-desc text-y-white text-sm max-w-2xl break-all">
-										{classDetails.class_desc}
-									</p>
-								</div>
+                <div className="class-info-student-teacher text-white flex flex-col gap-2 py-1">
+                  <div className="flex flex-row gap-2 items-center">
+                    <Avatar>{classDetails?.teacher?.name[0]}</Avatar>
+                    {classDetails.teacher.name}
+                  </div>
+                </div>
 
-								<div className="class-info-student-teacher text-white flex flex-col gap-2 py-1">
-									<div className="flex flex-row gap-2 items-center">
-										<Avatar>
-											{classDetails?.teacher?.name[0]}
-										</Avatar>
-										{classDetails.teacher.name}
-									</div>
-								</div>
+                <div className="class-info-student-info flex flex-col md:flex-row gap-8 text-sm text-white">
+                  <div>
+                    <p className="font-medium">Start Time</p>
+                    <p>
+                      {new Date(
+                        classDetails.onetime_class_start_time
+                      ).toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-medium">End Time</p>
+                    <p>
+                      {new Date(
+                        classDetails.onetime_class_end_time
+                      ).toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-medium">Duration</p>
+                    <p>
+                      {classDetails?.onetime_class_end_time &&
+                      classDetails?.onetime_class_start_time
+                        ? (new Date(classDetails.onetime_class_end_time) -
+                            new Date(classDetails.onetime_class_start_time)) /
+                          1000 /
+                          3600
+                        : 0}{" "}
+                      hours
+                    </p>
+                  </div>
+                </div>
 
-								<div className="class-info-student-info flex flex-col md:flex-row gap-8 text-sm text-white">
-									<div>
-										<p className="font-medium">
-											Start Time
-										</p>
-										<p>
-											{new Date(
-												classDetails.start_time
-											).toLocaleString()}
-										</p>
-									</div>
-									<div>
-										<p className="font-medium">End Time</p>
-										<p>
-											{new Date(
-												classDetails.end_time
-											).toLocaleString()}
-										</p>
-									</div>
-									<div>
-										<p className="font-medium">Duration</p>
-										<p>
-											{classDetails?.end_time &&
-											classDetails?.start_time
-												? (new Date(
-														classDetails.end_time
-													) -
-														new Date(
-															classDetails.start_time
-														)) /
-													1000 /
-													60
-												: 0}{" "}
-											minutes
-										</p>
-									</div>
-
-									{/* <div>
-										<p className="font-medium">Attendees</p>
-										<p className="flex flex-row gap-1 items-center">
-											<span
-												className={`w-2 h-2 rounded-full bg-green-500`}></span>
-											{classDetails.attendees}
-										</p>
-									</div> */}
-								</div>
-
-								{/* actions */}
-								<div className="class-info-student-actions flex flex-col gap-4 justify-center">
-									<Button
-										variant="contained"
-										startIcon={<ExitToApp />}
-										sx={{
-											minWidth: "fit-content",
-										}}
-										onClick={handleMarkAttendance}
-										disabled={
-											classDetails?.status !==
-											CLASS_ONGOING
-										}>
-										Join Class
-									</Button>
-									<Button
-										sx={{
-											minWidth: "fit-content",
-										}}
-										variant="contained"
-										startIcon={<Share />}
-										disabled={
-											classDetails?.status !==
-												CLASS_ONGOING &&
-											classDetails.status !==
-												CLASS_UPCOMING
-										}
-										onClick={handleShare}>
-										Share
-									</Button>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-				)}
-			</div>
-		</StudentPageWrapper>
-	);
+                {/* actions */}
+                <div className="class-info-student-actions flex flex-col gap-4 justify-center">
+                  <Button
+                    variant="contained"
+                    startIcon={<ExitToApp />}
+                    sx={{
+                      minWidth: "fit-content",
+                    }}
+                    onClick={handleMarkAttendance}
+                    disabled={classDetails?.status !== CLASS_ONGOING}
+                  >
+                    Join Class
+                  </Button>
+                  <Button
+                    sx={{
+                      minWidth: "fit-content",
+                    }}
+                    variant="contained"
+                    startIcon={<Share />}
+                    disabled={
+                      classDetails?.status !== CLASS_ONGOING &&
+                      classDetails.status !== CLASS_UPCOMING &&
+                      classDetails?.status !== "CLASS_METADATA_DRAFT"
+                    }
+                    onClick={handleShare}
+                  >
+                    Share
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </StudentPageWrapper>
+  );
 }
