@@ -1,327 +1,417 @@
-const express = require("express");
-const router = express.Router();
-const Class = require("../models/mongo/ClassHistory");
+const express = require('express')
+
+const router = express.Router()
+
+const Class = require('../models/mongo/Class')
+// const ClassHistory = require('../models/mongo/ClassHistory')
+
 const {
-	HTTP_BAD_REQUEST,
-	HTTP_OK,
-	HTTP_INTERNAL_SERVER_ERROR,
-} = require("../utils/http_status_codes");
-const { CLASS_UPCOMING, CLASS_ONGOING } = require("../enums/class_status");
-const { User } = require("../models/sql/User");
+  HTTP_BAD_REQUEST,
+  HTTP_OK,
+  HTTP_INTERNAL_SERVER_ERROR,
+} = require('../utils/http_status_codes')
 
-router.post("/create", async (req, res) => {
-	try {
-		const {
-			default_class_name,
-			class_desc,
-			teacher_id,
-			start_time,
-			end_time,
-			allowed_students = [],
-		} = req.body;
-		// const maxIdClass = await ClassMode.findOne().sort({ id: -1 }).limit(1);
+const { CLASS_ONGOING } = require('../enums/class_status')
 
-		if (
-			!class_name ||
-			!class_desc ||
-			!start_time ||
-			!end_time ||
-			!teacher_id
-		) {
-			return res.status(HTTP_BAD_REQUEST).json({
-				error: "Missing required fields",
-			});
-		}
+const { User } = require('../models/sql/User')
+const {
+  CLASS_TYPE_ONETIME,
+  CLASS_TYPE_RECURRING,
+} = require('../enums/class_metadata_class_type')
+const {
+  CLASS_RECURRANCE_TYPE_WEEKLY,
+} = require('../enums/class_metadata_recurrance_type')
 
-		let newClass = await ClassMode.create({
-			class_name,
-			class_desc,
-			teacher_id,
-			start_time,
-			end_time,
-			status: CLASS_UPCOMING,
-			allowed_students,
-		});
+router.post('/create', async (req, res) => {
+  try {
+    const {
+      class_name,
+      class_desc,
+      class_type,
+      recurrance_type,
+      recurrance_days = [],
+      onetime_class_start_time = null,
+      onetime_class_end_time = null,
+      recurring_class_start_time = null,
+      recurring_class_end_time = null,
+      teacher_id,
+      allowed_students = [],
+    } = req.body
+    // const maxIdClass = await ClassMode.findOne().sort({ id: -1 }).limit(1);
 
-		res.status(HTTP_OK).json({ message: "Class Saved" });
-	} catch (error) {
-		console.error("Error saving new Class:", error);
+    if (
+      !class_name ||
+      !class_desc ||
+      !teacher_id ||
+      !class_type ||
+      !recurrance_type
+    ) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        error: 'Missing required fields',
+      })
+    }
 
-		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-			error: "Failed to save new Class",
-		});
-	}
-});
+    if (class_type === CLASS_TYPE_ONETIME) {
+      if (!onetime_class_start_time || !onetime_class_end_time) {
+        return res.status(HTTP_BAD_REQUEST).json({
+          error: 'Missing required fields',
+        })
+      }
+    }
 
-router.post("/update", async (req, res) => {
-	try {
-		const {
-			class_id,
-			class_name,
-			class_desc,
-			status,
-			teacher_id,
-			start_time,
-			end_time,
-			allowed_students = [],
-		} = req.body;
-		// const maxIdClass = await ClassMode.findOne().sort({ id: -1 }).limit(1);
+    if (class_type === CLASS_TYPE_RECURRING) {
+      if (!recurring_class_start_time || !recurring_class_end_time) {
+        return res.status(HTTP_BAD_REQUEST).json({
+          error: 'Missing required fields',
+        })
+      }
+    }
 
-		if (
-			!class_id ||
-			!class_name ||
-			!class_desc ||
-			!status ||
-			!start_time ||
-			!end_time ||
-			!teacher_id
-		) {
-			return res.status(HTTP_BAD_REQUEST).json({
-				error: "Missing required fields",
-			});
-		}
+    if (
+      recurrance_type === CLASS_RECURRANCE_TYPE_WEEKLY &&
+      (!recurrance_days || recurrance_days.length === 0)
+    ) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        error: 'Missing required fields',
+      })
+    }
 
-		// update class
-		await ClassMode.findByIdAndUpdate(
-			class_id,
-			{
-				class_name,
-				class_desc,
-				teacher_id,
-				status,
-				start_time,
-				end_time,
-				allowed_students,
-			},
-			{ new: true }
-		);
+    await Class.create({
+      class_name,
+      class_desc,
+      teacher_id,
+      class_type,
+      recurrance_type,
+      recurrance_days,
+      onetime_class_start_time,
+      onetime_class_end_time,
+      recurring_class_start_time,
+      recurring_class_end_time,
+      allowed_students,
+    })
 
-		res.status(HTTP_OK).json({ message: "Class Saved" });
-	} catch (error) {
-		console.error("Error saving new Class:", error);
+    return res.status(HTTP_OK).json({ message: 'Class Saved' })
+  } catch (error) {
+    console.error('Error saving new Class:', error)
 
-		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-			error: "Failed to save new Class",
-		});
-	}
-});
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to save new Class',
+    })
+  }
+})
 
-router.get("/get-all", async (req, res) => {
-	try {
-		const classes = await ClassMode.find(
-			{},
-			{ allowed_students: 0, attendees: 0, __v: 0, has_teacher_joined: 0 }
-		);
+router.post('/update', async (req, res) => {
+  try {
+    const {
+      class_id,
+      class_name,
+      class_desc,
+      status,
+      teacher_id,
+      start_time,
+      end_time,
+      allowed_students = [],
+    } = req.body
+    // const maxIdClass = await ClassMode.findOne().sort({ id: -1 }).limit(1);
 
-		for (let i = 0; i < classes.length; i++) {
-			const classObj = classes[i].toJSON();
-			const teacher = await User.findByPk(classObj.teacher_id, {
-				attributes: ["name", "email"],
-			});
-			classObj.teacher = teacher;
+    if (
+      !class_id ||
+      !class_name ||
+      !class_desc ||
+      !status ||
+      !start_time ||
+      !end_time ||
+      !teacher_id
+    ) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        error: 'Missing required fields',
+      })
+    }
 
-			classes[i] = classObj;
-		}
+    // update class
+    await Class.findByIdAndUpdate(
+      class_id,
+      {
+        class_name,
+        class_desc,
+        teacher_id,
+        status,
+        start_time,
+        end_time,
+        allowed_students,
+      },
+      { new: true }
+    )
 
-		res.status(HTTP_OK).json(classes);
-	} catch (error) {
-		console.error(error);
-		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-			error: "Failed to fetch classes",
-		});
-	}
-});
+    return res.status(HTTP_OK).json({ message: 'Class Saved' })
+  } catch (error) {
+    console.error('Error saving new Class:', error)
 
-router.post("/get-by-id", async (req, res) => {
-	try {
-		const { class_id } = req.body;
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to save new Class',
+    })
+  }
+})
 
-		if (!class_id) {
-			return res.status(HTTP_BAD_REQUEST).json({
-				error: "Missing required fields",
-			});
-		}
+router.get('/student/get-all', async (req, res) => {
+  try {
+    const classes = await Class.find(
+      {
+        class_type: CLASS_TYPE_ONETIME,
+        onetime_class_end_time: {
+          $gte: new Date(),
+        },
+      },
+      {
+        allowed_students: 0,
+        attendees: 0,
+        __v: 0,
+        has_teacher_joined: 0,
+      }
+    )
 
-		const classObj = await ClassMode.findById(class_id);
+    for (let i = 0; i < classes.length; i += 1) {
+      const classObj = classes[i].toJSON()
+      const teacher = await User.findByPk(classObj.teacher_id, {
+        attributes: ['name', 'email'],
+      })
+      classObj.teacher = teacher
 
-		if (!classObj) {
-			return res.status(HTTP_BAD_REQUEST).json({
-				error: "Class not found",
-			});
-		}
+      classes[i] = classObj
+    }
 
-		const teacher = await User.findByPk(classObj.teacher_id, {
-			attributes: ["name", "email"],
-		});
+    return res.status(HTTP_OK).json(classes)
+  } catch (error) {
+    console.error(error)
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to fetch classes',
+    })
+  }
+})
 
-		res.status(HTTP_OK).json({ class: { ...classObj.toJSON(), teacher } });
-	} catch (err) {
-		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-			error: "Failed to fetch class",
-		});
-	}
-});
+router.get('/teacher/get-all', async (req, res) => {
+  try {
+    const { teacher_id } = req.body
 
-router.post("/start", async (req, res) => {
-	try {
-		const { class_id } = req.body;
+    const filter = {}
 
-		if (!class_id) {
-			return res.status(HTTP_BAD_REQUEST).json({
-				error: "Missing required fields",
-			});
-		}
+    if (teacher_id) {
+      filter.teacher_id = teacher_id
+    }
 
-		const classObj = await ClassMode.findByIdAndUpdate(
-			class_id,
-			{ status: CLASS_ONGOING },
-			{ new: true }
-		);
-		res.status(HTTP_OK).json({ classObj });
-	} catch (err) {
-		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-			error: "Failed to start class",
-		});
-	}
-});
+    const classes = await Class.find(filter, {})
 
-router.post("/end", async (req, res) => {
-	try {
-		const { class_id, status } = req.body;
+    for (let i = 0; i < classes.length; i += 1) {
+      const classObj = classes[i].toJSON()
+      const teacher = await User.findByPk(classObj.teacher_id, {
+        attributes: ['name', 'email'],
+      })
+      classObj.teacher = teacher
 
-		if (!class_id || !status) {
-			return res.status(HTTP_BAD_REQUEST).json({
-				error: "Missing required fields",
-			});
-		}
+      classes[i] = classObj
+    }
 
-		const classObj = await ClassMode.findByIdAndUpdate(
-			class_id,
-			{ status: status },
-			{ new: true }
-		);
+    return res.status(HTTP_OK).json(classes)
+  } catch (error) {
+    console.error(error)
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to fetch classes',
+    })
+  }
+})
 
-		res.status(HTTP_OK).json({ classObj });
-	} catch (err) {
-		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-			error: "Failed to start class",
-		});
-	}
-});
+router.post('/get-by-id', async (req, res) => {
+  try {
+    const { class_id } = req.body
 
-router.post("/join", async (req, res) => {
-	try {
-		const { class_id, student_id } = req.body;
+    if (!class_id) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        error: 'Missing required fields',
+      })
+    }
 
-		if (!class_id || !student_id) {
-			return res.status(HTTP_BAD_REQUEST).json({
-				error: "Missing required fields",
-			});
-		}
+    const classObj = await Class.findById(class_id)
 
-		const classObj = await ClassMode.findByIdAndUpdate(
-			class_id,
-			{ $push: { attendees: student_id } },
-			{ new: true }
-		);
-		res.status(HTTP_OK).json({ classObj });
-	} catch (err) {
-		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-			error: "Failed to join class",
-		});
-	}
-});
+    if (!classObj) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        error: 'Class not found',
+      })
+    }
 
-router.post("/leave", async (req, res) => {
-	try {
-		const { class_id, student_id } = req.body;
+    const teacher = await User.findByPk(classObj.teacher_id, {
+      attributes: ['name', 'email'],
+    })
 
-		if (!class_id || !student_id) {
-			return res.status(HTTP_BAD_REQUEST).json({
-				error: "Missing required fields",
-			});
-		}
+    return res
+      .status(HTTP_OK)
+      .json({ class: { ...classObj.toJSON(), teacher } })
+  } catch (err) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to fetch class',
+    })
+  }
+})
 
-		const classObj = await ClassMode.findByIdAndUpdate(
-			class_id,
-			{ $pull: { attendees: student_id } },
-			{ new: true }
-		);
-		res.status(HTTP_OK).json({ classObj });
-	} catch (err) {
-		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-			error: "Failed to leave class",
-		});
-	}
-});
+router.post('/start', async (req, res) => {
+  try {
+    const { class_id } = req.body
 
-router.post("/add-student", async (req, res) => {
-	try {
-		const { class_id, email } = req.body;
+    if (!class_id) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        error: 'Missing required fields',
+      })
+    }
 
-		if (!class_id || !email) {
-			return res.status(HTTP_BAD_REQUEST).json({
-				error: "Missing required fields",
-			});
-		}
+    const classObj = await Class.findByIdAndUpdate(
+      class_id,
+      { status: CLASS_ONGOING },
+      { new: true }
+    )
+    return res.status(HTTP_OK).json({ classObj })
+  } catch (err) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to start class',
+    })
+  }
+})
 
-		const classObj = await ClassMode.findByIdAndUpdate(
-			class_id,
-			{ $push: { allowed_students: email } },
-			{ new: true }
-		);
-		res.status(HTTP_OK).json({ classObj });
-	} catch (err) {
-		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-			error: "Failed to add student",
-		});
-	}
-});
+router.post('/end', async (req, res) => {
+  try {
+    const { class_id, status } = req.body
 
-router.post("/remove-student", async (req, res) => {
-	try {
-		const { class_id, email } = req.body;
+    if (!class_id || !status) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        error: 'Missing required fields',
+      })
+    }
 
-		if (!class_id || !email) {
-			return res.status(HTTP_BAD_REQUEST).json({
-				error: "Missing required fields",
-			});
-		}
+    const classObj = await Class.findByIdAndUpdate(
+      class_id,
+      { status },
+      { new: true }
+    )
 
-		const classObj = await ClassMode.findByIdAndUpdate(
-			class_id,
-			{ $pull: { allowed_students: email } },
-			{ new: true }
-		);
-		res.status(HTTP_OK).json({ classObj });
-	} catch (err) {
-		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-			error: "Failed to remove student",
-		});
-	}
-});
+    return res.status(HTTP_OK).json({ classObj })
+  } catch (err) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to start class',
+    })
+  }
+})
 
-router.post("/end", async (req, res) => {
-	try {
-		const { class_id } = req.body;
+router.post('/join', async (req, res) => {
+  try {
+    const { class_id, student_id } = req.body
 
-		if (!class_id) {
-			return res.status(HTTP_BAD_REQUEST).json({
-				error: "Missing required fields",
-			});
-		}
+    if (!class_id || !student_id) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        error: 'Missing required fields',
+      })
+    }
 
-		const classObj = await ClassMode.findByIdAndUpdate(
-			class_id,
-			{ has_started: false },
-			{ new: true }
-		);
-		res.status(HTTP_OK).json({ classObj });
-	} catch (err) {
-		res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-			error: "Failed to end class",
-		});
-	}
-});
+    const classObj = await Class.findByIdAndUpdate(
+      class_id,
+      { $push: { attendees: student_id } },
+      { new: true }
+    )
+    return res.status(HTTP_OK).json({ classObj })
+  } catch (err) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to join class',
+    })
+  }
+})
 
-module.exports = router;
+router.post('/leave', async (req, res) => {
+  try {
+    const { class_id, student_id } = req.body
+
+    if (!class_id || !student_id) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        error: 'Missing required fields',
+      })
+    }
+
+    const classObj = await Class.findByIdAndUpdate(
+      class_id,
+      { $pull: { attendees: student_id } },
+      { new: true }
+    )
+    return res.status(HTTP_OK).json({ classObj })
+  } catch (err) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to leave class',
+    })
+  }
+})
+
+router.post('/add-student', async (req, res) => {
+  try {
+    const { class_id, email } = req.body
+
+    if (!class_id || !email) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        error: 'Missing required fields',
+      })
+    }
+
+    const classObj = await Class.findByIdAndUpdate(
+      class_id,
+      { $push: { allowed_students: email } },
+      { new: true }
+    )
+    return res.status(HTTP_OK).json({ classObj })
+  } catch (err) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to add student',
+    })
+  }
+})
+
+router.post('/remove-student', async (req, res) => {
+  try {
+    const { class_id, email } = req.body
+
+    if (!class_id || !email) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        error: 'Missing required fields',
+      })
+    }
+
+    const classObj = await Class.findByIdAndUpdate(
+      class_id,
+      { $pull: { allowed_students: email } },
+      { new: true }
+    )
+    return res.status(HTTP_OK).json({ classObj })
+  } catch (err) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to remove student',
+    })
+  }
+})
+
+router.post('/end', async (req, res) => {
+  try {
+    const { class_id } = req.body
+
+    if (!class_id) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        error: 'Missing required fields',
+      })
+    }
+
+    const classObj = await Class.findByIdAndUpdate(
+      class_id,
+      { has_started: false },
+      { new: true }
+    )
+    return res.status(HTTP_OK).json({ classObj })
+  } catch (err) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to end class',
+    })
+  }
+})
+
+module.exports = router
