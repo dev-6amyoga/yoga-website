@@ -29,7 +29,10 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Grid,
 } from "@mui/material";
+
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
 
 import { transitionGenerator } from "../../transition-generator/TransitionGenerator";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -60,7 +63,17 @@ function RegisterPlaylistForm() {
   const [playlistCurrent, setPlaylistCurrent] = useState([]);
   const [teacherModeFilter, setTeacherModeFilter] = useState(false);
   const [drmVideoFilter, setDrmVideoFilter] = useState(false);
+  const [noBreakFilter, setNoBreakFilter] = useState(false);
+  const [playlistName, setPlaylistName] = useState("");
+  const [playlistStartDate, setPlaylistStartDate] = useState("");
+  const [playlistEndDate, setPlaylistEndDate] = useState("");
+  const [playlistType, setPlaylistType] = useState("");
   const [sortedAsanas, setSortedAsanas] = useState([]);
+
+  const handleNoBreakFilterChange = (event) => {
+    setNoBreakFilter(event.target.checked);
+  };
+
   const handleTeacherModeFilterChange = (event) => {
     setTeacherModeFilter(event.target.checked);
   };
@@ -622,7 +635,8 @@ function RegisterPlaylistForm() {
       asanas: category.asanas.filter((asana) => {
         return (
           (!teacherModeFilter || asana.teacher_mode === teacherModeFilter) &&
-          (!drmVideoFilter || asana.drm_video === drmVideoFilter)
+          (!drmVideoFilter || asana.drm_video === drmVideoFilter) &&
+          (!noBreakFilter || asana.nobreak_asana === noBreakFilter)
         );
       }),
     }))
@@ -734,11 +748,6 @@ function RegisterPlaylistForm() {
     // }
   };
 
-  const [playlistName, setPlaylistName] = useState("");
-  const [playlistStartDate, setPlaylistStartDate] = useState("");
-  const [playlistEndDate, setPlaylistEndDate] = useState("");
-  const [playlistType, setPlaylistType] = useState("");
-
   const handleAddPlaylist = () => {
     console.log({
       playlistName,
@@ -750,32 +759,7 @@ function RegisterPlaylistForm() {
 
   return (
     <div>
-      <div>
-        <div className="filter-options flex flex-col gap-4 mb-4">
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={teacherModeFilter}
-                onChange={handleTeacherModeFilterChange}
-                name="teacherMode"
-                color="primary"
-              />
-            }
-            label="Teacher Mode"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={drmVideoFilter}
-                onChange={handleDrmVideoFilterChange}
-                name="drmVideo"
-                color="primary"
-              />
-            }
-            label="DRM Video"
-          />
-        </div>
-
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-4 mb-4">
           <TextField
             label="Playlist Name"
@@ -815,6 +799,136 @@ function RegisterPlaylistForm() {
               <MenuItem value="disabled">Disabled</MenuItem>
             </Select>
           </FormControl>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <div className="filter-options flex flex-row items-center justify-center gap-4 p-4 mb-4 border rounded-lg">
+            <FilterAltIcon />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={teacherModeFilter}
+                  onChange={handleTeacherModeFilterChange}
+                  name="teacherMode"
+                  color="primary"
+                />
+              }
+              label="Teacher Mode"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={drmVideoFilter}
+                  onChange={handleDrmVideoFilterChange}
+                  name="drmVideo"
+                  color="primary"
+                />
+              }
+              label="DRM Video"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={noBreakFilter}
+                  onChange={handleNoBreakFilterChange}
+                  name="noBreak"
+                  color="primary"
+                />
+              }
+              label="No Break"
+            />
+          </div>
+          <div className="flex flex-row gap-3">
+            <div>
+              {filteredCategories.map((x, index) => (
+                <Accordion key={index} className="flex flex-col gap-2">
+                  <AccordionSummary
+                    expandIcon={<ExpandMore />}
+                    aria-controls="panel1-content"
+                    id="panel1-header"
+                  >
+                    {x.category}
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Asana Name</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {x.asanas.map((asana, idx) => (
+                            <TableRow key={idx}>
+                              <TableCell>{asana.asana_name}</TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="contained"
+                                  onClick={() => {
+                                    addToPlaylist(asana);
+                                  }}
+                                >
+                                  Add
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </AccordionDetails>
+                </Accordion>
+              ))}
+            </div>
+            <div>
+              <List>
+                {names.map((name, index) => (
+                  <ListItem
+                    key={index}
+                    style={{
+                      border: "1px solid #ccc",
+                      borderRadius: "8px",
+                      marginBottom: "8px",
+                      padding: "8px",
+                    }}
+                  >
+                    <Grid container alignItems="center" spacing={2}>
+                      <Grid item xs>
+                        <ListItemText primary={name} />
+                      </Grid>
+                      {typeof playlistCurrent[index] === "number" && (
+                        <Grid item>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleUp(index)}
+                            style={{ marginRight: 8 }}
+                          >
+                            Up
+                          </Button>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleDown(index)}
+                            style={{ marginRight: 8 }}
+                          >
+                            Down
+                          </Button>
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={() => handleDelete(index)}
+                          >
+                            Delete
+                          </Button>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </ListItem>
+                ))}
+              </List>
+            </div>
+          </div>
           <Button
             variant="contained"
             color="primary"
@@ -823,164 +937,8 @@ function RegisterPlaylistForm() {
             Add Playlist
           </Button>
         </div>
-
-        <div className="flex flex-row gap-3">
-          <div>
-            {filteredCategories.map((x, index) => (
-              <Accordion key={index} className="flex flex-col gap-2">
-                <AccordionSummary
-                  expandIcon={<ExpandMore />}
-                  aria-controls="panel1-content"
-                  id="panel1-header"
-                >
-                  {x.category}
-                </AccordionSummary>
-                <AccordionDetails>
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Asana Name</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {x.asanas.map((asana, idx) => (
-                          <TableRow key={idx}>
-                            <TableCell>{asana.asana_name}</TableCell>
-                            <TableCell>
-                              <Button
-                                variant="contained"
-                                onClick={() => {
-                                  addToPlaylist(asana);
-                                }}
-                              >
-                                Add
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </AccordionDetails>
-              </Accordion>
-            ))}
-          </div>
-          <div>
-            <List>
-              {names.map((name, index) => (
-                <ListItem key={index}>
-                  <ListItemText primary={name} />
-                  {typeof playlistCurrent[index] === "number" && (
-                    <ListItemSecondaryAction>
-                      <Button onClick={() => handleUp(index)}>Up</Button>
-                      <Button onClick={() => handleDown(index)}>Down</Button>
-                      <Button onClick={() => handleDelete(index)}>
-                        Delete
-                      </Button>
-                    </ListItemSecondaryAction>
-                  )}
-                </ListItem>
-              ))}
-            </List>
-          </div>
-        </div>
       </div>
     </div>
-
-    // <div>
-    //   <div>
-    //     <div className="filter-options flex flex-col gap-4 mb-4">
-    //       <FormControlLabel
-    //         control={
-    //           <Checkbox
-    //             checked={teacherModeFilter}
-    //             onChange={handleTeacherModeFilterChange}
-    //             name="teacherMode"
-    //             color="primary"
-    //           />
-    //         }
-    //         label="Teacher Mode"
-    //       />
-    //       <FormControlLabel
-    //         control={
-    //           <Checkbox
-    //             checked={drmVideoFilter}
-    //             onChange={handleDrmVideoFilterChange}
-    //             name="drmVideo"
-    //             color="primary"
-    //           />
-    //         }
-    //         label="DRM Video"
-    //       />
-    //     </div>
-
-    //     <div className="flex flex-row gap-3">
-    //       <div>
-    //         {filteredCategories.map((x, index) => {
-    //           return (
-    //             <Accordion className="flex flex-col gap-2">
-    //               <AccordionSummary
-    //                 expandIcon={<ExpandMore />}
-    //                 aria-controls="panel1-content"
-    //                 id="panel1-header"
-    //               >
-    //                 {x.category}
-    //               </AccordionSummary>
-    //               <AccordionDetails>
-    //                 {/* {x.asanas.map((x) => {
-    //                 return <div>{x.asana_name}</div>;
-    //               })} */}
-    //                 <TableContainer component={Paper}>
-    //                   <Table>
-    //                     <TableHead>
-    //                       <TableRow>
-    //                         <TableCell>Asana Name</TableCell>
-    //                       </TableRow>
-    //                     </TableHead>
-    //                     <TableBody>
-    //                       {x.asanas.map((asana, idx) => (
-    //                         <TableRow key={idx}>
-    //                           <TableCell>{asana.asana_name}</TableCell>
-    //                           <Button
-    //                             variant="contained"
-    //                             onClick={() => {
-    //                               addToPlaylist(asana);
-    //                             }}
-    //                           >
-    //                             Add
-    //                           </Button>
-    //                         </TableRow>
-    //                       ))}
-    //                     </TableBody>
-    //                   </Table>
-    //                 </TableContainer>
-    //               </AccordionDetails>
-    //             </Accordion>
-    //           );
-    //         })}
-    //       </div>
-    //       <div>
-    //         <List>
-    //           {names.map((name, index) => (
-    //             <ListItem key={index}>
-    //               <ListItemText primary={name} />
-    //               {typeof playlistCurrent[index] === "number" && (
-    //                 <ListItemSecondaryAction>
-    //                   <Button onClick={() => handleUp(index)}>Up</Button>
-    //                   <Button onClick={() => handleDown(index)}>Down</Button>
-    //                   <Button onClick={() => handleDelete(index)}>
-    //                     Delete
-    //                   </Button>
-    //                 </ListItemSecondaryAction>
-    //               )}
-    //             </ListItem>
-    //           ))}
-    //         </List>
-    //       </div>
-    //     </div>
-    //   </div>
-    // </div>
   );
 }
 export default RegisterPlaylistForm;
