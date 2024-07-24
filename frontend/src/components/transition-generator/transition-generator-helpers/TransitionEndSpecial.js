@@ -37,6 +37,7 @@ export const TransitionEndSpecial = async (
       })
       .filter(Boolean);
   };
+
   if (!start_category) {
     let res = handleTransition(["Sitting Position Transition"]);
     res = res.map((transition) => transition.transition_id);
@@ -45,20 +46,21 @@ export const TransitionEndSpecial = async (
   }
 
   if (start_category === "Closing Prayer Sitting") {
-    if (start_video.namaskara_end === true) {
-      let res = handleTransition([
-        "Prayer Sitting Namaskara Unlock",
-        "Pranayama Unlock Legs",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
-    } else {
-      let res = handleTransition(["Pranayama Unlock Legs"]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
-    }
+    return [];
+    // if (start_video.namaskara_end === true) {
+    //   let res = handleTransition([
+    //     "Prayer Sitting Namaskara Unlock",
+    //     "Pranayama Unlock Legs",
+    //   ]);
+    //   res = res.map((transition) => transition.transition_id);
+    //   res = res.filter((element) => element !== undefined);
+    //   return res;
+    // } else {
+    //   let res = handleTransition(["Pranayama Unlock Legs"]);
+    //   res = res.map((transition) => transition.transition_id);
+    //   res = res.filter((element) => element !== undefined);
+    //   return res;
+    // }
   }
 
   if (start_category === "Closing Prayer Standing") {

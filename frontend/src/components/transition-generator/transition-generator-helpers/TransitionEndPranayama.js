@@ -1023,7 +1023,8 @@ export const TransitionEndPranayama = async (
         transition.drm_transition === drm_status &&
         transition.teacher_mode === end_video.teacher_mode
     );
-    if (start_video === end_video) {
+    console.log(start_video, end_video);
+    if (start_video.id === end_video.id) {
       return [];
     }
     let pending_2 = pranayamaFinder(end_video, filteredTransitions_all);
