@@ -65,11 +65,12 @@ function RegisterPlaylistForm() {
   const [drmVideoFilter, setDrmVideoFilter] = useState(false);
   const [noBreakFilter, setNoBreakFilter] = useState(false);
   const [playlistName, setPlaylistName] = useState("");
+  const [language, setLanguage] = useState("");
   const [playlistStartDate, setPlaylistStartDate] = useState("");
   const [playlistEndDate, setPlaylistEndDate] = useState("");
   const [playlistType, setPlaylistType] = useState("");
   const [sortedAsanas, setSortedAsanas] = useState([]);
-
+  const [allLanguages, setAllLanguages] = useState([]);
   const handleNoBreakFilterChange = (event) => {
     setNoBreakFilter(event.target.checked);
   };
@@ -93,6 +94,22 @@ function RegisterPlaylistForm() {
     "Special",
     "Closing Prayer Sitting",
   ];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await Fetch({
+          url: "/content/language/getAllLanguages",
+        });
+        const data = response.data;
+        console.log(data);
+        setAllLanguages(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -166,9 +183,9 @@ function RegisterPlaylistForm() {
     }
   };
 
-  useEffect(() => {
-    console.log(playlistCurrent, "is p");
-  }, [playlistCurrent]);
+  // useEffect(() => {
+  //   console.log(playlistCurrent, "is p");
+  // }, [playlistCurrent]);
 
   const addToPlaylist = async (rowData) => {
     if (playlistCurrent.length === 0) {
@@ -594,30 +611,6 @@ function RegisterPlaylistForm() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const playlist_name = document.querySelector("#playlist_name").value;
-    const playlist_sequence = {};
-    playlist_sequence["playlist_name"] = playlist_name;
-    playlist_sequence["asana_ids"] = [];
-    //insert modal here
-    try {
-      const response = await Fetch({
-        url: "/content/playlists/addPlaylist",
-        method: "POST",
-        data: playlist_sequence,
-      });
-      if (response?.status === 200) {
-        toast("Playlist added successfully");
-        navigate("/admin/playlist/view-all");
-      } else {
-        console.error("Failed to add playlist");
-      }
-    } catch (error) {
-      console.error("Error during playlist addition:", error);
-    }
-  };
-
   const filteredAsanasByCategory = predefinedOrder.map((category) => {
     return {
       category: category,
@@ -748,13 +741,55 @@ function RegisterPlaylistForm() {
     // }
   };
 
-  const handleAddPlaylist = () => {
-    console.log({
-      playlistName,
-      playlistStartDate,
-      playlistEndDate,
-      playlistType,
-    });
+  const handleAddPlaylist = async () => {
+    let newPlaylist = {
+      playlist_name: playlistName,
+      playlist_start_date: playlistStartDate,
+      playlist_end_date: playlistEndDate,
+      playlist_mode: playlistType,
+      asana_ids: playlistCurrent,
+      playlist_language: language,
+      drm_playlist: drmVideoFilter,
+    };
+    if (
+      playlistName.length === 0 ||
+      playlistStartDate.length === 0 ||
+      playlistEndDate.length === 0 ||
+      playlistType.length === 0 ||
+      language.length === 0 ||
+      playlistCurrent.length === 0
+    ) {
+      toast("Missing required fields!");
+      return;
+    }
+    try {
+      const response = await Fetch({
+        url: "/content/playlists/addPlaylist",
+        method: "POST",
+        data: newPlaylist,
+      });
+      if (response?.status === 200) {
+        toast("Playlist added successfully");
+        let new_playlist_id = response.data.playlist_id;
+        console.log(new_playlist_id);
+        try {
+          const response = await Fetch({
+            url: `/content/playlists/createManifest/${new_playlist_id}`,
+            method: "POST",
+          });
+          if (response?.status === 200) {
+            toast("Manifest Generated!");
+          }
+        } catch (error) {
+          console.log(error);
+        }
+        // navigate("/admin/playlist/view-all");
+      } else {
+        console.error("Failed to add playlist");
+      }
+    } catch (error) {
+      console.error("Error during playlist addition:", error);
+    }
   };
 
   return (
@@ -787,6 +822,17 @@ function RegisterPlaylistForm() {
             }}
             fullWidth
           />
+          <FormControl fullWidth>
+            <InputLabel>Language</InputLabel>
+            <Select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+            >
+              {allLanguages.map((x) => {
+                return <MenuItem value={x.language}>{x.language}</MenuItem>;
+              })}
+            </Select>
+          </FormControl>
           <FormControl fullWidth>
             <InputLabel>Playlist Type</InputLabel>
             <Select

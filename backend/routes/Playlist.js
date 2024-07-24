@@ -116,6 +116,7 @@ router.delete("/playlists/deletePlaylist/:playlistId", async (req, res) => {
 
 router.post("/playlists/createManifest/:playlistId", async (req, res) => {
   const playlistId = req.params.playlistId;
+  console.log("IN CREATE MANIFEST WITH : ", playlistId);
   try {
     const playlist = await Playlist.findOne({
       playlist_id: playlistId,
