@@ -9,11 +9,12 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import getFormData from "../../../utils/getFormData";
 import { getFrontendDomain } from "../../../utils/getFrontendDomain";
 import Timer from "../../Common/Timer";
+import { Fetch } from "../../../utils/Fetch";
 
 export default function ViewDetailsModal({
   activeClassModal,
@@ -66,6 +67,23 @@ export default function ViewDetailsModal({
     setDirty(false);
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      toast("hello!");
+      console.log(activeClassModalData, "HELLO");
+      const response = await Fetch({
+        url: "/class/get-history",
+        method: "POST",
+        data: { class_id: activeClassModalData.class_id },
+      });
+      if (response.status === 200) {
+        console.log(response, "HELLO");
+      }
+    };
+    if (activeClassModal) {
+      fetchData();
+    }
+  }, [activeClassModalData]);
   return (
     <Modal
       visible={activeClassModal}
