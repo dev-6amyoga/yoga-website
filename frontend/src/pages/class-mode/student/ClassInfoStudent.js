@@ -100,9 +100,7 @@ export default function ClassInfoStudent() {
               <div className="class-info-student">
                 {/* info */}
                 <div className="class-info-student-title">
-                  <h3 className="text-white">
-                    {class_id} | {classDetails.class_name}
-                  </h3>
+                  <h3 className="text-white">{classDetails.class_name}</h3>
                   <p className="class-info-student-desc text-y-white text-sm max-w-2xl break-all">
                     {classDetails.class_desc}
                   </p>
@@ -140,9 +138,9 @@ export default function ClassInfoStudent() {
                         ? (new Date(classDetails.onetime_class_end_time) -
                             new Date(classDetails.onetime_class_start_time)) /
                           1000 /
-                          60
+                          3600
                         : 0}{" "}
-                      minutes
+                      hours
                     </p>
                   </div>
                 </div>
@@ -168,7 +166,8 @@ export default function ClassInfoStudent() {
                     startIcon={<Share />}
                     disabled={
                       classDetails?.status !== CLASS_ONGOING &&
-                      classDetails.status !== CLASS_UPCOMING
+                      classDetails.status !== CLASS_UPCOMING &&
+                      classDetails?.status !== "CLASS_METADATA_DRAFT"
                     }
                     onClick={handleShare}
                   >
