@@ -2,6 +2,8 @@ const express = require('express')
 
 const router = express.Router()
 
+const mongoose = require('mongoose')
+
 const Class = require('../models/mongo/Class')
 // const ClassHistory = require('../models/mongo/ClassHistory')
 
@@ -11,7 +13,7 @@ const {
   HTTP_INTERNAL_SERVER_ERROR,
 } = require('../utils/http_status_codes')
 
-const { CLASS_ONGOING } = require('../enums/class_status')
+const { CLASS_ONGOING, CLASS_UPCOMING } = require('../enums/class_status')
 
 const { User } = require('../models/sql/User')
 const {
@@ -22,7 +24,13 @@ const {
   CLASS_RECURRANCE_TYPE_WEEKLY,
 } = require('../enums/class_metadata_recurrance_type')
 
+const ClassHistory = require('../models/mongo/ClassHistory')
+
 router.post('/create', async (req, res) => {
+  const mt = await mongoose.startSession()
+
+  mt.startTransaction()
+
   try {
     const {
       class_name,
@@ -76,24 +84,53 @@ router.post('/create', async (req, res) => {
       })
     }
 
-    await Class.create({
-      class_name,
-      class_desc,
-      teacher_id,
-      class_type,
-      recurrance_type,
-      recurrance_days,
-      onetime_class_start_time,
-      onetime_class_end_time,
-      recurring_class_start_time,
-      recurring_class_end_time,
-      allowed_students,
-    })
+    const classObj = await Class.create(
+      {
+        class_name,
+        class_desc,
+        teacher_id,
+        class_type,
+        recurrance_type,
+        recurrance_days,
+        onetime_class_start_time,
+        onetime_class_end_time,
+        recurring_class_start_time,
+        recurring_class_end_time,
+        allowed_students,
+      },
+      {
+        session: mt,
+      }
+    )
 
+    if (class_type === CLASS_TYPE_ONETIME) {
+      await ClassHistory.create(
+        {
+          class_id: classObj._id,
+          actions_queue: [],
+          attendees: [],
+          controls_queue: [],
+          has_teacher_joined: false,
+          status: CLASS_UPCOMING,
+          watch_history: [],
+          class_name,
+          class_desc,
+          start_time: onetime_class_start_time,
+          end_time: onetime_class_end_time,
+        },
+        {
+          session: mt,
+        }
+      )
+    }
+
+    await mt.commitTransaction()
+    await mt.endSession()
     return res.status(HTTP_OK).json({ message: 'Class Saved' })
   } catch (error) {
     console.error('Error saving new Class:', error)
-
+    await mt.abortTransaction()
+    await mt.endSession()
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
       error: 'Failed to save new Class',
     })
@@ -257,16 +294,16 @@ router.post('/get-by-id', async (req, res) => {
 
 router.post('/start', async (req, res) => {
   try {
-    const { class_id } = req.body
+    const { class_history_id } = req.body
 
-    if (!class_id) {
+    if (!class_history_id) {
       return res.status(HTTP_BAD_REQUEST).json({
         error: 'Missing required fields',
       })
     }
 
-    const classObj = await Class.findByIdAndUpdate(
-      class_id,
+    const classObj = await ClassHistory.findByIdAndUpdate(
+      class_history_id,
       { status: CLASS_ONGOING },
       { new: true }
     )
@@ -278,18 +315,45 @@ router.post('/start', async (req, res) => {
   }
 })
 
+router.post('/get-history', async (req, res) => {
+  const { class_id } = req.body
+
+  if (!class_id) {
+    return res.status(HTTP_BAD_REQUEST).json({
+      error: 'Missing required fields',
+    })
+  }
+
+  try {
+    const class_history_records = await ClassHistory.find({
+      class_id:
+        typeof class_id === 'string'
+          ? new mongoose.Schema.Types.ObjectId(class_id)
+          : class_id,
+    })
+
+    return res.status(HTTP_OK).json({ class_history: class_history_records })
+  } catch (error) {
+    console.log(error)
+
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to fetch class history',
+    })
+  }
+})
+
 router.post('/end', async (req, res) => {
   try {
-    const { class_id, status } = req.body
+    const { class_history_id, status } = req.body
 
-    if (!class_id || !status) {
+    if (!class_history_id || !status) {
       return res.status(HTTP_BAD_REQUEST).json({
         error: 'Missing required fields',
       })
     }
 
-    const classObj = await Class.findByIdAndUpdate(
-      class_id,
+    const classObj = await ClassHistory.findByIdAndUpdate(
+      class_history_id,
       { status },
       { new: true }
     )
