@@ -478,40 +478,19 @@ export const TransitionEndSupine = async (
     let res1;
     let pending_2 = [];
     if (break_status_end === "Break") {
-      if (start_video.person_starting_position === "Front") {
-        res1 = handleTransition([
-          "Pranayama Unlock Legs",
-          "Sitting To Standing Transition",
-          "Turn Mat Front To Side Standing Transition",
-        ]);
-      }
-      if (start_video.person_starting_position === "Left") {
-        res1 = handleTransition([
-          "Pranayama Unlock Legs",
-          "Sitting To Standing Transition",
-          "Turn Mat Front To Side Standing Transition",
-          "Person Transit Front To Left",
-        ]);
-      }
+      res1 = handleTransition([
+        "Pranayama Unlock Legs",
+        "Turn Mat Front To Side Sitting Transition",
+        "Sitting To Supine Transition",
+      ]);
     }
     if (break_status_end === "No Break") {
-      if (start_video.person_starting_position === "Front") {
-        res1 = handleTransition([
-          "Pranayama Unlock Legs",
-          "Sitting To Standing Transition",
-          "Turn Mat Front To Side Standing Transition",
-          "Feet Together Hands Tight Standing Transition Front",
-        ]);
-      }
-      if (start_video.person_starting_position === "Left") {
-        res1 = handleTransition([
-          "Pranayama Unlock Legs",
-          "Sitting To Standing Transition",
-          "Turn Mat Front To Side Standing Transition",
-          "Person Transit Front To Left",
-          "Feet Together Hands Tight Standing Side Transition",
-        ]);
-      }
+      res1 = handleTransition([
+        "Pranayama Unlock Legs",
+        "Turn Mat Front To Side Sitting Transition",
+        "Sitting To Supine Transition",
+        "Arms Overhead Feet Together Supine Transition",
+      ]);
     }
     pending_2 = res1;
     if (start_video.vibhagiya) {
@@ -613,6 +592,9 @@ export const TransitionEndSupine = async (
             }
           }
         }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
         let new_res = [...res, ...pending_2];
         new_res = new_res.filter((element) => element !== undefined);
         new_res = new_res.map((transition) => transition.transition_id);
