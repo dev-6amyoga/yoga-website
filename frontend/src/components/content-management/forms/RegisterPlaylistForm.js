@@ -771,7 +771,7 @@ function RegisterPlaylistForm() {
       if (response?.status === 200) {
         toast("Playlist added successfully");
         let new_playlist_id = response.data.playlist_id;
-        console.log(new_playlist_id);
+        console.log(response.data);
         try {
           const response = await Fetch({
             url: `/content/playlists/createManifest/${new_playlist_id}`,
