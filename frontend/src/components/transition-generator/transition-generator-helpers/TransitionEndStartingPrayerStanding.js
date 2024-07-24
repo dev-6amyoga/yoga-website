@@ -39,7 +39,7 @@ export const TransitionEndStartingPrayerStanding = async (
 
   if (!start_category) {
     let res = handleTransition([
-      "Feet Apart Hands Loose Standing Transition Front",
+      "Standing Position Transition",
       "Prayer Start Standing",
     ]);
     res = res.map((transition) => transition.transition_id);
