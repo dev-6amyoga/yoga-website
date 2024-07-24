@@ -222,8 +222,8 @@ export const TransitionEndPranayamaPrayer = async (
   }
 
   if (start_category === "Pranayama") {
-    let res1 = handleTransition(["Pranayama Inhale Arms Up Exhale Namaskara"]);
-    const pending_2 = res1;
+    // let res1 = handleTransition(["Pranayama Inhale Arms Up Exhale Namaskara"]);
+    const pending_2 = [];
     if (start_video.vibhagiya) {
       if (start_video.vibhagiya === "Abdomen") {
         let res = [];
