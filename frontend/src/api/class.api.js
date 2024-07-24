@@ -4,20 +4,32 @@ export class ClassAPI {
 	static async postCreateClass(
 		class_name,
 		class_desc,
+		class_type,
+		recurrance_type,
+		recurrance_days = [],
+		onetime_class_start_time = null,
+		onetime_class_end_time = null,
+		recurring_class_start_time = null,
+		recurring_class_end_time = null,
 		teacher_id,
-		start_time,
-		end_time
+		allowed_students = []
 	) {
 		try {
 			const response = await Fetch({
 				url: "/class/create",
 				method: "POST",
 				data: {
-					class_name: class_name,
-					class_desc: class_desc,
-					teacher_id: teacher_id,
-					start_time: start_time,
-					end_time: end_time,
+					class_name,
+					class_desc,
+					class_type,
+					recurrance_type,
+					recurrance_days,
+					onetime_class_start_time,
+					onetime_class_end_time,
+					recurring_class_start_time,
+					recurring_class_end_time,
+					teacher_id,
+					allowed_students,
 				},
 			});
 
