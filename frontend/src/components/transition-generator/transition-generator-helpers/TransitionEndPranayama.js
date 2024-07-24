@@ -1023,6 +1023,9 @@ export const TransitionEndPranayama = async (
         transition.drm_transition === drm_status &&
         transition.teacher_mode === end_video.teacher_mode
     );
+    if (start_video === end_video) {
+      return [];
+    }
     let pending_2 = pranayamaFinder(end_video, filteredTransitions_all);
     if (start_video.vibhagiya) {
       if (start_video.vibhagiya === "Abdomen") {
