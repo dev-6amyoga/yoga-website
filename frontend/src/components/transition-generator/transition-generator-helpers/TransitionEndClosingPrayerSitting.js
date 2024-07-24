@@ -223,7 +223,7 @@ export const TransitionEndClosingPrayerSitting = async (
 
   if (start_category === "Pranayama") {
     // let res1 = handleTransition(["Pranayama Inhale Arms Up Exhale Namaskara"]);
-    const pending_2 = res1;
+    const pending_2 = [];
     if (start_video.vibhagiya) {
       if (start_video.vibhagiya === "Abdomen") {
         let res = [];
@@ -323,6 +323,9 @@ export const TransitionEndClosingPrayerSitting = async (
             }
           }
         }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
         let new_res = [...res, ...pending_2];
         new_res = new_res.filter((element) => element !== undefined);
         new_res = new_res.map((transition) => transition.transition_id);
