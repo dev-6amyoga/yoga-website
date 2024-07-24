@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const { CLASS_UPCOMING } = require('../../enums/class_status')
 
 const classHistorySchema = new mongoose.Schema({
-  class_metadata_id: mongoose.Schema.Types.ObjectId,
+  class_id: mongoose.Schema.Types.ObjectId,
   class_name: String,
   class_desc: String,
   teacher_id: Number,
@@ -48,4 +48,4 @@ const ClassHistory = mongoose.model(
   'class_history'
 )
 
-// module.exports = Class;
+module.exports = ClassHistory

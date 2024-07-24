@@ -1,53 +1,72 @@
 {
-	"name": "yoga-web-backend",
-	"version": "0.1.0",
-	"private": true,
-	"dependencies": {
-		"@aws-sdk/client-s3": "^3.590.0",
-		"@mediapipe/tasks-vision": "^0.10.14",
-		"@xmldom/xmldom": "^0.8.10",
-		"bcrypt": "^5.1.1",
-		"buffer": "^6.0.3",
-		"compression": "^1.7.4",
-		"cors": "^2.8.5",
-		"crypto-js": "^4.2.0",
-		"dotenv": "^16.3.1",
-		"eta": "^3.2.0",
-		"express": "^4.18.2",
-		"express-rate-limit": "^7.1.5",
-		"express-useragent": "^1.0.15",
-		"ffprobe-static": "^3.1.0",
-		"fluent-ffmpeg": "^2.1.2",
-		"google-auth-library": "^9.2.0",
-		"helmet": "^7.1.0",
-		"html-pdf-node": "^1.0.8",
-		"jsonwebtoken": "^9.0.2",
-		"mongodb": "^6.2.0",
-		"mongoose": "^7.6.3",
-		"morgan": "^1.10.0",
-		"nodemailer": "^6.9.8",
-		"nodemon": "^3.1.0",
-		"pdfkit": "^0.14.0",
-		"pg": "^8.11.3",
-		"pg-hstore": "^2.3.4",
-		"querystring-es3": "^0.2.1",
-		"razorpay": "^2.9.2",
-		"request-ip": "^3.3.0",
-		"sequelize": "^6.35.1",
-		"sqlite3": "^5.1.6"
-	},
-	"scripts": {
-		"start": "nodemon server.js",
-		"build": "webpack",
-		"prod": "nodemon ./dist/final.js"
-	},
-	"devDependencies": {
-		"sequelize-cli": "^6.6.2",
-		"webpack": "^5.90.3",
-		"webpack-cli": "^5.1.4",
-		"webpack-node-externals": "^3.0.0"
-	},
-	"engines": {
-		"node": "20.x"
-	}
+  "name": "yoga-web-backend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.590.0",
+    "@mediapipe/tasks-vision": "^0.10.14",
+    "@xmldom/xmldom": "^0.8.10",
+    "bcrypt": "^5.1.1",
+    "buffer": "^6.0.3",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.3.1",
+    "eta": "^3.2.0",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "express-useragent": "^1.0.15",
+    "express-ws": "^5.0.2",
+    "ffprobe-static": "^3.1.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "glob": "^11.0.0",
+    "google-auth-library": "^9.2.0",
+    "helmet": "^7.1.0",
+    "html-pdf-node": "^1.0.8",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.2.0",
+    "mongoose": "^7.6.3",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.9.8",
+    "nodemon": "^3.1.0",
+    "pdfkit": "^0.14.0",
+    "pg": "^8.11.3",
+    "pg-hstore": "^2.3.4",
+    "querystring-es3": "^0.2.1",
+    "razorpay": "^2.9.2",
+    "request-ip": "^3.3.0",
+    "sequelize": "^6.35.1",
+    "sqlite3": "^5.1.6"
+  },
+  "scripts": {
+    "start": "nodemon server.js",
+    "build": "webpack",
+    "prod": "nodemon ./dist/final.js"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "sequelize-cli": "^6.6.2",
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4",
+    "webpack-node-externals": "^3.0.0"
+  },
+  "engines": {
+    "node": "20.x"
+  },
+  "eslintConfig": {
+    "extends": [
+      "airbnb-base",
+      "prettier"
+    ],
+    "rules": {
+      "camelcase": "off",
+      "no-await-in-loop": "warn",
+      "import/no-dynamic-require": "warn",
+      "global-require": "warn",
+      "no-underscore-dangle": "warn"
+    }
+  }
 }
