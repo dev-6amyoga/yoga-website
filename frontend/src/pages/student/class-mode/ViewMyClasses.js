@@ -1,15 +1,44 @@
 import * as React from "react";
-import CssBaseline from "@mui/material/CssBaseline";
-import Box from "@mui/material/Box";
-import { alpha, Typography } from "@mui/material";
-import Divider from "@mui/material/Divider";
+import {
+  alpha,
+  CssBaseline,
+  Box,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Divider,
+  Button,
+} from "@mui/material";
+
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import StudentNavMUI from "../../../components/Common/StudentNavbar/StudentNavMUI";
 import Hero from "../components/Hero";
-
-export default function ViewMyClasses() {
+import { useEffect, useState } from "react";
+import { Fetch } from "../../../utils/Fetch";
+import { withAuth } from "../../../utils/withAuth";
+import { ROLE_STUDENT } from "../../../enums/roles";
+function ViewMyClasses() {
   const [mode, setMode] = React.useState("light");
   const defaultTheme = createTheme({ palette: { mode } });
+  const [classes, setClasses] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await Fetch({
+        url: "/class/student/get-all",
+        method: "GET",
+      });
+      if (res.status === 200) {
+        setClasses(res.data);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -22,8 +51,8 @@ export default function ViewMyClasses() {
           sx={(theme) => ({
             mt: { xs: 0, sm: 0 },
             alignSelf: "center",
-            height: { xs: 150, sm: 400 }, // Reduced height
-            width: { xs: "90%", sm: "50%" }, // Reduced and responsive width
+            height: { xs: 150, sm: 400 },
+            width: { xs: "90%", sm: "80%" },
             borderRadius: "10px",
             outline: "1px solid",
             outlineColor:
@@ -36,11 +65,44 @@ export default function ViewMyClasses() {
                 : `0 0 24px 12px ${alpha("#033363", 0.2)}`,
           })}
         >
-          <div>
-            <Typography>Hello</Typography>
-          </div>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Class Name</TableCell>
+                  <TableCell>Class Description</TableCell>
+                  {/* <TableCell>Class Type</TableCell> */}
+                  <TableCell>Start Time</TableCell>
+                  <TableCell>End Time</TableCell>
+                  {/* <TableCell>Status</TableCell> */}
+                  <TableCell>Teacher</TableCell>
+                  <TableCell align="right">Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {classes.map((classItem) => (
+                  <TableRow key={classItem.class_name}>
+                    <TableCell>{classItem.class_name}</TableCell>
+                    <TableCell>{classItem.class_desc}</TableCell>
+                    {/* <TableCell>{classItem.class_type}</TableCell> */}
+                    <TableCell>{classItem.onetime_class_start_time}</TableCell>
+                    <TableCell>{classItem.onetime_class_end_time}</TableCell>
+                    {/* <TableCell>{classItem.status}</TableCell> */}
+                    <TableCell>{classItem.teacher.name}</TableCell>
+                    <TableCell align="right">
+                      <Button variant="contained" color="primary">
+                        Join
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Box>
       </div>
     </ThemeProvider>
   );
 }
+
+export default withAuth(ViewMyClasses, ROLE_STUDENT);
