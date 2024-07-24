@@ -47,13 +47,7 @@ router.post('/create', async (req, res) => {
     } = req.body
     // const maxIdClass = await ClassMode.findOne().sort({ id: -1 }).limit(1);
 
-    if (
-      !class_name ||
-      !class_desc ||
-      !teacher_id ||
-      !class_type ||
-      !recurrance_type
-    ) {
+    if (!class_name || !class_desc || !teacher_id || !class_type) {
       return res.status(HTTP_BAD_REQUEST).json({
         error: 'Missing required fields',
       })
@@ -85,39 +79,46 @@ router.post('/create', async (req, res) => {
     }
 
     const classObj = await Class.create(
-      {
-        class_name,
-        class_desc,
-        teacher_id,
-        class_type,
-        recurrance_type,
-        recurrance_days,
-        onetime_class_start_time,
-        onetime_class_end_time,
-        recurring_class_start_time,
-        recurring_class_end_time,
-        allowed_students,
-      },
+      [
+        {
+          class_name,
+          class_desc,
+          teacher_id,
+          class_type,
+          recurrance_type,
+          recurrance_days,
+          onetime_class_start_time,
+          onetime_class_end_time,
+          recurring_class_start_time,
+          recurring_class_end_time,
+          allowed_students,
+        },
+      ],
       {
         session: mt,
       }
     )
 
+    console.log('classObj:', classObj)
+
     if (class_type === CLASS_TYPE_ONETIME) {
       await ClassHistory.create(
-        {
-          class_id: classObj._id,
-          actions_queue: [],
-          attendees: [],
-          controls_queue: [],
-          has_teacher_joined: false,
-          status: CLASS_UPCOMING,
-          watch_history: [],
-          class_name,
-          class_desc,
-          start_time: onetime_class_start_time,
-          end_time: onetime_class_end_time,
-        },
+        [
+          {
+            class_id: classObj[0]._id,
+            actions_queue: [],
+            attendees: [],
+            controls_queue: [],
+            has_teacher_joined: false,
+            status: CLASS_UPCOMING,
+            watch_history: [],
+            class_name,
+            class_desc,
+            start_time: onetime_class_start_time,
+            end_time: onetime_class_end_time,
+            teacher_id,
+          },
+        ],
         {
           session: mt,
         }
