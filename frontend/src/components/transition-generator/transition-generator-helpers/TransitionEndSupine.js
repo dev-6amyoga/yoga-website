@@ -476,6 +476,7 @@ export const TransitionEndSupine = async (
 
   if (start_category === "Pranayama") {
     let res1;
+    let pending_2 = [];
     if (break_status_end === "Break") {
       if (start_video.person_starting_position === "Front") {
         res1 = handleTransition([
