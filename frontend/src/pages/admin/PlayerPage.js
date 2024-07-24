@@ -12,13 +12,13 @@ import ShakaVideo from "../testing/ShakaVideo";
 function PlayerPage() {
   const [position, setPosition] = useState(0);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPosition((prevPosition) => (prevPosition + 1) % 100);
-    }, 100);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setPosition((prevPosition) => (prevPosition + 1) % 100);
+  //   }, 100);
 
-    return () => clearInterval(interval);
-  }, []);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   return (
     <AdminPageWrapper heading="Video Player">
