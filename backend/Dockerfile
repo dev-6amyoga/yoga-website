@@ -15,6 +15,7 @@ COPY ./backend/routes ./backend/routes
 COPY ./backend/services ./backend/services
 COPY ./backend/utils ./backend/utils
 COPY ./backend/public ./backend/public
+COPY ./backend/websocket-routes ./backend/websocket-routes
 
 WORKDIR /backend
 
