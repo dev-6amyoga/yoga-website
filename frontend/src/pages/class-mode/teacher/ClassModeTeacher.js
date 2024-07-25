@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { Spacer } from "@geist-ui/core";
 
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { ClassAPI } from "../../../api/class.api";
 import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
@@ -35,17 +35,34 @@ function ClassModeTeacher() {
 		retry: 0,
 	});
 
+	const { data: classHistoryInfo } = useQuery({
+		queryKey: ["classHistoryInfo", class_id],
+
+		queryFn: async () => {
+			console.log("GETTING CLASS HISTORY INFO");
+			const [res, err] = await ClassAPI.postGetClassHistoryById(class_id);
+
+			if (err) {
+				console.error(err);
+				toast.error("Failed to fetch class history info");
+			}
+
+			return res.class_history;
+		},
+		retry: 0,
+	});
+
 	useEffect(() => {
-		if (classInfo?.status !== CLASS_ONGOING) {
+		if (classHistoryInfo?.status !== CLASS_ONGOING) {
 			setDisabled(true);
 		} else {
 			setDisabled(false);
 		}
-	}, [classInfo]);
+	}, [classHistoryInfo]);
 
 	// connect to socket
 	const [connectionOpen, setConnectionOpen] = useState(false);
-	const [socket, setSocket] = useState(null);
+	const socket = useRef(null);
 	const [queue, setQueue] = useState([]);
 	const [startConnection, setStartConnection] = useState(true);
 	let intervalTimer = useRef(null);
@@ -54,43 +71,49 @@ function ClassModeTeacher() {
 		if (!startConnection) return;
 
 		const ws = new WebSocket("ws://localhost:4000/ws/class/teacher/");
-		setSocket(ws);
+		socket.current = ws;
 		setStartConnection(false);
+		console.log("[SOCKET]: started");
 	}, [startConnection]);
 
 	useEffect(() => {
-		if (socket === null) return;
+		if (socket.current === null) return;
 
 		const handleOpen = () => {
 			setConnectionOpen(true);
+			toast.success("Connection opened");
 			// intervalTimer.current = setInterval(() => {
 			// 	socket.send(
 
 			// 	);
 			// }, 5000);
+
+			// socket.send("Hello from teacher");
 		};
 
 		const handleClose = () => {
 			setConnectionOpen(false);
 			clearInterval(intervalTimer.current);
+			setStartConnection(true);
 		};
 
 		const handleMessage = (e) => {
 			console.log("Message received: ", e.data);
 			const data = JSON.parse(e.data);
-			setQueue((prev) => [...prev, data]);
+			// setQueue((prev) => [...prev, data]);
 		};
 
-		socket.addEventListener("open", handleOpen);
-		socket.addEventListener("close", handleClose);
-		socket.addEventListener("message", handleMessage);
+		socket.current.addEventListener("open", handleOpen);
+		socket.current.addEventListener("close", handleClose);
+		socket.current.addEventListener("message", handleMessage);
 
 		return () => {
 			if (socket) {
-				socket.close();
-				socket.removeEventListener("open", handleOpen);
-				socket.removeEventListener("close", handleClose);
-				socket.removeEventListener("message", handleMessage);
+				socket.current.close();
+				socket.current.removeEventListener("open", handleOpen);
+				socket.current.removeEventListener("close", handleClose);
+				socket.current.removeEventListener("message", handleMessage);
+				socket.current = null;
 			}
 		};
 	}, [socket]);
@@ -111,6 +134,23 @@ function ClassModeTeacher() {
           event_time: new Date().toISOString(),
         }
     */
+
+		if (socket.current && connectionOpen && classHistoryInfo) {
+			console.log("[SOCKET] sending message");
+			socket.current.send(
+				JSON.stringify({
+					class_id: classHistoryInfo._id,
+					type: "EVENT_QUEUE",
+					data: {
+						sub_type: "EVENT_QUEUE_PUSH",
+						data: {
+							video_id: 21,
+						},
+					},
+					event_time: new Date().toISOString(),
+				})
+			);
+		}
 	};
 
 	const handlePopFromQueue = (playlist, idx) => {
@@ -146,6 +186,20 @@ function ClassModeTeacher() {
           event_time: new Date().toISOString(),
         }
     */
+
+		if (socket.current && connectionOpen) {
+			socket.current.send(
+				JSON.stringify({
+					class_id: classHistoryInfo._id,
+					type: "EVENT_QUEUE",
+					data: {
+						subtype: "EVENT_QUEUE_CLEAR",
+						data: {},
+					},
+					event_time: new Date().toISOString(),
+				})
+			);
+		}
 	};
 
 	return (
@@ -211,7 +265,10 @@ function ClassModeTeacher() {
 
 								<Spacer h={2} />
 
-								<Playlist onAddQueue={handleAddToQueue} />
+								<Playlist
+									onAddToQueue={handleAddToQueue}
+									page="testing"
+								/>
 							</>
 						)}
 					</div>
