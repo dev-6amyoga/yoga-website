@@ -64,7 +64,6 @@ function StudentHome() {
           const validPlans = res.data.plans.filter(
             (plan) => new Date(plan.validity_to) > today
           );
-
           const sortedPlans = validPlans.sort(
             (a, b) => new Date(b.created.$date) - new Date(a.created.$date)
           );
