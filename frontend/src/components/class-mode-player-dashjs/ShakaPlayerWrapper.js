@@ -30,6 +30,7 @@ const emptyFn = () => {};
 export default function ShakaPlayerWrapper({
 	src,
 	isDrm,
+	isStudent,
 	handlePlayerLoaded = emptyFn,
 	handlePlayerLoading = emptyFn,
 	handleVideoSeeking = emptyFn,
@@ -128,7 +129,7 @@ export default function ShakaPlayerWrapper({
 				const isMobile = { done: true, check: check };
 				console.log("Checking for isMobile", isMobile);
 
-				if (playerRef.current.ui) {
+				if (playerRef.current.ui && false) {
 					console.log("Setting up UI");
 					shaka.ui.Controls.registerElement(
 						"custom_play_pause",
@@ -384,5 +385,11 @@ export default function ShakaPlayerWrapper({
 		]
 	);
 
-	return <ShakaPlayer ref={playerInit} timingObjRef={timingObjRef} />;
+	return (
+		<ShakaPlayer
+			ref={playerInit}
+			timingObjRef={timingObjRef}
+			isStudent={isStudent}
+		/>
+	);
 }
