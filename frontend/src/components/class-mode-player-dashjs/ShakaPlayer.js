@@ -13,7 +13,7 @@ import shaka from "shaka-player/dist/shaka-player.ui";
  * @constructor
  */
 function ShakaPlayer(
-	{ src, config, chromeless, className, timingObjRef, ...rest },
+	{ src, config, chromeless, className, timingObjRef, isStudent, ...rest },
 	ref
 ) {
 	const uiContainerRef = React.useRef(null);
@@ -101,7 +101,10 @@ function ShakaPlayer(
 
 		if (timingObjRef.current && element !== null) {
 			console.log("[DASH PLAYER] : mediaSync");
-			MCorp.mediaSync(element, timingObjRef.current);
+			MCorp.mediaSync(element, timingObjRef.current, {
+				mode: "skip",
+				debug: true,
+			});
 		}
 	};
 
@@ -115,6 +118,57 @@ function ShakaPlayer(
 				}}
 				{...rest}
 			/>
+
+			{!isStudent && (
+				<div className={`absolute bottom-4 right-4 z-[1000]`}>
+					<button
+						className="bg-white text-black px-4 py-2 rounded-md"
+						onClick={() => {
+							// player.play();
+							timingObjRef.current.update({ velocity: 1 });
+						}}>
+						Play
+					</button>
+					<button
+						className="bg-white text-black px-4 py-2 rounded-md"
+						onClick={() => {
+							// player.pause();
+							timingObjRef.current.update({ velocity: 0 });
+						}}>
+						Pause
+					</button>
+					<button
+						className="bg-white text-black px-4 py-2 rounded-md"
+						onClick={() => {
+							// playerRef.current.seek(playerRef.current.time() - 10);
+							timingObjRef.current.update({
+								position:
+									timingObjRef.current.query().position - 10,
+							});
+						}}>
+						Seek -10
+					</button>
+					<button
+						className="bg-white text-black px-4 py-2 rounded-md"
+						onClick={() => {
+							timingObjRef.current.update({
+								position:
+									timingObjRef.current.query().position + 10,
+							});
+						}}>
+						Seek +10
+					</button>
+					<button
+						className="bg-white text-black px-4 py-2 rounded-md"
+						onClick={() => {
+							timingObjRef.current.update({
+								position: 0,
+							});
+						}}>
+						Reset
+					</button>
+				</div>
+			)}
 		</div>
 	);
 }
