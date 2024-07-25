@@ -65,10 +65,10 @@ export default function ClassModePlayer({ isStudent }) {
 			<DashPlayer
 				ref={player}
 				timingObjRef={timingObj}
-				isAsanaVideo={false}
+				isAsanaVideo={true}
 				isStudent={isStudent}
 				className="w-full h-full"
-				src="https://pub-0f821d8aa0b0446cae0613788ad21abc.r2.dev/66534d88d655c7a09791b21c.mpd"
+				src="https://pub-0f821d8aa0b0446cae0613788ad21abc.r2.dev/66a14fb5c1cf1650ea1f536e.mpd"
 			/>
 		</div>
 	);

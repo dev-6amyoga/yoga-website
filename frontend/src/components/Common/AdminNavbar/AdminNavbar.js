@@ -131,6 +131,7 @@ const paths = [
 		],
 	},
 	{ path: "/admin/discount-management", title: "Discount Management" },
+	{ path: "/admin/class/manage", title: "Manage Classes" },
 
 	{ title: "Free Videos" },
 ];
