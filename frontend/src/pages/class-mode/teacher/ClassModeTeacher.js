@@ -68,56 +68,56 @@ function ClassModeTeacher() {
 	const [startConnection, setStartConnection] = useState(true);
 	let intervalTimer = useRef(null);
 
-	// useEffect(() => {
-	// 	if (!startConnection) return;
+	useEffect(() => {
+		if (!startConnection) return;
 
-	// 	const ws = new WebSocket("ws://localhost:4000/ws/class/teacher/");
-	// 	socket.current = ws;
-	// 	setStartConnection(false);
-	// 	// console.log("[SOCKET]: started");
-	// }, [startConnection]);
+		const ws = new WebSocket("ws://localhost:4000/ws/class/teacher/");
+		socket.current = ws;
+		setStartConnection(false);
+		console.log("[SOCKET]: started");
+	}, [startConnection]);
 
-	// useEffect(() => {
-	// 	if (socket.current === null) return;
+	useEffect(() => {
+		if (socket.current === null) return;
 
-	// 	const handleOpen = () => {
-	// 		setConnectionOpen(true);
-	// 		toast.success("Connection opened");
-	// 		// intervalTimer.current = setInterval(() => {
-	// 		// 	socket.send(
+		const handleOpen = () => {
+			setConnectionOpen(true);
+			toast.success("Connection opened");
+			// intervalTimer.current = setInterval(() => {
+			// 	socket.send(
 
-	// 		// 	);
-	// 		// }, 5000);
+			// 	);
+			// }, 5000);
 
-	// 		// socket.send("Hello from teacher");
-	// 	};
+			// socket.send("Hello from teacher");
+		};
 
-	// 	const handleClose = () => {
-	// 		setConnectionOpen(false);
-	// 		clearInterval(intervalTimer.current);
-	// 		setStartConnection(true);
-	// 	};
+		const handleClose = () => {
+			setConnectionOpen(false);
+			clearInterval(intervalTimer.current);
+			setStartConnection(true);
+		};
 
-	// 	const handleMessage = (e) => {
-	// 		console.log("Message received: ", e.data);
-	// 		const data = JSON.parse(e.data);
-	// 		// setQueue((prev) => [...prev, data]);
-	// 	};
+		const handleMessage = (e) => {
+			console.log("Message received: ", e.data);
+			const data = JSON.parse(e.data);
+			// setQueue((prev) => [...prev, data]);
+		};
 
-	// 	socket.current.addEventListener("open", handleOpen);
-	// 	socket.current.addEventListener("close", handleClose);
-	// 	socket.current.addEventListener("message", handleMessage);
+		socket.current.addEventListener("open", handleOpen);
+		socket.current.addEventListener("close", handleClose);
+		socket.current.addEventListener("message", handleMessage);
 
-	// 	return () => {
-	// 		if (socket) {
-	// 			socket.current.close();
-	// 			socket.current.removeEventListener("open", handleOpen);
-	// 			socket.current.removeEventListener("close", handleClose);
-	// 			socket.current.removeEventListener("message", handleMessage);
-	// 			socket.current = null;
-	// 		}
-	// 	};
-	// }, [socket]);
+		return () => {
+			if (socket) {
+				socket.current.close();
+				socket.current.removeEventListener("open", handleOpen);
+				socket.current.removeEventListener("close", handleClose);
+				socket.current.removeEventListener("message", handleMessage);
+				socket.current = null;
+			}
+		};
+	}, [socket]);
 
 	const handleAddToQueue = (playlist) => {
 		// send request to socket
@@ -135,22 +135,23 @@ function ClassModeTeacher() {
           event_time: new Date().toISOString(),
         }
     */
-		// if (socket.current && connectionOpen && classHistoryInfo) {
-		// 	console.log("[SOCKET] sending message");
-		// 	socket.current.send(
-		// 		JSON.stringify({
-		// 			class_id: classHistoryInfo._id,
-		// 			type: "EVENT_QUEUE",
-		// 			data: {
-		// 				sub_type: "EVENT_QUEUE_PUSH",
-		// 				data: {
-		// 					video_id: 21,
-		// 				},
-		// 			},
-		// 			event_time: new Date().toISOString(),
-		// 		})
-		// 	);
-		// }
+
+		if (socket.current && connectionOpen && classHistoryInfo) {
+			console.log("[SOCKET] sending message");
+			socket.current.send(
+				JSON.stringify({
+					class_id: classHistoryInfo._id,
+					type: "EVENT_QUEUE",
+					data: {
+						sub_type: "EVENT_QUEUE_PUSH",
+						data: {
+							video_id: 21,
+						},
+					},
+					event_time: new Date().toISOString(),
+				})
+			);
+		}
 	};
 
 	const handlePopFromQueue = (playlist, idx) => {
@@ -186,19 +187,20 @@ function ClassModeTeacher() {
           event_time: new Date().toISOString(),
         }
     */
-		// if (socket.current && connectionOpen) {
-		// 	socket.current.send(
-		// 		JSON.stringify({
-		// 			class_id: classHistoryInfo._id,
-		// 			type: "EVENT_QUEUE",
-		// 			data: {
-		// 				subtype: "EVENT_QUEUE_CLEAR",
-		// 				data: {},
-		// 			},
-		// 			event_time: new Date().toISOString(),
-		// 		})
-		// 	);
-		// }
+
+		if (socket.current && connectionOpen) {
+			socket.current.send(
+				JSON.stringify({
+					class_id: classHistoryInfo._id,
+					type: "EVENT_QUEUE",
+					data: {
+						subtype: "EVENT_QUEUE_CLEAR",
+						data: {},
+					},
+					event_time: new Date().toISOString(),
+				})
+			);
+		}
 	};
 
 	return (
