@@ -99,7 +99,7 @@ router.post('/create', async (req, res) => {
       }
     )
 
-    console.log('classObj:', classObj)
+    // console.log('classObj:', classObj)
 
     if (class_type === CLASS_TYPE_ONETIME) {
       await ClassHistory.create(
@@ -327,13 +327,35 @@ router.post('/get-history', async (req, res) => {
 
   try {
     const class_history_records = await ClassHistory.find({
-      class_id:
-        typeof class_id === 'string'
-          ? new mongoose.Schema.Types.ObjectId(class_id)
-          : class_id,
+      class_id: class_id.toString(),
     })
 
     return res.status(HTTP_OK).json({ class_history: class_history_records })
+  } catch (error) {
+    console.log(error)
+
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to fetch class history',
+    })
+  }
+})
+
+router.post('/get-latest-history', async (req, res) => {
+  const { class_id } = req.body
+
+  if (!class_id) {
+    return res.status(HTTP_BAD_REQUEST).json({
+      error: 'Missing required fields',
+    })
+  }
+
+  try {
+    const class_history_record = await ClassHistory.findOne({
+      class_id: class_id.toString(),
+      status: CLASS_ONGOING,
+    })
+
+    return res.status(HTTP_OK).json({ class_history: class_history_record })
   } catch (error) {
     console.log(error)
 
