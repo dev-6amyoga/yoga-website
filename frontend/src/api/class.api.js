@@ -155,10 +155,31 @@ export class ClassAPI {
 		}
 	}
 
-	static async postGetClassHistoryById(class_id) {
+	static async postGetLatestClassHistoryById(class_id) {
 		try {
 			const response = await Fetch({
 				url: "/class/get-latest-history",
+				method: "POST",
+				data: {
+					class_id: class_id,
+				},
+			});
+
+			if (response.status === 200) {
+				return [response.data, null];
+			} else {
+				return [null, response.data];
+			}
+		} catch (err) {
+			return [null, err];
+		}
+	}
+
+	static async postGetClassHistoryById(class_id) {
+		try {
+			console.log("GETTING HISTORY : ", class_id);
+			const response = await Fetch({
+				url: "/class/get-history",
 				method: "POST",
 				data: {
 					class_id: class_id,

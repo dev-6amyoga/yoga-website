@@ -319,6 +319,8 @@ router.post('/start', async (req, res) => {
 router.post('/get-history', async (req, res) => {
   const { class_id } = req.body
 
+  console.log(class_id)
+
   if (!class_id) {
     return res.status(HTTP_BAD_REQUEST).json({
       error: 'Missing required fields',

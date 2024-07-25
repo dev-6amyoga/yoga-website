@@ -31,7 +31,8 @@ export default function ClassInfoStudent() {
 	const { data: classHistoryInfo } = useQuery({
 		queryKey: ["classHistoryInfo", class_id],
 		queryFn: async () => {
-			const [res, err] = await ClassAPI.postGetClassHistoryById(class_id);
+			const [res, err] =
+				await ClassAPI.postGetLatestClassHistoryById(class_id);
 
 			if (err) {
 				console.error(err);
@@ -197,7 +198,7 @@ export default function ClassInfoStudent() {
 										disabled={
 											classHistoryInfo?.status !==
 												CLASS_ONGOING &&
-											classHistoryInfo.status !==
+											classHistoryInfo?.status !==
 												CLASS_UPCOMING &&
 											classHistoryInfo?.status !==
 												"CLASS_METADATA_DRAFT"

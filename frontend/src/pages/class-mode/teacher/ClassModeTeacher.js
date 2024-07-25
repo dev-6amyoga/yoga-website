@@ -40,7 +40,8 @@ function ClassModeTeacher() {
 
 		queryFn: async () => {
 			console.log("GETTING CLASS HISTORY INFO");
-			const [res, err] = await ClassAPI.postGetClassHistoryById(class_id);
+			const [res, err] =
+				await ClassAPI.postGetLatestClassHistoryById(class_id);
 
 			if (err) {
 				console.error(err);
