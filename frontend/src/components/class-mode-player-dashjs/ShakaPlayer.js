@@ -104,6 +104,7 @@ function ShakaPlayer(
 			MCorp.mediaSync(element, timingObjRef.current, {
 				mode: "skip",
 				debug: true,
+				target: 0.5,
 			});
 		}
 	};
