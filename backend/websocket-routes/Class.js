@@ -89,7 +89,7 @@ const handleTeacherConnection = (ws) => {
             })
           )
 
-          return
+          return null
         }
       }
       await mt.commitTransaction()
