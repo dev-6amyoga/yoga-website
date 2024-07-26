@@ -15,6 +15,7 @@ import {
   Button,
 } from "@mui/material";
 
+import VideoRecorder from "../../../components/video-recorder/VideoRecorder";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import StudentNavMUI from "../../../components/Common/StudentNavbar/StudentNavMUI";
 import Hero from "../components/Hero";
@@ -128,6 +129,7 @@ function ViewMyClasses() {
           </TableContainer>
         </Box>
       </div>
+      <VideoRecorder />
     </ThemeProvider>
   );
 }
