@@ -64,7 +64,7 @@ const VideoRecorder = () => {
 	};
 
 	return (
-		<div>
+		<div className="max-w-7xl mx-auto">
 			<ReactMediaRecorder
 				mediaRecorderOptions={{
 					videoBitsPerSecond: 2000000,
@@ -91,8 +91,8 @@ const VideoRecorder = () => {
 					isAudioMuted,
 					mediaBlobUrl,
 				}) => (
-					<div>
-						<p>{status}</p>
+					<div className="flex flex-row gap-2 items-center">
+						<p className="p-1 border rounded-md">{status}</p>
 						<Button onClick={startRecording}>
 							Start Recording
 						</Button>
