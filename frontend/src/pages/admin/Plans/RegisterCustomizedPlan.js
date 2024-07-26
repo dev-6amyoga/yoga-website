@@ -334,7 +334,7 @@ function RegisterNewCustomizedPlan() {
             <MenuItem value="Neck Pain">Neck Pain</MenuItem>
             <MenuItem value="Pranayama">Pranayama</MenuItem>
             <MenuItem value="Thyroid">Thyroid</MenuItem>
-
+            <MenuItem value="Parkinsons">Parkinsons</MenuItem>
             <MenuItem value="Pre Natal Yoga">Pre Natal Yoga</MenuItem>
           </Select>
         </FormControl>
