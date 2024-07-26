@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ClassAPI } from "../../../api/class.api";
+import DisplayWatchTime from "../../../components/Common/DisplayWatchTime";
 import StudentPageWrapper from "../../../components/Common/StudentPageWrapper";
 import { CLASS_ONGOING, CLASS_UPCOMING } from "../../../enums/class_status";
 import { getFrontendDomain } from "../../../utils/getFrontendDomain";
@@ -13,6 +14,16 @@ export default function ClassInfoStudent() {
 	const { class_id } = useParams();
 	const [timeRemaining, setTimeRemaining] = useState(null);
 	const navigate = useNavigate();
+
+	const [now, setNow] = useState(new Date());
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setNow(new Date());
+		}, 1000);
+
+		return () => clearInterval(interval);
+	}, []);
 
 	const { data: classDetails } = useQuery({
 		queryKey: ["classInfo", class_id],
@@ -107,109 +118,155 @@ export default function ClassInfoStudent() {
 		<StudentPageWrapper heading="Class Info Student">
 			<div className="elements">
 				{classDetails && (
-					<Card
-						sx={{
-							border: "1px solid",
-							borderColor: "primary.main",
-							background: "linear-gradient(#033363, #021F3B)",
-							borderRadius: "1rem",
-							margin: "2rem 0",
-						}}>
-						<CardContent>
-							<div className="class-info-student">
-								{/* info */}
-								<div className="class-info-student-title">
-									<h3 className="text-white">
-										{classDetails.class_name}
-									</h3>
-									<p className="class-info-student-desc text-y-white text-sm max-w-2xl break-all">
-										{classDetails.class_desc}
-									</p>
-								</div>
+					<>
+						<div className="flex flex-row gap-2">
+							<Card
+								sx={{
+									flex: 1,
+								}}>
+								<CardContent>
+									<p className="font-medium">Starts In</p>
+									<div className="text-2xl text-center">
+										<DisplayWatchTime
+											endTs={
+												new Date(
+													classHistoryInfo?.start_time
+												)
+											}
+										/>
+									</div>
+								</CardContent>
+							</Card>
+							<Card
+								sx={{
+									flex: 1,
+								}}>
+								<CardContent>
+									<p className="font-medium">Ends In</p>
+									<div className="text-2xl">
+										<DisplayWatchTime
+											endTs={
+												new Date(
+													classHistoryInfo?.end_time
+												)
+											}
+										/>
+									</div>
+								</CardContent>
+							</Card>
+						</div>
+						<Card
+							sx={{
+								border: "1px solid",
+								borderColor: "primary.main",
+								background: "linear-gradient(#033363, #021F3B)",
+								borderRadius: "1rem",
+								margin: "2rem 0",
+							}}>
+							<CardContent>
+								<div className="class-info-student">
+									{/* info */}
+									<div className="class-info-student-title">
+										<h3 className="text-white">
+											{classDetails.class_name}
+										</h3>
+										<p className="class-info-student-desc text-y-white text-sm max-w-2xl break-all">
+											{classDetails.class_desc}
+										</p>
+									</div>
 
-								<div className="class-info-student-teacher text-white flex flex-col gap-2 py-1">
-									<div className="flex flex-row gap-2 items-center">
-										<Avatar>
-											{classDetails?.teacher?.name[0]}
-										</Avatar>
-										{classDetails.teacher.name}
+									<div className="class-info-student-teacher text-white flex flex-col gap-2 py-1">
+										<div className="flex flex-row gap-2 items-center">
+											<Avatar>
+												{classDetails?.teacher?.name[0]}
+											</Avatar>
+											{classDetails.teacher.name}
+										</div>
 									</div>
-								</div>
 
-								<div className="class-info-student-info flex flex-col md:flex-row gap-8 text-sm text-white">
-									<div>
-										<p className="font-medium">
-											Start Time
-										</p>
-										<p>
-											{new Date(
-												classDetails.onetime_class_start_time
-											).toLocaleString()}
-										</p>
+									<div className="class-info-student-info flex flex-col md:flex-row gap-8 text-sm text-white">
+										<div>
+											<p className="font-medium">
+												Start Time
+											</p>
+											<p>
+												{new Date(
+													classDetails.onetime_class_start_time
+												).toLocaleString()}
+											</p>
+										</div>
+										<div>
+											<p className="font-medium">
+												End Time
+											</p>
+											<p>
+												{new Date(
+													classDetails.onetime_class_end_time
+												).toLocaleString()}
+											</p>
+										</div>
+										<div>
+											<p className="font-medium">
+												Duration
+											</p>
+											<p>
+												{classDetails?.onetime_class_end_time &&
+												classDetails?.onetime_class_start_time
+													? (new Date(
+															classDetails.onetime_class_end_time
+														) -
+															new Date(
+																classDetails.onetime_class_start_time
+															)) /
+														1000 /
+														3600
+													: 0}{" "}
+												hours
+											</p>
+										</div>
 									</div>
-									<div>
-										<p className="font-medium">End Time</p>
-										<p>
-											{new Date(
-												classDetails.onetime_class_end_time
-											).toLocaleString()}
-										</p>
-									</div>
-									<div>
-										<p className="font-medium">Duration</p>
-										<p>
-											{classDetails?.onetime_class_end_time &&
-											classDetails?.onetime_class_start_time
-												? (new Date(
-														classDetails.onetime_class_end_time
-													) -
-														new Date(
-															classDetails.onetime_class_start_time
-														)) /
-													1000 /
-													3600
-												: 0}{" "}
-											hours
-										</p>
-									</div>
-								</div>
 
-								{/* actions */}
-								<div className="class-info-student-actions flex flex-col gap-4 justify-center">
-									<Button
-										variant="contained"
-										startIcon={<ExitToApp />}
-										sx={{
-											minWidth: "fit-content",
-										}}
-										onClick={handleMarkAttendance}
-										disabled={
-											classHistoryInfo?.status !==
-											CLASS_ONGOING
-										}>
-										Join Class
-									</Button>
-									<Button
-										sx={{
-											minWidth: "fit-content",
-										}}
-										variant="contained"
-										startIcon={<Share />}
-										disabled={
-											classHistoryInfo?.status !==
-												CLASS_ONGOING &&
-											classHistoryInfo?.status !==
-												CLASS_UPCOMING &&
-											classHistoryInfo?.status !==
-												"CLASS_METADATA_DRAFT"
-										}
-										onClick={handleShare}>
-										Share
-									</Button>
+									{/* actions */}
+									<div className="class-info-student-actions flex flex-col gap-4 justify-center">
+										<Button
+											variant="contained"
+											startIcon={<ExitToApp />}
+											sx={{
+												minWidth: "fit-content",
+											}}
+											onClick={handleMarkAttendance}
+											disabled={
+												new Date(
+													classHistoryInfo?.start_time
+												) > now ||
+												new Date(
+													classHistoryInfo?.end_time
+												) < now
+											}>
+											Join Class
+										</Button>
+										<Button
+											sx={{
+												minWidth: "fit-content",
+											}}
+											variant="contained"
+											startIcon={<Share />}
+											disabled={
+												classHistoryInfo?.status !==
+													CLASS_ONGOING &&
+												classHistoryInfo?.status !==
+													CLASS_UPCOMING &&
+												classHistoryInfo?.status !==
+													"CLASS_METADATA_DRAFT"
+											}
+											onClick={handleShare}>
+											Share
+										</Button>
+									</div>
 								</div>
-							</div>
-						</CardContent>
-					</Card>
+							</CardContent>
+						</Card>
+					</>
 				)}
 			</div>
 		</StudentPageWrapper>

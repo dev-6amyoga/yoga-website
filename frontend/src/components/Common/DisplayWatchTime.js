@@ -37,7 +37,7 @@ export default function DisplayWatchTime({
 	}, [hasEnded]);
 
 	useEffect(() => {
-		console.log("in effect");
+		// console.log("in effect");
 		if (startTs === null && !hasStarted) {
 			setHasStarted(true);
 		}
@@ -56,15 +56,14 @@ export default function DisplayWatchTime({
 						const distance = endTs - now;
 
 						// console.log(distance);
+						if (distance < 0) {
+							setHasEnded(true);
+							return;
+						}
 
 						setTimeArray(
 							convertSecondsToHMS(Math.floor(distance / 1000))
 						);
-
-						if (distance < 0) {
-							clearInterval(timerInterval.current);
-							setHasEnded(true);
-						}
 					}
 				}, 1000);
 			}

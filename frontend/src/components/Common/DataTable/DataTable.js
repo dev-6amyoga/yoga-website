@@ -58,21 +58,22 @@ const fuzzySort = (rowA, rowB, columnId) => {
 
 export function DataTablePagination({ table }) {
 	return (
-		<div className="flex items-center justify-between px-1 py-1 border rounded-lg">
+		<div className="flex items-center justify-between px-2 py-1 border rounded-lg text-xs">
 			{/* <div className="flex-1 text-sm text-muted-foreground">
 				{table.getFilteredSelectedRowModel().rows.length} of{" "}
 				{table.getFilteredRowModel().rows.length} row(s) selected.
 			</div> */}
 			<div className="flex items-center space-x-6 lg:space-x-8">
 				<div className="flex items-center space-x-2">
-					<p className="text-sm font-medium">Rows per page</p>
+					<p className="font-medium">Rows per page</p>
 					<Select
 						value={`${table.getState().pagination.pageSize}`}
 						onChange={(e) => {
 							console.log(e.target.value);
 							table.setPageSize(Number(e.target.value));
 						}}
-						size="small">
+						size="small"
+						className="scale-90">
 						{/* <SelectTrigger className="h-8 w-[70px]">
 							<SelectValue
 								placeholder={
@@ -87,45 +88,45 @@ export function DataTablePagination({ table }) {
 						))}
 					</Select>
 				</div>
-				<div className="flex w-[100px] items-center justify-center text-sm font-medium">
+				<div className="flex w-[100px] items-center justify-center font-medium">
 					Page {table.getState().pagination.pageIndex + 1} of{" "}
 					{table.getPageCount()}
 				</div>
 				<div className="flex items-center space-x-2">
 					<Button
 						variant="outline"
-						className="hidden h-8 w-8 p-0 lg:flex"
+						className="hidden h-6 w-6 p-0 lg:flex"
 						onClick={() => table.setPageIndex(0)}
 						disabled={!table.getCanPreviousPage()}
 						endIcon={
-							<DoubleArrow className="h-4 w-4 rotate-180" />
+							<DoubleArrow className="h-3 w-3 rotate-180" />
 						}>
 						<span className="sr-only">Go to first page</span>
 					</Button>
 					<Button
 						variant="outline"
-						className="h-8 w-8 p-0"
+						className="h-6 w-6 p-0"
 						onClick={() => table.previousPage()}
 						disabled={!table.getCanPreviousPage()}
-						endIcon={<ArrowBack className="h-4 w-4" />}>
+						endIcon={<ArrowBack className="h-3 w-3" />}>
 						<span className="sr-only">Go to previous page</span>
 					</Button>
 					<Button
 						variant="outline"
-						className="h-8 w-8 p-0"
+						className="h-6 w-6 p-0"
 						onClick={() => table.nextPage()}
 						disabled={!table.getCanNextPage()}
-						endIcon={<ArrowForward className="h-4 w-4" />}>
+						endIcon={<ArrowForward className="h-3 w-3" />}>
 						<span className="sr-only">Go to next page</span>
 					</Button>
 					<Button
 						variant="outline"
-						className="hidden h-8 w-8 p-0 lg:flex"
+						className="hidden h-6 w-6 p-0 lg:flex"
 						onClick={() =>
 							table.setPageIndex(table.getPageCount() - 1)
 						}
 						disabled={!table.getCanNextPage()}
-						endIcon={<DoubleArrow className="h-4 w-4" />}>
+						endIcon={<DoubleArrow className="h-3 w-3" />}>
 						<span className="sr-only">Go to last page</span>
 					</Button>
 				</div>
@@ -229,7 +230,7 @@ export function DataTable({
 							) : (
 								<TableRow>
 									<TableCell
-										colSpan={columns.length}
+										colSpan={columns?.length}
 										className="h-24 text-center">
 										No results.
 									</TableCell>
@@ -241,7 +242,9 @@ export function DataTable({
 			</div>
 			{enableGlobalFilter ? (
 				<div className="flex gap-4 items-center justify-between my-4">
-					<DataTablePagination table={table} />
+					<div className="">
+						<DataTablePagination table={table} />
+					</div>
 					<div className="flex flex-row items-center gap-2">
 						<DebouncedInput
 							value={globalFilter ?? ""}

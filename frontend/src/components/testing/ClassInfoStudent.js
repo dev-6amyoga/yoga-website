@@ -2,6 +2,7 @@ import { ExitToApp, Share } from "@mui/icons-material";
 import { Avatar, Button, Card, CardContent } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { ClassAPI } from "../../api/class.api";
+import Timer from "../Common/Timer";
 import "./ClassInfoStudent.css";
 
 // const classInfo = {
@@ -17,7 +18,11 @@ import "./ClassInfoStudent.css";
 // 	attendees: 12,
 // };
 
-export default function ClassInfoStudent({ class_id }) {
+export default function ClassInfoStudent({
+	class_id,
+	handleClassStart,
+	handleClassEnd,
+}) {
 	const { data: classInfo } = useQuery({
 		queryKey: ["classInfo", class_id],
 		queryFn: async () => {
@@ -42,6 +47,8 @@ export default function ClassInfoStudent({ class_id }) {
 				console.error(err);
 				toast.error("Failed to fetch class history info");
 			}
+
+			console.log(res);
 
 			return res.class_history;
 		},
@@ -73,23 +80,32 @@ export default function ClassInfoStudent({ class_id }) {
 						</div>
 					</div>
 
-					<div className="class-info-student-info flex flex-row gap-8 text-sm text-white">
-						<div>
-							<p className="font-medium">Start Time</p>
-							<p>
-								{new Date(
-									classHistoryInfo?.start_time
-								).toLocaleString()}
-							</p>
+					<div className="class-info-student-info flex flex-col gap-8 text-sm text-white">
+						<div className="flex flex-row gap-8">
+							<div>
+								<p className="font-medium">Start Time</p>
+								<p>
+									{new Date(
+										classHistoryInfo?.start_time
+									).toLocaleString()}
+								</p>
+							</div>
+							<div>
+								<p className="font-medium">End Time</p>
+								<p>
+									{new Date(
+										classHistoryInfo?.end_time
+									).toLocaleString()}
+								</p>
+							</div>
 						</div>
-						<div>
-							<p className="font-medium">End Time</p>
-							<p>
-								{new Date(
-									classHistoryInfo?.end_time
-								).toLocaleString()}
-							</p>
-						</div>
+						<Timer
+							className="text-white text-xl"
+							prefix="Starts in"
+							endTime={classHistoryInfo?.start_time}
+							onEnded={handleClassStart}
+							onEndTitle=""
+						/>
 						{/* <div>
 							<p className="font-medium">Duration</p>
 							<p>{classInfo?.duration / 1000 / 60} minutes</p>
