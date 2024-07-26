@@ -123,6 +123,8 @@ router.post('/create', async (req, res) => {
           session: mt,
         }
       )
+    } else if (class_type === CLASS_TYPE_RECURRING) {
+      //
     }
 
     await mt.commitTransaction()

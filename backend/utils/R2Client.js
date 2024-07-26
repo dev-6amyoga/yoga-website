@@ -3,35 +3,42 @@ const {
   PutObjectCommand,
   GetObjectCommand,
   ListObjectsCommand,
-} = require("@aws-sdk/client-s3");
+} = require('@aws-sdk/client-s3')
 
 const R2 = new S3Client({
-  region: "auto",
+  region: 'auto',
   endpoint: `https://${process.env.CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
   credentials: {
     accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID,
     secretAccessKey: process.env.CLOUDFLARE_R2_ACCESS_KEY,
   },
-});
+})
 
 module.exports = {
-  cloudflareAddFile: async (filename, body) => {
-    return R2.send(
+  cloudflareAddFile: async (filename, body) =>
+    R2.send(
       new PutObjectCommand({
         Bucket: process.env.CLOUDFLARE_R2_BUCKET,
         Key: filename,
         Body: body,
       })
-    );
-  },
+    ),
+  cloudflareAddFileToBucket: async (bucket, filename, body) =>
+    R2.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: filename,
+        Body: body,
+      })
+    ),
   cloudflareGetFile: async (filename) => {
     const response = await R2.send(
       new GetObjectCommand({
         Bucket: process.env.CLOUDFLARE_R2_BUCKET,
         Key: filename,
       })
-    );
-    return response.Body.transformToString("utf-8");
+    )
+    return response.Body.transformToString('utf-8')
   },
   cloudflareListDir: async (prefix) => {
     const response = await R2.send(
@@ -39,7 +46,7 @@ module.exports = {
         Bucket: process.env.CLOUDFLARE_R2_BUCKET,
         Prefix: prefix,
       })
-    );
-    return response.Contents;
+    )
+    return response.Contents
   },
-};
+}

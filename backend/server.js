@@ -66,6 +66,7 @@ const playbackRouter = require('./routes/Playback')
 const classRouter = require('./routes/Class')
 const postureRouter = require('./routes/Posture')
 const otpRouter = require('./routes/OTP')
+const r2Router = require('./routes/UploadToR2')
 
 // ws routers
 
@@ -222,6 +223,7 @@ app.use('/posture', postureRouter)
 app.use('/otp', otpRouter)
 app.use('/customPlan', customPlanRouter)
 app.use('/customUserPlan', customUserPlanRouter)
+app.use('/r2', r2Router)
 
 // ws routers
 // app.use('/ws/class', classWsRouter)
