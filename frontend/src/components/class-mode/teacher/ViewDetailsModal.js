@@ -2,6 +2,7 @@ import { Modal, Spacer, Text } from "@geist-ui/core";
 import { ArrowOutward } from "@mui/icons-material";
 import {
 	Button,
+	CircularProgress,
 	Divider,
 	FormControl,
 	InputLabel,
@@ -9,16 +10,75 @@ import {
 	Select,
 	TextField,
 } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { ClassAPI } from "../../../api/class.api";
+import {
+	CLASS_CANCELLED,
+	CLASS_COMPLETED,
+	CLASS_ONGOING,
+	CLASS_UPCOMING,
+} from "../../../enums/class_status";
 import useUserStore from "../../../store/UserStore";
-import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
 import { getFrontendDomain } from "../../../utils/getFrontendDomain";
+import { DataTable } from "../../Common/DataTable/DataTable";
 import SortableColumn from "../../Common/DataTable/SortableColumn";
 import Timer from "../../Common/Timer";
+
+function StatusUpdate({ status, class_id, class_history_id }) {
+	const [statusVal, setStatusVal] = useState(status);
+	const queryClient = useQueryClient();
+
+	const handleChange = async (e) => {
+		setStatusVal(e.target.value);
+
+		const [res, err] = await ClassAPI.postUpdateClassHistoryStatus(
+			class_history_id,
+			e.target.value
+		);
+
+		if (err) {
+			// console.error(err);
+			toast.error("Failed to update status");
+			return;
+		}
+
+		toast.success("Status updated successfully");
+
+		queryClient.invalidateQueries({
+			queryKey: ["classHistory", class_id],
+		});
+	};
+
+	return (
+		<>
+			{statusVal ? (
+				<FormControl>
+					<InputLabel id="status-update-dropdown">Status</InputLabel>
+					<Select
+						labelId="status-update-dropdown"
+						value={statusVal}
+						onChange={handleChange}>
+						{[
+							CLASS_UPCOMING,
+							CLASS_ONGOING,
+							CLASS_COMPLETED,
+							CLASS_CANCELLED,
+						].map((ss) => (
+							<MenuItem key={ss + class_history_id} value={ss}>
+								{ss}
+							</MenuItem>
+						))}
+					</Select>
+				</FormControl>
+			) : (
+				<CircularProgress />
+			)}
+		</>
+	);
+}
 
 export default function ViewDetailsModal({
 	activeClassModal,
@@ -27,6 +87,7 @@ export default function ViewDetailsModal({
 	refetchClasses = () => {},
 }) {
 	const [dirty, setDirty] = useState(false);
+	const queryClient = useQueryClient();
 
 	const user = useUserStore((state) => state.user);
 
@@ -34,6 +95,7 @@ export default function ViewDetailsModal({
 		queryKey: ["classHistory", activeClassModalData?._id],
 
 		queryFn: async () => {
+			console.log("GETTING CLASS HISTORY INFO");
 			const [res, err] = await ClassAPI.postGetClassHistoryById(
 				activeClassModalData._id
 			);
@@ -73,12 +135,15 @@ export default function ViewDetailsModal({
 		let start_time = formData.start_time;
 		let end_time = formData.end_time;
 
+		let old_start_time = activeClassModalData.onetime_class_start_time;
+		let old_end_time = activeClassModalData.onetime_class_end_time;
+
 		if (start_time === "") {
-			start_time = activeClassModalData.start_time;
+			start_time = activeClassModalData.onetime_class_start_time;
 		}
 
 		if (end_time === "") {
-			end_time = activeClassModalData.end_time;
+			end_time = activeClassModalData.onetime_class_end_time;
 		}
 
 		const [res, err] = await ClassAPI.postUpdateClass(
@@ -87,6 +152,8 @@ export default function ViewDetailsModal({
 			formData.class_desc,
 			formData.status,
 			user?.user_id,
+			old_start_time,
+			old_end_time,
 			new Date(start_time).toISOString(),
 			new Date(end_time).toISOString()
 		);
@@ -99,39 +166,25 @@ export default function ViewDetailsModal({
 		toast.success("Class updated successfully");
 		refetchClasses();
 		setDirty(false);
+		queryClient.invalidateQueries({
+			queryKey: ["classHistory", activeClassModalData?._id],
+		});
 	};
-
-	useEffect(() => {
-		const fetchData = async () => {
-			toast("hello!");
-			console.log(activeClassModalData, "HELLO");
-			const response = await Fetch({
-				url: "/class/get-history",
-				method: "POST",
-				data: { class_id: activeClassModalData.class_id },
-			});
-			if (response.status === 200) {
-				console.log(response, "HELLO");
-			}
-		};
-		if (activeClassModal) {
-			fetchData();
-		}
-	}, [activeClassModalData]);
 
 	const classHistoryTableColumns = useMemo(() => {
 		return [
 			{
-				header: ({ column }) => (
-					<SortableColumn column={column}>Class Name</SortableColumn>
-				),
+				header: "Name",
 				accessorKey: "class_name",
 			},
 			{
-				header: ({ column }) => (
-					<SortableColumn column={column}>Description</SortableColumn>
-				),
+				header: "Description",
 				accessorKey: "class_desc",
+				cell: ({ getValue }) => {
+					return (
+						<p className="max-w-[20ch] break-all">{getValue()}</p>
+					);
+				},
 			},
 			{
 				header: ({ column }) => (
@@ -144,12 +197,32 @@ export default function ViewDetailsModal({
 					<SortableColumn column={column}>Start Time</SortableColumn>
 				),
 				accessorKey: "start_time",
+				cell: ({ getValue }) => {
+					return <p>{new Date(getValue()).toLocaleString()}</p>;
+				},
 			},
 			{
 				header: ({ column }) => (
 					<SortableColumn column={column}>End Time</SortableColumn>
 				),
 				accessorKey: "end_time",
+				cell: ({ getValue }) => {
+					return <p>{new Date(getValue()).toLocaleString()}</p>;
+				},
+			},
+			{
+				header: "Update Status",
+				accessorKey: "status",
+				cell: ({ getValue, row }) => {
+					// console.log(getValue());
+					return (
+						<StatusUpdate
+							status={getValue()}
+							class_history_id={row?.original?._id}
+							class_id={activeClassModalData?._id}
+						/>
+					);
+				},
 			},
 		];
 	}, []);
@@ -158,7 +231,7 @@ export default function ViewDetailsModal({
 		<Modal
 			visible={activeClassModal}
 			onClose={() => setActiveClassModal(false)}
-			w="50%">
+			w="70%">
 			<Modal.Title>{activeClassModalData?.class_name}</Modal.Title>
 			<Modal.Subtitle>
 				<Timer
@@ -170,15 +243,17 @@ export default function ViewDetailsModal({
 				<div className="flex flex-col align-center">
 					{dirty ? (
 						<form
-							className="flex-col items-center justify-center space-y-10 my-10 bg-white"
+							className="flex flex-col gap-2 items-center justify-center my-10 bg-white max-w-2xl mx-auto"
 							onSubmit={handleSubmit}>
 							<TextField
 								name="class_name"
 								label="Class Name"
-								className="w-full"
+								fullWidth
+								className="w-full flex-1"
 								defaultValue={activeClassModalData?.class_name}
 								required
 							/>
+
 							<TextField
 								name="class_desc"
 								label="Class Description"
@@ -186,6 +261,7 @@ export default function ViewDetailsModal({
 								defaultValue={activeClassModalData?.class_desc}
 								required
 							/>
+
 							<FormControl fullWidth>
 								<InputLabel>Status</InputLabel>
 								<Select
@@ -204,50 +280,54 @@ export default function ViewDetailsModal({
 								</Select>
 							</FormControl>
 
-							<div className="mb-4">
-								<p className="text-sm text-gray-600">
-									Start Time (Previously :{" "}
-									{new Date(
-										activeClassModalData.onetime_class_start_time
-									).toLocaleString()}
-									)
-								</p>
-								<input
-									type="datetime-local"
-									name="start_time"
-									className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-								/>
-							</div>
-							<div className="mb-4">
-								<p className="text-sm text-gray-600">
-									End Time (Previously :{" "}
-									{new Date(
-										activeClassModalData.onetime_class_end_time
-									).toLocaleString()}
-									)
-								</p>
-								<input
-									type="datetime-local"
-									name="end_time"
-									className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-								/>
+							<div className="flex gap-2">
+								<div className="mb-4">
+									<p className="text-sm text-gray-600">
+										Start Time (Previously :{" "}
+										{new Date(
+											activeClassModalData.onetime_class_start_time
+										).toLocaleString()}
+										)
+									</p>
+									<input
+										type="datetime-local"
+										name="start_time"
+										className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+									/>
+								</div>
+								<div className="mb-4">
+									<p className="text-sm text-gray-600">
+										End Time (Previously :{" "}
+										{new Date(
+											activeClassModalData.onetime_class_end_time
+										).toLocaleString()}
+										)
+									</p>
+									<input
+										type="datetime-local"
+										name="end_time"
+										className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+									/>
+								</div>
 							</div>
 
-							<Button
-								type="submit"
-								className="w-full"
-								variant="contained">
-								Submit
-							</Button>
-							<Button
-								type="button"
-								className="w-full"
-								onClick={() => {
-									setDirty(false);
-								}}
-								variant="outlined">
-								Cancel
-							</Button>
+							<div className="flex flex-row gap-2">
+								<Button
+									type="submit"
+									className="w-full"
+									variant="contained">
+									Submit
+								</Button>
+								<Button
+									type="button"
+									className="w-full"
+									onClick={() => {
+										setDirty(false);
+									}}
+									variant="outlined">
+									Cancel
+								</Button>
+							</div>
 						</form>
 					) : (
 						<div className="flex flex-col">
@@ -277,7 +357,7 @@ export default function ViewDetailsModal({
 					<Divider />
 
 					<Spacer />
-					<div className="flex flex-col gap-2">
+					<div className="flex flex-row gap-2">
 						<Button
 							variant="outlined"
 							startIcon={<ArrowOutward />}
@@ -318,10 +398,12 @@ export default function ViewDetailsModal({
 
 					<Spacer />
 
-					{/* <DataTable
+					<h3>Class History</h3>
+					<DataTable
 						columns={classHistoryTableColumns}
-						data={classHistory}
-					/> */}
+						data={classHistory ?? []}
+						refetch={refetchClassHistory}
+					/>
 				</div>
 			</Modal.Content>
 		</Modal>

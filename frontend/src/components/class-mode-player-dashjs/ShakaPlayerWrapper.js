@@ -8,6 +8,7 @@ import useVideoStore, {
 import { isMobileTablet } from "../../utils/isMobileOrTablet";
 import ShakaPlayer from "./ShakaPlayer";
 
+import { Button } from "@mui/material";
 import "shaka-player/dist/controls.css";
 import {
 	ShakaPlayerCustomPlayPause,
@@ -58,6 +59,8 @@ export default function ShakaPlayerWrapper({
 		state.popFromQueue,
 		state.popFromArchive,
 	]);
+
+	const [askToPairRef, setAskToPairRef] = useState(true);
 
 	const [playerLoaded, setPlayerLoaded] = useState(false);
 	const [metadataLoaded, setMetadataLoaded] = useState(false);
@@ -386,10 +389,32 @@ export default function ShakaPlayerWrapper({
 	);
 
 	return (
-		<ShakaPlayer
-			ref={playerInit}
-			timingObjRef={timingObjRef}
-			isStudent={isStudent}
-		/>
+		<div className="relative">
+			<ShakaPlayer
+				ref={playerInit}
+				timingObjRef={timingObjRef}
+				isStudent={isStudent}
+			/>
+
+			{askToPairRef && isStudent ? (
+				<div className="absolute w-full h-full top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-40 z-[1000]">
+					<Button
+						variant="contained"
+						onClick={() => {
+							setAskToPairRef(false);
+							playerRef.current
+								.play()
+								.then(() => {})
+								.catch((err) => {
+									toast.error("Error playing video!");
+								});
+						}}>
+						Sync with Teacher's Screen
+					</Button>
+				</div>
+			) : (
+				<></>
+			)}
+		</div>
 	);
 }

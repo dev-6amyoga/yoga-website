@@ -157,7 +157,13 @@ export default function Login({ switchForm }) {
 			removeCookie(SIXAMYOGA_REFRESH_TOKEN);
 			// alert(import.meta.env.VITE_BACKEND_DOMAIN);
 			// alert(error?.message);
-			toast("Error!", { type: "error" });
+			console.log(error);
+			toast(
+				error?.response?.data?.error
+					? `${error?.response?.data?.error}`
+					: "Error!",
+				{ type: "error" }
+			);
 		}
 	};
 

@@ -49,6 +49,8 @@ export class ClassAPI {
 		class_desc,
 		status,
 		teacher_id,
+		old_start_time,
+		old_end_time,
 		start_time,
 		end_time
 	) {
@@ -62,6 +64,8 @@ export class ClassAPI {
 					class_desc: class_desc,
 					status: status,
 					teacher_id: teacher_id,
+					old_start_time,
+					old_end_time,
 					start_time: start_time,
 					end_time: end_time,
 				},
@@ -183,6 +187,27 @@ export class ClassAPI {
 				method: "POST",
 				data: {
 					class_id: class_id,
+				},
+			});
+
+			if (response.status === 200) {
+				return [response.data, null];
+			} else {
+				return [null, response.data];
+			}
+		} catch (err) {
+			return [null, err];
+		}
+	}
+
+	static async postUpdateClassHistoryStatus(class_history_id, status) {
+		try {
+			const response = await Fetch({
+				url: "/class/update-history-status",
+				method: "POST",
+				data: {
+					class_history_id: class_history_id,
+					status: status,
 				},
 			});
 

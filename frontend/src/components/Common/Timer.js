@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function Timer({ endTime, onEndTitle = "Timer Ended" }) {
+export default function Timer({
+	prefix = "Class Ends",
+	className = "",
+	endTime,
+	onEnded,
+	onEndTitle = "Timer Ended",
+}) {
 	const interval = useRef(null);
 	const [ended, setEnded] = useState(false);
 
@@ -32,12 +38,22 @@ export default function Timer({ endTime, onEndTitle = "Timer Ended" }) {
 		};
 	}, [endTime]);
 
+	useEffect(() => {
+		if (ended) {
+			if (onEnded) {
+				onEnded();
+			}
+		}
+	}, [ended]);
+
 	return (
 		<div>
 			{ended ? (
-				<p>{onEndTitle}</p>
+				<p className={className}>{onEndTitle}</p>
 			) : (
-				<p>Class Ends in {timeLeftSeconds} seconds</p>
+				<p className={className}>
+					{prefix} in {timeLeftSeconds.toFixed()} seconds
+				</p>
 			)}
 		</div>
 	);

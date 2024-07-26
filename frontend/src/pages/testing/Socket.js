@@ -125,8 +125,8 @@ function TeacherSocket() {
 										data: {
 											video_id: "1234",
 										},
-										event_time: new Date().toISOString(),
 									},
+									event_time: new Date().toISOString(),
 								})
 							);
 						}

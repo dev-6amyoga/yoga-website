@@ -27,6 +27,7 @@ import ViewAllSchedules from "../pages/admin/schedule-management/ViewAllSchedule
 import LogPayment from "../pages/admin/transactions/LogPayment";
 import RefundManagement from "../pages/admin/transactions/Refund";
 import TeacherManageClasses from "../pages/teacher/class/Manage";
+import AdminManageClasses from "../pages/admin/classes/AdminManageClasses";
 
 export const AdminRoutes = [
 	{
@@ -163,6 +164,6 @@ export const AdminRoutes = [
 
 	{
 		path: "/admin/class/manage",
-		element: <TeacherManageClasses />,
+		element: <AdminManageClasses />,
 	},
 ];

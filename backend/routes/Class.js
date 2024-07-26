@@ -146,6 +146,8 @@ router.post('/update', async (req, res) => {
       class_desc,
       status,
       teacher_id,
+      old_start_time,
+      old_end_time,
       start_time,
       end_time,
       allowed_students = [],
@@ -174,11 +176,22 @@ router.post('/update', async (req, res) => {
         class_desc,
         teacher_id,
         status,
-        start_time,
-        end_time,
+        onetime_class_start_time: start_time,
+        onetime_class_end_time: end_time,
         allowed_students,
       },
       { new: true }
+    )
+
+    await ClassHistory.findOneAndUpdate(
+      { class_id, start_time: old_start_time, end_time: old_end_time },
+      {
+        class_name,
+        class_desc,
+        start_time,
+        end_time,
+        teacher_id,
+      }
     )
 
     return res.status(HTTP_OK).json({ message: 'Class Saved' })
@@ -187,6 +200,32 @@ router.post('/update', async (req, res) => {
 
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
       error: 'Failed to save new Class',
+    })
+  }
+})
+
+router.post('/update-history-status', async (req, res) => {
+  try {
+    const { class_history_id, status } = req.body
+
+    if (!class_history_id || !status) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        error: 'Missing required fields',
+      })
+    }
+
+    await ClassHistory.findOneAndUpdate(
+      { _id: class_history_id },
+      { status },
+      { new: true }
+    )
+
+    return res.status(HTTP_OK).json({ message: 'Class history status updated' })
+  } catch (error) {
+    console.error('Error saving new Class:', error)
+
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to update class history status',
     })
   }
 })
@@ -354,7 +393,6 @@ router.post('/get-latest-history', async (req, res) => {
   try {
     const class_history_record = await ClassHistory.findOne({
       class_id: class_id.toString(),
-      status: CLASS_ONGOING,
     })
 
     return res.status(HTTP_OK).json({ class_history: class_history_record })
