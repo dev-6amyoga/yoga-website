@@ -18,9 +18,10 @@
 //     setVideoBlob(blob);
 //     setRecordingStart(false);
 //     setRecordingPlaying(false);
+//     handleResizeAndUpload(blob);
 //   };
 
-//   const handleResizeAndUpload = async () => {
+//   const handleResizeAndUpload = async (videoBlob) => {
 //     if (!videoBlob) return;
 
 //     // upload video
@@ -154,7 +155,7 @@
 //                   controls
 //                   ref={videoRef}
 //                 /> */}
-//                 <Button onClick={handleResizeAndUpload}>Upload Video</Button>
+//                 {/* The upload button can be removed if the upload happens automatically */}
 //               </>
 //             )}
 //           </div>
@@ -169,7 +170,7 @@
 // export default VideoRecorder;
 
 import { Button } from "@mui/material";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { ReactMediaRecorder } from "react-media-recorder";
 import { toast } from "react-toastify";
 import useUserStore from "../../store/UserStore";
@@ -183,6 +184,23 @@ const VideoRecorder = () => {
   const canvasRef = useRef();
 
   const user = useUserStore((state) => state.user);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (recordingStart) {
+        event.preventDefault();
+        event.returnValue =
+          "If you close the browser, the recording will be lost.";
+        return "If you close the browser, the recording will be lost.";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [recordingStart]);
 
   const handleStopRecording = (blobUrl, blob) => {
     setVideoBlob(blob);
@@ -311,13 +329,6 @@ const VideoRecorder = () => {
               </div>
             )}
 
-            {/* 
-            <Button onClick={muteAudio} disabled={isAudioMuted}>
-              Mute Audio
-            </Button>
-            <Button onClick={unMuteAudio} disabled={!isAudioMuted}>
-              Unmute Audio
-            </Button> */}
             {mediaBlobUrl && (
               <>
                 {/* <video
