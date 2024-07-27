@@ -1,4 +1,4 @@
-import { CssBaseline } from "@mui/material";
+import { CssBaseline, Paper } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
@@ -103,7 +103,10 @@ function StudentHome() {
       <Hero heading="6AM Yoga Player" />
       {hasPlan ? (
         <div className="max-w-7xl mx-auto">
-          <VideoRecorder />
+          <Paper>
+            <VideoRecorder />
+          </Paper>
+          <br />
 
           <VideoPlayerWrapper />
         </div>
