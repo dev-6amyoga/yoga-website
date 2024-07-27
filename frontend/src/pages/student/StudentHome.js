@@ -9,6 +9,7 @@ import { withAuth } from "../../utils/withAuth";
 import "./MovingText.css";
 import Hero from "./components/Hero";
 import { Fetch } from "../../utils/Fetch";
+import VideoRecorder from "../../components/video-recorder/VideoRecorder";
 
 function StudentHome() {
   const [mode, setMode] = useState("light");
@@ -102,6 +103,8 @@ function StudentHome() {
       <Hero heading="6AM Yoga Player" />
       {hasPlan ? (
         <div className="max-w-7xl mx-auto">
+          <VideoRecorder />
+
           <VideoPlayerWrapper />
         </div>
       ) : (
