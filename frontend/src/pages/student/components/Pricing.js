@@ -94,7 +94,6 @@ export default function Pricing({
           } else {
             selectedPricing = Number(plan.prices[0][currentCurrencyId]);
           }
-
           return (
             <>
               {plan.name && (
@@ -444,6 +443,10 @@ export default function Pricing({
                     {[
                       {
                         name: plan.selectedNeeds.map((x) => x + ","),
+                        enable: true,
+                      },
+                      {
+                        name: `${plan.plan_description}`,
                         enable: true,
                       },
                       {
