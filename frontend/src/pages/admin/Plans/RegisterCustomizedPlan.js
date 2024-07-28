@@ -316,6 +316,14 @@ function RegisterNewCustomizedPlan() {
           fullWidth
         />
 
+        <Typography>Plan Description</Typography>
+        <TextField
+          name="plan_description"
+          label="Enter Plan Description"
+          variant="outlined"
+          fullWidth
+        />
+
         <br />
         <Typography>Choose Plan Requirements</Typography>
         <FormControl fullWidth>

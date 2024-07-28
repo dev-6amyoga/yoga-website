@@ -6,7 +6,36 @@ import Privacy from "../pages/general/Privacy";
 import TermsAndConditions from "../pages/general/TermsAndConditions";
 import PlansAndPricing from "../pages/general/PlansAndPricing";
 import Cancellations from "../pages/general/Cancellations";
-import { Card, Text } from "@geist-ui/core";
+import { Text } from "@geist-ui/core";
+import { Card, CardContent, Typography, Divider } from "@mui/material";
+
+const ContactCard = () => {
+  return (
+    <Card sx={{ maxWidth: 600, margin: "auto", mt: 14 }}>
+      <CardContent>
+        <Typography variant="h6" component="div" gutterBottom>
+          Contact Us
+        </Typography>
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="body1" paragraph>
+          Phone: <strong>+919980802351</strong>
+        </Typography>
+        <Typography variant="body1" paragraph>
+          Email: <a href="mailto:992351@gmail.com">992351@gmail.com</a>
+        </Typography>
+        <Typography variant="body1" paragraph>
+          Operating and Registered Address:
+          <br />
+          6AM, 4th Floor, Shalom Arcade,
+          <br />
+          Kasavanahalli, Sarjapur Road,
+          <br />
+          Bangalore 560035, Karnataka, India
+        </Typography>
+      </CardContent>
+    </Card>
+  );
+};
 
 export const GeneralRoutes = [
   {
@@ -21,10 +50,9 @@ export const GeneralRoutes = [
     path: "/contact-us",
     element: (
       <PageWrapper>
-        <Card>
-          <Text>Contact us at +919980802351</Text>
-          <Text>Write us at 992351@gmail.com</Text>
-        </Card>
+        <div className="min-h-screen grid place-items-center">
+          <ContactCard />
+        </div>
       </PageWrapper>
     ),
   },
