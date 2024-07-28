@@ -31,22 +31,24 @@ module.exports = {
         Body: body,
       })
     ),
-  cloudflareGetFile: async (filename) => {
+  cloudflareGetFile: async (bucket, filename, contentType) => {
     const response = await R2.send(
       new GetObjectCommand({
-        Bucket: process.env.CLOUDFLARE_R2_BUCKET,
+        Bucket: bucket,
         Key: filename,
+        ResponseContentType: contentType,
       })
     )
     return response.Body.transformToString('utf-8')
   },
-  cloudflareListDir: async (prefix) => {
+  cloudflareListDir: async (bucket, prefix) => {
     const response = await R2.send(
       new ListObjectsCommand({
-        Bucket: process.env.CLOUDFLARE_R2_BUCKET,
+        Bucket: bucket,
         Prefix: prefix,
+        MaxKeys: 1000,
       })
     )
-    return response.Contents
+    return response
   },
 }
