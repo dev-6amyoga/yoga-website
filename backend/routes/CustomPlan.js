@@ -87,19 +87,27 @@ router.get('/getCustomPlansByUser/:user_id', async (req, res) => {
 router.put('/editCustomPlan/:id', async (req, res) => {
   try {
     const planId = req.params.id
+    console.log(planId)
     const updateData = req.body
-    const updatedCustomPlan = await CustomPlan.findByIdAndUpdate(
-      planId,
-      updateData,
-      { new: true }
-    )
-    if (updatedCustomPlan) {
-      res.status(HTTP_OK).json(updatedCustomPlan)
-    } else {
-      res.status(HTTP_NOT_FOUND).json({
+
+    // Fetch the existing plan
+    const existingPlan = await CustomPlan.findById(planId)
+    if (!existingPlan) {
+      return res.status(HTTP_NOT_FOUND).json({
         error: 'Custom plan not found',
       })
     }
+
+    // Merge existing plan data with update data
+    const updatedData = { ...existingPlan.toObject(), ...updateData }
+
+    // Update the plan with the merged data
+    const updatedCustomPlan = await CustomPlan.findByIdAndUpdate(
+      planId,
+      updatedData,
+      { new: true }
+    )
+    res.status(HTTP_OK).json(updatedCustomPlan)
   } catch (error) {
     console.error('Error updating custom plan:', error)
     res.status(HTTP_INTERNAL_SERVER_ERROR).json({
