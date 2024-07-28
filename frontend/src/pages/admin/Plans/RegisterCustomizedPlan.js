@@ -28,8 +28,10 @@ import { ROLE_ROOT } from "../../../enums/roles";
 import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
 import { withAuth } from "../../../utils/withAuth";
+import { useNavigate } from "react-router-dom";
 
 function RegisterNewCustomizedPlan() {
+  const navigate = useNavigate();
   const [selectedNeeds, setSelectedNeeds] = useState([]);
   const [userType, setUserType] = useState("");
   const [currencies, setCurrencies] = useState([]);
@@ -212,6 +214,7 @@ function RegisterNewCustomizedPlan() {
 
       if (res.status === 200) {
         toast("New custom plan registered successfully!");
+        navigate("/admin/custom-plan/view");
       }
     } catch (err) {
       console.log(err);
