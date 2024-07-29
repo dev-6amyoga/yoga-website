@@ -31,6 +31,16 @@ module.exports = {
         Body: body,
       })
     ),
+  // cloudflareGetFile: async (bucket, filename, contentType) => {
+  //   const response = await R2.send(
+  //     new GetObjectCommand({
+  //       Bucket: bucket,
+  //       Key: filename,
+  //       ResponseContentType: contentType,
+  //     })
+  //   )
+  //   return response.Body.transformToString('utf-8')
+  // },
   cloudflareGetFile: async (bucket, filename, contentType) => {
     const response = await R2.send(
       new GetObjectCommand({
@@ -39,7 +49,7 @@ module.exports = {
         ResponseContentType: contentType,
       })
     )
-    return response.Body.transformToString('utf-8')
+    return response.Body
   },
   cloudflareListDir: async (bucket, prefix) => {
     const response = await R2.send(

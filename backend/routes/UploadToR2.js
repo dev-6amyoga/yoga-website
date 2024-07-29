@@ -45,7 +45,6 @@ router.get('/videos', async (req, res) => {
   try {
     const prefix = ''
     const resp = await cloudflareListDir('yoga-video-recordings', prefix)
-    // console.log(resp)
 
     return res.status(HTTP_OK).json({
       message: 'Files fetched successfully',
@@ -62,17 +61,17 @@ router.get('/videos', async (req, res) => {
 router.get('/videos/:filename', async (req, res) => {
   try {
     const { filename } = req.params
-    const fileStream = await cloudflareGetFile(
+    const response = await cloudflareGetFile(
       'yoga-video-recordings',
       filename,
       'video/mp4'
     )
     res.setHeader('Content-Disposition', `attachment; filename=${filename}`)
     res.setHeader('Content-Type', 'video/mp4')
-    return res.send(Buffer.from(fileStream))
+    response.pipe(res)
   } catch (err) {
     console.error(err)
-    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+    return res.status(500).json({
       message: 'Failed to download file',
     })
   }
