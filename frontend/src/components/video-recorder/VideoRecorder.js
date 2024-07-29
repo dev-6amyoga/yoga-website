@@ -85,6 +85,8 @@ const VideoRecorder = () => {
       return;
     }
 
+    toast("Uploading video, please don't close or move away from this tab!");
+
     try {
       let videoBlobFile = new File([videoBlob], "video.mp4", {
         type: "video/mp4",
@@ -291,9 +293,6 @@ const VideoRecorder = () => {
               onClick={() => {
                 setPreviewTrue();
                 setShowPreviewModal(false);
-                // startRecording();
-                // setRecordingStart(true);
-                // setRecordingPlaying(true);
               }}
             >
               Done
