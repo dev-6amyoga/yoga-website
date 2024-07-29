@@ -250,7 +250,7 @@ const VideoRecorder = () => {
             setShowPreviewModal(true);
           }}
         >
-          Preview Recording
+          Preview Webcam
         </Button>
       )}
 
