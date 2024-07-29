@@ -650,370 +650,96 @@ export const TransitionEndPranayama = async (
   }
 
   if (start_category === "Sitting") {
-    if (break_status_start === "Break" && break_status_end === "Break") {
-      return [];
+    if (break_status_start === "Break") {
+      let res = handleTransition(["Pranayama Start Sitting"]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
-    if (break_status_start === "Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Feet Together Hands Side Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      return result;
-    }
-    if (break_status_start === "No Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Feet Apart Hands Back Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      return result;
-    }
-    if (break_status_start === "No Break" && break_status_end === "No Break") {
-      return [];
+
+    if (break_status_start === "No Break") {
+      let res = handleTransition([
+        "Feet Apart Hands Back Sitting Transition",
+        "Pranayama Start Sitting",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Supine") {
-    if (break_status_start === "Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name === "Supine To Sitting Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Turn Mat Side To Front Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      if (t2) {
-        result.push(t2);
-      }
-      return result;
+    if (break_status_start === "Break") {
+      let res = handleTransition([
+        "Supine To Sitting Transition",
+        "Turn Mat Side To Front Sitting Transition",
+        "Pranayama Start Sitting",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
-    if (break_status_start === "Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name === "Supine To Sitting Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Turn Mat Side To Front Sitting Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Feet Together Hands Side Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      if (t2) {
-        result.push(t2);
-      }
-      if (t3) {
-        result.push(t3);
-      }
-      return result;
-    }
-    if (break_status_start === "No Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Arms Down Feet Apart Supine Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name === "Supine To Sitting Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Turn Mat Side To Front Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      if (t2) {
-        result.push(t2);
-      }
-      if (t3) {
-        result.push(t3);
-      }
-      return result;
-    }
-    if (break_status_start === "No Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Arms Down Feet Apart Supine Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name === "Supine To Sitting Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Turn Mat Side To Front Sitting Transition"
-      );
-      const transition_4 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Feet Together Hands Side Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      let t4 = getUniqueTransition(transition_4);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      if (t2) {
-        result.push(t2);
-      }
-      if (t3) {
-        result.push(t3);
-      }
-      if (t4) {
-        result.push(t4);
-      }
-      return result;
+
+    if (break_status_start === "No Break") {
+      let res = handleTransition([
+        "Arms Down Feet Apart Supine Transition",
+        "Supine To Sitting Transition",
+        "Turn Mat Side To Front Sitting Transition",
+        "Pranayama Start Sitting",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Prone") {
-    if (break_status_start === "Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name === "Prone To Sitting Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Turn Mat Side To Front Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      if (t2) {
-        result.push(t2);
-      }
-      return result;
+    if (break_status_start === "Break") {
+      let res = handleTransition([
+        "Prone Breath After Asana",
+        "Prone To Sitting Transition",
+        "Turn Mat Side To Front Sitting Transition",
+        "Pranayama Start Sitting",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
-    if (break_status_start === "Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name === "Prone To Sitting Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Turn Mat Side To Front Sitting Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Feet Together Hands Side Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      if (t2) {
-        result.push(t2);
-      }
-      if (t3) {
-        result.push(t3);
-      }
-      return result;
-    }
-    if (break_status_start === "No Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Fold Hands Feet Apart Prone Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name === "Supine To Sitting Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Turn Mat Side To Front Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      if (t2) {
-        result.push(t2);
-      }
-      if (t3) {
-        result.push(t3);
-      }
-      return result;
-    }
-    if (break_status_start === "No Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Fold Hands Feet Apart Prone Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name === "Supine To Sitting Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Turn Mat Side To Front Sitting Transition"
-      );
-      const transition_4 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Feet Together Hands Side Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      let t4 = getUniqueTransition(transition_4);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      if (t2) {
-        result.push(t2);
-      }
-      if (t3) {
-        result.push(t3);
-      }
-      if (t4) {
-        result.push(t4);
-      }
-      return result;
+
+    if (break_status_start === "No Break") {
+      let res = handleTransition([
+        "Fold Hands Feet Apart Prone Transition",
+        "Prone Breath After Asana",
+        "Prone To Sitting Transition",
+        "Turn Mat Side To Front Sitting Transition",
+        "Pranayama Start Sitting",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 
   if (start_category === "Vajrasana") {
-    if (break_status_start === "Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name === "Vajra To Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      return result;
+    if (break_status_start === "Break") {
+      let res = handleTransition([
+        "Vajra To Sitting Transition",
+        "Pranayama Start Sitting",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
-    if (break_status_start === "Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name === "Vajra To Sitting Transition"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Feet Together Hands Side Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      if (t2) {
-        result.push(t2);
-      }
-      return result;
-    }
-    if (break_status_start === "No Break" && break_status_end === "Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Vajrasana Dyanmudra To Relax Position"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name === "Vajra To Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      if (t2) {
-        result.push(t2);
-      }
-      return result;
-    }
-    if (break_status_start === "No Break" && break_status_end === "No Break") {
-      const transition_1 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Vajrasana Dyanmudra To Relax Position"
-      );
-      const transition_2 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name === "Vajra To Sitting Transition"
-      );
-      const transition_3 = filteredTransitions_all.filter(
-        (transition) =>
-          transition.transition_video_name ===
-          "Feet Together Hands Side Sitting Transition"
-      );
-      let t1 = getUniqueTransition(transition_1);
-      let t2 = getUniqueTransition(transition_2);
-      let t3 = getUniqueTransition(transition_3);
-      const result = [];
-      if (t1) {
-        result.push(t1);
-      }
-      if (t2) {
-        result.push(t2);
-      }
-      if (t3) {
-        result.push(t3);
-      }
-      return result;
+
+    if (break_status_start === "No Break") {
+      let res = handleTransition([
+        "Vajrasana Dyanmudra To Relax Position",
+        "Vajra To Sitting Transition",
+        "Pranayama Start Sitting",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
   }
 

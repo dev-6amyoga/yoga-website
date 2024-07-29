@@ -176,6 +176,7 @@ export const TransitionEndStartingPrayerSitting = async (
   if (start_category === "Prone") {
     if (break_status_start === "Break") {
       let res = handleTransition([
+        "Prone Breath After Asana",
         "Prone To Sitting Transition",
         "Turn Mat Side To Front Sitting Transition",
         "Pranayama Start Sitting",
@@ -188,6 +189,7 @@ export const TransitionEndStartingPrayerSitting = async (
     if (break_status_start === "No Break") {
       let res = handleTransition([
         "Fold Hands Feet Apart Prone Transition",
+        "Prone Breath After Asana",
         "Prone To Sitting Transition",
         "Turn Mat Side To Front Sitting Transition",
         "Pranayama Start Sitting",
