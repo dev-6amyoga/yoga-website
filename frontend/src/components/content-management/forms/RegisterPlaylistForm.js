@@ -1,6 +1,4 @@
 import {
-  Card,
-  Divider,
   TextField,
   Button,
   Table,
@@ -9,22 +7,15 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Switch,
-  Typography,
-  Collapse,
-  Modal,
-  IconButton,
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  AccordionActions,
   Paper,
   FormControlLabel,
   Checkbox,
   List,
   ListItem,
   ListItemText,
-  ListItemSecondaryAction,
   FormControl,
   InputLabel,
   Select,
@@ -34,7 +25,6 @@ import {
 
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 
-import { transitionGenerator } from "../../transition-generator/TransitionGenerator";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -182,10 +172,6 @@ function RegisterPlaylistForm() {
       return null;
     }
   };
-
-  // useEffect(() => {
-  //   console.log(playlistCurrent, "is p");
-  // }, [playlistCurrent]);
 
   const addToPlaylist = async (rowData) => {
     if (playlistCurrent.length === 0) {
@@ -694,18 +680,16 @@ function RegisterPlaylistForm() {
 
   const handleUp = async (index) => {
     toast(index);
-    if (
-      index > 0 &&
-      typeof playlistCurrent[index] === "number" &&
-      typeof playlistCurrent[index - 1] === "number"
-    ) {
+    if (index > 0 && typeof playlistCurrent[index] === "number") {
       const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
       console.log(asanasOnlyPlaylist);
       const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
-      [asanasOnlyPlaylist[asanaIndex - 1], asanasOnlyPlaylist[asanaIndex]] = [
-        asanasOnlyPlaylist[asanaIndex],
-        asanasOnlyPlaylist[asanaIndex - 1],
-      ];
+      if (asanaIndex - 1 >= 0) {
+        [asanasOnlyPlaylist[asanaIndex - 1], asanasOnlyPlaylist[asanaIndex]] = [
+          asanasOnlyPlaylist[asanaIndex],
+          asanasOnlyPlaylist[asanaIndex - 1],
+        ];
+      }
       console.log(asanasOnlyPlaylist);
       //   await recalculateTransitions(asanasOnlyPlaylist);
     }
@@ -713,32 +697,31 @@ function RegisterPlaylistForm() {
 
   const handleDown = async (index) => {
     toast(index);
-
-    // if (
-    //   index < playlistCurrent.length - 1 &&
-    //   typeof playlistCurrent[index] === "number" &&
-    //   typeof playlistCurrent[index + 1] === "number"
-    // ) {
-    //   const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
-    //   const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
-    //   [asanasOnlyPlaylist[asanaIndex + 1], asanasOnlyPlaylist[asanaIndex]] =
-    //     [
-    //       asanasOnlyPlaylist[asanaIndex],
-    //       asanasOnlyPlaylist[asanaIndex + 1],
-    //     ];
-    //   await recalculateTransitions(asanasOnlyPlaylist);
-    // }
+    toast(index);
+    if (index > 0 && typeof playlistCurrent[index] === "number") {
+      const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
+      console.log(asanasOnlyPlaylist);
+      const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
+      if (asanaIndex + 1 < asanasOnlyPlaylist.length) {
+        [asanasOnlyPlaylist[asanaIndex + 1], asanasOnlyPlaylist[asanaIndex]] = [
+          asanasOnlyPlaylist[asanaIndex],
+          asanasOnlyPlaylist[asanaIndex + 1],
+        ];
+      }
+      console.log(asanasOnlyPlaylist);
+      //   await recalculateTransitions(asanasOnlyPlaylist);
+    }
   };
 
   const handleDelete = async (index) => {
     toast(index);
-
-    // if (typeof playlistCurrent[index] === "number") {
-    //   const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
-    //   const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
-    //   asanasOnlyPlaylist.splice(asanaIndex, 1);
-    //   await recalculateTransitions(asanasOnlyPlaylist);
-    // }
+    if (typeof playlistCurrent[index] === "number") {
+      const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
+      const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
+      asanasOnlyPlaylist.splice(asanaIndex, 1);
+      console.log(asanasOnlyPlaylist);
+      // await recalculateTransitions(asanasOnlyPlaylist);
+    }
   };
 
   const handleAddPlaylist = async () => {
