@@ -515,7 +515,11 @@ export const TransitionEndStanding = async (
           return [];
         }
         if (start_video.person_starting_position === "Left") {
-          let res = handleTransition(["Jump Side To Front Transition"]);
+          let res = handleTransition([
+            "Jump Side To Front Transition",
+            "Feet Apart Hands Loose Standing Transition Front",
+            "Feet Together Hands Tight Standing Transition Front",
+          ]);
           res = res.map((transition) => transition.transition_id);
           res = res.filter((element) => element !== undefined);
           return res;
