@@ -402,13 +402,17 @@ export const TransitionEndSupine = async (
 
   if (start_category === "Prone") {
     if (break_status_start === "Break" && break_status_end === "Break") {
-      let res = handleTransition(["Prone To Supine Transition"]);
+      let res = handleTransition([
+        "Prone Breath After Asana",
+        "Prone To Supine Transition",
+      ]);
       res = res.map((transition) => transition.transition_id);
       res = res.filter((element) => element !== undefined);
       return res;
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
       let res = handleTransition([
+        "Prone Breath After Asana",
         "Prone To Supine Transition",
         "Arms Overhead Feet Together Supine Transition",
       ]);
@@ -419,6 +423,7 @@ export const TransitionEndSupine = async (
     if (break_status_start === "No Break" && break_status_end === "Break") {
       let res = handleTransition([
         "Fold Hands Feet Apart Prone Transition",
+        "Prone Breath After Asana",
         "Prone To Supine Transition",
       ]);
       res = res.map((transition) => transition.transition_id);
@@ -428,6 +433,7 @@ export const TransitionEndSupine = async (
     if (break_status_start === "No Break" && break_status_end === "No Break") {
       let res = handleTransition([
         "Fold Hands Feet Apart Prone Transition",
+        "Prone Breath After Asana",
         "Prone To Supine Transition",
         "Arms Overhead Feet Together Supine Transition",
       ]);

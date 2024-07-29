@@ -189,6 +189,7 @@ export const TransitionEndSuryanamaskaraStithi = async (
   if (start_category === "Prone") {
     if (break_status_start === "Break") {
       let res = handleTransition([
+        "Prone Breath After Asana",
         "Prone To Standing Transition",
         "Turn Mat Side To Front Standing Transition",
         "Suryanamaskara Preparation And Mantra Stithi Type",
@@ -201,6 +202,7 @@ export const TransitionEndSuryanamaskaraStithi = async (
     if (break_status_start === "No Break") {
       let res = handleTransition([
         "Fold Hands Feet Apart Prone Transition",
+        "Prone Breath After Asana",
         "Prone To Standing Transition",
         "Turn Mat Side To Front Standing Transition",
         "Suryanamaskara Preparation And Mantra Stithi Type",

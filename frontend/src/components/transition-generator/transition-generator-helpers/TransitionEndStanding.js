@@ -723,6 +723,7 @@ export const TransitionEndStanding = async (
     if (break_status_start === "Break" && break_status_end === "Break") {
       if (end_video.person_starting_position === "Front") {
         let res = handleTransition([
+          "Prone Breath After Asana",
           "Prone To Standing Transition",
           "Turn Mat Side To Front Standing Transition",
         ]);
@@ -732,6 +733,7 @@ export const TransitionEndStanding = async (
       }
       if (end_video.person_starting_position === "Left") {
         let res = handleTransition([
+          "Prone Breath After Asana",
           "Prone To Standing Transition",
           "Turn Mat Side To Front Standing Transition",
           "Person Transit Front To Left",
@@ -744,6 +746,7 @@ export const TransitionEndStanding = async (
     if (break_status_start === "Break" && break_status_end === "No Break") {
       if (end_video.person_starting_position === "Front") {
         let res = handleTransition([
+          "Prone Breath After Asana",
           "Prone To Standing Transition",
           "Turn Mat Side To Front Standing Transition",
           "Feet Together Hands Tight Standing Transition Front",
@@ -754,6 +757,7 @@ export const TransitionEndStanding = async (
       }
       if (end_video.person_starting_position === "Left") {
         let res = handleTransition([
+          "Prone Breath After Asana",
           "Prone To Standing Transition",
           "Turn Mat Side To Front Standing Transition",
           "Person Transit Front To Left",
@@ -768,6 +772,7 @@ export const TransitionEndStanding = async (
       if (end_video.person_starting_position === "Front") {
         let res = handleTransition([
           "Fold Hands Feet Apart Prone Transition",
+          "Prone Breath After Asana",
           "Prone To Standing Transition",
           "Turn Mat Side To Front Standing Transition",
         ]);
@@ -778,6 +783,7 @@ export const TransitionEndStanding = async (
       if (end_video.person_starting_position === "Left") {
         let res = handleTransition([
           "Fold Hands Feet Apart Prone Transition",
+          "Prone Breath After Asana",
           "Prone To Standing Transition",
           "Turn Mat Side To Front Standing Transition",
           "Person Transit Front To Left",
@@ -791,6 +797,7 @@ export const TransitionEndStanding = async (
       if (end_video.person_starting_position === "Front") {
         let res = handleTransition([
           "Fold Hands Feet Apart Prone Transition",
+          "Prone Breath After Asana",
           "Prone To Standing Transition",
           "Turn Mat Side To Front Standing Transition",
           "Feet Together Hands Tight Standing Transition Front",
@@ -802,6 +809,7 @@ export const TransitionEndStanding = async (
       if (end_video.person_starting_position === "Left") {
         let res = handleTransition([
           "Fold Hands Feet Apart Prone Transition",
+          "Prone Breath After Asana",
           "Prone To Standing Transition",
           "Turn Mat Side To Front Standing Transition",
           "Person Transit Front To Left",
