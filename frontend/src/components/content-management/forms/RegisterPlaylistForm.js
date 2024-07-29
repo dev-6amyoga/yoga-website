@@ -634,45 +634,514 @@ function RegisterPlaylistForm() {
           console.log(currentId);
           const curAsana = await fetchAsanaById(currentId);
           console.log(curAsana);
-          // transitionFunction(null, currentId)
-          // const newTransitions = await TransitionEndSitting(
-          //   null,
-          //   currentId,
-          //   "Break",
-          //   null,
-          //   { id: currentId },
-          //   false,
-          //   transitions
-          // );
-          // recalculatedPlaylist = [
-          //   ...recalculatedPlaylist,
-          //   ...newTransitions.filter((el) => el !== undefined),
-          // ];
+          let transitionData = {
+            start_category: null,
+            break_status_start: null,
+            break_status_end: curAsana.nobreak_asana ? "No Break" : "Break",
+            start_video: null,
+            end_video: curAsana,
+            drm_status: curAsana.drm_video,
+            transitions: transitions,
+          };
+          console.log(transitionData);
+          if (curAsana.asana_category === "Sitting") {
+            let t1 = await TransitionEndSitting(
+              transitionData.start_category,
+              transitionData.break_status_start,
+              transitionData.break_status_end,
+              transitionData.start_video,
+              transitionData.end_video,
+              transitionData.drm_status,
+              transitionData.transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            recalculatedPlaylist = [
+              ...recalculatedPlaylist,
+              ...t1,
+              curAsana.id,
+            ];
+          }
+          if (curAsana.asana_category === "Pranayama") {
+            let t1 = await TransitionEndPranayama(
+              transitionData.start_category,
+              transitionData.break_status_start,
+              transitionData.break_status_end,
+              transitionData.start_video,
+              transitionData.end_video,
+              transitionData.drm_status,
+              transitionData.transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            recalculatedPlaylist = [
+              ...recalculatedPlaylist,
+              ...t1,
+              curAsana.id,
+            ];
+          }
+          if (curAsana.asana_category === "Closing Prayer Sitting") {
+            let t1 = await TransitionEndClosingPrayerSitting(
+              transitionData.start_category,
+              transitionData.break_status_start,
+              transitionData.break_status_end,
+              transitionData.start_video,
+              transitionData.end_video,
+              transitionData.drm_status,
+              transitionData.transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            recalculatedPlaylist = [
+              ...recalculatedPlaylist,
+              ...t1,
+              curAsana.id,
+            ];
+          }
+          if (curAsana.asana_category === "Closing Prayer Standing") {
+            let t1 = await TransitionEndClosingPrayerStanding(
+              transitionData.start_category,
+              transitionData.break_status_start,
+              transitionData.break_status_end,
+              transitionData.start_video,
+              transitionData.end_video,
+              transitionData.drm_status,
+              transitionData.transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            recalculatedPlaylist = [
+              ...recalculatedPlaylist,
+              ...t1,
+              curAsana.id,
+            ];
+          }
+          if (curAsana.asana_category === "Starting Prayer Sitting") {
+            let t1 = await TransitionEndStartingPrayerStanding(
+              transitionData.start_category,
+              transitionData.break_status_start,
+              transitionData.break_status_end,
+              transitionData.start_video,
+              transitionData.end_video,
+              transitionData.drm_status,
+              transitionData.transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            recalculatedPlaylist = [
+              ...recalculatedPlaylist,
+              ...t1,
+              curAsana.id,
+            ];
+          }
+          if (curAsana.asana_category === "Starting Prayer Standing") {
+            let t1 = await TransitionEndStartingPrayerSitting(
+              transitionData.start_category,
+              transitionData.break_status_start,
+              transitionData.break_status_end,
+              transitionData.start_video,
+              transitionData.end_video,
+              transitionData.drm_status,
+              transitionData.transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            recalculatedPlaylist = [
+              ...recalculatedPlaylist,
+              ...t1,
+              curAsana.id,
+            ];
+          }
+          if (curAsana.asana_category === "Pranayama Prayer") {
+            let t1 = await TransitionEndPranayamaPrayer(
+              transitionData.start_category,
+              transitionData.break_status_start,
+              transitionData.break_status_end,
+              transitionData.start_video,
+              transitionData.end_video,
+              transitionData.drm_status,
+              transitionData.transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            recalculatedPlaylist = [
+              ...recalculatedPlaylist,
+              ...t1,
+              curAsana.id,
+            ];
+          }
+          if (curAsana.asana_category === "Standing") {
+            let t1 = await TransitionEndStanding(
+              transitionData.start_category,
+              transitionData.break_status_start,
+              transitionData.break_status_end,
+              transitionData.start_video,
+              transitionData.end_video,
+              transitionData.drm_status,
+              transitionData.transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            recalculatedPlaylist = [
+              ...recalculatedPlaylist,
+              ...t1,
+              curAsana.id,
+            ];
+          }
+          if (curAsana.asana_category === "Supine") {
+            let t1 = await TransitionEndSupine(
+              transitionData.start_category,
+              transitionData.break_status_start,
+              transitionData.break_status_end,
+              transitionData.start_video,
+              transitionData.end_video,
+              transitionData.drm_status,
+              transitionData.transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            recalculatedPlaylist = [
+              ...recalculatedPlaylist,
+              ...t1,
+              curAsana.id,
+            ];
+          }
+          if (curAsana.asana_category === "Prone") {
+            let t1 = await TransitionEndProne(
+              transitionData.start_category,
+              transitionData.break_status_start,
+              transitionData.break_status_end,
+              transitionData.start_video,
+              transitionData.end_video,
+              transitionData.drm_status,
+              transitionData.transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            recalculatedPlaylist = [
+              ...recalculatedPlaylist,
+              ...t1,
+              curAsana.id,
+            ];
+          }
+          if (curAsana.asana_category === "Special") {
+            let t1 = await TransitionEndSpecial(
+              transitionData.start_category,
+              transitionData.break_status_start,
+              transitionData.break_status_end,
+              transitionData.start_video,
+              transitionData.end_video,
+              transitionData.drm_status,
+              transitionData.transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            recalculatedPlaylist = [
+              ...recalculatedPlaylist,
+              ...t1,
+              curAsana.id,
+            ];
+          }
+          if (curAsana.asana_category === "Suryanamaskara Stithi") {
+            let t1 = await TransitionEndSuryanamaskaraStithi(
+              transitionData.start_category,
+              transitionData.break_status_start,
+              transitionData.break_status_end,
+              transitionData.start_video,
+              transitionData.end_video,
+              transitionData.drm_status,
+              transitionData.transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            recalculatedPlaylist = [
+              ...recalculatedPlaylist,
+              ...t1,
+              curAsana.id,
+            ];
+          }
+          if (curAsana.asana_category === "Vajrasana") {
+            let t1 = await TransitionEndVajrasana(
+              transitionData.start_category,
+              transitionData.break_status_start,
+              transitionData.break_status_end,
+              transitionData.start_video,
+              transitionData.end_video,
+              transitionData.drm_status,
+              transitionData.transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            recalculatedPlaylist = [
+              ...recalculatedPlaylist,
+              ...t1,
+              curAsana.id,
+            ];
+          }
+          if (curAsana.asana_category === "Suryanamaskara Non Stithi") {
+            let t1 = await TransitionEndSuryanamaskaraNonStithi(
+              transitionData.start_category,
+              transitionData.break_status_start,
+              transitionData.break_status_end,
+              transitionData.start_video,
+              transitionData.end_video,
+              transitionData.drm_status,
+              transitionData.transitions
+            );
+            t1 = t1.filter((element) => element !== undefined);
+            recalculatedPlaylist = [
+              ...recalculatedPlaylist,
+              ...t1,
+              curAsana.id,
+            ];
+          }
         } else {
           const previousId = asanasOnlyPlaylist[i - 1];
           if (typeof previousId === "number") {
-            console.log(previousId, currentId);
             const curAsana = await fetchAsanaById(currentId);
             const prevAsana = await fetchAsanaById(previousId);
-            console.log(curAsana, prevAsana);
-
-            // transitionFunction(previousId, currentId)
-            // const newTransitions = await TransitionEndSitting(
-            //   previousId,
-            //   currentId,
-            //   "Break",
-            //   null,
-            //   { id: currentId },
-            //   false,
-            //   transitions
-            // );
-            // recalculatedPlaylist = [
-            //   ...recalculatedPlaylist,
-            //   ...newTransitions.filter((el) => el !== undefined),
-            // ];
+            let transitionData = {
+              start_category:
+                "end_category" in prevAsana
+                  ? prevAsana.end_category
+                  : prevAsana.asana_category,
+              break_status_start: prevAsana.nobreak_asana
+                ? "No Break"
+                : "Break",
+              break_status_end: curAsana.nobreak_asana ? "No Break" : "Break",
+              start_video: prevAsana,
+              end_video: curAsana,
+              drm_status: curAsana.drm_video,
+              transitions: transitions,
+            };
+            if (curAsana.asana_category === "Sitting") {
+              let t1 = await TransitionEndSitting(
+                transitionData.start_category,
+                transitionData.break_status_start,
+                transitionData.break_status_end,
+                transitionData.start_video,
+                transitionData.end_video,
+                transitionData.drm_status,
+                transitionData.transitions
+              );
+              t1 = t1.filter((element) => element !== undefined);
+              recalculatedPlaylist = [
+                ...recalculatedPlaylist,
+                ...t1,
+                curAsana.id,
+              ];
+            }
+            if (curAsana.asana_category === "Pranayama") {
+              let t1 = await TransitionEndPranayama(
+                transitionData.start_category,
+                transitionData.break_status_start,
+                transitionData.break_status_end,
+                transitionData.start_video,
+                transitionData.end_video,
+                transitionData.drm_status,
+                transitionData.transitions
+              );
+              t1 = t1.filter((element) => element !== undefined);
+              recalculatedPlaylist = [
+                ...recalculatedPlaylist,
+                ...t1,
+                curAsana.id,
+              ];
+            }
+            if (curAsana.asana_category === "Closing Prayer Sitting") {
+              let t1 = await TransitionEndClosingPrayerSitting(
+                transitionData.start_category,
+                transitionData.break_status_start,
+                transitionData.break_status_end,
+                transitionData.start_video,
+                transitionData.end_video,
+                transitionData.drm_status,
+                transitionData.transitions
+              );
+              t1 = t1.filter((element) => element !== undefined);
+              recalculatedPlaylist = [
+                ...recalculatedPlaylist,
+                ...t1,
+                curAsana.id,
+              ];
+            }
+            if (curAsana.asana_category === "Closing Prayer Standing") {
+              let t1 = await TransitionEndClosingPrayerStanding(
+                transitionData.start_category,
+                transitionData.break_status_start,
+                transitionData.break_status_end,
+                transitionData.start_video,
+                transitionData.end_video,
+                transitionData.drm_status,
+                transitionData.transitions
+              );
+              t1 = t1.filter((element) => element !== undefined);
+              recalculatedPlaylist = [
+                ...recalculatedPlaylist,
+                ...t1,
+                curAsana.id,
+              ];
+            }
+            if (curAsana.asana_category === "Starting Prayer Sitting") {
+              let t1 = await TransitionEndStartingPrayerStanding(
+                transitionData.start_category,
+                transitionData.break_status_start,
+                transitionData.break_status_end,
+                transitionData.start_video,
+                transitionData.end_video,
+                transitionData.drm_status,
+                transitionData.transitions
+              );
+              t1 = t1.filter((element) => element !== undefined);
+              recalculatedPlaylist = [
+                ...recalculatedPlaylist,
+                ...t1,
+                curAsana.id,
+              ];
+            }
+            if (curAsana.asana_category === "Starting Prayer Standing") {
+              let t1 = await TransitionEndStartingPrayerSitting(
+                transitionData.start_category,
+                transitionData.break_status_start,
+                transitionData.break_status_end,
+                transitionData.start_video,
+                transitionData.end_video,
+                transitionData.drm_status,
+                transitionData.transitions
+              );
+              t1 = t1.filter((element) => element !== undefined);
+              recalculatedPlaylist = [
+                ...recalculatedPlaylist,
+                ...t1,
+                curAsana.id,
+              ];
+            }
+            if (curAsana.asana_category === "Pranayama Prayer") {
+              let t1 = await TransitionEndPranayamaPrayer(
+                transitionData.start_category,
+                transitionData.break_status_start,
+                transitionData.break_status_end,
+                transitionData.start_video,
+                transitionData.end_video,
+                transitionData.drm_status,
+                transitionData.transitions
+              );
+              t1 = t1.filter((element) => element !== undefined);
+              recalculatedPlaylist = [
+                ...recalculatedPlaylist,
+                ...t1,
+                curAsana.id,
+              ];
+            }
+            if (curAsana.asana_category === "Standing") {
+              let t1 = await TransitionEndStanding(
+                transitionData.start_category,
+                transitionData.break_status_start,
+                transitionData.break_status_end,
+                transitionData.start_video,
+                transitionData.end_video,
+                transitionData.drm_status,
+                transitionData.transitions
+              );
+              t1 = t1.filter((element) => element !== undefined);
+              recalculatedPlaylist = [
+                ...recalculatedPlaylist,
+                ...t1,
+                curAsana.id,
+              ];
+            }
+            if (curAsana.asana_category === "Supine") {
+              let t1 = await TransitionEndSupine(
+                transitionData.start_category,
+                transitionData.break_status_start,
+                transitionData.break_status_end,
+                transitionData.start_video,
+                transitionData.end_video,
+                transitionData.drm_status,
+                transitionData.transitions
+              );
+              t1 = t1.filter((element) => element !== undefined);
+              recalculatedPlaylist = [
+                ...recalculatedPlaylist,
+                ...t1,
+                curAsana.id,
+              ];
+            }
+            if (curAsana.asana_category === "Prone") {
+              let t1 = await TransitionEndProne(
+                transitionData.start_category,
+                transitionData.break_status_start,
+                transitionData.break_status_end,
+                transitionData.start_video,
+                transitionData.end_video,
+                transitionData.drm_status,
+                transitionData.transitions
+              );
+              t1 = t1.filter((element) => element !== undefined);
+              recalculatedPlaylist = [
+                ...recalculatedPlaylist,
+                ...t1,
+                curAsana.id,
+              ];
+            }
+            if (curAsana.asana_category === "Special") {
+              let t1 = await TransitionEndSpecial(
+                transitionData.start_category,
+                transitionData.break_status_start,
+                transitionData.break_status_end,
+                transitionData.start_video,
+                transitionData.end_video,
+                transitionData.drm_status,
+                transitionData.transitions
+              );
+              t1 = t1.filter((element) => element !== undefined);
+              recalculatedPlaylist = [
+                ...recalculatedPlaylist,
+                ...t1,
+                curAsana.id,
+              ];
+            }
+            if (curAsana.asana_category === "Suryanamaskara Stithi") {
+              let t1 = await TransitionEndSuryanamaskaraStithi(
+                transitionData.start_category,
+                transitionData.break_status_start,
+                transitionData.break_status_end,
+                transitionData.start_video,
+                transitionData.end_video,
+                transitionData.drm_status,
+                transitionData.transitions
+              );
+              t1 = t1.filter((element) => element !== undefined);
+              recalculatedPlaylist = [
+                ...recalculatedPlaylist,
+                ...t1,
+                curAsana.id,
+              ];
+            }
+            if (curAsana.asana_category === "Vajrasana") {
+              let t1 = await TransitionEndVajrasana(
+                transitionData.start_category,
+                transitionData.break_status_start,
+                transitionData.break_status_end,
+                transitionData.start_video,
+                transitionData.end_video,
+                transitionData.drm_status,
+                transitionData.transitions
+              );
+              t1 = t1.filter((element) => element !== undefined);
+              recalculatedPlaylist = [
+                ...recalculatedPlaylist,
+                ...t1,
+                curAsana.id,
+              ];
+            }
+            if (curAsana.asana_category === "Suryanamaskara Non Stithi") {
+              let t1 = await TransitionEndSuryanamaskaraNonStithi(
+                transitionData.start_category,
+                transitionData.break_status_start,
+                transitionData.break_status_end,
+                transitionData.start_video,
+                transitionData.end_video,
+                transitionData.drm_status,
+                transitionData.transitions
+              );
+              t1 = t1.filter((element) => element !== undefined);
+              recalculatedPlaylist = [
+                ...recalculatedPlaylist,
+                ...t1,
+                curAsana.id,
+              ];
+            }
           }
         }
-        recalculatedPlaylist.push(currentId);
+        // recalculatedPlaylist.push(currentId);
       }
     }
     setPlaylistCurrent(recalculatedPlaylist);
@@ -691,7 +1160,7 @@ function RegisterPlaylistForm() {
         ];
       }
       console.log(asanasOnlyPlaylist);
-      //   await recalculateTransitions(asanasOnlyPlaylist);
+      await recalculateTransitions(asanasOnlyPlaylist);
     }
   };
 
@@ -709,7 +1178,7 @@ function RegisterPlaylistForm() {
         ];
       }
       console.log(asanasOnlyPlaylist);
-      //   await recalculateTransitions(asanasOnlyPlaylist);
+      await recalculateTransitions(asanasOnlyPlaylist);
     }
   };
 
@@ -720,7 +1189,7 @@ function RegisterPlaylistForm() {
       const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
       asanasOnlyPlaylist.splice(asanaIndex, 1);
       console.log(asanasOnlyPlaylist);
-      // await recalculateTransitions(asanasOnlyPlaylist);
+      await recalculateTransitions(asanasOnlyPlaylist);
     }
   };
 

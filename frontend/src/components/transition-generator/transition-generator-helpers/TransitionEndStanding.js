@@ -21,6 +21,8 @@ export const TransitionEndStanding = async (
   drm_status,
   transitions
 ) => {
+  console.log(transitions);
+
   const filteredTransitions_all = transitions.filter(
     (transition) =>
       transition.drm_transition === drm_status &&
