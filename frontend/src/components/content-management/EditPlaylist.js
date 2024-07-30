@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
 import AdminPageWrapper from "../Common/AdminPageWrapper";
 
 function EditPlaylist() {
-  const { id } = useParams(); // Get the playlist ID from URL
+  const { playlist_id } = useParams();
   const [playlist, setPlaylist] = useState(null);
   const [formValues, setFormValues] = useState({});
   const navigate = useNavigate();
@@ -22,7 +22,8 @@ function EditPlaylist() {
     const fetchPlaylist = async () => {
       try {
         const response = await Fetch({
-          url: `/content/playlists/getPlaylist/${id}`,
+          url: `/content/playlists/getPlaylistById/${playlist_id}`,
+          method: "GET",
         });
         setPlaylist(response.data);
         setFormValues(response.data);
@@ -32,7 +33,7 @@ function EditPlaylist() {
     };
 
     fetchPlaylist();
-  }, [id]);
+  }, [playlist_id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,13 +43,13 @@ function EditPlaylist() {
   const handleSave = async () => {
     try {
       const response = await Fetch({
-        url: `/content/playlists/updatePlaylist/${id}`,
+        url: `/content/playlists/updatePlaylist/${playlist_id}`,
         method: "PUT",
-        body: formValues,
+        data: formValues,
       });
       if (response.status === 200) {
         toast("Playlist updated successfully!");
-        navigate("/admin/playlists"); // Navigate back to the playlists page
+        navigate("/admin/playlist/view-all");
       } else {
         toast("Error updating playlist:", response.status);
       }
@@ -56,8 +57,6 @@ function EditPlaylist() {
       console.log(error);
     }
   };
-
-  if (!playlist) return <div>Loading...</div>;
 
   return (
     <AdminPageWrapper heading="Edit Playlist">
@@ -76,6 +75,7 @@ function EditPlaylist() {
             <TextField
               label="Duration (mins)"
               name="duration"
+              disabled
               value={formValues.duration || ""}
               onChange={handleChange}
               fullWidth
