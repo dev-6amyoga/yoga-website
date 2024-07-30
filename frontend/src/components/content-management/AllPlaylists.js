@@ -131,10 +131,10 @@ function AllPlaylists() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Playlist ID</TableCell>
+              {/* <TableCell>Playlist ID</TableCell> */}
               <TableCell>Playlist Name</TableCell>
               {/* <TableCell>Asanas</TableCell> */}
-              <TableCell>Dash URL</TableCell>
+              {/* <TableCell>Dash URL</TableCell> */}
               <TableCell>Duration (mins)</TableCell>
               <TableCell>Start Date</TableCell>
               <TableCell>End Date</TableCell>
@@ -146,7 +146,7 @@ function AllPlaylists() {
           <TableBody>
             {allPlaylists.map((playlist) => (
               <TableRow key={playlist.playlist_id}>
-                <TableCell>{playlist.playlist_id}</TableCell>
+                {/* <TableCell>{playlist.playlist_id}</TableCell> */}
                 <TableCell>{playlist.playlist_name}</TableCell>
                 {/* <TableCell>
                   <Card className="h-32 scrollable overflow-y-auto border border-gray-300">
@@ -157,7 +157,7 @@ function AllPlaylists() {
                     </CardContent>
                   </Card>
                 </TableCell> */}
-                <TableCell>
+                {/* <TableCell>
                   <a
                     href={playlist.playlist_dash_url}
                     target="_blank"
@@ -165,8 +165,8 @@ function AllPlaylists() {
                   >
                     {playlist.playlist_dash_url}
                   </a>
-                </TableCell>
-                <TableCell>{playlist.duration}</TableCell>
+                </TableCell> */}
+                <TableCell>{playlist.duration / 60}</TableCell>
                 <TableCell>
                   {new Date(playlist.playlist_start_date).toDateString()}
                 </TableCell>
@@ -174,7 +174,7 @@ function AllPlaylists() {
                   {new Date(playlist.playlist_end_date).toDateString()}
                 </TableCell>
                 <TableCell>{playlist.playlist_language}</TableCell>
-                <TableCell>{playlist.playist_mode}</TableCell>
+                <TableCell>{playlist.playlist_mode}</TableCell>
                 <TableCell>{playlist.drm_playlist ? "Yes" : "No"}</TableCell>
               </TableRow>
             ))}
