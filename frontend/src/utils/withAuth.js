@@ -40,12 +40,12 @@ export const withAuth = (Component, ...roles) => {
 		const [finishedLoading, setFinishLoading] = useState(false);
 
 		useEffect(() => {
-			const t = setTimeout(() => {
+			const t = setInterval(() => {
 				setFinishLoading(true);
-			}, 2000);
+			}, 1000);
 
 			return () => {
-				clearTimeout(t);
+				clearInterval(t);
 			};
 		}, []);
 
@@ -73,6 +73,7 @@ export const withAuth = (Component, ...roles) => {
 					if (queryClient.isFetching({ queryKey: ["user"] })) {
 						// alert("fetching");
 						console.log("fetching");
+						setFinishLoading(false);
 						return;
 					}
 
