@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { ReactMediaRecorder } from "react-media-recorder";
 import { toast } from "react-toastify";
 import useUserStore from "../../store/UserStore";
-import { getBackendDomain } from "../../utils/getBackendDomain";
 import CustomModal from "./CustomModal";
 
 const VideoRecorder = () => {
@@ -63,14 +62,14 @@ const VideoRecorder = () => {
 		setVideoBlob(blob);
 		setRecordingStart(false);
 		setRecordingPlaying(false);
-		handleResizeAndUpload(blob);
+		handleResizeAndUpload(blobUrl, blob);
 	};
 
 	const handleStartRecording = () => {
 		setShowPreviewModal(true);
 	};
 
-	const handleResizeAndUpload = async (videoBlob) => {
+	const handleResizeAndUpload = async (blobUrl, videoBlob) => {
 		if (!videoBlob) return;
 
 		let bucket = import.meta.env.VITE_CLOUDFLARE_R2_RECORDINGS_BUCKET;
@@ -86,24 +85,36 @@ const VideoRecorder = () => {
 		}
 
 		toast(
-			"Uploading video, please don't close or move away from this tab!"
+			"Downloading video, please don't close or move away from this tab!"
 		);
 
 		try {
-			let videoBlobFile = new File([videoBlob], "video.mp4", {
-				type: "video/mp4",
-			});
+			const url = window.URL.createObjectURL(new Blob([videoBlob]));
+			console.log(blobUrl, videoBlob);
+			const link = document.createElement("a");
+			link.href = url;
+			link.setAttribute(
+				"download",
+				`video-${new Date().toISOString()}.mp4`
+			);
+			document.body.appendChild(link);
+			link.click();
+			link.parentNode.removeChild(link);
+			window.URL.revokeObjectURL(url);
+			// let videoBlobFile = new File([videoBlob], "video.mp4", {
+			// 	type: "video/mp4",
+			// });
 
-			const formdata = new FormData();
+			// const formdata = new FormData();
 
-			formdata.set("filename", `video-${new Date().toISOString()}.mp4`);
-			formdata.set("file", videoBlobFile);
+			// formdata.set("filename", `video-${new Date().toISOString()}.mp4`);
+			// formdata.set("file", videoBlobFile);
 
-			const res = await fetch(`${getBackendDomain()}/r2/upload`, {
-				method: "POST",
-				body: formdata,
-			});
-			toast.success("Video uploaded successfully");
+			// const res = await fetch(`${getBackendDomain()}/r2/upload`, {
+			// 	method: "POST",
+			// 	body: formdata,
+			// });
+			toast.success("Video Downloaded");
 		} catch (error) {
 			console.log(error);
 			toast.error("Failed to upload video");
