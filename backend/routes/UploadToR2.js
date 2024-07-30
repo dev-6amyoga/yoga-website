@@ -27,7 +27,8 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     await cloudflareAddFileToBucket(
       'yoga-video-recordings',
       filename,
-      req.file.buffer
+      req.file.buffer,
+      'video/mp4'
     )
 
     return res.status(HTTP_OK).json({
@@ -64,11 +65,15 @@ router.get('/videos/:filename', async (req, res) => {
     const response = await cloudflareGetFile(
       'yoga-video-recordings',
       filename,
-      'video/mp4'
+      'application/octet-stream'
     )
-    res.setHeader('Content-Disposition', `attachment; filename=${filename}`)
-    res.setHeader('Content-Type', 'video/mp4')
-    response.pipe(res)
+
+    // res.setHeader('Content-Disposition', `attachment; filename=${filename}`)
+    // res.setHeader('Content-Type', 'video/mp4')
+
+    res.setHeader('Content-Type', 'application/octet-stream')
+
+    return res.send(Buffer.from(fileStream))
   } catch (err) {
     console.error(err)
     return res.status(500).json({
