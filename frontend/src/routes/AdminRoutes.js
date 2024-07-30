@@ -29,6 +29,7 @@ import RegisterNewSchedule from "../pages/admin/schedule-management/RegisterNewS
 import ViewAllSchedules from "../pages/admin/schedule-management/ViewAllSchedules";
 import LogPayment from "../pages/admin/transactions/LogPayment";
 import RefundManagement from "../pages/admin/transactions/Refund";
+import EditPlaylist from "../components/content-management/EditPlaylist";
 
 export const AdminRoutes = [
   {
@@ -104,6 +105,10 @@ export const AdminRoutes = [
   {
     path: "/admin/playlist/create",
     element: <RegisterPlaylist />,
+  },
+  {
+    path: "/admin/playlist/edit/:playlist_id",
+    element: <EditPlaylist />,
   },
   {
     path: "/admin/playlist/view-all",
