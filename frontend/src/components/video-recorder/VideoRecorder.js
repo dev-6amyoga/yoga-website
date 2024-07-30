@@ -1,9 +1,11 @@
 import { Box, Button, Modal, Typography } from "@mui/material";
+import Pako from "pako";
 import { useEffect, useRef, useState } from "react";
 import { ReactMediaRecorder } from "react-media-recorder";
 import { toast } from "react-toastify";
 import useUserStore from "../../store/UserStore";
 import useVideoStore from "../../store/VideoStore";
+import { getBackendDomain } from "../../utils/getBackendDomain";
 import CustomModal from "./CustomModal";
 
 const VideoRecorder = () => {
@@ -106,12 +108,6 @@ const VideoRecorder = () => {
 		try {
 			const blb = new Blob([videoBlob]);
 
-			const compressed = blb
-				.stream()
-				.pipeThrough(new CompressionStream("gzip"));
-
-			// compressed.getReader().read()
-
 			const url = window.URL.createObjectURL(blb);
 			console.log(blobUrl, videoBlob);
 			const link = document.createElement("a");
@@ -124,19 +120,49 @@ const VideoRecorder = () => {
 			link.click();
 			link.parentNode.removeChild(link);
 			window.URL.revokeObjectURL(url);
-			// let videoBlobFile = new File([videoBlob], "video.mp4", {
-			// 	type: "video/mp4",
-			// });
 
-			// const formdata = new FormData();
+			// const compressedBlob = blb
+			// 	.stream()
+			// 	.pipeThrough(new CompressionStream("gzip"));
 
-			// formdata.set("filename", `video-${new Date().toISOString()}.mp4`);
-			// formdata.set("compressed", true);
-			// formdata.set("file", videoBlobFile);
+			// const compressedBuffer = Pako.gzip(await blb.arrayBuffer(), {
+			// 	level: 5,
+			// 	memLevel: 6,
+			// }).buffer;
 
-			// const res = await fetch(`${getBackendDomain()}/r2/upload`, {
+			const compressedBuffer = Pako.gzip(await blb.arrayBuffer(), {
+				level: 9,
+				memLevel: 9,
+			}).buffer;
+
+			console.log(compressedBuffer.byteLength);
+
+			// compressed.getReader().read()
+
+			let videoBlobFile = new File([compressedBuffer], "file");
+
+			const formdata = new FormData();
+
+			// const cBlob = new Blob([compressedBlob]);
+
+			formdata.set("filename", `video-${new Date().toISOString()}.mp4`);
+			formdata.set("compressed", true);
+			// formdata.set("body", cBlob);
+			formdata.set("file", videoBlobFile);
+
+			const res = await fetch(`${getBackendDomain()}/r2/upload`, {
+				method: "POST",
+				body: formdata,
+			});
+
+			// const res = await Fetch({
+			// 	url: `/r2/upload`,
 			// 	method: "POST",
-			// 	body: formdata,
+			// 	data: {
+			// 		filename: `video-${new Date().toISOString()}.mp4`,
+			// 		compressed: true,
+			// 		body: (await compressedBlob.getReader().read()).value,
+			// 	},
 			// });
 			toast.success("Video Downloaded");
 		} catch (error) {
