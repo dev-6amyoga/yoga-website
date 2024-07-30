@@ -1,41 +1,84 @@
-import { Card, Divider, Text } from "@geist-ui/core";
+import React from "react";
+import {
+  Box,
+  Card,
+  CardContent,
+  CardActions,
+  Typography,
+  Divider,
+  Container,
+} from "@mui/material";
 import PageWrapper from "../../components/Common/PageWrapper";
 
 function PlansAndPricing() {
   return (
-    <PageWrapper heading={"Plans and Pricing"}>
-      <div className="flex flex-col items-center">
-        <Divider />{" "}
-        <Card width="50%" type="dark">
-          <Text h4 my={0}>
-            Plans and Pricing
-          </Text>
-          <Text>We currently have two plans for students</Text>
-          <Card>
-            <Text>Basic Plan</Text>
-            <Text>Play 6AM Yoga Playlists!</Text>
-            <Text>50 Hours Watch Time Limit</Text>
-            <Text>30 days validity</Text>
-            <Text>INR 1999</Text>
-          </Card>
+    <PageWrapper heading="Plans and Pricing">
+      <Container maxWidth="md" sx={{ mt: 4 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 4,
+          }}
+        >
+          <Divider />
 
-          <Card>
-            <Text>Basic Plan</Text>
-            <Text>Play 6AM Yoga Playlists!</Text>
-            <Text>50 Hours Watch Time Limit</Text>
-            <Text>90 days validity</Text>
-            <Text>INR 4999</Text>
-          </Card>
+          <Card variant="outlined" sx={{ width: "100%" }}>
+            <CardContent>
+              <Typography variant="h5" component="div" gutterBottom>
+                Plans and Pricing
+              </Typography>
+              <Typography variant="body1" paragraph>
+                We currently have two plans for students
+              </Typography>
 
-          <Card.Footer>
-            <Text>
-              For any queries contact us at +91990802351 or write us at
-              992351@gmail.com
-            </Text>
-          </Card.Footer>
-        </Card>
-      </div>
+              <Card sx={{ mb: 2, p: 2 }}>
+                <CardContent>
+                  <Typography variant="h6" component="div" gutterBottom>
+                    Solo Plan 1 Month
+                  </Typography>
+                  <Typography variant="body2">Validity for 30 Days</Typography>
+                  <Typography variant="body2">50 Hours Watch Time</Typography>
+                  <Typography variant="body2">
+                    Monthly yoga sequence having warm up, suryanamaskara,
+                    yogasanas and pranayama (75 min/day)
+                  </Typography>
+                  <Typography variant="h6" color="primary" component="div">
+                    INR 2999
+                  </Typography>
+                </CardContent>
+              </Card>
+
+              <Card sx={{ mb: 2, p: 2 }}>
+                <CardContent>
+                  <Typography variant="h6" component="div" gutterBottom>
+                    Family Plan 1 Month
+                  </Typography>
+                  <Typography variant="body2">Validity for 30 Days</Typography>
+                  <Typography variant="body2">100 Hours Watch Time</Typography>
+                  <Typography variant="body2">
+                    Monthly yoga sequence having warm up, suryanamaskara,
+                    yogasanas and pranayama (75 min/day)
+                  </Typography>
+                  <Typography variant="h6" color="primary" component="div">
+                    INR 3999
+                  </Typography>
+                </CardContent>
+              </Card>
+            </CardContent>
+
+            <CardActions>
+              <Typography variant="body2" color="text.secondary">
+                For any queries contact us at +91990802351 or write us at
+                992351@gmail.com
+              </Typography>
+            </CardActions>
+          </Card>
+        </Box>
+      </Container>
     </PageWrapper>
   );
 }
+
 export default PlansAndPricing;

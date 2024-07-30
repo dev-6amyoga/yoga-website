@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import { BrowserRouter } from "react-router-dom";
 import { toast } from "react-toastify";
+import HomeIcon from "@mui/icons-material/Home";
 
 export default function PageWrapper({ heading, children }) {
   const navigate = useNavigate();
@@ -73,6 +74,18 @@ export default function PageWrapper({ heading, children }) {
               className="w-20 pt-2"
             />
 
+            <Tooltip title="Home">
+              <Button
+                onClick={() => {
+                  navigate("/");
+                  //   // setTimeout(() => {
+                  //   //   window.location.reload();
+                  //   // }, 100); // Adjust the delay as needed
+                }}
+              >
+                <HomeIcon style={{ color: "blue" }} />
+              </Button>
+            </Tooltip>
             <Tooltip title="Register/Login">
               <Button
                 onClick={() => {
