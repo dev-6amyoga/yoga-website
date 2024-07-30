@@ -23,12 +23,18 @@ module.exports = {
         Body: body,
       })
     ),
-  cloudflareAddFileToBucket: async (bucket, filename, body) =>
+  cloudflareAddFileToBucket: async (
+    bucket,
+    filename,
+    body,
+    contentType = undefined
+  ) =>
     R2.send(
       new PutObjectCommand({
         Bucket: bucket,
         Key: filename,
         Body: body,
+        ContentType: contentType,
       })
     ),
   // cloudflareGetFile: async (bucket, filename, contentType) => {
@@ -49,7 +55,7 @@ module.exports = {
         ResponseContentType: contentType,
       })
     )
-    return response.Body
+    return response.Body.transformToByteArray()
   },
   cloudflareListDir: async (bucket, prefix) => {
     const response = await R2.send(

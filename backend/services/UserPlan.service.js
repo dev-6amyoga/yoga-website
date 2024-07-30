@@ -126,11 +126,11 @@ const UpdateUserPlanStatus = async (
 		return [null, "User ID is required"];
 	}
 
-	let ins_id = institute_id ?? null;
+	let ins_id = institute_id || null;
 
-	let t = transaction ?? (await sequelize.transaction());
+	let t = transaction || (await sequelize.transaction());
 
-	let mt = mongo_session ?? (await mongoose.startSession());
+	let mt = mongo_session || (await mongoose.startSession());
 
 	if (!mt.inTransaction()) {
 		mt.startTransaction();
