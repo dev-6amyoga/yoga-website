@@ -25,9 +25,11 @@ import { ROLE_ROOT } from "../../enums/roles";
 import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
 import AdminPageWrapper from "../Common/AdminPageWrapper";
+import { useNavigate } from "react-router-dom";
 // import { transitionGenerator } from "../transition-generator/TransitionFunction";
 
 function AllPlaylists() {
+  const navigate = useNavigate();
   const [allPlaylists, setAllPlaylists] = useState([]);
   const [allAsanas, setAllAsanas] = useState([]);
   const [allTransitions, setAllTransitions] = useState([]);
@@ -94,6 +96,8 @@ function AllPlaylists() {
 
   const updateData = async (playlistId) => {
     toast(playlistId);
+    navigate(`/admin/playlist/edit/${playlistId}`);
+
     // try {
     //   const playlistId = Number(modalData.playlist_id);
     //   const response = await Fetch({
