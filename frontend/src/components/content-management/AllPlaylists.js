@@ -6,6 +6,8 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Card,
+  CardContent,
 } from "@mui/material";
 
 import { useEffect, useState } from "react";
@@ -131,7 +133,7 @@ function AllPlaylists() {
             <TableRow>
               <TableCell>Playlist ID</TableCell>
               <TableCell>Playlist Name</TableCell>
-              <TableCell>Asanas</TableCell>
+              {/* <TableCell>Asanas</TableCell> */}
               <TableCell>Dash URL</TableCell>
               <TableCell>Duration (mins)</TableCell>
               <TableCell>Start Date</TableCell>
@@ -139,7 +141,6 @@ function AllPlaylists() {
               <TableCell>Language</TableCell>
               <TableCell>Mode</TableCell>
               <TableCell>DRM Playlist</TableCell>
-              <TableCell>Sections</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -147,9 +148,15 @@ function AllPlaylists() {
               <TableRow key={playlist.playlist_id}>
                 <TableCell>{playlist.playlist_id}</TableCell>
                 <TableCell>{playlist.playlist_name}</TableCell>
-                <TableCell>
-                  {asanaNames[playlist.playlist_id]?.join(", ")}
-                </TableCell>
+                {/* <TableCell>
+                  <Card className="h-32 scrollable overflow-y-auto border border-gray-300">
+                    <CardContent className="p-2">
+                      {asanaNames[playlist.playlist_id]?.map((name, index) => (
+                        <div key={index}>{name}</div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </TableCell> */}
                 <TableCell>
                   <a
                     href={playlist.playlist_dash_url}
@@ -169,27 +176,6 @@ function AllPlaylists() {
                 <TableCell>{playlist.playlist_language}</TableCell>
                 <TableCell>{playlist.playist_mode}</TableCell>
                 <TableCell>{playlist.drm_playlist ? "Yes" : "No"}</TableCell>
-                <TableCell>
-                  {playlist.sections.map((section, index) => (
-                    <div key={index}>
-                      {section.name}: {section.time} mins
-                      {section.transition_ids &&
-                        section.transition_ids.length > 0 && (
-                          <div>
-                            Transitions:{" "}
-                            {section.transition_ids
-                              .map(
-                                (id) =>
-                                  transitionNames[playlist.playlist_id]?.find(
-                                    (name) => name === id
-                                  ) || "Unknown"
-                              )
-                              .join(", ")}
-                          </div>
-                        )}
-                    </div>
-                  ))}
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>
