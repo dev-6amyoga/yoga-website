@@ -8,8 +8,17 @@ import {
   Paper,
   Card,
   CardContent,
+  Button,
+  Tooltip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography,
 } from "@mui/material";
 
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { ROLE_ROOT } from "../../enums/roles";
@@ -24,6 +33,8 @@ function AllPlaylists() {
   const [allTransitions, setAllTransitions] = useState([]);
   const [asanaNames, setAsanaNames] = useState({});
   const [transitionNames, setTransitionNames] = useState({});
+  const [delOpen, setDelOpen] = useState(false);
+  const [delPlaylistId, setDelPlaylistId] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -81,7 +92,8 @@ function AllPlaylists() {
     fetchNames();
   }, [allPlaylists, allAsanas, allTransitions]);
 
-  const updateData = async () => {
+  const updateData = async (playlistId) => {
+    toast(playlistId);
     // try {
     //   const playlistId = Number(modalData.playlist_id);
     //   const response = await Fetch({
@@ -105,24 +117,25 @@ function AllPlaylists() {
     // }
   };
 
-  const deletePlaylist = async () => {
-    // try {
-    //   const playlistId = delPlaylistId;
-    //   const response = await Fetch({
-    //     url: `/content/playlists/deletePlaylist/${playlistId}`,
-    //     method: "DELETE",
-    //   });
-    //   if (response.status === 200) {
-    //     setPlaylist1((prev) =>
-    //       prev.filter((playlist) => playlist.playlist_id !== playlistId)
-    //     );
-    //   } else {
-    //     toast("Error deleting playlist:", response.status);
-    //   }
-    //   setDelState(false);
-    // } catch (error) {
-    //   console.log(error);
-    // }
+  const deletePlaylist = async (playlistId) => {
+    try {
+      const response = await Fetch({
+        url: `/content/playlists/deletePlaylist/${playlistId}`,
+        method: "DELETE",
+      });
+      if (response.status === 200) {
+        toast("Playlist deleted successfully!");
+        setDelOpen(false);
+        setAllPlaylists((prev) =>
+          prev.filter((playlist) => playlist.playlist_id !== playlistId)
+        );
+      } else {
+        toast("Error deleting playlist:", response.status);
+      }
+      setDelState(false);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -141,6 +154,7 @@ function AllPlaylists() {
               <TableCell>Language</TableCell>
               <TableCell>Mode</TableCell>
               <TableCell>DRM Playlist</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -166,7 +180,7 @@ function AllPlaylists() {
                     {playlist.playlist_dash_url}
                   </a>
                 </TableCell> */}
-                <TableCell>{playlist.duration / 60}</TableCell>
+                <TableCell>{(playlist.duration / 60).toFixed(1)}</TableCell>
                 <TableCell>
                   {new Date(playlist.playlist_start_date).toDateString()}
                 </TableCell>
@@ -176,11 +190,68 @@ function AllPlaylists() {
                 <TableCell>{playlist.playlist_language}</TableCell>
                 <TableCell>{playlist.playlist_mode}</TableCell>
                 <TableCell>{playlist.drm_playlist ? "Yes" : "No"}</TableCell>
+                <TableCell>
+                  <div className="flex flex-row gap-2">
+                    <Tooltip title={"Edit"}>
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          updateData(playlist.playlist_id);
+                        }}
+                      >
+                        <EditIcon />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title={"Delete"}>
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          setDelPlaylistId(playlist.playlist_id);
+                          setDelOpen(true);
+                        }}
+                      >
+                        <DeleteIcon />
+                      </Button>
+                    </Tooltip>
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Dialog
+        open={delOpen}
+        onClose={() => {
+          setDelOpen(false);
+        }}
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Are you sure you want to delete this playlist?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setDelOpen(false);
+            }}
+            color="primary"
+          >
+            No
+          </Button>
+          <Button
+            onClick={() => {
+              deletePlaylist(delPlaylistId);
+            }}
+            color="secondary"
+          >
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </AdminPageWrapper>
   );
 }
