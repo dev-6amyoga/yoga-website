@@ -50,5 +50,6 @@ export default defineConfig({
 				".js": "jsx",
 			},
 		},
+		exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/core"],
 	},
 });
