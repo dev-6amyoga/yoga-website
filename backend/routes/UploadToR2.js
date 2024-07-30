@@ -14,9 +14,39 @@ const storage = multer.memoryStorage()
 
 const upload = multer({ storage })
 
+const zlib = require('zlib')
+
 router.post('/upload', upload.single('file'), async (req, res) => {
   try {
-    const { filename } = req.body
+    const { filename, compressed } = req.body
+
+    // console.log('[/upload] : body', req.body)
+
+    if (compressed) {
+      console.log('[/upload] : compressed', req.file.buffer.byteLength)
+      // decompress the file
+      // const compressedBlob = new Blob([req.file.buffer])
+
+      // const decompressedBlob = await new Response(
+      //   compressedBlob.stream().pipeThrough(new DecompressionStream('gzip'))
+      // ).blob()
+
+      const decompressedBuffer = zlib.gunzipSync(req.file.buffer)
+
+      // const decompressedBuffer = await decompressedBlob.arrayBuffer()
+      console.log(decompressedBuffer.byteLength)
+
+      await cloudflareAddFileToBucket(
+        'yoga-video-recordings',
+        filename,
+        decompressedBuffer.buffer,
+        'video/mp4'
+      )
+
+      return res.status(HTTP_OK).json({
+        message: 'File uploaded successfully',
+      })
+    }
 
     // if (!filename || !body) {
     //   return res.status(400).json({
