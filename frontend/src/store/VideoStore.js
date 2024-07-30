@@ -175,6 +175,18 @@ export const useVideoStore = create(
 			set(() => {
 				return { playreadyKeyUrl: url };
 			}),
+
+		recordingStart: false,
+		setRecordingStart: (recordingStart) =>
+			set(() => {
+				return { recordingStart };
+			}),
+
+		recordingPlaying: false,
+		setRecordingPlaying: (recordingPlaying) =>
+			set(() => {
+				return { recordingPlaying };
+			}),
 	}))
 );
 

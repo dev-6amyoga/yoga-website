@@ -3,20 +3,35 @@ import { useEffect, useRef, useState } from "react";
 import { ReactMediaRecorder } from "react-media-recorder";
 import { toast } from "react-toastify";
 import useUserStore from "../../store/UserStore";
+import useVideoStore from "../../store/VideoStore";
 import CustomModal from "./CustomModal";
 
 const VideoRecorder = () => {
 	const [videoBlob, setVideoBlob] = useState(null);
-	const [recordingStart, setRecordingStart] = useState(false);
-	const [recordingPlaying, setRecordingPlaying] = useState(false);
+	// const [recordingStart, setRecordingStart] = useState(false);
+	// const [recordingPlaying, setRecordingPlaying] = useState(false);
 	const [showModal, setShowModal] = useState(false);
 	const [showPreviewModal, setShowPreviewModal] = useState(false);
 	const [previewDone, setPreviewDone] = useState(false);
+	const [stream, setStream] = useState(null);
+
 	const videoRef = useRef();
 	const canvasRef = useRef();
-	const user = useUserStore((state) => state.user);
 	const prevVideoRef = useRef(null);
-	const [stream, setStream] = useState(null);
+
+	const user = useUserStore((state) => state.user);
+
+	const [
+		recordingStart,
+		setRecordingStart,
+		recordingPlaying,
+		setRecordingPlaying,
+	] = useVideoStore((state) => [
+		state.recordingStart,
+		state.setRecordingStart,
+		state.recordingPlaying,
+		state.setRecordingPlaying,
+	]);
 
 	useEffect(() => {
 		const handleBeforeUnload = (event) => {
@@ -89,7 +104,15 @@ const VideoRecorder = () => {
 		);
 
 		try {
-			const url = window.URL.createObjectURL(new Blob([videoBlob]));
+			const blb = new Blob([videoBlob]);
+
+			const compressed = blb
+				.stream()
+				.pipeThrough(new CompressionStream("gzip"));
+
+			// compressed.getReader().read()
+
+			const url = window.URL.createObjectURL(blb);
 			console.log(blobUrl, videoBlob);
 			const link = document.createElement("a");
 			link.href = url;
@@ -108,6 +131,7 @@ const VideoRecorder = () => {
 			// const formdata = new FormData();
 
 			// formdata.set("filename", `video-${new Date().toISOString()}.mp4`);
+			// formdata.set("compressed", true);
 			// formdata.set("file", videoBlobFile);
 
 			// const res = await fetch(`${getBackendDomain()}/r2/upload`, {
