@@ -60,13 +60,13 @@ export default function LoginIndex() {
 			const access_token = cookies[SIXAMYOGA_ACCESS_TOKEN];
 			const refresh_token = cookies[SIXAMYOGA_REFRESH_TOKEN];
 
-			console.log(
-				"[INIT] Tokens",
-				access_token,
-				refresh_token,
-				cookies[SIXAMYOGA_ACCESS_TOKEN],
-				cookies[SIXAMYOGA_REFRESH_TOKEN]
-			);
+			// console.log(
+			// 	"[INIT] Tokens",
+			// 	access_token,
+			// 	refresh_token,
+			// 	cookies[SIXAMYOGA_ACCESS_TOKEN],
+			// 	cookies[SIXAMYOGA_REFRESH_TOKEN]
+			// );
 
 			if (refresh_token) {
 				console.log("[INIT] Token available");
@@ -252,13 +252,13 @@ export default function LoginIndex() {
 							break;
 						// invalid response, let it go
 						default:
-							console.log(
-								"[INIT]",
-								access_token === null ||
-									access_token === undefined,
-								refresh_token !== null ||
-									refresh_token !== undefined
-							);
+							// console.log(
+							// 	"[INIT]",
+							// 	access_token === null ||
+							// 		access_token === undefined,
+							// 	refresh_token !== null ||
+							// 		refresh_token !== undefined
+							// );
 							if (
 								(access_token === null ||
 									access_token === undefined) &&
