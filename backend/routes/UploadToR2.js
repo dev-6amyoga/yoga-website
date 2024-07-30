@@ -62,7 +62,7 @@ router.get('/videos', async (req, res) => {
 router.get('/videos/:filename', async (req, res) => {
   try {
     const { filename } = req.params
-    const response = await cloudflareGetFile(
+    const fileStream = await cloudflareGetFile(
       'yoga-video-recordings',
       filename,
       'application/octet-stream'
