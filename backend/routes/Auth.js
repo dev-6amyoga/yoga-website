@@ -475,6 +475,7 @@ router.post('/login-google', async (req, res) => {
         refreshTokenExpiryAt: refresh_token_expiry_at,
       })
     } catch (err) {
+      console.error(err)
       await t.rollback()
       return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
         message: 'internal server error',
@@ -560,8 +561,11 @@ router.post('/refresh-token', async (req, res) => {
     prev_login_token.access_token = accessToken
     prev_login_token.access_token_creation_at = access_token_creation_at
     prev_login_token.access_token_expiry_at = access_token_expiry_at
+
     await prev_login_token.save({ transaction: t })
+
     await t.commit()
+
     return res.status(HTTP_OK).json({
       accessToken,
       accessTokenExpiryAt: access_token_expiry_at,

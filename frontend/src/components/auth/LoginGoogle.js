@@ -91,7 +91,7 @@ export default function LoginGoogle() {
 							},
 						});
 						if (response && response?.status === 200) {
-							console.log("response is : ", response);
+							// console.log("response is : ", response);
 							if (
 								response.data?.message === "User does not exist"
 							) {
