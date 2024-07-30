@@ -144,10 +144,10 @@ const VideoRecorder = () => {
     setShowPreviewModal(false);
   };
 
-  useEffect(() => {
-    toast(recordingStart ? "rec start" : "rec no start");
-    toast(recordingPlaying ? "rec play" : "rec no play");
-  }, [recordingStart, recordingPlaying]);
+  // useEffect(() => {
+  //   toast(recordingStart ? "rec start" : "rec no start");
+  //   toast(recordingPlaying ? "rec play" : "rec no play");
+  // }, [recordingStart, recordingPlaying]);
 
   return (
     <div className="max-w-7xl mx-auto">
