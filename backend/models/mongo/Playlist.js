@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
 const PlaylistSchema6am = new mongoose.Schema({
   playlist_id: { type: Number, required: true },
@@ -9,7 +9,7 @@ const PlaylistSchema6am = new mongoose.Schema({
   playlist_start_date: Date,
   playlist_end_date: Date,
   playlist_language: String,
-  playist_mode: String,
+  playlist_mode: String,
   drm_playlist: Boolean,
   sections: [
     {
@@ -17,12 +17,12 @@ const PlaylistSchema6am = new mongoose.Schema({
       time: Number,
     },
   ],
-});
+})
 
 const Playlist = mongoose.model(
-  "Playlists",
+  'Playlists',
   PlaylistSchema6am,
-  "6amyoga_playlists"
-);
+  '6amyoga_playlists'
+)
 
-module.exports = Playlist;
+module.exports = Playlist
