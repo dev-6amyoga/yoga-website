@@ -11,6 +11,7 @@ const { ListObjectsCommand } = require('@aws-sdk/client-s3')
 const Asana = require('../models/mongo/Asana')
 const TransitionVideo = require('../models/mongo/TransitionVideo')
 const { MPDCombiner } = require('../utils/ManifestCombiner')
+const { spawn } = require('child_process')
 
 router.post('/playlists/addPlaylist', async (req, res) => {
   try {
@@ -246,6 +247,34 @@ router.post('/playlists/createManifest/:playlistId', async (req, res) => {
       error: 'Failed to generate manifest for playlist',
     })
   }
+})
+
+router.post('/getFactorial', (req, res) => {
+  const num = req.body.number
+  console.log(num)
+
+  const pythonProcess = spawn('python', [
+    'D:/DESKTOP_STUFF/yoga-web/backend/python-script/demo.py',
+    num,
+  ])
+
+  pythonProcess.stdout.on('data', (data) => {
+    const result = parseInt(data.toString().trim(), 10)
+    console.log(result)
+    res.json({ factorial: result })
+  })
+
+  pythonProcess.stderr.on('data', (data) => {
+    console.error(`stderr: ${data}`)
+    res.status(500).json({ error: 'Failed to calculate factorial' })
+  })
+
+  pythonProcess.on('close', (code) => {
+    if (code !== 0) {
+      console.error(`Python process exited with code ${code}`)
+      res.status(500).json({ error: 'Failed to calculate factorial' })
+    }
+  })
 })
 
 module.exports = router
