@@ -46,37 +46,6 @@ function Playlist({ page }) {
       ])
     );
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const res = await Fetch({
-  //         url: `/customUserPlan/getCustomUserPlansByUser/${user.user_id}`,
-  //         token: true,
-  //         method: "GET",
-  //       });
-  //       if (res.status === 200) {
-  //         if (res.data.plans) {
-  //           const today = new Date();
-  //           const validPlans = res.data.plans.filter(
-  //             (plan) => new Date(plan.validity_to) > today
-  //           );
-  //           console.log(validPlans, "are valid");
-  //           setCurrentCustomUserPlans(
-  //             validPlans.sort(
-  //               (a, b) => new Date(b.created_at) - new Date(a.created_at)
-  //             )
-  //           );
-  //         }
-  //       }
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
-  //   };
-  //   if (user) {
-  //     fetchData();
-  //   }
-  // }, [user]);
-
   useEffect(() => {
     const fetchCustomPlanDetails = async (planId) => {
       try {
