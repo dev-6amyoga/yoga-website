@@ -46,6 +46,7 @@ export default function DesignBoard() {
       });
       if (response.status === 200) {
         toast("yay");
+        setResult(response.data.factorial);
       } else {
         toast("nay1");
       }
