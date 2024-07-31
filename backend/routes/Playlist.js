@@ -255,21 +255,32 @@ router.post('/getFactorial', (req, res) => {
 
   const pythonProcess = spawn('python3', ['python-script/demo.py', num])
 
+  let responseSent = false
+
   pythonProcess.stdout.on('data', (data) => {
-    const result = parseInt(data.toString().trim(), 10)
-    console.log(result)
-    res.json({ factorial: result })
+    if (!responseSent) {
+      const result = parseInt(data.toString().trim(), 10)
+      console.log(result)
+      res.json({ factorial: result })
+      responseSent = true
+    }
   })
 
   pythonProcess.stderr.on('data', (data) => {
-    console.error(`stderr: ${data}`)
-    res.status(500).json({ error: 'Failed to calculate factorial' })
+    if (!responseSent) {
+      console.error(`stderr: ${data}`)
+      res.status(500).json({ error: 'Failed to calculate factorial' })
+      responseSent = true
+    }
   })
 
   pythonProcess.on('close', (code) => {
-    if (code !== 0) {
-      console.error(`Python process exited with code ${code}`)
-      res.status(500).json({ error: 'Failed to calculate factorial' })
+    if (!responseSent) {
+      if (code !== 0) {
+        console.error(`Python process exited with code ${code}`)
+        res.status(500).json({ error: 'Failed to calculate factorial' })
+      }
+      responseSent = true
     }
   })
 })
