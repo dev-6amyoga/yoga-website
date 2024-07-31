@@ -33,15 +33,17 @@ router.post('/playlists/addPlaylist', async (req, res) => {
     })
   }
 })
-
 router.get('/playlists/getAllPlaylists', async (req, res) => {
   try {
     const playlists = await Playlist.find()
-    res.json(playlists)
+    const filteredPlaylists = playlists.filter(
+      (playlist) => playlist.playlist_mode !== 'deleted'
+    )
+    res.json(filteredPlaylists)
   } catch (error) {
     console.error(error)
-    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-      error: 'Failed to fetch videos',
+    res.status(500).json({
+      error: 'Failed to fetch playlists',
     })
   }
 })

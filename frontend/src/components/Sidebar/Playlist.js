@@ -89,11 +89,9 @@ function Playlist({ page }) {
         if (res.status === 200) {
           return res.data;
         } else {
-          console.log(`Failed to fetch custom plan with id ${planId}`);
           return null;
         }
       } catch (err) {
-        console.log(err);
         return null;
       }
     };
@@ -149,7 +147,6 @@ function Playlist({ page }) {
                   daysSinceStart <= activeTo
                 ) {
                   if (today1 < endDate) {
-                    console.log(`Playlist ID ${playlistId} is active today.`);
                     activePlaylists.push(playlistId);
                   }
                 }
@@ -167,17 +164,10 @@ function Playlist({ page }) {
                   method: "GET",
                 });
                 if (response.status === 200) {
-                  console.log(response.data);
                   return response.data;
                 } else {
                   toast("error");
                 }
-                // if (!response.ok) {
-                //   throw new Error(
-                //     `Error fetching playlist with ID ${playlistId}`
-                //   );
-                // }
-                // return await response.json();
               } catch (error) {
                 console.error(error);
                 return null;
@@ -191,7 +181,6 @@ function Playlist({ page }) {
             const validPlaylistDetails = playlistDetails.filter(
               (playlist) => playlist !== null
             );
-            console.log(validPlaylistDetails);
             setCustomPlaylists(validPlaylistDetails);
           }
         }
@@ -275,7 +264,6 @@ function Playlist({ page }) {
               },
             }).then((res) => {
               if (res.status === 200) {
-                // console.log(res.data, "IS RES!!");
                 setNextMonthSchedules(res.data);
                 if (res.data.length > 0) {
                   setNextMonthSchedulePresent(true);
@@ -471,7 +459,6 @@ function Playlist({ page }) {
           url: "/content/playlists/getAllPlaylists",
         });
         const data = response.data;
-        console.log(data, "IS A RESP YO");
         if (currentRole === "STUDENT") {
           const studentPlaylists = data.filter(
             (playlist) => playlist.playlist_mode.toLowerCase() === "student"
@@ -497,13 +484,9 @@ function Playlist({ page }) {
   const handleAddToQueue = (playlist, playlist_type) => {
     // clearQueue();
     if (playlist?.playlist_dash_url) {
-      console.log("Adding playlist to queue", playlist);
       addToQueue([playlist]);
     } else {
-      // addToQueue()
-      // console.log(playlist);
       let videos = [];
-
       playlist.asana_ids.forEach((asana_id) => {
         if (typeof asana_id === "number") {
           const asana = allAsanas.find((asana) => asana.asana_id === asana_id);
