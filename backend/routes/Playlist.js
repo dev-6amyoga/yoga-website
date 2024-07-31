@@ -253,7 +253,7 @@ router.post('/getFactorial', (req, res) => {
   const num = req.body.number
   console.log(num)
 
-  const pythonProcess = spawn('python', [
+  const pythonProcess = spawn('python3', [
     'D:/DESKTOP_STUFF/yoga-web/backend/python-script/demo.py',
     num,
   ])
