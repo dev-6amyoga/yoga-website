@@ -253,10 +253,7 @@ router.post('/getFactorial', (req, res) => {
   const num = req.body.number
   console.log(num)
 
-  const pythonProcess = spawn('python3', [
-    'D:/DESKTOP_STUFF/yoga-web/backend/python-script/demo.py',
-    num,
-  ])
+  const pythonProcess = spawn('python3', ['python-script/demo.py', num])
 
   pythonProcess.stdout.on('data', (data) => {
     const result = parseInt(data.toString().trim(), 10)
