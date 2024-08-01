@@ -28,7 +28,12 @@ export const Fetch = async ({
 		h["authorization"] = `Bearer ${cookieToken}`;
 	}
 
-	if (data !== null && data !== undefined && method !== "GET") {
+	if (
+		data !== null &&
+		data !== undefined &&
+		method !== "GET" &&
+		h["Content-Type"] === undefined
+	) {
 		h["Content-Type"] = "application/json";
 	}
 
