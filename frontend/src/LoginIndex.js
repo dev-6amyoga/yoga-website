@@ -365,7 +365,7 @@ export default function LoginIndex() {
 		refetchOnMount: true,
 		refetchOnWindowFocus: true,
 		refetchOnReconnect: "always",
-		refetchInterval: 1000 * 60 * 1,
+		refetchInterval: 1000 * 60 * 5,
 		retry: 3,
 		retryDelay: 1000 * 4,
 	});

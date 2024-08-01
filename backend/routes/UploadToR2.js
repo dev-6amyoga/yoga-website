@@ -80,7 +80,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 router.post('/upload', upload.single('file'), async (req, res) => {
   try {
-    const { filename } = req.body
+    const { filename, content_type = 'video/mp4' } = req.body
 
     let { compressed = 'false', python = 'false' } = req.body
 
@@ -93,7 +93,8 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
     let buffer = req.file
 
-    console.log('[/upload] : python', python, typeof python)
+    // console.log('[/upload] : python', python, typeof python)
+    console.log('[/upload] : filename', filename)
     console.log('[/upload] : original size:', req.file.buffer.byteLength)
 
     if (compressed) {
@@ -175,7 +176,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       'yoga-video-recordings',
       filename,
       buffer.buffer,
-      'video/mp4'
+      content_type
     )
 
     const endTs = performance.now()
