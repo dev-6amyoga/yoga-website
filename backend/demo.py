@@ -50,7 +50,7 @@ def upload_to_r2(filename, file_data, bucket_dir: str) -> bool:
 if __name__ == "__main__":
     try:
         filename = sys.argv[1]
-        compressed = sys.argv[2].lower() == "true"
+        # compressed = sys.argv[2].lower() == "true"
 
         print("before file read")
 
@@ -58,8 +58,8 @@ if __name__ == "__main__":
 
         print("after file read")
 
-        if compressed and file_data:
-            file_data = gzip.decompress(file_data)
+        # if compressed and file_data:
+        #     file_data = gzip.decompress(file_data)
 
         upload_to_r2(filename, file_data, config["r2"]["bucket"])
     except Exception as e:
