@@ -6,6 +6,9 @@ const router = express.Router()
 const { spawn } = require('child_process')
 
 const multer = require('multer')
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
+const path = require('path')
+
 const {
   HTTP_OK,
   HTTP_INTERNAL_SERVER_ERROR,
@@ -72,6 +75,7 @@ const zlib = require('zlib')
 //     })
 //   }
 // })
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 router.post('/upload', upload.single('file'), async (req, res) => {
@@ -184,6 +188,42 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   } catch (err) {
     console.error(err)
     return res.status(500).json({ message: 'File upload failed' })
+  }
+})
+
+const s3Client = new S3Client({
+  region: 'apac',
+  endpoint: process.env.R2_RECORDINGS_UPLOAD_URL,
+  credentials: {
+    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY,
+  },
+})
+
+router.post('/api/upload', upload.single('file'), async (req, res) => {
+  console.log('in api upload')
+  // if (!req.file) {
+  //   console.log('no file ')
+  //   return res.status(400).send('No file uploaded')
+  // }
+  console.log(req.body)
+  // const { buffer, originalname } = req.file
+  // console.log(req.file)
+
+  try {
+    //   const uploadParams = {
+    //     Bucket: process.env.CLOUDFLARE_R2_RECORDING_BUCKET,
+    //     Key: path.basename(originalname), // or use a unique key
+    //     Body: buffer,
+    //     ContentType: req.file.mimetype,
+    //   }
+
+    //   await s3Client.send(new PutObjectCommand(uploadParams))
+
+    res.status(200).send('File uploaded successfully')
+  } catch (error) {
+    console.error(error)
+    res.status(500).send('Failed to upload file')
   }
 })
 
