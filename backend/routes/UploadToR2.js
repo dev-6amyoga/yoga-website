@@ -76,90 +76,111 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 router.post('/upload', upload.single('file'), async (req, res) => {
   try {
-    const { filename, compressed } = req.body
+    const { filename } = req.body
+
+    let { compressed = 'false', python = 'false' } = req.body
+
+    python = python === 'true'
+    compressed = compressed === 'true'
+
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' })
     }
 
-    const uploadProcess = spawn('python', ['demo.py', filename, compressed])
+    let buffer = req.file
 
-    uploadProcess.stdin.write(req.file.buffer)
-    uploadProcess.stdin.end()
+    console.log('[/upload] : python', python, typeof python)
+    console.log('[/upload] : original size:', req.file.buffer.byteLength)
 
-    let timeoutCount = 0
+    if (compressed) {
+      buffer = zlib.gunzipSync(req.file.buffer)
+      // buffer = await decompressedBlob.arrayBuffer()
 
-    while (uploadProcess.exitCode === null && timeoutCount < 300) {
-      console.log(
-        'Waiting for upload to complete',
-        timeoutCount,
-        uploadProcess.stdout.readable,
-        uploadProcess.stderr.readable,
-        uploadProcess.pid
-      )
+      console.log('[/upload] : decompressed size:  ', buffer.byteLength)
+    }
+
+    // let python = false
+
+    if (python) {
+      const uploadProcess = spawn('python', ['demo.py', filename, compressed])
+
+      uploadProcess.stdin.write(Buffer.from(buffer.buffer))
+      uploadProcess.stdin.end()
+
+      let timeoutCount = 0
+
+      while (uploadProcess.exitCode === null && timeoutCount < 300) {
+        console.log(
+          'Waiting for upload to complete',
+          timeoutCount,
+          uploadProcess.stdout.readable,
+          uploadProcess.stderr.readable,
+          uploadProcess.pid
+        )
+
+        if (uploadProcess.stdout.readable) {
+          const data = uploadProcess.stdout.read()
+          if (data) {
+            console.log(`[/upload] : stdout: ${data}`)
+          }
+        }
+
+        if (uploadProcess.stderr.readable) {
+          const data = uploadProcess.stderr.read()
+          if (data) {
+            console.error(`[/upload] : stderr: ${data}`)
+            return res.status(500).json({ message: 'Failed to upload video' })
+          }
+        }
+
+        await sleep(100)
+        timeoutCount += 1
+      }
 
       if (uploadProcess.stdout.readable) {
         const data = uploadProcess.stdout.read()
         if (data) {
-          console.log(`stdout: ${data}`)
+          console.log(`[/upload] : stdout: ${data}`)
         }
       }
 
       if (uploadProcess.stderr.readable) {
         const data = uploadProcess.stderr.read()
         if (data) {
-          console.error(`stderr: ${data}`)
+          console.error(`[/upload] : stderr: ${data}`)
           return res.status(500).json({ message: 'Failed to upload video' })
         }
       }
 
-      await sleep(100)
-      timeoutCount += 1
-    }
-
-    if (uploadProcess.stdout.readable) {
-      const data = uploadProcess.stdout.read()
-      if (data) {
-        console.log(`stdout: ${data}`)
-      }
-    }
-
-    if (uploadProcess.stderr.readable) {
-      const data = uploadProcess.stderr.read()
-      if (data) {
-        console.error(`stderr: ${data}`)
+      if (timeoutCount >= 300) {
+        console.log('[/upload] : Timeout')
         return res.status(500).json({ message: 'Failed to upload video' })
       }
-    }
 
-    // uploadProcess.stdout.on('data', (data) => {
-    //   console.log(`stdout: ${data}`)
-    // })
+      if (uploadProcess.exitCode === 0) {
+        console.log('[/upload] : Success, exit code:', uploadProcess.exitCode)
+        return res.status(200).json({ message: 'File uploaded successfully' })
+      }
 
-    // uploadProcess.stderr.on('data', (data) => {
-    //   console.error(`stderr: ${data}`)
-    //   return res.status(500).json({ message: 'Failed to upload video' })
-    // })
-
-    // uploadProcess.uploadProcess.on('close', (code) => {
-    //   if (code === 0) {
-    //     return res.status(200).json({ message: 'File uploaded successfully' })
-    //   } else {
-    //     return res.status(500).json({ message: 'Failed to upload video' })
-    //   }
-    // })
-
-    if (timeoutCount >= 300) {
-      console.log('Timeout')
+      console.error('[/upload] : Failed, exit code:', uploadProcess.exitCode)
       return res.status(500).json({ message: 'Failed to upload video' })
     }
 
-    if (uploadProcess.exitCode === 0) {
-      console.log('Success, exit code:', uploadProcess.exitCode)
-      return res.status(200).json({ message: 'File uploaded successfully' })
-    }
+    const startTs = performance.now()
+    await cloudflareAddFileToBucket(
+      'yoga-video-recordings',
+      filename,
+      buffer.buffer,
+      'video/mp4'
+    )
 
-    console.error('Failed, exit code:', uploadProcess.exitCode)
-    return res.status(500).json({ message: 'Failed to upload video' })
+    const endTs = performance.now()
+
+    console.log('[/upload] : Time taken (js) :', endTs - startTs)
+
+    return res.status(HTTP_OK).json({
+      message: 'File uploaded successfully',
+    })
   } catch (err) {
     console.error(err)
     return res.status(500).json({ message: 'File upload failed' })
