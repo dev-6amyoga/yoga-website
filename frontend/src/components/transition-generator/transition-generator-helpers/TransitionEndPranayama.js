@@ -651,20 +651,41 @@ export const TransitionEndPranayama = async (
 
   if (start_category === "Sitting") {
     if (break_status_start === "Break") {
-      let res = handleTransition(["Pranayama Start Sitting"]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+      if (start_video.mat_ending_position === "Side") {
+        let res = handleTransition([
+          "Turn Mat Side To Front Sitting Transition",
+          "Pranayama Start Sitting",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      } else {
+        let res = handleTransition(["Pranayama Start Sitting"]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
     }
 
     if (break_status_start === "No Break") {
-      let res = handleTransition([
-        "Feet Apart Hands Back Sitting Transition",
-        "Pranayama Start Sitting",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+      if (start_video.mat_ending_position === "Side") {
+        let res = handleTransition([
+          "Feet Apart Hands Back Sitting Transition",
+          "Turn Mat Side To Front Sitting Transition",
+          "Pranayama Start Sitting",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      } else {
+        let res = handleTransition([
+          "Feet Apart Hands Back Sitting Transition",
+          "Pranayama Start Sitting",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
     }
   }
 

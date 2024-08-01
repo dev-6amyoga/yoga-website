@@ -66,19 +66,19 @@ const VideoRecorder = () => {
   }, [showPreviewModal]);
 
   const handleStartRecording = () => {
-    if (mediaRecorder) {
+    if (mediaRecorder && mediaRecorder.state === "inactive") {
       mediaRecorder.start();
     }
   };
 
   const handleStopRecording = () => {
-    if (mediaRecorder) {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
       mediaRecorder.stop();
     }
   };
 
   const handleRequestData = () => {
-    if (mediaRecorder) {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
       mediaRecorder.requestData();
     }
   };
