@@ -426,37 +426,54 @@ ShakaPlayerPrevMarker.Factory = class {
 	}
 };
 
-const handleFullscreen = () => {
+const handleFullscreen = (externalEventHandler = () => {}) => {
 	const videoStore = useVideoStore.getState();
 	console.log("Current Fullscreen State: ", videoStore.fullScreen);
 	const fs = videoStore.fullScreen;
 
 	if (fs) {
-		document
-			.exitFullscreen()
-			.then(() => {
-				console.log("exited fullscreen mode");
-			})
-			.catch((err) => {
-				toast.error("Failed to exit fullscreen mode");
-			});
+		if (document.exitFullscreen) {
+			document
+				.exitFullscreen()
+				.then(() => {
+					console.log("exited fullscreen mode");
+				})
+				.catch((err) => {
+					console.error(err);
+					toast.error("Failed to exit fullscreen mode");
+				});
+		} else if (document.mozCancelFullScreen) {
+			/* Firefox */
+			document.mozCancelFullScreen();
+		} else if (document.webkitExitFullscreen) {
+			/* Chrome, Safari and Opera */
+			document.webkitExitFullscreen();
+		} else if (document.msExitFullscreen) {
+			/* IE/Edge */
+			document.msExitFullscreen();
+		}
 	} else {
-		document.body
-			.requestFullscreen()
-			.then(() => {
-				console.log("entered fullscreen mode");
-			})
-			.catch((err) => {
-				toast.error("Failed to enter fullscreen mode");
-			});
+		if (document.body.requestFullscreen) {
+			document.body.requestFullscreen();
+		} else if (document.body.mozRequestFullScreen) {
+			/* Firefox */
+			document.body.mozRequestFullScreen();
+		} else if (document.body.webkitRequestFullscreen) {
+			/* Chrome, Safari and Opera */
+			document.body.webkitRequestFullscreen();
+		} else if (document.body.msRequestFullscreen) {
+			/* IE/Edge */
+			document.body.msRequestFullscreen();
+		}
 	}
-	useVideoStore.setState({ fullScreen: !fs });
+	// useVideoStore.setState({ fullScreen: !fs });
+	// externalEventHandler();
 
 	return fs;
 };
 
 class ShakaPlayerFullscreen extends shaka.ui.Element {
-	constructor(parent, controls) {
+	constructor(parent, controls, externalEventHandler = () => {}) {
 		super(parent, controls);
 
 		// The actual button that will be displayed
@@ -473,6 +490,8 @@ class ShakaPlayerFullscreen extends shaka.ui.Element {
 			"click",
 			this.handleFullScreenWrapper
 		);
+
+		this.externalEventHandler = externalEventHandler;
 	}
 
 	enable() {
@@ -484,7 +503,7 @@ class ShakaPlayerFullscreen extends shaka.ui.Element {
 	}
 
 	handleFullScreenWrapper() {
-		const fs = handleFullscreen();
+		const fs = handleFullscreen(this.externalEventHandler);
 		// console.log("handleFullScreenWrapper : ", fs);
 
 		if (fs) {
@@ -500,9 +519,10 @@ class ShakaPlayerFullscreen extends shaka.ui.Element {
 }
 
 ShakaPlayerFullscreen.Factory = class {
-	constructor() {
+	constructor(handleFullscreen) {
 		this.element = null;
 		this.enableElement = true;
+		this.externalEventHandler = handleFullscreen;
 	}
 
 	enable() {
@@ -520,7 +540,11 @@ ShakaPlayerFullscreen.Factory = class {
 	}
 
 	create(rootElement, controls) {
-		this.element = new ShakaPlayerFullscreen(rootElement, controls);
+		this.element = new ShakaPlayerFullscreen(
+			rootElement,
+			controls,
+			this.externalEventHandler
+		);
 		return this.element;
 	}
 };

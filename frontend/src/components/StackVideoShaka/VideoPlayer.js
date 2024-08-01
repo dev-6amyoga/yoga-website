@@ -132,6 +132,33 @@ function VideoPlayer() {
 		setPauseReason(null);
 		// setVideoState(STATE_VIDEO_LOADING);
 		setCurrentTime(0);
+		// setFullScreen(false);
+		try {
+			if (document.fullscreenElement) {
+				if (document.exitFullscreen) {
+					document
+						.exitFullscreen()
+						.then(() => {
+							console.log("exited fullscreen mode");
+						})
+						.catch((err) => {
+							console.error(err);
+							toast.error("Failed to exit fullscreen mode");
+						});
+				} else if (document.mozCancelFullScreen) {
+					/* Firefox */
+					document.mozCancelFullScreen();
+				} else if (document.webkitExitFullscreen) {
+					/* Chrome, Safari and Opera */
+					document.webkitExitFullscreen();
+				} else if (document.msExitFullscreen) {
+					/* IE/Edge */
+					document.msExitFullscreen();
+				}
+			}
+		} catch (error) {
+			console.log("Error exiting fullscreen mode", error);
+		}
 	}, [setCurrentMarkerIdx, setPauseReason, setCurrentTime]);
 
 	const handleEnd = useCallback(() => {
@@ -264,6 +291,23 @@ function VideoPlayer() {
 		setShowDisclaimer(false);
 	}, []);
 
+	const handleFullscreen = useCallback(() => {}, []);
+
+	useEffect(() => {
+		const handleFs = () => {
+			if (document.fullscreenElement) {
+				setFullScreen(true);
+			} else {
+				setFullScreen(false);
+			}
+		};
+		document.body.addEventListener("fullscreenchange", handleFs);
+
+		return () => {
+			document.body.removeEventListener("fullscreenchange", handleFs);
+		};
+	}, []);
+
 	return (
 		<div
 			className={`hover:cursor-pointer bg-black w-full ${fullScreen ? "h-screen" : "h-auto rounded-xl overflow-hidden"}`}>
@@ -310,7 +354,9 @@ function VideoPlayer() {
 															setVideoStateVisible={
 																setVideoStateVisible
 															}
-															handleFullScreen={() => {}}
+															handleFullscreen={
+																handleFullscreen
+															}
 														/>
 													);
 												})}
@@ -323,14 +369,10 @@ function VideoPlayer() {
 									recordingStart &&
 									recordingPlaying ? (
 										<Tooltip
-											title="Recording Webcam in progress!"
 											style={{
 												zIndex: 100000,
 											}}>
-											<RecordingStatus
-												className="absolute top-8 left-8 bg-red-500 w-4 h-4 rounded-full"
-												title="Recording Webcam in progress!"
-											/>
+											<RecordingStatus className="absolute top-8 left-8 bg-red-500 w-4 h-4 rounded-full" />
 										</Tooltip>
 									) : (
 										<></>
