@@ -43,6 +43,8 @@
 		"csv-writer": "^1.6.0",
 		"dashjs": "^4.7.4",
 		"date-fns": "^3.6.0",
+		"extendable-media-recorder": "^9.2.9",
+		"extendable-media-recorder-wav-encoder": "^7.0.113",
 		"firebase": "^10.7.1",
 		"framer-motion": "^11.0.3",
 		"fs": "^0.0.1-security",
