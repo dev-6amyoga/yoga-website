@@ -72,6 +72,7 @@ const zlib = require('zlib')
 //     })
 //   }
 // })
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 router.post('/upload', upload.single('file'), async (req, res) => {
   try {
@@ -85,22 +86,80 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     uploadProcess.stdin.write(req.file.buffer)
     uploadProcess.stdin.end()
 
-    uploadProcess.stdout.on('data', (data) => {
-      console.log(`stdout: ${data}`)
-    })
+    let timeoutCount = 0
 
-    uploadProcess.stderr.on('data', (data) => {
-      console.error(`stderr: ${data}`)
-      return res.status(500).json({ message: 'Failed to upload video' })
-    })
+    while (uploadProcess.exitCode === null && timeoutCount < 300) {
+      console.log(
+        'Waiting for upload to complete',
+        timeoutCount,
+        uploadProcess.stdout.readable,
+        uploadProcess.stderr.readable,
+        uploadProcess.pid
+      )
 
-    uploadProcess.on('close', (code) => {
-      if (code === 0) {
-        return res.status(200).json({ message: 'File uploaded successfully' })
-      } else {
+      if (uploadProcess.stdout.readable) {
+        const data = uploadProcess.stdout.read()
+        if (data) {
+          console.log(`stdout: ${data}`)
+        }
+      }
+
+      if (uploadProcess.stderr.readable) {
+        const data = uploadProcess.stderr.read()
+        if (data) {
+          console.error(`stderr: ${data}`)
+          return res.status(500).json({ message: 'Failed to upload video' })
+        }
+      }
+
+      await sleep(100)
+      timeoutCount += 1
+    }
+
+    if (uploadProcess.stdout.readable) {
+      const data = uploadProcess.stdout.read()
+      if (data) {
+        console.log(`stdout: ${data}`)
+      }
+    }
+
+    if (uploadProcess.stderr.readable) {
+      const data = uploadProcess.stderr.read()
+      if (data) {
+        console.error(`stderr: ${data}`)
         return res.status(500).json({ message: 'Failed to upload video' })
       }
-    })
+    }
+
+    // uploadProcess.stdout.on('data', (data) => {
+    //   console.log(`stdout: ${data}`)
+    // })
+
+    // uploadProcess.stderr.on('data', (data) => {
+    //   console.error(`stderr: ${data}`)
+    //   return res.status(500).json({ message: 'Failed to upload video' })
+    // })
+
+    // uploadProcess.uploadProcess.on('close', (code) => {
+    //   if (code === 0) {
+    //     return res.status(200).json({ message: 'File uploaded successfully' })
+    //   } else {
+    //     return res.status(500).json({ message: 'Failed to upload video' })
+    //   }
+    // })
+
+    if (timeoutCount >= 300) {
+      console.log('Timeout')
+      return res.status(500).json({ message: 'Failed to upload video' })
+    }
+
+    if (uploadProcess.exitCode === 0) {
+      console.log('Success, exit code:', uploadProcess.exitCode)
+      return res.status(200).json({ message: 'File uploaded successfully' })
+    }
+
+    console.error('Failed, exit code:', uploadProcess.exitCode)
+    return res.status(500).json({ message: 'Failed to upload video' })
   } catch (err) {
     console.error(err)
     return res.status(500).json({ message: 'File upload failed' })
