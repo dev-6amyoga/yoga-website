@@ -354,6 +354,9 @@ const VideoRecorder = () => {
 
 		// let videoBlobFile = new File([compressedBuffer], "file");
 		try {
+			if (!user || user?.user_id === undefined) {
+				return;
+			}
 			// const buff = await blob.arrayBuffer();
 			// console.log(blob, buff, buff.byteLength);
 			let videoBlobFile = new File([blob], "file");
@@ -364,10 +367,13 @@ const VideoRecorder = () => {
 
 			formdata.set(
 				"filename",
-				`video_${videoSessionTimeRef.current}_${videoSessionCountRef.current}`
+				`user_${user.user_id}_video_${videoSessionTimeRef.current}_${videoSessionCountRef.current}`
+			);
+			formdata.set(
+				"foldername",
+				`user_${user.user_id}_video_${videoSessionTimeRef.current}`
 			);
 			formdata.set("compressed", false);
-			// formdata.set("body", cBlob);
 			formdata.set("file", videoBlobFile);
 			formdata.set("python", false);
 			formdata.set("content_type", "application/octet-stream");

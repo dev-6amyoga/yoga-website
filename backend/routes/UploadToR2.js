@@ -80,7 +80,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 router.post('/upload', upload.single('file'), async (req, res) => {
   try {
-    const { filename, content_type = 'video/mp4' } = req.body
+    const { filename, foldername, content_type = 'video/mp4' } = req.body
 
     let { compressed = 'false', python = 'false' } = req.body
 
@@ -89,6 +89,10 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' })
+    }
+
+    if (!filename || !foldername) {
+      return res.status(400).json({ message: 'Invalid request' })
     }
 
     let buffer = req.file
@@ -174,7 +178,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     const startTs = performance.now()
     await cloudflareAddFileToBucket(
       'yoga-video-recordings',
-      filename,
+      `${foldername}/${filename}`,
       buffer.buffer,
       content_type
     )
