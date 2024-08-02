@@ -191,23 +191,23 @@ function RefundManagement() {
           );
         },
       },
-      {
-        accessorKey: "referral_code",
-        header: "Referral Code",
-        cell: ({ row }) => {
-          return (
-            <>
-              {row?.original?.referral_code ? (
-                <Accordion title="">
-                  <pre>{row.referral_code}</pre>
-                </Accordion>
-              ) : (
-                <p>---</p>
-              )}
-            </>
-          );
-        },
-      },
+      // {
+      //   accessorKey: "referral_code",
+      //   header: "Referral Code",
+      //   cell: ({ row }) => {
+      //     return (
+      //       <>
+      //         {row?.original?.referral_code ? (
+      //           <Accordion title="">
+      //             <pre>{row.referral_code}</pre>
+      //           </Accordion>
+      //         ) : (
+      //           <p>---</p>
+      //         )}
+      //       </>
+      //     );
+      //   },
+      // },
       {
         accessorKey: "user_plan",
         header: "User Plan",
