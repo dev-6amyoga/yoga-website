@@ -116,11 +116,21 @@ function RefundManagement() {
 
   const columnsDataTable = useMemo(
     () => [
+      // {
+      //   accessorKey: "transaction_id",
+      //   header: ({ column }) => (
+      //     <SortableColumn column={column}>Transaction ID</SortableColumn>
+      //   ),
+      // },
       {
-        accessorKey: "transaction_id",
+        accessorKey: "name",
         header: ({ column }) => (
-          <SortableColumn column={column}>Transaction ID</SortableColumn>
+          <SortableColumn column={column}>Name</SortableColumn>
         ),
+        cell: ({ row }) => {
+          console.log(row?.original);
+          return row?.original?.user?.name;
+        },
       },
       {
         accessorKey: "payment_for",
