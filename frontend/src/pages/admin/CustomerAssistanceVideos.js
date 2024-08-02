@@ -67,7 +67,32 @@ export default function CustomerAssistanceVideos() {
 				});
 
 				console.log("res?.data?", res);
-				return res?.data?.videos;
+				let videos = res?.data?.videos;
+
+				if (!videos) {
+					return [];
+				} else {
+					videos = videos.reduce((acc, video) => {
+						// split the key to get the folder of the video
+						const [folder, key] = video.Key.split("/");
+
+						// add key to list of videos under folder
+						if (!acc[folder]) {
+							acc[folder] = {
+								folder: folder,
+								videos: [],
+							};
+						}
+
+						acc[folder]["videos"].push({ Key: key });
+
+						return acc;
+					}, {});
+				}
+
+				console.log("videos", videos);
+
+				return videos;
 			} catch (error) {
 				console.error("res?.data?", err);
 				toast.error("Failed to fetch customer assistance videos");
@@ -82,18 +107,47 @@ export default function CustomerAssistanceVideos() {
 		mutationFn: async (video) => {
 			try {
 				let intermediateStart = performance.now();
-				const res = await fetch(
-					`${getBackendDomain()}/r2/videos/${video.Key}`,
-					{
-						method: "GET",
-					}
-				);
 
-				const videoData = await res.arrayBuffer();
+				const { folder, videos } = video;
+
+				let promises = videos.map(async (v) => {
+					try {
+						let res = await fetch(
+							`${getBackendDomain()}/r2/videos/get`,
+							{
+								method: "POST",
+								headers: {
+									"Content-Type": "application/json",
+								},
+								body: JSON.stringify({
+									filename: `${folder}/${v.Key}`,
+								}),
+							}
+						);
+
+						const buffer = await res.arrayBuffer();
+
+						console.log("[download] got : ", v.Key);
+						return { Key: v.Key, buffer: buffer };
+					} catch (error) {
+						console.error(
+							"[download] Failed to fetch video",
+							error
+						);
+						throw error;
+					}
+				});
+
+				let videoData = await Promise.all(promises);
+
+				videoData.sort((v1, v2) => (v1.Key > v2.Key ? 1 : -1));
+
+				let buffers = videoData.map((v) => v.buffer);
 
 				console.log(
-					"res?.data?",
-					videoData
+					"[download] res?.data?",
+					videoData,
+					buffers
 					// Buffer.from(res.data)
 				);
 
@@ -102,19 +156,16 @@ export default function CustomerAssistanceVideos() {
 					performance.now() - intermediateStart
 				);
 
+				/*
 				// do ffmpeg stuff here
 				intermediateStart = performance.now();
-				const f = new File([videoData], video.Key, {
+				const f = new File(buffers, video.Key, {
 					type: "video/mp4",
 				});
 
+				console.log("[download] combined size : ", f.size);
+
 				const fileBuffer = await f.stream().getReader().read();
-
-				// if (!fileBuffer.done) {
-				// 	throw new Error("Failed to read file");
-				// }
-
-				// console.log(fileBuffer.value);
 
 				console.log(
 					"[download] Time to create file: ",
@@ -122,11 +173,35 @@ export default function CustomerAssistanceVideos() {
 				);
 
 				intermediateStart = performance.now();
-				// do ffmpeg stuff here
+
+				let files = (await ffmpegRef.current.listDir("/"))
+					.filter((f) => !f.isDir)
+					.map((f) => f.name);
+
+				console.log("[download] files", files);
+
+				if (files.includes("video.mp4")) {
+					await ffmpegRef.current.deleteFile("/video.mp4");
+				}
+
+				console.log(
+					"[download] Time to list and delete file: ",
+					performance.now() - intermediateStart
+				);
+
+				// // do ffmpeg stuff here
+				intermediateStart = performance.now();
+
 				await ffmpegRef.current.writeFile(
-					"video.mp4",
+					"/video.mp4",
 					fileBuffer.value
 				);
+
+				files = (await ffmpegRef.current.listDir("/"))
+					.filter((f) => !f.isDir)
+					.map((f) => f.name);
+
+				console.log("[download] files", files);
 
 				console.log(
 					"[download] Time to write file: ",
@@ -149,7 +224,8 @@ export default function CustomerAssistanceVideos() {
 
 				console.log(
 					"[download] Time to exec: ",
-					performance.now() - intermediateStart
+					performance.now() - intermediateStart,
+					{ ffmpegExecResult }
 				);
 
 				if (ffmpegExecResult !== 0) {
@@ -160,7 +236,7 @@ export default function CustomerAssistanceVideos() {
 
 				const data = await ffmpegRef.current.readFile("output.mp4");
 
-				// videoBlobFile = new File(data, "output.mp4", {
+				// let videoBlobFile = new File(data, "output.mp4", {
 				// 	type: "video/mp4",
 				// });
 
@@ -168,17 +244,25 @@ export default function CustomerAssistanceVideos() {
 					"[download] Time to read file, parse: ",
 					performance.now() - intermediateStart
 				);
+        */
 
-				const url = window.URL.createObjectURL(new Blob([data]));
+				const combinedBlob = new Blob(buffers, {
+					type: "video/mp4",
+				});
+
+				console.log("[download] combinedBlob", combinedBlob);
+
+				const url = window.URL.createObjectURL(combinedBlob);
 				const link = document.createElement("a");
+
 				link.href = url;
-				link.setAttribute("download", `${video.Key}`);
+				link.setAttribute("download", `${folder}.mp4`);
 				document.body.appendChild(link);
 				link.click();
 				link.parentNode.removeChild(link);
 				window.URL.revokeObjectURL(url);
 
-				return res.data;
+				return [];
 			} catch (error) {
 				console.error("res?.data?", error);
 				toast.error("Failed to download video");
@@ -192,13 +276,13 @@ export default function CustomerAssistanceVideos() {
 
 	const columns = [
 		{
-			accessorKey: "Key",
-			header: "Video Name",
+			accessorKey: "folder",
+			header: "Folder name",
 		},
 		{
 			header: "Actions",
 			cell: ({ row }) => {
-				console.log(row?.original);
+				// console.log(row?.original);
 				let [loading, setLoading] = useState(false);
 
 				const handle = async (row) => {
@@ -233,7 +317,7 @@ export default function CustomerAssistanceVideos() {
 		<AdminPageWrapper heading="Customer Assistance Videos">
 			<div>
 				<DataTable
-					data={videos ?? []}
+					data={videos ? Object.values(videos) : []}
 					columns={columns}
 					refetch={refetch}
 				/>
