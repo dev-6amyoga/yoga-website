@@ -110,51 +110,141 @@ export default function CustomerAssistanceVideos() {
 
 				const { folder, videos } = video;
 
-				let promises = videos.map(async (v) => {
-					try {
-						let res = await fetch(
-							`${getBackendDomain()}/r2/videos/get`,
-							{
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-								},
-								body: JSON.stringify({
-									filename: `${folder}/${v.Key}`,
-								}),
-							}
-						);
+				let finalVideoPath = `${folder}_final.mp4`;
 
+				// console.log(
+				// 	finalVideoPath,
+				// 	videos.find((v) => v.Key === finalVideoPath)
+				// );
+
+				if (videos.length === 0) {
+					throw new Error("No videos to process");
+				}
+
+				if (videos.find((v) => v.Key === finalVideoPath)) {
+					const res = await fetch(
+						`${getBackendDomain()}/r2/videos/get`,
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								filename: `${folder}/${finalVideoPath}`,
+								content_type: "video/mp4",
+							}),
+						}
+					);
+
+					if (res.status === 200) {
 						const buffer = await res.arrayBuffer();
-
-						console.log("[download] got : ", v.Key);
-						return { Key: v.Key, buffer: buffer };
-					} catch (error) {
-						console.error(
-							"[download] Failed to fetch video",
-							error
-						);
-						throw error;
+						const blob = new Blob([buffer], { type: "video/mp4" });
+						const url = URL.createObjectURL(blob);
+						const a = document.createElement("a");
+						a.href = url;
+						a.download = `${folder}.mp4`;
+						a.click();
+						URL.revokeObjectURL(url);
+						toast("Video downloaded successfully", {
+							type: "success",
+						});
+						return [];
+					} else {
+						throw new Error("Failed to download video");
 					}
+				}
+
+				toast.warn("Processing videos, this may take upto 5 minutes");
+
+				const res = await Fetch({
+					url: `/r2/videos/process/${folder}`,
+					method: "POST",
+					data: {
+						videos: videos,
+					},
 				});
 
-				let videoData = await Promise.all(promises);
+				if (res.status === 200) {
+					toast.success("Videos processed successfully");
+					const res = await fetch(
+						`${getBackendDomain()}/r2/videos/get`,
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								filename: `${folder}/${finalVideoPath}`,
+								content_type: "video/mp4",
+							}),
+						}
+					);
 
-				videoData.sort((v1, v2) => (v1.Key > v2.Key ? 1 : -1));
+					if (res.status === 200) {
+						const buffer = await res.arrayBuffer();
+						const blob = new Blob([buffer], { type: "video/mp4" });
+						const url = URL.createObjectURL(blob);
+						const a = document.createElement("a");
+						a.href = url;
+						a.download = `${folder}.mp4`;
+						a.click();
+						URL.revokeObjectURL(url);
+						toast("Video downloaded successfully", {
+							type: "success",
+						});
+						return [];
+					} else {
+						throw new Error("Failed to download video");
+					}
+				} else {
+					throw new Error("Failed to process videos");
+				}
 
-				let buffers = videoData.map((v) => v.buffer);
+				// let promises = videos.map(async (v) => {
+				// 	try {
+				// 		let res = await fetch(
+				// 			`${getBackendDomain()}/r2/videos/get`,
+				// 			{
+				// 				method: "POST",
+				// 				headers: {
+				// 					"Content-Type": "application/json",
+				// 				},
+				// 				body: JSON.stringify({
+				// 					filename: `${folder}/${v.Key}`,
+				// 				}),
+				// 			}
+				// 		);
 
-				console.log(
-					"[download] res?.data?",
-					videoData,
-					buffers
-					// Buffer.from(res.data)
-				);
+				// 		const buffer = await res.arrayBuffer();
 
-				console.log(
-					"[download] Time to fetch video: ",
-					performance.now() - intermediateStart
-				);
+				// 		console.log("[download] got : ", v.Key);
+				// 		return { Key: v.Key, buffer: buffer };
+				// 	} catch (error) {
+				// 		console.error(
+				// 			"[download] Failed to fetch video",
+				// 			error
+				// 		);
+				// 		throw error;
+				// 	}
+				// });
+
+				// let videoData = await Promise.all(promises);
+
+				// videoData.sort((v1, v2) => (v1.Key > v2.Key ? 1 : -1));
+
+				// let buffers = videoData.map((v) => v.buffer);
+
+				// console.log(
+				// 	"[download] res?.data?",
+				// 	videoData,
+				// 	buffers
+				// 	// Buffer.from(res.data)
+				// );
+
+				// console.log(
+				// 	"[download] Time to fetch video: ",
+				// 	performance.now() - intermediateStart
+				// );
 
 				/*
 				// do ffmpeg stuff here
@@ -246,21 +336,21 @@ export default function CustomerAssistanceVideos() {
 				);
         */
 
-				const combinedBlob = new Blob(buffers, {
-					type: "video/mp4",
-				});
+				// const combinedBlob = new Blob(buffers, {
+				// 	type: "video/mp4",
+				// });
 
-				console.log("[download] combinedBlob", combinedBlob);
+				// console.log("[download] combinedBlob", combinedBlob);
 
-				const url = window.URL.createObjectURL(combinedBlob);
-				const link = document.createElement("a");
+				// const url = window.URL.createObjectURL(combinedBlob);
+				// const link = document.createElement("a");
 
-				link.href = url;
-				link.setAttribute("download", `${folder}.mp4`);
-				document.body.appendChild(link);
-				link.click();
-				link.parentNode.removeChild(link);
-				window.URL.revokeObjectURL(url);
+				// link.href = url;
+				// link.setAttribute("download", `${folder}.mp4`);
+				// document.body.appendChild(link);
+				// link.click();
+				// link.parentNode.removeChild(link);
+				// window.URL.revokeObjectURL(url);
 
 				return [];
 			} catch (error) {
