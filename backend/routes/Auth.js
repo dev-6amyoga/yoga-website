@@ -214,13 +214,13 @@ router.post('/login', async (req, res) => {
       transaction: t,
     })
 
-    if (login_token_history) {
-      await t.rollback()
-      console.log('one device one login')
-      return res.status(HTTP_BAD_REQUEST).json({
-        error: 'Varying IP Address; One device login only',
-      })
-    }
+    // if (login_token_history) {
+    //   await t.rollback()
+    //   console.log('one device one login')
+    //   return res.status(HTTP_BAD_REQUEST).json({
+    //     error: 'Varying IP Address; One device login only',
+    //   })
+    // }
 
     console.log(
       'elapsed time to get login token history: ',
@@ -406,12 +406,12 @@ router.post('/login-google', async (req, res) => {
         transaction: t,
       })
 
-      if (login_token_history) {
-        await t.rollback()
-        return res.status(HTTP_BAD_REQUEST).json({
-          error: 'Varying IP Address; One device login only',
-        })
-      }
+      // if (login_token_history) {
+      //   await t.rollback()
+      //   return res.status(HTTP_BAD_REQUEST).json({
+      //     error: 'Varying IP Address; One device login only',
+      //   })
+      // }
 
       console.log(
         'elapsed time to get login token history: ',
