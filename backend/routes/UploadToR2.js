@@ -20,6 +20,10 @@ const upload = multer({ storage })
 
 const zlib = require('zlib')
 
+const ffmpeg = require('fluent-ffmpeg')
+const { Readable } = require('stream')
+const fs = require('fs')
+
 // router.post('/upload', upload.single('file'), async (req, res) => {
 //   try {
 //     const { filename, compressed } = req.body
@@ -251,20 +255,124 @@ router.get('/videos', async (req, res) => {
 
 router.post('/videos/get', async (req, res) => {
   try {
-    const { filename } = req.body
+    const { filename, content_type } = req.body
 
     const fileStream = await cloudflareGetFile(
       'yoga-video-recordings',
       filename,
-      'application/octet-stream'
+      content_type
     )
 
     // res.setHeader('Content-Disposition', `attachment; filename=${filename}`)
     // res.setHeader('Content-Type', 'video/mp4')
 
-    res.setHeader('Content-Type', 'application/octet-stream')
+    res.setHeader('Content-Type', content_type)
 
     return res.send(Buffer.from(fileStream))
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({
+      message: 'Failed to download file',
+    })
+  }
+})
+
+router.post('/videos/process/:foldername', async (req, res) => {
+  try {
+    const { foldername } = req.params
+    const { videos } = req.body
+
+    // console.log('foldername:', foldername)
+    // console.log('videos:', videos)
+
+    // get all videos from r2
+    const videoData = await Promise.all(
+      videos.map(async (video) => {
+        try {
+          const buf = await cloudflareGetFile(
+            'yoga-video-recordings',
+            `${foldername}/${video.Key}`,
+            'application/octet-stream'
+          )
+          console.log('got video:', video.Key)
+          return { Key: video.Key, buffer: buf }
+        } catch (err) {
+          console.error(err)
+          throw err
+        }
+      })
+    )
+
+    videoData.sort((v1, v2) => (v1.Key > v2.Key ? 1 : -1))
+
+    const buffers = videoData.map((v) => v.buffer)
+
+    console.log('buffers size:', buffers.length)
+
+    // merge all videos into one buffer in order
+    const combinedBuffer = Buffer.concat(buffers)
+
+    console.log('combined buffer size:', combinedBuffer.byteLength)
+
+    const readableBuffer = Readable.from(combinedBuffer)
+
+    // create a file
+    // fs.closeSync(fs.openSync(`${foldername}.mp4`, 'a'))
+    const fd = fs.openSync(`video.mp4`, 'a')
+
+    fs.closeSync(fd)
+
+    // process with ffmpeg
+    const command = ffmpeg(readableBuffer)
+      .inputOption('-sn')
+      .videoCodec('libx264')
+      .audioCodec('aac')
+      .inputOption('-strict', 'experimental')
+      .output(`video.mp4`)
+
+    command.run()
+
+    let status = 0
+    command.on('end', () => {
+      status = 1
+    })
+
+    command.on('error', (err) => {
+      console.error(err)
+      status = -1
+    })
+
+    while (status === 0) {
+      console.log('waiting for ffmpeg to complete')
+      await sleep(1000)
+    }
+
+    if (status === -1) {
+      return res.status(500).json({
+        message: 'Failed to process video',
+      })
+    }
+
+    // get buffer from file
+    const processedBuffer = fs.readFileSync(`video.mp4`)
+
+    console.log('processed buffer size:', processedBuffer.byteLength)
+
+    // delete the file
+    fs.unlinkSync(`video.mp4`)
+
+    // upload the processed video
+    await cloudflareAddFileToBucket(
+      'yoga-video-recordings',
+      `${foldername}/${foldername}_final.mp4`,
+      processedBuffer,
+      'video/mp4'
+    )
+
+    // send the processed video
+    return res.status(200).json({
+      message: 'Video processed successfully',
+    })
   } catch (err) {
     console.error(err)
     return res.status(500).json({
