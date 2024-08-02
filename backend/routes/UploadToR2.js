@@ -249,9 +249,10 @@ router.get('/videos', async (req, res) => {
   }
 })
 
-router.get('/videos/:filename', async (req, res) => {
+router.post('/videos/get', async (req, res) => {
   try {
-    const { filename } = req.params
+    const { filename } = req.body
+
     const fileStream = await cloudflareGetFile(
       'yoga-video-recordings',
       filename,
