@@ -51,16 +51,20 @@ const paths = [
     ],
   },
   {
-    title: "Schedule Management",
-    type: "group",
-    subPaths: [
-      {
-        path: "/admin/schedule/register",
-        title: "Register New Schedule",
-      },
-      { path: "/admin/schedule/view", title: "View All Schedules" },
-    ],
+    title: "Customer Assistance Videos",
+    path: "/admin/customer-assistance-videos",
   },
+  // {
+  //   title: "Schedule Management",
+  //   type: "group",
+  //   subPaths: [
+  //     {
+  //       path: "/admin/schedule/register",
+  //       title: "Register New Schedule",
+  //     },
+  //     { path: "/admin/schedule/view", title: "View All Schedules" },
+  //   ],
+  // },
   {
     title: "View/Set Configurations",
     type: "group",
@@ -134,10 +138,6 @@ const paths = [
   },
   { path: "/admin/discount-management", title: "Discount Management" },
   { title: "Free Videos" },
-  {
-    title: "Customer Assistance Videos",
-    path: "/admin/customer-assistance-videos",
-  },
 ];
 
 function AdminNavbar() {
