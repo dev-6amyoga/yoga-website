@@ -111,7 +111,7 @@ const paths = [
         path: "/admin/transactions/log-payment",
         title: "Log a Payment",
       },
-      { path: "/admin/transactions/refund", title: "Refund Management" },
+      { path: "/admin/transactions/refund", title: "All Transactions" },
     ],
   },
   {
