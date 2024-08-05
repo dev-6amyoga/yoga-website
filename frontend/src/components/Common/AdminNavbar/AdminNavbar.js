@@ -19,14 +19,22 @@ const paths = [
     title: "Dashboard",
   },
   {
-    path: "/admin/watch-analysis",
-    title: "Watch Analysis",
+    title: "Customer Assistance Videos",
+    path: "/admin/customer-assistance-videos",
+  },
+  {
+    title: "Package Videos",
+    path: "/admin/package-videos",
   },
   {
     path: "/admin/player-page",
     title: "Video Player",
   },
   { path: "/admin/class/manage", title: "Manage Classes" },
+  {
+    path: "/admin/watch-analysis",
+    title: "Watch Analysis",
+  },
 
   // {
   // 	title: "Class Mode",
@@ -49,10 +57,6 @@ const paths = [
 
       { path: "/admin/members/teachers", title: "Teachers" },
     ],
-  },
-  {
-    title: "Customer Assistance Videos",
-    path: "/admin/customer-assistance-videos",
   },
   // {
   //   title: "Schedule Management",
@@ -134,6 +138,10 @@ const paths = [
         path: "/admin/custom-plan/create",
         title: "Create Custom Plan",
       },
+      {
+        path: "/admin/custom-plan/view",
+        title: "View Custom Plans",
+      },
     ],
   },
   { path: "/admin/discount-management", title: "Discount Management" },
@@ -165,14 +173,12 @@ function AdminNavbar() {
       token: true,
     })
       .then((res) => {
-        console.log("hello");
         removeCookie(SIXAMYOGA_ACCESS_TOKEN);
         removeCookie(SIXAMYOGA_REFRESH_TOKEN);
         resetUserState();
         navigate("/auth");
       })
       .catch((err) => {
-        console.log("Logout Error:", err);
         removeCookie(SIXAMYOGA_ACCESS_TOKEN);
         removeCookie(SIXAMYOGA_REFRESH_TOKEN);
         resetUserState();

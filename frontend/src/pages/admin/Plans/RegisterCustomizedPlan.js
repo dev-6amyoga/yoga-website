@@ -49,10 +49,6 @@ function RegisterNewCustomizedPlan() {
   const [searchQuery, setSearchQuery] = useState("");
   const [numberOfDays, setNumberOfDays] = useState(10);
 
-  useEffect(() => {
-    console.log("allocations are :", allocations);
-  }, [allocations]);
-
   const handleAddAllocation = () => {
     setAllocations([...allocations, { startDay: "", endDay: "" }]);
   };
@@ -125,7 +121,6 @@ function RegisterNewCustomizedPlan() {
           method: "GET",
         });
         const data = response.data;
-        console.log(data.currencies);
         setCurrencies(data.currencies);
       } catch (err) {
         console.log(err);
