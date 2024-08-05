@@ -296,7 +296,7 @@ function RefundManagement() {
   );
 
   return (
-    <AdminPageWrapper heading="Refund Management">
+    <AdminPageWrapper heading="All Transactions">
       <div>
         <TransactionModal
           open={transactionModal.open || false}
