@@ -442,15 +442,10 @@ function VideoPlayer() {
 		setVideoState,
 		playlistState,
 		setPlaylistState,
-		viewMode,
 		addToSeekQueue,
-		pauseReason,
 		setPauseReason,
-		currentMarkerIdx,
 		setCurrentMarkerIdx,
 		setCurrentTime,
-		markersLength,
-		videoStarted,
 		setVideoStarted,
 	] = useVideoStore((state) => [
 		state.currentVideo,
@@ -459,15 +454,10 @@ function VideoPlayer() {
 		state.setVideoState,
 		state.playlistState,
 		state.setPlaylistState,
-		state.viewMode,
 		state.addToSeekQueue,
-		state.pauseReason,
 		state.setPauseReason,
-		state.currentMarkerIdx,
 		state.setCurrentMarkerIdx,
 		state.setCurrentTime,
-		state?.markers?.length || 0,
-		state.videoStarted,
 		state.setVideoStarted,
 	]);
 
@@ -476,11 +466,13 @@ function VideoPlayer() {
 		setRecordingStart,
 		recordingPlaying,
 		setRecordingPlaying,
+		addToRecordingControlQueue,
 	] = useVideoStore((state) => [
 		state.recordingStart,
 		state.setRecordingStart,
 		state.recordingPlaying,
 		state.setRecordingPlaying,
+		state.addToRecordingControlQueue,
 	]);
 
 	const [videoStateVisible, setVideoStateVisible] = useState(false);
@@ -646,6 +638,8 @@ function VideoPlayer() {
 		setRecordConsent(true);
 		setShowRecordModal(false);
 		setPlaylistState(true);
+		console.log("handleConfirmRecord, add to queue");
+		addToRecordingControlQueue("RECORDING_PREVIEW");
 	}, [setPlaylistState]);
 
 	const handleRejectRecord = useCallback(() => {
@@ -672,11 +666,16 @@ function VideoPlayer() {
 	}, []);
 
 	useEffect(() => {
-		if (disclaimerHandled) {
+		if (disclaimerHandled && !recordingStart && !recordingPlaying) {
+			// show record modal if not recording
 			setShowRecordModal(true);
 			setDisclaimerHandled(false);
+		} else if (disclaimerHandled && recordingStart && recordingPlaying) {
+			// show start video
+			setPlaylistState(true);
+			setDisclaimerHandled(false);
 		}
-	}, [disclaimerHandled]);
+	}, [disclaimerHandled, recordingStart, recordingPlaying]);
 
 	return (
 		<div
@@ -806,7 +805,7 @@ function VideoPlayer() {
 			</div>
 
 			<Dialog
-				open={showRecordModal}
+				open={showRecordModal && !recordingStart && !recordingPlaying}
 				onClose={() => setShowRecordModal(false)}>
 				<DialogTitle>Record Yourself?</DialogTitle>
 				<DialogContent>
