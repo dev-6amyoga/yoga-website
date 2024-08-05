@@ -30,6 +30,7 @@ import ViewAllSchedules from "../pages/admin/schedule-management/ViewAllSchedule
 import LogPayment from "../pages/admin/transactions/LogPayment";
 import RefundManagement from "../pages/admin/transactions/Refund";
 import EditPlaylist from "../components/content-management/EditPlaylist";
+import PackagingVideos from "../pages/admin/packing-videos/PackagingVideos";
 
 export const AdminRoutes = [
   {
@@ -40,6 +41,10 @@ export const AdminRoutes = [
   {
     path: "/admin/video/create",
     element: <RegisterVideo />,
+  },
+  {
+    path: "/admin/package-videos",
+    element: <PackagingVideos />,
   },
   // {
   // 	path: "/admin/classmode/create",

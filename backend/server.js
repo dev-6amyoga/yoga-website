@@ -35,6 +35,8 @@ glob.sync('./models/mongo/*.js').forEach((file) => {
 
 // routers
 const asanaRouter = require('./routes/Asana')
+const videoRecordingRouter = require('./routes/VideoRecordings')
+const videoPackagingRouter = require('./routes/VideoPackaging')
 const authRouter = require('./routes/Auth')
 const instituteRouter = require('./routes/Institute')
 const userRouter = require('./routes/User')
@@ -192,6 +194,7 @@ app.get('/error', async (req, res) =>
 )
 
 app.use('/content', asanaRouter)
+app.use('/video-packaging', videoPackagingRouter)
 app.use('/content', playlistRouter)
 app.use('/schedule', scheduleRouter)
 app.use('/user', userRouter)
@@ -224,6 +227,7 @@ app.use('/otp', otpRouter)
 app.use('/customPlan', customPlanRouter)
 app.use('/customUserPlan', customUserPlanRouter)
 app.use('/r2', r2Router)
+app.use('/video-rec', videoRecordingRouter)
 
 // ws routers
 // app.use('/ws/class', classWsRouter)
