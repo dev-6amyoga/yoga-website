@@ -17,11 +17,22 @@ const Recorder = ({
 	requestData,
 	uploadData = () => {},
 	recordingStart,
-	recordingPlaying,
 	setRecordingStart,
+	recordingPlaying,
 	setRecordingPlaying,
+	showPreviewModal,
+	setShowPreviewModal,
+	previewDone,
+	setPreviewDone,
 	setupBeforeRecordingStart,
 }) => {
+	const [recordingControlQueue, popFromRecordingControlQueue] = useVideoStore(
+		(state) => [
+			state.recordingControlQueue,
+			state.popFromRecordingControlQueue,
+		]
+	);
+
 	useEffect(() => {
 		// setup interval to request data for every 20s
 		let interval = null;
@@ -43,6 +54,30 @@ const Recorder = ({
 			if (interval) clearInterval(interval);
 		};
 	}, [recordingStart, recordingPlaying]);
+
+	// to start recording after the user consents to recording the session
+	useEffect(() => {
+		console.log("[recordingControlQueue] : CHANGED");
+		if (recordingControlQueue.length > 0) {
+			const controlEvent = recordingControlQueue[0];
+
+			console.log("[recordingControlQueue] : ", controlEvent);
+
+			switch (controlEvent) {
+				case "RECORDING_START":
+					setupBeforeRecordingStart();
+					startRecording();
+					setRecordingStart(true);
+					setRecordingPlaying(true);
+					popFromRecordingControlQueue(0);
+					break;
+				default:
+					break;
+			}
+		}
+	}, [recordingControlQueue]);
+
+	// console.log("[recordingControlQueue] : ", recordingControlQueue);
 
 	return (
 		<div className="flex flex-row gap-2 items-center">
@@ -69,13 +104,13 @@ const Recorder = ({
 						}}>
 						Pause Recording
 					</Button>
-					<Button
+					{/* <Button
 						onClick={() => {
 							if (requestData) requestData();
 							else console.log("Cannot call requestData;");
 						}}>
 						Request Data
-					</Button>
+					</Button> */}
 					<Button
 						onClick={() => {
 							stopRecording();
@@ -120,10 +155,9 @@ const Recorder = ({
 };
 
 const VideoRecorder = () => {
-	const [videoBlob, setVideoBlob] = useState(null);
+	// const [videoBlob, setVideoBlob] = useState(null);
 	const [showModal, setShowModal] = useState(false);
-	const [showPreviewModal, setShowPreviewModal] = useState(false);
-	const [previewDone, setPreviewDone] = useState(false);
+	// const [showPreviewModal, setShowPreviewModal] = useState(false);
 	const [stream, setStream] = useState(null);
 
 	const videoRef = useRef();
@@ -140,11 +174,25 @@ const VideoRecorder = () => {
 		setRecordingStart,
 		recordingPlaying,
 		setRecordingPlaying,
+		previewDone,
+		setPreviewDone,
+		showPreviewModal,
+		setShowPreviewModal,
+		recordingControlQueue,
+		addToRecordingControlQueue,
+		popFromRecordingControlQueue,
 	] = useVideoStore((state) => [
 		state.recordingStart,
 		state.setRecordingStart,
 		state.recordingPlaying,
 		state.setRecordingPlaying,
+		state.previewDone,
+		state.setPreviewDone,
+		state.showPreviewModal,
+		state.setShowPreviewModal,
+		state.recordingControlQueue,
+		state.addToRecordingControlQueue,
+		state.popFromRecordingControlQueue,
 	]);
 
 	useEffect(() => {
@@ -162,6 +210,24 @@ const VideoRecorder = () => {
 			window.removeEventListener("beforeunload", handleBeforeUnload);
 		};
 	}, [recordingStart]);
+
+	useEffect(() => {
+		console.log("[recordingControlQueue] : CHANGED");
+		if (recordingControlQueue.length > 0) {
+			const controlEvent = recordingControlQueue[0];
+
+			console.log("[recordingControlQueue] : ", controlEvent);
+
+			switch (controlEvent) {
+				case "RECORDING_PREVIEW":
+					setShowPreviewModal(true);
+					popFromRecordingControlQueue(0);
+					break;
+				default:
+					break;
+			}
+		}
+	}, [recordingControlQueue]);
 
 	useEffect(() => {
 		let stream;
@@ -292,10 +358,6 @@ const VideoRecorder = () => {
 		}
 	};
 
-	const setPreviewTrue = () => {
-		setPreviewDone(true);
-	};
-
 	useEffect(() => {
 		if (showPreviewModal) {
 			navigator.mediaDevices
@@ -309,6 +371,7 @@ const VideoRecorder = () => {
 				})
 				.catch((err) => {
 					console.error("Error accessing webcam: ", err);
+					toast.error("Error accessing webcam");
 				});
 		}
 		return () => {
@@ -326,6 +389,9 @@ const VideoRecorder = () => {
 			tracks.forEach((track) => track.stop()); // Stop all tracks of the stream
 		}
 		setShowPreviewModal(false);
+		setRecordingStart(false);
+		setRecordingPlaying(false);
+		setPreviewDone(false);
 	};
 
 	const setupBeforeRecordingStart = () => {
@@ -426,9 +492,13 @@ const VideoRecorder = () => {
 							{...props}
 							uploadData={uploadData}
 							recordingStart={recordingStart}
-							recordingPlaying={recordingPlaying}
 							setRecordingStart={setRecordingStart}
+							recordingPlaying={recordingPlaying}
 							setRecordingPlaying={setRecordingPlaying}
+							showPreviewModal={showPreviewModal}
+							setShowPreviewModal={setShowPreviewModal}
+							previewDone={previewDone}
+							setPreviewDone={setPreviewDone}
 							setupBeforeRecordingStart={
 								setupBeforeRecordingStart
 							}
@@ -495,10 +565,11 @@ const VideoRecorder = () => {
 							variant="contained"
 							color="primary"
 							onClick={() => {
-								setPreviewTrue();
+								setPreviewDone(true);
 								setShowPreviewModal(false);
+								addToRecordingControlQueue("RECORDING_START");
 							}}>
-							Done
+							Start
 						</Button>
 						<Button
 							variant="outlined"

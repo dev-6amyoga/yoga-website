@@ -176,6 +176,29 @@ export const useVideoStore = create(
 				return { playreadyKeyUrl: url };
 			}),
 
+		recordingControlQueue: [],
+		addToRecordingControlQueue: (controlEvent) =>
+			set((state) => {
+				console.log("addToRecordingControlQueue", controlEvent);
+				return {
+					recordingControlQueue: [
+						...state.recordingControlQueue,
+						controlEvent,
+					],
+				};
+			}),
+		popFromRecordingControlQueue: (index) =>
+			set((state) => {
+				if (state.recordingControlQueue.length > index) {
+					const rcq = [...state.recordingControlQueue];
+					rcq.splice(index, 1);
+					return {
+						recordingControlQueue: rcq,
+					};
+				}
+				return {};
+			}),
+
 		recordingStart: false,
 		setRecordingStart: (recordingStart) =>
 			set(() => {
@@ -186,6 +209,18 @@ export const useVideoStore = create(
 		setRecordingPlaying: (recordingPlaying) =>
 			set(() => {
 				return { recordingPlaying };
+			}),
+
+		previewDone: false,
+		setPreviewDone: (previewDone) =>
+			set(() => {
+				return { previewDone };
+			}),
+
+		showPreviewModal: false,
+		setShowPreviewModal: (showPreviewModal) =>
+			set(() => {
+				return { showPreviewModal };
 			}),
 	}))
 );
