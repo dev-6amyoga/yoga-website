@@ -4,6 +4,8 @@
 	"private": true,
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.620.0",
+		"@aws-sdk/s3-request-presigner": "^3.624.0",
+		"@aws-sdk/xhr-http-handler": "^3.620.0",
 		"@emotion/react": "^11.11.4",
 		"@emotion/styled": "^11.11.5",
 		"@ffmpeg/ffmpeg": "^0.12.10",

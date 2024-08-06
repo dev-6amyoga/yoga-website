@@ -22,6 +22,7 @@ const {
 } = require('../enums/class_metadata_class_type')
 const {
   CLASS_RECURRANCE_TYPE_WEEKLY,
+  CLASS_RECURRANCE_TYPE_DAILY,
 } = require('../enums/class_metadata_recurrance_type')
 
 const ClassHistory = require('../models/mongo/ClassHistory')
@@ -124,7 +125,13 @@ router.post('/create', async (req, res) => {
         }
       )
     } else if (class_type === CLASS_TYPE_RECURRING) {
-      //
+      if (recurrance_type === CLASS_RECURRANCE_TYPE_DAILY) {
+        //
+      } else if (recurrance_type === CLASS_RECURRANCE_TYPE_WEEKLY) {
+        //
+      } else {
+        //
+      }
     }
 
     await mt.commitTransaction()
