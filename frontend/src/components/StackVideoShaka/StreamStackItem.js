@@ -469,7 +469,6 @@ function StreamStackItem({
           setVideoState(STATE_VIDEO_PLAY);
           return;
         }
-
         // pause if currenttime is greater than the timestamp of next?
         if (
           videoState !== STATE_VIDEO_LOADING &&
@@ -485,14 +484,6 @@ function StreamStackItem({
         ) {
           autoSetCurrentMarkerIdx(playerRef.current?.videoElement?.currentTime);
         }
-
-        // before 0.05 seconds of video end, add a video event
-        // to play the inactive video
-        // console.log(
-        // 	"VIDEO_EVENT_PLAY_INACTIVE : ",
-        // 	playerRef.current?.videoElement?.currentTime -
-        // 		playerRef.current?.videoElement?.duration
-        // );
         if (
           viewMode === VIDEO_VIEW_STUDENT_MODE &&
           playerRef.current?.videoElement?.duration -
@@ -779,7 +770,6 @@ function StreamStackItem({
         const check = isMobileTablet();
         const isMobile = { done: true, check: check };
         console.log("Checking for isMobile", isMobile);
-
         if (playerRef.current.ui) {
           console.log("Setting up UI");
           shaka.ui.Controls.registerElement(
