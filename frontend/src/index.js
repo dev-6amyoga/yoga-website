@@ -82,11 +82,7 @@ function Index() {
 				<GeistProvider>
 					{/* <CssBaseline /> */}
 					<RouterProvider router={router} />
-					<ToastContainer
-						autoClose={3000}
-						newestOnTop={true}
-						pauseOnHover={true}
-					/>
+					<ToastContainer autoClose={3000} pauseOnHover={true} />
 					<LoginIndex />
 				</GeistProvider>
 				<ReactQueryDevtools initialIsOpen={false} />
