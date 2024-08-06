@@ -4,7 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useShallow } from "zustand/react/shallow";
 import InstitutePageWrapper from "../../../components/Common/InstitutePageWrapper";
-import { ROLE_INSTITUTE_OWNER } from "../../../enums/roles";
+import {
+  ROLE_INSTITUTE_ADMIN,
+  ROLE_INSTITUTE_OWNER,
+} from "../../../enums/roles";
 import { USER_PLAN_ACTIVE } from "../../../enums/user_plan_status";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
@@ -393,4 +396,4 @@ function AddNewTeacher() {
   );
 }
 
-export default withAuth(AddNewTeacher, ROLE_INSTITUTE_OWNER);
+export default withAuth(AddNewTeacher, ROLE_INSTITUTE_ADMIN);

@@ -13,7 +13,10 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useShallow } from "zustand/react/shallow";
 import InstitutePageWrapper from "../../../components/Common/InstitutePageWrapper";
-import { ROLE_INSTITUTE_OWNER } from "../../../enums/roles";
+import {
+  ROLE_INSTITUTE_ADMIN,
+  ROLE_INSTITUTE_OWNER,
+} from "../../../enums/roles";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
@@ -358,4 +361,4 @@ function MakeNewPlaylist() {
   );
 }
 
-export default withAuth(MakeNewPlaylist, ROLE_INSTITUTE_OWNER);
+export default withAuth(MakeNewPlaylist, ROLE_INSTITUTE_ADMIN);

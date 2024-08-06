@@ -6,7 +6,10 @@ import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import Papa from "papaparse";
 import { toast } from "react-toastify";
-import { ROLE_INSTITUTE_OWNER } from "../../../enums/roles";
+import {
+  ROLE_INSTITUTE_ADMIN,
+  ROLE_INSTITUTE_OWNER,
+} from "../../../enums/roles";
 import { withAuth } from "../../../utils/withAuth";
 
 function MemberManagement() {
@@ -171,4 +174,4 @@ function MemberManagement() {
   );
 }
 
-export default withAuth(MemberManagement, ROLE_INSTITUTE_OWNER);
+export default withAuth(MemberManagement, ROLE_INSTITUTE_ADMIN);
