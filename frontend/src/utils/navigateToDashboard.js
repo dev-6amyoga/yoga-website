@@ -10,7 +10,9 @@ export const navigateToDashboard = (currentRole, userPlan, navigate) => {
       navigate("/teacher");
       break;
     case "INSTITUTE_OWNER":
-      // TODO what if institute_owner doesnt have a plan
+      navigate("/institute");
+      break;
+    case "INSTITUTE_ADMIN":
       navigate("/institute");
       break;
     case "STUDENT":
