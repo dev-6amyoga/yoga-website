@@ -1,24 +1,11 @@
 const express = require('express')
-
 const router = express.Router()
 const { spawn } = require('child_process')
-
 const multer = require('multer')
 const { S3Client } = require('@aws-sdk/client-s3')
-// const path = require('path')
-
 const storage = multer.memoryStorage()
-
 const upload = multer({ storage })
-
 const zlib = require('zlib')
-
-// const ffmpeg = require('fluent-ffmpeg')
-// const { Readable, Writable } = require('stream')
-// const fs = require('fs')
-
-// const { MovieParser } = require('node-video-lib')
-
 const {
   HTTP_OK,
   HTTP_INTERNAL_SERVER_ERROR,
@@ -27,62 +14,6 @@ const {
 const { cloudflareAddFileToBucket } = require('../utils/R2Client')
 const { cloudflareGetFile } = require('../utils/R2Client')
 const { cloudflareListDir } = require('../utils/R2Client')
-
-// router.post('/upload', upload.single('file'), async (req, res) => {
-//   try {
-//     const { filename, compressed } = req.body
-
-//     // console.log('[/upload] : body', req.body)
-
-//     if (compressed) {
-//       console.log('[/upload] : compressed', req.file.buffer.byteLength)
-//       // decompress the file
-//       // const compressedBlob = new Blob([req.file.buffer])
-
-//       // const decompressedBlob = await new Response(
-//       //   compressedBlob.stream().pipeThrough(new DecompressionStream('gzip'))
-//       // ).blob()
-
-//       const decompressedBuffer = zlib.gunzipSync(req.file.buffer)
-
-//       // const decompressedBuffer = await decompressedBlob.arrayBuffer()
-//       console.log(decompressedBuffer.byteLength)
-
-//       await cloudflareAddFileToBucket(
-//         'yoga-video-recordings',
-//         filename,
-//         decompressedBuffer.buffer,
-//         'video/mp4'
-//       )
-
-//       return res.status(HTTP_OK).json({
-//         message: 'File uploaded successfully',
-//       })
-//     }
-
-//     // if (!filename || !body) {
-//     //   return res.status(400).json({
-//     //     message: 'Invalid request',
-//     //   })
-//     // }
-
-//     await cloudflareAddFileToBucket(
-//       'yoga-video-recordings',
-//       filename,
-//       req.file.buffer,
-//       'video/mp4'
-//     )
-
-//     return res.status(HTTP_OK).json({
-//       message: 'File uploaded successfully',
-//     })
-//   } catch (err) {
-//     console.error(err)
-//     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-//       message: 'File upload failed',
-//     })
-//   }
-// })
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 

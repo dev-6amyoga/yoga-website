@@ -1,7 +1,10 @@
 import { Button, Grid, Table } from "@geist-ui/core";
 import { useEffect, useState } from "react";
 import InstituteNavbar from "../../../components/Common/InstituteNavbar/InstituteNavbar";
-import { ROLE_INSTITUTE_OWNER } from "../../../enums/roles";
+import {
+  ROLE_INSTITUTE_ADMIN,
+  ROLE_INSTITUTE_OWNER,
+} from "../../../enums/roles";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
@@ -106,4 +109,4 @@ function TransactionHistoryInstitute() {
   );
 }
 
-export default withAuth(TransactionHistoryInstitute, ROLE_INSTITUTE_OWNER);
+export default withAuth(TransactionHistoryInstitute, ROLE_INSTITUTE_ADMIN);

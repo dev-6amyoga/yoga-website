@@ -3,7 +3,10 @@ import InstitutePageWrapper from "../../../components/Common/InstitutePageWrappe
 import BillingSettings from "../../../components/Institute/InstituteSettings/BillingSettings";
 import ContactInfoSettings from "../../../components/Institute/InstituteSettings/ContactInfoSettings";
 import GeneralSettings from "../../../components/Institute/InstituteSettings/GeneralSettings";
-import { ROLE_INSTITUTE_OWNER } from "../../../enums/roles";
+import {
+  ROLE_INSTITUTE_ADMIN,
+  ROLE_INSTITUTE_OWNER,
+} from "../../../enums/roles";
 import { withAuth } from "../../../utils/withAuth";
 
 function InstituteSettings() {
@@ -26,4 +29,4 @@ function InstituteSettings() {
   );
 }
 
-export default withAuth(InstituteSettings, ROLE_INSTITUTE_OWNER);
+export default withAuth(InstituteSettings, ROLE_INSTITUTE_ADMIN);
