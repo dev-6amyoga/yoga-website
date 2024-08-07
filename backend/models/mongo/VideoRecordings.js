@@ -4,7 +4,7 @@ const videoRecordingsSchema = new mongoose.Schema({
   video_recordings_id: Number,
   user_id: Number,
   user_name: String,
-  creation_date: Date,
+  created_at: Date,
   recording_video_name: String,
 })
 

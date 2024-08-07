@@ -1,13 +1,14 @@
 const express = require('express')
+
 const router = express.Router()
 const {
   HTTP_OK,
   HTTP_NOT_FOUND,
   HTTP_INTERNAL_SERVER_ERROR,
 } = require('../utils/http_status_codes')
-const R2 = require('../utils/R2Client')
+// const R2 = require('../utils/R2Client')
 const VideoRecordings = require('../models/mongo/VideoRecordings')
-const { spawn } = require('child_process')
+// const { spawn } = require('child_process')
 
 router.post('/addVideoRecording', async (req, res) => {
   try {
@@ -67,10 +68,10 @@ router.put('/updateVideoRecording/:videoRecordingId', async (req, res) => {
         new: true,
       }
     )
-    res.json(updatedVideoRecording)
+    return res.json(updatedVideoRecording)
   } catch (error) {
     console.error(error)
-    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
       error: 'Failed to update Video Recording',
     })
   }
