@@ -130,7 +130,7 @@ router.post('/login', async (req, res) => {
     ])
     console.log('elapsed time to get user info: ', new Date() - startTime)
 
-    // console.log(errorUser);
+    console.log(errorUser)
 
     if (!user || errorUser) {
       await t.rollback()

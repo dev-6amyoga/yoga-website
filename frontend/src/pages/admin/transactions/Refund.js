@@ -1,7 +1,7 @@
 import { Button, Tag } from "@geist-ui/core";
 import { MoreHorizontal } from "@geist-ui/icons";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { DataTable } from "../../../components/Common/DataTable/DataTable";
@@ -60,11 +60,24 @@ function RefundManagement() {
         token: true,
       });
 
-      console.log({ ts: res?.data?.transactions });
-
       return res?.data?.transactions;
     },
   });
+
+  const [customUserPlans, setCustomUserPlans] = useState([]);
+  // /customUserPlan/getAllCustomUserPlans
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await Fetch({
+        url: "/customUserPlan/getAllCustomUserPlans",
+        method: "GET",
+        token: true,
+      });
+      setCustomUserPlans(res.data.plans);
+    };
+    fetchData();
+  }, []);
 
   const [transactionModal, setTransactionModal] = useState({
     open: false,
@@ -128,7 +141,6 @@ function RefundManagement() {
           <SortableColumn column={column}>Name</SortableColumn>
         ),
         cell: ({ row }) => {
-          console.log(row?.original);
           return row?.original?.user?.name;
         },
       },
@@ -310,7 +322,7 @@ function RefundManagement() {
         />
         <UserPlanModal
           open={userPlanModal.open || false}
-          data={userPlanModal.data || null}
+          data={userPlanModal.data || customUserPlans || null}
           handleClose={toggleUserPlanModal}
         />
         <RefundModal
