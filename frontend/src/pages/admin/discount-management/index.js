@@ -11,22 +11,6 @@ import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
 import Papa from "papaparse";
 
-// import {
-//   Button,
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableContainer,
-//   TableHead,
-//   TableRow,
-//   Dialog,
-//   DialogActions,
-//   DialogContent,
-//   DialogTitle,
-//   Chip,
-//   Typography,
-// } from "@mui/material";
-
 function DiscountManagement() {
   const [coupons, setCoupons] = useState([]);
   const [usageHistory, setUsageHistory] = useState([]);
@@ -287,17 +271,6 @@ function DiscountManagement() {
                 prop="discount_percentage"
                 label="Discount Percentage"
                 render={(val) => `${val}%`}
-              />
-              <Table.Column
-                label="Actions"
-                render={(val, row) => (
-                  <div className="flex flex-row gap-2">
-                    <Button auto scale={0.7}>
-                      Details
-                    </Button>
-                    {/* Add more action buttons if needed */}
-                  </div>
-                )}
               />
             </Table>
           </div>
