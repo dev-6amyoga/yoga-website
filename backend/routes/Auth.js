@@ -419,6 +419,7 @@ router.post('/login-google', async (req, res) => {
       )
 
       startTime = new Date()
+
       const [accessToken, access_token_creation_at, access_token_expiry_at] =
         generateAccessToken(user)
 

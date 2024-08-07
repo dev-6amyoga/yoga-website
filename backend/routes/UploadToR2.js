@@ -1,11 +1,11 @@
 const express = require('express')
-const router = express.Router()
-const { spawn } = require('child_process')
 const multer = require('multer')
-const { S3Client } = require('@aws-sdk/client-s3')
-const storage = multer.memoryStorage()
-const upload = multer({ storage })
+const { spawn } = require('child_process')
 const zlib = require('zlib')
+
+// const fs = require('fs')
+// const ffmpeg = require('fluent-ffmpeg')
+
 const {
   HTTP_OK,
   HTTP_INTERNAL_SERVER_ERROR,
@@ -14,8 +14,16 @@ const {
 const { cloudflareAddFileToBucket } = require('../utils/R2Client')
 const { cloudflareGetFile } = require('../utils/R2Client')
 const { cloudflareListDir } = require('../utils/R2Client')
+// const { Readable } = require('stream')
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+const router = express.Router()
+const storage = multer.memoryStorage()
+const upload = multer({ storage })
+
+const sleep = (ms) =>
+  new Promise((r) => {
+    setTimeout(r, ms)
+  })
 
 router.post('/upload', upload.single('file'), async (req, res) => {
   try {
@@ -135,15 +143,6 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   }
 })
 
-const s3Client = new S3Client({
-  region: 'apac',
-  endpoint: process.env.R2_RECORDINGS_UPLOAD_URL,
-  credentials: {
-    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY,
-  },
-})
-
 router.post('/api/upload', upload.single('file'), async (req, res) => {
   console.log('in api upload')
   // if (!req.file) {
@@ -213,15 +212,15 @@ router.post('/videos/get', async (req, res) => {
 })
 
 router.post('/videos/process/:foldername', async (req, res) => {
-  try {
-    const { foldername } = req.params
-    const { videos } = req.body
+  const { foldername } = req.params
+  const { videos } = req.body
 
+  try {
     // console.log('foldername:', foldername)
     // console.log('videos:', videos)
 
     // get all videos from r2
-    const videoData = await Promise.all(
+    let videoData = await Promise.all(
       videos.map(async (video) => {
         try {
           const buf = await cloudflareGetFile(
@@ -238,7 +237,10 @@ router.post('/videos/process/:foldername', async (req, res) => {
       })
     )
 
+    videoData = videoData.filter((v) => !String(v.Key).includes('final'))
+
     const foldernameLength = foldername.length + 1
+
     videoData.sort((v1, v2) =>
       Number(String(v1.Key).substring(foldernameLength)) >
       Number(String(v2.Key).substring(foldernameLength))
@@ -250,61 +252,70 @@ router.post('/videos/process/:foldername', async (req, res) => {
 
     console.log('buffers processed:', buffers.length)
 
-    // for (let v = 0; v < videoData.length; v += 1) {
-    //   console.log('video:', videoData[v].Key, videoData[v].buffer.byteLength)
-    // }
+    for (let v = 0; v < videoData.length; v += 1) {
+      console.log('video:', videoData[v].Key, videoData[v].buffer.byteLength)
+    }
 
     // merge all videos into one buffer in order
     const combinedBuffer = Buffer.concat(buffers)
 
     console.log('combined buffer size:', combinedBuffer.byteLength)
 
-    // const readableBuffer = Readable.from(combinedBuffer)
+    /*
+    const readableBuffer = Readable.from(combinedBuffer)
 
     // create a file
     // fs.closeSync(fs.openSync(`${foldername}.mp4`, 'a'))
-    // const fd = fs.openSync(`video.mp4`, 'a')
+    const fd = fs.openSync(`video.mp4`, 'a')
 
-    // fs.closeSync(fd)
+    fs.closeSync(fd)
 
     // // process with ffmpeg
-    // const command = ffmpeg(readableBuffer)
-    //   .inputOption('-sn')
-    //   .videoCodec('libx264')
-    //   .audioCodec('aac')
-    //   .inputOption('-strict', 'experimental')
-    //   .output(writableStream)
+    const command = ffmpeg(readableBuffer)
+      .inputOption('-sn')
+      .inputOption('-strict', 'experimental')
+      .output(`video.mp4`)
 
-    // command.run()
+    command.run()
 
-    // let status = 0
-    // command.on('end', () => {
-    //   status = 1
-    // })
+    let status = 0
 
-    // command.on('error', (err) => {
-    //   console.error(err)
-    //   status = -1
-    // })
+    command.on('end', () => {
+      status = 1
+    })
 
-    // while (status === 0) {
-    //   console.log('waiting for ffmpeg to complete')
-    //   await sleep(1000)
-    // }
+    command.on('error', (err) => {
+      console.error(err)
+      status = -1
+    })
 
-    // if (status === -1) {
-    //   return res.status(500).json({
-    //     message: 'Failed to process video',
-    //   })
-    // }
+    while (status === 0) {
+      console.log('waiting for ffmpeg to complete')
+      await sleep(1000)
+    }
+
+    if (status === -1) {
+      fs.unlinkSync(`video.mp4`)
+      return res.status(500).json({
+        message: 'Failed to process video',
+      })
+    }
 
     // get buffer from file
-    // const processedBuffer = fs.readFileSync(`video.mp4`)
+    const processedBuffer = fs.readFileSync(`video.mp4`)
 
-    // console.log('processed buffer size:', processedBuffer.byteLength)
+    console.log('processed buffer size:', processedBuffer.byteLength)
+
+    await cloudflareAddFileToBucket(
+      'yoga-video-recordings',
+      `${foldername}/${foldername}_final.mp4`,
+      processedBuffer,
+      'video/mp4'
+    )
 
     // delete the file
-    // fs.unlinkSync(`video.mp4`)
+    fs.unlinkSync(`video.mp4`)
+    */
 
     // upload the processed video
     await cloudflareAddFileToBucket(
@@ -320,6 +331,7 @@ router.post('/videos/process/:foldername', async (req, res) => {
     })
   } catch (err) {
     console.error(err)
+    // fs.unlinkSync(`video.mp4`)
     return res.status(500).json({
       message: 'Failed to download file',
     })
