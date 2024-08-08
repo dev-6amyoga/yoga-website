@@ -289,18 +289,27 @@ router.post('/videos/process/', async (req, res) => {
     )
 
     videos.sort((v1, v2) =>
-      Number(String(v1.Key).substring(foldernameLength)) >
-      Number(String(v2.Key).substring(foldernameLength))
-        ? -1
-        : 1
+      Number(String(v1.Key).substring(2 * foldernameLength)) >
+      Number(String(v2.Key).substring(2 * foldernameLength))
+        ? 1
+        : -1
     )
 
-    console.log('videos:', videos)
+    console.log(
+      'videos:',
+      videos.map((v) => v.Key)
+    )
 
     console.log(
       'TOTAL BUFFER LENGTH : ',
       videos.reduce((acc, v) => acc + v.Size, 0)
     )
+
+    // if (videos) {
+    //   return res.status(HTTP_BAD_REQUEST).json({
+    //     message: 'No videos found',
+    //   })
+    // }
 
     // start multipart upload
 
@@ -332,7 +341,6 @@ router.post('/videos/process/', async (req, res) => {
     let buf = Buffer.alloc(0)
 
     for (let v = 0; v < videos.length; v += 1) {
-      console.log('video:', videos[v].Key)
       subpartNumber = 0
 
       buf = await cloudflareGetFile(
@@ -344,7 +352,8 @@ router.post('/videos/process/', async (req, res) => {
       // upload parts to r2
       totalLen = buf.byteLength + leftoverBufferLen
       currentBufferPointer = 0
-      console.log('totalLen:', totalLen)
+
+      console.log('video:', videos[v].Key, buf.byteLength, totalLen)
 
       while (totalLen >= chunkSize) {
         console.log({
@@ -416,7 +425,14 @@ router.post('/videos/process/', async (req, res) => {
         console.log('totalLen > 0; calc leftoverBuffer', { totalLen })
         if (subpartNumber === 0) {
           console.log('totalLen > 0, subpartNumber === 0', subpartNumber)
-          leftoverBuffer = buf.subarray(0, buf.byteLength)
+          if (leftoverBuffer.byteLength > 0) {
+            leftoverBuffer = Buffer.concat([
+              leftoverBuffer,
+              buf.subarray(0, buf.byteLength),
+            ])
+          } else {
+            leftoverBuffer = buf.subarray(0, totalLen)
+          }
         } else {
           console.log(
             'totalLen > 0, subpartNumber !== 0',
