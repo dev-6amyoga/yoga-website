@@ -6,7 +6,7 @@ import { DataTable } from "../../components/Common/DataTable/DataTable";
 import { Fetch } from "../../utils/Fetch";
 
 import { FFmpeg } from "@ffmpeg/ffmpeg";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { cloudflareGetFileUrl } from "../../utils/R2Client";
 
 // export default function CustomerAssistanceVideos() {
@@ -403,10 +403,132 @@ import { cloudflareGetFileUrl } from "../../utils/R2Client";
 //   );
 // }
 
+const VideoActions = ({ video }) => {
+	const { mutateAsync: handleDownload, isPending: isDownloadPending } =
+		useMutation({
+			mutationKey: ["justDownloadVideo", video._id],
+			mutationFn: async () => {
+				try {
+					const url = await cloudflareGetFileUrl(
+						import.meta.env.VITE_CLOUDFLARE_R2_RECORDINGS_BUCKET,
+						`${video.folder_name}/${video.folder_name}_final.mp4`,
+						"video/mp4"
+					);
+
+					const res = await fetch(url);
+
+					if (res.status === 200) {
+						const buffer = await res.arrayBuffer();
+						const blob = new Blob([buffer], { type: "video/mp4" });
+						const blobURL = URL.createObjectURL(blob);
+
+						const a = document.createElement("a");
+						a.href = blobURL;
+						a.download = `${video.folder_name}.mp4`;
+						a.click();
+
+						URL.revokeObjectURL(blobURL);
+
+						toast("Video downloaded successfully", {
+							type: "success",
+						});
+
+						return [];
+					} else {
+						throw new Error("Failed to download video");
+					}
+				} catch (error) {
+					toast.error(error);
+					throw error;
+				}
+			},
+		});
+
+	const { mutateAsync: handleProcess, isPending: isProcessPending } =
+		useMutation({
+			mutationKey: ["processVideo", video._id],
+			mutationFn: async () => {
+				try {
+					toast.warn(
+						"Processing videos, this may take up to 5 minutes"
+					);
+
+					const res = await Fetch({
+						url: `/r2/videos/process/`,
+						method: "POST",
+						data: {
+							folder_name: video.folder_name,
+							video_recording_id: video._id,
+						},
+					});
+
+					if (res.status === 200) {
+						toast.success("Videos processed successfully");
+					} else {
+						throw new Error("Failed to process videos");
+					}
+				} catch (error) {
+					toast.error(error);
+					throw error;
+				}
+			},
+		});
+
+	return (
+		<div className="flex flex-row gap-2">
+			<Button
+				onClick={() => {
+					handleProcess(video);
+				}}
+				variant={
+					video?.processing_status === "PROCESSED"
+						? "outlined"
+						: "contained"
+				}
+				size="small"
+				disabled={isProcessPending}>
+				{isProcessPending ? (
+					<CircularProgress size="1rem" />
+				) : video?.processing_status === "PROCESSED" ? (
+					"REPROCESS"
+				) : (
+					"PROCESS"
+				)}
+			</Button>
+
+			<Button
+				onClick={() => {
+					handleDownload(video);
+				}}
+				variant="contained"
+				size="small"
+				disabled={
+					isDownloadPending ||
+					!(video?.processing_status === "PROCESSED")
+				}>
+				{isDownloadPending ? (
+					<CircularProgress size="1rem" />
+				) : (
+					"Download"
+				)}
+			</Button>
+
+			<Button
+				onClick={() => handleDelete(video)}
+				color="error"
+				variant="outlined"
+				size="small"
+				disabled={true}>
+				Delete
+			</Button>
+		</div>
+	);
+};
+
 export default function CustomerAssistanceVideos() {
 	const ffmpegRef = useRef(new FFmpeg());
 	const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
-	const [allVideoRecs, setAllVideoRecs] = useState([]);
+	// const [allVideoRecs, setAllVideoRecs] = useState([]);
 
 	const {
 		data: videos,
@@ -445,17 +567,22 @@ export default function CustomerAssistanceVideos() {
 		},
 	});
 
-	useEffect(() => {
-		const fetchData = async () => {
-			const response = await Fetch({
-				url: "/video-rec/getAllVideoRecordings",
-				method: "GET",
-			});
-			const data = response.data;
-			setAllVideoRecs(data);
-		};
-		fetchData();
-	}, []);
+	const { data: allVideoRecs, refetch: refetchAllVideos } = useQuery({
+		queryKey: ["allVideoRecordings"],
+		queryFn: async () => {
+			try {
+				const response = await Fetch({
+					url: "/video-rec/getAllVideoRecordings",
+					method: "GET",
+				});
+				const data = response.data;
+
+				return data;
+			} catch (err) {
+				throw err;
+			}
+		},
+	});
 
 	const { mutateAsync: handleDownload, isPending } = useMutation({
 		mutationKey: ["downloadVideo"],
@@ -616,43 +743,24 @@ export default function CustomerAssistanceVideos() {
 
 	const columns1 = [
 		{
-			accessorKey: "user_name",
-			header: "Student name",
+			accessorKey: "user_id",
+			header: "Student ID",
 		},
 		{
-			accessorKey: "creation_date",
+			accessorKey: "user_username",
+			header: "Student Username",
+		},
+		{
+			accessorKey: "created_at",
 			header: "Creation Date",
 		},
 		{
+			accessorKey: "processing_status",
+			header: "Processing Status",
+		},
+		{
 			header: "Actions",
-			cell: ({ row }) => {
-				let [loading, setLoading] = useState(false);
-				const handle = async (row) => {
-					setLoading(true);
-					await handleDownload(row);
-					setLoading(false);
-				};
-				return (
-					<div className="flex flex-row gap-2">
-						<Button
-							onClick={() => {
-								handle(row?.original);
-							}}
-							variant="contained"
-							size="small"
-							disabled={loading}>
-							{loading ? <CircularProgress /> : "Download"}
-						</Button>
-						<Button
-							onClick={() => handleDelete(row?.original)}
-							color="error"
-							variant="outlined"
-							size="small">
-							Delete
-						</Button>
-					</div>
-				);
-			},
+			cell: ({ row }) => <VideoActions video={row.original} />,
 		},
 	];
 
@@ -661,9 +769,9 @@ export default function CustomerAssistanceVideos() {
 			<div>
 				<h2>All Video Recordings</h2>
 				<DataTable
-					data={allVideoRecs}
+					data={allVideoRecs ?? []}
 					columns={columns1}
-					refetch={refetch}
+					refetch={refetchAllVideos}
 				/>
 			</div>
 			<br />

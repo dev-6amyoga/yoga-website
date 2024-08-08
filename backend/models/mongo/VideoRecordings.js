@@ -1,11 +1,14 @@
 const mongoose = require('mongoose')
 
 const videoRecordingsSchema = new mongoose.Schema({
-  video_recordings_id: Number,
   user_id: Number,
-  user_name: String,
-  created_at: Date,
-  recording_video_name: String,
+  user_username: String,
+  folder_name: String,
+  processing_status: { type: String, default: 'PENDING' },
+  created_at: {
+    type: Date,
+    default: Date.now,
+  },
 })
 
 const VideoRecordings = mongoose.model(

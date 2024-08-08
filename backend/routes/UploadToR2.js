@@ -9,11 +9,21 @@ const zlib = require('zlib')
 const {
   HTTP_OK,
   HTTP_INTERNAL_SERVER_ERROR,
+  HTTP_BAD_REQUEST,
 } = require('../utils/http_status_codes')
 
-const { cloudflareAddFileToBucket } = require('../utils/R2Client')
+const {
+  cloudflareAddFileToBucket,
+  cloudflareListDirV2,
+  cloudflareStartMultipartUpload,
+  cloudflareUploadPart,
+  cloudflareCompleteMultipartUpload,
+  cloudflareCancelMultipartUpload,
+} = require('../utils/R2Client')
 const { cloudflareGetFile } = require('../utils/R2Client')
 const { cloudflareListDir } = require('../utils/R2Client')
+const VideoRecordings = require('../models/mongo/VideoRecordings')
+const { GetUser } = require('../services/User.service')
 // const { Readable } = require('stream')
 
 const router = express.Router()
@@ -27,7 +37,12 @@ const sleep = (ms) =>
 
 router.post('/upload', upload.single('file'), async (req, res) => {
   try {
-    const { filename, foldername, content_type = 'video/mp4' } = req.body
+    const {
+      user_id,
+      file_name,
+      folder_name,
+      content_type = 'video/mp4',
+    } = req.body
 
     let { compressed = 'false', python = 'false' } = req.body
 
@@ -38,14 +53,14 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       return res.status(400).json({ message: 'No file uploaded' })
     }
 
-    if (!filename || !foldername) {
+    if (!file_name || !folder_name) {
       return res.status(400).json({ message: 'Invalid request' })
     }
 
     let buffer = req.file
 
     // console.log('[/upload] : python', python, typeof python)
-    console.log('[/upload] : filename', filename)
+    console.log('[/upload] : file_name', file_name)
     console.log('[/upload] : original size:', req.file.buffer.byteLength)
 
     if (compressed) {
@@ -58,7 +73,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     // let python = false
 
     if (python) {
-      const uploadProcess = spawn('python', ['demo.py', filename, compressed])
+      const uploadProcess = spawn('python', ['demo.py', file_name, compressed])
 
       uploadProcess.stdin.write(Buffer.from(buffer.buffer))
       uploadProcess.stdin.end()
@@ -122,10 +137,35 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       return res.status(500).json({ message: 'Failed to upload video' })
     }
 
+    // check if video recording exists
+    if (user_id !== 'XXX') {
+      const videoRecording = await VideoRecordings.findOne({
+        user_id,
+        folder_name,
+      })
+
+      if (!videoRecording) {
+        const [user, error] = await GetUser({ user_id }, ['username'])
+
+        if (error || !user) {
+          console.error(error)
+          return res.status(400).json({ message: error || 'user not found' })
+        }
+
+        const newVideoRecording = new VideoRecordings({
+          user_id,
+          folder_name,
+          user_username: user.username,
+        })
+
+        await newVideoRecording.save()
+      }
+    }
+
     const startTs = performance.now()
     await cloudflareAddFileToBucket(
       'yoga-video-recordings',
-      `${foldername}/${filename}`,
+      `${folder_name}/${file_name}`,
       buffer.buffer,
       content_type
     )
@@ -211,55 +251,248 @@ router.post('/videos/get', async (req, res) => {
   }
 })
 
-router.post('/videos/process/:foldername', async (req, res) => {
-  const { foldername } = req.params
-  const { videos } = req.body
+router.post('/videos/process/', async (req, res) => {
+  const { video_recording_id } = req.body
+
+  let videoRecording = null
+  let uploadId = null
+  let folder_name = null
 
   try {
     // console.log('foldername:', foldername)
     // console.log('videos:', videos)
+    videoRecording = await VideoRecordings.findById(video_recording_id)
 
-    // get all videos from r2
-    let videoData = await Promise.all(
-      videos.map(async (video) => {
-        try {
-          const buf = await cloudflareGetFile(
-            'yoga-video-recordings',
-            `${foldername}/${video.Key}`,
-            'application/octet-stream'
-          )
-          console.log('got video:', video.Key)
-          return { Key: video.Key, buffer: buf }
-        } catch (err) {
-          console.error(err)
-          throw err
-        }
+    if (!videoRecording) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        message: 'Video recording not found',
       })
-    )
-
-    videoData = videoData.filter((v) => !String(v.Key).includes('final'))
-
-    const foldernameLength = foldername.length + 1
-
-    videoData.sort((v1, v2) =>
-      Number(String(v1.Key).substring(foldernameLength)) >
-      Number(String(v2.Key).substring(foldernameLength))
-        ? 1
-        : -1
-    )
-
-    const buffers = videoData.map((v) => v.buffer)
-
-    console.log('buffers processed:', buffers.length)
-
-    for (let v = 0; v < videoData.length; v += 1) {
-      console.log('video:', videoData[v].Key, videoData[v].buffer.byteLength)
     }
 
-    // merge all videos into one buffer in order
-    const combinedBuffer = Buffer.concat(buffers)
+    folder_name = videoRecording.get('folder_name')
 
-    console.log('combined buffer size:', combinedBuffer.byteLength)
+    const foldernameLength = folder_name.length + 1
+
+    const videosRes = await cloudflareListDirV2(
+      'yoga-video-recordings',
+      folder_name
+    )
+
+    if (!videosRes.Contents || videosRes.Contents.length === 0) {
+      return res.status(HTTP_BAD_REQUEST).json({
+        message: 'No videos found',
+      })
+    }
+
+    const videos = videosRes.Contents.filter(
+      (v) => !String(v.Key).includes('final')
+    )
+
+    videos.sort((v1, v2) =>
+      Number(String(v1.Key).substring(foldernameLength)) >
+      Number(String(v2.Key).substring(foldernameLength))
+        ? -1
+        : 1
+    )
+
+    console.log('videos:', videos)
+
+    console.log(
+      'TOTAL BUFFER LENGTH : ',
+      videos.reduce((acc, v) => acc + v.Size, 0)
+    )
+
+    // start multipart upload
+
+    const multipartUpload = await cloudflareStartMultipartUpload(
+      'yoga-video-recordings',
+      `${folder_name}/${folder_name}_final.mp4`,
+      'video/mp4'
+    )
+
+    uploadId = multipartUpload.UploadId
+
+    console.log('uploadId:', uploadId)
+
+    const chunkSize = 10 * 1024 * 1024
+
+    // // get all videos from r2
+    let leftoverBuffer = Buffer.alloc(0)
+    let leftoverBufferLen = 0
+    let partNumber = 1
+    let subpartNumber = 0
+    let currentBufferPointer = 0
+
+    // get one video from r2
+    // send parts to r2
+    // add leftover buffer to next video
+
+    const parts = []
+    let totalLen = 0
+    let buf = Buffer.alloc(0)
+
+    for (let v = 0; v < videos.length; v += 1) {
+      console.log('video:', videos[v].Key)
+      subpartNumber = 0
+
+      buf = await cloudflareGetFile(
+        'yoga-video-recordings',
+        `${videos[v].Key}`,
+        'application/octet-stream'
+      )
+
+      // upload parts to r2
+      totalLen = buf.byteLength + leftoverBufferLen
+      currentBufferPointer = 0
+      console.log('totalLen:', totalLen)
+
+      while (totalLen >= chunkSize) {
+        console.log({
+          leftoverBufferLen,
+          sizeOfleftoverBuffer: leftoverBuffer.byteLength,
+          totalLen,
+          partNumber,
+          subpartNumber,
+        })
+
+        if (leftoverBufferLen > 0) {
+          const partBuf = Buffer.concat([
+            leftoverBuffer,
+            buf.subarray(0, chunkSize - leftoverBufferLen),
+          ])
+
+          console.log('partBuf size : ', partBuf.byteLength)
+
+          const uploadRes = await cloudflareUploadPart(
+            'yoga-video-recordings',
+            `${folder_name}/${folder_name}_final.mp4`,
+            uploadId,
+            partNumber,
+            partBuf
+          )
+
+          parts.push({
+            ETag: uploadRes.ETag,
+            PartNumber: partNumber,
+          })
+
+          currentBufferPointer = chunkSize - leftoverBufferLen
+          leftoverBufferLen = 0
+        } else {
+          const partBuf = buf.subarray(
+            currentBufferPointer,
+            currentBufferPointer + chunkSize
+          )
+
+          console.log('partBuf : ', {
+            start: currentBufferPointer,
+            end: currentBufferPointer + chunkSize,
+            buf_size: buf.byteLength,
+            partBuf_size: partBuf.byteLength,
+          })
+
+          const uploadRes = await cloudflareUploadPart(
+            'yoga-video-recordings',
+            `${folder_name}/${folder_name}_final.mp4`,
+            uploadId,
+            partNumber,
+            partBuf
+          )
+
+          parts.push({
+            ETag: uploadRes.ETag,
+            PartNumber: partNumber,
+          })
+
+          currentBufferPointer += chunkSize
+        }
+
+        partNumber += 1
+        totalLen -= chunkSize
+        subpartNumber += 1
+      }
+
+      if (totalLen > 0) {
+        console.log('totalLen > 0; calc leftoverBuffer', { totalLen })
+        if (subpartNumber === 0) {
+          console.log('totalLen > 0, subpartNumber === 0', subpartNumber)
+          leftoverBuffer = buf.subarray(0, buf.byteLength)
+        } else {
+          console.log(
+            'totalLen > 0, subpartNumber !== 0',
+            subpartNumber,
+            buf.byteLength,
+            subpartNumber * chunkSize,
+            buf.byteLength - subpartNumber * chunkSize
+          )
+          leftoverBuffer = buf.subarray(
+            buf.byteLength - totalLen,
+            buf.byteLength
+          )
+        }
+        leftoverBufferLen = leftoverBuffer.byteLength
+      }
+    }
+
+    console.log('out of loop')
+    console.log({ leftoverBufferLen, totalLen, partNumber, subpartNumber })
+
+    // if (totalLen > 0 && totalLen < chunkSize && buf.byteLength > 0) {
+    //   leftoverBuffer = buf
+    //   leftoverBufferLen = buf.byteLength
+    // }
+
+    // upload the last part
+    if (leftoverBufferLen > 0) {
+      console.log('uploading leftover buffer:', leftoverBufferLen)
+      const uploadRes = await cloudflareUploadPart(
+        'yoga-video-recordings',
+        `${folder_name}/${folder_name}_final.mp4`,
+        uploadId,
+        partNumber,
+        leftoverBuffer
+      )
+
+      parts.push({
+        ETag: uploadRes.ETag,
+        PartNumber: partNumber,
+      })
+    }
+
+    // complete multipart upload
+    await cloudflareCompleteMultipartUpload(
+      'yoga-video-recordings',
+      `${folder_name}/${folder_name}_final.mp4`,
+      uploadId,
+      parts
+    )
+
+    videoRecording.processing_status = 'PROCESSED'
+    await videoRecording.save()
+
+    // videoData = videoData.filter((v) => !String(v.Key).includes('final'))
+
+    // const foldernameLength = folder_name.length + 1
+
+    // videoData.sort((v1, v2) =>
+    //   Number(String(v1.Key).substring(foldernameLength)) >
+    //   Number(String(v2.Key).substring(foldernameLength))
+    //     ? 1
+    //     : -1
+    // )
+
+    // const buffers = videoData.map((v) => v.buffer)
+
+    // console.log('buffers processed:', buffers.length)
+
+    // for (let v = 0; v < videoData.length; v += 1) {
+    //   console.log('video:', videoData[v].Key, videoData[v].buffer.byteLength)
+    // }
+
+    // // merge all videos into one buffer in order
+    // const combinedBuffer = Buffer.concat(buffers)
+
+    // console.log('combined buffer size:', combinedBuffer.byteLength)
 
     /*
     const readableBuffer = Readable.from(combinedBuffer)
@@ -318,22 +551,61 @@ router.post('/videos/process/:foldername', async (req, res) => {
     */
 
     // upload the processed video
-    await cloudflareAddFileToBucket(
-      'yoga-video-recordings',
-      `${foldername}/${foldername}_final.mp4`,
-      combinedBuffer,
-      'video/mp4'
-    )
+    // await cloudflareAddFileToBucket(
+    //   'yoga-video-recordings',
+    //   `${folder_name}/${folder_name}_final.mp4`,
+    //   combinedBuffer,
+    //   'video/mp4'
+    // )
 
-    // send the processed video
+    // videoRecording.processing_status = 'PROCESSED'
+    // await videoRecording.save()
+
+    // // send the processed video
     return res.status(200).json({
       message: 'Video processed successfully',
     })
   } catch (err) {
+    if (videoRecording) {
+      videoRecording.processing_status = 'FAILED'
+      await videoRecording.save()
+    }
+
+    if (uploadId) {
+      await cloudflareCancelMultipartUpload(
+        'yoga-video-recordings',
+        `${folder_name}/${folder_name}_final.mp4`,
+        uploadId,
+        []
+      )
+    }
+
     console.error(err)
     // fs.unlinkSync(`video.mp4`)
     return res.status(500).json({
-      message: 'Failed to download file',
+      message: err || 'Failed to process video',
+    })
+  }
+})
+
+router.post('/mpu/abort', async (req, res) => {
+  const { uploadId, filename } = req.body
+
+  try {
+    await cloudflareCancelMultipartUpload(
+      'yoga-video-recordings',
+      filename,
+      uploadId,
+      []
+    )
+
+    return res.status(200).json({
+      message: 'Multipart upload aborted successfully',
+    })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({
+      message: 'Failed to abort multipart upload',
     })
   }
 })
