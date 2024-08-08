@@ -3,6 +3,11 @@ const {
   PutObjectCommand,
   GetObjectCommand,
   ListObjectsCommand,
+  ListObjectsV2Command,
+  CreateMultipartUploadCommand,
+  CompleteMultipartUploadCommand,
+  AbortMultipartUploadCommand,
+  UploadPartCommand,
 } = require('@aws-sdk/client-s3')
 
 const R2 = new S3Client({
@@ -62,9 +67,77 @@ module.exports = {
       new ListObjectsCommand({
         Bucket: bucket,
         Prefix: prefix,
-        MaxKeys: 1000,
       })
     )
     return response
   },
+
+  cloudflareListDirV2: async (bucket, prefix) => {
+    const response = await R2.send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: prefix,
+      })
+    )
+    return response
+  },
+
+  cloudflareStartMultipartUpload: async (bucket, filename, content_type) =>
+    R2.send(
+      new CreateMultipartUploadCommand({
+        Bucket: bucket,
+        Key: filename,
+        ContentType: content_type,
+      })
+    ),
+
+  cloudflareUploadPart: async (
+    bucket,
+    filename,
+    uploadId,
+    partNumber,
+    body
+  ) => {
+    console.log(
+      '[cloudflareUploadPart] uploading size:',
+      body.byteLength,
+      ' part number:',
+      partNumber
+    )
+    return R2.send(
+      new UploadPartCommand({
+        Bucket: bucket,
+        Key: filename,
+        UploadId: uploadId,
+        PartNumber: partNumber,
+        Body: body,
+      })
+    )
+  },
+
+  cloudflareCompleteMultipartUpload: async (
+    bucket,
+    filename,
+    uploadId,
+    parts
+  ) =>
+    R2.send(
+      new CompleteMultipartUploadCommand({
+        Bucket: bucket,
+        Key: filename,
+        UploadId: uploadId,
+        MultipartUpload: {
+          Parts: parts,
+        },
+      })
+    ),
+
+  cloudflareCancelMultipartUpload: async (bucket, filename, uploadId) =>
+    R2.send(
+      new AbortMultipartUploadCommand({
+        Bucket: bucket,
+        Key: filename,
+        UploadId: uploadId,
+      })
+    ),
 }
