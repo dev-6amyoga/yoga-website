@@ -10,6 +10,7 @@ const {
 } = require('../utils/http_status_codes')
 // const R2 = require('../utils/R2Client')
 const VideoRecordings = require('../models/mongo/VideoRecordings')
+const { cloudflareDeleteFolder } = require('../utils/R2Client')
 // const { spawn } = require('child_process')
 
 router.post('/addVideoRecording', async (req, res) => {
@@ -66,12 +67,16 @@ router.delete('/deleteVideoRecording/:videoRecordingId', async (req, res) => {
   const { videoRecordingId } = req.params
   try {
     // delete from mongo
-    const deletedVideoRecording = await VideoRecordings.findOneAndDelete({
-      _id: new mongoose.Schema.ObjectId(videoRecordingId),
-    })
+    const deletedVideoRecording =
+      await VideoRecordings.findByIdAndRemove(videoRecordingId)
 
     if (deletedVideoRecording) {
       // delete all recordings chunks from R2
+
+      await cloudflareDeleteFolder(
+        'yoga-video-recordings',
+        deletedVideoRecording.folder_name
+      )
 
       return res.status(HTTP_OK).json({
         message: 'Video Recording deleted successfully',

@@ -474,6 +474,28 @@ const VideoActions = ({ video }) => {
 			},
 		});
 
+	const { mutateAsync: handleDelete, isPending: isDeletePending } =
+		useMutation({
+			mutationKey: ["deleteVideo", video._id],
+			mutationFn: async (video) => {
+				// console.log(video._id, video._id.toString());
+				try {
+					const res = await Fetch({
+						url: `/video-rec/deleteVideoRecording/${video._id.toString()}`,
+						method: "DELETE",
+					});
+					if (res.status === 200) {
+						toast.success("Video deleted successfully");
+					} else {
+						throw new Error("Failed to delete video");
+					}
+				} catch (error) {
+					toast.error(error);
+					throw error;
+				}
+			},
+		});
+
 	return (
 		<div className="flex flex-row gap-2">
 			<Button
@@ -518,7 +540,7 @@ const VideoActions = ({ video }) => {
 				color="error"
 				variant="outlined"
 				size="small"
-				disabled={true}>
+				disabled={isDeletePending}>
 				Delete
 			</Button>
 		</div>
@@ -683,8 +705,6 @@ export default function CustomerAssistanceVideos() {
 		},
 	});
 
-	const handleDelete = (row) => {};
-
 	const columns = [
 		{
 			accessorKey: "folder",
@@ -751,8 +771,10 @@ export default function CustomerAssistanceVideos() {
 			header: "Student Username",
 		},
 		{
-			accessorKey: "created_at",
 			header: "Creation Date",
+			cell: ({ row }) => (
+				<p>{new Date(row?.original?.created_at).toLocaleString()}</p>
+			),
 		},
 		{
 			accessorKey: "processing_status",

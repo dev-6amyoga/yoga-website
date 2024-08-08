@@ -8,6 +8,7 @@ const {
   CompleteMultipartUploadCommand,
   AbortMultipartUploadCommand,
   UploadPartCommand,
+  DeleteObjectsCommand,
 } = require('@aws-sdk/client-s3')
 
 const R2 = new S3Client({
@@ -140,4 +141,34 @@ module.exports = {
         UploadId: uploadId,
       })
     ),
+
+  cloudflareDeleteFolder: async (bucket, folder) => {
+    const response = await R2.send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: folder,
+      })
+    )
+
+    if (!response.Contents) {
+      throw Error("contents doesn't exist")
+    }
+
+    if (response.Contents.length === 0) {
+      return null
+    }
+
+    const keys = response.Contents.map((content) => ({
+      Key: content.Key,
+    }))
+
+    return R2.send(
+      new DeleteObjectsCommand({
+        Bucket: bucket,
+        Delete: {
+          Objects: keys,
+        },
+      })
+    )
+  },
 }
