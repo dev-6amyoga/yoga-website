@@ -591,6 +591,7 @@ router.post('/register', async (req, res) => {
     name,
     institute_name,
     role_name,
+    institute_details,
     is_google_login,
   } = req.body
   // validate inputs
@@ -602,7 +603,8 @@ router.post('/register', async (req, res) => {
     !name ||
     !role_name ||
     is_google_login === undefined ||
-    is_google_login === null
+    is_google_login === null ||
+    !institute_details
   )
     return res
       .status(HTTP_BAD_REQUEST)
@@ -703,7 +705,7 @@ router.post('/register', async (req, res) => {
     const user_institute_plan_role = await UserInstitutePlanRole.create(
       {
         user_id: newUser.user_id,
-        institute_id: institute ? institute.institute_id : null,
+        institute_id: institute_details ? institute_details.id : null,
         role_id: role.role_id,
         user_plan_id: null,
       },
@@ -968,4 +970,16 @@ router.post('/register-google', async (req, res) => {
   }
 })
 
+router.get('/get-login-history', async (req, res) => {
+  try {
+    // Fetch all rows from the LoginHistory table
+    const loginHistories = await LoginHistory.findAll()
+    res.status(200).json(loginHistories)
+  } catch (error) {
+    console.error(error)
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: 'Internal server error' })
+  }
+})
 module.exports = router

@@ -31,7 +31,8 @@ import LogPayment from "../pages/admin/transactions/LogPayment";
 import RefundManagement from "../pages/admin/transactions/Refund";
 import EditPlaylist from "../components/content-management/EditPlaylist";
 import PackagingVideos from "../pages/admin/packing-videos/PackagingVideos";
-
+import LoginHistory from "../pages/admin/member-management/LoginHistory";
+import UserPlanPage from "../pages/admin/member-management/UserPlanPage";
 export const AdminRoutes = [
   {
     path: "/admin",
@@ -145,6 +146,15 @@ export const AdminRoutes = [
     path: "/admin/members/students",
     element: <Students />,
   },
+  {
+    path: "/admin/members/login-history",
+    element: <LoginHistory />,
+  },
+  {
+    path: "/admin/members/all-user-plans",
+    element: <UserPlanPage />,
+  },
+
   // transactions
   {
     path: "/admin/transactions/log-payment",

@@ -432,5 +432,3 @@ self.onmessage = async (event) => {
 self.onerror = function (err) {
   console.log(err);
 };
-
-// export {};

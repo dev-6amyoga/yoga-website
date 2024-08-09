@@ -60,6 +60,9 @@ export default function Register({ switchForm }) {
     ])
   );
   const [selectedInstitute, setSelectedInstitute] = useState("");
+  useEffect(() => {
+    console.log(selectedInstitute);
+  }, [selectedInstitute]);
   const handleChange = (event) => {
     setSelectedInstitute(event.target.value);
   };
@@ -127,6 +130,10 @@ export default function Register({ switchForm }) {
   const [allInstitutes, setAllInstitutes] = useState([]);
 
   useEffect(() => {
+    console.log("all institutes are : ", allInstitutes);
+  }, [allInstitutes]);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await Fetch({
@@ -134,7 +141,6 @@ export default function Register({ switchForm }) {
           method: "GET",
         });
         if (res.status === 200) {
-          console.log(res.data);
           setAllInstitutes(res.data);
         } else {
           toast.error("Error fetching institutes");
@@ -179,6 +185,7 @@ export default function Register({ switchForm }) {
         const newUser = {
           ...generalInfo,
           role_name: "STUDENT",
+          institute_details: selectedInstitute,
           is_google_login: googleInfo && googleInfo?.verified ? true : false,
         };
         let url = "/auth/register";
@@ -397,7 +404,7 @@ export default function Register({ switchForm }) {
     }
   };
 
-  const maxSteps = 4;
+  const maxSteps = 5;
   const minSteps = 1;
 
   const handleNextStep = useCallback(() => {
@@ -448,7 +455,7 @@ export default function Register({ switchForm }) {
 
   const RenderStep = useMemo(() => {
     switch (step) {
-      case 5:
+      case 1:
         return (
           <PickRegistationMode
             regMode={regMode}
@@ -482,7 +489,7 @@ export default function Register({ switchForm }) {
           />
         );
 
-      case 4:
+      case 5:
         return role === "STUDENT" ? (
           <div className="border text-center rounded-lg p-4">
             <p>
@@ -517,7 +524,7 @@ export default function Register({ switchForm }) {
           />
         );
 
-      case 1:
+      case 4:
         return role === "STUDENT" ? (
           <>
             <div className="border text-center rounded-lg p-4">
@@ -528,24 +535,28 @@ export default function Register({ switchForm }) {
                 <InputLabel id="institute-select-label">Institute</InputLabel>
                 <Select
                   labelId="institute-select-label"
-                  value={selectedInstitute}
+                  value={selectedInstitute.name}
                   onChange={handleChange}
                   label="Institute"
                 >
                   <MenuItem value="" disabled>
                     <em>Select an institute</em>
                   </MenuItem>
-                  {allInstitutes.map((institute) => {
-                    console.log(institute); // Log each institute
-                    return (
+                  {allInstitutes.length > 0 ? (
+                    allInstitutes.map((institute) => (
                       <MenuItem
                         key={institute.institute_id}
-                        value={institute.institute_id}
+                        value={{
+                          id: institute.institute_id,
+                          name: institute.name,
+                        }}
                       >
                         {institute.name}
                       </MenuItem>
-                    );
-                  })}
+                    ))
+                  ) : (
+                    <MenuItem disabled>No institutes available</MenuItem>
+                  )}
                 </Select>
               </FormControl>
             </div>
@@ -554,87 +565,6 @@ export default function Register({ switchForm }) {
           <></>
         );
 
-      // return role === "INSTITUTE_OWNER" ? (
-      // 	// <div className="border text-center rounded-lg p-4">
-      // 	// 	<p>
-      // 	// 		We will send an email to{" "}
-      // 	// 		<b>{generalInfo?.email_id}</b>
-      // 	// 	</p>
-      // 	// 	<p>
-      // 	// 		Please{" "}
-      // 	// 		<Button
-      // 	// 			onClick={sendEmail}
-      // 	// 			disabled={regVerifyDisabled}>
-      // 	// 			Verify
-      // 	// 		</Button>{" "}
-      // 	// 		<br />
-      // 	// 		your email to be able to access your account!
-      // 	// 	</p>
-      // 	// </div>
-      // 	<>
-      // 		<h4 className="text-center">
-      // 			Phone Number Verification
-      // 		</h4>
-      // 		<div
-      // 			className={`max-w-md border-2 flex items-center justify-center p-4 rounded-lg my-4 mx-auto ${
-      // 				personalBusinessPhoneInfoSame
-      // 					? "border-blue-500"
-      // 					: ""
-      // 			}`}>
-      // 			<Checkbox
-      // 				initialChecked={personalBusinessPhoneInfoSame}
-      // 				onChange={() =>
-      // 					setPersonalBusinessPhoneInfoSame((p) => !p)
-      // 				}
-      // 				scale={1}>
-      // 				Use same phone number for Personal information
-      // 				and Business contact information.
-      // 			</Checkbox>
-      // 		</div>
-      // 		<Divider />
-      // 		{personalBusinessPhoneInfoSame && (
-      // 			<PhoneNumberForm
-      // 				heading="Personal Phone Number"
-      // 				phoneValue={phoneInfo}
-      // 				setPhoneInfo={setPhoneInfo}
-      // 				setBlockStep={setBlockPhoneStep}
-      // 				setLoading={setLoading}
-      // 				handleNextStep={handleNextStep}
-      // 			/>
-      // 		)}
-      // 		{!personalBusinessPhoneInfoSame && (
-      // 			<>
-      // 				<form
-      // 					className="flex flex-col gap-1"
-      // 					onSubmit={handlePhoneSubmit}>
-      // 					<p className="text-center text-zinc-500">
-      // 						Personal Phone Number
-      // 					</p>
-      // 					<Input
-      // 						width="100%"
-      // 						name="personal_phone_number"></Input>
-      // 					<Button
-      // 						htmlType="submit"
-      // 						width="20%"
-      // 						type="secondary">
-      // 						Save
-      // 					</Button>
-      // 				</form>
-      // 				<Divider />
-      // 				{/* <PhoneNumberForm
-      //   heading="Business Phone Number"
-      //   phoneValue={businessPhoneInfo}
-      //   setPhoneInfo={setBusinessPhoneInfo}
-      //   setBlockStep={setBlockBusinessPhoneStep}
-      //   setLoading={setLoading}
-      //   handleNextStep={handleNextStep}
-      // /> */}
-      // 			</>
-      // 		)}
-      // 	</>
-      // ) : (
-      // 	<></>
-      // );
       case 6:
         return role === "INSTITUTE_OWNER" && step === 6 ? (
           <div className="border text-center rounded-lg p-4">
@@ -668,6 +598,7 @@ export default function Register({ switchForm }) {
     generalInfo,
     phoneInfo,
     clientID,
+    allInstitutes,
     handleNextStep,
     regVerifyDisabled,
     sendEmail,
