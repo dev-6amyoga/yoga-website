@@ -852,6 +852,25 @@ router.get('/get-all-students', async (req, res) => {
   }
 })
 
+router.get('/get-all-users', async (req, res) => {
+  try {
+    const users = await User.findAll({
+      attributes: ['user_id', 'name'],
+    })
+
+    if (!users) {
+      return res.status(HTTP_BAD_REQUEST).json({ error: 'Users dont exist' })
+    }
+
+    return res.status(HTTP_OK).json({ users: users })
+  } catch (error) {
+    console.error(error)
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: 'Failed to fetch Students' })
+  }
+})
+
 router.post('/reset-password', async (req, res) => {
   const { user_id, new_password, confirm_new_password } = req.body
   if (!user_id || !new_password || !confirm_new_password) {

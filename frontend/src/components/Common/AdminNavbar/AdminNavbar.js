@@ -56,6 +56,10 @@ const paths = [
       { path: "/admin/members/students", title: "Students" },
 
       { path: "/admin/members/teachers", title: "Teachers" },
+
+      { path: "/admin/members/login-history", title: "Login History" },
+
+      { path: "/admin/members/all-user-plans", title: "User Plan Mappings" },
     ],
   },
   // {

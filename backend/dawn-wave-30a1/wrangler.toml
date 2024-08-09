@@ -1,0 +1,4 @@
+name = "dawn-wave-30a1"
+main = "src/worker.js"
+compatibility_date = "2024-08-08"
+workers_dev = true
