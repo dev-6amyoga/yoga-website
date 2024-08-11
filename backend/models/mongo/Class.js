@@ -43,6 +43,10 @@ const classSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.String,
     default: null,
   },
+  recurring_class_timezone: {
+    type: mongoose.Schema.Types.String,
+    default: null,
+  },
   status: {
     type: String,
     default: CLASS_METADATA_DRAFT,
