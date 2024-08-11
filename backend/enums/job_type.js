@@ -1,0 +1,3 @@
+module.exports = {
+  JOB_TYPE_SCHEDULE_CLASSES: 'JOB_TYPE_SCHEDULE_CLASSES',
+}

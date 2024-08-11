@@ -138,6 +138,11 @@ expressWs(app)
 // app.use(logger())
 
 // CORS
+
+// logger
+// app.use(logger())
+
+// CORS
 app.use(cors(corsOptions))
 
 // parse json body
@@ -178,12 +183,19 @@ app.use(
 )
 
 /*
+/*
 // Apply rate limiter to all requests
 const limiter = RateLimit({
   windowMs: 30 * 1000, // 30s
   max: process.env.NODE_ENV === 'production' ? 100 : 1000,
 })
+const limiter = RateLimit({
+  windowMs: 30 * 1000, // 30s
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000,
+})
 
+app.use(limiter);
+*/
 app.use(limiter);
 */
 
@@ -272,6 +284,30 @@ initializeSequelize()
         //     console.log(err);
         //   });
 
+let start = performance.now()
+initializeSequelize()
+  .then(() => {
+    console.log('Sequelize initialized, took', performance.now() - start, 'ms')
+
+    start = performance.now()
+
+    mongoose
+      .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+      .then(() => {
+        console.log(
+          'Connected to MongoDB Atlas, took',
+          performance.now() - start,
+          'ms'
+        )
+        start = performance.now()
+        // bulkCreateSampleData()
+        //   .then(() => {
+        //     console.log("Sample data created!");
+        //   })
+        //   .catch((err) => {
+        //     console.log(err);
+        //   });
+
         app.listen(port || 4000, () => {
           console.log(
             `Server is running on port ${port}, took`,
@@ -290,3 +326,5 @@ initializeSequelize()
       })
   })
   .catch((err) => console.log(err))
+
+
