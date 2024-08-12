@@ -1,28 +1,29 @@
 const os = require('node:os')
 const process = require('node:process')
 const { parentPort } = require('node:worker_threads')
-const ClassHistory = require('../models/mongo/ClassHistory')
 const Class = require('../models/mongo/Class')
-const { CLASS_TYPE_RECURRING } = require('../enums/class_metadata_class_type')
-const {
-  CLASS_RECURRANCE_TYPE_DAILY,
-  CLASS_RECURRANCE_TYPE_MONTHLY,
-  CLASS_RECURRANCE_TYPE_WEEKLY,
-} = require('../enums/class_metadata_recurrance_type')
-const {
-  CLASS_METADATA_INACTIVE,
-  CLASS_METADATA_ACTIVE,
-} = require('../enums/class_metadata_status')
+
 const { SchedulerJobRun } = require('../models/sql/SchedulerJobRun')
 const { JOB_TYPE_SCHEDULE_CLASSES } = require('../enums/job_type')
 const job_status = require('../enums/job_status')
+const ClassHistory = require('../models/mongo/ClassHistory')
 
 let isCancelled = false
 
-const concurrency = os.cpus().length
+// const concurrency = os.cpus().length
 
-async function scheduleClass() {
+async function scheduleClass(class_) {
   if (isCancelled) return
+
+  // calculate start time and end time based on timezone
+
+  // create a class history record
+  const class_history = await ClassHistory.create({
+    class_id: class_._id,
+    class_name: class_.class_name,
+    class_description: class_.class_description,
+    teacher_id: class_.teacher_id,
+  })
 }
 
 // handle cancellation (this is a very simple example)
@@ -50,30 +51,60 @@ if (parentPort) {
     try {
       // find all classes which are recurring and have not been scheduled for the day
       // create class history records
-      const classes_to_be_scheduled = await Class.find(
-        {
-          class_type: CLASS_TYPE_RECURRING,
-          recurrance_type: {
-            $in: [
-              CLASS_RECURRANCE_TYPE_DAILY,
-              CLASS_RECURRANCE_TYPE_WEEKLY,
-              CLASS_RECURRANCE_TYPE_MONTHLY,
-            ],
+      const classes_to_be_scheduled = await Class.aggregate(
+        [
+          {
+            $match: {
+              class_type: 'CLASS_TYPE_RECURRING',
+              recurrance_type: {
+                $in: [
+                  'CLASS_RECURRANCE_TYPE_DAILY',
+                  'CLASS_RECURRANCE_TYPE_WEEKLY',
+                  'CLASS_RECURRANCE_TYPE_MONTHLY',
+                ],
+              },
+              status: 'CLASS_METADATA_ACTIVE',
+            },
           },
-          status: CLASS_METADATA_ACTIVE,
-        },
+          {
+            $lookup: {
+              from: 'class_history',
+              localField: '_id',
+              foreignField: 'class_id',
+              as: 'class_history',
+              pipeline: [
+                {
+                  $match: {
+                    created_at: {
+                      $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                      $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+                    },
+                  },
+                },
+                {
+                  $limit: 1,
+                },
+              ],
+            },
+          },
+          {
+            $match: {
+              class_history: { $size: 0 },
+            },
+          },
+        ],
         {}
       )
 
-      console.log(classes_to_be_scheduled)
+      // console.log(classes_to_be_scheduled)
 
-      // const promises = classes_to_be_scheduled.map(
-      //   async (class_to_be_scheduled) => {
-      //     await scheduleClass(class_to_be_scheduled)
-      //   }
-      // )
+      const promises = classes_to_be_scheduled.map(
+        async (class_to_be_scheduled) => {
+          await scheduleClass(class_to_be_scheduled)
+        }
+      )
 
-      // await Promise.all(promises)
+      await Promise.all(promises)
 
       // mark the job as done
       job.setAttributes('job_status', job_status.JOB_STATUS_COMPLETED)
