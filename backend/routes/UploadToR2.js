@@ -155,7 +155,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
         const newVideoRecording = new VideoRecordings({
           user_id,
           folder_name,
-          user_username: user.username,
+          user_username: user.name,
         })
 
         await newVideoRecording.save()
