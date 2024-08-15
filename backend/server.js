@@ -282,7 +282,6 @@ initializeSequelize()
         //   .catch((err) => {
         //     console.log(err);
         //   });
-
         app.listen(port || 4000, () => {
           console.log(
             `Server is running on port ${port}, took`,

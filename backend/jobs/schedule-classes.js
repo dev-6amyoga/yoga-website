@@ -7,6 +7,16 @@ const { SchedulerJobRun } = require('../models/sql/SchedulerJobRun')
 const { JOB_TYPE_SCHEDULE_CLASSES } = require('../enums/job_type')
 const job_status = require('../enums/job_status')
 const ClassHistory = require('../models/mongo/ClassHistory')
+const {
+  set,
+  add,
+  startOfDay,
+  endOfDay,
+  getDay,
+  getDate,
+  lastDayOfMonth,
+} = require('date-fns')
+const { default: mongoose } = require('mongoose')
 
 let isCancelled = false
 
@@ -15,15 +25,44 @@ let isCancelled = false
 async function scheduleClass(class_) {
   if (isCancelled) return
 
-  // calculate start time and end time based on timezone
+  try {
+    // calculate start time and end time based on timezone
 
-  // create a class history record
-  const class_history = await ClassHistory.create({
-    class_id: class_._id,
-    class_name: class_.class_name,
-    class_description: class_.class_description,
-    teacher_id: class_.teacher_id,
-  })
+    const start_time_parts = class_.recurring_class_start_time
+      .split(':')
+      .map((x) => parseInt(x, 10))
+    const end_time_parts = class_.recurring_class_end_time
+      .split(':')
+      .map((x) => parseInt(x, 10))
+
+    const base_date = startOfDay(new Date())
+
+    const start_time = add(base_date, {
+      hours: start_time_parts[0],
+      minutes: start_time_parts[1],
+      seconds: start_time_parts[2],
+    })
+    const end_time = add(base_date, {
+      hours: end_time_parts[0],
+      minutes: end_time_parts[1],
+      seconds: end_time_parts[2],
+    })
+
+    // create a class history record
+    await ClassHistory.create({
+      class_id: class_._id,
+      class_name: class_.class_name,
+      class_description: class_.class_description,
+      teacher_id: class_.teacher_id,
+      start_time,
+      end_time,
+    })
+
+    console.log('Scheduled class:', class_)
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
 }
 
 // handle cancellation (this is a very simple example)
@@ -40,6 +79,14 @@ if (parentPort) {
 
 ;(async () => {
   try {
+    const mongoURI = process.env.MONGO_SRV_URL
+
+    await mongoose.connect(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+
+    const today = new Date()
     // let job_id = null
 
     // create a job record
@@ -76,8 +123,8 @@ if (parentPort) {
                 {
                   $match: {
                     created_at: {
-                      $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-                      $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+                      $gte: startOfDay(today),
+                      $lt: endOfDay(today),
                     },
                   },
                 },
@@ -96,9 +143,38 @@ if (parentPort) {
         {}
       )
 
-      // console.log(classes_to_be_scheduled)
+      // filter those classes based on recurrence type and schedule them
 
-      const promises = classes_to_be_scheduled.map(
+      const current_day_of_week = getDay(today)
+      const current_day_of_month = today.getDate()
+
+      const final_classes_to_be_scheduled = classes_to_be_scheduled.filter(
+        (c) => {
+          // if daily, schedule all classes
+          // if weekly, schedule classes based on day of the week
+          // if monthly, schedule classes based on day of the month
+
+          if (c.recurrance_type === 'CLASS_RECURRANCE_TYPE_DAILY') return true
+
+          if (c.recurrance_type === 'CLASS_RECURRANCE_TYPE_WEEKLY') {
+            return c.recurrance_days.includes(current_day_of_week)
+          }
+
+          if (c.recurrance_type === 'CLASS_RECURRANCE_TYPE_MONTHLY') {
+            return (
+              c.recurrance_date === current_day_of_month ||
+              (c.recurrance_date === 'LAST_DAY' &&
+                current_day_of_month === getDate(lastDayOfMonth(today)))
+            )
+          }
+
+          return false
+        }
+      )
+
+      console.log(final_classes_to_be_scheduled)
+
+      const promises = final_classes_to_be_scheduled.map(
         async (class_to_be_scheduled) => {
           await scheduleClass(class_to_be_scheduled)
         }
@@ -107,8 +183,24 @@ if (parentPort) {
       await Promise.all(promises)
 
       // mark the job as done
-      job.setAttributes('job_status', job_status.JOB_STATUS_COMPLETED)
-      await job.save()
+
+      const update = await SchedulerJobRun.update(
+        {
+          job_status: job_status.JOB_STATUS_COMPLETED,
+          job_run_end_time: new Date().toISOString(),
+        },
+        {
+          where: {
+            scheduler_job_id: job.get('scheduler_job_id'),
+          },
+        }
+      )
+
+      console.log('marking job as done', update)
+
+      if (update === 0) {
+        throw new Error('Failed to mark job as done')
+      }
 
       // signal to parent that the job is done
       if (parentPort) parentPort.postMessage('done')
