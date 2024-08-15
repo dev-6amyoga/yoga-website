@@ -84,9 +84,10 @@ const classWsRouter = require('./websocket-routes/Class')
 const bree = new Bree({
   jobs: [
     {
-      name: 'hello-world',
-      interval: 5000,
-      timeout: 10000,
+      name: 'schedule-classes',
+      interval: '1m',
+      timeout: '30s',
+      retries: 2,
     },
   ],
 })
@@ -181,25 +182,6 @@ app.use('/static', express.static(path.join(__dirname, 'public')))
 
 // initialize databases
 const mongoURI = process.env.MONGO_SRV_URL
-mongoose
-  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch((err) => console.log(err))
-
-initializeSequelize()
-  .then(() => {
-    console.log('Sequelize initialized')
-    // bulkCreateSampleData()
-    //   .then(() => {
-    //     console.log("Sample data created!");
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
-  })
-  .catch((err) => {
-    console.error(err)
-  })
 
 app.get('/info', async (req, res) =>
   res.status(200).json({
@@ -255,11 +237,33 @@ app.ws('/ws/class/student', classWsRouter.handleStudentConnection)
 
 const port = parseInt(process.env.PORT, 10)
 
-app.listen(port || 4000, () => {
-  console.log(`Server is running on port ${port}`)
+initializeSequelize()
+  .then(() => {
+    console.log('Sequelize initialized')
 
-  graceful.listen()
-  ;(async () => {
-    await bree.start()
-  })()
-})
+    mongoose
+      .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+      .then(() => {
+        console.log('Connected to MongoDB Atlas')
+        // bulkCreateSampleData()
+        //   .then(() => {
+        //     console.log("Sample data created!");
+        //   })
+        //   .catch((err) => {
+        //     console.log(err);
+        //   });
+
+        app.listen(port || 4000, () => {
+          console.log(`Server is running on port ${port}`)
+
+          graceful.listen()
+          ;(async () => {
+            await bree.start()
+          })()
+        })
+      })
+      .catch((err) => {
+        console.error(err)
+      })
+  })
+  .catch((err) => console.log(err))
