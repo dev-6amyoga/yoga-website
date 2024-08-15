@@ -145,7 +145,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       })
 
       if (!videoRecording) {
-        const [user, error] = await GetUser({ user_id }, ['username'])
+        const [user, error] = await GetUser({ user_id }, ['username', 'name'])
 
         if (error || !user) {
           console.error(error)
@@ -180,33 +180,6 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   } catch (err) {
     console.error(err)
     return res.status(500).json({ message: 'File upload failed' })
-  }
-})
-
-router.post('/api/upload', upload.single('file'), async (req, res) => {
-  console.log('in api upload')
-  // if (!req.file) {
-  //   console.log('no file ')
-  //   return res.status(400).send('No file uploaded')
-  // }
-  console.log(req.body)
-  // const { buffer, originalname } = req.file
-  // console.log(req.file)
-
-  try {
-    //   const uploadParams = {
-    //     Bucket: process.env.CLOUDFLARE_R2_RECORDING_BUCKET,
-    //     Key: path.basename(originalname), // or use a unique key
-    //     Body: buffer,
-    //     ContentType: req.file.mimetype,
-    //   }
-
-    //   await s3Client.send(new PutObjectCommand(uploadParams))
-
-    res.status(200).send('File uploaded successfully')
-  } catch (error) {
-    console.error(error)
-    res.status(500).send('Failed to upload file')
   }
 })
 
@@ -277,6 +250,8 @@ router.post('/videos/process/', async (req, res) => {
       'yoga-video-recordings',
       folder_name
     )
+
+    console.log(videosRes)
 
     if (!videosRes.Contents || videosRes.Contents.length === 0) {
       return res.status(HTTP_BAD_REQUEST).json({
@@ -582,6 +557,7 @@ router.post('/videos/process/', async (req, res) => {
       message: 'Video processed successfully',
     })
   } catch (err) {
+    console.error(err)
     if (videoRecording) {
       videoRecording.processing_status = 'FAILED'
       await videoRecording.save()
@@ -596,7 +572,6 @@ router.post('/videos/process/', async (req, res) => {
       )
     }
 
-    console.error(err)
     // fs.unlinkSync(`video.mp4`)
     return res.status(500).json({
       message: err || 'Failed to process video',
