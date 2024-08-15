@@ -58,7 +58,7 @@ async function scheduleClass(class_) {
       end_time,
     })
 
-    console.log('Scheduled class:', class_)
+    console.log('[schedule-classes] Scheduled class:', class_)
   } catch (error) {
     console.error(error)
     throw error
@@ -87,6 +87,7 @@ if (parentPort) {
     })
 
     const today = new Date()
+    console.log("[schedule-classes] Today's date:", today)
     // let job_id = null
 
     // create a job record
@@ -147,6 +148,10 @@ if (parentPort) {
 
       const current_day_of_week = getDay(today)
       const current_day_of_month = today.getDate()
+      console.log({
+        current_day_of_week,
+        current_day_of_month,
+      })
 
       const final_classes_to_be_scheduled = classes_to_be_scheduled.filter(
         (c) => {
@@ -157,7 +162,7 @@ if (parentPort) {
           if (c.recurrance_type === 'CLASS_RECURRANCE_TYPE_DAILY') return true
 
           if (c.recurrance_type === 'CLASS_RECURRANCE_TYPE_WEEKLY') {
-            return c.recurrance_days.includes(current_day_of_week)
+            return c.recurrance_days.includes(String(current_day_of_week))
           }
 
           if (c.recurrance_type === 'CLASS_RECURRANCE_TYPE_MONTHLY') {
@@ -196,7 +201,7 @@ if (parentPort) {
         }
       )
 
-      console.log('marking job as done', update)
+      console.log('[schedule-classes] marking job as done', update)
 
       if (update === 0) {
         throw new Error('Failed to mark job as done')
