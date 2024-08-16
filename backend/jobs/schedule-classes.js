@@ -1,14 +1,7 @@
-const os = require('node:os')
+// const os = require('node:os')
 const process = require('node:process')
 const { parentPort } = require('node:worker_threads')
-const Class = require('../models/mongo/Class')
-
-const { SchedulerJobRun } = require('../models/sql/SchedulerJobRun')
-const { JOB_TYPE_SCHEDULE_CLASSES } = require('../enums/job_type')
-const job_status = require('../enums/job_status')
-const ClassHistory = require('../models/mongo/ClassHistory')
 const {
-  set,
   add,
   startOfDay,
   endOfDay,
@@ -16,7 +9,13 @@ const {
   getDate,
   lastDayOfMonth,
 } = require('date-fns')
-const { default: mongoose } = require('mongoose')
+const mongoose = require('mongoose')
+
+const Class = require('../models/mongo/Class')
+const { SchedulerJobRun } = require('../models/sql/SchedulerJobRun')
+const { JOB_TYPE_SCHEDULE_CLASSES } = require('../enums/job_type')
+const job_status = require('../enums/job_status')
+const ClassHistory = require('../models/mongo/ClassHistory')
 
 let isCancelled = false
 
@@ -148,9 +147,11 @@ if (parentPort) {
 
       const current_day_of_week = getDay(today)
       const current_day_of_month = today.getDate()
+      const last_day_of_month = getDate(lastDayOfMonth(today))
       console.log({
         current_day_of_week,
         current_day_of_month,
+        last_day_of_month,
       })
 
       const final_classes_to_be_scheduled = classes_to_be_scheduled.filter(
@@ -158,6 +159,7 @@ if (parentPort) {
           // if daily, schedule all classes
           // if weekly, schedule classes based on day of the week
           // if monthly, schedule classes based on day of the month
+          console.log(c.recurrance_days)
 
           if (c.recurrance_type === 'CLASS_RECURRANCE_TYPE_DAILY') return true
 
@@ -167,9 +169,9 @@ if (parentPort) {
 
           if (c.recurrance_type === 'CLASS_RECURRANCE_TYPE_MONTHLY') {
             return (
-              c.recurrance_date === current_day_of_month ||
-              (c.recurrance_date === 'LAST_DAY' &&
-                current_day_of_month === getDate(lastDayOfMonth(today)))
+              c.recurrance_days.includes(String(current_day_of_month)) ||
+              (c.recurrance_days.includes('LAST_DAY') &&
+                current_day_of_month === last_day_of_month)
             )
           }
 

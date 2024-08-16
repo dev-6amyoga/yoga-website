@@ -27,10 +27,6 @@ const classSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
-  recurrance_date: {
-    type: mongoose.Schema.Types.String,
-    default: null,
-  },
   onetime_class_start_time: {
     type: mongoose.Schema.Types.Date,
     default: null,
