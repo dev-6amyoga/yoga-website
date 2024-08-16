@@ -40,7 +40,7 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 	const [recurranceType, setRecurranceType] = useState(
 		CLASS_RECURRANCE_TYPE_DAILY
 	);
-	const [weeklyRecurranceDays, setWeeklyRecurranceDays] = useState([]);
+	const [recurranceDays, setRecurranceDays] = useState([]);
 	const [allowedStudents, setAllowedStudents] = useState([]);
 
 	const [openAllowedStudentsList, setOpenAllowedStudentsList] =
@@ -75,6 +75,8 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 				parseInt(hour1, 10) * 100 + parseInt(minute1, 10);
 			const timeInMinutes2 =
 				parseInt(hour2, 10) * 100 + parseInt(minute2, 10);
+
+			console.log(timeInMinutes1 - timeInMinutes2);
 
 			// Calculate the difference in minutes
 			let difference = 2400 - (timeInMinutes1 - timeInMinutes2);
@@ -230,7 +232,7 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 				end_time: formData.end_time,
 				class_type: classType,
 				recurrance_type: recurranceType,
-				recurrance_days: weeklyRecurranceDays,
+				recurrance_days: recurranceDays,
 				allowed_students: allowedStudents.map((s) => s.email),
 			});
 		}
@@ -253,7 +255,7 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 			formData.class_desc,
 			classType,
 			classType === CLASS_TYPE_ONETIME ? null : recurranceType,
-			weeklyRecurranceDays,
+			recurranceDays,
 			onetime_class_start_time,
 			onetime_class_end_time,
 			recurring_class_start_time,
@@ -278,7 +280,7 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 			onClose={() => {
 				setVisible(false);
 			}}
-			w={"80%"}>
+			w={"50%"}>
 			<Modal.Title>Create New Class</Modal.Title>
 
 			<Modal.Content>
@@ -332,34 +334,6 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 
 					{/* {classType} */}
 
-					{classType === CLASS_TYPE_RECURRING && (
-						<FormControl fullWidth>
-							<InputLabel id="recurrance-type-select-label">
-								Recurrance Type
-							</InputLabel>
-							<Select
-								labelId="recurrance-type-select-label"
-								value={recurranceType}
-								onChange={(e) => {
-									setRecurranceType(e.target.value);
-								}}>
-								<MenuItem value={CLASS_RECURRANCE_TYPE_DAILY}>
-									Every Day
-								</MenuItem>
-								<MenuItem value={CLASS_RECURRANCE_TYPE_WEEKLY}>
-									Every Week
-								</MenuItem>
-								<MenuItem
-									value={CLASS_RECURRANCE_TYPE_FORTNIGHTLY}>
-									Every Fortnight
-								</MenuItem>
-								{/* <MenuItem value={CLASS_RECURRANCE_TYPE_MONTHLY}>
-									Every Month
-								</MenuItem> */}
-							</Select>
-						</FormControl>
-					)}
-
 					{classType === CLASS_TYPE_RECURRING &&
 						recurranceType === CLASS_RECURRANCE_TYPE_DAILY && (
 							<p className="text-sm mt-2">
@@ -393,44 +367,142 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 							</p>
 						)}
 
-					{classType === CLASS_TYPE_RECURRING &&
-						recurranceType === CLASS_RECURRANCE_TYPE_WEEKLY && (
+					{classType === CLASS_TYPE_RECURRING && (
+						<div
+							className={
+								recurranceType === CLASS_RECURRANCE_TYPE_DAILY
+									? ""
+									: "grid grid-cols-2 gap-2"
+							}>
 							<FormControl fullWidth>
-								<InputLabel id="days-select-label">
-									Weekly (Recurrance)
+								<InputLabel id="recurrance-type-select-label">
+									Recurrance Type
 								</InputLabel>
 								<Select
-									labelId="days-select-label"
-									multiple
-									value={weeklyRecurranceDays}
+									labelId="recurrance-type-select-label"
+									value={recurranceType}
 									onChange={(e) => {
-										const { value } = e.target;
-										setWeeklyRecurranceDays(
-											typeof value === "string"
-												? value.split(",")
-												: value
-										);
+										setRecurranceType(e.target.value);
 									}}>
-									<MenuItem value="Monday">Monday</MenuItem>
-									<MenuItem value="Tuesday">Tuesday</MenuItem>
-									<MenuItem value="Wednesday">
-										Wednesday
+									<MenuItem
+										value={CLASS_RECURRANCE_TYPE_DAILY}>
+										Every Day
 									</MenuItem>
-									<MenuItem value="Thursday">
-										Thursday
+									<MenuItem
+										value={CLASS_RECURRANCE_TYPE_WEEKLY}>
+										Every Week
 									</MenuItem>
-									<MenuItem value="Friday">Friday</MenuItem>
-									<MenuItem value="Saturday">
-										Saturday
+									{/* <MenuItem
+									value={CLASS_RECURRANCE_TYPE_FORTNIGHTLY}>
+									Every Fortnight
+								</MenuItem> */}
+									<MenuItem
+										value={CLASS_RECURRANCE_TYPE_MONTHLY}>
+										Every Month
 									</MenuItem>
-									<MenuItem value="Sunday">Sunday</MenuItem>
 								</Select>
 							</FormControl>
-						)}
+
+							{recurranceType ===
+								CLASS_RECURRANCE_TYPE_MONTHLY && (
+								<>
+									{/* <div className="grid grid-cols-5 gap-2 max-w-xl">
+                    {[...Array(31).keys()].map((day) => {
+                      return (
+                        <label className="flex flex-row gap-2 items-center">
+                          <input
+                            type="checkbox"
+                            className="accent-blue-600"
+                            id={"day" + (day + 1)}
+                            key={"day" + (day + 1)}
+                            name="recurrance_date"
+                            value={day + 1}
+                          />
+                          {day + 1}
+                        </label>
+                      );
+                    })}
+                    <label className="flex flex-row gap-2 items-center">
+                      <input
+                        type="checkbox"
+                        id="day"
+                        className="accent-blue-600"
+                        key={"LAST_DAY"}
+                        name="recurrance_date"
+                        value="LAST_DAY"
+                      />
+                      Last Day
+                    </label>
+                  </div> */}
+									<FormControl fullWidth>
+										<InputLabel id="days-select-label">
+											Monthly (Recurrance)
+										</InputLabel>
+										<Select
+											labelId="days-select-label"
+											multiple
+											value={recurranceDays}
+											onChange={(e) => {
+												const { value } = e.target;
+												setRecurranceDays(
+													typeof value === "string"
+														? value.split(",")
+														: value
+												);
+											}}>
+											{[...Array(31).keys()].map(
+												(day) => {
+													return (
+														<MenuItem
+															value={day + 1}
+															key={day + 1}>
+															{day + 1}
+														</MenuItem>
+													);
+												}
+											)}
+											<MenuItem value={"LAST_DAY"}>
+												Last Day
+											</MenuItem>
+										</Select>
+									</FormControl>
+								</>
+							)}
+
+							{recurranceType ===
+								CLASS_RECURRANCE_TYPE_WEEKLY && (
+								<FormControl fullWidth>
+									<InputLabel id="days-select-label">
+										Weekly (Recurrance)
+									</InputLabel>
+									<Select
+										labelId="days-select-label"
+										multiple
+										value={recurranceDays}
+										onChange={(e) => {
+											const { value } = e.target;
+											setRecurranceDays(
+												typeof value === "string"
+													? value.split(",")
+													: value
+											);
+										}}>
+										<MenuItem value="1">Monday</MenuItem>
+										<MenuItem value="2">Tuesday</MenuItem>
+										<MenuItem value="3">Wednesday</MenuItem>
+										<MenuItem value="4">Thursday</MenuItem>
+										<MenuItem value="5">Friday</MenuItem>
+										<MenuItem value="6">Saturday</MenuItem>
+										<MenuItem value="0">Sunday</MenuItem>
+									</Select>
+								</FormControl>
+							)}
+						</div>
+					)}
 
 					{classType === CLASS_TYPE_RECURRING && (
-						<div className="flex flex-row gap-2">
-							<div className="mb-4 flex-1">
+						<div className="grid grid-cols-2 gap-4 mb-4">
+							<div>
 								<p className="text-sm text-gray-600">
 									Start Time
 								</p>
@@ -442,7 +514,7 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 									required
 								/>
 							</div>
-							<div className="mb-4 flex-1">
+							<div>
 								<p className="text-sm text-gray-600">
 									End Time
 								</p>

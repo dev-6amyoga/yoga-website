@@ -76,6 +76,8 @@ export default function ManageClasses() {
 							} else {
 								tempInactiveClasses.push(classInfo);
 							}
+						} else {
+							tempInactiveClasses.push(classInfo);
 						}
 					}
 					setActiveClasses(tempActiveClasses);
