@@ -21,6 +21,7 @@ import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
 
+import TimezoneSelect from "react-timezone-select";
 import {
 	CLASS_RECURRANCE_TYPE_DAILY,
 	CLASS_RECURRANCE_TYPE_FORTNIGHTLY,
@@ -211,6 +212,9 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 
 		const formData = getFormData(e);
 
+		console.log("formData", formData);
+
+		if (formData) return;
 		// formData["days"] = days;
 
 		// console.log(formData, new Date(formData.start_time).toISOString());
@@ -260,6 +264,7 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 			onetime_class_end_time,
 			recurring_class_start_time,
 			recurring_class_end_time,
+			formData.recurring_class_timezone,
 			user.user_id,
 			allowedStudents.map((s) => s.email)
 		);
@@ -280,7 +285,8 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 			onClose={() => {
 				setVisible(false);
 			}}
-			w={"50%"}>
+			w={"50%"}
+			disableBackdropClick>
 			<Modal.Title>Create New Class</Modal.Title>
 
 			<Modal.Content>
@@ -501,32 +507,42 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 					)}
 
 					{classType === CLASS_TYPE_RECURRING && (
-						<div className="grid grid-cols-2 gap-4 mb-4">
-							<div>
-								<p className="text-sm text-gray-600">
-									Start Time
-								</p>
-								<input
-									type="time"
-									name="start_time"
-									onChange={handleStartTimeChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-									required
-								/>
+						<>
+							<div className="grid grid-cols-2 gap-4 mb-4">
+								<div>
+									<p className="text-sm text-gray-600">
+										Start Time
+									</p>
+									<input
+										type="time"
+										name="start_time"
+										onChange={handleStartTimeChange}
+										className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+										required
+									/>
+								</div>
+								<div>
+									<p className="text-sm text-gray-600">
+										End Time
+									</p>
+									<input
+										type="time"
+										name="end_time"
+										onChange={handleEndTimeChange}
+										className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+										required
+									/>
+								</div>
 							</div>
 							<div>
-								<p className="text-sm text-gray-600">
-									End Time
-								</p>
-								<input
-									type="time"
-									name="end_time"
-									onChange={handleEndTimeChange}
-									className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-									required
+								<TimezoneSelect
+									classNamePrefix=""
+									className="z-[10000] my-4"
+									name="recurring_class_timezone"
+									defaultValue={"Asia/Kolkata"}
 								/>
 							</div>
-						</div>
+						</>
 					)}
 
 					{classType === CLASS_TYPE_ONETIME && (
@@ -634,12 +650,23 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 						</>
 					)} */}
 
-					<Button
-						type="submit"
-						className="w-full"
-						variant="contained">
-						Submit
-					</Button>
+					<div className="flex flex-row gap-2">
+						<Button
+							type="submit"
+							className="w-full"
+							variant="contained">
+							Submit
+						</Button>
+						<Button
+							type="button"
+							className="w-full"
+							variant="outlined"
+							onClick={() => {
+								setVisible(false);
+							}}>
+							Cancel
+						</Button>
+					</div>
 				</form>
 			</Modal.Content>
 		</Modal>

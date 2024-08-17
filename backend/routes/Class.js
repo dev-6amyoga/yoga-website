@@ -43,6 +43,7 @@ router.post('/create', async (req, res) => {
       onetime_class_end_time = null,
       recurring_class_start_time = null,
       recurring_class_end_time = null,
+      recurring_class_timezone = 'Asia/Kolkata',
       teacher_id,
       allowed_students = [],
     } = req.body
@@ -92,6 +93,7 @@ router.post('/create', async (req, res) => {
           onetime_class_end_time,
           recurring_class_start_time,
           recurring_class_end_time,
+          recurring_class_timezone,
           allowed_students,
         },
       ],

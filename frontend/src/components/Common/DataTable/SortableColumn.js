@@ -1,13 +1,17 @@
-import { Button } from "@geist-ui/core";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 
 export default function SortableColumn({ column, children }) {
 	return (
-		<Button
+		<div
 			auto
 			onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-			iconRight={<ArrowUpDown className="ml-2 h-4 w-4" />}>
+			className="flex flex-row items-center gap-2">
 			{children}
-		</Button>
+			{column.getIsSorted() === "asc" ? (
+				<ArrowDownIcon size={12} />
+			) : (
+				<ArrowUpIcon size={12} />
+			)}
+		</div>
 	);
 }
