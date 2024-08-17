@@ -11,6 +11,7 @@ export class ClassAPI {
 		onetime_class_end_time = null,
 		recurring_class_start_time = null,
 		recurring_class_end_time = null,
+		recurring_class_timezone = null,
 		teacher_id,
 		allowed_students = []
 	) {
@@ -28,6 +29,7 @@ export class ClassAPI {
 					onetime_class_end_time,
 					recurring_class_start_time,
 					recurring_class_end_time,
+					recurring_class_timezone,
 					teacher_id,
 					allowed_students,
 				},
