@@ -594,7 +594,11 @@ export default function CustomerAssistanceVideos() {
         });
         const data = response.data;
 
-        return data;
+        const sortedData = data.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+
+        return sortedData;
       } catch (err) {
         throw err;
       }
