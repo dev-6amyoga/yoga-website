@@ -5,16 +5,16 @@ COPY --from=ffmpeg / /
 
 WORKDIR /
 
-COPY ./job-backend/package*.json ./job-backend/
+COPY ./package*.json ./job-backend/
 
-COPY ./job-backend/*.js ./job-backend/
-COPY ./job-backend/*.json ./job-backend/
-COPY ./job-backend/*.yaml ./job-backend/
+COPY ./*.js ./job-backend/
+COPY ./*.json ./job-backend/
+COPY ./*.yaml ./job-backend/
 
 
-COPY ./job-backend/models/ ./job-backend/models/
-COPY ./job-backend/routes/ ./job-backend/routes/
-COPY ./job-backend/utils/ ./job-backend/utils/
+COPY ./models/ ./job-backend/models/
+COPY ./routes/ ./job-backend/routes/
+COPY ./utils/ ./job-backend/utils/
 # COPY ./job-backend/*.py ./job-backend/
 WORKDIR /job-backend
 
