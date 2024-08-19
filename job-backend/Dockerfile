@@ -1,4 +1,4 @@
-FROM jrottenberg/ffmpeg:4.1-ubuntu1604 AS ffmpeg
+FROM jrottenberg/ffmpeg:4.1-ubuntu AS ffmpeg
 FROM node:20
 
 COPY --from=ffmpeg / /
@@ -14,6 +14,7 @@ COPY ./job-backend/*.yaml ./job-backend/
 
 COPY ./job-backend/models/ ./job-backend/models/
 COPY ./job-backend/routes/ ./job-backend/routes/
+COPY ./job-backend/utils/ ./job-backend/utils/
 # COPY ./job-backend/*.py ./job-backend/
 WORKDIR /job-backend
 
