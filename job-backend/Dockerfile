@@ -1,4 +1,4 @@
-FROM jrottenberg/ffmpeg:4.1-ubuntu AS ffmpeg
+FROM linuxserver/ffmpeg AS ffmpeg
 FROM node:20
 
 COPY --from=ffmpeg / /
