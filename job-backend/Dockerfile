@@ -14,7 +14,6 @@ COPY ./job-backend/*.yaml ./job-backend/
 
 COPY ./job-backend/models/ ./job-backend/models/
 COPY ./job-backend/routes/ ./job-backend/routes/
-COPY ./job-backend/websocket-routes/ ./job-backend/websocket-routes/
 COPY ./job-backend/*.py ./job-backend/
 WORKDIR /job-backend
 
