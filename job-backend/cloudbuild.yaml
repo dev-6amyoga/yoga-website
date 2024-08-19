@@ -1,0 +1,36 @@
+steps:
+    # Build the container image
+    - name: "gcr.io/cloud-builders/docker"
+      args:
+          [
+              "build",
+              "-t",
+              "gcr.io/am-yoga-website/github.com/dev-6amyoga/yoga-website:$COMMIT_SHA",
+              "-f",
+              "./job-backend/Dockerfile",
+              ".",
+          ]
+    # Push the container image to Container Registry
+    - name: "gcr.io/cloud-builders/docker"
+      args:
+          [
+              "push",
+              "gcr.io/am-yoga-website/github.com/dev-6amyoga/yoga-website:$COMMIT_SHA",
+          ]
+    # Deploy container image to Cloud Run
+    - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+      entrypoint: gcloud
+      args:
+          [
+              "run",
+              "deploy",
+              "job-backend-service",
+              "--image",
+              "gcr.io/am-yoga-website/github.com/dev-6amyoga/yoga-website:$COMMIT_SHA",
+              "--region",
+              "asia-southeast1",
+          ]
+images:
+    - gcr.io/am-yoga-website/github.com/dev-6amyoga/yoga-website:$COMMIT_SHA
+options:
+    logging: CLOUD_LOGGING_ONLY

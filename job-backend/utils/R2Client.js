@@ -142,6 +142,21 @@ module.exports = {
 			})
 		),
 
+	cloudflareDeleteFile: async (bucket, filename) => {
+		return R2.send(
+			new DeleteObjectsCommand({
+				Bucket: bucket,
+				Delete: {
+					Objects: [
+						{
+							Key: filename,
+						},
+					],
+				},
+			})
+		);
+	},
+
 	cloudflareDeleteFolder: async (bucket, folder) => {
 		const response = await R2.send(
 			new ListObjectsV2Command({
