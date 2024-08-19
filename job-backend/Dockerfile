@@ -1,5 +1,5 @@
 FROM jrottenberg/ffmpeg:4.1-alpine AS ffmpeg
-FROM node:20-alpine3.20
+FROM node:20
 
 COPY --from=ffmpeg / /
 
