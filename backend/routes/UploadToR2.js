@@ -581,7 +581,7 @@ router.post('/videos/process/', async (req, res) => {
 
 router.post('/video/process-ffmpeg', async (req, res) => {
   console.log('ffmpeg processing request')
-  const { video_recording_id } = await req.json()
+  const { video_recording_id } = req.body
 
   console.info('video_recording_id', video_recording_id)
 
