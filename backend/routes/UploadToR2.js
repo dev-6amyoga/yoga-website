@@ -579,7 +579,7 @@ router.post('/videos/process/', async (req, res) => {
   }
 })
 
-router.post('/video/process-ffmpeg', async (req, res) => {
+router.post('/videos/process-ffmpeg', async (req, res) => {
   console.log('ffmpeg processing request')
   const { video_recording_id } = req.body
 
@@ -641,6 +641,8 @@ router.post('/video/process-ffmpeg', async (req, res) => {
     console.info('file created')
     // // process with ffmpeg
     const command = ffmpeg(`input.mp4`)
+      .audioCodec('copy')
+      .videoCodec('copy')
       .inputOption('-sn')
       .inputOption('-strict', 'experimental')
       .output(`video.mp4`)
@@ -648,7 +650,11 @@ router.post('/video/process-ffmpeg', async (req, res) => {
     command.run()
 
     let status = -1
-    let maxWaitTime = 5 * 60
+    let maxWaitTime = 17 * 60
+
+    command.on('progress', (progress) => {
+      console.log(`Processing: ${JSON.stringify(progress)}`)
+    })
 
     command.on('end', () => {
       status = 1
@@ -668,6 +674,15 @@ router.post('/video/process-ffmpeg', async (req, res) => {
     }
 
     if (status === -1 || maxWaitTime === 0) {
+      fs.unlinkSync(`input.mp4`)
+      fs.unlinkSync(`video.mp4`)
+      return res.status(500).json({
+        message: 'Failed to process video',
+      })
+    }
+
+    if (status === 0) {
+      fs.unlinkSync(`input.mp4`)
       fs.unlinkSync(`video.mp4`)
       return res.status(500).json({
         message: 'Failed to process video',

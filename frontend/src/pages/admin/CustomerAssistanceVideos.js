@@ -1,5 +1,5 @@
-import { Button, CircularProgress } from "@mui/material";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button, CircularProgress, Tooltip } from "@mui/material";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import AdminPageWrapper from "../../components/Common/AdminPageWrapper";
 import { DataTable } from "../../components/Common/DataTable/DataTable";
@@ -9,789 +9,440 @@ import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { useRef, useState } from "react";
 import { cloudflareGetFileUrl } from "../../utils/R2Client";
 
-// export default function CustomerAssistanceVideos() {
-//   const ffmpegRef = useRef(new FFmpeg());
-//   const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
-//   const [allVideoRecs, setAllVideoRecs] = useState([]);
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       const response = await Fetch({
-//         url: "/video-rec/getAllVideoRecordings",
-//         method: "GET",
-//       });
-//       const data = response.data;
-//       setAllVideoRecs(data);
-//     };
-//     fetchData();
-//   }, []);
-
-//   useEffect(() => {
-//     const loadFFMpeg = async () => {
-//       try {
-//         const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm";
-//         const ffmpeg = ffmpegRef.current;
-//         ffmpeg.on("log", ({ message }) => {
-//           console.log("[FFMPEG]", message);
-//         });
-//         console.log("[FFMPEG]", "getting ffmpeg-core.js and ffmpeg-core.wasm");
-//         await ffmpeg.load({
-//           coreURL: await toBlobURL(
-//             `${baseURL}/ffmpeg-core.js`,
-//             "text/javascript"
-//           ),
-//           wasmURL: await toBlobURL(
-//             `${baseURL}/ffmpeg-core.wasm`,
-//             "application/wasm"
-//           ),
-//         });
-//         console.log("[FFMPEG]", "loaded ffmpeg-core.js and ffmpeg-core.wasm");
-//         setFfmpegLoaded(true);
-//       } catch (error) {
-//         console.error("[FFMPEG]", error);
-//       }
-//     };
-//     loadFFMpeg();
-//   }, []);
-
-//   const {
-//     data: videos,
-//     isLoading,
-//     refetch,
-//   } = useQuery({
-//     queryKey: ["customerAssistanceVideos"],
-//     queryFn: async () => {
-//       try {
-//         const res = await Fetch({
-//           url: "/r2/videos",
-//           method: "GET",
-//         });
-//         let videos = res?.data?.videos;
-//         if (!videos) {
-//           return [];
-//         } else {
-//           videos = videos.reduce((acc, video) => {
-//             // split the key to get the folder of the video
-//             const [folder, key] = video.Key.split("/");
-
-//             // add key to list of videos under folder
-//             if (!acc[folder]) {
-//               acc[folder] = {
-//                 folder: folder,
-//                 videos: [],
-//               };
-//             }
-
-//             acc[folder]["videos"].push({ Key: key });
-
-//             return acc;
-//           }, {});
-//         }
-//         return videos;
-//       } catch (error) {
-//         console.error("res?.data?", err);
-//         toast.error("Failed to fetch customer assistance videos");
-
-//         throw err;
-//       }
-//     },
-//   });
-
-//   const { mutateAsync: handleDownload, isPending } = useMutation({
-//     mutationKey: ["downloadVideo"],
-//     mutationFn: async (video) => {
-//       try {
-//         let intermediateStart = performance.now();
-
-//         const { folder, videos } = video;
-
-//         let finalVideoPath = `${folder}_final.mp4`;
-
-//         // console.log(
-//         // 	finalVideoPath,
-//         // 	videos.find((v) => v.Key === finalVideoPath)
-//         // );
-
-//         if (videos.length === 0) {
-//           throw new Error("No videos to process");
-//         }
-
-//         if (videos.find((v) => v.Key === finalVideoPath)) {
-//           const res = await fetch(`${getBackendDomain()}/r2/videos/get`, {
-//             method: "POST",
-//             headers: {
-//               "Content-Type": "application/json",
-//             },
-//             body: JSON.stringify({
-//               filename: `${folder}/${finalVideoPath}`,
-//               content_type: "video/mp4",
-//             }),
-//           });
-
-//           if (res.status === 200) {
-//             const buffer = await res.arrayBuffer();
-//             const blob = new Blob([buffer], { type: "video/mp4" });
-//             const url = URL.createObjectURL(blob);
-//             const a = document.createElement("a");
-//             a.href = url;
-//             a.download = `${folder}.mp4`;
-//             a.click();
-//             URL.revokeObjectURL(url);
-//             toast("Video downloaded successfully", {
-//               type: "success",
-//             });
-//             return [];
-//           } else {
-//             throw new Error("Failed to download video");
-//           }
-//         }
-
-//         toast.warn("Processing videos, this may take upto 5 minutes");
-
-//         const res = await Fetch({
-//           url: `/r2/videos/process/${folder}`,
-//           method: "POST",
-//           data: {
-//             videos: videos,
-//           },
-//         });
-
-//         if (res.status === 200) {
-//           toast.success("Videos processed successfully");
-//           const res = await fetch(`${getBackendDomain()}/r2/videos/get`, {
-//             method: "POST",
-//             headers: {
-//               "Content-Type": "application/json",
-//             },
-//             body: JSON.stringify({
-//               filename: `${folder}/${finalVideoPath}`,
-//               content_type: "video/mp4",
-//             }),
-//           });
-
-//           if (res.status === 200) {
-//             const buffer = await res.arrayBuffer();
-//             const blob = new Blob([buffer], { type: "video/mp4" });
-//             const url = URL.createObjectURL(blob);
-//             const a = document.createElement("a");
-//             a.href = url;
-//             a.download = `${folder}.mp4`;
-//             a.click();
-//             URL.revokeObjectURL(url);
-//             toast("Video downloaded successfully", {
-//               type: "success",
-//             });
-//             return [];
-//           } else {
-//             throw new Error("Failed to download video");
-//           }
-//         } else {
-//           throw new Error("Failed to process videos");
-//         }
-
-//         // let promises = videos.map(async (v) => {
-//         // 	try {
-//         // 		let res = await fetch(
-//         // 			`${getBackendDomain()}/r2/videos/get`,
-//         // 			{
-//         // 				method: "POST",
-//         // 				headers: {
-//         // 					"Content-Type": "application/json",
-//         // 				},
-//         // 				body: JSON.stringify({
-//         // 					filename: `${folder}/${v.Key}`,
-//         // 				}),
-//         // 			}
-//         // 		);
-
-//         // 		const buffer = await res.arrayBuffer();
-
-//         // 		console.log("[download] got : ", v.Key);
-//         // 		return { Key: v.Key, buffer: buffer };
-//         // 	} catch (error) {
-//         // 		console.error(
-//         // 			"[download] Failed to fetch video",
-//         // 			error
-//         // 		);
-//         // 		throw error;
-//         // 	}
-//         // });
-
-//         // let videoData = await Promise.all(promises);
-
-//         // videoData.sort((v1, v2) => (v1.Key > v2.Key ? 1 : -1));
-
-//         // let buffers = videoData.map((v) => v.buffer);
-
-//         // console.log(
-//         // 	"[download] res?.data?",
-//         // 	videoData,
-//         // 	buffers
-//         // 	// Buffer.from(res.data)
-//         // );
-
-//         // console.log(
-//         // 	"[download] Time to fetch video: ",
-//         // 	performance.now() - intermediateStart
-//         // );
-
-//         /*
-// 				// do ffmpeg stuff here
-// 				intermediateStart = performance.now();
-// 				const f = new File(buffers, video.Key, {
-// 					type: "video/mp4",
-// 				});
-
-// 				console.log("[download] combined size : ", f.size);
-
-// 				const fileBuffer = await f.stream().getReader().read();
-
-// 				console.log(
-// 					"[download] Time to create file: ",
-// 					performance.now() - intermediateStart
-// 				);
-
-// 				intermediateStart = performance.now();
-
-// 				let files = (await ffmpegRef.current.listDir("/"))
-// 					.filter((f) => !f.isDir)
-// 					.map((f) => f.name);
-
-// 				console.log("[download] files", files);
-
-// 				if (files.includes("video.mp4")) {
-// 					await ffmpegRef.current.deleteFile("/video.mp4");
-// 				}
-
-// 				console.log(
-// 					"[download] Time to list and delete file: ",
-// 					performance.now() - intermediateStart
-// 				);
-
-// 				// // do ffmpeg stuff here
-// 				intermediateStart = performance.now();
-
-// 				await ffmpegRef.current.writeFile(
-// 					"/video.mp4",
-// 					fileBuffer.value
-// 				);
-
-// 				files = (await ffmpegRef.current.listDir("/"))
-// 					.filter((f) => !f.isDir)
-// 					.map((f) => f.name);
-
-// 				console.log("[download] files", files);
-
-// 				console.log(
-// 					"[download] Time to write file: ",
-// 					performance.now() - intermediateStart
-// 				);
-
-// 				intermediateStart = performance.now();
-// 				let ffmpegExecResult = await ffmpegRef.current.exec([
-// 					"-i",
-// 					"video.mp4",
-// 					"-sn",
-// 					"-c:v",
-// 					"libx264",
-// 					"-c:a",
-// 					"aac",
-// 					"-strict",
-// 					"experimental",
-// 					"output.mp4",
-// 				]);
-
-// 				console.log(
-// 					"[download] Time to exec: ",
-// 					performance.now() - intermediateStart,
-// 					{ ffmpegExecResult }
-// 				);
-
-// 				if (ffmpegExecResult !== 0) {
-// 					throw new Error("FFMPEG failed to execute");
-// 				}
-
-// 				intermediateStart = performance.now();
-
-// 				const data = await ffmpegRef.current.readFile("output.mp4");
-
-// 				// let videoBlobFile = new File(data, "output.mp4", {
-// 				// 	type: "video/mp4",
-// 				// });
-
-// 				console.log(
-// 					"[download] Time to read file, parse: ",
-// 					performance.now() - intermediateStart
-// 				);
-//         */
-
-//         // const combinedBlob = new Blob(buffers, {
-//         // 	type: "video/mp4",
-//         // });
-
-//         // console.log("[download] combinedBlob", combinedBlob);
-
-//         // const url = window.URL.createObjectURL(combinedBlob);
-//         // const link = document.createElement("a");
-
-//         // link.href = url;
-//         // link.setAttribute("download", `${folder}.mp4`);
-//         // document.body.appendChild(link);
-//         // link.click();
-//         // link.parentNode.removeChild(link);
-//         // window.URL.revokeObjectURL(url);
-
-//         return [];
-//       } catch (error) {
-//         console.error("res?.data?", error);
-//         toast.error("Failed to download video");
-
-//         throw error;
-//       }
-//     },
-//   });
-
-//   const handleDelete = (row) => {};
-
-//   const columns = [
-//     {
-//       accessorKey: "folder",
-//       header: "Folder name",
-//     },
-//     {
-//       header: "Actions",
-//       cell: ({ row }) => {
-//         let [loading, setLoading] = useState(false);
-//         const handle = async (row) => {
-//           setLoading(true);
-//           await handleDownload(row);
-//           setLoading(false);
-//         };
-//         return (
-//           <div className="flex flex-row gap-2">
-//             <Button
-//               onClick={() => handle(row?.original)}
-//               variant="contained"
-//               size="small"
-//               disabled={loading}
-//             >
-//               {loading ? <CircularProgress /> : "Download"}
-//             </Button>
-//             <Button
-//               onClick={() => handleDelete(row?.original)}
-//               color="error"
-//               variant="outlined"
-//               size="small"
-//             >
-//               Delete
-//             </Button>
-//           </div>
-//         );
-//       },
-//     },
-//   ];
-
-//   return (
-//     <AdminPageWrapper heading="Customer Assistance Videos">
-//       <div>
-//         <DataTable
-//           data={videos ? Object.values(videos) : []}
-//           columns={columns}
-//           refetch={refetch}
-//         />
-//       </div>
-//     </AdminPageWrapper>
-//   );
-// }
-
 const VideoActions = ({ video }) => {
-  const { mutateAsync: handleDownload, isPending: isDownloadPending } =
-    useMutation({
-      mutationKey: ["justDownloadVideo", video._id],
-      mutationFn: async () => {
-        try {
-          const url = await cloudflareGetFileUrl(
-            import.meta.env.VITE_CLOUDFLARE_R2_RECORDINGS_BUCKET,
-            `${video.folder_name}/${video.folder_name}_final.mp4`,
-            "video/mp4"
-          );
+	const queryClient = useQueryClient();
 
-          const res = await fetch(url);
+	const { mutateAsync: handleDownload, isPending: isDownloadPending } =
+		useMutation({
+			mutationKey: ["justDownloadVideo", video._id],
+			mutationFn: async () => {
+				try {
+					const url = await cloudflareGetFileUrl(
+						import.meta.env.VITE_CLOUDFLARE_R2_RECORDINGS_BUCKET,
+						`${video.folder_name}/${video.folder_name}_final_ffmpeg.mp4`,
+						"video/mp4"
+					);
 
-          if (res.status === 200) {
-            const buffer = await res.arrayBuffer();
-            const blob = new Blob([buffer], { type: "video/mp4" });
-            const blobURL = URL.createObjectURL(blob);
+					const res = await fetch(url);
 
-            const a = document.createElement("a");
-            a.href = blobURL;
-            a.download = `${video.folder_name}.mp4`;
-            a.click();
+					if (res.status === 200) {
+						const buffer = await res.arrayBuffer();
+						const blob = new Blob([buffer], { type: "video/mp4" });
+						const blobURL = URL.createObjectURL(blob);
 
-            URL.revokeObjectURL(blobURL);
+						const a = document.createElement("a");
+						a.href = blobURL;
+						a.download = `${video.folder_name}.mp4`;
+						a.click();
 
-            toast("Video downloaded successfully", {
-              type: "success",
-            });
+						URL.revokeObjectURL(blobURL);
 
-            return [];
-          } else {
-            throw new Error("Failed to download video");
-          }
-        } catch (error) {
-          toast.error(error);
-          throw error;
-        }
-      },
-    });
+						toast("Video downloaded successfully", {
+							type: "success",
+						});
 
-  const { mutateAsync: handleProcess, isPending: isProcessPending } =
-    useMutation({
-      mutationKey: ["processVideo", video._id],
-      mutationFn: async () => {
-        try {
-          toast.warn("Processing videos, this may take up to 5 minutes");
+						return [];
+					} else {
+						throw new Error("Failed to download video");
+					}
+				} catch (error) {
+					toast.error(error);
+					throw error;
+				}
+			},
+		});
 
-          const res = await Fetch({
-            url: `/r2/videos/process/`,
-            method: "POST",
-            data: {
-              folder_name: video.folder_name,
-              video_recording_id: video._id,
-            },
-          });
+	const { mutateAsync: handleProcess, isPending: isProcessPending } =
+		useMutation({
+			mutationKey: ["processVideo", video._id],
+			mutationFn: async () => {
+				try {
+					toast.warn(
+						"Processing videos, this may take up to 5 minutes"
+					);
 
-          if (res.status === 200) {
-            toast.success("Videos processed successfully");
-          } else {
-            throw new Error("Failed to process videos");
-          }
-        } catch (error) {
-          toast.error(error);
-          throw error;
-        }
-      },
-    });
+					const res = await Fetch({
+						url: `/r2/videos/process/`,
+						method: "POST",
+						data: {
+							folder_name: video.folder_name,
+							video_recording_id: video._id,
+						},
+					});
 
-  const { mutateAsync: handleDelete, isPending: isDeletePending } = useMutation(
-    {
-      mutationKey: ["deleteVideo", video._id],
-      mutationFn: async (video) => {
-        // console.log(video._id, video._id.toString());
-        try {
-          const res = await Fetch({
-            url: `/video-rec/deleteVideoRecording/${video._id.toString()}`,
-            method: "DELETE",
-          });
-          if (res.status === 200) {
-            toast.success("Video deleted successfully");
-          } else {
-            throw new Error("Failed to delete video");
-          }
-        } catch (error) {
-          toast.error(error);
-          throw error;
-        }
-      },
-    }
-  );
+					if (res.status === 200) {
+						const res = await Fetch({
+							url: `/r2/videos/process-ffmpeg/`,
+							method: "POST",
+							data: {
+								folder_name: video.folder_name,
+								video_recording_id: video._id,
+							},
+						});
 
-  return (
-    <div className="flex flex-row gap-2">
-      <Button
-        onClick={() => {
-          handleProcess(video);
-        }}
-        variant={
-          video?.processing_status === "PROCESSED" ? "outlined" : "contained"
-        }
-        size="small"
-        disabled={isProcessPending}
-      >
-        {isProcessPending ? (
-          <CircularProgress size="1rem" />
-        ) : video?.processing_status === "PROCESSED" ? (
-          "REPROCESS"
-        ) : (
-          "PROCESS"
-        )}
-      </Button>
+						if (res.status === 200) {
+							queryClient.invalidateQueries({
+								queryKey: ["allVideoRecordings"],
+							});
+							toast.success("Videos processed successfully");
 
-      <Button
-        onClick={() => {
-          handleDownload(video);
-        }}
-        variant="contained"
-        size="small"
-        disabled={
-          isDownloadPending || !(video?.processing_status === "PROCESSED")
-        }
-      >
-        {isDownloadPending ? <CircularProgress size="1rem" /> : "Download"}
-      </Button>
+							return [];
+						} else {
+							throw new Error("Failed to process videos");
+						}
+					} else {
+						throw new Error("Failed to process videos");
+					}
+				} catch (error) {
+					toast.error(error);
+					throw error;
+				}
+			},
+		});
 
-      <Button
-        onClick={() => handleDelete(video)}
-        color="error"
-        variant="outlined"
-        size="small"
-        disabled={isDeletePending}
-      >
-        Delete
-      </Button>
-    </div>
-  );
+	const {
+		mutateAsync: handleProcessFFMPEG,
+		isPending: isProcessFFMPEGPending,
+	} = useMutation({
+		mutationKey: ["processVideoFFMPEG", video._id],
+		mutationFn: async () => {
+			try {
+				toast.warn("Processing videos, this may take up to 5 minutes");
+
+				const res = await Fetch({
+					url: `/r2/videos/process-ffmpeg/`,
+					method: "POST",
+					data: {
+						folder_name: video.folder_name,
+						video_recording_id: video._id,
+					},
+				});
+
+				if (res.status === 200) {
+					queryClient.invalidateQueries({
+						queryKey: ["allVideoRecordings"],
+					});
+					toast.success("Videos processed successfully");
+
+					return [];
+				} else {
+					throw new Error("Failed to process videos");
+				}
+			} catch (error) {
+				toast.error(error);
+				throw error;
+			}
+		},
+	});
+
+	const { mutateAsync: handleDelete, isPending: isDeletePending } =
+		useMutation({
+			mutationKey: ["deleteVideo", video._id],
+			mutationFn: async (video) => {
+				// console.log(video._id, video._id.toString());
+				try {
+					const res = await Fetch({
+						url: `/video-rec/deleteVideoRecording/${video._id.toString()}`,
+						method: "DELETE",
+					});
+					if (res.status === 200) {
+						toast.success("Video deleted successfully");
+					} else {
+						throw new Error("Failed to delete video");
+					}
+				} catch (error) {
+					toast.error(error);
+					throw error;
+				}
+			},
+		});
+
+	return (
+		<div className="flex flex-row gap-2">
+			<Tooltip title="Will combine and process ffmpeg.">
+				<Button
+					onClick={() => {
+						handleProcess(video);
+					}}
+					variant={
+						video?.processing_status === "PROCESSED" ||
+						video?.processing_status === "PROCESSED_FFMPEG"
+							? "outlined"
+							: "contained"
+					}
+					size="small"
+					disabled={isProcessPending}>
+					{isProcessPending ? (
+						<CircularProgress size="1rem" />
+					) : video?.processing_status === "PROCESSED" ||
+					  video?.processing_status === "PROCESSED_FFMPEG" ? (
+						"REPROCESS"
+					) : (
+						"PROCESS"
+					)}
+				</Button>
+			</Tooltip>
+
+			<Tooltip title="Will process ffmpeg only.">
+				<Button
+					onClick={() => {
+						handleProcessFFMPEG(video);
+					}}
+					variant={
+						video?.processing_status === "PROCESSED_FFMPEG"
+							? "outlined"
+							: "contained"
+					}
+					size="small"
+					disabled={
+						isProcessFFMPEGPending ||
+						video?.processing_status === "PENDING"
+					}>
+					{isProcessFFMPEGPending ? (
+						<CircularProgress size="1rem" />
+					) : video?.processing_status === "PROCESSED_FFMPEG" ? (
+						"REPROCESS FFMPEG"
+					) : (
+						"PROCESS FFMPEG"
+					)}
+				</Button>
+			</Tooltip>
+
+			<Tooltip title="If prepared and processed with ffmpeg, will be downloadable">
+				<Button
+					onClick={() => {
+						handleDownload(video);
+					}}
+					variant="contained"
+					size="small"
+					disabled={
+						isDownloadPending ||
+						!(video?.processing_status === "PROCESSED_FFMPEG")
+					}>
+					{isDownloadPending ? (
+						<CircularProgress size="1rem" />
+					) : (
+						"Download"
+					)}
+				</Button>
+			</Tooltip>
+
+			<Button
+				onClick={() => handleDelete(video)}
+				color="error"
+				variant="outlined"
+				size="small"
+				disabled={isDeletePending}>
+				Delete
+			</Button>
+		</div>
+	);
 };
 
 export default function CustomerAssistanceVideos() {
-  const ffmpegRef = useRef(new FFmpeg());
-  const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
-  // const [allVideoRecs, setAllVideoRecs] = useState([]);
+	const ffmpegRef = useRef(new FFmpeg());
+	const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
+	// const [allVideoRecs, setAllVideoRecs] = useState([]);
 
-  const {
-    data: videos,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["customerAssistanceVideos"],
-    queryFn: async () => {
-      try {
-        const res = await Fetch({
-          url: "/r2/videos",
-          method: "GET",
-        });
-        let videos = res?.data?.videos;
-        if (!videos) {
-          return [];
-        } else {
-          videos = videos.reduce((acc, video) => {
-            const [folder, key] = video.Key.split("/");
-            if (!acc[folder]) {
-              acc[folder] = {
-                folder: folder,
-                videos: [],
-              };
-            }
-            acc[folder]["videos"].push({ Key: key });
-            return acc;
-          }, {});
-        }
-        return videos;
-      } catch (error) {
-        console.error("res?.data?", err);
-        toast.error("Failed to fetch customer assistance videos");
-        throw err;
-      }
-    },
-  });
+	const {
+		data: videos,
+		isLoading,
+		refetch,
+	} = useQuery({
+		queryKey: ["customerAssistanceVideos"],
+		queryFn: async () => {
+			try {
+				const res = await Fetch({
+					url: "/r2/videos",
+					method: "GET",
+				});
+				let videos = res?.data?.videos;
+				if (!videos) {
+					return [];
+				} else {
+					videos = videos.reduce((acc, video) => {
+						const [folder, key] = video.Key.split("/");
+						if (!acc[folder]) {
+							acc[folder] = {
+								folder: folder,
+								videos: [],
+							};
+						}
+						acc[folder]["videos"].push({ Key: key });
+						return acc;
+					}, {});
+				}
+				return videos;
+			} catch (error) {
+				console.error("res?.data?", err);
+				toast.error("Failed to fetch customer assistance videos");
+				throw err;
+			}
+		},
+	});
 
-  const { data: allVideoRecs, refetch: refetchAllVideos } = useQuery({
-    queryKey: ["allVideoRecordings"],
-    queryFn: async () => {
-      try {
-        const response = await Fetch({
-          url: "/video-rec/getAllVideoRecordings",
-          method: "GET",
-        });
-        const data = response.data;
+	const { data: allVideoRecs, refetch: refetchAllVideos } = useQuery({
+		queryKey: ["allVideoRecordings"],
+		queryFn: async () => {
+			try {
+				const response = await Fetch({
+					url: "/video-rec/getAllVideoRecordings",
+					method: "GET",
+				});
+				const data = response.data;
 
-        const sortedData = data.sort(
-          (a, b) => new Date(b.created_at) - new Date(a.created_at)
-        );
+				const sortedData = data.sort(
+					(a, b) => new Date(b.created_at) - new Date(a.created_at)
+				);
 
-        return sortedData;
-      } catch (err) {
-        throw err;
-      }
-    },
-  });
+				return sortedData;
+			} catch (err) {
+				throw err;
+			}
+		},
+	});
 
-  const { mutateAsync: handleDownload, isPending } = useMutation({
-    mutationKey: ["downloadVideo"],
-    mutationFn: async (video) => {
-      try {
-        console.log("video is : ", video);
-        let intermediateStart = performance.now();
-        const { folder, videos } = video;
-        let finalVideoPath = `${folder}_final.mp4`;
-        if (videos.length === 0) {
-          throw new Error("No videos to process");
-        }
+	const { mutateAsync: handleDownload, isPending } = useMutation({
+		mutationKey: ["downloadVideo"],
+		mutationFn: async (video) => {
+			try {
+				console.log("video is : ", video);
+				let intermediateStart = performance.now();
+				const { folder, videos } = video;
+				let finalVideoPath = `${folder}_final_ffmpeg.mp4`;
+				console.log("finalVideoPath", finalVideoPath);
+				if (videos.length === 0) {
+					throw new Error("No videos to process");
+				}
 
-        if (videos.find((v) => v.Key === finalVideoPath)) {
-          // toast("")
-          const url = await cloudflareGetFileUrl(
-            import.meta.env.VITE_CLOUDFLARE_R2_RECORDINGS_BUCKET,
-            `${folder}/${finalVideoPath}`,
-            "video/mp4"
-          );
+				if (videos.find((v) => v.Key === finalVideoPath)) {
+					// toast("")
+					const url = await cloudflareGetFileUrl(
+						import.meta.env.VITE_CLOUDFLARE_R2_RECORDINGS_BUCKET,
+						`${folder}/${finalVideoPath}`,
+						"video/mp4"
+					);
 
-          const res = await fetch(url);
+					const res = await fetch(url);
 
-          if (res.status === 200) {
-            const buffer = await res.arrayBuffer();
-            const blob = new Blob([buffer], { type: "video/mp4" });
-            const blobURL = URL.createObjectURL(blob);
+					if (res.status === 200) {
+						const buffer = await res.arrayBuffer();
+						const blob = new Blob([buffer], { type: "video/mp4" });
+						const blobURL = URL.createObjectURL(blob);
 
-            const a = document.createElement("a");
-            a.href = blobURL;
-            a.download = `${folder}.mp4`;
-            a.click();
+						const a = document.createElement("a");
+						a.href = blobURL;
+						a.download = `${folder}.mp4`;
+						a.click();
 
-            URL.revokeObjectURL(blobURL);
+						URL.revokeObjectURL(blobURL);
 
-            toast("Video downloaded successfully", {
-              type: "success",
-            });
+						toast("Video downloaded successfully", {
+							type: "success",
+						});
 
-            return [];
-          } else {
-            throw new Error("Failed to download video");
-          }
-        } else {
-          toast.warn("Processing videos, this may take up to 5 minutes");
+						return [];
+					} else {
+						throw new Error("Failed to download video");
+					}
+				} else {
+					toast.warn(
+						"Processing videos, this may take up to 5 minutes"
+					);
 
-          const res = await Fetch({
-            url: `/r2/videos/process/${folder}`,
-            method: "POST",
-            data: {
-              videos: videos,
-            },
-          });
+					const res = await Fetch({
+						url: `/r2/videos/process/${folder}`,
+						method: "POST",
+						data: {
+							videos: videos,
+						},
+					});
 
-          if (res.status === 200) {
-            toast.success("Videos processed successfully");
-            const url = await cloudflareGetFileUrl(
-              import.meta.env.VITE_CLOUDFLARE_R2_RECORDINGS_BUCKET,
-              `${folder}/${finalVideoPath}`,
-              "video/mp4"
-            );
+					if (res.status === 200) {
+						toast.success("Videos processed successfully");
+						const url = await cloudflareGetFileUrl(
+							import.meta.env
+								.VITE_CLOUDFLARE_R2_RECORDINGS_BUCKET,
+							`${folder}/${finalVideoPath}`,
+							"video/mp4"
+						);
 
-            const res = await fetch(url);
+						const res = await fetch(url);
 
-            if (res.status === 200) {
-              const buffer = await res.arrayBuffer();
-              const blob = new Blob([buffer], {
-                type: "video/mp4",
-              });
-              const blobURL = URL.createObjectURL(blob);
+						if (res.status === 200) {
+							const buffer = await res.arrayBuffer();
+							const blob = new Blob([buffer], {
+								type: "video/mp4",
+							});
+							const blobURL = URL.createObjectURL(blob);
 
-              const a = document.createElement("a");
-              a.href = blobURL;
-              a.download = `${folder}.mp4`;
-              a.click();
+							const a = document.createElement("a");
+							a.href = blobURL;
+							a.download = `${folder}.mp4`;
+							a.click();
 
-              URL.revokeObjectURL(blobURL);
+							URL.revokeObjectURL(blobURL);
 
-              toast("Video downloaded successfully", {
-                type: "success",
-              });
+							toast("Video downloaded successfully", {
+								type: "success",
+							});
 
-              return [];
-            } else {
-              throw new Error("Failed to download video");
-            }
-          } else {
-            throw new Error("Failed to process videos");
-          }
-        }
-      } catch (error) {
-        toast.error(error);
-        throw error;
-      }
-    },
-  });
+							return [];
+						} else {
+							throw new Error("Failed to download video");
+						}
+					} else {
+						throw new Error("Failed to process videos");
+					}
+				}
+			} catch (error) {
+				toast.error(error);
+				throw error;
+			}
+		},
+	});
 
-  const columns = [
-    {
-      accessorKey: "folder",
-      header: "Folder name",
-    },
-    {
-      header: "Status",
-      cell: ({ row }) => {
-        return (
-          <p>
-            {row?.original.videos.find(
-              (v) => v.Key === `${row?.original.folder}_final.mp4`
-            )
-              ? "Processed"
-              : "Not Processed"}
-          </p>
-        );
-      },
-    },
-    {
-      header: "Actions",
-      cell: ({ row }) => {
-        let [loading, setLoading] = useState(false);
+	const columns1 = [
+		{
+			accessorKey: "user_id",
+			header: "Student ID",
+		},
+		{
+			accessorKey: "user_username",
+			header: "Student Username",
+		},
+		{
+			header: "Creation Date",
+			cell: ({ row }) => (
+				<p>{new Date(row?.original?.created_at).toLocaleString()}</p>
+			),
+		},
+		{
+			accessorKey: "processing_status",
+			header: "Processing Status",
+		},
+		{
+			header: "Actions",
+			cell: ({ row }) => <VideoActions video={row.original} />,
+		},
+	];
 
-        const handle = async (row) => {
-          setLoading(true);
-          await handleDownload(row);
-          setLoading(false);
-        };
-
-        return (
-          <div className="flex flex-row gap-2">
-            <Button
-              onClick={() => handle(row?.original)}
-              variant="contained"
-              size="small"
-              disabled={isPending && loading}
-            >
-              {isPending && loading ? <CircularProgress /> : "Download"}
-            </Button>
-            <Button
-              onClick={() => handleDelete(row?.original)}
-              color="error"
-              variant="outlined"
-              size="small"
-            >
-              Delete
-            </Button>
-          </div>
-        );
-      },
-    },
-  ];
-
-  const columns1 = [
-    {
-      accessorKey: "user_id",
-      header: "Student ID",
-    },
-    {
-      accessorKey: "user_username",
-      header: "Student Username",
-    },
-    {
-      header: "Creation Date",
-      cell: ({ row }) => (
-        <p>{new Date(row?.original?.created_at).toLocaleString()}</p>
-      ),
-    },
-    {
-      accessorKey: "processing_status",
-      header: "Processing Status",
-    },
-    {
-      header: "Actions",
-      cell: ({ row }) => <VideoActions video={row.original} />,
-    },
-  ];
-
-  return (
-    <AdminPageWrapper heading="Customer Assistance Videos">
-      <div>
-        <h2>All Video Recordings</h2>
-        <DataTable
-          data={allVideoRecs ?? []}
-          columns={columns1}
-          refetch={refetchAllVideos}
-        />
-      </div>
-      <br />
-      {/* <div>
+	return (
+		<AdminPageWrapper heading="Customer Assistance Videos">
+			<div>
+				<h2>All Video Recordings</h2>
+				<p className="my-2 text-muted-foreground">
+					{"Stages : PENDING -> PROCESSED -> PROCESSED_FFMPEG"}
+				</p>
+				<div className="my-4"></div>
+				<DataTable
+					data={allVideoRecs ?? []}
+					columns={columns1}
+					refetch={refetchAllVideos}
+				/>
+			</div>
+			<br />
+			{/* <div>
         <h2>Processed Videos</h2>
         <DataTable
           data={videos ? Object.values(videos) : []}
@@ -799,6 +450,6 @@ export default function CustomerAssistanceVideos() {
           refetch={refetch}
         />
       </div> */}
-    </AdminPageWrapper>
-  );
+		</AdminPageWrapper>
+	);
 }
