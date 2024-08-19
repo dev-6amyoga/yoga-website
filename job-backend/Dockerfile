@@ -11,13 +11,9 @@ COPY ./job-backend/*.js ./job-backend/
 COPY ./job-backend/*.json ./job-backend/
 COPY ./job-backend/*.yaml ./job-backend/
 
-COPY ./job-backend/enums/ ./job-backend/enums/
-COPY ./job-backend/invoice-templates/ ./job-backend/invoice-templates/
+
 COPY ./job-backend/models/ ./job-backend/models/
 COPY ./job-backend/routes/ ./job-backend/routes/
-COPY ./job-backend/services/ ./job-backend/services/
-COPY ./job-backend/utils/ ./job-backend/utils/
-COPY ./job-backend/public/ ./job-backend/public/
 COPY ./job-backend/websocket-routes/ ./job-backend/websocket-routes/
 COPY ./job-backend/*.py ./job-backend/
 WORKDIR /job-backend

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const cors = require("cors");
-// const morgan = require("morgan");
-const logger = require("pino-http");
+const morgan = require("morgan");
+// const logger = require("pino-http");
 const dotenv = require("dotenv");
 const compression = require("compression");
 const helmet = require("helmet");
@@ -10,6 +10,8 @@ const glob = require("glob");
 const HyperExpress = require("hyper-express");
 
 const bodyParser = require("body-parser");
+
+const path = require("path");
 
 // const RateLimit = require('express-rate-limit')
 
@@ -67,34 +69,34 @@ const app = new HyperExpress.Server();
 app.use(cors(corsOptions));
 
 // parse json body
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 
 // logging
-// app.use(
-// 	morgan((tokens, req, res) =>
-// 		[
-// 			tokens.date(req, res, "iso"),
-// 			tokens.method(req, res),
-// 			tokens.url(req, res),
-// 			tokens.status(req, res),
-// 			tokens.res(req, res, "content-length"),
-// 			"-",
-// 			tokens["response-time"](req, res),
-// 			"ms",
-// 		].join(" ")
-// 	)
-// );
-
 app.use(
-	logger({
-		customAttributeKeys: {
-			req: "request",
-			// res: "response",
-			// err: "error",
-			responseTime: "timeTaken",
-		},
-	})
+	morgan((tokens, req, res) =>
+		[
+			tokens.date(req, res, "iso"),
+			tokens.method(req, res),
+			tokens.url(req, res),
+			tokens.status(req, res),
+			tokens.res(req, res, "content-length"),
+			"-",
+			tokens["response-time"](req, res),
+			"ms",
+		].join(" ")
+	)
 );
+
+// app.use(
+// 	logger({
+// 		customAttributeKeys: {
+// 			req: "request",
+// 			// res: "response",
+// 			// err: "error",
+// 			responseTime: "timeTaken",
+// 		},
+// 	})
+// );
 
 // parsing user agent
 // app.use(useragent.express());
