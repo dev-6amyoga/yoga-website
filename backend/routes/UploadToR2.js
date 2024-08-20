@@ -641,11 +641,13 @@ router.post('/videos/process-ffmpeg', async (req, res) => {
     console.info('file created')
     // // process with ffmpeg
     const command = ffmpeg(`input.mp4`)
-      .audioCodec('copy')
+      .audioCodec('aac')
       .videoCodec('copy')
-      .inputOption('-sn')
-      .inputOption('-strict', 'experimental')
+
       .output(`video.mp4`)
+
+    // .inputOption('-sn')
+    // .inputOption('-strict', 'experimental')
 
     command.run()
 
