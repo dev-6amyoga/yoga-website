@@ -603,8 +603,7 @@ router.post('/register', async (req, res) => {
     !name ||
     !role_name ||
     is_google_login === undefined ||
-    is_google_login === null ||
-    !institute_details
+    is_google_login === null
   )
     return res
       .status(HTTP_BAD_REQUEST)
