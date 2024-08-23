@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"os"
 	"syncer-backend/src/events"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func NewClass() (*ClassModel, error) {
@@ -27,7 +29,7 @@ func AddToActionsQueue(db *mongo.Client, classId string, action events.QueueEven
 
 	ss.StartTransaction()
 
-	collection := db.Database(os.Getenv("DB_NAME")).Collection("class_mode")
+	collection := db.Database(os.Getenv("DB_NAME")).Collection("class_history")
 
 	objId, _ := primitive.ObjectIDFromHex(classId)
 
@@ -63,6 +65,43 @@ func AddToActionsQueue(db *mongo.Client, classId string, action events.QueueEven
 
 	ss.CommitTransaction(context.Background())
 	return nil
+}
+
+func GetQueueEventsSince(db *mongo.Client, classId string, maxTime time.Time) ([]events.QueueEvent, error) {
+	// get records from the db
+	ss, err := db.StartSession()
+
+	if err != nil {
+		return nil, err
+	}
+
+	ss.StartTransaction()
+
+	collection := db.Database(os.Getenv("DB_NAME")).Collection("class_history")
+
+	objId, _ := primitive.ObjectIDFromHex(classId)
+
+	// Define the filter criteria (e.g., update document with specific ID)
+	filter := bson.M{"_id": objId}
+
+	opts := options.FindOneOptions{}
+
+	opts.SetProjection(bson.M{"actions_queue": 1})
+
+	res := collection.FindOne(context.TODO(), filter, &opts)
+
+	classModel := ClassModel{}
+
+	err = res.Decode(&classModel)
+
+	if err != nil {
+		ss.AbortTransaction(context.Background())
+		return nil, err
+	}
+
+	ss.CommitTransaction(context.Background())
+
+	return classModel.ActionsQueue, nil
 }
 
 func AddToControlsQueue(db *mongo.Client, classId string, action events.ControlsEvent) error {

@@ -107,9 +107,9 @@ const (
 )
 
 type EventStudentResponse struct {
-	Status  EventStatus `json:"status"`
-	Message string      `json:"message"`
-	Events  []Event     `json:"events"`
+	Status      EventStatus  `json:"status"`
+	Message     string       `json:"message"`
+	QueueEvents []QueueEvent `json:"queue_events"`
 }
 
 type EventTeacherResponse struct {

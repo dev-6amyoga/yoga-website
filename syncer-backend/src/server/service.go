@@ -89,6 +89,14 @@ func (s *Server) ProcessQueueEvent(classId string, queueEvent events.QueueEvent,
 	}
 }
 
+func (s *Server) ProcessQueueEventsPoll() ([]events.QueueEvent, error) {
+	// get all events from the db
+
+	// return them
+
+	return nil, nil
+}
+
 func (s *Server) ProcessControlsEvent(classId string, controlsEvent events.ControlsEvent, conn *websocket.Conn) {
 
 	// switch controlsEvent.SubType {

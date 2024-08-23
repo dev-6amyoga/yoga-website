@@ -229,18 +229,36 @@ func (s *Server) handleStudentConnection(w http.ResponseWriter, r *http.Request)
 		Message: "Connection established",
 	})
 
+	// var max_update_time time.Time
+
+	// max_update_time = time.Now()
+
 	for {
 		select {
 
 		case <-timer.C:
 			// TODO : poll for events
-			// send events to students
-			msg := events.EventStudentResponse{
-				Status:  events.EVENT_STATUS_ACK,
-				Message: fmt.Sprintf("[FIRED BY TIMER] Event from class %s", classId),
+
+			evs, err := s.ProcessQueueEventsPoll()
+
+			if err != nil {
+				conn.WriteJSON(events.EventStudentResponse{
+					Status:  events.EVENT_STATUS_NACK,
+					Message: "Error polling for events",
+				})
+				s.logger.Error("Error polling for events:", err)
 			}
 
-			err := conn.WriteJSON(msg)
+			// get the max of event time
+
+			// send events to students
+			msg := events.EventStudentResponse{
+				Status:      events.EVENT_STATUS_ACK,
+				Message:     fmt.Sprintf("[FIRED BY TIMER] Event from class %s", classId),
+				QueueEvents: evs,
+			}
+
+			err = conn.WriteJSON(msg)
 
 			if err != nil {
 				conn.WriteJSON(events.EventTeacherResponse{
