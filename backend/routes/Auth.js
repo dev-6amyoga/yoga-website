@@ -489,6 +489,8 @@ router.post('/login-google', async (req, res) => {
 })
 
 router.post('/logout', authenticateToken, async (req, res) => {
+  const clientIp = req.clientIp
+
   if (!req.user) {
     return res.status(HTTP_BAD_REQUEST).json({ error: 'No user logged in' })
   }
@@ -498,10 +500,15 @@ router.post('/logout', authenticateToken, async (req, res) => {
   const t = await sequelize.transaction()
 
   try {
+    const filter = {
+      user_id,
+    }
+
+    if (clientIp) {
+      filter[ip] = clientIp
+    }
     await LoginToken.destroy({
-      where: {
-        user_id,
-      },
+      where: filter,
       transaction: t,
       force: true,
     })

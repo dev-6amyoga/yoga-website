@@ -45,6 +45,7 @@ export const TransitionEndStartingPrayerSitting = async (
     ]);
     res = res.map((transition) => transition.transition_id);
     res = res.filter((element) => element !== undefined);
+    console.log("hi");
     return res;
   }
 
