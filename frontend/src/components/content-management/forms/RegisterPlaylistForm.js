@@ -175,6 +175,7 @@ function RegisterPlaylistForm() {
 
   const addToPlaylist = async (rowData) => {
     if (playlistCurrent.length === 0) {
+      toast(rowData.asana_category);
       if (rowData.asana_category === "Sitting") {
         let t1 = await TransitionEndSitting(
           null,
