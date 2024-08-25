@@ -43,12 +43,31 @@ export const TransitionEndStanding = async (
   if (!start_category) {
     if (break_status_end === "Break") {
       if (end_video.person_starting_position === "Front") {
+        if (end_video.catch_waist_start === true) {
+          let res = handleTransition([
+            "Standing Position Transition",
+            "Catch Your Waist",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition(["Standing Position Transition"]);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
         return res;
       }
       if (end_video.person_starting_position === "Left") {
+        if (end_video.catch_waist_start === true) {
+          let res = handleTransition([
+            "Standing Position Transition",
+            "Person Transit Front To Left",
+            "Catch Your Waist",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Standing Position Transition",
           "Person Transit Front To Left",
@@ -60,6 +79,16 @@ export const TransitionEndStanding = async (
     }
     if (break_status_end === "No Break") {
       if (end_video.person_starting_position === "Front") {
+        if (end_video.catch_waist_start === true) {
+          let res = handleTransition([
+            "Standing Position Transition",
+            "Feet Together Hands Tight Standing Transition Front",
+            "Catch Your Waist",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Standing Position Transition",
           "Feet Together Hands Tight Standing Transition Front",
@@ -69,6 +98,17 @@ export const TransitionEndStanding = async (
         return res;
       }
       if (end_video.person_starting_position === "Left") {
+        if (end_video.catch_waist_start === true) {
+          let res = handleTransition([
+            "Standing Position Transition",
+            "Person Transit Front To Left",
+            "Feet Together Hands Tight Standing Side Transition",
+            "Catch Your Waist",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Standing Position Transition",
           "Person Transit Front To Left",
@@ -85,6 +125,17 @@ export const TransitionEndStanding = async (
     if (break_status_end === "Break") {
       if (start_video.namaskara_end === true) {
         if (end_video.person_starting_position === "Front") {
+          if (end_video.catch_waist_start === true) {
+            let res = handleTransition([
+              "Prayer Sitting Namaskara Unlock",
+              "Pranayama Unlock Legs",
+              "Sitting To Standing Transition",
+              "Catch Your Waist",
+            ]);
+            res = res.map((transition) => transition.transition_id);
+            res = res.filter((element) => element !== undefined);
+            return res;
+          }
           let res = handleTransition([
             "Prayer Sitting Namaskara Unlock",
             "Pranayama Unlock Legs",
@@ -95,6 +146,18 @@ export const TransitionEndStanding = async (
           return res;
         }
         if (end_video.person_starting_position === "Left") {
+          if (end_video.catch_waist_start === true) {
+            let res = handleTransition([
+              "Prayer Sitting Namaskara Unlock",
+              "Pranayama Unlock Legs",
+              "Sitting To Standing Transition",
+              "Person Transit Front To Left",
+              "Catch Your Waist",
+            ]);
+            res = res.map((transition) => transition.transition_id);
+            res = res.filter((element) => element !== undefined);
+            return res;
+          }
           let res = handleTransition([
             "Prayer Sitting Namaskara Unlock",
             "Pranayama Unlock Legs",
@@ -107,6 +170,16 @@ export const TransitionEndStanding = async (
         }
       } else {
         if (end_video.person_starting_position === "Front") {
+          if (end_video.catch_waist_start === true) {
+            let res = handleTransition([
+              "Pranayama Unlock Legs",
+              "Sitting To Standing Transition",
+              "Catch Your Waist",
+            ]);
+            res = res.map((transition) => transition.transition_id);
+            res = res.filter((element) => element !== undefined);
+            return res;
+          }
           let res = handleTransition([
             "Pranayama Unlock Legs",
             "Sitting To Standing Transition",
@@ -116,6 +189,17 @@ export const TransitionEndStanding = async (
           return res;
         }
         if (end_video.person_starting_position === "Left") {
+          if (end_video.catch_waist_start === true) {
+            let res = handleTransition([
+              "Pranayama Unlock Legs",
+              "Sitting To Standing Transition",
+              "Person Transit Front To Left",
+              "Catch Your Waist",
+            ]);
+            res = res.map((transition) => transition.transition_id);
+            res = res.filter((element) => element !== undefined);
+            return res;
+          }
           let res = handleTransition([
             "Pranayama Unlock Legs",
             "Sitting To Standing Transition",
@@ -130,6 +214,19 @@ export const TransitionEndStanding = async (
     if (break_status_end === "No Break") {
       if (start_video.namaskara_end === true) {
         if (end_video.person_starting_position === "Front") {
+          if (end_video.catch_waist_start === true) {
+            let res = handleTransition([
+              "Prayer Sitting Namaskara Unlock",
+              "Pranayama Unlock Legs",
+              "Sitting To Standing Transition",
+              "Feet Apart Hands Loose Standing Transition Front",
+              "Feet Together Hands Tight Standing Transition Front",
+              "Catch Your Waist",
+            ]);
+            res = res.map((transition) => transition.transition_id);
+            res = res.filter((element) => element !== undefined);
+            return res;
+          }
           let res = handleTransition([
             "Prayer Sitting Namaskara Unlock",
             "Pranayama Unlock Legs",
@@ -142,6 +239,20 @@ export const TransitionEndStanding = async (
           return res;
         }
         if (end_video.person_starting_position === "Left") {
+          if (end_video.catch_waist_start === true) {
+            let res = handleTransition([
+              "Prayer Sitting Namaskara Unlock",
+              "Pranayama Unlock Legs",
+              "Sitting To Standing Transition",
+              "Feet Apart Hands Loose Standing Transition Front",
+              "Person Transit Front To Left",
+              "Feet Together Hands Tight Standing Side Transition",
+              "Catch Your Waist",
+            ]);
+            res = res.map((transition) => transition.transition_id);
+            res = res.filter((element) => element !== undefined);
+            return res;
+          }
           let res = handleTransition([
             "Prayer Sitting Namaskara Unlock",
             "Pranayama Unlock Legs",
@@ -156,6 +267,18 @@ export const TransitionEndStanding = async (
         }
       } else {
         if (end_video.person_starting_position === "Front") {
+          if (end_video.catch_waist_start === true) {
+            let res = handleTransition([
+              "Pranayama Unlock Legs",
+              "Sitting To Standing Transition",
+              "Feet Apart Hands Loose Standing Transition Front",
+              "Feet Together Hands Tight Standing Transition Front",
+              "Catch Your Waist",
+            ]);
+            res = res.map((transition) => transition.transition_id);
+            res = res.filter((element) => element !== undefined);
+            return res;
+          }
           let res = handleTransition([
             "Pranayama Unlock Legs",
             "Sitting To Standing Transition",
@@ -167,6 +290,19 @@ export const TransitionEndStanding = async (
           return res;
         }
         if (end_video.person_starting_position === "Left") {
+          if (end_video.catch_waist_start === true) {
+            let res = handleTransition([
+              "Pranayama Unlock Legs",
+              "Sitting To Standing Transition",
+              "Feet Apart Hands Loose Standing Transition Front",
+              "Person Transit Front To Left",
+              "Feet Together Hands Tight Standing Side Transition",
+              "Catch Your Waist",
+            ]);
+            res = res.map((transition) => transition.transition_id);
+            res = res.filter((element) => element !== undefined);
+            return res;
+          }
           let res = handleTransition([
             "Pranayama Unlock Legs",
             "Sitting To Standing Transition",
@@ -185,12 +321,31 @@ export const TransitionEndStanding = async (
   if (start_category === "Closing Prayer Standing") {
     if (break_status_end === "Break") {
       if (end_video.person_starting_position === "Front") {
+        if (end_video.catch_waist_start === true) {
+          let res = handleTransition([
+            "Prayer End Standing",
+            "Catch Your Waist",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition(["Prayer End Standing"]);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
         return res;
       }
       if (end_video.person_starting_position === "Left") {
+        if (end_video.catch_waist_start === true) {
+          let res = handleTransition([
+            "Prayer End Standing",
+            "Person Transit Front To Left",
+            "Catch Your Waist",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Prayer End Standing",
           "Person Transit Front To Left",
@@ -202,6 +357,16 @@ export const TransitionEndStanding = async (
     }
     if (break_status_end === "No Break") {
       if (end_video.person_starting_position === "Front") {
+        if (end_video.catch_waist_start === true) {
+          let res = handleTransition([
+            "Prayer End Standing",
+            "Feet Together Hands Tight Standing Transition Front",
+            "Catch Your Waist",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Prayer End Standing",
           "Feet Together Hands Tight Standing Transition Front",
@@ -211,6 +376,17 @@ export const TransitionEndStanding = async (
         return res;
       }
       if (end_video.person_starting_position === "Left") {
+        if (end_video.catch_waist_start === true) {
+          let res = handleTransition([
+            "Prayer End Standing",
+            "Person Transit Front To Left",
+            "Feet Together Hands Tight Standing Side Transition",
+            "Catch Your Waist",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Prayer End Standing",
           "Person Transit Front To Left",
