@@ -26,6 +26,8 @@ export function useReactMediaRecorder({
 	customMediaStream = null,
 	stopStreamsOnStop = true,
 	askPermissionOnMount = false,
+	chosenAudioDevice = null,
+	chosenVideoDevice = null,
 }) {
 	const mediaRecorder = useRef(null);
 	const mediaChunks = useRef([]);
@@ -33,6 +35,8 @@ export function useReactMediaRecorder({
 	const [status, setStatus] = useState("idle");
 	const [isAudioMuted, setIsAudioMuted] = useState(false);
 	const [mediaBlobUrl, setMediaBlobUrl] = useState(undefined);
+
+	const videoPreviewStream = useRef(null);
 	// const [mediaBlob, setMediaBlob] = useState(undefined);
 	const [error, setError] = useState("NONE");
 
@@ -78,6 +82,12 @@ export function useReactMediaRecorder({
 						requiredMedia
 					);
 				mediaStream.current = stream;
+			}
+
+			if (mediaStream.current) {
+				// videoPreviewStream.current = new MediaStream(
+				// 	mediaStream.current.getVideoTracks()
+				// );
 			}
 			setStatus("idle");
 		} catch (error) {
@@ -285,11 +295,8 @@ export function useReactMediaRecorder({
 		mediaBlobUrl,
 		status,
 		isAudioMuted,
-		previewStream: mediaStream.current
-			? new MediaStream(mediaStream.current.getVideoTracks())
-			: null,
-		previewAudioStream: mediaStream.current
-			? new MediaStream(mediaStream.current.getAudioTracks())
+		previewStream: mediaRecorder.current
+			? mediaRecorder.current.stream
 			: null,
 		clearBlobUrl: () => {
 			if (mediaBlobUrl) {
