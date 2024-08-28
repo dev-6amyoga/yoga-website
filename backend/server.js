@@ -1,30 +1,36 @@
 const express = require('express')
+const expressWs = require('express-ws')
 const requestIp = require('request-ip')
 
 const mongoose = require('mongoose')
+
 const cors = require('cors')
-const morgan = require('morgan')
 const dotenv = require('dotenv')
 const useragent = require('express-useragent')
 const path = require('path')
 const compression = require('compression')
 const helmet = require('helmet')
 const glob = require('glob')
-const expressWs = require('express-ws')
+
+const getFrontendDomain = require('./utils/getFrontendDomain')
+
+// LOGGING
+// const logger = require('pino-http')
+const morgan = require('morgan')
+
+// JOB SCHEUDLER
+const Bree = require('bree')
+const Graceful = require('@ladjs/graceful')
 
 // const RateLimit = require('express-rate-limit')
 
 // init the config from .env file
 dotenv.config()
 
-// console.log({ env: process.env });
-
 // init the sequelize, nodemailer
 const { initializeSequelize } = require('./init.sequelize')
-// const { mailTransporter } = require('./init.nodemailer')
 
 // sql models
-
 glob.sync('./models/sql/*.js').forEach((file) => {
   require(path.resolve(file))
 })
@@ -74,10 +80,18 @@ const r2Router = require('./routes/UploadToR2')
 
 const classWsRouter = require('./websocket-routes/Class')
 
-// DEV : sample data creation
-// const { bulkCreateSampleData } = require('./sample_data')
-const getFrontendDomain = require('./utils/getFrontendDomain')
-// const helloWorld = require("./defer/helloWorld");
+// JOB SCHEDULER
+const bree = new Bree({
+  jobs: [
+    // {
+    //   name: 'schedule-classes',
+    //   interval: '1m',
+    //   timeout: '30s',
+    //   retries: 2,
+    // },
+  ],
+})
+const graceful = new Graceful({ brees: [bree] })
 
 const corsOptions = {
   origin: [
@@ -109,6 +123,11 @@ expressWs(app)
 // };
 
 // middleware
+
+// logger
+// app.use(logger())
+
+// CORS
 app.use(cors(corsOptions))
 
 // parse json body
@@ -148,38 +167,21 @@ app.use(
   })
 )
 
+/*
 // Apply rate limiter to all requests
-// const limiter = RateLimit({
-//   windowMs: 30 * 1000, // 30s
-//   max: process.env.NODE_ENV === 'production' ? 100 : 1000,
-// })
+const limiter = RateLimit({
+  windowMs: 30 * 1000, // 30s
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000,
+})
 
-//   app.use(limiter);
+app.use(limiter);
+*/
 
 // static files
 app.use('/static', express.static(path.join(__dirname, 'public')))
 
 // initialize databases
 const mongoURI = process.env.MONGO_SRV_URL
-mongoose
-  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch((err) => console.log(err))
-
-initializeSequelize()
-  .then(() => {
-    console.log('Sequelize initialized')
-    // bulkCreateSampleData()
-    //   .then(() => {
-    //     console.log("Sample data created!");
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
-  })
-  .catch((err) => {
-    console.error(err)
-  })
 
 app.get('/info', async (req, res) =>
   res.status(200).json({
@@ -230,13 +232,50 @@ app.use('/r2', r2Router)
 app.use('/video-rec', videoRecordingRouter)
 
 // ws routers
-// app.use('/ws/class', classWsRouter)
 app.ws('/ws/class/teacher', classWsRouter.handleTeacherConnection)
-
 app.ws('/ws/class/student', classWsRouter.handleStudentConnection)
 
 const port = parseInt(process.env.PORT, 10)
 
-app.listen(port || 4000, () => {
-  console.log(`Server is running on port ${port}`)
-})
+let start = performance.now()
+initializeSequelize()
+  .then(() => {
+    console.log('Sequelize initialized, took', performance.now() - start, 'ms')
+
+    start = performance.now()
+
+    mongoose
+      .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+      .then(() => {
+        console.log(
+          'Connected to MongoDB Atlas, took',
+          performance.now() - start,
+          'ms'
+        )
+        start = performance.now()
+        // bulkCreateSampleData()
+        //   .then(() => {
+        //     console.log("Sample data created!");
+        //   })
+        //   .catch((err) => {
+        //     console.log(err);
+        //   });
+
+        app.listen(port || 4000, () => {
+          console.log(
+            `Server is running on port ${port}, took`,
+            performance.now() - start,
+            'ms'
+          )
+
+          // graceful.listen()
+          // ;(async () => {
+          //   await bree.start()
+          // })()
+        })
+      })
+      .catch((err) => {
+        console.error(err)
+      })
+  })
+  .catch((err) => console.log(err))
