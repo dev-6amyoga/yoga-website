@@ -505,7 +505,7 @@ router.post('/logout', authenticateToken, async (req, res) => {
     }
 
     if (clientIp) {
-      filter[ip] = clientIp
+      filter['ip'] = clientIp
     }
     await LoginToken.destroy({
       where: filter,
