@@ -19,8 +19,8 @@ const getFrontendDomain = require('./utils/getFrontendDomain')
 const morgan = require('morgan')
 
 // JOB SCHEUDLER
-const Bree = require('bree')
-const Graceful = require('@ladjs/graceful')
+// const Bree = require('bree')
+// const Graceful = require('@ladjs/graceful')
 
 // const RateLimit = require('express-rate-limit')
 
@@ -81,17 +81,17 @@ const r2Router = require('./routes/UploadToR2')
 const classWsRouter = require('./websocket-routes/Class')
 
 // JOB SCHEDULER
-const bree = new Bree({
-  jobs: [
-    // {
-    //   name: 'schedule-classes',
-    //   interval: '1m',
-    //   timeout: '30s',
-    //   retries: 2,
-    // },
-  ],
-})
-const graceful = new Graceful({ brees: [bree] })
+// const bree = new Bree({
+//   jobs: [
+//     // {
+//     //   name: 'schedule-classes',
+//     //   interval: '1m',
+//     //   timeout: '30s',
+//     //   retries: 2,
+//     // },
+//   ],
+// })
+// const graceful = new Graceful({ brees: [bree] })
 
 const corsOptions = {
   origin: [
