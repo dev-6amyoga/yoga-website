@@ -98,75 +98,68 @@ const Recorder = ({
   }, [recordingControlQueue]);
 
   return (
-    <div className="flex flex-row gap-2 items-center">
-      {!recordingStart && (
-        <Button
-          onClick={() => {
-            setupBeforeRecordingStart();
-            startRecording();
-            setRecordingStart(true);
-            setRecordingPlaying(true);
-          }}
-        >
-          Start Recording
-        </Button>
-      )}
-      {recordingStart && recordingPlaying && (
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <div className="w-4 h-4 bg-red-500 rounded-full animate-blink" />
-          </div>
+    <div className="flex flex-row justify-between items-center">
+      <div className="flex flex-row gap-2 items-center">
+        {!recordingStart && (
           <Button
             onClick={() => {
-              pauseRecording();
-              setRecordingPlaying(false);
-            }}
-          >
-            Pause Recording
-          </Button>
-          <Button
-            onClick={() => {
-              stopRecording();
-              setRecordingStart(false);
-              setRecordingPlaying(false);
-            }}
-          >
-            Stop Recording
-          </Button>
-        </div>
-      )}
-
-      {recordingStart && !recordingPlaying && (
-        <div>
-          <Button
-            onClick={() => {
-              resumeRecording();
+              setupBeforeRecordingStart();
+              startRecording();
+              setRecordingStart(true);
               setRecordingPlaying(true);
             }}
           >
-            Resume Recording
+            Start Recording
           </Button>
-          <Button
-            onClick={() => {
-              stopRecording();
-              setRecordingStart(false);
-              setRecordingPlaying(false);
-            }}
-          >
-            Stop Recording
-          </Button>
-        </div>
-      )}
+        )}
+        {recordingStart && recordingPlaying && (
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <div className="w-4 h-4 bg-red-500 rounded-full animate-blink" />
+            </div>
+            <Button
+              onClick={() => {
+                pauseRecording();
+                setRecordingPlaying(false);
+              }}
+            >
+              Pause Recording
+            </Button>
+            <Button
+              onClick={() => {
+                stopRecording();
+                setRecordingStart(false);
+                setRecordingPlaying(false);
+              }}
+            >
+              Stop Recording
+            </Button>
+          </div>
+        )}
 
-      {mediaBlobUrl && (
-        <>
-          {/* <video
-                  src={mediaBlobUrl}
-                  controls
-                  ref={videoRef}
-                /> */}
-        </>
-      )}
+        {recordingStart && !recordingPlaying && (
+          <div>
+            <Button
+              onClick={() => {
+                resumeRecording();
+                setRecordingPlaying(true);
+              }}
+            >
+              Resume Recording
+            </Button>
+            <Button
+              onClick={() => {
+                stopRecording();
+                setRecordingStart(false);
+                setRecordingPlaying(false);
+              }}
+            >
+              Stop Recording
+            </Button>
+          </div>
+        )}
+      </div>
+      {previewStream ? <VideoPreview stream={previewStream} /> : <></>}
     </div>
   );
 };
@@ -177,10 +170,18 @@ const VideoRecorder = () => {
   const videoRef = useRef();
   const canvasRef = useRef();
   const prevVideoRef = useRef(null);
+
   const user = useUserStore((state) => state.user);
   const videoSessionTimeRef = useRef(new Date().toISOString());
   const videoSessionCountRef = useRef(0);
+
   const [videoName, setVideoName] = useState(null);
+
+  const [chosenVideoDevice, setChosenVideoDevice] = useState(null);
+  const [chosenAudioDevice, setChosenAudioDevice] = useState(null);
+
+  const [devices, setDevices] = useState(null);
+
   const [
     recordingStart,
     setRecordingStart,
@@ -246,6 +247,7 @@ const VideoRecorder = () => {
             video: true,
           });
           videoRef.current.srcObject = stream;
+          canvasRef.current.srcObject = stream;
         } catch (err) {
           console.error("Error accessing webcam:", err);
         }
@@ -264,6 +266,7 @@ const VideoRecorder = () => {
   const handleStopRecording = async () => {
     setRecordingStart(false);
     setRecordingPlaying(false);
+    setPreviewDone(false);
     toast.success("Recording uploaded successfully!");
 
     // let user_id = user?.user_id ?? "XXX";
@@ -387,9 +390,24 @@ const VideoRecorder = () => {
   };
 
   useEffect(() => {
+    if (!chosenAudioDevice || !chosenVideoDevice) {
+      return;
+    }
+
     if (showPreviewModal) {
       navigator.mediaDevices
-        .getUserMedia({ video: true })
+        .getUserMedia({
+          video: {
+            deviceId: {
+              exact: chosenVideoDevice,
+            },
+          },
+          audio: {
+            deviceId: {
+              exact: chosenAudioDevice,
+            },
+          },
+        })
         .then((stream) => {
           if (prevVideoRef.current) {
             prevVideoRef.current.srcObject = stream;
@@ -399,7 +417,9 @@ const VideoRecorder = () => {
         })
         .catch((err) => {
           console.error("Error accessing webcam: ", err);
-          toast.error("Error accessing webcam");
+          toast.error(
+            "Error accessing webcam/mic; Please try a different combination of devices."
+          );
         });
     }
     return () => {
@@ -409,7 +429,7 @@ const VideoRecorder = () => {
         tracks.forEach((track) => track.stop());
       }
     };
-  }, [showPreviewModal]);
+  }, [showPreviewModal, chosenAudioDevice, chosenVideoDevice]);
 
   const handleCancel = () => {
     if (stream) {
@@ -468,22 +488,170 @@ const VideoRecorder = () => {
     }
   };
 
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      devices.forEach((device) => {
+        console.log(
+          device.kind + ": " + device.label + " id = " + device.deviceId
+        );
+      });
+    });
+  }, []);
+
+  const getAllAudioVideoDevices = (successCallback, failureCallback) => {
+    console.log("[] 1");
+
+    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+      // Firefox 38+, Microsoft Edge, and Chrome 44+ seems having support of enumerateDevices
+      console.log("[] 1.1");
+      navigator.enumerateDevices = function (callback) {
+        navigator.mediaDevices.enumerateDevices().then(callback);
+      };
+    }
+
+    if (
+      !navigator.enumerateDevices &&
+      window.MediaStreamTrack &&
+      window.MediaStreamTrack.getSources
+    ) {
+      console.log("[] 2");
+      navigator.enumerateDevices = window.MediaStreamTrack.getSources.bind(
+        window.MediaStreamTrack
+      );
+    }
+
+    if (
+      !navigator.enumerateDevices &&
+      navigator.mediaDevices.enumerateDevices
+    ) {
+      console.log("[] 3");
+      navigator.enumerateDevices =
+        navigator.mediaDevices.enumerateDevices.bind(navigator);
+    }
+
+    if (!navigator.enumerateDevices) {
+      console.log("[] 4 fail");
+      failureCallback(
+        null,
+        "Neither navigator.mediaDevices.enumerateDevices NOR MediaStreamTrack.getSources are available."
+      );
+      return;
+    }
+
+    // var allMdiaDevices = [];
+    // var allAudioDevices = [];
+    // var allVideoDevices = [];
+
+    var audioInputDevices = [];
+    var videoInputDevices = [];
+
+    navigator.enumerateDevices(function (devices) {
+      devices.forEach(function (_device) {
+        var device = {};
+        for (var d in _device) {
+          device[d] = _device[d];
+        }
+
+        // if it is MediaStreamTrack.getSources
+        if (device.kind === "audio") {
+          device.kind = "audioinput";
+        }
+
+        if (device.kind === "video") {
+          device.kind = "videoinput";
+        }
+
+        if (!device.deviceId) {
+          device.deviceId = device.id;
+        }
+
+        if (!device.id) {
+          device.id = device.deviceId;
+        }
+
+        if (!device.label) {
+          device.label = "Please invoke getUserMedia once.";
+        }
+
+        if (device.kind === "audioinput" || device.kind === "audio") {
+          if (audioInputDevices.find((d) => d.groupId === device.groupId)) {
+            return;
+          }
+
+          audioInputDevices.push(device);
+        }
+
+        if (device.kind === "videoinput" || device.kind === "video") {
+          if (videoInputDevices.find((d) => d.groupId === device.groupId)) {
+            return;
+          }
+          videoInputDevices.push(device);
+        }
+      });
+
+      console.log("[] 5");
+      // console.log({
+      // 	videoInputDevices,
+      // 	audioInputDevices,
+      // });
+      return successCallback({
+        videoInputDevices: videoInputDevices,
+        audioInputDevices: audioInputDevices,
+      });
+    });
+  };
+
+  useEffect(() => {
+    getAllAudioVideoDevices(
+      (d) => {
+        console.log(d);
+        setDevices(d);
+        console.log(
+          d.audioInputDevices.find((d) =>
+            String(d.label).toLowerCase().includes("default")
+          )
+        );
+        setChosenAudioDevice(
+          d.audioInputDevices.length > 0
+            ? d?.audioInputDevices?.find((div) =>
+                String(div?.label).toLowerCase().includes("default")
+              )?.deviceId ?? d?.audioInputDevices[0]?.deviceId
+            : null
+        );
+
+        setChosenVideoDevice(
+          d?.videoInputDevices.length > 0
+            ? d?.videoInputDevices?.find((div) =>
+                String(div?.label).toLowerCase().includes("default")
+              )?.deviceId ?? d?.videoInputDevices[0]?.deviceId
+            : null
+        );
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+  }, []);
+
   return (
-    <div className="max-w-7xl mx-auto">
-      {previewDone && (
+    <div className="max-w-7xl mx-auto h-auto p-4">
+      {previewDone && chosenVideoDevice && chosenAudioDevice && (
         <ReactMediaRecorder
-          mediaRecorderOptions={{
-            videoBitsPerSecond: 2000000,
-            audioBitsPerSecond: 128000,
-          }}
+          mediaRecorderOptions={{}}
           video={{
             aspectRatio: 4 / 3,
             width: 720,
             frameRate: 24,
+            deviceId: {
+              exact: chosenVideoDevice,
+            },
           }}
           audio={{
             sampleSize: 16,
             channelCount: 2,
+            deviceId: {
+              exact: chosenAudioDevice,
+            },
           }}
           render={(props) => (
             <Recorder
@@ -498,6 +666,7 @@ const VideoRecorder = () => {
               previewDone={previewDone}
               setPreviewDone={setPreviewDone}
               setupBeforeRecordingStart={setupBeforeRecordingStart}
+              previewStream={props.previewStream}
             />
           )}
           onStop={handleStopRecording}
@@ -509,13 +678,21 @@ const VideoRecorder = () => {
         <Button
           onClick={() => {
             setShowPreviewModal(true);
+            getAllAudioVideoDevices(
+              (devices) => {
+                setDevices(devices);
+              },
+              (err) => {
+                console.error(err);
+              }
+            );
           }}
         >
           Preview Webcam
         </Button>
       )}
 
-      <canvas ref={canvasRef} style={{ display: "none" }} />
+      {/* <canvas ref={canvasRef} /> */}
 
       <CustomModal open={showModal} onClose={() => setShowModal(false)} />
 
@@ -526,7 +703,7 @@ const VideoRecorder = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: 600,
             bgcolor: "background.paper",
             borderRadius: 1,
             boxShadow: 24,
@@ -536,6 +713,44 @@ const VideoRecorder = () => {
           <Typography variant="h6" component="h2">
             Preview
           </Typography>
+          <p>Choose Audio Input</p>
+          <Select
+            fullWidth
+            label="Audio Device"
+            defaultValue={chosenAudioDevice}
+            onChange={(e) => {
+              console.log("audio device", e.target.value);
+              setChosenAudioDevice(e.target.value);
+            }}
+          >
+            {devices?.audioInputDevices.map((device) => (
+              <MenuItem
+                key={device.deviceId || device.id}
+                value={device.deviceId || device.id}
+              >
+                {device.label}
+              </MenuItem>
+            ))}
+          </Select>
+          <p>Choose Video Input</p>
+          <Select
+            fullWidth
+            label="Video Device"
+            defaultValue={chosenVideoDevice}
+            onChange={(e) => {
+              console.log("video device", e.target.value);
+              setChosenVideoDevice(e.target.value);
+            }}
+          >
+            {devices?.videoInputDevices.map((device) => (
+              <MenuItem
+                key={device.deviceId || device.id}
+                value={device.deviceId || device.id}
+              >
+                {device.label}
+              </MenuItem>
+            ))}
+          </Select>
           <Box
             sx={{
               mt: 2,
@@ -552,6 +767,7 @@ const VideoRecorder = () => {
                 border: "1px solid #ddd",
               }}
               autoPlay
+              muted
             />
           </Box>
           <Box
