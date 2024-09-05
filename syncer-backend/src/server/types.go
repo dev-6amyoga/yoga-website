@@ -1,6 +1,7 @@
 package server
 
 import (
+	"syncer-backend/src/events"
 	"syncer-backend/src/timer"
 
 	"github.com/puzpuzpuz/xsync"
@@ -20,6 +21,7 @@ type Server struct {
 	// timers
 	Timers timer.TimerMap
 
-	// update channels map for each classId with a channel for each student
-	UpdateChannels *xsync.MapOf[string, []chan float64]
+	// update channels map for each classId with a channel for each joinee
+	// {classId: {userId: chan float32}}
+	UpdateChannels *xsync.MapOf[string, *xsync.MapOf[string, chan events.TimerVector]]
 }
