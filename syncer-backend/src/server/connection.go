@@ -2,11 +2,169 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"syncer-backend/src/events"
 	"time"
+
+	"github.com/gorilla/websocket"
+	"github.com/puzpuzpuz/xsync"
 )
+
+func (s *Server) teacherConnectionInit(w http.ResponseWriter, r *http.Request) (*websocket.Conn, chan events.TimerVector, chan bool) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+
+	if err != nil {
+		s.logger.Error("Error upgrading to WebSocket:", err)
+		return nil, nil, nil
+	}
+
+	// read class id to initialize the connection
+	event := events.Event{}
+	teacherEventInitReq := events.TeacherEventInitRequest{}
+
+	conn.ReadJSON(&event)
+
+	if event.ClassID == "" {
+		conn.WriteJSON(events.EventTeacherResponse{
+			Status:  events.EVENT_STATUS_NACK,
+			Message: "Invalid class ID",
+		})
+		return nil, nil, nil
+	}
+
+	// marshal the data
+	eventData, err := json.Marshal(event.Data)
+
+	if err != nil {
+		return nil, nil, nil
+	}
+
+	// unmarshal the data
+	err = json.Unmarshal(eventData, &teacherEventInitReq)
+
+	if err != nil {
+		return nil, nil, nil
+	}
+
+	// UPDATE CHANNEL --------------------------------------------
+	// check if the class exists and get the teacher's channel
+	var chs *xsync.MapOf[string, chan events.TimerVector] = nil
+	var ch chan events.TimerVector = nil
+	var loadedUpdateChannels, loadedUserUpdateChannel bool = false, false
+
+	s.logger.Infof("Loading update channels for class %s", event.ClassID)
+	chs, loadedUpdateChannels = s.UpdateChannels.Load(event.ClassID)
+
+	s.logger.Infof("Loaded update channels for class %v", loadedUpdateChannels)
+
+	if !loadedUpdateChannels {
+		newMap := xsync.NewMapOf[chan events.TimerVector]()
+		s.logger.Infof("Storing a new update channel for class %s", event.ClassID)
+		chs, loadedUpdateChannels = s.UpdateChannels.LoadOrStore(event.ClassID, newMap)
+
+		s.logger.Infof("Loaded a new update channel for class %s", loadedUpdateChannels, chs)
+	}
+
+	if !loadedUpdateChannels {
+		// initialize the subscription to update channel for the class
+		ch = make(chan events.TimerVector, 1)
+		chs.Store(event.UserID, ch)
+	} else {
+		ch, loadedUserUpdateChannel = chs.Load(event.UserID)
+
+		if !loadedUserUpdateChannel {
+			ch = make(chan events.TimerVector, 1)
+			chs.Store(event.UserID, ch)
+		}
+	}
+
+	// send time updates
+	// go (func(ch chan events.TimerVector, conn *websocket.Conn) {
+	// 	s.logger.Infof("Listening to updates for userId: %s, classId: %s", event.UserID, event.ClassID)
+	// 	for updatedVec := range ch {
+	// 		err = conn.WriteJSON(events.TimerEventTimeUpdateData{
+	// 			Data: updatedVec,
+	// 		})
+
+	// 		if err != nil {
+	// 			s.logger.Error("Error writing to WebSocket:", err)
+	// 			return
+	// 		}
+	// 	}
+	// })(ch, conn)
+
+	s.logger.Infof("Stored a update channel for userId : %s , classId: %s", event.UserID, event.ClassID)
+
+	// TIMER CHANNEL FOR CLASS --------------------------------------------
+	_, loadedTimerClassChannel := s.Timers.Map.Load(event.ClassID)
+
+	if !loadedTimerClassChannel {
+		s.logger.Infof("Initializing timer for class %s", event.ClassID)
+		// initialize the timer for the class
+		timer, err := s.Timers.AddTimerNew(
+			event.ClassID,
+			teacherEventInitReq.StartPosition,
+			teacherEventInitReq.EndPosition,
+			teacherEventInitReq.Velocity,
+			teacherEventInitReq.Acceleration,
+		)
+
+		if err != nil {
+			s.logger.Error("Error initializing timer for class:", err)
+			conn.WriteJSON(events.EventTeacherResponse{
+				Status:  events.EVENT_STATUS_NACK,
+				Message: "Error initializing timer for class",
+			})
+		}
+
+		// start the timer
+		s.logger.Infof("Starting ticker timer for class %s", event.ClassID)
+		go s.TickerHandler(event.ClassID, timer)
+	} else {
+		s.logger.Infof("Ticker exists for %s", event.ClassID)
+	}
+
+	err = conn.WriteJSON(events.EventTeacherResponse{
+		Status:  events.EVENT_STATUS_ACK,
+		Message: "Connection established",
+	})
+
+	if err != nil {
+		return nil, nil, nil
+	}
+
+	closeChan := make(chan bool, 1)
+
+	conn.SetCloseHandler(func(code int, text string) error {
+		s.logger.Infof("Connection closed with code: %d, text: %s", code, text)
+
+		// close the update channel
+		chs, ok := s.UpdateChannels.Load(event.ClassID)
+
+		if !ok {
+			s.logger.Infof("No update channels found for class %s", event.ClassID)
+			return nil
+		}
+
+		ch, ok := chs.Load(event.UserID)
+
+		if !ok {
+			s.logger.Infof("No update channels found for user %s", event.UserID)
+			return nil
+		}
+
+		s.logger.Infof("Closing update channel for user %s", event.UserID)
+		close(ch)
+
+		chs.Delete(event.UserID)
+
+		closeChan <- true
+
+		return nil
+	})
+
+	return conn, ch, closeChan
+}
 
 /*
 Teacher connection handler
@@ -15,26 +173,52 @@ Teacher connection handler
 - Updates the timer for the class
 */
 func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request) {
-	// try to upgrade the connection to WebSocket
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, ch, closeChan := s.teacherConnectionInit(w, r)
 
-	if err != nil {
-		s.logger.Error("Error upgrading to WebSocket:", err)
+	if conn == nil || ch == nil {
 		return
 	}
 
+	conn.EnableWriteCompression(true)
+
+	defer conn.Close()
+
 	s.logger.Info("Teacher connected")
 
-	// close the connection when the function returns
-	defer conn.Close()
+	go (func() {
+		for {
+			select {
+			case <-closeChan:
+				s.logger.Info("Closing go routine for teacher connection")
+				return
+			case updatedVec := <-ch:
+				err := conn.WriteJSON(events.TimerEventTimeUpdateData{
+					Data: updatedVec,
+				})
+
+				if err != nil {
+					s.logger.Error("Error writing to WebSocket:", err)
+					return
+				}
+			}
+		}
+	})()
 
 	// loop to read messages from the WebSocket
 	for {
 		// read
 		_, message, err := conn.ReadMessage()
 
+		s.logger.Infof("Received message: %v", message)
+
 		if err != nil {
+			s.logger.Error("Error reading from WebSocket:", err)
 			break
+		}
+
+		if len(message) == 0 {
+			s.logger.Info("Empty message received")
+			continue
 		}
 
 		var event *events.Event
@@ -99,70 +283,146 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			// process data based on subtype
 			s.ProcessControlsEvent(event.ClassID, controlsEvent, conn)
 
-		case events.EVENT_TIMER:
+		case events.EVENT_TIMER_QUERY:
 			s.logger.Infof("Received event: %s", event.Type)
 
-			timerEvent := events.TimerEvent{}
+			// timerEvent := events.TimerEventQueryData{}
+
+			// temp, err := json.Marshal(event.Data)
+
+			// if err != nil {
+			// 	conn.WriteJSON(events.EventTeacherResponse{
+			// 		Status:  events.EVENT_STATUS_NACK,
+			// 		Message: "Error unmarshalling timer query event",
+			// 	})
+			// 	s.logger.Errorf("Error unmarshalling timer event: %v", timerEvent)
+			// 	continue
+			// }
+
+			// err = json.Unmarshal(temp, &timerEvent)
+
+			// if err != nil {
+			// 	conn.WriteJSON(events.EventTeacherResponse{
+			// 		Status:  events.EVENT_STATUS_NACK,
+			// 		Message: "Error unmarshalling timer query event",
+			// 	})
+			// 	s.logger.Errorf("Error unmarshalling timer event: %v", timerEvent)
+			// 	continue
+			// }
+
+			// send current vector
+			timerVector, err := s.Timers.GetTimeVectorNew(event.ClassID)
+
+			if err != nil {
+				s.logger.Error("Error getting timer vector:", err)
+				err = conn.WriteJSON(events.EventTeacherResponse{
+					Status:  events.EVENT_STATUS_NACK,
+					Message: "Error getting timer vector",
+				})
+
+				if err != nil {
+					return
+				}
+
+				continue
+			}
+
+			err = conn.WriteJSON(events.TimerEventQueryResponse{
+				Status: events.EVENT_STATUS_ACK,
+				Data:   timerVector,
+			})
+
+			if err != nil {
+				return
+			}
+
+		case events.EVENT_TIMER_UPDATE:
+			s.logger.Infof("Received event: %s", event.Type)
+
+			timerEvent := events.TimerEventUpdateData{}
 
 			temp, err := json.Marshal(event.Data)
 
 			if err != nil {
 				conn.WriteJSON(events.EventTeacherResponse{
 					Status:  events.EVENT_STATUS_NACK,
-					Message: "Error unmarshalling timer event",
+					Message: "Error unmarshalling timer query event",
 				})
 				s.logger.Errorf("Error unmarshalling timer event: %v", timerEvent)
-				return
+				continue
 			}
 
 			err = json.Unmarshal(temp, &timerEvent)
 
 			if err != nil {
-
 				conn.WriteJSON(events.EventTeacherResponse{
 					Status:  events.EVENT_STATUS_NACK,
-					Message: "Error unmarshalling timer event",
+					Message: "Error unmarshalling timer query event",
 				})
 				s.logger.Errorf("Error unmarshalling timer event: %v", timerEvent)
-				return
+				continue
 			}
 
-			s.logger.Infof("Timer event: %v; %v", timerEvent.CurrentTime, timerEvent.EventTime)
+			eventTime := time.Now().Unix()
 
-			et, err := time.Parse(time.RFC3339, timerEvent.EventTime)
+			// update the timer object
+			err = s.Timers.UpdateTimeNew(
+				event.ClassID,
+				timerEvent.Position,
+				timerEvent.Velocity,
+				timerEvent.Acceleration,
+				eventTime,
+			)
 
 			if err != nil {
-				conn.WriteJSON(events.EventTeacherResponse{
+				s.logger.Error("Error updating timer vector:", err)
+				err = conn.WriteJSON(events.EventTeacherResponse{
 					Status:  events.EVENT_STATUS_NACK,
-					Message: "Error parsing time",
+					Message: "Error updating timer vector",
 				})
-				s.logger.Error("Error parsing time:", err)
-				return
+
+				if err != nil {
+					return
+				}
+				continue
 			}
 
-			err = s.Timers.UpdateTime(event.ClassID, timerEvent.CurrentTime, et.UnixMilli())
-
-			if err != nil {
-				conn.WriteJSON(events.EventTeacherResponse{
-					Status:  events.EVENT_STATUS_NACK,
-					Message: "Error updating timer",
-				})
-				s.logger.Error("Error updating timer:", err)
-				return
-			}
-
+			// multicast the update to all students
 			chs, ok := s.UpdateChannels.Load(event.ClassID)
 
 			if !ok {
-				chs = make([]chan float64, 0)
+				err = conn.WriteJSON(events.EventTeacherResponse{
+					Status:  events.EVENT_STATUS_NACK,
+					Message: "Class not found",
+				})
 
-				s.UpdateChannels.Store(event.ClassID, chs)
-			} else {
-				// update all the channels
-				for _, ch := range chs {
-					ch <- timerEvent.CurrentTime
+				if err != nil {
+					return
 				}
+				continue
 			}
+
+			chs.Range(
+				func(key string, value chan events.TimerVector) bool {
+					value <- events.TimerVector{
+						Position:     timerEvent.Position,
+						Velocity:     timerEvent.Velocity,
+						Acceleration: timerEvent.Acceleration,
+						Timestamp:    eventTime,
+					}
+					return true
+				},
+			)
+
+			err = conn.WriteJSON(events.EventTeacherResponse{
+				Status:  events.EVENT_STATUS_ACK,
+				Message: "updated vector",
+			})
+
+			if err != nil {
+				return
+			}
+
 		}
 
 		conn.WriteJSON(events.EventTeacherResponse{
@@ -189,108 +449,108 @@ func (s *Server) handleStudentConnection(w http.ResponseWriter, r *http.Request)
 
 	defer conn.Close()
 
-	// read class id to initialize the connection
-	studentEventInitReq := events.StudentEventInitRequest{}
+	// // read class id to initialize the connection
+	// studentEventInitReq := events.StudentEventInitRequest{}
 
-	conn.ReadJSON(&studentEventInitReq)
+	// conn.ReadJSON(&studentEventInitReq)
 
-	classId := studentEventInitReq.ClassID
+	// classId := studentEventInitReq.ClassID
 
-	if classId == "" {
-		conn.WriteJSON(events.EventStudentResponse{
-			Status:  events.EVENT_STATUS_NACK,
-			Message: "Invalid class ID",
-		})
-		return
-	}
+	// if classId == "" {
+	// 	conn.WriteJSON(events.EventStudentResponse{
+	// 		Status:  events.EVENT_STATUS_NACK,
+	// 		Message: "Invalid class ID",
+	// 	})
+	// 	return
+	// }
 
-	// initialize the subscription to update channel for the class
-	ch := make(chan float64)
-	chs, ok := s.UpdateChannels.Load(classId)
+	// // initialize the subscription to update channel for the class
+	// ch := make(chan float32)
+	// chs, ok := s.UpdateChannels.Load(classId)
 
-	if !ok {
-		conn.WriteJSON(events.EventStudentResponse{
-			Status:  events.EVENT_STATUS_NACK,
-			Message: "Class not found",
-		})
-		return
-	}
+	// if !ok {
+	// 	conn.WriteJSON(events.EventStudentResponse{
+	// 		Status:  events.EVENT_STATUS_NACK,
+	// 		Message: "Class not found",
+	// 	})
+	// 	return
+	// }
 
-	chs = append(chs, ch)
-	s.UpdateChannels.Store(classId, chs)
+	// chs = append(chs, ch)
+	// s.UpdateChannels.Store(classId, chs)
 
-	// close the channel when the function returns/errors out
-	defer close(ch)
+	// // close the channel when the function returns/errors out
+	// defer close(ch)
 
-	timer := time.NewTicker(2 * time.Second)
+	// timer := time.NewTicker(2 * time.Second)
 
-	conn.WriteJSON(events.EventStudentResponse{
-		Status:  events.EVENT_STATUS_ACK,
-		Message: "Connection established",
-	})
+	// conn.WriteJSON(events.EventStudentResponse{
+	// 	Status:  events.EVENT_STATUS_ACK,
+	// 	Message: "Connection established",
+	// })
 
-	// var max_update_time time.Time
+	// // var max_update_time time.Time
 
-	// max_update_time = time.Now()
+	// // max_update_time = time.Now()
 
-	for {
-		select {
+	// for {
+	// 	select {
 
-		case <-timer.C:
-			// TODO : poll for events
+	// 	case <-timer.C:
+	// 		// TODO : poll for events
 
-			evs, err := s.ProcessQueueEventsPoll()
+	// 		evs, err := s.ProcessQueueEventsPoll()
 
-			if err != nil {
-				conn.WriteJSON(events.EventStudentResponse{
-					Status:  events.EVENT_STATUS_NACK,
-					Message: "Error polling for events",
-				})
-				s.logger.Error("Error polling for events:", err)
-			}
+	// 		if err != nil {
+	// 			conn.WriteJSON(events.EventStudentResponse{
+	// 				Status:  events.EVENT_STATUS_NACK,
+	// 				Message: "Error polling for events",
+	// 			})
+	// 			s.logger.Error("Error polling for events:", err)
+	// 		}
 
-			// get the max of event time
+	// 		// get the max of event time
 
-			// send events to students
-			msg := events.EventStudentResponse{
-				Status:      events.EVENT_STATUS_ACK,
-				Message:     fmt.Sprintf("[FIRED BY TIMER] Event from class %s", classId),
-				QueueEvents: evs,
-			}
+	// 		// send events to students
+	// 		msg := events.EventStudentResponse{
+	// 			Status:      events.EVENT_STATUS_ACK,
+	// 			Message:     fmt.Sprintf("[FIRED BY TIMER] Event from class %s", classId),
+	// 			QueueEvents: evs,
+	// 		}
 
-			err = conn.WriteJSON(msg)
+	// 		err = conn.WriteJSON(msg)
 
-			if err != nil {
-				conn.WriteJSON(events.EventTeacherResponse{
-					Status:  events.EVENT_STATUS_NACK,
-					Message: "Error writing to WebSocket",
-				})
-				s.logger.Error("Error writing to WebSocket:", err)
-				return
-			}
+	// 		if err != nil {
+	// 			conn.WriteJSON(events.EventTeacherResponse{
+	// 				Status:  events.EVENT_STATUS_NACK,
+	// 				Message: "Error writing to WebSocket",
+	// 			})
+	// 			s.logger.Error("Error writing to WebSocket:", err)
+	// 			return
+	// 		}
 
-		case <-ch:
-			// poll for events
-			// send events to students
-			msg := events.EventStudentResponse{
-				Status:  events.EVENT_STATUS_ACK,
-				Message: fmt.Sprintf("[FIRED BY UPDATE] Event from class %s", classId),
-			}
+	// 	case <-ch:
+	// 		// poll for events
+	// 		// send events to students
+	// 		msg := events.EventStudentResponse{
+	// 			Status:  events.EVENT_STATUS_ACK,
+	// 			Message: fmt.Sprintf("[FIRED BY UPDATE] Event from class %s", classId),
+	// 		}
 
-			err := conn.WriteJSON(msg)
+	// 		err := conn.WriteJSON(msg)
 
-			if err != nil {
-				conn.WriteJSON(events.EventTeacherResponse{
-					Status:  events.EVENT_STATUS_NACK,
-					Message: "Error writing to WebSocket",
-				})
-				s.logger.Error("Error writing to WebSocket:", err)
-				return
-			}
+	// 		if err != nil {
+	// 			conn.WriteJSON(events.EventTeacherResponse{
+	// 				Status:  events.EVENT_STATUS_NACK,
+	// 				Message: "Error writing to WebSocket",
+	// 			})
+	// 			s.logger.Error("Error writing to WebSocket:", err)
+	// 			return
+	// 		}
 
-			timer.Reset(2 * time.Second)
+	// 		timer.Reset(2 * time.Second)
 
-		}
-	}
+	// 	}
+	// }
 
 }
