@@ -694,8 +694,8 @@ const shakaStreamConfig = {
 		// maxDisabledTime: 0,
 		// inaccurateManifestTolerance: 0,
 		// lowLatencyMode: true,
-		bufferingGoal: 25,
-		bufferBehind: 10,
+		bufferingGoal: 12,
+		bufferBehind: 8,
 		rebufferingGoal: 2,
 		ignoreTextStreamFailures: true,
 		stallThreshold: 3,
@@ -705,7 +705,7 @@ const shakaStreamConfig = {
 			maxAttempts: 3,
 			timeout: 30000,
 			connectionTimeout: 30000,
-			stallTimeout: 15000,
+			stallTimeout: 5000,
 		},
 	},
 
@@ -715,6 +715,12 @@ const shakaStreamConfig = {
 		switchInterval: 8,
 		bandwidthUpgradeTarget: 0.85,
 		bandwidthDowngradeTarget: 0.95,
+	},
+
+	manifest: {
+		dash: {
+			ignoreMinBufferTime: true,
+		},
 	},
 };
 
