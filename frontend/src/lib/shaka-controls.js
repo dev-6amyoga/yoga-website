@@ -717,11 +717,11 @@ const shakaStreamConfig = {
 		bandwidthDowngradeTarget: 0.95,
 	},
 
-	manifest: {
-		dash: {
-			ignoreMinBufferTime: true,
-		},
-	},
+	// manifest: {
+	// 	dash: {
+	// 		ignoreMinBufferTime: true,
+	// 	},
+	// },
 };
 
 export {
