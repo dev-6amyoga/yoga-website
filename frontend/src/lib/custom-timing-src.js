@@ -86,11 +86,13 @@ const setTimingSrc = (mediaElement, timingObject) => {
 		}
 
 		if (velocity <= 0) {
+			console.log("[setTimingSrc] clearing interval, velocity <= 0");
 			clearInterval(intervalId);
 			intervalId = null;
 			return;
 		} else {
 			if (intervalId === null) {
+				console.log("[setTimingSrc] setting up interval");
 				intervalId = setInterval(update, 100);
 			}
 		}
@@ -106,11 +108,14 @@ const setTimingSrc = (mediaElement, timingObject) => {
 	};
 
 	const handleTimingObjectChange = (e) => {
-		update(e.detail);
+		console.log("[setTimingSrc] handling change event", e?.detail);
+		update(e?.detail);
 	};
 
+	console.log("[setTimingSrc] setting up interval");
 	intervalId = setInterval(update, 100);
 
+	console.log("[setTimingSrc] listening to change event");
 	timingObject.addEventListener("change", handleTimingObjectChange);
 
 	unsubscribeFunctions.push(() => {
@@ -119,10 +124,12 @@ const setTimingSrc = (mediaElement, timingObject) => {
 	});
 
 	unsubscribeFunctions.push(() => {
+		console.log("[setTimingSrc] removing event listener for change event");
 		timingObject.removeEventListener("change", handleTimingObjectChange);
 	});
 
 	return () => {
+		console.log("[setTimingSrc] unsubscribe called on setTimingSrc");
 		unsubscribeFunctions.forEach((unsubscribe) => {
 			unsubscribe();
 		});
