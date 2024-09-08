@@ -97,7 +97,16 @@ export class CustomTimingProvider extends EventTarget {
 			case "EVENT_TIMER_QUERY_RESPONSE":
 				break;
 
-			case "EVENT_TIMER_UPDATE":
+			case "EVENT_TIMER_TIMEUPDATE":
+				this._position = eventData.data.position;
+				this._velocity = eventData.data.velocity;
+				this._acceleration = eventData.data.acceleration;
+				this._timestamp = eventData.data.timestamp;
+
+				// trigger the update event
+				this.dispatchEvent(
+					new CustomEvent("timeupdate", { detail: eventData.data })
+				);
 				break;
 
 			default:

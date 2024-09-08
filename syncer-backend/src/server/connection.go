@@ -209,6 +209,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			case updatedVec := <-ch:
 				// TODO : lock to write to conn? [concurrent write error]
 				err := tryToWrite(conn, lock, events.TimerEventTimeUpdateData{
+					Type: events.EVENT_TIMER_TIMEUPDATE,
 					Data: updatedVec,
 				})
 
