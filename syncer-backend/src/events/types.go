@@ -139,6 +139,7 @@ type TimerEventQueryResponse struct {
 }
 
 type TimerEventTimeUpdateData struct {
+	Type EventType   `json:"type"`
 	Data TimerVector `json:"data"`
 }
 
