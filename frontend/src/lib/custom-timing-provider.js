@@ -5,7 +5,7 @@ import {
 	READYSTATE_OPEN,
 } from "../enums/timing_provider_readystate.js";
 
-export class CustomTimingProvider {
+export class CustomTimingProvider extends EventTarget {
 	constructor(
 		class_id,
 		user_id,
@@ -79,6 +79,9 @@ export class CustomTimingProvider {
 		// handle the socket message event
 
 		switch (eventData.type) {
+			case "EVENT_TEACHER_INIT_RESPONSE":
+				break;
+
 			case "EVENT_TIMER_UPDATE_RESPONSE":
 				this._position = eventData.data.position;
 				this._velocity = eventData.data.velocity;
@@ -86,9 +89,15 @@ export class CustomTimingProvider {
 				this._timestamp = eventData.data.timestamp;
 
 				// trigger the update event
+				this.dispatchEvent(
+					new CustomEvent("timeupdate", { detail: eventData.data })
+				);
 				break;
 
 			case "EVENT_TIMER_QUERY_RESPONSE":
+				break;
+
+			case "EVENT_TIMER_UPDATE":
 				break;
 
 			default:

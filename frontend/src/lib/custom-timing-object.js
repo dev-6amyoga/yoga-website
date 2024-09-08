@@ -6,6 +6,7 @@ export class CustomTimingObject extends EventTarget {
 
 		this.timingProvider = timingProvider;
 		this.readyState = READYSTATE_INITIALIZED;
+		this._vector = {};
 	}
 
 	get vector() {
@@ -22,25 +23,63 @@ export class CustomTimingObject extends EventTarget {
 
 	set vector(vector) {
 		this._vector = vector;
-		this.dispatchEvent(new CustomEvent("change"));
+		this.dispatchEvent(new CustomEvent("change"), { detail: vector });
 	}
 
+	_handleTimingProviderChange = (e) => {
+		this.vector = e.detail;
+	};
+
+	_handleTimingProviderTimeUpdate = (e) => {
+		this.dispatchEvent(new CustomEvent("timeupdate", { detail: e.detail }));
+	};
+
 	_init() {
-		this.timingProvider.addEventListener("change", () => {
-			this.vector = this.timingProvider.vector;
-		});
+		// setup event listeners
+		console.log(
+			"[CustomTimingObject] initializing, setting up event listeners"
+		);
+
+		this.timingProvider.addEventListener(
+			"change",
+			this._handleTimingProviderChange
+		);
+		this.timingProvider.addEventListener(
+			"timeupdate",
+			this._handleTimingProviderTimeUpdate
+		);
+
+		this.vector = this.timingProvider.query();
 	}
 
 	query() {
-		// query the timing provider
+		// TODO : query the timing provider or return the vector
+		console.log("[CustomTimingObject] query");
+		return this.vector;
 	}
 
-	update() {
-		// update the timing provider
+	update(updates) {
+		// send update to the timing provider
+		// can have position (and/or) velocity (and/or) acceleration
+		console.log(
+			"[CustomTimingObject] sending update to timing provider",
+			vector
+		);
+		this.timingProvider.update(updates);
 	}
 
 	destroy() {
 		// destroy the timing provider
-		this.timingProvider.removeEventListener("change");
+		console.log(
+			"[CustomTimingObject] destroying, removing event listeners"
+		);
+		this.timingProvider.removeEventListener(
+			"change",
+			this._handleTimingProviderChange
+		);
+		this.timingProvider.removeEventListener(
+			"timeupdate",
+			this._handleTimingProviderTimeUpdate
+		);
 	}
 }
