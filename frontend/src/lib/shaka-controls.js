@@ -696,13 +696,16 @@ const shakaStreamConfig = {
 		// lowLatencyMode: true,
 		bufferingGoal: 10,
 		bufferBehind: 20,
-		rebufferingGoal: 4,
+		rebufferingGoal: 2,
 		ignoreTextStreamFailures: true,
 		stallThreshold: 3,
-		segmentPrefetchLimit: 3,
-		preloadNextUrlWindow: 40,
+		// set segmentPrefetchLimit to 0 to disable
+		segmentPrefetchLimit: 1,
 		retryParameters: {
-			maxAttempts: 3,
+			maxAttempts: 2,
+			baseDelay: 1000,
+			backoffFactor: 2,
+			fuzzFactor: 0.5,
 			timeout: 30000,
 			connectionTimeout: 30000,
 			stallTimeout: 5000,
@@ -712,9 +715,10 @@ const shakaStreamConfig = {
 	abr: {
 		enabled: true,
 		defaultBandwidthEstimate: 1e6,
-		switchInterval: 8,
+		switchInterval: 2,
 		bandwidthUpgradeTarget: 0.85,
 		bandwidthDowngradeTarget: 0.95,
+		preferNetworkInformationBandwidth: true,
 	},
 
 	// manifest: {
