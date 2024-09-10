@@ -700,7 +700,7 @@ const shakaStreamConfig = {
 		ignoreTextStreamFailures: true,
 		stallThreshold: 3,
 		// set segmentPrefetchLimit to 0 to disable
-		segmentPrefetchLimit: 1,
+		segmentPrefetchLimit: 0,
 		retryParameters: {
 			maxAttempts: 2,
 			baseDelay: 1000,
