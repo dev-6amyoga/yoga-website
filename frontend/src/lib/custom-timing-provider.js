@@ -6,6 +6,9 @@ import {
 } from "../enums/timing_provider_readystate.js";
 
 export class CustomTimingProvider extends EventTarget {
+	#vector = {};
+	#socket = null;
+
 	constructor(
 		class_id,
 		user_id,
@@ -18,19 +21,20 @@ export class CustomTimingProvider extends EventTarget {
 		startPosition,
 		endPosition
 	) {
-		this._class_id = class_id;
-		this._user_id = user_id;
+		super();
+		this._class_id = String(class_id);
+		this._user_id = String(user_id);
 
-		this._skew = skew;
+		this._skew = -1;
 
 		this.startPosition = startPosition;
 		this.endPosition = endPosition;
 
-		this.readyState = READYSTATE_INITIALIZED;
+		this.readyStateStatus = READYSTATE_INITIALIZED;
 
-		this._socket = null;
+		this.#socket = null;
 
-		this._vector = {
+		this.#vector = {
 			position,
 			velocity,
 			acceleration,
@@ -44,37 +48,38 @@ export class CustomTimingProvider extends EventTarget {
 		return this._skew;
 	}
 
-	get startPosition() {
-		return this.startPosition;
+	get vector() {
+		return this.#vector;
 	}
 
-	get endPosition() {
-		return this.endPosition;
-	}
-
-	_handleSocketOpen() {
+	#handleSocketOpen = () => {
+		console.log("[CustomTimingProvider] socket open", this);
 		// handle the socket open event
-		this.readyState = READYSTATE_OPEN;
+		this.readyStateStatus = READYSTATE_OPEN;
 
 		// send the initial vector to the server
-		this._socket.send(
-			JSON.stringify({
-				type: "EVENT_TEACHER_INIT",
-				class_id: this._class_id,
-				user_id: this._user_id,
-				start_position: 0,
-				end_position: 0,
-				data: {
-					position: 0,
-					velocity: 0,
-					acceleration: 0,
-				},
-			})
-		);
-	}
+		if (this.#socket) {
+			this.#socket.send(
+				JSON.stringify({
+					type: "EVENT_TEACHER_INIT",
+					class_id: this._class_id,
+					user_id: this._user_id,
+					start_position: this.startPosition,
+					end_position: this.endPosition,
+					data: {
+						position: 0,
+						velocity: 0,
+						acceleration: 0,
+					},
+				})
+			);
+		}
+	};
 
-	_handleSocketMessage(e) {
+	#handleSocketMessage = (e) => {
 		const eventData = JSON.parse(e.data);
+
+		console.log("[CustomTimingProvider] event received : ", eventData.type);
 
 		// handle the socket message event
 
@@ -83,10 +88,7 @@ export class CustomTimingProvider extends EventTarget {
 				break;
 
 			case "EVENT_TIMER_UPDATE_RESPONSE":
-				this._position = eventData.data.position;
-				this._velocity = eventData.data.velocity;
-				this._acceleration = eventData.data.acceleration;
-				this._timestamp = eventData.data.timestamp;
+				this.#vector = eventData.data;
 
 				// trigger the update event
 				this.dispatchEvent(
@@ -98,14 +100,15 @@ export class CustomTimingProvider extends EventTarget {
 				break;
 
 			case "EVENT_TIMER_TIMEUPDATE":
-				this._position = eventData.data.position;
-				this._velocity = eventData.data.velocity;
-				this._acceleration = eventData.data.acceleration;
-				this._timestamp = eventData.data.timestamp;
+				this.#vector = eventData.data;
 
 				// trigger the update event
 				this.dispatchEvent(
 					new CustomEvent("timeupdate", { detail: eventData.data })
+				);
+				console.log(
+					performance.now(),
+					"[CustomTimingProvider] timeupdate event dispatched"
 				);
 				break;
 
@@ -116,43 +119,44 @@ export class CustomTimingProvider extends EventTarget {
 					eventData
 				);
 		}
-	}
+	};
 
-	_handleSocketClose() {
+	#handleSocketClose = () => {
 		// handle the socket close event
-		this.readyState = READYSTATE_CLOSING;
+		this.readyStateStatus = READYSTATE_CLOSING;
 
-		this._destroy();
-		this.readyState = READYSTATE_CLOSED;
-	}
+		this.destroy();
+		this.readyStateStatus = READYSTATE_CLOSED;
+	};
 
 	_init() {
 		// initialize the timing provider
 		// connect to the server
-		this._socket = new WebSocket("ws://localhost:4949/");
+		this.#socket = new WebSocket("ws://localhost:4949/teacher/ws");
 
-		this._socket.addEventListener("open", this._handleSocketOpen);
-		this._socket.addEventListener("message", this._handleSocketMessage);
-		this._socket.addEventListener("close", this._handleSocketClose);
+		this.#socket.addEventListener("open", this.#handleSocketOpen);
+		this.#socket.addEventListener("message", this.#handleSocketMessage);
+		this.#socket.addEventListener("close", this.#handleSocketClose);
 	}
 
-	_destroy() {
+	destroy() {
 		// destroy the timing provider
-		this._socket.removeEventListener("open", this._handleSocketOpen);
-		this._socket.removeEventListener("message", this._handleSocketMessage);
-		this._socket.removeEventListener("close", this._handleSocketClose);
+		this.#socket.removeEventListener("open", this.#handleSocketOpen);
+		this.#socket.removeEventListener("message", this.#handleSocketMessage);
+		this.#socket.removeEventListener("close", this.#handleSocketClose);
 
-		if (this._socket.readyState === WebSocket.OPEN) {
-			this._socket.close();
+		if (this.#socket.readyState === WebSocket.OPEN) {
+			this.#socket.close();
 		}
+		console.log("[CustomTimingProvider] destroyed");
 	}
 
 	query() {
 		// return the current position, velocity, acceleration, and timestamp
 
 		// send query to server
-		if (this._socket.readyState === WebSocket.OPEN) {
-			this._socket.send(
+		if (this.#socket.readyState === WebSocket.OPEN) {
+			this.#socket.send(
 				JSON.stringify({
 					type: "EVENT_TIME_QUERY",
 				})
@@ -162,10 +166,10 @@ export class CustomTimingProvider extends EventTarget {
 		// calculate the current position using the vector
 
 		// return {
-		// 	position: this._position,
-		// 	velocity: this._velocity,
-		// 	acceleration: this._acceleration,
-		// 	timestamp: this._timestamp,
+		// 	position: this.#position,
+		// 	velocity: this.#velocity,
+		// 	acceleration: this.#acceleration,
+		// 	timestamp: this.#timestamp,
 		// };
 	}
 
@@ -174,7 +178,7 @@ export class CustomTimingProvider extends EventTarget {
 		// during a response from the server?
 
 		// send update to server
-		if (this._socket.readyState === WebSocket.OPEN) {
+		if (this.#socket.readyState === WebSocket.OPEN) {
 			updatedVector = {};
 
 			if (vector?.position) {
@@ -191,7 +195,7 @@ export class CustomTimingProvider extends EventTarget {
 				return;
 			}
 
-			this._socket.send(
+			this.#socket.send(
 				JSON.stringify({
 					type: "EVENT_TIME_UPDATE",
 					class_id: this._class_id,
@@ -201,7 +205,7 @@ export class CustomTimingProvider extends EventTarget {
 			);
 		}
 
-		this._vector = {
+		this.#vector = {
 			position: vector.position,
 			velocity: vector.velocity,
 			acceleration: vector.acceleration,

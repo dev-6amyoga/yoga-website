@@ -174,6 +174,8 @@ func (s *Server) teacherConnectionInit(w http.ResponseWriter, r *http.Request, l
 
 		closeChan <- true
 
+		// TODO : delete the class if no more users are connected
+
 		return nil
 	})
 

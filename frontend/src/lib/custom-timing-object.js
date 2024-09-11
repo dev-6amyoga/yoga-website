@@ -7,6 +7,8 @@ export class CustomTimingObject extends EventTarget {
 		this.timingProvider = timingProvider;
 		this.readyState = READYSTATE_INITIALIZED;
 		this._vector = {};
+
+		this.#init();
 	}
 
 	get vector() {
@@ -26,15 +28,24 @@ export class CustomTimingObject extends EventTarget {
 		this.dispatchEvent(new CustomEvent("change"), { detail: vector });
 	}
 
-	_handleTimingProviderChange = (e) => {
+	#handleTimingProviderChange = (e) => {
 		this.vector = e.detail;
+		this.dispatchEvent(new CustomEvent("change", { detail: e.detail }));
+		console.log(
+			performance.now(),
+			"[CustomTimingObject] change event dispatched"
+		);
 	};
 
-	_handleTimingProviderTimeUpdate = (e) => {
+	#handleTimingProviderTimeUpdate = (e) => {
 		this.dispatchEvent(new CustomEvent("timeupdate", { detail: e.detail }));
+		console.log(
+			performance.now(),
+			"[CustomTimingObject] timeupdate event dispatched"
+		);
 	};
 
-	_init() {
+	#init() {
 		// setup event listeners
 		console.log(
 			"[CustomTimingObject] initializing, setting up event listeners"
@@ -42,11 +53,11 @@ export class CustomTimingObject extends EventTarget {
 
 		this.timingProvider.addEventListener(
 			"change",
-			this._handleTimingProviderChange
+			this.#handleTimingProviderChange
 		);
 		this.timingProvider.addEventListener(
 			"timeupdate",
-			this._handleTimingProviderTimeUpdate
+			this.#handleTimingProviderTimeUpdate
 		);
 
 		this.vector = this.timingProvider.query();
@@ -75,11 +86,11 @@ export class CustomTimingObject extends EventTarget {
 		);
 		this.timingProvider.removeEventListener(
 			"change",
-			this._handleTimingProviderChange
+			this.#handleTimingProviderChange
 		);
 		this.timingProvider.removeEventListener(
 			"timeupdate",
-			this._handleTimingProviderTimeUpdate
+			this.#handleTimingProviderTimeUpdate
 		);
 	}
 }
