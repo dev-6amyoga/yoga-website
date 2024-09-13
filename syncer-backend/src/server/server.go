@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 	"syncer-backend/src/events"
 	"syncer-backend/src/timer"
@@ -90,7 +89,7 @@ func (s *Server) TickerHandler(classId string, t *timer.Timer) {
 		case <-t.Done:
 			return
 		case tic := <-t.Ticker.C:
-			fmt.Println("Tick at", tic)
+			// fmt.Println("Tick at", tic)
 
 			ticToInt := tic.UnixMilli() - t.LastUpdated
 

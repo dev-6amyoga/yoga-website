@@ -24,5 +24,5 @@ type Timer struct {
 }
 
 type TimerMap struct {
-	Map *xsync.MapOf[string, Timer]
+	Map *xsync.MapOf[string, *Timer]
 }

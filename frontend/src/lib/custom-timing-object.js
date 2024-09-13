@@ -74,7 +74,7 @@ export class CustomTimingObject extends EventTarget {
 		// can have position (and/or) velocity (and/or) acceleration
 		console.log(
 			"[CustomTimingObject] sending update to timing provider",
-			vector
+			updates
 		);
 		this.timingProvider.update(updates);
 	}

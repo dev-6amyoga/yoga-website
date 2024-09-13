@@ -2,6 +2,7 @@ package timer
 
 import (
 	"errors"
+	"fmt"
 	"syncer-backend/src/events"
 	"time"
 
@@ -11,12 +12,12 @@ import (
 
 func NewTimerMap() TimerMap {
 	return TimerMap{
-		Map: xsync.NewMapOf[Timer](),
+		Map: xsync.NewMapOf[*Timer](),
 	}
 }
 
 func (t TimerMap) AddTimer(classId string, duration float32) {
-	t.Map.Store(classId, Timer{
+	t.Map.Store(classId, &Timer{
 		CurrentTime: duration,
 	})
 }
@@ -25,7 +26,7 @@ func (t TimerMap) UpdateTime(classId string, duration float32, eventTime int64) 
 	ct, ok := t.Map.Load(classId)
 
 	if !ok {
-		t.Map.Store(classId, Timer{
+		t.Map.Store(classId, &Timer{
 			CurrentTime: duration,
 			LastUpdated: eventTime,
 		})
@@ -73,7 +74,7 @@ func (t *TimerMap) AddTimerNew(
 	// TODO: decide the interval
 	newTimer := Timer{
 		CurrentTime: 0,
-		Ticker:      time.NewTicker(1000 * time.Millisecond),
+		Ticker:      time.NewTicker(100 * time.Millisecond),
 		Done:        make(chan bool, 1),
 		ClassID:     classId,
 
@@ -87,7 +88,7 @@ func (t *TimerMap) AddTimerNew(
 	}
 
 	zap.S().Infof("Storing timer to %s", classId)
-	t.Map.Store(classId, newTimer)
+	t.Map.Store(classId, &newTimer)
 	zap.S().Infof("Stored to %s", classId)
 
 	return &newTimer, nil
@@ -115,6 +116,8 @@ func (t *TimerMap) UpdateTimeNew(
 	acceleration float32,
 	eventTime int64,
 ) error {
+	// zap.S().Info("Updating timer for class ", classId, position, velocity, acceleration, eventTime)
+	fmt.Println("Updating timer for class ", classId, position, velocity, acceleration, eventTime)
 	ct, ok := t.Map.Load(classId)
 
 	if !ok {
@@ -125,6 +128,9 @@ func (t *TimerMap) UpdateTimeNew(
 	ct.Velocity = velocity
 	ct.Acceleration = acceleration
 	ct.LastUpdated = eventTime
+
+	// zap.S().Info("Updated timer : ", ct)
+	fmt.Println("Updated timer : ", ct.Velocity)
 
 	t.Map.Store(classId, ct)
 
