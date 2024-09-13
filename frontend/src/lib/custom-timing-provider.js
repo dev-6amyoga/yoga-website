@@ -179,7 +179,7 @@ export class CustomTimingProvider extends EventTarget {
 
 		// send update to server
 		if (this.#socket.readyState === WebSocket.OPEN) {
-			updatedVector = {};
+			let updatedVector = {};
 
 			if (vector?.position) {
 				updatedVector.position = vector.position;
@@ -197,7 +197,7 @@ export class CustomTimingProvider extends EventTarget {
 
 			this.#socket.send(
 				JSON.stringify({
-					type: "EVENT_TIME_UPDATE",
+					type: "EVENT_TIMER_UPDATE",
 					class_id: this._class_id,
 					user_id: this._user_id,
 					data: updatedVector,

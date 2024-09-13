@@ -372,6 +372,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			}
 
 			err = json.Unmarshal(temp, &timerEvent)
+			s.logger.Infof("[EVENT_TIMER_UPDATE] unmarshalled")
 
 			if err != nil {
 				tryToWrite(conn, lock, events.EventTeacherResponse{
@@ -382,8 +383,9 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 				continue
 			}
 
-			eventTime := time.Now().Unix()
+			eventTime := time.Now().UnixMilli()
 
+			s.logger.Infof("[EVENT_TIMER_UPDATE] updating")
 			// update the timer object
 			err = s.Timers.UpdateTimeNew(
 				event.ClassID,
@@ -392,6 +394,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 				timerEvent.Acceleration,
 				eventTime,
 			)
+			s.logger.Infof("[EVENT_TIMER_UPDATE] updated")
 
 			if err != nil {
 				s.logger.Error("Error updating timer vector:", err)
