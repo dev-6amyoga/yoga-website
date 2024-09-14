@@ -67,19 +67,17 @@ const setTimingSrc = (mediaElement, timingObject) => {
 
 	let intervalId = null;
 
-	const update = (newVec) => {
+	const update = (newVec = null) => {
 		// query timingObject
 		let vec = newVec;
 
 		if (!vec) {
+			console.log("[setTimingSrc] querying timingObject");
 			vec = timingObject.query();
+			console.log("[setTimingSrc] vec", vec);
 		}
 
-		if (newVec === null) {
-			return;
-		}
-
-		const { position, velocity } = newVec;
+		const { position = null, velocity = null } = vec;
 
 		if (position === null || velocity === null) {
 			return;

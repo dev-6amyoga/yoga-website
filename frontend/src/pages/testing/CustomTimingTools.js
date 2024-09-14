@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CustomTimingObject } from "../../lib/custom-timing-object";
 import { CustomTimingProvider } from "../../lib/custom-timing-provider";
+import setTimingSrc from "../../lib/custom-timing-src";
 
 export function CustomTimingTools() {
 	const timingProviderRef = useRef(null);
@@ -33,9 +34,11 @@ export function CustomTimingTools() {
 			timingProviderRef.current
 		);
 
+		const unsubTimingSrc = setTimingSrc(null, timingObjectRef.current);
+
 		const handleTimeUpdate = (e) => {
 			// console.log("[CustomTimingTools] timeupdate", e.detail);
-			setMessages((prev) => [...prev, e.detail]);
+			// setMessages((prev) => [e.detail, ...prev]);
 		};
 
 		timingObjectRef.current.addEventListener(
@@ -56,6 +59,8 @@ export function CustomTimingTools() {
 			);
 
 			timingObjectRef.current.removeEventListener("change", handleChange);
+
+			unsubTimingSrc();
 
 			timingObjectRef.current.destroy();
 
@@ -92,13 +97,30 @@ export function CustomTimingTools() {
 
 					const formData = Object.fromEntries(new FormData(e.target));
 
+					console.log(formData);
+
+					let updates = {};
+
+					if (formData.position) {
+						updates.position = parseFloat(formData.position);
+					}
+
+					if (formData.velocity) {
+						updates.velocity = parseFloat(formData.velocity);
+					}
+
+					if (formData.acceleration) {
+						updates.acceleration = parseFloat(
+							formData.acceleration
+						);
+					}
+
 					if (timingObjectRef.current) {
-						timingObjectRef.current.update({
-							type: "EVENT_TIMER_UPDATE",
-							class_id: classId,
-							user_id: userId,
-							data: formData,
-						});
+						timingObjectRef.current.update(updates);
+					} else {
+						console.error(
+							"[CustomTimingTools] timingObjectRef.current is null"
+						);
 					}
 				}}>
 				<input

@@ -11,7 +11,7 @@ import (
 	"github.com/puzpuzpuz/xsync"
 )
 
-func tryToWrite(conn *websocket.Conn, lock *sync.Mutex, msg interface{}) error {
+func tryToWriteJSON(conn *websocket.Conn, lock *sync.Mutex, msg interface{}) error {
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -23,7 +23,19 @@ func tryToWrite(conn *websocket.Conn, lock *sync.Mutex, msg interface{}) error {
 	return nil
 }
 
-func (s *Server) teacherConnectionInit(w http.ResponseWriter, r *http.Request, lock *sync.Mutex) (*websocket.Conn, chan events.TimerVector, chan bool) {
+func tryToWrite(conn *websocket.Conn, lock *sync.Mutex, msg []byte) error {
+	lock.Lock()
+	defer lock.Unlock()
+
+	err := conn.WriteMessage(websocket.TextMessage, msg)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Server) teacherConnectionInit(w http.ResponseWriter, r *http.Request, lock *sync.Mutex) (*websocket.Conn, chan events.TimerEventResponse, chan bool) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 
 	if err != nil {
@@ -61,8 +73,8 @@ func (s *Server) teacherConnectionInit(w http.ResponseWriter, r *http.Request, l
 
 	// UPDATE CHANNEL --------------------------------------------
 	// check if the class exists and get the teacher's channel
-	var chs *xsync.MapOf[string, chan events.TimerVector] = nil
-	var ch chan events.TimerVector = nil
+	var chs *xsync.MapOf[string, chan events.TimerEventResponse] = nil
+	var ch chan events.TimerEventResponse = nil
 	var loadedUpdateChannels, loadedUserUpdateChannel bool = false, false
 
 	s.logger.Infof("Loading update channels for class %s", event.ClassID)
@@ -71,7 +83,7 @@ func (s *Server) teacherConnectionInit(w http.ResponseWriter, r *http.Request, l
 	s.logger.Infof("Loaded update channels for class %v", loadedUpdateChannels)
 
 	if !loadedUpdateChannels {
-		newMap := xsync.NewMapOf[chan events.TimerVector]()
+		newMap := xsync.NewMapOf[chan events.TimerEventResponse]()
 		s.logger.Infof("Storing a new update channel for class %s", event.ClassID)
 		chs, loadedUpdateChannels = s.UpdateChannels.LoadOrStore(event.ClassID, newMap)
 
@@ -81,22 +93,22 @@ func (s *Server) teacherConnectionInit(w http.ResponseWriter, r *http.Request, l
 	if !loadedUpdateChannels {
 		// initialize the subscription to update channel for the class
 		// TODO : fix the buffer size
-		ch = make(chan events.TimerVector, 1)
+		ch = make(chan events.TimerEventResponse, 1)
 		chs.Store(event.UserID, ch)
 	} else {
 		ch, loadedUserUpdateChannel = chs.Load(event.UserID)
 
 		if !loadedUserUpdateChannel {
-			ch = make(chan events.TimerVector, 1)
+			ch = make(chan events.TimerEventResponse, 1)
 			chs.Store(event.UserID, ch)
 		}
 	}
 
 	// send time updates
-	// go (func(ch chan events.TimerVector, conn *websocket.Conn) {
+	// go (func(ch chan events.TimerEventResponse, conn *websocket.Conn) {
 	// 	s.logger.Infof("Listening to updates for userId: %s, classId: %s", event.UserID, event.ClassID)
 	// 	for updatedVec := range ch {
-	// 		err = conn.WriteJSON(events.TimerEventTimeUpdateData{
+	// 		err = conn.WriteJSON(events.TimerEventResponse{
 	// 			Data: updatedVec,
 	// 		})
 
@@ -125,7 +137,7 @@ func (s *Server) teacherConnectionInit(w http.ResponseWriter, r *http.Request, l
 
 		if err != nil {
 			s.logger.Error("Error initializing timer for class:", err)
-			tryToWrite(conn, lock, events.EventTeacherResponse{
+			tryToWriteJSON(conn, lock, events.EventTeacherResponse{
 				Status:  events.EVENT_STATUS_NACK,
 				Message: "Error initializing timer for class",
 			})
@@ -138,7 +150,7 @@ func (s *Server) teacherConnectionInit(w http.ResponseWriter, r *http.Request, l
 		s.logger.Infof("Ticker exists for %s", event.ClassID)
 	}
 
-	err = tryToWrite(conn, lock, events.EventTeacherResponse{
+	err = tryToWriteJSON(conn, lock, events.EventTeacherResponse{
 		Status:  events.EVENT_STATUS_ACK,
 		Message: "Connection established",
 	})
@@ -210,10 +222,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 				return
 			case updatedVec := <-ch:
 				// TODO : lock to write to conn? [concurrent write error]
-				err := tryToWrite(conn, lock, events.TimerEventTimeUpdateData{
-					Type: events.EVENT_TIMER_TIMEUPDATE,
-					Data: updatedVec,
-				})
+				err := tryToWriteJSON(conn, lock, updatedVec)
 
 				if err != nil {
 					s.logger.Error("Error writing to WebSocket:", err)
@@ -247,7 +256,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 
 		if err != nil {
 			s.logger.Error("Error unmarshalling message:", err)
-			tryToWrite(conn, lock, events.EventTeacherResponse{
+			tryToWriteJSON(conn, lock, events.EventTeacherResponse{
 				Status:  events.EVENT_STATUS_NACK,
 				Message: "Error unmarshalling event message",
 			})
@@ -257,7 +266,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 		eventData, err := json.Marshal(event.Data)
 
 		if err != nil {
-			tryToWrite(conn, lock, events.EventTeacherResponse{
+			tryToWriteJSON(conn, lock, events.EventTeacherResponse{
 				Status:  events.EVENT_STATUS_NACK,
 				Message: "Error marshalling event data",
 			})
@@ -273,7 +282,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			s.logger.Infof("Received event: %s %v", event.Type, queueEvent)
 
 			if err != nil {
-				tryToWrite(conn, lock, events.EventTeacherResponse{
+				tryToWriteJSON(conn, lock, events.EventTeacherResponse{
 					Status:  events.EVENT_STATUS_NACK,
 					Message: "Error unmarshalling queue event",
 				})
@@ -291,7 +300,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			err = json.Unmarshal(message, &controlsEvent)
 
 			if err != nil {
-				tryToWrite(conn, lock, events.EventTeacherResponse{
+				tryToWriteJSON(conn, lock, events.EventTeacherResponse{
 					Status:  events.EVENT_STATUS_NACK,
 					Message: "Error unmarshalling controls event",
 				})
@@ -310,7 +319,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			// temp, err := json.Marshal(event.Data)
 
 			// if err != nil {
-			// 	tryToWrite(conn, lock, events.EventTeacherResponse{
+			// 	tryToWriteJSON(conn, lock, events.EventTeacherResponse{
 			// 		Status:  events.EVENT_STATUS_NACK,
 			// 		Message: "Error unmarshalling timer query event",
 			// 	})
@@ -321,7 +330,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			// err = json.Unmarshal(temp, &timerEvent)
 
 			// if err != nil {
-			// 	tryToWrite(conn, lock, events.EventTeacherResponse{
+			// 	tryToWriteJSON(conn, lock, events.EventTeacherResponse{
 			// 		Status:  events.EVENT_STATUS_NACK,
 			// 		Message: "Error unmarshalling timer query event",
 			// 	})
@@ -334,7 +343,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 
 			if err != nil {
 				s.logger.Error("Error getting timer vector:", err)
-				err = tryToWrite(conn, lock, events.EventTeacherResponse{
+				err = tryToWriteJSON(conn, lock, events.EventTeacherResponse{
 					Status:  events.EVENT_STATUS_NACK,
 					Message: "Error getting timer vector",
 				})
@@ -346,7 +355,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 				continue
 			}
 
-			err = tryToWrite(conn, lock, events.TimerEventQueryResponse{
+			err = tryToWriteJSON(conn, lock, events.TimerEventResponse{
 				Status: events.EVENT_STATUS_ACK,
 				Data:   timerVector,
 			})
@@ -363,7 +372,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			temp, err := json.Marshal(event.Data)
 
 			if err != nil {
-				tryToWrite(conn, lock, events.EventTeacherResponse{
+				tryToWriteJSON(conn, lock, events.EventTeacherResponse{
 					Status:  events.EVENT_STATUS_NACK,
 					Message: "Error unmarshalling timer query event",
 				})
@@ -375,7 +384,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			s.logger.Infof("[EVENT_TIMER_UPDATE] unmarshalled")
 
 			if err != nil {
-				tryToWrite(conn, lock, events.EventTeacherResponse{
+				tryToWriteJSON(conn, lock, events.EventTeacherResponse{
 					Status:  events.EVENT_STATUS_NACK,
 					Message: "Error unmarshalling timer query event",
 				})
@@ -398,9 +407,10 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 
 			if err != nil {
 				s.logger.Error("Error updating timer vector:", err)
-				err = tryToWrite(conn, lock, events.EventTeacherResponse{
-					Status:  events.EVENT_STATUS_NACK,
-					Message: "Error updating timer vector",
+				err = tryToWriteJSON(conn, lock, events.TimerEventResponse{
+					Type:   events.EVENT_TIMER_CHANGE,
+					Status: events.EVENT_STATUS_NACK,
+					Data:   map[string]string{"message": "Error updating timer vector"},
 				})
 
 				if err != nil {
@@ -413,9 +423,10 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			chs, ok := s.UpdateChannels.Load(event.ClassID)
 
 			if !ok {
-				err = tryToWrite(conn, lock, events.EventTeacherResponse{
-					Status:  events.EVENT_STATUS_NACK,
-					Message: "Class not found",
+				err = tryToWriteJSON(conn, lock, events.TimerEventResponse{
+					Type:   events.EVENT_TIMER_CHANGE,
+					Status: events.EVENT_STATUS_NACK,
+					Data:   map[string]string{"message": "Class not found"},
 				})
 
 				if err != nil {
@@ -424,30 +435,38 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 				continue
 			}
 
+			newVec := events.TimerVector{
+				Position:     timerEvent.Position,
+				Velocity:     timerEvent.Velocity,
+				Acceleration: timerEvent.Acceleration,
+				Timestamp:    eventTime,
+			}
+
 			chs.Range(
-				func(key string, value chan events.TimerVector) bool {
-					value <- events.TimerVector{
-						Position:     timerEvent.Position,
-						Velocity:     timerEvent.Velocity,
-						Acceleration: timerEvent.Acceleration,
-						Timestamp:    eventTime,
+				// TODO : change channel to a struct with Type of event
+				func(key string, value chan events.TimerEventResponse) bool {
+					value <- events.TimerEventResponse{
+						Type:   events.EVENT_TIMER_CHANGE,
+						Status: events.EVENT_STATUS_ACK,
+						Data:   newVec,
 					}
 					return true
 				},
 			)
 
-			err = tryToWrite(conn, lock, events.EventTeacherResponse{
-				Status:  events.EVENT_STATUS_ACK,
-				Message: "updated vector",
-			})
+			// err = tryToWriteJSON(conn, lock, events.TimerEventResponse{
+			// 	Type:   events.EVENT_TIMER_CHANGE,
+			// 	Status: events.EVENT_STATUS_ACK,
+			// 	Data:   newVec,
+			// })
 
-			if err != nil {
-				return
-			}
+			// if err != nil {
+			// 	return
+			// }
 
 		}
 
-		tryToWrite(conn, lock, events.EventTeacherResponse{
+		tryToWriteJSON(conn, lock, events.EventTeacherResponse{
 			Status: events.EVENT_STATUS_ACK,
 		})
 	}
