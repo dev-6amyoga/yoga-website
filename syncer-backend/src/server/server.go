@@ -60,7 +60,7 @@ func NewServer() *Server {
 		dbClient:       nil,
 		logger:         prependedLogger,
 		Timers:         timers,
-		UpdateChannels: xsync.NewMapOf[*xsync.MapOf[string, chan events.TimerVector]](),
+		UpdateChannels: xsync.NewMapOf[*xsync.MapOf[string, chan events.TimerEventResponse]](),
 	}
 }
 
@@ -93,12 +93,16 @@ func (s *Server) TickerHandler(classId string, t *timer.Timer) {
 
 			ticToInt := tic.UnixMilli() - t.LastUpdated
 
-			chans.Range(func(key string, value chan events.TimerVector) bool {
-				value <- events.TimerVector{
-					Position:     timer.CalculatePosition(t.StartPosition, ticToInt, t.Velocity, t.Acceleration),
-					Velocity:     t.Velocity,
-					Acceleration: t.Acceleration,
-					Timestamp:    tic.UnixMilli(),
+			chans.Range(func(key string, value chan events.TimerEventResponse) bool {
+				value <- events.TimerEventResponse{
+					Type:   events.EVENT_TIMER_TIMEUPDATE,
+					Status: events.EVENT_STATUS_ACK,
+					Data: events.TimerVector{
+						Position:     timer.CalculatePosition(t.StartPosition, ticToInt, t.Velocity, t.Acceleration),
+						Velocity:     t.Velocity,
+						Acceleration: t.Acceleration,
+						Timestamp:    tic.UnixMilli(),
+					},
 				}
 
 				return true

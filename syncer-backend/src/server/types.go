@@ -23,5 +23,5 @@ type Server struct {
 
 	// update channels map for each classId with a channel for each joinee
 	// {classId: {userId: chan float32}}
-	UpdateChannels *xsync.MapOf[string, *xsync.MapOf[string, chan events.TimerVector]]
+	UpdateChannels *xsync.MapOf[string, *xsync.MapOf[string, chan events.TimerEventResponse]]
 }

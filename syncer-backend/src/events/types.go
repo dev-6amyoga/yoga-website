@@ -114,6 +114,7 @@ const (
 	EVENT_TIMER_QUERY  EventType = "EVENT_TIMER_QUERY"
 
 	EVENT_TIMER_TIMEUPDATE EventType = "EVENT_TIMER_TIMEUPDATE"
+	EVENT_TIMER_CHANGE     EventType = "EVENT_TIMER_CHANGE"
 )
 
 type TimerEvent struct {
@@ -133,14 +134,10 @@ type TimerEventQueryData struct {
 	*TimerEvent
 }
 
-type TimerEventQueryResponse struct {
+type TimerEventResponse struct {
+	Type   EventType   `json:"type"`
 	Status EventStatus `json:"status"`
-	Data   TimerVector `json:"data"`
-}
-
-type TimerEventTimeUpdateData struct {
-	Type EventType   `json:"type"`
-	Data TimerVector `json:"data"`
+	Data   interface{} `json:"data"`
 }
 
 // ----------------------------------------------------------

@@ -6,7 +6,12 @@ export class CustomTimingObject extends EventTarget {
 
 		this.timingProvider = timingProvider;
 		this.readyState = READYSTATE_INITIALIZED;
-		this._vector = {};
+		this._vector = {
+			position: 0,
+			velocity: 0,
+			acceleration: 0,
+			timestamp: Date.now(),
+		};
 
 		this.#init();
 	}
@@ -25,7 +30,6 @@ export class CustomTimingObject extends EventTarget {
 
 	set vector(vector) {
 		this._vector = vector;
-		this.dispatchEvent(new CustomEvent("change"), { detail: vector });
 	}
 
 	#handleTimingProviderChange = (e) => {
@@ -38,6 +42,7 @@ export class CustomTimingObject extends EventTarget {
 	};
 
 	#handleTimingProviderTimeUpdate = (e) => {
+		this.vector = e.detail;
 		this.dispatchEvent(new CustomEvent("timeupdate", { detail: e.detail }));
 		console.log(
 			performance.now(),
