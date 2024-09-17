@@ -112,6 +112,19 @@ export class CustomTimingProvider extends EventTarget {
 				);
 				break;
 
+			case "EVENT_TIMER_CHANGE":
+				this.#vector = eventData.data;
+
+				// trigger the change event
+				this.dispatchEvent(
+					new CustomEvent("change", { detail: eventData.data })
+				);
+				console.log(
+					performance.now(),
+					"[CustomTimingProvider] change event dispatched"
+				);
+				break;
+
 			default:
 				console.error(
 					"[CustomTimingProvider] Unknown message type:",
@@ -181,11 +194,11 @@ export class CustomTimingProvider extends EventTarget {
 		if (this.#socket.readyState === WebSocket.OPEN) {
 			let updatedVector = {};
 
-			if (vector?.position) {
+			if (vector?.position !== undefined) {
 				updatedVector.position = vector.position;
-			} else if (vector?.velocity) {
+			} else if (vector?.velocity !== undefined) {
 				updatedVector.velocity = vector.velocity;
-			} else if (vector?.acceleration) {
+			} else if (vector?.acceleration !== undefined) {
 				updatedVector.acceleration = vector.acceleration;
 			} else {
 				console.error(

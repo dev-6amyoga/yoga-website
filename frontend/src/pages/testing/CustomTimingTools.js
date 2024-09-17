@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { CustomTimingObject } from "../../lib/custom-timing-object";
 import { CustomTimingProvider } from "../../lib/custom-timing-provider";
 import setTimingSrc from "../../lib/custom-timing-src";
+import { MockMediaElement } from "../../lib/mock-media-element";
 
 export function CustomTimingTools() {
 	const timingProviderRef = useRef(null);
@@ -34,7 +35,10 @@ export function CustomTimingTools() {
 			timingProviderRef.current
 		);
 
-		const unsubTimingSrc = setTimingSrc(null, timingObjectRef.current);
+		const unsubTimingSrc = setTimingSrc(
+			new MockMediaElement(),
+			timingObjectRef.current
+		);
 
 		const handleTimeUpdate = (e) => {
 			// console.log("[CustomTimingTools] timeupdate", e.detail);

@@ -7,11 +7,17 @@ const setPlaybackRate = (mediaElement, newPlaybackRate) => {
 };
 
 const play = (mediaElement) => {
-	mediaElement.play();
+	if (mediaElement.paused) {
+		console.log("[setTimingSrc] calling play");
+		mediaElement.play();
+	}
 };
 
 const pause = (mediaElement) => {
-	mediaElement.pause();
+	if (!mediaElement.paused) {
+		console.log("[setTimingSrc] calling pause");
+		mediaElement.pause();
+	}
 };
 
 // TODO : doesnt gradually shift
@@ -23,6 +29,19 @@ const updateMediaElement = (
 	position,
 	velocity
 ) => {
+	console.log(
+		"[updateMediaElement] currentTime",
+		currentTime,
+		"duration",
+		duration,
+		"playbackRate",
+		playbackRate,
+		"position",
+		position,
+		"velocity",
+		velocity
+	);
+
 	if (position < 0) {
 		if (currentTime > 0) {
 			setCurrentTime(mediaElement, currentTime);
@@ -84,6 +103,14 @@ const setTimingSrc = (mediaElement, timingObject) => {
 		}
 
 		if (velocity <= 0) {
+			updateMediaElement(
+				mediaElement,
+				mediaElement?.currentTime,
+				mediaElement?.duration,
+				mediaElement?.playbackRate,
+				position,
+				velocity
+			);
 			console.log("[setTimingSrc] clearing interval, velocity <= 0");
 			clearInterval(intervalId);
 			intervalId = null;
@@ -97,9 +124,9 @@ const setTimingSrc = (mediaElement, timingObject) => {
 
 		updateMediaElement(
 			mediaElement,
-			mediaElement.currentTime,
-			mediaElement.duration,
-			mediaElement.playbackRate,
+			mediaElement?.currentTime,
+			mediaElement?.duration,
+			mediaElement?.playbackRate,
 			position,
 			velocity
 		);
