@@ -91,18 +91,27 @@ func (s *Server) TickerHandler(classId string, t *timer.Timer) {
 		case tic := <-t.Ticker.C:
 			// fmt.Println("Tick at", tic)
 
-			ticToInt := tic.UnixMilli() - t.LastUpdated
+			ticToFloat := float32(tic.UnixMilli() - t.LastUpdated)
+
+			if t.Velocity == 0 {
+				break
+			}
+
+			ticData := events.TimerVector{
+				Position:     timer.CalculatePosition(t.Position, ticToFloat, t.Velocity, t.Acceleration),
+				Velocity:     t.Velocity,
+				Acceleration: t.Acceleration,
+				Timestamp:    tic.UnixMilli(),
+			}
+
+			t.Position = ticData.Position
+			t.LastUpdated = ticData.Timestamp
 
 			chans.Range(func(key string, value chan events.TimerEventResponse) bool {
 				value <- events.TimerEventResponse{
 					Type:   events.EVENT_TIMER_TIMEUPDATE,
 					Status: events.EVENT_STATUS_ACK,
-					Data: events.TimerVector{
-						Position:     timer.CalculatePosition(t.StartPosition, ticToInt, t.Velocity, t.Acceleration),
-						Velocity:     t.Velocity,
-						Acceleration: t.Acceleration,
-						Timestamp:    tic.UnixMilli(),
-					},
+					Data:   ticData,
 				}
 
 				return true

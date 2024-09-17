@@ -58,9 +58,9 @@ func (t *TimerMap) DeleteTimer(classId string) {
 }
 
 // new spec
-func CalculatePosition(positionOffset float32, time int64, velocity float32, acceleration float32) float32 {
-	convT := float32(time)
-	return positionOffset + velocity*convT + 0.5*acceleration*convT*convT
+func CalculatePosition(positionOffset float32, time float32, velocity float32, acceleration float32) float32 {
+	// convT := float32(time)
+	return positionOffset + velocity*time + 0.5*acceleration*time*time
 }
 
 func (t *TimerMap) AddTimerNew(
@@ -124,13 +124,21 @@ func (t *TimerMap) UpdateTimeNew(
 		return errors.New("timer not found")
 	}
 
-	ct.Position = position
-	ct.Velocity = velocity
-	ct.Acceleration = acceleration
-	ct.LastUpdated = eventTime
+	if position != -1 {
+		ct.Position = position
+	}
+	if velocity != -1 {
+		ct.Velocity = velocity
+	}
+	if acceleration != -1 {
+		ct.Acceleration = acceleration
+	}
+
+	// TODO : check if this is correct
+	// ct.LastUpdated = eventTime
 
 	// zap.S().Info("Updated timer : ", ct)
-	fmt.Println("Updated timer : ", ct.Velocity)
+	fmt.Println("Updated timer : ", ct.Position, ct.Velocity, ct.Acceleration, ct.LastUpdated)
 
 	t.Map.Store(classId, ct)
 
