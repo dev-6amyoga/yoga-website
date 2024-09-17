@@ -367,7 +367,13 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 		case events.EVENT_TIMER_UPDATE:
 			s.logger.Infof("Received event: %s", event.Type)
 
-			timerEvent := events.TimerEventUpdateData{}
+			timerEvent := events.TimerEventUpdateData{
+				TimerVector: &events.TimerVector{
+					Position:     -1,
+					Velocity:     -1,
+					Acceleration: -1,
+				},
+			}
 
 			temp, err := json.Marshal(event.Data)
 
@@ -394,7 +400,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 
 			eventTime := time.Now().UnixMilli()
 
-			s.logger.Infof("[EVENT_TIMER_UPDATE] updating")
+			s.logger.Infof("[EVENT_TIMER_UPDATE] updating", timerEvent.Position, timerEvent.Velocity, timerEvent.Acceleration, eventTime)
 			// update the timer object
 			err = s.Timers.UpdateTimeNew(
 				event.ClassID,
