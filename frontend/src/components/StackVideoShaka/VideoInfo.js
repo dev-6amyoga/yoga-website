@@ -2,6 +2,7 @@
 import { Description } from "@geist-ui/core";
 import { useMemo } from "react";
 import usePlaylistStore from "../../store/PlaylistStore";
+import useTimeStore from "../../store/TimeStore";
 import useVideoStore from "../../store/VideoStore";
 
 export default function VideoInfo() {
@@ -18,7 +19,6 @@ export default function VideoInfo() {
 		viewMode,
 		pauseReason,
 		currentVideo,
-		currentTime,
 		devMode,
 	] = useVideoStore((state) => [
 		state.markers,
@@ -33,9 +33,10 @@ export default function VideoInfo() {
 		state.viewMode,
 		state.pauseReason,
 		state.currentVideo,
-		state.currentTime,
 		state.devMode,
 	]);
+
+	const [currentTime] = useTimeStore((state) => [state.currentTime]);
 
 	const [queue] = usePlaylistStore((state) => [state.queue]);
 
