@@ -1,6 +1,3 @@
-import { Spacer } from "@geist-ui/core";
-import { Avatar, Button, Tooltip } from "@mui/material";
-import { blue } from "@mui/material/colors";
 import { memo, useEffect, useMemo, useRef } from "react";
 import { SEEK_TYPE_MARKER } from "../../enums/seek_types";
 import usePlaylistStore from "../../store/PlaylistStore";
@@ -13,14 +10,12 @@ function PlaylistSections() {
 
 	const [
 		fullScreen,
-		currentVideo,
 		addToSeekQueue,
 		currentMarkerIdx,
 		setCurrentMarkerIdx,
 		setMarkers,
 	] = useVideoStore((state) => [
 		state.fullScreen,
-		state.currentVideo,
 		state.addToSeekQueue,
 		state.currentMarkerIdx,
 		state.setCurrentMarkerIdx,
@@ -58,6 +53,10 @@ function PlaylistSections() {
 	}, [currVideo, setCurrentMarkerIdx, setMarkers]);
 
 	const currMarker = useMemo(() => {
+		console.log(
+			"[PlaylistSections] recalc currMarker => currentMarkerIdx",
+			currentMarkerIdx
+		);
 		if (
 			currVideo &&
 			currentMarkerIdx !== null &&
@@ -74,7 +73,7 @@ function PlaylistSections() {
 		<div
 			className={`relative mx-auto overflow-y-auto overflow-x-hidden rounded-xl bg-blue-50 ${fullScreen ? "" : "xl:h-full"}`}>
 			<div className="px-4 pt-4 pb-2 sticky top-0 bg-blue-50 z-[1000] rounded-xl">
-				<Spacer />
+				<div className="py-4"></div>
 				<h6 className="uppercase">Currently Playing</h6>
 				{currVideo ? (
 					<div className="flex flex-col gap-2 py-2">
@@ -98,9 +97,9 @@ function PlaylistSections() {
 							</p>
 							<p className="h-8 text-sm">
 								{currMarker ? (
-									<Tooltip title={currMarker.name}>
+									<p title={currMarker.name}>
 										{currMarker.name.substring(0, 45)}...
-									</Tooltip>
+									</p>
 								) : (
 									"---"
 								)}
@@ -124,15 +123,19 @@ function PlaylistSections() {
 							id={`section-${idx}`}
 							className={`text-sm w-full border flex-shrink-0 flex flex-row items-center gap-2 p-2 hover:cursor-pointer hover:bg-blue-100 transition-colors ${currentMarkerIdx === idx ? "bg-blue-100" : ""}`}
 							onClick={() => handleSeek(s, idx)}>
-							<Avatar sx={{ bgcolor: blue[700] }}>
+							<div
+								className={`bg-blue-500 flex items-center justify-center text-white w-10 h-10 rounded-full ${
+									idx ? "text-lg" : "text-base"
+								}`}>
 								{idx + 1}
-							</Avatar>
+							</div>
 							<div className="flex flex-col gap-1">
-								<Tooltip title={s.name}>
-									<p className="font-medium text-sm">
-										{s.name.substring(0, 45)}..
-									</p>
-								</Tooltip>
+								{/* <Tooltip title={s.name}>
+									
+								</Tooltip> */}
+								<p className="font-medium text-sm">
+									{s.name.substring(0, 45)}..
+								</p>
 								<p className="text-sm">
 									{toTimeString(s.time)}
 								</p>
@@ -142,9 +145,11 @@ function PlaylistSections() {
 				}) ?? <p className="text-center">---</p>}
 			</div>
 			<div className="px-4 py-4">
-				<Button variant="contained" onClick={clearQueue} size="small">
+				<button
+					className="bg-blue-500 rounded-md px-3 py-2 text-white text-sm uppercase"
+					onClick={clearQueue}>
 					Clear Queue
-				</Button>
+				</button>
 			</div>
 		</div>
 	);

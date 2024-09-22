@@ -36,6 +36,7 @@ import shaka from "shaka-player/dist/shaka-player.ui";
 import { VIDEO_EVENT_PLAY_INACTIVE } from "../../enums/video_event";
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
+import useTimeStore from "../../store/TimeStore";
 
 // shakaL.log.setLogLevel(shaka.log.Level.V1);
 
@@ -106,7 +107,6 @@ function StreamStackItem({
 		videoState,
 		setVideoState,
 		// current time
-		setCurrentTime,
 		// volume
 		volume,
 		setVolume,
@@ -149,8 +149,6 @@ function StreamStackItem({
 		state.videoState,
 		state.setVideoState,
 		//
-		state.setCurrentTime,
-		//
 		state.volume,
 		state.setVolume,
 		//
@@ -187,6 +185,8 @@ function StreamStackItem({
 		state.popFromQueue,
 		state.popFromArchive,
 	]);
+
+	const [setCurrentTime] = useTimeStore((state) => [state.setCurrentTime]);
 
 	let [
 		enableWatchHistory,
