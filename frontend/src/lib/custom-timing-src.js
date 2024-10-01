@@ -1,8 +1,15 @@
+const UPDATE_INTERVAL = 200;
+
 const setCurrentTime = (mediaElement, newCurrentTime) => {
+	console.log("[setTimingSrc] setting current time", {
+		oldCurrentTime: mediaElement.currentTime,
+		newCurrentTime,
+	});
 	mediaElement.currentTime = newCurrentTime;
 };
 
 const setPlaybackRate = (mediaElement, newPlaybackRate) => {
+	console.log("[setTimingSrc] setting playback rate");
 	mediaElement.playbackRate = newPlaybackRate;
 };
 
@@ -42,37 +49,36 @@ const updateMediaElement = (
 		velocity
 	);
 
+	if (velocity > 0) {
+		if (playbackRate !== velocity) {
+			setPlaybackRate(mediaElement, velocity);
+		}
+		play(mediaElement);
+	} else if (currentTime !== duration) {
+		pause(mediaElement);
+	}
+
 	if (position < 0) {
+		console.log(">>> branch 1");
 		if (currentTime > 0) {
 			setCurrentTime(mediaElement, currentTime);
 		}
 
 		pause(mediaElement);
-	} else if (position >= duration) {
+	} else if (
+		duration !== undefined &&
+		duration !== null &&
+		position >= duration
+	) {
+		console.log(">>> branch 2");
 		if (currentTime !== duration) {
 			setCurrentTime(mediaElement, duration);
 		}
 
 		pause(mediaElement);
-	} else if (currentTime !== position) {
+	} else if (Math.abs(currentTime - position) > 0.5) {
+		console.log(">>> branch 3");
 		setCurrentTime(mediaElement, position);
-
-		if (velocity !== 0) {
-			if (playbackRate !== velocity) {
-				setPlaybackRate(mediaElement, velocity);
-			}
-
-			play(mediaElement);
-		} else {
-			pause(mediaElement);
-		}
-	} else if (playbackRate !== velocity) {
-		if (velocity !== 0) {
-			setPlaybackRate(mediaElement, velocity);
-			play(mediaElement);
-		} else {
-			pause(mediaElement);
-		}
 	}
 };
 
@@ -108,7 +114,7 @@ const setTimingSrc = (mediaElement, timingObject) => {
 				mediaElement?.currentTime,
 				mediaElement?.duration,
 				mediaElement?.playbackRate,
-				position,
+				position / 1000,
 				velocity
 			);
 			console.log("[setTimingSrc] clearing interval, velocity <= 0");
@@ -118,7 +124,7 @@ const setTimingSrc = (mediaElement, timingObject) => {
 		} else {
 			if (intervalId === null) {
 				console.log("[setTimingSrc] setting up interval");
-				intervalId = setInterval(update, 100);
+				intervalId = setInterval(update, UPDATE_INTERVAL);
 			}
 		}
 
@@ -127,7 +133,7 @@ const setTimingSrc = (mediaElement, timingObject) => {
 			mediaElement?.currentTime,
 			mediaElement?.duration,
 			mediaElement?.playbackRate,
-			position,
+			position / 1000,
 			velocity
 		);
 	};
@@ -138,7 +144,7 @@ const setTimingSrc = (mediaElement, timingObject) => {
 	};
 
 	console.log("[setTimingSrc] setting up interval");
-	intervalId = setInterval(update, 100);
+	intervalId = setInterval(update, UPDATE_INTERVAL);
 
 	console.log("[setTimingSrc] listening to change event");
 	timingObject.addEventListener("change", handleTimingObjectChange);
