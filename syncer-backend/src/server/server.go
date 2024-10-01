@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 	"syncer-backend/src/events"
 	"syncer-backend/src/timer"
@@ -89,23 +90,26 @@ func (s *Server) TickerHandler(classId string, t *timer.Timer) {
 		case <-t.Done:
 			return
 		case tic := <-t.Ticker.C:
-			// fmt.Println("Tick at", tic)
-
-			ticToFloat := float32(tic.UnixMilli() - t.LastUpdated)
+			now := tic.UnixMilli()
+			ticToFloat := float32(now - t.LastUpdated)
 
 			if t.Velocity == 0 {
+				t.LastUpdated = now
 				break
 			}
 
+			pos := timer.CalculatePosition(t.Position, ticToFloat, t.Velocity, t.Acceleration)
+			fmt.Println("Tick at", tic, t.Velocity, pos)
+
 			ticData := events.TimerVector{
-				Position:     timer.CalculatePosition(t.Position, ticToFloat, t.Velocity, t.Acceleration),
+				Position:     pos,
 				Velocity:     t.Velocity,
 				Acceleration: t.Acceleration,
-				Timestamp:    tic.UnixMilli(),
+				Timestamp:    now,
 			}
 
 			t.Position = ticData.Position
-			t.LastUpdated = ticData.Timestamp
+			t.LastUpdated = now
 
 			chans.Range(func(key string, value chan events.TimerEventResponse) bool {
 				value <- events.TimerEventResponse{

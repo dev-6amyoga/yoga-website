@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { CustomTimingObject } from "../../lib/custom-timing-object";
 import { CustomTimingProvider } from "../../lib/custom-timing-provider";
 import setTimingSrc from "../../lib/custom-timing-src";
-import { MockMediaElement } from "../../lib/mock-media-element";
 
 export function CustomTimingTools() {
 	const timingProviderRef = useRef(null);
 	const timingObjectRef = useRef(null);
+	const mediaElement = useRef(null);
 
 	const [classId, setClassId] = useState(null);
 	const [userId, setUserId] = useState(null);
@@ -29,14 +29,17 @@ export function CustomTimingTools() {
 			0,
 			null
 		);
+
 		timingProviderRef.current = tp;
 
 		timingObjectRef.current = new CustomTimingObject(
 			timingProviderRef.current
 		);
 
+		// mediaElement.current = new MockMediaElement();
+
 		const unsubTimingSrc = setTimingSrc(
-			new MockMediaElement(),
+			mediaElement.current,
 			timingObjectRef.current
 		);
 
@@ -151,6 +154,8 @@ export function CustomTimingTools() {
 			{messages.map((msg, idx) => (
 				<div key={idx}>{JSON.stringify(msg)}</div>
 			))}
+
+			<video src="/frontpage_video.mp4" controls ref={mediaElement} />
 		</div>
 	);
 }
