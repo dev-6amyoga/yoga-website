@@ -1,111 +1,3 @@
-// import { useEffect, useState } from "react";
-// import { ROLE_ROOT } from "../../../enums/roles";
-// import { withAuth } from "../../../utils/withAuth";
-// import {
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableContainer,
-//   TableHead,
-//   TableRow,
-//   Button,
-//   Paper,
-// } from "@mui/material";
-// import { Fetch } from "../../../utils/Fetch";
-// import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
-
-// function ViewAllCustomPlans() {
-//   const [customPlans, setCustomPlans] = useState([]);
-
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//         const response = await Fetch({
-//           url: "/customPlan/getAllCustomPlans",
-//           method: "GET",
-//         });
-//         const data = response.data;
-//         setCustomPlans(data.custom_plans);
-//       } catch (err) {
-//         console.log(err);
-//       }
-//     };
-//     fetchData();
-//   }, []);
-
-//   const handleEditClick = (planId) => {
-//     console.log("Edit plan with ID:", planId);
-//   };
-
-//   return (
-//     <AdminPageWrapper heading="Plan Management - View Customized Plans">
-//       <TableContainer component={Paper}>
-//         <Table>
-//           <TableHead>
-//             <TableRow>
-//               <TableCell>ID</TableCell>
-//               <TableCell>Plan Name</TableCell>
-//               <TableCell>Description</TableCell>
-//               <TableCell>Selected Needs</TableCell>
-//               <TableCell>Prices</TableCell>
-//               <TableCell>Playlists</TableCell>
-//               <TableCell>Validity</TableCell>
-//               <TableCell>Students</TableCell>
-//               <TableCell>Watch Hours</TableCell>
-//               <TableCell>Actions</TableCell>
-//             </TableRow>
-//           </TableHead>
-//           <TableBody>
-//             {customPlans.map((plan) => (
-//               <TableRow key={plan._id.$oid}>
-//                 <TableCell>{plan.custom_plan_id}</TableCell>
-//                 <TableCell>{plan.plan_name}</TableCell>
-//                 <TableCell>{plan.plan_description}</TableCell>
-//                 <TableCell>{plan.selectedNeeds.join(", ")}</TableCell>
-//                 <TableCell>
-//                   {plan.prices.map((price, index) => (
-//                     <div key={index}>
-//                       {Object.entries(price).map(([key, value]) => (
-//                         <div key={key}>
-//                           {key}: {value}
-//                         </div>
-//                       ))}
-//                     </div>
-//                   ))}
-//                 </TableCell>
-//                 <TableCell>
-//                   {plan.playlists.map((playlist, index) => (
-//                     <div key={index}>
-//                       {Object.entries(playlist).map(([playlistId, asanas]) => (
-//                         <div key={playlistId}>
-//                           Playlist {playlistId}: {asanas.join(", ")}
-//                         </div>
-//                       ))}
-//                     </div>
-//                   ))}
-//                 </TableCell>
-//                 <TableCell>{plan.planValidity} days</TableCell>
-//                 <TableCell>{plan.students.join(", ")}</TableCell>
-//                 <TableCell>{plan.watchHours} hours</TableCell>
-//                 <TableCell>
-//                   <Button
-//                     variant="contained"
-//                     color="primary"
-//                     onClick={() => handleEditClick(plan._id.$oid)}
-//                   >
-//                     Edit
-//                   </Button>
-//                 </TableCell>
-//               </TableRow>
-//             ))}
-//           </TableBody>
-//         </Table>
-//       </TableContainer>
-//     </AdminPageWrapper>
-//   );
-// }
-// export default withAuth(ViewAllCustomPlans, ROLE_ROOT);
-
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -160,9 +52,11 @@ function ViewAllCustomPlans() {
   const [searchQuery, setSearchQuery] = useState("");
   const [numberOfDays, setNumberOfDays] = useState(10);
 
-  const handleAddAllocation = () => {
-    setAllocations([...allocations, { startDay: "", endDay: "" }]);
-  };
+  useEffect(() => {
+    console.log(customPlans);
+    console.log(allPlaylists);
+  }, [customPlans, allPlaylists]);
+
   const [formData, setFormData] = useState({
     plan_name: "",
     plan_description: "",
@@ -182,12 +76,26 @@ function ViewAllCustomPlans() {
           method: "GET",
         });
         const data = response.data;
-        console.log(data.currencies);
         setCurrencies(data.currencies);
       } catch (err) {
         console.log(err);
       }
     };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [playlistsResponse] = await Promise.all([
+          Fetch({ url: "/content/playlists/getAllPlaylists" }),
+        ]);
+        setAllPlaylists(playlistsResponse.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     fetchData();
   }, []);
 
@@ -364,14 +272,26 @@ function ViewAllCustomPlans() {
                 <TableCell>
                   {plan.playlists.map((playlist, index) => (
                     <div key={index}>
-                      {Object.entries(playlist).map(([playlistId, asanas]) => (
-                        <div key={playlistId}>
-                          Playlist {playlistId}: {asanas.join(", ")}
-                        </div>
-                      ))}
+                      {Object.entries(playlist).map(
+                        ([playlistId, playlistData]) => {
+                          // Find the matching playlist from allPlaylists using playlistId
+                          const matchingPlaylist = allPlaylists.find(
+                            (p) => p.playlist_id === parseInt(playlistId) // Convert playlistId to number if necessary
+                          );
+
+                          return (
+                            <div key={playlistId}>
+                              Playlist{" "}
+                              {matchingPlaylist?.playlist_name || "Unknown"}:{" "}
+                              {/* {playlistData.asanas.join(", ")} */}
+                            </div>
+                          );
+                        }
+                      )}
                     </div>
                   ))}
                 </TableCell>
+
                 <TableCell>{plan.planValidity} days</TableCell>
                 <TableCell>{plan.students.join(", ")}</TableCell>
                 <TableCell>{plan.watchHours} hours</TableCell>
@@ -468,167 +388,6 @@ function ViewAllCustomPlans() {
               <MenuItem value="student">Student</MenuItem>
               <MenuItem value="institute">Institute</MenuItem>
             </Select>
-
-            {/* <br />
-            {formData.userType === "student" && (
-              <Box
-                sx={{
-                  "& .MuiTextField-root": { mb: 2 },
-                  "& .MuiOutlinedInput-root": { backgroundColor: "#F0F5FF" },
-                  p: 3,
-                  border: "1px solid",
-                  borderColor: "#AAC0DB",
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 2,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "justify",
-                  boxShadow: 0,
-                  transition: "box-shadow 0.3s",
-                  "&:hover": { boxShadow: 3 },
-                }}
-              >
-                All Students
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            indeterminate={
-                              formData.selectedStudents.length > 0 &&
-                              formData.selectedStudents.length <
-                                allStudents.length
-                            }
-                            checked={
-                              allStudents.length > 0 &&
-                              formData.selectedStudents.length ===
-                                allStudents.length
-                            }
-                            onChange={handleSelectAllStudents}
-                          />
-                        </TableCell>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Email</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {allStudents.map((student) => {
-                        const isItemSelected =
-                          formData.selectedStudents.includes(student.user_id);
-                        return (
-                          <TableRow
-                            key={student.user_id}
-                            hover
-                            role="checkbox"
-                            aria-checked={isItemSelected}
-                            selected={isItemSelected}
-                          >
-                            <TableCell padding="checkbox">
-                              <Checkbox
-                                checked={isItemSelected}
-                                onChange={(event) =>
-                                  handleSelectOneStudent(event, student.user_id)
-                                }
-                              />
-                            </TableCell>
-                            <TableCell>{student.name}</TableCell>
-                            <TableCell>{student.email}</TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                  <br />
-                  <Button fullWidth variant="contained" color="primary">
-                    Assign
-                  </Button>
-                </TableContainer>
-              </Box>
-            )}
-
-            {formData.userType === "institute" && (
-              <Box
-                sx={{
-                  "& .MuiTextField-root": { mb: 2 },
-                  "& .MuiOutlinedInput-root": { backgroundColor: "#F0F5FF" },
-                  p: 3,
-                  border: "1px solid",
-                  borderColor: "#AAC0DB",
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 2,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "justify",
-                  boxShadow: 0,
-                  transition: "box-shadow 0.3s",
-                  "&:hover": { boxShadow: 3 },
-                }}
-              >
-                All Institutes
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            indeterminate={
-                              formData.selectedInstitutes.length > 0 &&
-                              formData.selectedInstitutes.length <
-                                allInstitutes.length
-                            }
-                            checked={
-                              allInstitutes.length > 0 &&
-                              formData.selectedInstitutes.length ===
-                                allInstitutes.length
-                            }
-                            onChange={handleSelectAllInstitutes}
-                          />
-                        </TableCell>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Email</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {allInstitutes.map((institute) => {
-                        const isItemSelected =
-                          formData.selectedInstitutes.includes(
-                            institute.institute.institute_id
-                          );
-                        return (
-                          <TableRow
-                            key={institute.institute.institute_id}
-                            hover
-                            role="checkbox"
-                            aria-checked={isItemSelected}
-                            selected={isItemSelected}
-                          >
-                            <TableCell padding="checkbox">
-                              <Checkbox
-                                checked={isItemSelected}
-                                onChange={(event) =>
-                                  handleSelectOneInstitute(
-                                    event,
-                                    institute.institute.institute_id
-                                  )
-                                }
-                              />
-                            </TableCell>
-                            <TableCell>{institute.institute.name}</TableCell>
-                            <TableCell>{institute.institute.email}</TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                  <br />
-                  <Button fullWidth variant="contained" color="primary">
-                    Assign
-                  </Button>
-                </TableContainer>
-              </Box>
-            )} */}
-
             <br />
             <Typography>Watch Hours</Typography>
             <Select
@@ -676,92 +435,6 @@ function ViewAllCustomPlans() {
                 sx={{ mt: 2 }}
               />
             ))}
-
-            {/* <br />
-            <Typography>Allocate Playlists to Days</Typography>
-            <Button
-              variant="outlined"
-              startIcon={<Add />}
-              onClick={handleAddAllocation}
-            >
-              Add Allocation
-            </Button>
-
-            {formData.allocations.map((allocation, index) => (
-              <Card key={index} style={{ marginTop: "16px" }}>
-                <CardContent>
-                  <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} md={4}>
-                      <Select
-                        fullWidth
-                        value={allocation.playlist_id || ""}
-                        onChange={(e) =>
-                          handlePlaylistSelect(index, e.target.value)
-                        }
-                        displayEmpty
-                      >
-                        <MenuItem value="" disabled>
-                          Select Playlist
-                        </MenuItem>
-                        {filteredPlaylists.map((playlist) => (
-                          <MenuItem
-                            key={playlist.playlist_id}
-                            value={playlist.playlist_id}
-                          >
-                            {playlist.playlist_name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </Grid>
-
-                    <Grid item xs={12} md={3}>
-                      <Select
-                        fullWidth
-                        value={allocation.startDay}
-                        onChange={(e) =>
-                          handleAllocationChange(
-                            index,
-                            "startDay",
-                            e.target.value
-                          )
-                        }
-                        displayEmpty
-                        inputProps={{ min: 1, max: formData.planValidity }}
-                      >
-                        {[...Array(formData.planValidity).keys()].map((day) => (
-                          <MenuItem key={day + 1} value={day + 1}>
-                            {day + 1}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </Grid>
-                    <Grid item xs={12} md={3}>
-                      <Select
-                        fullWidth
-                        value={allocation.endDay}
-                        onChange={(e) =>
-                          handleEndDayChange(index, e.target.value)
-                        }
-                        displayEmpty
-                        inputProps={{ min: 1, max: formData.planValidity }}
-                      >
-                        {[...Array(formData.planValidity).keys()].map((day) => (
-                          <MenuItem key={day + 1} value={day + 1}>
-                            {day + 1}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </Grid>
-                    <Grid item xs={12} md={2}>
-                      <IconButton onClick={() => handleRemoveAllocation(index)}>
-                        <Remove />
-                      </IconButton>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-            ))} */}
-
             <br />
             <Button
               type="submit"
