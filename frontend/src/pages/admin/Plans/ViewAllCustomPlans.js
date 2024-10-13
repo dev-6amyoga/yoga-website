@@ -440,7 +440,7 @@ function ViewAllCustomPlans() {
                 color: "white",
               }}
             >
-              Submit
+              Finish
             </Button>
           </Box>
         </DialogContent>
