@@ -52,11 +52,6 @@ function ViewAllCustomPlans() {
   const [searchQuery, setSearchQuery] = useState("");
   const [numberOfDays, setNumberOfDays] = useState(10);
 
-  useEffect(() => {
-    console.log(customPlans);
-    console.log(allPlaylists);
-  }, [customPlans, allPlaylists]);
-
   const [formData, setFormData] = useState({
     plan_name: "",
     plan_description: "",
