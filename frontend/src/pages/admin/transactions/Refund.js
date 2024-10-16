@@ -3,6 +3,7 @@ import { MoreHorizontal } from "@geist-ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import Papa from "papaparse";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { DataTable } from "../../../components/Common/DataTable/DataTable";
 import SortableColumn from "../../../components/Common/DataTable/SortableColumn";
@@ -44,6 +45,21 @@ function Accordion({ title, children }) {
     </div>
   );
 }
+
+const handleDownload = (data1) => {
+  const csv = Papa.unparse(data1);
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "data.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
 
 function RefundManagement() {
   const {
@@ -292,6 +308,13 @@ function RefundManagement() {
 
   return (
     <AdminPageWrapper heading="All Transactions">
+      <Button
+        onClick={() => {
+          handleDownload(transactions);
+        }}
+      >
+        Download CSV
+      </Button>
       <div>
         <TransactionModal
           open={transactionModal.open || false}
