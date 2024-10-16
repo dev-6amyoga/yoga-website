@@ -47,7 +47,21 @@ function Accordion({ title, children }) {
 }
 
 const handleDownload = (data1) => {
-  const csv = Papa.unparse(data1);
+  // Add cgst and sgst columns to each row based on the 'amount' column
+  const updatedData = data1.map((row) => {
+    // Assuming 'amount' is a numeric field in each row
+    const amount = parseFloat(row.amount) || 0; // Handle cases where amount is missing or not a number
+    const cgst = (amount * 0.09).toFixed(2); // 9% of amount for cgst
+    const sgst = (amount * 0.09).toFixed(2); // 9% of amount for sgst
+
+    // Return the updated row with cgst and sgst columns added
+    return { ...row, cgst, sgst };
+  });
+
+  // Convert the updated data to CSV format
+  const csv = Papa.unparse(updatedData);
+
+  // Create a Blob and initiate download
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
   if (link.download !== undefined) {
