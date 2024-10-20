@@ -4,6 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import Papa from "papaparse";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { parseISO } from "date-fns";
+
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { DataTable } from "../../../components/Common/DataTable/DataTable";
 import SortableColumn from "../../../components/Common/DataTable/SortableColumn";
@@ -45,36 +49,6 @@ function Accordion({ title, children }) {
     </div>
   );
 }
-
-const handleDownload = (data1) => {
-  // Add cgst and sgst columns to each row based on the 'amount' column, and divide all values by 100
-  const updatedData = data1.map((row) => {
-    // Assuming 'amount' is a numeric field in each row
-    console.log(row.user);
-    const amount = parseFloat(row.amount) / 100 || 0; // Divide amount by 100
-    const cgst = (amount * 0.09).toFixed(2); // 9% of the amount, which is already divided by 100
-    const sgst = (amount * 0.09).toFixed(2); // 9% of the amount, which is already divided by 100
-    const name = row.user.name || "Unknown";
-    // Return the updated row with amount, cgst, and sgst divided by 100
-    return { ...row, name: name, amount: amount.toFixed(2), cgst, sgst };
-  });
-
-  // Convert the updated data to CSV format
-  const csv = Papa.unparse(updatedData);
-
-  // Create a Blob and initiate download
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  if (link.download !== undefined) {
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", "data.csv");
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-};
 
 function RefundManagement() {
   const {
@@ -150,6 +124,47 @@ function RefundManagement() {
       data,
     }));
   };
+
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+
+  const handleDownload = (data1) => {
+    const filteredData = data1.filter((row) => {
+      const paymentDate = parseISO(row.payment_date);
+      return paymentDate >= startDate && paymentDate <= endDate;
+    });
+
+    const updatedData = filteredData.map((row) => {
+      const amount = parseFloat(row.amount) / 100 || 0;
+      const cgst = (amount * 0.09).toFixed(2);
+      const sgst = (amount * 0.09).toFixed(2);
+      const name = row.user?.name || "Unknown";
+      amount = amount - cgst - sgst;
+      return { ...row, name, amount: amount.toFixed(2), cgst, sgst };
+    });
+
+    const csv = Papa.unparse(updatedData);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "filtered_data.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  // Filter transactions by selected date range
+  const filteredTransactions = useMemo(() => {
+    if (!startDate || !endDate) return transactions;
+    return transactions?.filter((row) => {
+      const paymentDate = parseISO(row?.payment_date);
+      return paymentDate >= startDate && paymentDate <= endDate;
+    });
+  }, [transactions, startDate, endDate]);
 
   const toggleRefundModal = (data = null) => {
     setRefundModal((prev) => ({
@@ -323,13 +338,32 @@ function RefundManagement() {
 
   return (
     <AdminPageWrapper heading="All Transactions">
-      <Button
-        onClick={() => {
-          handleDownload(transactions);
-        }}
-      >
+      {/* Date Range Pickers */}
+      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+        <DatePicker
+          selected={startDate}
+          onChange={(date) => setStartDate(date)}
+          selectsStart
+          startDate={startDate}
+          endDate={endDate}
+          placeholderText="Start Date"
+        />
+        <DatePicker
+          selected={endDate}
+          onChange={(date) => setEndDate(date)}
+          selectsEnd
+          startDate={startDate}
+          endDate={endDate}
+          minDate={startDate}
+          placeholderText="End Date"
+        />
+      </div>
+
+      {/* Button to download filtered CSV */}
+      <Button onClick={() => handleDownload(filteredTransactions)}>
         Download CSV
       </Button>
+
       <div>
         <TransactionModal
           open={transactionModal.open || false}
@@ -354,7 +388,7 @@ function RefundManagement() {
         <div className="max-w-7xl">
           <DataTable
             columns={columnsDataTable}
-            data={transactions || []}
+            data={filteredTransactions || []}
             refetch={getTransactions}
           ></DataTable>
         </div>
