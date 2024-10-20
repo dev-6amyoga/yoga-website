@@ -62,18 +62,18 @@ const handleDownload = (data1) => {
   // Convert the updated data to CSV format
   const csv = Papa.unparse(updatedData);
 
-  // // Create a Blob and initiate download
-  // const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  // const link = document.createElement("a");
-  // if (link.download !== undefined) {
-  //   const url = URL.createObjectURL(blob);
-  //   link.setAttribute("href", url);
-  //   link.setAttribute("download", "data.csv");
-  //   link.style.visibility = "hidden";
-  //   document.body.appendChild(link);
-  //   link.click();
-  //   document.body.removeChild(link);
-  // }
+  // Create a Blob and initiate download
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "data.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 };
 
 function RefundManagement() {
