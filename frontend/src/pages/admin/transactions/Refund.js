@@ -135,11 +135,11 @@ function RefundManagement() {
     });
 
     const updatedData = filteredData.map((row) => {
-      const amount = parseFloat(row.amount) / 100 || 0;
+      const amount =
+        parseFloat(row.amount) / 100 || 0 - 2 * (amount * 0.09).toFixed(2);
       const cgst = (amount * 0.09).toFixed(2);
       const sgst = (amount * 0.09).toFixed(2);
       const name = row.user?.name || "Unknown";
-      amount = amount - cgst - sgst;
       return { ...row, name, amount: amount.toFixed(2), cgst, sgst };
     });
 
