@@ -22,18 +22,25 @@ import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
 import { ROLE_STUDENT } from "../../../enums/roles";
 import { toast } from "react-toastify";
+import useUserStore from "../../../store/UserStore";
 function ViewMyClasses() {
   const [mode, setMode] = React.useState("light");
   const defaultTheme = createTheme({ palette: { mode } });
   const [classes, setClasses] = useState([]);
+  let user = useUserStore((state) => state.user);
 
   useEffect(() => {
     const fetchData = async () => {
       const res = await Fetch({
         url: "/class/student/get-all",
-        method: "GET",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: { user_id: user?.user_id },
       });
       if (res.status === 200) {
+        console.log(res.data);
         setClasses(res.data);
       }
     };
@@ -108,7 +115,7 @@ function ViewMyClasses() {
                       {formatDate(classItem.onetime_class_end_time)}
                     </TableCell>
                     {/* <TableCell>{classItem.status}</TableCell> */}
-                    <TableCell>{classItem.teacher.name}</TableCell>
+                    <TableCell>{classItem.teacher_id}</TableCell>
                     <TableCell align="right">
                       <Button
                         onClick={() => {

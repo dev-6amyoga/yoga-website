@@ -239,37 +239,23 @@ router.post('/update-history-status', async (req, res) => {
   }
 })
 
-router.get('/student/get-all', async (req, res) => {
+router.post('/student/get-all', async (req, res) => {
   try {
-    const classes1 = await Class.find()
-    console.log(classes1)
-    const classes = await Class.find(
-      {
-        class_type: CLASS_TYPE_ONETIME,
-        onetime_class_end_time: {
-          $gte: new Date(),
-        },
-      },
-      {
-        allowed_students: 0,
-        attendees: 0,
-        __v: 0,
-        has_teacher_joined: 0,
-      }
-    )
-    console.log(classes)
-
+    const { user_id } = req.body
+    const classes = await Class.find()
+    const finalList = []
     for (let i = 0; i < classes.length; i += 1) {
       const classObj = classes[i].toJSON()
-      const teacher = await User.findByPk(classObj.teacher_id, {
-        attributes: ['name', 'email'],
-      })
-      classObj.teacher = teacher
 
-      classes[i] = classObj
+      if (classObj.allowed_students.includes(String(user_id))) {
+        finalList.push(classes[i])
+      } else {
+        console.log(classObj.allowed_students)
+      }
     }
-
-    return res.status(HTTP_OK).json(classes)
+    console.log(user_id)
+    console.log(finalList)
+    return res.status(HTTP_OK).json(finalList)
   } catch (error) {
     console.error(error)
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
