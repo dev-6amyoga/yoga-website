@@ -4,5 +4,9 @@ import "syncer-backend/src/server"
 
 func main() {
 	server := server.NewServer()
-	server.Start()
+	err := server.Start()
+
+	if err != nil {
+		panic(err)
+	}
 }

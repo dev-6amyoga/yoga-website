@@ -21,7 +21,7 @@ type Server struct {
 	// timers
 	Timers timer.TimerMap
 
-	// update channels map for each classId with a channel for each joinee
-	// {classId: {userId: chan float32}}
+	// update channels map for each classID with a channel for each joinee
+	// {classID: {userId: chan float32}}
 	UpdateChannels *xsync.MapOf[string, *xsync.MapOf[string, chan events.TimerEventResponse]]
 }
