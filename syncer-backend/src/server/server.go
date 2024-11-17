@@ -65,7 +65,7 @@ func NewServer() *Server {
 	}
 }
 
-func (s *Server) Start() {
+func (s *Server) Start() error {
 	// start socket server
 
 	// serve
@@ -73,13 +73,20 @@ func (s *Server) Start() {
 	http.HandleFunc("/student/ws", s.handleStudentConnection)
 
 	s.logger.Info("HTTP server for WebSocket started at port 4949")
-	http.ListenAndServe(":4949", nil)
+	err := http.ListenAndServe(":4949", nil)
+
+	if err != nil {
+		s.logger.Errorf("Error starting HTTP server: %s", err)
+		return err
+	}
+
+	return nil
 }
 
-func (s *Server) TickerHandler(classId string, t *timer.Timer) {
+func (s *Server) TickerHandler(classID string, t *timer.Timer) {
 	// TODO : make done part work where position > endPosition
 
-	chans, ok := s.UpdateChannels.Load(classId)
+	chans, ok := s.UpdateChannels.Load(classID)
 
 	if !ok {
 		return
@@ -111,7 +118,7 @@ func (s *Server) TickerHandler(classId string, t *timer.Timer) {
 			t.Position = ticData.Position
 			t.LastUpdated = now
 
-			chans.Range(func(key string, value chan events.TimerEventResponse) bool {
+			chans.Range(func(_ string, value chan events.TimerEventResponse) bool {
 				value <- events.TimerEventResponse{
 					Type:   events.EVENT_TIMER_TIMEUPDATE,
 					Status: events.EVENT_STATUS_ACK,

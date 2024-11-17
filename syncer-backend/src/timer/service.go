@@ -16,17 +16,17 @@ func NewTimerMap() TimerMap {
 	}
 }
 
-func (t TimerMap) AddTimer(classId string, duration float32) {
-	t.Map.Store(classId, &Timer{
+func (t TimerMap) AddTimer(classID string, duration float32) {
+	t.Map.Store(classID, &Timer{
 		CurrentTime: duration,
 	})
 }
 
-func (t TimerMap) UpdateTime(classId string, duration float32, eventTime int64) error {
-	ct, ok := t.Map.Load(classId)
+func (t TimerMap) UpdateTime(classID string, duration float32, eventTime int64) error {
+	ct, ok := t.Map.Load(classID)
 
 	if !ok {
-		t.Map.Store(classId, &Timer{
+		t.Map.Store(classID, &Timer{
 			CurrentTime: duration,
 			LastUpdated: eventTime,
 		})
@@ -37,14 +37,14 @@ func (t TimerMap) UpdateTime(classId string, duration float32, eventTime int64) 
 		}
 
 		ct.CurrentTime = duration
-		t.Map.Store(classId, ct)
+		t.Map.Store(classID, ct)
 	}
 
 	return nil
 }
 
-func (t *TimerMap) GetTime(classId string) float32 {
-	ct, ok := t.Map.Load(classId)
+func (t *TimerMap) GetTime(classID string) float32 {
+	ct, ok := t.Map.Load(classID)
 
 	if !ok {
 		return -1
@@ -53,8 +53,8 @@ func (t *TimerMap) GetTime(classId string) float32 {
 	return ct.CurrentTime
 }
 
-func (t *TimerMap) DeleteTimer(classId string) {
-	t.Map.Delete(classId)
+func (t *TimerMap) DeleteTimer(classID string) {
+	t.Map.Delete(classID)
 }
 
 // new spec
@@ -64,19 +64,19 @@ func CalculatePosition(positionOffset float32, time float32, velocity float32, a
 }
 
 func (t *TimerMap) AddTimerNew(
-	classId string,
+	classID string,
 	startPosition float32,
 	endPosition float32,
 	velocity float32,
 	acceleration float32,
 ) (*Timer, error) {
-	zap.S().Infof("Adding timer for class %s", classId)
+	zap.S().Infof("Adding timer for class %s", classID)
 	// TODO: decide the interval
 	newTimer := Timer{
 		CurrentTime: 0,
 		Ticker:      time.NewTicker(100 * time.Millisecond),
 		Done:        make(chan bool, 1),
-		ClassID:     classId,
+		ClassID:     classID,
 
 		StartPosition: startPosition,
 		EndPosition:   endPosition,
@@ -87,15 +87,15 @@ func (t *TimerMap) AddTimerNew(
 		LastUpdated:  time.Now().UnixMilli(),
 	}
 
-	zap.S().Infof("Storing timer to %s", classId)
-	t.Map.Store(classId, &newTimer)
-	zap.S().Infof("Stored to %s", classId)
+	zap.S().Infof("Storing timer to %s", classID)
+	t.Map.Store(classID, &newTimer)
+	zap.S().Infof("Stored to %s", classID)
 
 	return &newTimer, nil
 }
 
-func (t *TimerMap) GetTimeVectorNew(classId string) (events.TimerVector, error) {
-	ct, ok := t.Map.Load(classId)
+func (t *TimerMap) GetTimeVectorNew(classID string) (events.TimerVector, error) {
+	ct, ok := t.Map.Load(classID)
 
 	if !ok {
 		return events.TimerVector{}, errors.New("timer not found")
@@ -110,15 +110,15 @@ func (t *TimerMap) GetTimeVectorNew(classId string) (events.TimerVector, error) 
 }
 
 func (t *TimerMap) UpdateTimeNew(
-	classId string,
+	classID string,
 	position float32,
 	velocity float32,
 	acceleration float32,
 	eventTime int64,
 ) error {
-	// zap.S().Info("Updating timer for class ", classId, position, velocity, acceleration, eventTime)
-	fmt.Println("Updating timer for class ", classId, position, velocity, acceleration, eventTime)
-	ct, ok := t.Map.Load(classId)
+	// zap.S().Info("Updating timer for class ", classID, position, velocity, acceleration, eventTime)
+	fmt.Println("Updating timer for class ", classID, position, velocity, acceleration, eventTime)
+	ct, ok := t.Map.Load(classID)
 
 	if !ok {
 		return errors.New("timer not found")
@@ -140,7 +140,7 @@ func (t *TimerMap) UpdateTimeNew(
 	// zap.S().Info("Updated timer : ", ct)
 	fmt.Println("Updated timer : ", ct.Position, ct.Velocity, ct.Acceleration, ct.LastUpdated)
 
-	t.Map.Store(classId, ct)
+	t.Map.Store(classID, ct)
 
 	return nil
 }

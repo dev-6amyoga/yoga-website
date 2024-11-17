@@ -19,7 +19,7 @@ func NewClass() (*ClassModel, error) {
 }
 
 // add to mongo db
-func AddToActionsQueue(db *mongo.Client, classId string, action events.QueueEvent) error {
+func AddToActionsQueue(db *mongo.Client, classID string, action events.QueueEvent) error {
 	// Get the collection you want to update from
 	ss, err := db.StartSession()
 
@@ -27,14 +27,18 @@ func AddToActionsQueue(db *mongo.Client, classId string, action events.QueueEven
 		return err
 	}
 
-	ss.StartTransaction()
+	err = ss.StartTransaction()
+
+	if err != nil {
+		return err
+	}
 
 	collection := db.Database(os.Getenv("DB_NAME")).Collection("class_history")
 
-	objId, _ := primitive.ObjectIDFromHex(classId)
+	objID, _ := primitive.ObjectIDFromHex(classID)
 
 	// Define the filter criteria (e.g., update document with specific ID)
-	filter := bson.M{"_id": objId}
+	filter := bson.M{"_id": objID}
 
 	// Define the update document specifying changes
 	update := bson.D{
@@ -45,29 +49,51 @@ func AddToActionsQueue(db *mongo.Client, classId string, action events.QueueEven
 	result, err := collection.UpdateOne(context.TODO(), filter, update)
 
 	if err != nil {
-		ss.AbortTransaction(context.Background())
+		err = ss.AbortTransaction(context.Background())
+
+		if err != nil {
+			return err
+		}
+
 		return err
 	}
 
 	// Check the update result
 	matchedCount, modifiedCount := result.MatchedCount, result.ModifiedCount
-	if matchedCount == 0 {
+
+	switch matchedCount {
+	case 0:
 		fmt.Println("No documents matched the filter.")
-		ss.AbortTransaction(context.Background())
+		err = ss.AbortTransaction(context.Background())
+
+		if err != nil {
+			return err
+		}
 		return errors.New("no documents matched the filter")
-	} else if modifiedCount == 1 {
+	case 1:
 		fmt.Println("Successfully updated one document.")
-	} else {
+
+	default:
 		fmt.Printf("Unexpected update result: Matched %d documents, Modified %d documents\n", matchedCount, modifiedCount)
-		ss.AbortTransaction(context.Background())
+		err = ss.AbortTransaction(context.Background())
+
+		if err != nil {
+			return err
+		}
+
 		return errors.New("unexpected update result")
 	}
 
-	ss.CommitTransaction(context.Background())
+	err = ss.CommitTransaction(context.Background())
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func GetQueueEventsSince(db *mongo.Client, classId string, maxTime time.Time) ([]events.QueueEvent, error) {
+func GetQueueEventsSince(db *mongo.Client, classID string, _ time.Time) ([]events.QueueEvent, error) {
 	// get records from the db
 	ss, err := db.StartSession()
 
@@ -75,14 +101,18 @@ func GetQueueEventsSince(db *mongo.Client, classId string, maxTime time.Time) ([
 		return nil, err
 	}
 
-	ss.StartTransaction()
+	err = ss.StartTransaction()
+
+	if err != nil {
+		return nil, err
+	}
 
 	collection := db.Database(os.Getenv("DB_NAME")).Collection("class_history")
 
-	objId, _ := primitive.ObjectIDFromHex(classId)
+	objID, _ := primitive.ObjectIDFromHex(classID)
 
 	// Define the filter criteria (e.g., update document with specific ID)
-	filter := bson.M{"_id": objId}
+	filter := bson.M{"_id": objID}
 
 	opts := options.FindOneOptions{}
 
@@ -95,23 +125,32 @@ func GetQueueEventsSince(db *mongo.Client, classId string, maxTime time.Time) ([
 	err = res.Decode(&classModel)
 
 	if err != nil {
-		ss.AbortTransaction(context.Background())
+		err = ss.AbortTransaction(context.Background())
+
+		if err != nil {
+			return nil, err
+		}
+
 		return nil, err
 	}
 
-	ss.CommitTransaction(context.Background())
+	err = ss.CommitTransaction(context.Background())
+
+	if err != nil {
+		return nil, err
+	}
 
 	return classModel.ActionsQueue, nil
 }
 
-func AddToControlsQueue(db *mongo.Client, classId string, action events.ControlsEvent) error {
+func AddToControlsQueue(db *mongo.Client, classID string, action events.ControlsEvent) error {
 	// Get the collection you want to update from
 	collection := db.Database("db_name").Collection("class")
 
-	objId, _ := primitive.ObjectIDFromHex(classId)
+	objID, _ := primitive.ObjectIDFromHex(classID)
 
 	// Define the filter criteria (e.g., update document with specific ID)
-	filter := bson.M{"_id": objId}
+	filter := bson.M{"_id": objID}
 
 	// Define the update document specifying changes
 	update := bson.D{
