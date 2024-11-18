@@ -58,7 +58,6 @@ function ViewMyClasses() {
   };
 
   const joinClass = (class_id) => {
-    console.log(class_id);
     toast("Joining class..." + String(class_id));
     window.open(`/student/class/${class_id}/info`, "_blank");
   };
