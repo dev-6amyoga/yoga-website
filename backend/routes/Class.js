@@ -246,7 +246,6 @@ router.post('/student/get-all', async (req, res) => {
     const finalList = []
     for (let i = 0; i < classes.length; i += 1) {
       const classObj = classes[i].toJSON()
-
       if (classObj.allowed_students.includes(String(user_id))) {
         finalList.push(classes[i])
       } else {
@@ -256,6 +255,25 @@ router.post('/student/get-all', async (req, res) => {
     console.log(user_id)
     console.log(finalList)
     return res.status(HTTP_OK).json(finalList)
+  } catch (error) {
+    console.error(error)
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Failed to fetch classes',
+    })
+  }
+})
+
+router.post('/student/get-class-for-student', async (req, res) => {
+  try {
+    const { class_id, user_id } = req.body
+    const selectedClass = await Class.findById(class_id)
+    if (selectedClass.class_id == class_id) {
+      if (selectedClass.allowed_students.includes(String(user_id))) {
+        return res.status(HTTP_OK).json({ inClass: true })
+      } else {
+        return res.status(HTTP_OK).json({ inClass: false })
+      }
+    }
   } catch (error) {
     console.error(error)
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({

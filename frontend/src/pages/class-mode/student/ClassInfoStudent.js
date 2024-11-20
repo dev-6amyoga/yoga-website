@@ -10,6 +10,7 @@ import StudentPageWrapper from "../../../components/Common/StudentPageWrapper";
 import { CLASS_ONGOING, CLASS_UPCOMING } from "../../../enums/class_status";
 import { getFrontendDomain } from "../../../utils/getFrontendDomain";
 import useUserStore from "../../../store/UserStore";
+import { Fetch } from "../../../utils/Fetch";
 
 export default function ClassInfoStudent() {
   // get user_id, if it is null or not in allowed_students, display message
@@ -20,13 +21,6 @@ export default function ClassInfoStudent() {
   const [validUser, setValidUser] = useState(false);
   const [now, setNow] = useState(new Date());
 
-  useEffect(() => {
-    if (user) {
-      setValidUser(true);
-    } else {
-      setValidUser(false);
-    }
-  }, [user]);
   useEffect(() => {
     const interval = setInterval(() => {
       setNow(new Date());
@@ -62,6 +56,37 @@ export default function ClassInfoStudent() {
       return res.class_history;
     },
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (classDetails && user) {
+        const res = await Fetch({
+          url: "/class/student/get-all",
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: { class_id: classDetails.class_id, user_id: user?.user_id },
+        });
+        if (res.status === 200) {
+          console.log(res.data);
+          if (res.data.length > 0) {
+            setValidUser(true);
+          } else {
+            setValidUser(false);
+          }
+          // setClasses(res.data);
+        } else {
+          console.error("Failed to fetch class data");
+        }
+      } else {
+        setValidUser(false);
+      }
+    };
+    if (classDetails) {
+      fetchData();
+    }
+  }, [user, classDetails]);
 
   useEffect(() => {
     let countdownInterval;
