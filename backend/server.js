@@ -3,6 +3,7 @@ const expressWs = require('express-ws')
 const requestIp = require('request-ip')
 
 const mongoose = require('mongoose')
+const cron = require('node-cron')
 
 const cors = require('cors')
 const dotenv = require('dotenv')
@@ -41,6 +42,7 @@ glob.sync('./models/mongo/*.js').forEach((file) => {
 
 // routers
 const asanaRouter = require('./routes/Asana')
+const reminderRouter = require('./routes/ReminderScript')
 const videoRecordingRouter = require('./routes/VideoRecordings')
 const videoPackagingRouter = require('./routes/VideoPackaging')
 const authRouter = require('./routes/Auth')
@@ -92,6 +94,13 @@ const classWsRouter = require('./websocket-routes/Class')
 //   ],
 // })
 // const graceful = new Graceful({ brees: [bree] })
+
+// cron.schedule('*/10 * * * * *', () => {
+//   console.log(
+//     'Running a task every 10 seconds: ',
+//     new Date().toLocaleTimeString()
+//   )
+// })
 
 const corsOptions = {
   origin: [

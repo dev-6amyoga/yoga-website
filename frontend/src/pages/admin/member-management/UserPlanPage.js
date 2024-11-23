@@ -22,6 +22,7 @@ function UserPlanPage() {
           url: "/user-plan/get-all-user-plans",
         });
         const data = response.data;
+        console.log(data.userplans);
         setUserPlans(data.userplans);
         const userDetailsPromises = data.userplans.map((userPlan) =>
           Fetch({
