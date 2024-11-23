@@ -9,9 +9,10 @@ import { useMemo } from "react";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import SortableColumn from "../../../components/Common/DataTable/SortableColumn";
 import { Fetch } from "../../../utils/Fetch";
+
 function UserPlanPage() {
   const [userPlans, setUserPlans] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
+  const [userDetails, setUserDetails] = useState([]);
   const [userIdNameMap, setUserIdNameMap] = useState({});
 
   useEffect(() => {
@@ -21,53 +22,40 @@ function UserPlanPage() {
           url: "/user-plan/get-all-user-plans",
         });
         const data = response.data;
-        console.log(data);
         setUserPlans(data.userplans);
-        // const userIdNameMap = data.reduce((map, user) => {
-        //   map[user.user_id] = user.name;
-        //   return map;
-        // }, {});
-        // setUserIdNameMap(userIdNameMap);
+        const userDetailsPromises = data.userplans.map((userPlan) =>
+          Fetch({
+            url: "/user/get-by-id",
+            method: "POST",
+            data: { user_id: userPlan.user_id },
+          }).then((response) => response.data)
+        );
+        const userDetailsArray = await Promise.all(userDetailsPromises);
+        setUserDetails(userDetailsArray);
+        const userIdNameMapping = {};
+        userDetailsArray.forEach((user) => {
+          userIdNameMapping[user.user.user_id] = user.user.name;
+        });
+        setUserIdNameMap(userIdNameMapping);
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching user plans or details:", error);
       }
     };
+
     fetchUsers();
   }, []);
 
-  //   useEffect(() => {
-  //     const fetchLoginHistories = async () => {
-  //       try {
-  //         const response = await Fetch({
-  //           url: "/auth/get-login-history",
-  //         });
-  //         const data = response.data;
-  //         const transformedData = data.map((history) => ({
-  //           ...history,
-  //           user_name: userIdNameMap[history.user_id] || "Unknown User",
-  //         }));
-
-  //         setLoginHistories(transformedData);
-  //       } catch (error) {
-  //         console.log(error);
-  //       }
-  //     };
-  //     fetchLoginHistories();
-  //   }, [userIdNameMap]);
-
   const columnsDataTable = useMemo(
     () => [
-      //   {
-      //     accessorKey: "login_history_id",
-      //     header: ({ column }) => (
-      //       <SortableColumn column={column}>ID</SortableColumn>
-      //     ),
-      //   },
       {
         accessorKey: "user_id",
         header: ({ column }) => (
-          <SortableColumn column={column}>User ID</SortableColumn>
+          <SortableColumn column={column}>User Name</SortableColumn>
         ),
+        cell: ({ row }) => {
+          const userId = row.original.user_id;
+          return userIdNameMap[userId] || "Loading...";
+        },
       },
       {
         accessorKey: "plan_id",
@@ -88,7 +76,7 @@ function UserPlanPage() {
         ),
       },
     ],
-    []
+    [userIdNameMap]
   );
 
   return (

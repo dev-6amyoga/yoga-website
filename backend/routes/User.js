@@ -30,6 +30,9 @@ const {
 const { UserInstitutePlanRole } = require('../models/sql/UserInstitutePlanRole')
 const { GetUserInfo, GetUser } = require('../services/User.service')
 const { hasPermission } = require('../utils/hasPermission')
+const { mailTransporter } = require('../init.nodemailer')
+const getFrontendDomain = require('../utils/getFrontendDomain')
+const { UpdateUserPlanStatus } = require('../services/UserPlan.service')
 
 router.post('/pose-detection', async (req, res) => {
   const { image } = req.body
@@ -625,10 +628,6 @@ router.post('/update-name-username', async (req, res) => {
       .json({ error: 'Failed to update user' })
   }
 })
-
-const { mailTransporter } = require('../init.nodemailer')
-const getFrontendDomain = require('../utils/getFrontendDomain')
-const { UpdateUserPlanStatus } = require('../services/UserPlan.service')
 
 router.post('/forgot-password-email', async (req, res) => {
   const { email_id } = req.body

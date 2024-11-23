@@ -75,7 +75,6 @@ export default function ClassInfoStudent() {
           } else {
             setValidUser(false);
           }
-          // setClasses(res.data);
         } else {
           console.error("Failed to fetch class data");
         }

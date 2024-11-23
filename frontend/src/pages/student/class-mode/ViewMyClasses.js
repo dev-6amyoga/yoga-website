@@ -40,7 +40,6 @@ function ViewMyClasses() {
         data: { user_id: user?.user_id },
       });
       if (res.status === 200) {
-        console.log(res.data);
         setClasses(res.data);
       }
     };
@@ -101,6 +100,7 @@ function ViewMyClasses() {
                   <TableCell align="right">Action</TableCell>
                 </TableRow>
               </TableHead>
+
               <TableBody>
                 {classes.map((classItem) => (
                   <TableRow key={classItem.class_name}>
