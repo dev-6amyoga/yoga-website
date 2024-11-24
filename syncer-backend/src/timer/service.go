@@ -102,9 +102,9 @@ func (t *TimerMap) GetTimeVectorNew(classID string) (events.TimerVector, error) 
 	}
 
 	return events.TimerVector{
-		Position:     ct.Position,
-		Velocity:     ct.Velocity,
-		Acceleration: ct.Acceleration,
+		Position:     &ct.Position,
+		Velocity:     &ct.Velocity,
+		Acceleration: &ct.Acceleration,
 		Timestamp:    ct.LastUpdated,
 	}, nil
 }

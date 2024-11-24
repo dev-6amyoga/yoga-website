@@ -22,10 +22,10 @@ Example :
 */
 
 type TimerVector struct {
-	Position     float32 `json:"position"`
-	Velocity     float32 `json:"velocity"`
-	Acceleration float32 `json:"acceleration"`
-	Timestamp    int64   `json:"timestamp"`
+	Position     *float32 `json:"position"`
+	Velocity     *float32 `json:"velocity"`
+	Acceleration *float32 `json:"acceleration"`
+	Timestamp    int64    `json:"timestamp"`
 }
 
 type EventType string

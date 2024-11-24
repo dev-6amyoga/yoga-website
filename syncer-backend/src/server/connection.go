@@ -142,8 +142,8 @@ func (s *Server) teacherConnectionInit(w http.ResponseWriter, r *http.Request, l
 			event.ClassID,
 			teacherEventInitReq.StartPosition,
 			teacherEventInitReq.EndPosition,
-			teacherEventInitReq.Velocity,
-			teacherEventInitReq.Acceleration,
+			*teacherEventInitReq.Velocity,
+			*teacherEventInitReq.Acceleration,
 		)
 
 		if err != nil {
@@ -408,11 +408,7 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 			s.logger.Infof("Received event: %s", event.Type)
 
 			timerEvent := events.TimerEventUpdateData{
-				TimerVector: &events.TimerVector{
-					Position:     -1,
-					Velocity:     -1,
-					Acceleration: -1,
-				},
+				TimerVector: &events.TimerVector{},
 			}
 
 			temp, err := json.Marshal(event.Data)
@@ -454,13 +450,20 @@ func (s *Server) handleTeacherConnection(w http.ResponseWriter, r *http.Request)
 
 			eventTime := time.Now().UnixMilli()
 
-			s.logger.Infof("[EVENT_TIMER_UPDATE] updating", timerEvent.Position, timerEvent.Velocity, timerEvent.Acceleration, eventTime)
+			s.logger.Infof(
+				"[EVENT_TIMER_UPDATE] updating",
+				valueOrDefaultFloat32(timerEvent.Position, -1),
+				valueOrDefaultFloat32(timerEvent.Velocity, -1),
+				valueOrDefaultFloat32(timerEvent.Acceleration, -1),
+				eventTime,
+			)
+
 			// update the timer object
 			err = s.Timers.UpdateTimeNew(
 				event.ClassID,
-				timerEvent.Position,
-				timerEvent.Velocity,
-				timerEvent.Acceleration,
+				valueOrDefaultFloat32(timerEvent.Position, -1),
+				valueOrDefaultFloat32(timerEvent.Velocity, -1),
+				valueOrDefaultFloat32(timerEvent.Acceleration, -1),
 				eventTime,
 			)
 			s.logger.Infof("[EVENT_TIMER_UPDATE] updated")
