@@ -109,7 +109,7 @@ export function CustomTimingTools() {
 					let updates = {};
 
 					if (formData.position) {
-						updates.position = parseFloat(formData.position);
+						updates.position = parseFloat(formData.position) * 1000;
 					}
 
 					if (formData.velocity) {
@@ -155,7 +155,12 @@ export function CustomTimingTools() {
 				<div key={idx}>{JSON.stringify(msg)}</div>
 			))}
 
-			<video src="/frontpage_video.mp4" controls ref={mediaElement} />
+			<video
+				src="/10_minute.mp4"
+				controls
+				ref={mediaElement}
+				className="w-96 border-2 border-red-500"
+			/>
 		</div>
 	);
 }

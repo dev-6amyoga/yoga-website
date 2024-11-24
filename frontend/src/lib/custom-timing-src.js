@@ -49,36 +49,40 @@ const updateMediaElement = (
 		velocity
 	);
 
-	if (velocity > 0) {
+	if (velocity !== null && velocity > 0) {
+		console.log(">>> branch 1.1");
 		if (playbackRate !== velocity) {
 			setPlaybackRate(mediaElement, velocity);
 		}
 		play(mediaElement);
 	} else if (currentTime !== duration) {
+		console.log(">>> branch 1.2");
 		pause(mediaElement);
 	}
 
-	if (position < 0) {
-		console.log(">>> branch 1");
-		if (currentTime > 0) {
-			setCurrentTime(mediaElement, currentTime);
-		}
+	if (position !== null) {
+		if (position < 0) {
+			console.log(">>> branch 2.1");
+			if (currentTime > 0) {
+				setCurrentTime(mediaElement, currentTime);
+			}
 
-		pause(mediaElement);
-	} else if (
-		duration !== undefined &&
-		duration !== null &&
-		position >= duration
-	) {
-		console.log(">>> branch 2");
-		if (currentTime !== duration) {
-			setCurrentTime(mediaElement, duration);
-		}
+			pause(mediaElement);
+		} else if (
+			duration !== undefined &&
+			duration !== null &&
+			position >= duration
+		) {
+			console.log(">>> branch 2.2");
+			if (currentTime !== duration) {
+				setCurrentTime(mediaElement, duration);
+			}
 
-		pause(mediaElement);
-	} else if (Math.abs(currentTime - position) > 0.5) {
-		console.log(">>> branch 3");
-		setCurrentTime(mediaElement, position);
+			pause(mediaElement);
+		} else if (Math.abs(currentTime - position) > 0.5) {
+			console.log(">>> branch 2.3");
+			setCurrentTime(mediaElement, position);
+		}
 	}
 };
 
@@ -104,17 +108,17 @@ const setTimingSrc = (mediaElement, timingObject) => {
 
 		const { position = null, velocity = null } = vec;
 
-		if (position === null || velocity === null) {
-			return;
-		}
+		// if (position === null || velocity === null) {
+		// 	return;
+		// }
 
-		if (velocity <= 0) {
+		if (velocity !== null && velocity <= 0) {
 			updateMediaElement(
 				mediaElement,
 				mediaElement?.currentTime,
 				mediaElement?.duration,
 				mediaElement?.playbackRate,
-				position / 1000,
+				position !== null ? position / 1000 : position,
 				velocity
 			);
 			console.log("[setTimingSrc] clearing interval, velocity <= 0");
