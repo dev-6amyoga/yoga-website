@@ -467,31 +467,54 @@ router.get('/all-watch-time-log', async (req, res) => {
 
 router.get('/time-statistics', async (req, res) => {
   try {
-    const allWatchTime = await WatchTimeLog.find(
-      { asana_id: { $ne: null } },
-      { asana_id: 1, duration: 1, _id: 0 }
-    )
-    const aggregatedData = allWatchTime.reduce((acc, curr) => {
-      const { asana_id, duration } = curr
-      if (acc[asana_id]) {
-        acc[asana_id].push({ duration })
-      } else {
-        acc[asana_id] = [{ duration }]
-      }
-      return acc
-    }, {})
-
-    // Convert aggregated data to the desired format
-    const result = Object.keys(aggregatedData).map((asana_id) => ({
-      label: `Asana ${asana_id}`,
-      data: aggregatedData[asana_id],
-    }))
-
-    res.json(result)
+    // Use MongoDB aggregation to calculate net watch time per user
+    const aggregatedData = await WatchTimeLog.aggregate([
+      {
+        $group: {
+          _id: '$user_id', // Group by user_id
+          totalWatchTime: { $sum: '$duration' }, // Sum the durations
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Remove the MongoDB auto ID field from the output
+          user_id: '$_id', // Rename the group field to user_id
+          totalWatchTimeInHours: { $divide: ['$totalWatchTime', 3600] }, // Convert seconds to hours
+        },
+      },
+    ])
+    console.log(aggregatedData)
+    res.json(aggregatedData)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
 })
+
+// router.get('/time-statistics', async (req, res) => {
+//   try {
+//     const allWatchTime = await WatchTimeLog.find()
+//     console.log(allWatchTime)
+//     const aggregatedData = allWatchTime.reduce((acc, curr) => {
+//       const { asana_id, duration } = curr
+//       if (acc[asana_id]) {
+//         acc[asana_id].push({ duration })
+//       } else {
+//         acc[asana_id] = [{ duration }]
+//       }
+//       return acc
+//     }, {})
+
+//     // Convert aggregated data to the desired format
+//     const result = Object.keys(aggregatedData).map((asana_id) => ({
+//       label: `Asana ${asana_id}`,
+//       data: aggregatedData[asana_id],
+//     }))
+
+//     res.json(result)
+//   } catch (error) {
+//     res.status(500).json({ message: error.message })
+//   }
+// })
 
 router.get('/admin-stats/current-month-usage', async (req, res) => {
   try {
