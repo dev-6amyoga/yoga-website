@@ -109,13 +109,13 @@ func (s *Server) TickerHandler(classID string, t *timer.Timer) {
 			fmt.Println("Tick at", tic, t.Velocity, pos)
 
 			ticData := events.TimerVector{
-				Position:     pos,
-				Velocity:     t.Velocity,
-				Acceleration: t.Acceleration,
+				Position:     &pos,
+				Velocity:     &t.Velocity,
+				Acceleration: &t.Acceleration,
 				Timestamp:    now,
 			}
 
-			t.Position = ticData.Position
+			t.Position = *ticData.Position
 			t.LastUpdated = now
 
 			chans.Range(func(_ string, value chan events.TimerEventResponse) bool {
