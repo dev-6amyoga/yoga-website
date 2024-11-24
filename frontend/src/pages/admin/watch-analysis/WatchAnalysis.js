@@ -1,22 +1,34 @@
 import { Button, Card, Spacer, Text } from "@geist-ui/core";
-import { useQuery } from "@tanstack/react-query";
-import { AreaChart, BarChart } from "@tremor/react";
 import Papa from "papaparse";
 import { useEffect, useMemo, useState } from "react";
-import { Cell, Legend, Pie, PieChart, Tooltip } from "recharts";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { DataTable } from "../../../components/Common/DataTable/DataTable";
 import SortableColumn from "../../../components/Common/DataTable/SortableColumn";
 import { ROLE_ROOT } from "../../../enums/roles";
 import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
-import { Input, Select } from "@mui/material";
+import { Input } from "@mui/material";
+import { DateRange } from "react-date-range";
+import { format } from "date-fns";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
 
 function WatchAnalysis() {
   const [watchTimeCount, setWatchTimeCount] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [uniqueNames, setUniqueNames] = useState([]);
+  const [dateRange, setDateRange] = useState([
+    {
+      startDate: new Date(),
+      endDate: new Date(),
+      key: "selection",
+    },
+  ]);
+
+  const handleRangeChange = (ranges) => {
+    setDateRange([ranges.selection]);
+    console.log("Selected Range:", ranges.selection);
+  };
 
   const columnsDataTable1 = useMemo(
     () => [
@@ -32,7 +44,7 @@ function WatchAnalysis() {
       },
       {
         accessorKey: "totalDuration",
-        header: "Net Watch Time (hours)",
+        header: "All time Watch hours (hours)",
       },
     ],
     []
@@ -118,26 +130,30 @@ function WatchAnalysis() {
     setFilteredData(filtered);
   };
 
-  const handleFilterByName = (name) => {
-    if (name === "All") {
-      setFilteredData(watchTimeCount); // Reset to all data
-    } else {
-      const filtered = watchTimeCount.filter((item) => item.name === name);
-      setFilteredData(filtered);
-    }
-  };
-
   return (
     <AdminPageWrapper heading="Watch Analysis">
-      <div className="flex items-center mb-4">
-        <Input
-          clearable
-          placeholder="Search by name"
-          value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
-          width="300px"
-          className="mr-4"
-        />
+      <div className="flex justify-center items-center mb-4">
+        <Card width="100">
+          <div className="flex flex-row gap-8 items-center">
+            <Input
+              clearable
+              placeholder="Search by name"
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              width="300px"
+              className="mr-4"
+            />
+            <div>
+              <h4>Select Date Range</h4>
+              <DateRange
+                editableDateInputs={true}
+                onChange={handleRangeChange}
+                moveRangeOnFirstSelection={false}
+                ranges={dateRange}
+              />
+            </div>
+          </div>
+        </Card>
       </div>
 
       <div className="elements">
@@ -161,30 +177,6 @@ function WatchAnalysis() {
           <div>No data available</div>
         )}
       </div>
-
-      {/* <div className="elements">
-        <Spacer h={2} />
-
-
-        {filteredData && filteredData.length > 0 ? (
-          <div className="flex justify-center items-center h-full">
-            <Card width="100">
-              <Text h4 my={10}>
-                Watch Time Per User
-              </Text>
-              <Button onClick={() => handleDownload(filteredData)}>
-                Download CSV
-              </Button>
-              <DataTable
-                columns={columnsDataTable1}
-                data={filteredData || []}
-              ></DataTable>
-            </Card>
-          </div>
-        ) : (
-          <div>No data available</div>
-        )}
-      </div> */}
     </AdminPageWrapper>
   );
 }
