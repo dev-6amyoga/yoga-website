@@ -130,6 +130,11 @@ function WatchAnalysis() {
     setFilteredData(filtered);
   };
 
+  const handleFilter = () => {
+    console.log("hi");
+    console.log("Selected Range:", ranges.selection);
+  };
+
   return (
     <AdminPageWrapper heading="Watch Analysis">
       <div className="flex justify-center items-center mb-4">
@@ -152,6 +157,7 @@ function WatchAnalysis() {
                 ranges={dateRange}
               />
             </div>
+            <Button onClick={() => handleFilter()}>Search</Button>
           </div>
         </Card>
       </div>
