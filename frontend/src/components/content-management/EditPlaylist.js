@@ -1186,7 +1186,7 @@ function EditPlaylist() {
 
   const handleDelete = async (index) => {
     if (typeof playlistCurrent[index] === "number") {
-      toast("Deleting. Please wait, this may take some time!");
+      toast("Deleting!! Please wait, this may take some time!");
       const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
       const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
       asanasOnlyPlaylist.splice(asanaIndex, 1);
