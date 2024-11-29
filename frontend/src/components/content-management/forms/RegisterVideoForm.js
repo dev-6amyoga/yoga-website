@@ -253,6 +253,7 @@ function RegisterVideoForm() {
       if (toastShown) {
       } else {
         toast("Adding new asana, kindly wait!");
+        console.log(combinedData);
         try {
           const response = await Fetch({
             url: "/content/video/addAsana",

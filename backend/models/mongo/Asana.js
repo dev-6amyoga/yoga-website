@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
 const MarkerSchema = new mongoose.Schema({
   title: String,
@@ -10,36 +10,20 @@ const MarkerSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
-});
+})
 
 const asanaSchema = new mongoose.Schema({
   id: Number,
   asana_name: String,
-
-  asana_desc: String,
   asana_category: String,
-  asana_thumbnailTs: {
-    type: Number,
-    default: 1,
-  },
   drm_video: Boolean,
-  asana_imageID: String,
-  asana_videoID: String,
-  asana_hls_url: String,
   asana_dash_url: String,
   ai_asana: Boolean,
   non_ai_asana: Boolean,
   teacher_mode: Boolean,
   asana_withAudio: String,
-  asana_audioLag: Number,
   asana_type: String,
-  duration: Number,
   asana_difficulty: [String],
-  markers: {
-    type: [MarkerSchema],
-    default: [],
-  },
-  muted: String,
   language: String,
   nobreak_asana: Boolean,
   person_starting_position: String,
@@ -48,13 +32,25 @@ const asanaSchema = new mongoose.Schema({
   mat_ending_position: String,
   asana_stithi_start: String,
   asana_stithi_end: String,
-  asana_namaskarastithi_start: String,
-  asana_namaskarastithi_end: String,
-  asana_eyestithi_start: String,
-  asana_eyestithi_end: String,
-  counter: String,
-});
+  vibhagiya: Boolean,
+  omkara: Boolean,
+  catch_waist_start: Boolean,
+  catch_waist_end: Boolean,
+  nose_lock_start: Boolean,
+  nose_lock_end: Boolean,
+  chin_lock_start: Boolean,
+  chin_lock_end: Boolean,
+  eye_close_start: Boolean,
+  eye_close_end: Boolean,
+  shanmuga_start: Boolean,
+  shanmuga_end: Boolean,
+  vajra_side: Boolean,
+  vajra_start: Boolean,
+  vajra_end: Boolean,
+  namaskara_start: Boolean,
+  namaskara_end: Boolean,
+})
 
-const Asana = mongoose.model("Asana", asanaSchema, "asanas");
+const Asana = mongoose.model('Asana', asanaSchema, 'asanas')
 
-module.exports = Asana;
+module.exports = Asana
