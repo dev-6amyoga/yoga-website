@@ -97,28 +97,6 @@ function AllPlaylists() {
   const updateData = async (playlistId) => {
     toast(playlistId);
     navigate(`/admin/playlist/edit/${playlistId}`);
-
-    // try {
-    //   const playlistId = Number(modalData.playlist_id);
-    //   const response = await Fetch({
-    //     url: `/content/playlists/updatePlaylist/${playlistId}`,
-    //     method: "PUT",
-    //     data: modalData,
-    //   });
-    //   if (response.status === 200) {
-    //     setPlaylist1((prev) =>
-    //       prev.map((p1) => (p1.playlist_id === playlistId ? modalData : p1))
-    //     );
-    //     setFilteredTransitions((prev) =>
-    //       prev.map((p1) => (p1.playlist_id === playlistId ? modalData : p1))
-    //     );
-    //     setModalState(false);
-    //   } else {
-    //     toast("Error updating playlist:", response.status);
-    //   }
-    // } catch (error) {
-    //   console.error(error);
-    // }
   };
 
   const deletePlaylist = async (playlistId) => {
@@ -148,10 +126,7 @@ function AllPlaylists() {
         <Table>
           <TableHead>
             <TableRow>
-              {/* <TableCell>Playlist ID</TableCell> */}
               <TableCell>Playlist Name</TableCell>
-              {/* <TableCell>Asanas</TableCell> */}
-              {/* <TableCell>Dash URL</TableCell> */}
               <TableCell>Duration (mins)</TableCell>
               <TableCell>Start Date</TableCell>
               <TableCell>End Date</TableCell>
@@ -164,26 +139,7 @@ function AllPlaylists() {
           <TableBody>
             {allPlaylists.map((playlist) => (
               <TableRow key={playlist.playlist_id}>
-                {/* <TableCell>{playlist.playlist_id}</TableCell> */}
                 <TableCell>{playlist.playlist_name}</TableCell>
-                {/* <TableCell>
-                  <Card className="h-32 scrollable overflow-y-auto border border-gray-300">
-                    <CardContent className="p-2">
-                      {asanaNames[playlist.playlist_id]?.map((name, index) => (
-                        <div key={index}>{name}</div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                </TableCell> */}
-                {/* <TableCell>
-                  <a
-                    href={playlist.playlist_dash_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {playlist.playlist_dash_url}
-                  </a>
-                </TableCell> */}
                 <TableCell>{(playlist.duration / 60).toFixed(1)}</TableCell>
                 <TableCell>
                   {new Date(playlist.playlist_start_date).toDateString()}
