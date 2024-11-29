@@ -38,7 +38,9 @@ export const TransitionEndStartingPrayerSitting = async (
       .filter(Boolean);
   };
 
+  console.log(start_category, "is start");
   if (!start_category) {
+    console.log("hello");
     let res = handleTransition([
       "Sitting Position Transition",
       "Pranayama Start Sitting",

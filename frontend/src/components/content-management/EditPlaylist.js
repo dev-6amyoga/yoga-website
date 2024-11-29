@@ -93,431 +93,6 @@ function EditPlaylist() {
     setNoBreakFilter(event.target.checked);
   };
 
-  const addToPlaylist = async (rowData) => {
-    if (playlistCurrent.length === 0) {
-      toast(rowData.asana_category);
-      if (rowData.asana_category === "Sitting") {
-        let t1 = await TransitionEndSitting(
-          null,
-          null,
-          rowData.nobreak_asana ? "No Break" : "Break",
-          null,
-          rowData,
-          rowData.drm_video,
-          transitions
-        );
-        t1 = t1.filter((element) => element !== undefined);
-        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-      }
-      if (rowData.asana_category === "Pranayama") {
-        let t1 = await TransitionEndPranayama(
-          null,
-          null,
-          rowData.nobreak_asana ? "No Break" : "Break",
-          null,
-          rowData,
-          rowData.drm_video,
-          transitions
-        );
-        t1 = t1.filter((element) => element !== undefined);
-        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-      }
-      if (rowData.asana_category === "Closing Prayer Sitting") {
-        let t1 = await TransitionEndClosingPrayerSitting(
-          null,
-          null,
-          rowData.nobreak_asana ? "No Break" : "Break",
-          null,
-          rowData,
-          rowData.drm_video,
-          transitions
-        );
-        t1 = t1.filter((element) => element !== undefined);
-        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-      }
-      if (rowData.asana_category === "Closing Prayer Standing") {
-        let t1 = await TransitionEndClosingPrayerStanding(
-          null,
-          null,
-          rowData.nobreak_asana ? "No Break" : "Break",
-          null,
-          rowData,
-          rowData.drm_video,
-          transitions
-        );
-        t1 = t1.filter((element) => element !== undefined);
-        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-      }
-      if (rowData.asana_category === "Starting Prayer Standing") {
-        let t1 = await TransitionEndStartingPrayerStanding(
-          null,
-          null,
-          rowData.nobreak_asana ? "No Break" : "Break",
-          null,
-          rowData,
-          rowData.drm_video,
-          transitions
-        );
-        t1 = t1.filter((element) => element !== undefined);
-        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-      }
-      if (rowData.asana_category === "Starting Prayer Sitting") {
-        let t1 = await TransitionEndStartingPrayerSitting(
-          null,
-          null,
-          rowData.nobreak_asana ? "No Break" : "Break",
-          null,
-          rowData,
-          rowData.drm_video,
-          transitions
-        );
-        t1 = t1.filter((element) => element !== undefined);
-        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-      }
-      if (rowData.asana_category === "Pranayama Prayer") {
-        let t1 = await TransitionEndPranayamaPrayer(
-          null,
-          null,
-          rowData.nobreak_asana ? "No Break" : "Break",
-          null,
-          rowData,
-          rowData.drm_video,
-          transitions
-        );
-        t1 = t1.filter((element) => element !== undefined);
-        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-      }
-      if (rowData.asana_category === "Standing") {
-        let t1 = await TransitionEndStanding(
-          null,
-          null,
-          rowData.nobreak_asana ? "No Break" : "Break",
-          null,
-          rowData,
-          rowData.drm_video,
-          transitions
-        );
-        t1 = t1.filter((element) => element !== undefined);
-        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-      }
-      if (rowData.asana_category === "Supine") {
-        let t1 = await TransitionEndSupine(
-          null,
-          null,
-          rowData.nobreak_asana ? "No Break" : "Break",
-          null,
-          rowData,
-          rowData.drm_video,
-          transitions
-        );
-        t1 = t1.filter((element) => element !== undefined);
-        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-      }
-      if (rowData.asana_category === "Prone") {
-        let t1 = await TransitionEndProne(
-          null,
-          null,
-          rowData.nobreak_asana ? "No Break" : "Break",
-          null,
-          rowData,
-          rowData.drm_video,
-          transitions
-        );
-        t1 = t1.filter((element) => element !== undefined);
-        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-      }
-      if (rowData.asana_category === "Special") {
-        let t1 = await TransitionEndSpecial(
-          null,
-          null,
-          rowData.nobreak_asana ? "No Break" : "Break",
-          null,
-          rowData,
-          rowData.drm_video,
-          transitions
-        );
-        t1 = t1.filter((element) => element !== undefined);
-        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-      }
-      if (rowData.asana_category === "Suryanamaskara Stithi") {
-        let t1 = await TransitionEndSuryanamaskaraStithi(
-          null,
-          null,
-          rowData.nobreak_asana ? "No Break" : "Break",
-          null,
-          rowData,
-          rowData.drm_video,
-          transitions
-        );
-        t1 = t1.filter((element) => element !== undefined);
-        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-      }
-      if (rowData.asana_category === "Suryanamaskara Non Stithi") {
-        let t1 = await TransitionEndSuryanamaskaraNonStithi(
-          null,
-          null,
-          rowData.nobreak_asana ? "No Break" : "Break",
-          null,
-          rowData,
-          rowData.drm_video,
-          transitions
-        );
-        t1 = t1.filter((element) => element !== undefined);
-        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-      }
-      if (rowData.asana_category === "Vajrasana") {
-        let t1 = await TransitionEndVajrasana(
-          null,
-          null,
-          rowData.nobreak_asana ? "No Break" : "Break",
-          null,
-          rowData,
-          rowData.drm_video,
-          transitions
-        );
-        console.log(t1);
-        t1 = t1.filter((element) => element !== undefined);
-        setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-      }
-    } else {
-      const lastId = playlistCurrent[playlistCurrent.length - 1];
-      if (Number.isInteger(lastId)) {
-        let prevAsana = await fetchAsanaById(lastId);
-        console.log(prevAsana);
-        if (prevAsana) {
-          if (rowData.asana_category === "Sitting") {
-            let t1 = await TransitionEndSitting(
-              // prevAsana.asana_category,
-              "end_category" in prevAsana
-                ? prevAsana.end_category
-                : prevAsana.asana_category,
-              prevAsana.nobreak_asana ? "No Break" : "Break",
-              rowData.nobreak_asana ? "No Break" : "Break",
-              prevAsana,
-              rowData,
-              rowData.drm_video,
-              transitions
-            );
-            console.log(t1);
-            t1 = t1.filter((element) => element !== undefined);
-            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-          }
-          if (rowData.asana_category === "Pranayama") {
-            let t1 = await TransitionEndPranayama(
-              // prevAsana.asana_category,
-              "end_category" in prevAsana
-                ? prevAsana.end_category
-                : prevAsana.asana_category,
-              prevAsana.nobreak_asana ? "No Break" : "Break",
-              rowData.nobreak_asana ? "No Break" : "Break",
-              prevAsana,
-              rowData,
-              rowData.drm_video,
-              transitions
-            );
-            t1 = t1.filter((element) => element !== undefined);
-            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-          }
-          if (rowData.asana_category === "Closing Prayer Sitting") {
-            let t1 = await TransitionEndClosingPrayerSitting(
-              // prevAsana.asana_category,
-              "end_category" in prevAsana
-                ? prevAsana.end_category
-                : prevAsana.asana_category,
-              prevAsana.nobreak_asana ? "No Break" : "Break",
-              rowData.nobreak_asana ? "No Break" : "Break",
-              prevAsana,
-              rowData,
-              rowData.drm_video,
-              transitions
-            );
-            t1 = t1.filter((element) => element !== undefined);
-            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-          }
-          if (rowData.asana_category === "Closing Prayer Standing") {
-            let t1 = await TransitionEndClosingPrayerStanding(
-              // prevAsana.asana_category,
-              "end_category" in prevAsana
-                ? prevAsana.end_category
-                : prevAsana.asana_category,
-              prevAsana.nobreak_asana ? "No Break" : "Break",
-              rowData.nobreak_asana ? "No Break" : "Break",
-              prevAsana,
-              rowData,
-              rowData.drm_video,
-              transitions
-            );
-            t1 = t1.filter((element) => element !== undefined);
-            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-          }
-          if (rowData.asana_category === "Starting Prayer Standing") {
-            let t1 = await TransitionEndStartingPrayerStanding(
-              // prevAsana.asana_category,
-              "end_category" in prevAsana
-                ? prevAsana.end_category
-                : prevAsana.asana_category,
-              prevAsana.nobreak_asana ? "No Break" : "Break",
-              rowData.nobreak_asana ? "No Break" : "Break",
-              prevAsana,
-              rowData,
-              rowData.drm_video,
-              transitions
-            );
-            t1 = t1.filter((element) => element !== undefined);
-            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-          }
-          if (rowData.asana_category === "Starting Prayer Sitting") {
-            let t1 = await TransitionEndStartingPrayerSitting(
-              // prevAsana.asana_category,
-              "end_category" in prevAsana
-                ? prevAsana.end_category
-                : prevAsana.asana_category,
-              prevAsana.nobreak_asana ? "No Break" : "Break",
-              rowData.nobreak_asana ? "No Break" : "Break",
-              prevAsana,
-              rowData,
-              rowData.drm_video,
-              transitions
-            );
-            t1 = t1.filter((element) => element !== undefined);
-            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-          }
-          if (rowData.asana_category === "Pranayama Prayer") {
-            let t1 = await TransitionEndPranayamaPrayer(
-              // prevAsana.asana_category,
-              "end_category" in prevAsana
-                ? prevAsana.end_category
-                : prevAsana.asana_category,
-              prevAsana.nobreak_asana ? "No Break" : "Break",
-              rowData.nobreak_asana ? "No Break" : "Break",
-              prevAsana,
-              rowData,
-              rowData.drm_video,
-              transitions
-            );
-            console.log(t1);
-            t1 = t1.filter((element) => element !== undefined);
-            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-          }
-          if (rowData.asana_category === "Standing") {
-            let t1 = await TransitionEndStanding(
-              // prevAsana.asana_category,
-              "end_category" in prevAsana
-                ? prevAsana.end_category
-                : prevAsana.asana_category,
-              prevAsana.nobreak_asana ? "No Break" : "Break",
-              rowData.nobreak_asana ? "No Break" : "Break",
-              prevAsana,
-              rowData,
-              rowData.drm_video,
-              transitions
-            );
-            t1 = t1.filter((element) => element !== undefined);
-            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-          }
-          if (rowData.asana_category === "Supine") {
-            let t1 = await TransitionEndSupine(
-              // prevAsana.asana_category,
-              "end_category" in prevAsana
-                ? prevAsana.end_category
-                : prevAsana.asana_category,
-              prevAsana.nobreak_asana ? "No Break" : "Break",
-              rowData.nobreak_asana ? "No Break" : "Break",
-              prevAsana,
-              rowData,
-              rowData.drm_video,
-              transitions
-            );
-            t1 = t1.filter((element) => element !== undefined);
-            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-          }
-          if (rowData.asana_category === "Prone") {
-            let t1 = await TransitionEndProne(
-              // prevAsana.asana_category,
-              "end_category" in prevAsana
-                ? prevAsana.end_category
-                : prevAsana.asana_category,
-              prevAsana.nobreak_asana ? "No Break" : "Break",
-              rowData.nobreak_asana ? "No Break" : "Break",
-              prevAsana,
-              rowData,
-              rowData.drm_video,
-              transitions
-            );
-            t1 = t1.filter((element) => element !== undefined);
-            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-          }
-          if (rowData.asana_category === "Special") {
-            let t1 = await TransitionEndSpecial(
-              // prevAsana.asana_category,
-              "end_category" in prevAsana
-                ? prevAsana.end_category
-                : prevAsana.asana_category,
-              prevAsana.nobreak_asana ? "No Break" : "Break",
-              rowData.nobreak_asana ? "No Break" : "Break",
-              prevAsana,
-              rowData,
-              rowData.drm_video,
-              transitions
-            );
-            t1 = t1.filter((element) => element !== undefined);
-            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-          }
-          if (rowData.asana_category === "Suryanamaskara Stithi") {
-            let t1 = await TransitionEndSuryanamaskaraStithi(
-              // prevAsana.asana_category,
-              "end_category" in prevAsana
-                ? prevAsana.end_category
-                : prevAsana.asana_category,
-              prevAsana.nobreak_asana ? "No Break" : "Break",
-              rowData.nobreak_asana ? "No Break" : "Break",
-              prevAsana,
-              rowData,
-              rowData.drm_video,
-              transitions
-            );
-            t1 = t1.filter((element) => element !== undefined);
-            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-          }
-          if (rowData.asana_category === "Suryanamaskara Non Stithi") {
-            let t1 = await TransitionEndSuryanamaskaraNonStithi(
-              // prevAsana.asana_category,
-              "end_category" in prevAsana
-                ? prevAsana.end_category
-                : prevAsana.asana_category,
-              prevAsana.nobreak_asana ? "No Break" : "Break",
-              rowData.nobreak_asana ? "No Break" : "Break",
-              prevAsana,
-              rowData,
-              rowData.drm_video,
-              transitions
-            );
-            t1 = t1.filter((element) => element !== undefined);
-            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-          }
-          if (rowData.asana_category === "Vajrasana") {
-            let t1 = await TransitionEndVajrasana(
-              // prevAsana.asana_category,
-              "end_category" in prevAsana
-                ? prevAsana.end_category
-                : prevAsana.asana_category,
-              prevAsana.nobreak_asana ? "No Break" : "Break",
-              rowData.nobreak_asana ? "No Break" : "Break",
-              prevAsana,
-              rowData,
-              rowData.drm_video,
-              transitions
-            );
-            t1 = t1.filter((element) => element !== undefined);
-            setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
-          }
-        }
-      } else {
-        toast("Last ID is not an integer");
-      }
-    }
-  };
-
   const [playlistCurrent, setPlaylistCurrent] = useState([]);
   const [transitions, setTransitions] = useState([]);
   const [formValues, setFormValues] = useState({});
@@ -599,7 +174,8 @@ function EditPlaylist() {
         });
         setPlaylist(response.data);
         setFormValues(response.data);
-        setPlaylistCurrent(response.data.asana_ids);
+        const asanasOnlyPlaylist = filterAsanas(response.data.asana_ids);
+        setPlaylistCurrent(asanasOnlyPlaylist);
       } catch (error) {
         console.log(error);
       }
@@ -607,6 +183,433 @@ function EditPlaylist() {
 
     fetchPlaylist();
   }, [playlist_id]);
+
+  const addToPlaylist = async (rowData) => {
+    setPlaylistCurrent([...playlistCurrent, rowData.id]);
+
+    // if (playlistCurrent.length === 0) {
+    //   toast(rowData.asana_category);
+    //   if (rowData.asana_category === "Sitting") {
+    //     let t1 = await TransitionEndSitting(
+    //       null,
+    //       null,
+    //       rowData.nobreak_asana ? "No Break" : "Break",
+    //       null,
+    //       rowData,
+    //       rowData.drm_video,
+    //       transitions
+    //     );
+    //     t1 = t1.filter((element) => element !== undefined);
+    //     setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //   }
+    //   if (rowData.asana_category === "Pranayama") {
+    //     let t1 = await TransitionEndPranayama(
+    //       null,
+    //       null,
+    //       rowData.nobreak_asana ? "No Break" : "Break",
+    //       null,
+    //       rowData,
+    //       rowData.drm_video,
+    //       transitions
+    //     );
+    //     t1 = t1.filter((element) => element !== undefined);
+    //     setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //   }
+    //   if (rowData.asana_category === "Closing Prayer Sitting") {
+    //     let t1 = await TransitionEndClosingPrayerSitting(
+    //       null,
+    //       null,
+    //       rowData.nobreak_asana ? "No Break" : "Break",
+    //       null,
+    //       rowData,
+    //       rowData.drm_video,
+    //       transitions
+    //     );
+    //     t1 = t1.filter((element) => element !== undefined);
+    //     setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //   }
+    //   if (rowData.asana_category === "Closing Prayer Standing") {
+    //     let t1 = await TransitionEndClosingPrayerStanding(
+    //       null,
+    //       null,
+    //       rowData.nobreak_asana ? "No Break" : "Break",
+    //       null,
+    //       rowData,
+    //       rowData.drm_video,
+    //       transitions
+    //     );
+    //     t1 = t1.filter((element) => element !== undefined);
+    //     setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //   }
+    //   if (rowData.asana_category === "Starting Prayer Standing") {
+    //     let t1 = await TransitionEndStartingPrayerStanding(
+    //       null,
+    //       null,
+    //       rowData.nobreak_asana ? "No Break" : "Break",
+    //       null,
+    //       rowData,
+    //       rowData.drm_video,
+    //       transitions
+    //     );
+    //     t1 = t1.filter((element) => element !== undefined);
+    //     setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //   }
+    //   if (rowData.asana_category === "Starting Prayer Sitting") {
+    //     let t1 = await TransitionEndStartingPrayerSitting(
+    //       null,
+    //       null,
+    //       rowData.nobreak_asana ? "No Break" : "Break",
+    //       null,
+    //       rowData,
+    //       rowData.drm_video,
+    //       transitions
+    //     );
+    //     t1 = t1.filter((element) => element !== undefined);
+    //     setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //   }
+    //   if (rowData.asana_category === "Pranayama Prayer") {
+    //     let t1 = await TransitionEndPranayamaPrayer(
+    //       null,
+    //       null,
+    //       rowData.nobreak_asana ? "No Break" : "Break",
+    //       null,
+    //       rowData,
+    //       rowData.drm_video,
+    //       transitions
+    //     );
+    //     t1 = t1.filter((element) => element !== undefined);
+    //     setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //   }
+    //   if (rowData.asana_category === "Standing") {
+    //     let t1 = await TransitionEndStanding(
+    //       null,
+    //       null,
+    //       rowData.nobreak_asana ? "No Break" : "Break",
+    //       null,
+    //       rowData,
+    //       rowData.drm_video,
+    //       transitions
+    //     );
+    //     t1 = t1.filter((element) => element !== undefined);
+    //     setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //   }
+    //   if (rowData.asana_category === "Supine") {
+    //     let t1 = await TransitionEndSupine(
+    //       null,
+    //       null,
+    //       rowData.nobreak_asana ? "No Break" : "Break",
+    //       null,
+    //       rowData,
+    //       rowData.drm_video,
+    //       transitions
+    //     );
+    //     t1 = t1.filter((element) => element !== undefined);
+    //     setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //   }
+    //   if (rowData.asana_category === "Prone") {
+    //     let t1 = await TransitionEndProne(
+    //       null,
+    //       null,
+    //       rowData.nobreak_asana ? "No Break" : "Break",
+    //       null,
+    //       rowData,
+    //       rowData.drm_video,
+    //       transitions
+    //     );
+    //     t1 = t1.filter((element) => element !== undefined);
+    //     setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //   }
+    //   if (rowData.asana_category === "Special") {
+    //     let t1 = await TransitionEndSpecial(
+    //       null,
+    //       null,
+    //       rowData.nobreak_asana ? "No Break" : "Break",
+    //       null,
+    //       rowData,
+    //       rowData.drm_video,
+    //       transitions
+    //     );
+    //     t1 = t1.filter((element) => element !== undefined);
+    //     setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //   }
+    //   if (rowData.asana_category === "Suryanamaskara Stithi") {
+    //     let t1 = await TransitionEndSuryanamaskaraStithi(
+    //       null,
+    //       null,
+    //       rowData.nobreak_asana ? "No Break" : "Break",
+    //       null,
+    //       rowData,
+    //       rowData.drm_video,
+    //       transitions
+    //     );
+    //     t1 = t1.filter((element) => element !== undefined);
+    //     setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //   }
+    //   if (rowData.asana_category === "Suryanamaskara Non Stithi") {
+    //     let t1 = await TransitionEndSuryanamaskaraNonStithi(
+    //       null,
+    //       null,
+    //       rowData.nobreak_asana ? "No Break" : "Break",
+    //       null,
+    //       rowData,
+    //       rowData.drm_video,
+    //       transitions
+    //     );
+    //     t1 = t1.filter((element) => element !== undefined);
+    //     setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //   }
+    //   if (rowData.asana_category === "Vajrasana") {
+    //     let t1 = await TransitionEndVajrasana(
+    //       null,
+    //       null,
+    //       rowData.nobreak_asana ? "No Break" : "Break",
+    //       null,
+    //       rowData,
+    //       rowData.drm_video,
+    //       transitions
+    //     );
+    //     console.log(t1);
+    //     t1 = t1.filter((element) => element !== undefined);
+    //     setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //   }
+    // } else {
+    //   const lastId = playlistCurrent[playlistCurrent.length - 1];
+    //   if (Number.isInteger(lastId)) {
+    //     let prevAsana = await fetchAsanaById(lastId);
+    //     console.log(prevAsana);
+    //     if (prevAsana) {
+    //       if (rowData.asana_category === "Sitting") {
+    //         let t1 = await TransitionEndSitting(
+    //           // prevAsana.asana_category,
+    //           "end_category" in prevAsana
+    //             ? prevAsana.end_category
+    //             : prevAsana.asana_category,
+    //           prevAsana.nobreak_asana ? "No Break" : "Break",
+    //           rowData.nobreak_asana ? "No Break" : "Break",
+    //           prevAsana,
+    //           rowData,
+    //           rowData.drm_video,
+    //           transitions
+    //         );
+    //         console.log(t1);
+    //         t1 = t1.filter((element) => element !== undefined);
+    //         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //       }
+    //       if (rowData.asana_category === "Pranayama") {
+    //         let t1 = await TransitionEndPranayama(
+    //           // prevAsana.asana_category,
+    //           "end_category" in prevAsana
+    //             ? prevAsana.end_category
+    //             : prevAsana.asana_category,
+    //           prevAsana.nobreak_asana ? "No Break" : "Break",
+    //           rowData.nobreak_asana ? "No Break" : "Break",
+    //           prevAsana,
+    //           rowData,
+    //           rowData.drm_video,
+    //           transitions
+    //         );
+    //         t1 = t1.filter((element) => element !== undefined);
+    //         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //       }
+    //       if (rowData.asana_category === "Closing Prayer Sitting") {
+    //         let t1 = await TransitionEndClosingPrayerSitting(
+    //           // prevAsana.asana_category,
+    //           "end_category" in prevAsana
+    //             ? prevAsana.end_category
+    //             : prevAsana.asana_category,
+    //           prevAsana.nobreak_asana ? "No Break" : "Break",
+    //           rowData.nobreak_asana ? "No Break" : "Break",
+    //           prevAsana,
+    //           rowData,
+    //           rowData.drm_video,
+    //           transitions
+    //         );
+    //         t1 = t1.filter((element) => element !== undefined);
+    //         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //       }
+    //       if (rowData.asana_category === "Closing Prayer Standing") {
+    //         let t1 = await TransitionEndClosingPrayerStanding(
+    //           // prevAsana.asana_category,
+    //           "end_category" in prevAsana
+    //             ? prevAsana.end_category
+    //             : prevAsana.asana_category,
+    //           prevAsana.nobreak_asana ? "No Break" : "Break",
+    //           rowData.nobreak_asana ? "No Break" : "Break",
+    //           prevAsana,
+    //           rowData,
+    //           rowData.drm_video,
+    //           transitions
+    //         );
+    //         t1 = t1.filter((element) => element !== undefined);
+    //         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //       }
+    //       if (rowData.asana_category === "Starting Prayer Standing") {
+    //         let t1 = await TransitionEndStartingPrayerStanding(
+    //           // prevAsana.asana_category,
+    //           "end_category" in prevAsana
+    //             ? prevAsana.end_category
+    //             : prevAsana.asana_category,
+    //           prevAsana.nobreak_asana ? "No Break" : "Break",
+    //           rowData.nobreak_asana ? "No Break" : "Break",
+    //           prevAsana,
+    //           rowData,
+    //           rowData.drm_video,
+    //           transitions
+    //         );
+    //         t1 = t1.filter((element) => element !== undefined);
+    //         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //       }
+    //       if (rowData.asana_category === "Starting Prayer Sitting") {
+    //         let t1 = await TransitionEndStartingPrayerSitting(
+    //           // prevAsana.asana_category,
+    //           "end_category" in prevAsana
+    //             ? prevAsana.end_category
+    //             : prevAsana.asana_category,
+    //           prevAsana.nobreak_asana ? "No Break" : "Break",
+    //           rowData.nobreak_asana ? "No Break" : "Break",
+    //           prevAsana,
+    //           rowData,
+    //           rowData.drm_video,
+    //           transitions
+    //         );
+    //         t1 = t1.filter((element) => element !== undefined);
+    //         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //       }
+    //       if (rowData.asana_category === "Pranayama Prayer") {
+    //         let t1 = await TransitionEndPranayamaPrayer(
+    //           // prevAsana.asana_category,
+    //           "end_category" in prevAsana
+    //             ? prevAsana.end_category
+    //             : prevAsana.asana_category,
+    //           prevAsana.nobreak_asana ? "No Break" : "Break",
+    //           rowData.nobreak_asana ? "No Break" : "Break",
+    //           prevAsana,
+    //           rowData,
+    //           rowData.drm_video,
+    //           transitions
+    //         );
+    //         console.log(t1);
+    //         t1 = t1.filter((element) => element !== undefined);
+    //         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //       }
+    //       if (rowData.asana_category === "Standing") {
+    //         let t1 = await TransitionEndStanding(
+    //           // prevAsana.asana_category,
+    //           "end_category" in prevAsana
+    //             ? prevAsana.end_category
+    //             : prevAsana.asana_category,
+    //           prevAsana.nobreak_asana ? "No Break" : "Break",
+    //           rowData.nobreak_asana ? "No Break" : "Break",
+    //           prevAsana,
+    //           rowData,
+    //           rowData.drm_video,
+    //           transitions
+    //         );
+    //         t1 = t1.filter((element) => element !== undefined);
+    //         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //       }
+    //       if (rowData.asana_category === "Supine") {
+    //         let t1 = await TransitionEndSupine(
+    //           // prevAsana.asana_category,
+    //           "end_category" in prevAsana
+    //             ? prevAsana.end_category
+    //             : prevAsana.asana_category,
+    //           prevAsana.nobreak_asana ? "No Break" : "Break",
+    //           rowData.nobreak_asana ? "No Break" : "Break",
+    //           prevAsana,
+    //           rowData,
+    //           rowData.drm_video,
+    //           transitions
+    //         );
+    //         t1 = t1.filter((element) => element !== undefined);
+    //         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //       }
+    //       if (rowData.asana_category === "Prone") {
+    //         let t1 = await TransitionEndProne(
+    //           // prevAsana.asana_category,
+    //           "end_category" in prevAsana
+    //             ? prevAsana.end_category
+    //             : prevAsana.asana_category,
+    //           prevAsana.nobreak_asana ? "No Break" : "Break",
+    //           rowData.nobreak_asana ? "No Break" : "Break",
+    //           prevAsana,
+    //           rowData,
+    //           rowData.drm_video,
+    //           transitions
+    //         );
+    //         t1 = t1.filter((element) => element !== undefined);
+    //         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //       }
+    //       if (rowData.asana_category === "Special") {
+    //         let t1 = await TransitionEndSpecial(
+    //           // prevAsana.asana_category,
+    //           "end_category" in prevAsana
+    //             ? prevAsana.end_category
+    //             : prevAsana.asana_category,
+    //           prevAsana.nobreak_asana ? "No Break" : "Break",
+    //           rowData.nobreak_asana ? "No Break" : "Break",
+    //           prevAsana,
+    //           rowData,
+    //           rowData.drm_video,
+    //           transitions
+    //         );
+    //         t1 = t1.filter((element) => element !== undefined);
+    //         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //       }
+    //       if (rowData.asana_category === "Suryanamaskara Stithi") {
+    //         let t1 = await TransitionEndSuryanamaskaraStithi(
+    //           // prevAsana.asana_category,
+    //           "end_category" in prevAsana
+    //             ? prevAsana.end_category
+    //             : prevAsana.asana_category,
+    //           prevAsana.nobreak_asana ? "No Break" : "Break",
+    //           rowData.nobreak_asana ? "No Break" : "Break",
+    //           prevAsana,
+    //           rowData,
+    //           rowData.drm_video,
+    //           transitions
+    //         );
+    //         t1 = t1.filter((element) => element !== undefined);
+    //         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //       }
+    //       if (rowData.asana_category === "Suryanamaskara Non Stithi") {
+    //         let t1 = await TransitionEndSuryanamaskaraNonStithi(
+    //           // prevAsana.asana_category,
+    //           "end_category" in prevAsana
+    //             ? prevAsana.end_category
+    //             : prevAsana.asana_category,
+    //           prevAsana.nobreak_asana ? "No Break" : "Break",
+    //           rowData.nobreak_asana ? "No Break" : "Break",
+    //           prevAsana,
+    //           rowData,
+    //           rowData.drm_video,
+    //           transitions
+    //         );
+    //         t1 = t1.filter((element) => element !== undefined);
+    //         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //       }
+    //       if (rowData.asana_category === "Vajrasana") {
+    //         let t1 = await TransitionEndVajrasana(
+    //           // prevAsana.asana_category,
+    //           "end_category" in prevAsana
+    //             ? prevAsana.end_category
+    //             : prevAsana.asana_category,
+    //           prevAsana.nobreak_asana ? "No Break" : "Break",
+    //           rowData.nobreak_asana ? "No Break" : "Break",
+    //           prevAsana,
+    //           rowData,
+    //           rowData.drm_video,
+    //           transitions
+    //         );
+    //         t1 = t1.filter((element) => element !== undefined);
+    //         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
+    //       }
+    //     }
+    //   } else {
+    //     toast("Last ID is not an integer");
+    //   }
+    // }
+  };
 
   useEffect(() => {
     const newNames = playlistCurrent.map((id) => {
@@ -716,7 +719,7 @@ function EditPlaylist() {
             ];
           }
           if (curAsana.asana_category === "Starting Prayer Sitting") {
-            let t1 = await TransitionEndStartingPrayerStanding(
+            let t1 = await TransitionEndStartingPrayerSitting(
               transitionData.start_category,
               transitionData.break_status_start,
               transitionData.break_status_end,
@@ -1154,73 +1157,70 @@ function EditPlaylist() {
     return playlist.filter((id) => typeof id === "number");
   };
 
+  const handleSave = async () => {
+    console.log(playlistCurrent);
+    recalculateTransitions(playlistCurrent);
+    // formValues.asana_ids = playlistCurrent;
+    // try {
+    //   const response = await Fetch({
+    //     url: `/content/playlists/updatePlaylist/${playlist_id}`,
+    //     method: "PUT",
+    //     data: formValues,
+    //   });
+    //   if (response.status === 200) {
+    //     toast("Playlist updated successfully!");
+    //     try {
+    //       const response = await Fetch({
+    //         url: `/content/playlists/createManifest/${playlist_id}`,
+    //         method: "POST",
+    //       });
+    //       if (response?.status === 200) {
+    //         toast("Manifest Generated!");
+    //       }
+    //     } catch (error) {
+    //       console.log(error);
+    //     }
+    //     navigate("/admin/playlist/view-all");
+    //   } else {
+    //     toast("Error updating playlist:", response.status);
+    //   }
+    // } catch (error) {
+    //   console.log(error);
+    // }
+  };
+
   const handleUp = async (index) => {
-    toast("Moving up. Please wait, this may take some time!");
+    toast("Moving up!!");
     if (index > 0 && typeof playlistCurrent[index] === "number") {
-      const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
-      const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
-      if (asanaIndex - 1 >= 0) {
-        [asanasOnlyPlaylist[asanaIndex - 1], asanasOnlyPlaylist[asanaIndex]] = [
-          asanasOnlyPlaylist[asanaIndex],
-          asanasOnlyPlaylist[asanaIndex - 1],
-        ];
-      }
-      await recalculateTransitions(asanasOnlyPlaylist);
+      const newPlaylist = [...playlistCurrent];
+      [newPlaylist[index - 1], newPlaylist[index]] = [
+        newPlaylist[index],
+        newPlaylist[index - 1],
+      ];
+      setPlaylistCurrent(newPlaylist);
     }
   };
 
   const handleDown = async (index) => {
-    if (index > 0 && typeof playlistCurrent[index] === "number") {
-      const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
-      const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
-      if (asanaIndex + 1 < asanasOnlyPlaylist.length) {
-        [asanasOnlyPlaylist[asanaIndex + 1], asanasOnlyPlaylist[asanaIndex]] = [
-          asanasOnlyPlaylist[asanaIndex],
-          asanasOnlyPlaylist[asanaIndex + 1],
-        ];
-      }
-      toast("Moving down. Please wait, this may take some time!");
-      await recalculateTransitions(asanasOnlyPlaylist);
+    toast("Moving down!!");
+    if (
+      index < playlistCurrent.length - 1 &&
+      typeof playlistCurrent[index] === "number"
+    ) {
+      const newPlaylist = [...playlistCurrent];
+      [newPlaylist[index + 1], newPlaylist[index]] = [
+        newPlaylist[index],
+        newPlaylist[index + 1],
+      ];
+      setPlaylistCurrent(newPlaylist);
     }
   };
 
   const handleDelete = async (index) => {
     if (typeof playlistCurrent[index] === "number") {
-      toast("Deleting!! Please wait, this may take some time!");
-      const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
-      const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
-      asanasOnlyPlaylist.splice(asanaIndex, 1);
-      await recalculateTransitions(asanasOnlyPlaylist);
-    }
-  };
-
-  const handleSave = async () => {
-    formValues.asana_ids = playlistCurrent;
-    try {
-      const response = await Fetch({
-        url: `/content/playlists/updatePlaylist/${playlist_id}`,
-        method: "PUT",
-        data: formValues,
-      });
-      if (response.status === 200) {
-        toast("Playlist updated successfully!");
-        try {
-          const response = await Fetch({
-            url: `/content/playlists/createManifest/${playlist_id}`,
-            method: "POST",
-          });
-          if (response?.status === 200) {
-            toast("Manifest Generated!");
-          }
-        } catch (error) {
-          console.log(error);
-        }
-        navigate("/admin/playlist/view-all");
-      } else {
-        toast("Error updating playlist:", response.status);
-      }
-    } catch (error) {
-      console.log(error);
+      toast("Deleting!!");
+      const newPlaylist = playlistCurrent.filter((_, i) => i !== index);
+      setPlaylistCurrent(newPlaylist);
     }
   };
 

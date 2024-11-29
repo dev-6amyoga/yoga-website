@@ -121,40 +121,40 @@ export const TransitionEndSitting = async (
 
   if (start_category === "Starting Prayer Sitting") {
     if (break_status_end === "Break") {
-      if (start_video.namaskara_end === true) {
-        let res = handleTransition([
-          "Prayer Sitting Namaskara Unlock",
-          "Pranayama Unlock Legs",
-        ]);
-        res = res.map((transition) => transition.transition_id);
-        res = res.filter((element) => element !== undefined);
-        return res;
-      } else {
-        let res = handleTransition(["Pranayama Unlock Legs"]);
-        res = res.map((transition) => transition.transition_id);
-        res = res.filter((element) => element !== undefined);
-        return res;
-      }
+      // if (start_video.namaskara_end === true) {
+      let res = handleTransition([
+        "Prayer Sitting Namaskara Unlock",
+        "Pranayama Unlock Legs",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+      // } else {
+      //   let res = handleTransition(["Pranayama Unlock Legs"]);
+      //   res = res.map((transition) => transition.transition_id);
+      //   res = res.filter((element) => element !== undefined);
+      //   return res;
+      // }
     }
     if (break_status_end === "No Break") {
-      if (start_video.namaskara_end === true) {
-        let res = handleTransition([
-          "Prayer Sitting Namaskara Unlock",
-          "Pranayama Unlock Legs",
-          "Feet Together Hands Side Sitting Transition",
-        ]);
-        res = res.map((transition) => transition.transition_id);
-        res = res.filter((element) => element !== undefined);
-        return res;
-      } else {
-        let res = handleTransition([
-          "Pranayama Unlock Legs",
-          "Feet Together Hands Side Sitting Transition",
-        ]);
-        res = res.map((transition) => transition.transition_id);
-        res = res.filter((element) => element !== undefined);
-        return res;
-      }
+      // if (start_video.namaskara_end === true) {
+      let res = handleTransition([
+        "Prayer Sitting Namaskara Unlock",
+        "Pranayama Unlock Legs",
+        "Feet Together Hands Side Sitting Transition",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+      // } else {
+      //   let res = handleTransition([
+      //     "Pranayama Unlock Legs",
+      //     "Feet Together Hands Side Sitting Transition",
+      //   ]);
+      //   res = res.map((transition) => transition.transition_id);
+      //   res = res.filter((element) => element !== undefined);
+      //   return res;
+      // }
     }
   }
 
