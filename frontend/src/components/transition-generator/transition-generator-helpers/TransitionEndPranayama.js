@@ -944,7 +944,6 @@ export const TransitionEndPranayama = async (
               new_res = new_res.map((transition) => transition.transition_id);
               return new_res;
             } else {
-              console.log(pending_2);
               let new_res = [...pending_2];
               console.log(new_res);
               new_res = new_res.filter((element) => element !== undefined);

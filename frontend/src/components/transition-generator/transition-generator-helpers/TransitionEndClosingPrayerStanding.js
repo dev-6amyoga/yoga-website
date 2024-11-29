@@ -225,12 +225,190 @@ export const TransitionEndClosingPrayerStanding = async (
   }
 
   if (start_category === "Pranayama") {
-    if (break_status_end === "Break") {
-      return handleTransition([]);
-    }
+    // let res1 = handleTransition(["Pranayama Inhale Arms Up Exhale Namaskara"]);
+    const pending_2 = [];
+    if (start_video.vibhagiya) {
+      if (start_video.vibhagiya === "Abdomen") {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          let transition_ind = filteredTransitions_all[i];
+          if (
+            transition_ind.transition_video_name
+              .toLowerCase()
+              .indexOf("stomach") !== -1
+          ) {
+            res.push(transition_ind);
+          }
+        }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
+        return new_res;
+      }
+      if (start_video.vibhagiya === "Clavicular") {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          let transition_ind = filteredTransitions_all[i];
+          if (
+            transition_ind.transition_video_name
+              .toLowerCase()
+              .indexOf("clavicular") !== -1
+          ) {
+            res.push(transition_ind);
+          }
+        }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
+        return new_res;
+      }
+      if (start_video.vibhagiya === "Thoracic") {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          let transition_ind = filteredTransitions_all[i];
+          if (
+            transition_ind.transition_video_name
+              .toLowerCase()
+              .indexOf("thoracic") !== -1
+          ) {
+            res.push(transition_ind);
+          }
+        }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
+        return new_res;
+      }
+      if (start_video.vibhagiya === "Final") {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          let transition_ind = filteredTransitions_all[i];
+          if (
+            transition_ind.transition_video_name
+              .toLowerCase()
+              .indexOf("jalandhara") !== -1
+          ) {
+            res.push(transition_ind);
+          }
+        }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
+        return new_res;
+      }
+    } else {
+      if (start_video.omkara) {
+        let res = [];
+        for (var i = 0; i !== filteredTransitions_all.length; i++) {
+          if (filteredTransitions_all[i]) {
+            let transition_ind = filteredTransitions_all[i];
+            if (
+              transition_ind.transition_video_name
+                .toLowerCase()
+                .indexOf("om") !== -1 &&
+              transition_ind.transition_video_name
+                .toLowerCase()
+                .indexOf("chanting") !== -1
+            ) {
+              res.push(transition_ind);
+            }
+          }
+        }
+        res = res.filter((transition) =>
+          transition.transition_video_name.toLowerCase().includes("unlock")
+        );
+        let new_res = [...res, ...pending_2];
+        new_res = new_res.filter((element) => element !== undefined);
+        new_res = new_res.map((transition) => transition.transition_id);
 
-    if (break_status_end === "No Break") {
-      return handleTransition([]);
+        return new_res;
+      } else {
+        if (start_video.nose_lock_start && start_video.nose_lock_end) {
+          let res = [];
+          for (var i = 0; i !== filteredTransitions_all.length; i++) {
+            let transition_ind = filteredTransitions_all[i];
+            if (
+              transition_ind.transition_video_name
+                .toLowerCase()
+                .indexOf("nasika") !== -1
+            ) {
+              res.push(transition_ind);
+            }
+          }
+          res = res.filter((transition) =>
+            transition.transition_video_name.toLowerCase().includes("unlock")
+          );
+          let new_res = [...res, ...pending_2];
+          new_res = new_res.filter((element) => element !== undefined);
+          new_res = new_res.map((transition) => transition.transition_id);
+
+          return new_res;
+        } else {
+          if (start_video.chin_lock_start && start_video.chin_lock_end) {
+            let res = [];
+            for (var i = 0; i !== filteredTransitions_all.length; i++) {
+              let transition_ind = filteredTransitions_all[i];
+              if (
+                transition_ind.transition_video_name
+                  .toLowerCase()
+                  .indexOf("jalandhara") !== -1
+              ) {
+                res.push(transition_ind);
+              }
+            }
+            res = res.filter((transition) =>
+              transition.transition_video_name.toLowerCase().includes("unlock")
+            );
+            let new_res = [...res, ...pending_2];
+            new_res = new_res.filter((element) => element !== undefined);
+            new_res = new_res.map((transition) => transition.transition_id);
+            return new_res;
+          } else {
+            if (start_video.shanmuga_start && start_video.shanmuga_end) {
+              // add bhramari lock and unlock
+              let res = [];
+              for (var i = 0; i !== filteredTransitions_all.length; i++) {
+                let transition_ind = filteredTransitions_all[i];
+                if (
+                  transition_ind.transition_video_name
+                    .toLowerCase()
+                    .indexOf("bhramari") !== -1
+                ) {
+                  res.push(transition_ind);
+                }
+              }
+              res = res.filter((transition) =>
+                transition.transition_video_name
+                  .toLowerCase()
+                  .includes("unlock")
+              );
+              let new_res = [...res, ...pending_2];
+              new_res = new_res.filter((element) => element !== undefined);
+              new_res = new_res.map((transition) => transition.transition_id);
+              return new_res;
+            } else {
+              console.log(pending_2);
+              let new_res = [...pending_2];
+              console.log(new_res);
+              new_res = new_res.filter((element) => element !== undefined);
+              new_res = new_res.map((transition) => transition.transition_id);
+              return new_res;
+            }
+          }
+        }
+      }
     }
   }
 

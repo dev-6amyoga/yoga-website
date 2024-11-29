@@ -1206,7 +1206,7 @@ export const TransitionEndStanding = async (
         return new_res;
       }
     } else {
-      if (pranayama.omkara) {
+      if (start_video.omkara) {
         let res = [];
         for (var i = 0; i !== filteredTransitions_all.length; i++) {
           if (filteredTransitions_all[i]) {
@@ -1227,7 +1227,7 @@ export const TransitionEndStanding = async (
         new_res = new_res.filter((element) => element !== undefined);
         return new_res;
       } else {
-        if (pranayama.nose_lock_start && pranayama.nose_lock_end) {
+        if (start_video.nose_lock_start && start_video.nose_lock_end) {
           let res = [];
           for (var i = 0; i !== filteredTransitions_all.length; i++) {
             let transition_ind = filteredTransitions_all[i];
@@ -1246,7 +1246,7 @@ export const TransitionEndStanding = async (
           new_res = new_res.filter((element) => element !== undefined);
           return new_res;
         } else {
-          if (pranayama.chin_lock_start && pranayama.chin_lock_end) {
+          if (start_video.chin_lock_start && start_video.chin_lock_end) {
             let res = [];
             for (var i = 0; i !== filteredTransitions_all.length; i++) {
               let transition_ind = filteredTransitions_all[i];
@@ -1265,7 +1265,7 @@ export const TransitionEndStanding = async (
             new_res = new_res.filter((element) => element !== undefined);
             return new_res;
           } else {
-            if (pranayama.shanmuga_start && pranayama.shanmuga_end) {
+            if (start_video.shanmuga_start && start_video.shanmuga_end) {
               // add bhramari lock and unlock
               let res = [];
               for (var i = 0; i !== filteredTransitions_all.length; i++) {
