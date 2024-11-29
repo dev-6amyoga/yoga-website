@@ -262,7 +262,7 @@ export const TransitionEndClosingPrayerSitting = async (
         res = res.filter((transition) =>
           transition.transition_video_name.toLowerCase().includes("unlock")
         );
-        let new_res = [...res, ...pending_2];
+        let new_res = [...res, ...pending_2, res1];
         new_res = new_res.filter((element) => element !== undefined);
         new_res = new_res.map((transition) => transition.transition_id);
         return new_res;
@@ -282,7 +282,7 @@ export const TransitionEndClosingPrayerSitting = async (
         res = res.filter((transition) =>
           transition.transition_video_name.toLowerCase().includes("unlock")
         );
-        let new_res = [...res, ...pending_2];
+        let new_res = [...res, ...pending_2, res1];
         new_res = new_res.filter((element) => element !== undefined);
         new_res = new_res.map((transition) => transition.transition_id);
         return new_res;
@@ -302,7 +302,7 @@ export const TransitionEndClosingPrayerSitting = async (
         res = res.filter((transition) =>
           transition.transition_video_name.toLowerCase().includes("unlock")
         );
-        let new_res = [...res, ...pending_2];
+        let new_res = [...res, ...pending_2, res1];
         new_res = new_res.filter((element) => element !== undefined);
         new_res = new_res.map((transition) => transition.transition_id);
         return new_res;
@@ -328,7 +328,7 @@ export const TransitionEndClosingPrayerSitting = async (
         res = res.filter((transition) =>
           transition.transition_video_name.toLowerCase().includes("unlock")
         );
-        let new_res = [...res, ...pending_2];
+        let new_res = [...res, ...pending_2, res1];
         new_res = new_res.filter((element) => element !== undefined);
         new_res = new_res.map((transition) => transition.transition_id);
 
@@ -349,7 +349,7 @@ export const TransitionEndClosingPrayerSitting = async (
           res = res.filter((transition) =>
             transition.transition_video_name.toLowerCase().includes("unlock")
           );
-          let new_res = [...res, ...pending_2];
+          let new_res = [...res, ...pending_2, res1];
           new_res = new_res.filter((element) => element !== undefined);
           new_res = new_res.map((transition) => transition.transition_id);
 
@@ -370,7 +370,7 @@ export const TransitionEndClosingPrayerSitting = async (
             res = res.filter((transition) =>
               transition.transition_video_name.toLowerCase().includes("unlock")
             );
-            let new_res = [...res, ...pending_2];
+            let new_res = [...res, ...pending_2, res1];
             new_res = new_res.filter((element) => element !== undefined);
             new_res = new_res.map((transition) => transition.transition_id);
             return new_res;
@@ -393,13 +393,13 @@ export const TransitionEndClosingPrayerSitting = async (
                   .toLowerCase()
                   .includes("unlock")
               );
-              let new_res = [...res, ...pending_2];
+              let new_res = [...res, ...pending_2, res1];
               new_res = new_res.filter((element) => element !== undefined);
               new_res = new_res.map((transition) => transition.transition_id);
               return new_res;
             } else {
               console.log(pending_2);
-              let new_res = [...pending_2];
+              let new_res = [...pending_2, res1];
               console.log(new_res);
               new_res = new_res.filter((element) => element !== undefined);
               new_res = new_res.map((transition) => transition.transition_id);
