@@ -1339,7 +1339,7 @@ function RegisterPlaylistForm() {
           </div>
           <div className="flex flex-row gap-3">
             <div>
-              {filteredCategories.map((x, index) => (
+              {/* {filteredCategories.map((x, index) => (
                 <Accordion key={index} className="flex flex-col gap-2">
                   <AccordionSummary
                     expandIcon={<ExpandMore />}
@@ -1372,6 +1372,50 @@ function RegisterPlaylistForm() {
                               </TableCell>
                             </TableRow>
                           ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </AccordionDetails>
+                </Accordion>
+              ))} */}
+              {filteredCategories.map((x, index) => (
+                <Accordion key={index} className="flex flex-col gap-2">
+                  <AccordionSummary
+                    expandIcon={<ExpandMore />}
+                    aria-controls="panel1-content"
+                    id="panel1-header"
+                  >
+                    {x.category}
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Asana Name</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {x.asanas
+                            .slice() // Create a copy to avoid mutating the original array
+                            .sort((a, b) =>
+                              a.asana_name.localeCompare(b.asana_name)
+                            ) // Sort alphabetically by asana_name
+                            .map((asana, idx) => (
+                              <TableRow key={idx}>
+                                <TableCell>{asana.asana_name}</TableCell>
+                                <TableCell>
+                                  <Button
+                                    variant="contained"
+                                    onClick={() => {
+                                      addToPlaylist(asana);
+                                    }}
+                                  >
+                                    Add
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
                         </TableBody>
                       </Table>
                     </TableContainer>
