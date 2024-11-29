@@ -741,35 +741,35 @@ function EditPlaylist() {
       // Wait for recalculateTransitions to finish
       await recalculateTransitions(playlistCurrent);
 
-      // Uncommented code runs only after recalculateTransitions is complete
-      formValues.asana_ids = playlistCurrent;
+      // // Uncommented code runs only after recalculateTransitions is complete
+      // formValues.asana_ids = playlistCurrent;
 
-      const response = await Fetch({
-        url: `/content/playlists/updatePlaylist/${playlist_id}`,
-        method: "PUT",
-        data: formValues,
-      });
+      // const response = await Fetch({
+      //   url: `/content/playlists/updatePlaylist/${playlist_id}`,
+      //   method: "PUT",
+      //   data: formValues,
+      // });
 
-      if (response.status === 200) {
-        toast("Playlist updated successfully!");
+      // if (response.status === 200) {
+      //   toast("Playlist updated successfully!");
 
-        try {
-          const manifestResponse = await Fetch({
-            url: `/content/playlists/createManifest/${playlist_id}`,
-            method: "POST",
-          });
+      //   try {
+      //     const manifestResponse = await Fetch({
+      //       url: `/content/playlists/createManifest/${playlist_id}`,
+      //       method: "POST",
+      //     });
 
-          if (manifestResponse?.status === 200) {
-            toast("Manifest Generated!");
-          }
-        } catch (manifestError) {
-          console.error("Error generating manifest:", manifestError);
-        }
+      //     if (manifestResponse?.status === 200) {
+      //       toast("Manifest Generated!");
+      //     }
+      //   } catch (manifestError) {
+      //     console.error("Error generating manifest:", manifestError);
+      //   }
 
-        navigate("/admin/playlist/view-all");
-      } else {
-        toast("Error updating playlist:", response.status);
-      }
+      //   navigate("/admin/playlist/view-all");
+      // } else {
+      //   toast("Error updating playlist:", response.status);
+      // }
     } catch (error) {
       console.error("Error updating playlist:", error);
     }

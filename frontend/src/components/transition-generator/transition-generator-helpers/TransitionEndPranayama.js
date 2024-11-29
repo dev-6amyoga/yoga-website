@@ -124,6 +124,7 @@ export const TransitionEndPranayama = async (
         return res;
       } else {
         if (pranayama.nose_lock_start && pranayama.nose_lock_end) {
+          console.log("in nasika");
           let res = [];
           console.log(pranayama);
           for (var i = 0; i !== filteredTransitions_all.length; i++) {
@@ -770,6 +771,7 @@ export const TransitionEndPranayama = async (
         transition.drm_transition === drm_status &&
         transition.teacher_mode === end_video.teacher_mode
     );
+    console.log("in pranayama!!!");
     console.log(start_video, end_video);
     if (start_video.id === end_video.id) {
       return [];
