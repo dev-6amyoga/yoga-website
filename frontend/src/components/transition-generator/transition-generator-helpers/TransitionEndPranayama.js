@@ -137,10 +137,19 @@ export const TransitionEndPranayama = async (
               res.push(transition_ind);
             }
           }
-          res = res.filter(
-            (transition) =>
-              !transition.transition_video_name.toLowerCase().includes("unlock")
-          );
+          res = res
+            .filter(
+              (transition) =>
+                !transition.transition_video_name
+                  .toLowerCase()
+                  .includes("unlock")
+            )
+            .filter(
+              (transition) =>
+                !transition.transition_video_name
+                  .toLowerCase()
+                  .includes("prenatal")
+            );
           console.log(res);
           return res;
         } else {
