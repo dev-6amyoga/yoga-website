@@ -900,9 +900,17 @@ export const TransitionEndPranayama = async (
               res.push(transition_ind);
             }
           }
-          res = res.filter((transition) =>
-            transition.transition_video_name.toLowerCase().includes("unlock")
-          );
+          res = res
+            .filter((transition) =>
+              transition.transition_video_name.toLowerCase().includes("unlock")
+            )
+            .filter(
+              (transition) =>
+                !transition.transition_video_name
+                  .toLowerCase()
+                  .includes("prenatal")
+            );
+
           let new_res = [...res, ...pending_2];
           new_res = new_res.filter((element) => element !== undefined);
           new_res = new_res.map((transition) => transition.transition_id);
