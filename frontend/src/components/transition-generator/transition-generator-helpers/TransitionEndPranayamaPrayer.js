@@ -247,7 +247,7 @@ export const TransitionEndPranayamaPrayer = async (
         return res;
       }
       let res = handleTransition([
-        "Vajrasana Dyanmudra To Relax Position",
+        "Vajrasana Dyanmudra To Relax Position Side",
         "Vajra To Sitting Transition",
         "Pranayama Start Sitting",
       ]);

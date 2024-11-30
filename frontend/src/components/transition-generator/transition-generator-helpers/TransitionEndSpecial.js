@@ -200,7 +200,7 @@ export const TransitionEndSpecial = async (
     }
     if (break_status_start === "No Break") {
       let res = handleTransition([
-        "Vajrasana Dyanmudra To Relax Position",
+        "Vajrasana Dyanmudra To Relax Position Side",
         "Vajra To Sitting Transition",
       ]);
       res = res.map((transition) => transition.transition_id);
