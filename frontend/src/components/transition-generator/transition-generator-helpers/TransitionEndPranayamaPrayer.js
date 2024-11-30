@@ -236,6 +236,16 @@ export const TransitionEndPranayamaPrayer = async (
       return res;
     }
     if (break_status_start === "No Break") {
+      if (start_video.teacher_mode == true) {
+        let res = handleTransition([
+          "Vajrasana Dyanmudra To Relax Position Side",
+          "Vajra To Sitting Transition",
+          "Pranayama Start Sitting",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Vajrasana Dyanmudra To Relax Position",
         "Vajra To Sitting Transition",
