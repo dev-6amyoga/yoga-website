@@ -219,6 +219,7 @@ function EditPlaylist() {
           console.log(curAsana);
           let transitionData = {
             start_category: null,
+            end_category: null,
             break_status_start: null,
             break_status_end: curAsana.nobreak_asana ? "No Break" : "Break",
             start_video: null,
@@ -246,7 +247,9 @@ function EditPlaylist() {
           }
           if (curAsana.asana_category === "Pranayama") {
             let t1 = await TransitionEndPranayama(
-              transitionData.start_category,
+              transitionData.end_category
+                ? transitionData.end_category
+                : transitionData.start_category,
               transitionData.break_status_start,
               transitionData.break_status_end,
               transitionData.start_video,
@@ -762,43 +765,8 @@ function EditPlaylist() {
   };
 
   const handleSave = async () => {
-    console.log(playlistCurrent);
-
     try {
-      // Wait for recalculateTransitions to finish
       await recalculateTransitions(playlistCurrent);
-
-      // Uncommented code runs only after recalculateTransitions is complete
-      // formValues.asana_ids = playlistCurrent;
-
-      // console.log(formValues);
-
-      // const response = await Fetch({
-      //   url: `/content/playlists/updatePlaylist/${playlist_id}`,
-      //   method: "PUT",
-      //   data: formValues,
-      // });
-
-      // if (response.status === 200) {
-      //   toast("Playlist updated successfully!");
-
-      //   try {
-      //     const manifestResponse = await Fetch({
-      //       url: `/content/playlists/createManifest/${playlist_id}`,
-      //       method: "POST",
-      //     });
-
-      //     if (manifestResponse?.status === 200) {
-      //       toast("Manifest Generated!");
-      //     }
-      //   } catch (manifestError) {
-      //     console.error("Error generating manifest:", manifestError);
-      //   }
-
-      //   navigate("/admin/playlist/view-all");
-      // } else {
-      //   toast("Error updating playlist:", response.status);
-      // }
     } catch (error) {
       console.error("Error updating playlist:", error);
     }

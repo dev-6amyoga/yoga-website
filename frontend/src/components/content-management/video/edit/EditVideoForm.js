@@ -1,5 +1,5 @@
 import { Button, Description, Input, Select, Text } from "@geist-ui/core";
-
+import { useState, useEffect } from "react";
 function EditVideoForm({
   modalData,
   editAsanaFormRef,
@@ -14,50 +14,45 @@ function EditVideoForm({
   loading,
   resetChanges,
 }) {
+  console.log(modalData);
+  const [asana_category, setAsanaCategory] = useState("");
+
+  const handler4 = (val) => {
+    setAsanaCategory(val);
+    modalData.asana_category = val;
+  };
   return (
     <div className="rounded-lg border p-4">
       <form className="flex flex-row gap-4" ref={editAsanaFormRef}>
         <div className="flex-1 flex flex-col gap-3">
-          <Description title="Asana Details" />
           <Text small type="secondary">
             <Text span>Asana ID: </Text>
             {asana.id}
           </Text>
+          <Text>Asana Name</Text>
           <Input
             width="100%"
             id="asana_name"
             placeholder={modalData.asana_name}
             onChange={handleInputChange}
-          >
-            Asana Name
-          </Input>
+          />
 
-          <Input
-            width="100%"
-            id="asana_desc"
-            placeholder={modalData.asana_desc}
-            onChange={handleInputChange}
+          <Text>Asana Category</Text>
+          <Select
+            placeholder={modalData.asana_category}
+            onChange={handler4}
+            name="asana_category"
           >
-            Description
-          </Input>
-
-          <Input
-            width="100%"
-            id="asana_videoID"
-            placeholder={modalData.asana_videoID}
-            onChange={handleInputChange}
-          >
-            Video ID
-          </Input>
-
-          <Input
-            width="100%"
-            id="asana_hls_url"
-            placeholder={modalData.asana_hls_url}
-            onChange={handleInputChange}
-          >
-            HLS Url
-          </Input>
+            {categories &&
+              categories.map((x) => (
+                <Select.Option
+                  key={x.asana_category_id}
+                  value={x.asana_category}
+                >
+                  {x.asana_category}
+                </Select.Option>
+              ))}
+          </Select>
 
           <Input
             width="100%"

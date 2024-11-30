@@ -225,7 +225,7 @@ export const TransitionEndPranayama = async (
     (transition) =>
       transition.drm_transition === drm_status &&
       //   transition.asana_category_start === start_category &&
-      transition.asana_category_end === "Pranayama" &&
+      // transition.asana_category_end === "Pranayama" &&
       transition.teacher_mode === end_video.teacher_mode
   );
 
@@ -233,7 +233,7 @@ export const TransitionEndPranayama = async (
     return transitions
       .map((transition) => {
         const filtered = filteredTransitions_all.filter(
-          (transitions) => transitions.transi === transition
+          (transitions) => transitions.transition_video_name === transition
         );
         return getUniqueTransition(filtered);
       })
@@ -651,14 +651,18 @@ export const TransitionEndPranayama = async (
   }
 
   if (start_category === "Sitting") {
+    console.log("HELLO this is sitting");
     if (break_status_start === "Break") {
+      console.log("in break : ", start_video);
       if (start_video.mat_ending_position === "Side") {
         let res = handleTransition([
           "Turn Mat Side To Front Sitting Transition",
           "Pranayama Start Sitting",
         ]);
+        console.log(res);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
+        console.log(res);
         return res;
       } else {
         let res = handleTransition(["Pranayama Start Sitting"]);
@@ -669,6 +673,8 @@ export const TransitionEndPranayama = async (
     }
 
     if (break_status_start === "No Break") {
+      console.log("in no break : ", start_video);
+
       if (start_video.mat_ending_position === "Side") {
         let res = handleTransition([
           "Feet Apart Hands Back Sitting Transition",
