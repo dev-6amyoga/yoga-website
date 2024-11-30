@@ -784,31 +784,31 @@ function EditPlaylist() {
     }
     setPlaylistCurrent(recalculatedPlaylist);
     formValues.asana_ids = recalculatedPlaylist;
-    // const response = await Fetch({
-    //   url: `/content/playlists/updatePlaylist/${playlist_id}`,
-    //   method: "PUT",
-    //   data: formValues,
-    // });
-    // if (response.status === 200) {
-    //   toast("Playlist updated successfully!");
+    const response = await Fetch({
+      url: `/content/playlists/updatePlaylist/${playlist_id}`,
+      method: "PUT",
+      data: formValues,
+    });
+    if (response.status === 200) {
+      toast("Playlist updated successfully!");
 
-    //   try {
-    //     const manifestResponse = await Fetch({
-    //       url: `/content/playlists/createManifest/${playlist_id}`,
-    //       method: "POST",
-    //     });
+      try {
+        const manifestResponse = await Fetch({
+          url: `/content/playlists/createManifest/${playlist_id}`,
+          method: "POST",
+        });
 
-    //     if (manifestResponse?.status === 200) {
-    //       toast("Manifest Generated!");
-    //     }
-    //   } catch (manifestError) {
-    //     console.error("Error generating manifest:", manifestError);
-    //   }
+        if (manifestResponse?.status === 200) {
+          toast("Manifest Generated!");
+        }
+      } catch (manifestError) {
+        console.error("Error generating manifest:", manifestError);
+      }
 
-    //   navigate("/admin/playlist/view-all");
-    // } else {
-    //   toast("Error updating playlist:", response.status);
-    // }
+      navigate("/admin/playlist/view-all");
+    } else {
+      toast("Error updating playlist:", response.status);
+    }
   };
 
   const filterAsanas = (playlist) => {
