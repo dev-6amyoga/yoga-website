@@ -224,9 +224,11 @@ export const TransitionEndClosingPrayerSitting = async (
   }
 
   if (start_category === "Pranayama") {
+    if (end_video.asana_name == "Rub Your Palms") {
+      return [];
+    }
     let res1 = handleTransition(["Pranayama Inhale Arms Up Exhale Namaskara"]);
     const pending_2 = [];
-    console.log("HOHOHOH", res1);
     if (start_video.vibhagiya) {
       if (start_video.vibhagiya === "Abdomen") {
         let res = [];
