@@ -1,57 +1,37 @@
 import React, { useState, useEffect } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
   Box,
-  Typography,
-  TextField,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   InputLabel,
-  Select,
   MenuItem,
-  Checkbox,
+  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
+  Typography,
   Paper,
-  IconButton,
-  Grid,
-  Card,
-  CardContent,
 } from "@mui/material";
-import { Remove, Add } from "@mui/icons-material";
+import Papa from "papaparse";
 import { Fetch } from "../../../utils/Fetch";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
-import { ROLE_ROOT } from "../../../enums/roles";
 import { withAuth } from "../../../utils/withAuth";
+import { ROLE_ROOT } from "../../../enums/roles";
 
 function ViewAllCustomPlans() {
   const [customPlans, setCustomPlans] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [currencies, setCurrencies] = useState([]);
-  const [allocations, setAllocations] = useState([]);
-  const [selectedNeeds, setSelectedNeeds] = useState([]);
-  const [userType, setUserType] = useState("");
-  const [allStudents, setAllStudents] = useState([]);
-  const [allInstitutes, setAllInstitutes] = useState([]);
-
-  const [selectedStudents, setSelectedStudents] = useState([]);
   const [allPlaylists, setAllPlaylists] = useState([]);
-  const [selectedInstitutes, setSelectedInstitutes] = useState([]);
-  const [watchHours, setWatchHours] = useState(null);
-  const [planValidity, setPlanValidity] = useState(null);
-  const [prices, setPrices] = useState([]);
-  const [chosenPlaylists, setChosenPlaylists] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [numberOfDays, setNumberOfDays] = useState(10);
-
   const [formData, setFormData] = useState({
     plan_name: "",
     plan_description: "",
@@ -62,6 +42,7 @@ function ViewAllCustomPlans() {
     prices: {},
     allocations: [],
   });
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -132,86 +113,8 @@ function ViewAllCustomPlans() {
     setOpen(false);
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleNeedsChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      selectedNeeds: e.target.value,
-    }));
-  };
-
-  const handleModeChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      userType: e.target.value,
-    }));
-  };
-
-  const handleWatchChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      watchHours: e.target.value,
-    }));
-  };
-
-  const handleValidityChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      planValidity: e.target.value,
-    }));
-  };
-
-  const handlePriceChange = (currencyId, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      prices: {
-        ...prev.prices,
-        [currencyId]: value,
-      },
-    }));
-  };
-
-  const handlePlaylistSelect = (index, value) => {
-    const newAllocations = [...formData.allocations];
-    newAllocations[index] = {
-      ...newAllocations[index],
-      playlist_id: value,
-    };
-    setFormData((prev) => ({
-      ...prev,
-      allocations: newAllocations,
-    }));
-  };
-
-  const handleAllocationChange = (index, field, value) => {
-    const newAllocations = [...formData.allocations];
-    newAllocations[index] = {
-      ...newAllocations[index],
-      [field]: value,
-    };
-    setFormData((prev) => ({
-      ...prev,
-      allocations: newAllocations,
-    }));
-  };
-
-  const handleEndDayChange = (index, value) => {
-    handleAllocationChange(index, "endDay", value);
-  };
-
-  const handleRemoveAllocation = (index) => {
-    const newAllocations = formData.allocations.filter((_, i) => i !== index);
-    setFormData((prev) => ({
-      ...prev,
-      allocations: newAllocations,
-    }));
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
   };
 
   const handleSubmit = async (e) => {
@@ -228,8 +131,59 @@ function ViewAllCustomPlans() {
     }
   };
 
+  // Filter customPlans based on the search term
+  const filteredPlans = customPlans.filter((plan) => {
+    return plan.plan_name.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
+  const handleDownloadCSV = () => {
+    const csvData = customPlans.map((plan) => ({
+      ID: plan.custom_plan_id,
+      Name: plan.plan_name,
+      Description: plan.plan_description,
+      "Selected Needs": plan.selectedNeeds.join(", "),
+      Prices: plan.prices
+        .map((price) => `${price.currency_id}: ${price.amount}`)
+        .join(", "),
+      Playlists: plan.playlists
+        .map((playlist) => playlist.playlist_name)
+        .join(", "),
+      Validity: plan.planValidity,
+      Students: plan.students.join(", "),
+      "Watch Hours": plan.watchHours,
+    }));
+
+    // Convert the data to CSV format
+    const csv = Papa.unparse(csvData);
+    // Trigger download
+    const link = document.createElement("a");
+    link.href = `data:text/csv;charset=utf-8,%EF%BB%BF${encodeURIComponent(csv)}`;
+    link.target = "_blank";
+    link.download = "custom_plans.csv";
+    link.click();
+  };
+
   return (
     <AdminPageWrapper heading="Plan Management - View Customized Plans">
+      <Box
+        mb={3}
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <TextField
+          label="Search Plans"
+          variant="outlined"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          fullWidth
+          sx={{ maxWidth: 400 }}
+        />
+        <Button variant="contained" color="primary" onClick={handleDownloadCSV}>
+          Download CSV
+        </Button>
+      </Box>
+
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -247,7 +201,7 @@ function ViewAllCustomPlans() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {customPlans.map((plan) => (
+            {filteredPlans.map((plan) => (
               <TableRow key={plan._id.$oid}>
                 <TableCell>{plan.custom_plan_id}</TableCell>
                 <TableCell>{plan.plan_name}</TableCell>
@@ -269,16 +223,13 @@ function ViewAllCustomPlans() {
                     <div key={index}>
                       {Object.entries(playlist).map(
                         ([playlistId, playlistData]) => {
-                          // Find the matching playlist from allPlaylists using playlistId
                           const matchingPlaylist = allPlaylists.find(
-                            (p) => p.playlist_id === parseInt(playlistId) // Convert playlistId to number if necessary
+                            (p) => p.playlist_id === parseInt(playlistId)
                           );
-
                           return (
                             <div key={playlistId}>
                               Playlist{" "}
-                              {matchingPlaylist?.playlist_name || "Unknown"}:{" "}
-                              {/* {playlistData.asanas.join(", ")} */}
+                              {matchingPlaylist?.playlist_name || "Unknown"}
                             </div>
                           );
                         }
@@ -286,7 +237,6 @@ function ViewAllCustomPlans() {
                     </div>
                   ))}
                 </TableCell>
-
                 <TableCell>{plan.planValidity} days</TableCell>
                 <TableCell>{plan.students.join(", ")}</TableCell>
                 <TableCell>{plan.watchHours} hours</TableCell>
@@ -334,112 +284,13 @@ function ViewAllCustomPlans() {
               variant="outlined"
               fullWidth
               value={formData.plan_name}
-              onChange={handleInputChange}
+              onChange={(e) =>
+                setFormData({ ...formData, plan_name: e.target.value })
+              }
             />
 
-            <Typography>Plan Description</Typography>
-            <TextField
-              name="plan_description"
-              label="Enter Plan Description"
-              variant="outlined"
-              fullWidth
-              value={formData.plan_description}
-              onChange={handleInputChange}
-            />
-
-            <br />
-            <Typography>Choose Plan Requirements</Typography>
-            <FormControl fullWidth>
-              <InputLabel id="yoga-needs-label">
-                Custom Plan Requirements
-              </InputLabel>
-              <Select
-                labelId="yoga-needs-label"
-                multiple
-                name="selectedNeeds"
-                value={formData.selectedNeeds}
-                onChange={handleNeedsChange}
-                required
-              >
-                <MenuItem value="Knee Pain">Knee Pain</MenuItem>
-                <MenuItem value="Back Pain">Back Pain</MenuItem>
-                <MenuItem value="Neck Pain">Neck Pain</MenuItem>
-                <MenuItem value="Pranayama">Pranayama</MenuItem>
-                <MenuItem value="Thyroid">Thyroid</MenuItem>
-                <MenuItem value="Parkinsons">Parkinsons</MenuItem>
-                <MenuItem value="Pre Natal Yoga">Pre Natal Yoga</MenuItem>
-              </Select>
-            </FormControl>
-
-            <br />
-            <Typography>Select User Type</Typography>
-            <Select
-              fullWidth
-              name="userType"
-              value={formData.userType}
-              onChange={handleModeChange}
-              id="user_type"
-            >
-              <MenuItem value="student">Student</MenuItem>
-              <MenuItem value="institute">Institute</MenuItem>
-            </Select>
-            <br />
-            <Typography>Watch Hours</Typography>
-            <Select
-              fullWidth
-              name="watchHours"
-              value={formData.watchHours}
-              onChange={handleWatchChange}
-              id="watch_hours"
-            >
-              <MenuItem value="10">10 Hours</MenuItem>
-              <MenuItem value="20">20 Hours</MenuItem>
-              <MenuItem value="30">30 Hours</MenuItem>
-              <MenuItem value="40">40 Hours</MenuItem>
-              <MenuItem value="50">50 Hours</MenuItem>
-            </Select>
-
-            <br />
-            <Typography>Number of days</Typography>
-            <Select
-              fullWidth
-              name="planValidity"
-              value={formData.planValidity}
-              onChange={handleValidityChange}
-              id="no_of_days"
-            >
-              {[10, 20, 30, 40, 50, 60, 70, 80, 90].map((day) => (
-                <MenuItem key={day} value={day}>
-                  {day} Days
-                </MenuItem>
-              ))}
-            </Select>
-
-            <br />
-            <Typography variant="h5">Enter Prices</Typography>
-            {currencies.map((currency) => (
-              <TextField
-                key={currency.currency_id}
-                label={`Price in ${currency.name}`}
-                type="number"
-                value={formData.prices[currency.currency_id] || ""}
-                onChange={(e) =>
-                  handlePriceChange(currency.currency_id, e.target.value)
-                }
-                fullWidth
-                sx={{ mt: 2 }}
-              />
-            ))}
-            <br />
-            <Button
-              type="submit"
-              variant="contained"
-              sx={{
-                backgroundColor: "grey.600",
-                "&:hover": { backgroundColor: "grey.500" },
-                color: "white",
-              }}
-            >
+            {/* Add other form fields here */}
+            <Button type="submit" variant="contained">
               Finish
             </Button>
           </Box>

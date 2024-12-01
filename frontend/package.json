@@ -45,6 +45,7 @@
 		"html2pdf.js": "^0.10.2",
 		"https-browserify": "^1.0.0",
 		"input-otp": "^1.2.2",
+		"json2csv": "^6.0.0-alpha.2",
 		"lucide-react": "^0.323.0",
 		"mui": "^0.0.1",
 		"pako": "^2.1.0",
