@@ -883,7 +883,7 @@ function EditPlaylist() {
                 label="Duration (mins)"
                 name="duration"
                 disabled
-                value={formValues.duration || ""}
+                value={formValues.duration / 60 || ""}
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
