@@ -428,9 +428,9 @@ function EditAsana() {
 
       <div className="rounded-lg border p-4">
         <div className="flex flex-col gap-4">
-          <Description title="Asana Markers" />
+          {/* <Description title="Asana Markers" /> */}
 
-          {/* video player */}
+          {/*
           <div className="max-w-3xl mx-auto w-full">
             <div className="w-full">
               <VideoPlayer />
@@ -448,10 +448,10 @@ function EditAsana() {
             >
               Reset Player
             </Button>
-          </div>
+          </div> */}
 
           {/* markers list */}
-          <div className="rounded-lg border p-4">
+          {/* <div className="rounded-lg border p-4">
             <Description title="Markers" />
             <Spacer y={2} />
             <div className="flex flex-row gap-4 max-w-full overflow-x-auto pb-4">
@@ -469,11 +469,11 @@ function EditAsana() {
                 );
               })}
             </div>
-          </div>
+          </div> */}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* add marker form */}
-            <div className="border rounded-lg p-4">
+          {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-4"> */}
+          {/* add marker form */}
+          {/* <div className="border rounded-lg p-4">
               <Description title="Add Marker" />
 
               <Text blockquote className="text-center">
@@ -562,10 +562,10 @@ function EditAsana() {
                   Add Marker
                 </Button>
               </form>
-            </div>
+            </div> */}
 
-            {/* set thumbnail form */}
-            <div className="border rounded-lg p-4">
+          {/* set thumbnail form */}
+          {/* <div className="border rounded-lg p-4">
               <Description title="Set Thumbnail" />
               <Spacer y={2} />
               <div className="flex flex-col">
@@ -632,8 +632,8 @@ function EditAsana() {
                   </Button>
                 </div>
               </div>
-            </div>
-          </div>
+            </div> */}
+          {/* </div> */}
         </div>
       </div>
       <Spacer h={4} />

@@ -1,10 +1,12 @@
 const axios = require('axios')
 const cron = require('node-cron')
 const { mailTransporter } = require('../init.nodemailer')
+// const {
+//   getBackendDomain,
+// } = require('../../frontend/src/utils/getBackendDomain')
 
 const sendReminders = async () => {
   try {
-    console.log('Fetching user plans...')
     const response = await axios.get(
       'http://localhost:4000/user-plan/get-all-user-plans'
     )
