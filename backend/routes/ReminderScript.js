@@ -34,6 +34,7 @@ const sendReminders = async () => {
         {
           from: 'dev.6amyoga@gmail.com',
           to: user1.email,
+          cc: '992351@gmail.com',
           subject: '6AM Yoga | Plan Expired!',
           html: `
             <p>Dear ${user1.name},</p>
