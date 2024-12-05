@@ -13,26 +13,21 @@ import shaka from "shaka-player/dist/shaka-player.ui";
  * @constructor
  */
 function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
+  console.log("Props passed to ShakaPlayer:", {
+    src,
+    config,
+    chromeless,
+    className,
+    rest,
+  });
+
   const uiContainerRef = React.useRef(null);
   const videoRef = React.useRef(null);
-
+  const [storage, setStorage] = React.useState(null);
+  const [contentList, setContentList] = React.useState([]);
+  const [downloadProgress, setDownloadProgress] = React.useState(0);
   const [player, setPlayer] = React.useState(null);
   const [ui, setUi] = React.useState(null);
-
-  // React.useEffect(() => {
-  //   const intervalId = setInterval(() => {
-  //     if (player) {
-  //       const stats = player.getStats();
-
-  //       console.log("Estimated buffer level (seconds):", stats);
-  //     }
-  //   }, 1000); // Log every 1000 milliseconds (1 second)
-
-  //   return () => {
-  //     clearInterval(intervalId); // Clean up the interval when the component unmounts
-  //   };
-  // }, [player]);
-  // Only re-run the effect if the player instance changes
 
   // Effect to handle component mount & mount.
   // Not related to the src prop, this hook creates a shaka.Player instance.
@@ -40,7 +35,7 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
   React.useEffect(() => {
     const player = new shaka.Player(videoRef.current);
     setPlayer(player);
-
+    console.log("HELLO THIS IS PLAYER!!!");
     let ui;
     if (!chromeless) {
       const ui = new shaka.ui.Overlay(
@@ -69,6 +64,7 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
   // Load the source url when we have one.
   React.useEffect(() => {
     if (player && src) {
+      console.log("url is : ", src);
       player.load(src);
     }
   }, [player, src]);

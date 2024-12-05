@@ -511,8 +511,6 @@ function RegisterVideoForm() {
           </Checkbox>
         </div>
       ))}
-
-      {/* <Button onClick={markerNavigate}>Add Markers</Button> */}
       <Button htmlType="submit">Submit</Button>
     </form>
   );

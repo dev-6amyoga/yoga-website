@@ -4,35 +4,53 @@ import {
   Description,
   Input,
   Spacer,
+  Select,
+  Divider,
   Text,
 } from "@geist-ui/core";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useBlocker, useParams } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useBlocker, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import VideoPlayer from "../../../../components/StackVideoShaka/VideoPlayer";
 import { Fetch } from "../../../../utils/Fetch";
-
-import { ArrowLeft, ArrowRight } from "@geist-ui/icons";
 import AdminPageWrapper from "../../../../components/Common/AdminPageWrapper";
 import EditVideoForm from "../../../../components/content-management/video/edit/EditVideoForm";
-import MarkerCard from "../../../../components/content-management/video/edit/MarkerCard";
 import SaveChangesAlert from "../../../../components/content-management/video/edit/SaveChangesAlert";
 import usePlaylistStore from "../../../../store/PlaylistStore";
-import useVideoStore from "../../../../store/VideoStore";
-import useWatchHistoryStore from "../../../../store/WatchHistoryStore";
-import getFormData from "../../../../utils/getFormData";
-import { toTimeString } from "../../../../utils/toTimeString";
-
 function EditAsana() {
   const { asana_id } = useParams();
   const [modalData, setModalData] = useState({});
   const [tableLanguages, setTableLanguages] = useState([]);
   const [categories, setCategories] = useState([]);
   const [dirty, setDirty] = useState(false);
-
-  const [customerCode, setCustomerCode] = useState("");
   const editAsanaFormRef = useRef(null);
-  const addMarkerTimestampInputRef = useRef(null);
+
+  const [asanaData, setAsanaData] = useState({
+    vibhagiya: false,
+    omkara: false,
+    catch_waist_start: false,
+    catch_waist_end: false,
+    nose_lock_start: false,
+    nose_lock_end: false,
+    chin_lock_start: false,
+    chin_lock_end: false,
+    eye_close_start: false,
+    eye_close_end: false,
+    shanmuga_start: false,
+    shanmuga_end: false,
+    vajra_side: false,
+    vajra_start: false,
+    vajra_end: false,
+    namaskara_start: false,
+    namaskara_end: false,
+  });
+  const [formState, setFormState] = useState({});
+
+  const handleCheckboxChange = (key) => {
+    setFormState((prevState) => ({
+      ...prevState,
+      [key]: !prevState[key],
+    }));
+  };
 
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
@@ -40,106 +58,38 @@ function EditAsana() {
   );
   const [unloadBlock, setUnloadBlock] = useState(false);
 
-  const [currentTime, addToSeekQueue, setPlaylistState] = useVideoStore(
-    (state) => [state.currentTime, state.addToSeekQueue, state.setPlaylistState]
-  );
-
   const [addToQueue, clearQueue] = usePlaylistStore((state) => [
     state.addToQueue,
     state.clearQueue,
   ]);
 
-  const [setEnableWatchHistory] = useWatchHistoryStore((state) => [
-    state.setEnableWatchHistory,
-  ]);
-
-  const [nextThumbnailTimestamp, setNextThumbnailTimestamp] = useState(0);
-
   const [loading, setLoading] = useState(false);
-
-  /*
-  id: Number,
-	asana_name: String,
-
-	asana_desc: String,
-	asana_category: String,
-
-	asana_thumbnailTs: type: Number
-	asana_imageID: String,
-	asana_videoID: String,
-	asana_hls_url: String,
-	asana_dash_url: String,
-
-	asana_withAudio: String,
-	asana_audioLag: Number,
-
-	asana_type: String,
-
-	duration: Number,
-	asana_difficulty: [String],
-
-	markers: type: [MarkerSchema],
-	muted: String,
-	language: String,
-	nobreak_asana: Boolean,
-	person_starting_position: String,
-	person_ending_position: String,
-	mat_starting_position: String,
-	mat_ending_position: String,
-
-	counter: String,
- */
+  const navigate = useNavigate();
   const [asana, setAsana] = useState({});
-
-  /*
-	{
-		timestamp: Number,
-		title: String,
-		loop: bool
-	}
-	*/
-  const [markers, setMarkers] = useState([]);
-
-  const handleThumbnailTimestampChange = useCallback(
-    (e) => {
-      setNextThumbnailTimestamp(currentTime?.toFixed(2));
-    },
-    [currentTime]
-  );
-
-  const moveToTimestamp = useCallback(
-    (time) => {
-      addToSeekQueue({
-        type: "move",
-        t: time,
-      });
-    },
-    [addToSeekQueue]
-  );
 
   const updateData = useCallback(async () => {
     setLoading(true);
     Fetch({
       url: `/content/video/updateAsana/${asana.id}`,
       method: "PUT",
-      data: { ...modalData, markers: markers },
+      data: { ...formState },
     })
       .then((res) => {
-        console.log(res.data);
         setAsana(res.data);
-        setMarkers(res.data?.markers ?? []);
         setModalData(res.data);
         setDirty(false);
         if (editAsanaFormRef.current) {
           editAsanaFormRef.current.reset();
         }
+        toast("Updated successfully!");
+        navigate("/admin/video/view-all");
         setLoading(false);
       })
       .catch((error) => {
         toast(error, { type: "error" });
         setLoading(false);
       });
-  }, [asana, modalData, markers]);
+  }, [asana, formState]);
 
   const resetChanges = useCallback(() => {
     setModalData(asana);
@@ -148,156 +98,6 @@ function EditAsana() {
     }
     setDirty(false);
   }, [asana]);
-
-  const handleInputChange = useCallback(
-    (e) => {
-      const { id, value } = e.target;
-      setDirty(true);
-      setModalData({ ...modalData, [id]: value });
-    },
-    [modalData]
-  );
-
-  const handleSelect = useCallback(
-    (val, key) => {
-      setDirty(true);
-      setModalData({ ...modalData, [key]: val });
-    },
-    [modalData]
-  );
-
-  const handleSaveMarker = useCallback((marker, prevIdx) => {
-    setDirty(true);
-
-    setMarkers((p) => {
-      const ms = [...p];
-      ms.splice(prevIdx, 1);
-      // add marker in correct place
-      const idx = ms.findIndex(
-        (m) => parseFloat(m.timestamp) > parseFloat(marker.timestamp)
-      );
-      ms.splice(idx === -1 ? ms.length + 1 : idx, 0, marker);
-      console.log("saving", prevIdx, idx, ms.timestamp);
-
-      return ms;
-    });
-  }, []);
-
-  const currentMarkers = useMemo(() => {
-    let prevIdx = -1;
-    let nextIdx = -1;
-
-    for (let i = 0; i < markers.length - 1; i++) {
-      if (
-        parseFloat(markers[i]?.timestamp) <= currentTime &&
-        parseFloat(markers[i + 1]?.timestamp) > currentTime
-      ) {
-        prevIdx = i;
-        nextIdx = i + 1;
-        break;
-      }
-    }
-
-    if (
-      prevIdx === -1 &&
-      parseFloat(markers[markers.length - 1]?.timestamp) < currentTime
-    ) {
-      prevIdx = markers.length - 1;
-    }
-
-    if (nextIdx === -1 && parseFloat(markers[0]?.timestamp) > currentTime) {
-      nextIdx = 0;
-    }
-
-    return [
-      prevIdx === -1 ? null : markers[prevIdx],
-      nextIdx === -1 ? null : markers[nextIdx],
-      prevIdx,
-      nextIdx,
-    ];
-  }, [currentTime, markers]);
-
-  const addMarker = useCallback(
-    (m) => {
-      setDirty(true);
-      // validate
-      if (!m?.timestamp || !m?.title) {
-        toast("Invalid marker", { type: "error" });
-        return;
-      }
-
-      if (parseFloat(m.timestamp) < 0) {
-        toast("Invalid timestamp", { type: "error" });
-        return;
-      }
-
-      if (m.title.length < 3) {
-        toast("Title too short", { type: "error" });
-        return;
-      }
-
-      let idx = -1;
-      let found = false;
-
-      for (let i = 0; i < markers.length; i++) {
-        if (markers[i].timestamp === m.timestamp) {
-          found = true;
-          break;
-        }
-        if (parseFloat(markers[i].timestamp) > parseFloat(m.timestamp)) {
-          idx = i;
-          break;
-        }
-      }
-
-      if (found) {
-        toast("Marker already exists", { type: "warning" });
-        return;
-      }
-
-      m.loop = m.loop === "on" ? true : false;
-
-      setMarkers((p) => {
-        // add marker in place
-        const ms = [...p];
-        ms.splice(idx === -1 ? ms.length : idx, 0, m);
-        return ms;
-      });
-    },
-    [markers]
-  );
-
-  const handleAddMarker = useCallback(
-    (e) => {
-      e.preventDefault();
-
-      const formData = getFormData(e);
-
-      console.log(formData);
-      addMarker(formData);
-    },
-    [addMarker]
-  );
-
-  const handleDeleteMarker = useCallback((idx) => {
-    setDirty(true);
-
-    setMarkers((p) => {
-      const ms = [...p];
-      ms.splice(idx, 1);
-      return ms;
-    });
-  }, []);
-
-  const handleMoveToMarker = useCallback(
-    (marker) => {
-      if (marker?.timestamp) {
-        moveToTimestamp(parseFloat(marker.timestamp));
-        toast(`Moved to : ${marker.title}`, { type: "info" });
-      }
-    },
-    [moveToTimestamp]
-  );
 
   const handleUnloadToggle = useCallback(
     (e) => {
@@ -322,17 +122,13 @@ function EditAsana() {
     };
   }, [handleUnloadToggle]);
 
-  // set customer code
-  // disable watch history
-  useEffect(() => {
-    setCustomerCode(import.meta.env.VITE_CLOUDFLARE_CUSTOMER_CODE);
-    setEnableWatchHistory(false);
-  }, [setEnableWatchHistory]);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    updateData();
+  };
 
-  // set current video
   useEffect(() => {
     clearQueue();
-    // set current video
     if (asana?.id) {
       addToQueue([asana]);
     }
@@ -341,9 +137,7 @@ function EditAsana() {
     };
   }, [asana, addToQueue, clearQueue]);
 
-  // get asana by id
   useEffect(() => {
-    // get asana by id
     if (asana_id) {
       setLoading(true);
       Fetch({
@@ -355,19 +149,20 @@ function EditAsana() {
       })
         .then((res) => {
           setAsana(res.data);
-          setMarkers(res.data?.markers ?? []);
-          setModalData(res.data);
+          setFormState(res.data);
           setLoading(false);
         })
         .catch((error) => {
-          console.error(error);
           toast("Error fetching asana", { type: "error" });
           setLoading(false);
         });
     }
   }, [asana_id]);
 
-  // get all languages
+  const handleChange = (key, value) => {
+    setFormState((prev) => ({ ...prev, [key]: value }));
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -382,7 +177,6 @@ function EditAsana() {
     fetchData();
   }, []);
 
-  // get all categories
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -399,7 +193,6 @@ function EditAsana() {
 
   return (
     <AdminPageWrapper heading="Edit Asana">
-      {/* Alert for saving changes before unload / unmount */}
       <SaveChangesAlert
         unloadBlock={unloadBlock}
         handleUnloadToggle={handleUnloadToggle}
@@ -407,235 +200,120 @@ function EditAsana() {
         updateData={updateData}
         dirty={dirty}
       />
+      <form
+        className="flex flex-col gap-4 p-4 border rounded-md bg-white"
+        onSubmit={handleSubmit}
+      >
+        <Text h3>Edit Asana Video</Text>
 
-      <EditVideoForm
-        asana={asana}
-        modalData={modalData}
-        setModalData={setModalData}
-        categories={categories}
-        dirty={dirty}
-        editAsanaFormRef={editAsanaFormRef}
-        handleInputChange={handleInputChange}
-        handleSelect={handleSelect}
-        loading={loading}
-        resetChanges={resetChanges}
-        setDirty={setDirty}
-        tableLanguages={tableLanguages}
-        updateData={updateData}
-      />
+        <Input
+          width="100%"
+          id="asana_name"
+          placeholder="Enter Asana Name"
+          value={formState.asana_name || ""}
+          onChange={(e) => handleChange("asana_name", e.target.value)}
+        >
+          Asana Name
+        </Input>
 
-      <Spacer h={4} />
+        <Text>Asana Category</Text>
+        <Select
+          placeholder="Choose Category"
+          value={formState.asana_category}
+          onChange={(value) => handleChange("asana_category", value)}
+        >
+          {categories &&
+            categories.map((x) => (
+              <Select.Option key={x.asana_category_id} value={x.asana_category}>
+                {x.asana_category}
+              </Select.Option>
+            ))}
+        </Select>
 
-      <div className="rounded-lg border p-4">
-        <div className="flex flex-col gap-4">
-          {/* <Description title="Asana Markers" /> */}
+        <Text>Language</Text>
+        <Select
+          placeholder="Choose Language"
+          value={formState.language}
+          onChange={(value) => handleChange("language", value)}
+        >
+          {tableLanguages &&
+            tableLanguages.map((lang) => (
+              <Select.Option key={lang.language_id} value={lang.language}>
+                {lang.language}
+              </Select.Option>
+            ))}
+        </Select>
 
-          {/*
-          <div className="max-w-3xl mx-auto w-full">
-            <div className="w-full">
-              <VideoPlayer />
-            </div>
-            <Spacer y={4} />
-            <Button
-              w={"100%"}
-              className="my-4 mx-auto"
-              onClick={() => {
-                clearQueue();
-                addToQueue([asana]);
-                setPlaylistState(false);
-                setPlaylistState(true);
-              }}
+        <Text>Asana Difficulty</Text>
+        <Select
+          placeholder="Select Difficulty"
+          value={formState.asana_difficulty}
+          onChange={(value) => handleChange("asana_difficulty", value)}
+        >
+          <Select.Option value="Beginner">Beginner</Select.Option>
+          <Select.Option value="Intermediate">Intermediate</Select.Option>
+          <Select.Option value="Advanced">Advanced</Select.Option>
+        </Select>
+
+        <Text>Video Type</Text>
+        <Select
+          placeholder="Choose Type"
+          value={formState.asana_type}
+          onChange={(value) => handleChange("asana_type", value)}
+        >
+          <Select.Option value="Single">Single</Select.Option>
+          <Select.Option value="Combination">Combination</Select.Option>
+        </Select>
+
+        <Input
+          width="100%"
+          id="asana_dash_url"
+          placeholder="Enter DASH URL"
+          value={formState.asana_dash_url || ""}
+          onChange={(e) => handleChange("asana_dash_url", e.target.value)}
+        >
+          DASH URL
+        </Input>
+
+        <Text>AI Transition</Text>
+        <Checkbox.Group
+          value={[
+            formState.ai_asana && "ai_transition",
+            formState.non_ai_asana && "non_ai_transition",
+          ].filter(Boolean)}
+          onChange={(values) => {
+            handleChange("ai_asana", values.includes("ai_transition"));
+            handleChange("non_ai_asana", values.includes("non_ai_transition"));
+          }}
+        >
+          <Checkbox value="ai_transition">AI Transition</Checkbox>
+          <Checkbox value="non_ai_transition">Non-AI Transition</Checkbox>
+        </Checkbox.Group>
+
+        <Divider />
+
+        <div className="flex flex-col gap-2">
+          <Text>Asana States</Text>
+          {Object.keys(asanaData).map((key) => (
+            <Checkbox
+              key={key}
+              checked={formState[key]}
+              onChange={() => handleCheckboxChange(key)}
             >
-              Reset Player
-            </Button>
-          </div> */}
-
-          {/* markers list */}
-          {/* <div className="rounded-lg border p-4">
-            <Description title="Markers" />
-            <Spacer y={2} />
-            <div className="flex flex-row gap-4 max-w-full overflow-x-auto pb-4">
-              {markers.map((marker, idx) => {
-                return (
-                  <MarkerCard
-                    key={String(marker?.timestamp)}
-                    marker={marker}
-                    handleDelete={handleDeleteMarker}
-                    handleSave={handleSaveMarker}
-                    idx={idx}
-                    moveToTimestamp={moveToTimestamp}
-                    isActive={currentMarkers[2] === idx}
-                  />
-                );
-              })}
-            </div>
-          </div> */}
-
-          {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-4"> */}
-          {/* add marker form */}
-          {/* <div className="border rounded-lg p-4">
-              <Description title="Add Marker" />
-
-              <Text blockquote className="text-center">
-                Current Time : {currentTime?.toFixed(2)}s |{" "}
-                {toTimeString(currentTime)}
-              </Text>
-              <div className="flex justify-between">
-                <Button
-                  icon={<ArrowLeft />}
-                  scale={0.5}
-                  auto
-                  disabled={currentMarkers[0] ? false : true}
-                  title={currentMarkers[0]?.title}
-                  onClick={() => handleMoveToMarker(currentMarkers[0])}
-                >
-                  {currentMarkers[0] ? (
-                    <>
-                      Prev : {toTimeString(currentMarkers[0]?.timestamp)} :{" "}
-                      {currentMarkers[0]?.title.slice(0, 10) + "..."}
-                    </>
-                  ) : (
-                    <>Prev</>
-                  )}
-                </Button>
-                <Button
-                  iconRight={<ArrowRight />}
-                  scale={0.5}
-                  auto
-                  disabled={currentMarkers[1] ? false : true}
-                  title={currentMarkers[1]?.title}
-                  onClick={() => handleMoveToMarker(currentMarkers[1])}
-                >
-                  {currentMarkers[1] ? (
-                    <>
-                      Next : {toTimeString(currentMarkers[1]?.timestamp)} :{" "}
-                      {currentMarkers[1]?.title.slice(0, 10) + "..."}
-                    </>
-                  ) : (
-                    <>Next</>
-                  )}
-                </Button>
-              </div>
-
-              <Spacer h={1} />
-
-              <form onSubmit={handleAddMarker}>
-                <div className="flex flex-row gap-2 items-end">
-                  <Input
-                    width="100%"
-                    initialValue={currentTime}
-                    name="timestamp"
-                    ref={addMarkerTimestampInputRef}
-                  >
-                    Marker Timestamp (in seconds)
-                  </Input>
-                  <Button
-                    scale={0.8}
-                    auto
-                    onClick={() => {
-                      if (addMarkerTimestampInputRef.current) {
-                        addMarkerTimestampInputRef.current.value =
-                          currentTime?.toFixed(2) ?? 0;
-                      }
-                    }}
-                  >
-                    Set Cur. Time
-                  </Button>
-                </div>
-                <Spacer h={1} />
-                <Input width="100%" name="title">
-                  Marker Title
-                </Input>
-                <Spacer h={1} />
-                <Checkbox name="loop">
-                  Loop (the marker will loop during "Teaching" View Mode)
-                </Checkbox>
-
-                <Spacer h={1} />
-
-                <Button
-                  width="100%"
-                  type="success"
-                  htmlType="submit"
-                  scale={0.8}
-                >
-                  Add Marker
-                </Button>
-              </form>
-            </div> */}
-
-          {/* set thumbnail form */}
-          {/* <div className="border rounded-lg p-4">
-              <Description title="Set Thumbnail" />
-              <Spacer y={2} />
-              <div className="flex flex-col">
-                <div className="flex flex-row gap-4 w-full justify-between">
-                  <div>
-                    <Description title="Current Thumbnail" />
-                    {customerCode && asana ? (
-                      <img
-                        className="max-w-[256px] rounded-lg"
-                        alt="Current Timestamp"
-                        src={`https://customer-${customerCode}.cloudflarestream.com/${
-                          asana?.asana_videoID ?? asana?.transition_video_ID
-                        }/thumbnails/thumbnail.jpg?time=${
-                          modalData.asana_thumbnailTs
-                        }s?height=150?`}
-                      />
-                    ) : (
-                      <></>
-                    )}
-                    <Spacer y={1} />
-                    <Input value={modalData.asana_thumbnailTs} width="100%">
-                      Current Timestamp
-                    </Input>
-                  </div>
-                  <div>
-                    <Description title="New Thumbnail" />
-                    {customerCode ? (
-                      <img
-                        className="max-w-[256px] rounded-lg"
-                        src={`https://customer-${customerCode}.cloudflarestream.com/${
-                          asana?.asana_videoID ?? asana?.transition_video_ID
-                        }/thumbnails/thumbnail.jpg?time=${nextThumbnailTimestamp}s?height=150?`}
-                        alt="New Timestamp"
-                      />
-                    ) : (
-                      <></>
-                    )}
-                    <Spacer y={1} />
-                    <Input value={nextThumbnailTimestamp} width="100%" disabled>
-                      New Timestamp
-                    </Input>
-                  </div>
-                </div>
-                <Spacer y={2} />
-                <div className="grid grid-cols-2 gap-4">
-                  <Button
-                    scale={0.8}
-                    title="Preview Thumbnail at current timestamp"
-                    onClick={handleThumbnailTimestampChange}
-                  >
-                    Preview Thumbnail
-                  </Button>
-                  <Button
-                    scale={0.8}
-                    type="success"
-                    onClick={() =>
-                      handleSelect(
-                        currentTime?.toFixed(2) ?? 0,
-                        "asana_thumbnailTs"
-                      )
-                    }
-                  >
-                    Set Thumbnail
-                  </Button>
-                </div>
-              </div>
-            </div> */}
-          {/* </div> */}
+              {key.replace(/_/g, " ")}
+            </Checkbox>
+          ))}
         </div>
-      </div>
+
+        <div className="flex gap-2 mt-4">
+          <Button htmlType="submit" type="primary" loading={loading}>
+            Save Changes
+          </Button>
+          <Button type="default" onClick={resetChanges}>
+            Cancel
+          </Button>
+        </div>
+      </form>
       <Spacer h={4} />
     </AdminPageWrapper>
   );
