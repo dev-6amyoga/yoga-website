@@ -1,62 +1,42 @@
-import { Button, Checkbox, Divider, Input, Select, Text } from "@geist-ui/core";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import React, { useEffect, useState } from "react";
+import {
+  TextField,
+  Checkbox,
+  FormControlLabel,
+  Select,
+  MenuItem,
+  Button,
+  FormControl,
+  InputLabel,
+  Box,
+} from "@mui/material";
+import AdminPageWrapper from "../../Common/AdminPageWrapper";
+import { withAuth } from "../../../utils/withAuth";
 import { ROLE_ROOT } from "../../../enums/roles";
 import { Fetch } from "../../../utils/Fetch";
-import getFormData from "../../../utils/getFormData";
-import { withAuth } from "../../../utils/withAuth";
-import AdminPageWrapper from "../../Common/AdminPageWrapper";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function RegisterTransitionVideoForm() {
-  const navigate = useNavigate();
-  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [formState, setFormState] = useState({
+    transition_video_name: "",
+    teacher_mode: false,
+    drm_transition: false,
+    transition_dash_url: "",
+    ai_transition: false,
+    non_ai_transition: false,
+    asana_category_start: "",
+    asana_category_end: "",
+    language: "",
+    person_starting_position: "",
+    person_ending_position: "",
+    mat_starting_position: "",
+    mat_ending_position: "",
+    going_to_relax: false,
+    coming_from_relax: false,
+  });
   const [categories, setCategories] = useState([]);
   const [tableLanguages, setTableLanguages] = useState([]);
-  const handleLanguageChange = (val) => {
-    setSelectedLanguage(val);
-  };
-  const [data, setData] = useState([]);
-  const [personStart, setPersonStart] = useState(null);
-  const [personEnd, setPersonEnd] = useState(null);
-  const [matStart, setMatStart] = useState(null);
-  const [matEnd, setMatEnd] = useState(null);
-  const [catStart, setCatStart] = useState(null);
-  const [catEnd, setCatEnd] = useState(null);
-  const [aiTransition, setAiTransition] = useState(false);
-  const [nonAiTransition, setNonAiTransition] = useState(false);
-  const [goingToRelax, setGoingToRelax] = useState(false);
-  const [comingFromRelax, setComingFromRelax] = useState(false);
-
-  const handlePersonStart = (val) => {
-    setPersonStart(val);
-  };
-  const handlePersonEnd = (val) => {
-    setPersonEnd(val);
-  };
-  const handleMatStart = (val) => {
-    setMatStart(val);
-  };
-  const handleMatEnd = (val) => {
-    setMatEnd(val);
-  };
-  const handlerCatStart = (val) => {
-    setCatStart(val);
-  };
-  const handlerCatEnd = (val) => {
-    setCatEnd(val);
-  };
-
-  useEffect(() => {
-    Fetch("/content/video/getAllTransitions")
-      .then((response) => response.data)
-      .then((asanas) => {
-        setData(asanas);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,285 +68,242 @@ function RegisterTransitionVideoForm() {
     fetchData();
   }, []);
 
+  const handleInputChange = (field, value) => {
+    setFormState((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleCheckboxChange = (field) => {
+    setFormState((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
+
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = getFormData(e);
-    const additionalData = {
-      asana_category_start: catStart,
-      asana_category_end: catEnd,
-      language: selectedLanguage,
-      person_starting_position: personStart,
-      person_ending_position: personEnd,
-      mat_starting_position: matStart,
-      mat_ending_position: matEnd,
-      going_to_relax: goingToRelax,
-      coming_from_relax: comingFromRelax,
-      ai_transition: aiTransition,
-      non_ai_transition: nonAiTransition,
-    };
-    const combinedData = {
-      ...formData,
-      ...additionalData,
-    };
-    if (
-      combinedData.transition_video_name === "" ||
-      combinedData.transition_video_ID === "" ||
-      combinedData.language === ""
-    ) {
-      toast("Misssing required fields!");
-    } else {
-      let toastShown = false;
-      for (var i = 0; i !== data.length; i++) {
-        if (
-          data[i].transition_video_name === combinedData.transition_video_name
-        ) {
-          toast("Transition already exists with the same name!");
-          toastShown = true;
-        }
-        // } else if (
-        // 	data[i].transition_video_ID ===
-        // 	combinedData.transition_video_ID
-        // ) {
-        // 	toast("Transition already exists with the same Video ID !");
-        // 	toastShown = true;
-        // }
-      }
-      if (toastShown) {
-        console.log("wait");
+    const formData = formState;
+    toast("Adding new transition, kindly wait!");
+    try {
+      const response = await Fetch({
+        url: "/content/video/addTransition",
+        method: "POST",
+        data: formData,
+      });
+      if (response?.status === 200) {
+        toast("New Transition added successfully");
+        navigate("/admin/video/transition/all");
       } else {
-        toast("Adding new transition, kindly wait!");
-        try {
-          const response = await Fetch({
-            url: "/content/video/addTransition",
-            method: "POST",
-            data: combinedData,
-          });
-          if (response?.status === 200) {
-            toast("New Transition added successfully");
-            navigate("/admin/video/transition/all");
-          } else {
-            console.log("Failed to add new transition");
-          }
-        } catch (error) {
-          console.log("Error while making the request:", error);
-        }
+        console.log("Failed to add new transition");
       }
-    }
-    // /video/addTransition
-  };
-
-  const hello = (value) => {
-    if (value.length === 0) {
-      setGoingToRelax(false);
-      setComingFromRelax(false);
-    }
-    if (value.length !== 0) {
-      if (value.includes("going_to_relax")) {
-        if (value.includes("coming_from_relax")) {
-          toast("You cannot select both checkboxes!");
-        } else {
-          setGoingToRelax(true);
-        }
-      }
-      if (value.includes("coming_from_relax")) {
-        if (value.includes("going_to_relax")) {
-          toast("You cannot select both checkboxes!");
-        } else {
-          setComingFromRelax(true);
-        }
-      }
-    }
-  };
-
-  const aiSetter = (value) => {
-    if (value.length === 0) {
-      setAiTransition(false);
-      setNonAiTransition(false);
-    }
-    if (value.length !== 0) {
-      if (value.includes("ai_transition")) {
-        if (value.length > 1) {
-          toast("You cannot select more than 1 checkbox!");
-        } else {
-          setAiTransition(true);
-          setNonAiTransition(false);
-        }
-      }
-      if (value.includes("non_ai_transition")) {
-        if (value.length > 1) {
-          toast("You cannot select more than 1 checkbox!");
-        } else {
-          setNonAiTransition(true);
-          setAiTransition(false);
-        }
-      }
-      if (value.includes("both")) {
-        if (
-          value.includes("ai_transition") ||
-          value.includes("non_ai_transition")
-        ) {
-          toast("You cannot select more than 1 checkbox!");
-        } else {
-          setAiTransition(true);
-          setNonAiTransition(true);
-        }
-      }
+    } catch (error) {
+      console.log("Error while making the request:", error);
     }
   };
 
   return (
     <AdminPageWrapper heading="Register Transition Video">
-      <div className="flex items-center justify-center min-h-screen max-w-7xl mx-auto">
-        <form
-          className="flex flex-col gap-1 border-2 w-full p-4 rounded-md mx-auto bg-white"
-          onSubmit={handleSubmit}
-        >
-          <Text h6>Transition Video Name</Text>
-          <Input width="100%" name="transition_video_name"></Input>
-          <Text h6>Category From </Text>
-          <Select placeholder="Choose Category From" onChange={handlerCatStart}>
-            {categories &&
-              categories.map((x) => (
-                <Select.Option
-                  key={x.asana_category_id}
-                  value={x.asana_category}
-                >
-                  {x.asana_category}
-                </Select.Option>
-              ))}
-          </Select>
-          <Text h6>Category To </Text>
-          <Select placeholder="Choose Category To" onChange={handlerCatEnd}>
-            {categories &&
-              categories.map((x) => (
-                <Select.Option
-                  key={x.asana_category_id}
-                  value={x.asana_category}
-                >
-                  {x.asana_category}
-                </Select.Option>
-              ))}
-          </Select>
-          <Text h6>Cloudflare ID</Text>
-          <Input width="100%" name="transition_video_ID"></Input>
-          <Text h6>HLS URL</Text>
-          <Input width="100%" name="transition_hls_url"></Input>
-          <Text h6>DASH URL</Text>
-          <Input width="100%" name="transition_dash_url"></Input>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          maxWidth: 500,
+          margin: "auto",
+          p: 2,
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+        }}
+      >
+        <TextField
+          label="Transition Video Name"
+          variant="outlined"
+          value={formState.transition_video_name}
+          onChange={(e) =>
+            handleInputChange("transition_video_name", e.target.value)
+          }
+          fullWidth
+        />
 
-          <Text h5>Going To/Coming From Relaxation</Text>
-          <Checkbox.Group value={[]} onChange={hello} name="relax">
-            <Checkbox value="going_to_relax">Going To Relax</Checkbox>
-            <Checkbox value="coming_from_relax">Coming From Relax</Checkbox>
-          </Checkbox.Group>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={formState.teacher_mode}
+              onChange={() => handleCheckboxChange("teacher_mode")}
+            />
+          }
+          label="Teacher Mode"
+        />
 
-          <Checkbox.Group value={[]} onChange={aiSetter} name="ai">
-            <Checkbox value="ai_transition">AI Mode Transition</Checkbox>
-            <Checkbox value="non_ai_transition">
-              Non AI Mode Transition
-            </Checkbox>
-            <Checkbox value="both">Both</Checkbox>
-          </Checkbox.Group>
-          <Divider />
-          <Text>Language</Text>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={formState.drm_transition}
+              onChange={() => handleCheckboxChange("drm_transition")}
+            />
+          }
+          label="DRM Transition"
+        />
+
+        <TextField
+          label="Transition DASH URL"
+          variant="outlined"
+          value={formState.transition_dash_url}
+          onChange={(e) =>
+            handleInputChange("transition_dash_url", e.target.value)
+          }
+          fullWidth
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={formState.ai_transition}
+              onChange={() => handleCheckboxChange("ai_transition")}
+            />
+          }
+          label="AI Transition"
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={formState.non_ai_transition}
+              onChange={() => handleCheckboxChange("non_ai_transition")}
+            />
+          }
+          label="Non-AI Transition"
+        />
+
+        <FormControl fullWidth>
+          <InputLabel>Asana Category Start</InputLabel>
           <Select
-            placeholder="Choose Language"
-            value={selectedLanguage}
-            onChange={handleLanguageChange}
-            id="asana_language"
-            name="asana_language"
+            value={formState.asana_category_start}
+            onChange={(e) =>
+              handleInputChange("asana_category_start", e.target.value)
+            }
+          >
+            {categories &&
+              categories.map((x) => (
+                <MenuItem value={x.asana_category}>{x.asana_category}</MenuItem>
+              ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth>
+          <InputLabel>Asana Category End</InputLabel>
+          <Select
+            value={formState.asana_category_end}
+            onChange={(e) =>
+              handleInputChange("asana_category_end", e.target.value)
+            }
+          >
+            {categories &&
+              categories.map((x) => (
+                <MenuItem value={x.asana_category}>{x.asana_category}</MenuItem>
+              ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth>
+          <InputLabel>Language</InputLabel>
+          <Select
+            value={formState.language}
+            onChange={(e) => handleInputChange("language", e.target.value)}
           >
             {tableLanguages &&
               tableLanguages.map((language) => (
-                <Select.Option
-                  key={language.language_id}
-                  value={language.language}
-                >
+                <MenuItem value={language.language}>
                   {language.language}
-                </Select.Option>
+                </MenuItem>
               ))}
           </Select>
-          <br />
-          <Text h5>Person Starting Position</Text>
+        </FormControl>
+
+        <FormControl fullWidth>
+          <InputLabel>Person Starting Position</InputLabel>
           <Select
-            placeholder="Choose Person Starting Position"
-            onChange={handlePersonStart}
+            value={formState.person_starting_position}
+            onChange={(e) =>
+              handleInputChange("person_starting_position", e.target.value)
+            }
           >
-            <Select.Option key="Front" value="Front">
-              Front
-            </Select.Option>
-            <Select.Option key="Left" value="Left">
-              Left
-            </Select.Option>
-            <Select.Option key="Right" value="Right">
-              Right
-            </Select.Option>
-            <Select.Option key="Back" value="Back">
-              Back
-            </Select.Option>
-            <Select.Option key="Diagonal" value="Diagonal">
-              Diagonal
-            </Select.Option>
+            <MenuItem value="Front">Front</MenuItem>
+            <MenuItem value="Back">Back</MenuItem>
+            <MenuItem value="Left">Left</MenuItem>
+            <MenuItem value="Right">Right</MenuItem>
+            <MenuItem value="Diagonal">Diagonal</MenuItem>
           </Select>
-          <br />
-          <Text h5>Person Ending Position</Text>
+        </FormControl>
+
+        <FormControl fullWidth>
+          <InputLabel>Person Ending Position</InputLabel>
           <Select
-            placeholder="Choose Person Starting Position"
-            onChange={handlePersonEnd}
+            value={formState.person_ending_position}
+            onChange={(e) =>
+              handleInputChange("person_ending_position", e.target.value)
+            }
           >
-            <Select.Option key="Front" value="Front">
-              Front
-            </Select.Option>
-            <Select.Option key="Left" value="Left">
-              Left
-            </Select.Option>
-            <Select.Option key="Right" value="Right">
-              Right
-            </Select.Option>
-            <Select.Option key="Back" value="Back">
-              Back
-            </Select.Option>
-            <Select.Option key="Diagonal" value="Diagonal">
-              Diagonal
-            </Select.Option>
+            <MenuItem value="Front">Front</MenuItem>
+            <MenuItem value="Back">Back</MenuItem>
+            <MenuItem value="Left">Left</MenuItem>
+            <MenuItem value="Right">Right</MenuItem>
+            <MenuItem value="Diagonal">Diagonal</MenuItem>
           </Select>
-          <br />
-          <Text h5>Mat Starting Position</Text>
+        </FormControl>
+
+        <FormControl fullWidth>
+          <InputLabel>Mat Starting Position</InputLabel>
           <Select
-            placeholder="Choose Mat Starting Position"
-            onChange={handleMatStart}
+            value={formState.mat_starting_position}
+            onChange={(e) =>
+              handleInputChange("mat_starting_position", e.target.value)
+            }
           >
-            <Select.Option key="Front" value="Front">
-              Front
-            </Select.Option>
-            <Select.Option key="Side" value="Side">
-              Side
-            </Select.Option>
-            <Select.Option key="Diagonal" value="Diagonal">
-              Diagonal
-            </Select.Option>
+            <MenuItem value="Front">Front</MenuItem>
+            <MenuItem value="Side">Side</MenuItem>
+            <MenuItem value="Diagonal">Diagonal</MenuItem>
           </Select>
-          <br />
-          <Text h5>Mat Ending Position</Text>
+        </FormControl>
+
+        <FormControl fullWidth>
+          <InputLabel>Mat Ending Position</InputLabel>
           <Select
-            placeholder="Choose Mat Starting Position"
-            onChange={handleMatEnd}
+            value={formState.mat_ending_position}
+            onChange={(e) =>
+              handleInputChange("mat_ending_position", e.target.value)
+            }
           >
-            <Select.Option key="Front" value="Front">
-              Front
-            </Select.Option>
-            <Select.Option key="Side" value="Side">
-              Side
-            </Select.Option>
-            <Select.Option key="Diagonal" value="Diagonal">
-              Diagonal
-            </Select.Option>
+            <MenuItem value="Front">Front</MenuItem>
+            <MenuItem value="Side">Side</MenuItem>
+            <MenuItem value="Diagonal">Diagonal</MenuItem>
           </Select>
-          <br />
-          {/* <Button onClick={markerNavigate}>Add Markers</Button> */}
-          <Button htmlType="submit">Submit</Button>
-        </form>
-      </div>
+        </FormControl>
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={formState.going_to_relax}
+              onChange={() => handleCheckboxChange("going_to_relax")}
+            />
+          }
+          label="Going to Relax"
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={formState.coming_from_relax}
+              onChange={() => handleCheckboxChange("coming_from_relax")}
+            />
+          }
+          label="Coming from Relax"
+        />
+
+        <Button type="submit" variant="contained" color="primary">
+          Save
+        </Button>
+      </Box>
     </AdminPageWrapper>
   );
 }

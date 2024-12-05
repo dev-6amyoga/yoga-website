@@ -719,7 +719,6 @@ function RefundManagement() {
       <Button onClick={handleDownload}>Download CSV</Button>
       <Spacer h={10} />
       <div>
-        {/* Table with filtered data */}
         <div className="max-w-7xl">
           <DataTable
             columns={columnsDataTable}
