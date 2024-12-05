@@ -1,5 +1,4 @@
 import {
-  Button,
   Dot,
   Input,
   Modal,
@@ -10,6 +9,8 @@ import {
   Grid,
   Card,
 } from "@geist-ui/core";
+import { Button, Box, Switch, FormControlLabel } from "@mui/material";
+
 import { Search } from "@geist-ui/icons";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
@@ -37,6 +38,10 @@ function AllAsanas() {
   const [tableLanguages, setTableLanguages] = useState([]);
   const [categories, setCategories] = useState([]);
   const [allPlaylists, setAllPlaylists] = useState([]);
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredTransitions, setFilteredTransitions] = useState([]);
+
   const [modalData, setModalData] = useState({
     asana_name: "",
     asana_desc: "",
@@ -48,10 +53,6 @@ function AllAsanas() {
     asana_dash_url: "",
     asana_hls_url: "",
   });
-  const navigate = useNavigate();
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredTransitions, setFilteredTransitions] = useState([]);
 
   useEffect(() => {
     if (searchTerm.length > 0) {
@@ -96,19 +97,18 @@ function AllAsanas() {
     fetchData();
   }, []);
 
-  const [category_modal, setCategoryModal] = useState("");
-  const [language_modal, setLanguageModal] = useState("");
-  const [type_modal, setTypeModal] = useState("");
-
   const handler1 = (val) => {
     setModalData({ ...modalData, asana_category: val });
   };
+
   const handler2 = (val) => {
     setModalData({ ...modalData, language: val });
   };
+
   const handler3 = (val) => {
     setModalData({ ...modalData, asana_type: val });
   };
+
   const handler4 = (val) => {
     setModalData({ ...modalData, asana_difficulty: val });
   };
@@ -240,6 +240,7 @@ function AllAsanas() {
     };
     fetchData();
   }, []);
+
   const updateData = async () => {
     try {
       setModalState(false);
@@ -392,7 +393,7 @@ function AllAsanas() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <Button
+        {/* <Button
           onClick={() => {
             setShowTeacherModeAsanas(!showTeacherModeAsanas);
           }}
@@ -407,7 +408,32 @@ function AllAsanas() {
           }}
         >
           {showNonDrmAsanas ? "View DRM Asanas" : "View NON DRM Asanas"}
-        </Button>
+        </Button> */}
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center", p: 2 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showTeacherModeAsanas}
+                onChange={() =>
+                  setShowTeacherModeAsanas(!showTeacherModeAsanas)
+                }
+                color="primary"
+              />
+            }
+            label={showTeacherModeAsanas ? "Teacher Mode" : "Normal Mode"}
+          />
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showNonDrmAsanas}
+                onChange={() => setShowNonDrmAsanas(!showNonDrmAsanas)}
+                color="primary"
+              />
+            }
+            label={showNonDrmAsanas ? "Non-DRM Asanas" : "DRM Asanas"}
+          />
+        </Box>
         {loading ? (
           <Text>Loading</Text>
         ) : (
@@ -564,58 +590,3 @@ function AllAsanas() {
 }
 
 export default withAuth(AllAsanas, ROLE_ROOT);
-
-// {
-//   /* <Table.Column prop="asana_difficulty" label="Difficulty" /> */
-// }
-// {
-//   /* <Table.Column
-//               prop="asana_difficulty"
-//               label="Difficulty"
-//               render={(data) => {
-//                 if (data.includes("Beginner")) {
-//                   if (data.includes("Intermediate")) {
-//                     if (data.includes("Advanced")) {
-//                       return "Beg, Int, Adv";
-//                     } else {
-//                       return "Beg, Int";
-//                     }
-//                   } else if (data.includes("Advanced")) {
-//                     return "Beg, Adv";
-//                   } else {
-//                     return "Beg";
-//                   }
-//                 } else if (data.includes("Intermediate")) {
-//                   if (data.includes("Advanced")) {
-//                     return "Int, Adv";
-//                   } else {
-//                     return "Int";
-//                   }
-//                 } else {
-//                   if (data.includes("Adnvanced")) {
-//                     return "Adv";
-//                   } else {
-//                     return "";
-//                   }
-//                 }
-//               }}
-//             /> */
-// }
-// {
-//   /* <Table.Column
-//   prop="asana_withAudio"
-//   label="With Audio?"
-//   render={renderBool}
-// />
-// {
-//   /* <Table.Column prop="asana_dash_url" label="DASH URL" /> */
-// }
-// {
-//   /* <Table.Column prop="duration" label="Duration" /> */
-// }
-// <Table.Column prop="muted" label="Muted?" render={renderBool} />
-// <Table.Column prop="counter" label="Counter?" render={renderBool} /> */
-// }
-//             {
-//               /* <Table.Column prop="id" label="Asana ID" /> */
-//             }
