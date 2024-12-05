@@ -1,4 +1,4 @@
-import { Button, Tag } from "@geist-ui/core";
+import { Button, Spacer, Tag } from "@geist-ui/core";
 import { MoreHorizontal } from "@geist-ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -673,6 +673,7 @@ function RefundManagement() {
             startDate={startDate}
             endDate={endDate}
             placeholderText="Start Date"
+            popperPlacement="top-start"
             style={{
               flex: "1",
               padding: "10px",
@@ -681,6 +682,7 @@ function RefundManagement() {
               fontSize: "14px",
             }}
           />
+
           <DatePicker
             selected={endDate}
             onChange={(date) => setEndDate(date)}
@@ -715,7 +717,7 @@ function RefundManagement() {
       </div>
 
       <Button onClick={handleDownload}>Download CSV</Button>
-
+      <Spacer h={10} />
       <div>
         {/* Table with filtered data */}
         <div className="max-w-7xl">
