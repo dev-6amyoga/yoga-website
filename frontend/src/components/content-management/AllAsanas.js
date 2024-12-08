@@ -125,7 +125,11 @@ function AllAsanas() {
           url: "/content/video/getAllAsanas",
         });
         const data = response.data;
-        setAllAsanas(data);
+        const sortedUsers = data.sort((a, b) => {
+          return b.id - a.id;
+        });
+
+        setAllAsanas(sortedUsers);
         let finalAsanas = [];
         for (var entry in data) {
           if (data[entry].drm_video === true) {
@@ -393,22 +397,6 @@ function AllAsanas() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        {/* <Button
-          onClick={() => {
-            setShowTeacherModeAsanas(!showTeacherModeAsanas);
-          }}
-        >
-          {showTeacherModeAsanas
-            ? "View Normal Mode Asanas"
-            : "View Teacher Mode Asanas"}
-        </Button>
-        <Button
-          onClick={() => {
-            setShowNonDrmAsanas(!showNonDrmAsanas);
-          }}
-        >
-          {showNonDrmAsanas ? "View DRM Asanas" : "View NON DRM Asanas"}
-        </Button> */}
         <Box sx={{ display: "flex", gap: 2, alignItems: "center", p: 2 }}>
           <FormControlLabel
             control={
