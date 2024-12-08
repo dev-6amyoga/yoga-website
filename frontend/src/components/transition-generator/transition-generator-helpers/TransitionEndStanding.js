@@ -21,8 +21,6 @@ export const TransitionEndStanding = async (
   drm_status,
   transitions
 ) => {
-  console.log(transitions);
-
   const filteredTransitions_all = transitions.filter(
     (transition) =>
       transition.drm_transition === drm_status &&
@@ -585,9 +583,31 @@ export const TransitionEndStanding = async (
     if (break_status_start === "Break" && break_status_end === "Break") {
       if (end_video.person_starting_position === "Front") {
         if (start_video.person_starting_position === "Front") {
+          if (end_video.catch_waist_start === true) {
+            if (start_video.catch_waist_end === true) {
+              return [];
+            } else {
+              let res = handleTransition(["Catch Your Waist"]);
+              res = res.map((transition) => transition.transition_id);
+              res = res.filter((element) => element !== undefined);
+              return res;
+            }
+          }
           return [];
         }
         if (start_video.person_starting_position === "Left") {
+          if (end_video.catch_waist_start === true) {
+            if (start_video.catch_waist_end === false) {
+              let res = handleTransition([
+                "Jump Side To Front Transition",
+                "Feet Apart Hands Loose Standing Transition Front",
+                "Catch Your Waist",
+              ]);
+              res = res.map((transition) => transition.transition_id);
+              res = res.filter((element) => element !== undefined);
+              return res;
+            }
+          }
           let res = handleTransition([
             "Jump Side To Front Transition",
             "Feet Apart Hands Loose Standing Transition Front",

@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { ROLE_ROOT } from "../../../enums/roles";
+import { parseISO } from "date-fns";
 import {
   USER_PLAN_ACTIVE,
   USER_PLAN_STAGED,
@@ -20,18 +21,19 @@ import { Fetch } from "../../../utils/Fetch";
 import getFormData from "../../../utils/getFormData";
 import { withAuth } from "../../../utils/withAuth";
 import Papa from "papaparse";
-
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 function LogPayment() {
   const [userStatus, setUserStatus] = useState("EXISTING");
-
   const [user_id, setUserId] = useState(0);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [instituteId, setInstituteId] = useState(0);
-
   const [currentStatus, setCurrentStatus] = useState("");
   const [amount, setAmount] = useState(0);
   const [validityFromDate, setValidityFromDate] = useState("");
   const [validityToDate, setValidityToDate] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [purchaseDate, setPurchaseDate] = useState(null);
 
   const [userPlans, setUserPlans] = useState([]);
   const [studentPlans, setStudentPlans] = useState([]);
@@ -55,14 +57,9 @@ function LogPayment() {
     const endDate = new Date(startDate);
     endDate.setUTCDate(endDate.getUTCDate() + validityDays);
     console.log(endDate.toISOString().split("T")[0]);
-    // setValidityToDate(endDate.toISOString().split('T')[0])
+    // setValidityToDate(endDate.toISOString().split("T")[0]);
     return endDate.toISOString().split("T")[0];
   };
-
-  useEffect(() => {
-    // Log the updated validityToDate whenever it changes
-    console.log("Validity To:", validityToDate);
-  }, [validityToDate]);
 
   const handleSetPaymentFor = (val) => {
     setPaymentFor(val);
@@ -151,6 +148,7 @@ function LogPayment() {
     };
     fetchStudents();
   }, []);
+
   useEffect(() => {
     const fetchInstitutes = async () => {
       try {
@@ -234,6 +232,7 @@ function LogPayment() {
       </Grid.Container>
     );
   };
+
   useEffect(() => {
     const fetchData = async () => {
       setValidityFromDate(getEndDate(userPlans));
@@ -316,6 +315,7 @@ function LogPayment() {
       document.body.removeChild(link);
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataT = getFormData(e);
@@ -329,6 +329,7 @@ function LogPayment() {
     formDataT.amount = formDataT.amount * 100;
 
     const timestamp = new Date().toLocaleString();
+
     const additionalTranscationData = {
       payment_for: "New Plan Manual",
       payment_status: "succeeded",
@@ -339,7 +340,7 @@ function LogPayment() {
     };
     const additionalPlanData = {
       purchase_date: formDataT.payment_date,
-      validity_to: validityToDate,
+      // validity_to: validityToDate,
       is_active: true,
       discount_coupon_id: 0,
       referral_code_id: 0,
@@ -359,8 +360,18 @@ function LogPayment() {
       ...formDataP,
       ...additionalPlanData,
     };
-    console.log(transactionData);
+    userPlanData.institute_id = 1;
+    userPlanData.purchase_date = purchaseDate.toISOString().split("T")[0];
+    userPlanData.validity_from = startDate.toISOString().split("T")[0];
+    userPlanData.validity_to = calculateEndDate(
+      startDate,
+      selectedPlan?.plan_validity_days
+    );
+    transactionData.payment_date = purchaseDate.toISOString().split("T")[0];
+
+    // console.log(transactionData);
     console.log(userPlanData);
+
     try {
       const response = await Fetch({
         url: "/transaction/add-transaction",
@@ -613,18 +624,26 @@ function LogPayment() {
                   onSubmit={handleSubmit}
                 >
                   <h6>Validity From</h6>
-                  <Input
-                    name="validity_from"
-                    htmlType="datetime-local"
-                    initialValue={formDate(validityFromDate)}
-                    min={formDate(new Date().toISOString())}
-                  ></Input>
-
+                  <DatePicker
+                    selected={startDate}
+                    onChange={(date) => setStartDate(date)}
+                    selectsStart
+                    startDate={startDate}
+                    placeholderText="Start Date"
+                    popperPlacement="top-start"
+                    style={{
+                      flex: "1",
+                      padding: "10px",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                      fontSize: "14px",
+                    }}
+                  />
                   <h6>Validity To</h6>
                   <Text>
                     {selectedPlan
                       ? calculateEndDate(
-                          validityFromDate,
+                          startDate,
                           selectedPlan?.plan_validity_days
                         )
                       : "---"}
@@ -653,9 +672,22 @@ function LogPayment() {
                   <h6>Amount Paid (in INR)</h6>
                   <Input width="100%" name="amount"></Input>
                   <h6>Payment Date</h6>
-                  <Input name="payment_date" htmlType="datetime-local"></Input>
+                  <DatePicker
+                    selected={purchaseDate}
+                    onChange={(date) => setPurchaseDate(date)}
+                    selectsStart
+                    startDate={purchaseDate}
+                    placeholderText="Purchase Date"
+                    popperPlacement="top-start"
+                    style={{
+                      flex: "1",
+                      padding: "10px",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                      fontSize: "14px",
+                    }}
+                  />{" "}
                   <br />
-
                   <br />
                   <Button htmlType="submit">Register</Button>
                 </form>

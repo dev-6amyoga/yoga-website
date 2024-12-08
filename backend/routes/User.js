@@ -829,7 +829,14 @@ router.get('/get-all-students', async (req, res) => {
       include: [
         {
           model: User,
-          attributes: ['user_id', 'name', 'email', 'phone', 'username'],
+          attributes: [
+            'user_id',
+            'name',
+            'email',
+            'phone',
+            'username',
+            'created',
+          ],
         },
       ],
     })

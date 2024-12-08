@@ -252,6 +252,18 @@ router.post('/register', authenticateToken, async (req, res) => {
     user_type,
   } = req.body
   // console.log(req.body);
+  // current_status: 'ACTIVE'
+  // discount_coupon_id: 0
+  // institute_id: 0
+  // is_active: true
+  // plan_id: 11
+  // purchase_date: '2024-11-30'
+  // referral_code_id: 0
+  // transaction_order_id: 'MANUAL12/6/2024, 10:25:17 PM'
+  // user_id: 18
+  // user_type: 'STUDENT'
+  // validity_to: '2024-12-30'
+
   console.log('registering!!')
 
   if (
@@ -279,15 +291,6 @@ router.post('/register', authenticateToken, async (req, res) => {
       .json({ error: 'Missing required fields' })
   } else if (current_status === USER_PLAN_STAGED) {
   } else {
-    console.log(
-      'INVALID STATUS',
-      current_status,
-      validity_from,
-      validity_to,
-      current_status === USER_PLAN_ACTIVE,
-      (validity_from === null || validity_from === undefined) &&
-        (validity_to === null || validity_to === undefined)
-    )
     if (
       current_status !== USER_PLAN_ACTIVE &&
       current_status !== USER_PLAN_STAGED
@@ -372,23 +375,23 @@ router.post('/register', authenticateToken, async (req, res) => {
         quota: plan.watch_time_limit,
       })
 
-      const x = await UserInstitutePlanRole.update(
-        {
-          user_plan_id: newUserPlan.user_plan_id,
-        },
-        {
-          transaction: t,
-          where: {
-            user_id: user_id,
-            role_id: role.role_id,
-            institute_id: institute_id,
-          },
-        }
-      )
+      // const x = await UserInstitutePlanRole.update(
+      //   {
+      //     user_plan_id: newUserPlan.user_plan_id,
+      //   },
+      //   {
+      //     transaction: t,
+      //     where: {
+      //       user_id: user_id,
+      //       role_id: role.role_id,
+      //       institute_id: institute_id,
+      //     },
+      //   }
+      // )
 
-      if (x[0] === 0) {
-        throw new Error('Failed to update user')
-      }
+      // if (x[0] === 0) {
+      //   throw new Error('Failed to update user')
+      // }
     }
 
     await t.commit()

@@ -62,7 +62,10 @@ function Teachers() {
           url: "/user/get-all-teachers",
           method: "GET",
         });
-        setTeachers(response.data.users);
+        const sortedUsers = response.data.users.sort((a, b) => {
+          return new Date(b.created) - new Date(a.created);
+        });
+        setTeachers(sortedUsers);
       } catch (err) {
         console.error(err);
         toast("Error fetching teachers. Please try again.", { type: "error" });
