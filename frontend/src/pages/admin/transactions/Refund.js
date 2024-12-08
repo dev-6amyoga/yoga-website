@@ -72,7 +72,7 @@ function RefundManagement() {
   });
 
   const [customUserPlans, setCustomUserPlans] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // For search functionality
+  const [searchTerm, setSearchTerm] = useState("");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
