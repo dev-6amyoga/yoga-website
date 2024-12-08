@@ -48,7 +48,11 @@ function ViewAllPlans() {
           url: "/plan/get-all",
         });
         const data = response.data;
-        setPlans(data["plans"]);
+
+        const sortedUsers = data.plans.sort((a, b) => {
+          return new Date(b.created) - new Date(a.created);
+        });
+        setPlans(sortedUsers);
       } catch (error) {
         console.log(error);
       }

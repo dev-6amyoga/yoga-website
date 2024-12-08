@@ -83,7 +83,11 @@ function ViewAllCustomPlans() {
           method: "GET",
         });
         const data = response.data;
-        setCustomPlans(data.custom_plans);
+        console.log(data);
+        const sortedUsers = data.custom_plans.sort((a, b) => {
+          return b.custom_plan_id - a.custom_plan_id;
+        });
+        setCustomPlans(sortedUsers);
       } catch (err) {
         console.log(err);
       }
