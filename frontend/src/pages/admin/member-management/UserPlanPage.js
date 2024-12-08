@@ -62,6 +62,13 @@ function UserPlanPage() {
     fetchUsers();
   }, []);
 
+  const formatDate = (dateString) => {
+    const options = { day: "2-digit", month: "2-digit", year: "numeric" };
+    return new Intl.DateTimeFormat("en-GB", options).format(
+      new Date(dateString)
+    );
+  };
+
   const handleSearch = (event) => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
@@ -106,12 +113,14 @@ function UserPlanPage() {
         header: ({ column }) => (
           <SortableColumn column={column}>Start Date</SortableColumn>
         ),
+        cell: ({ row }) => formatDate(row.original.validity_from),
       },
       {
         accessorKey: "validity_to",
         header: ({ column }) => (
           <SortableColumn column={column}>End Date</SortableColumn>
         ),
+        cell: ({ row }) => formatDate(row.original.validity_to),
       },
     ],
     [userIdNameMap]
