@@ -50,352 +50,6 @@ function Accordion({ title, children }) {
   );
 }
 
-// function RefundManagement() {
-//   const {
-//     isLoading,
-//     data: transactions,
-//     error,
-//     refetch: getTransactions,
-//   } = useQuery({
-//     queryKey: ["transactions"],
-//     queryFn: async () => {
-//       const res = await Fetch({
-//         url: "/transaction/get-all",
-//         method: "GET",
-//         token: true,
-//       });
-
-//       return res?.data?.transactions;
-//     },
-//   });
-
-//   const [customUserPlans, setCustomUserPlans] = useState([]);
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       const res = await Fetch({
-//         url: "/customUserPlan/getAllCustomUserPlans",
-//         method: "GET",
-//         token: true,
-//       });
-//       setCustomUserPlans(res.data.plans);
-//     };
-//     fetchData();
-//   }, []);
-
-//   const [transactionModal, setTransactionModal] = useState({
-//     open: false,
-//     data: null,
-//   });
-
-//   const [userModal, setUserModal] = useState({
-//     open: false,
-//     data: null,
-//   });
-
-//   const [userPlanModal, setUserPlanModal] = useState({
-//     open: false,
-//     data: null,
-//   });
-
-//   const [refundModal, setRefundModal] = useState({
-//     open: false,
-//     data: null,
-//   });
-
-//   const toggleTransactionModal = (data = null) => {
-//     setTransactionModal((prev) => ({
-//       open: !prev.open,
-//       data,
-//     }));
-//   };
-
-//   const toggleUserModal = (data = null) => {
-//     setUserModal((prev) => ({
-//       open: !prev.open,
-//       data,
-//     }));
-//   };
-
-//   const toggleUserPlanModal = (data = null) => {
-//     setUserPlanModal((prev) => ({
-//       open: !prev.open,
-//       data,
-//     }));
-//   };
-
-//   const [startDate, setStartDate] = useState(null);
-//   const [endDate, setEndDate] = useState(null);
-
-//   const handleDownload = (data1) => {
-//     const filteredData = data1.filter((row) => {
-//       const paymentDate = parseISO(row.payment_date);
-//       return paymentDate >= startDate && paymentDate <= endDate;
-//     });
-
-//     const updatedData = filteredData.map((row) => {
-//       const amount =
-//         parseFloat(row.amount) / 100 || 0 - 2 * (amount * 0.09).toFixed(2);
-//       const cgst = (amount * 0.09).toFixed(2);
-//       const sgst = (amount * 0.09).toFixed(2);
-//       const name = row.user?.name || "Unknown";
-//       return { ...row, name, amount: amount.toFixed(2), cgst, sgst };
-//     });
-
-//     const csv = Papa.unparse(updatedData);
-//     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-//     const link = document.createElement("a");
-//     if (link.download !== undefined) {
-//       const url = URL.createObjectURL(blob);
-//       link.setAttribute("href", url);
-//       link.setAttribute("download", "filtered_data.csv");
-//       link.style.visibility = "hidden";
-//       document.body.appendChild(link);
-//       link.click();
-//       document.body.removeChild(link);
-//     }
-//   };
-
-//   // Filter transactions by selected date range
-//   const filteredTransactions = useMemo(() => {
-//     if (!startDate || !endDate) return transactions;
-//     return transactions?.filter((row) => {
-//       const paymentDate = parseISO(row?.payment_date);
-//       return paymentDate >= startDate && paymentDate <= endDate;
-//     });
-//   }, [transactions, startDate, endDate]);
-
-//   const toggleRefundModal = (data = null) => {
-//     setRefundModal((prev) => ({
-//       open: !prev.open,
-//       data,
-//     }));
-//   };
-
-//   const columnsDataTable = useMemo(
-//     () => [
-//       // {
-//       //   accessorKey: "transaction_id",
-//       //   header: ({ column }) => (
-//       //     <SortableColumn column={column}>Transaction ID</SortableColumn>
-//       //   ),
-//       // },
-//       {
-//         accessorKey: "name",
-//         header: ({ column }) => (
-//           <SortableColumn column={column}>Name</SortableColumn>
-//         ),
-//         cell: ({ row }) => {
-//           return row?.original?.user?.name;
-//         },
-//       },
-//       {
-//         accessorKey: "payment_for",
-//         header: "Payment For",
-//       },
-//       {
-//         accessorKey: "payment_method",
-//         header: "Payment Method",
-//       },
-//       {
-//         accessorKey: "payment_status",
-//         header: ({ column }) => (
-//           <SortableColumn column={column}>Payment Status</SortableColumn>
-//         ),
-//         cell: ({ getValue }) => {
-//           const value = getValue();
-//           switch (value) {
-//             case TRANSACTION_SUCCESS:
-//               return <Tag type="success">Success</Tag>;
-//             case TRANSACTION_FAILED:
-//               return <Tag type="error">Failed</Tag>;
-//             case TRANSACTION_CANCELLED:
-//               return <Tag type="warning">Cancelled</Tag>;
-//             case TRANSACTION_TIMEOUT:
-//               return <Tag type="warning">Timeout</Tag>;
-//             default:
-//               return <Tag>---</Tag>;
-//           }
-//         },
-//       },
-//       {
-//         accessorKey: "amount",
-//         header: ({ column }) => (
-//           <SortableColumn column={column}>Amount</SortableColumn>
-//         ),
-//         cell: ({ row }) => {
-//           const formatted = new Intl.NumberFormat("en-IN", {
-//             currency: row?.original?.currency?.short_tag || "INR",
-//             style: "currency",
-//           }).format(row?.original?.amount / 100);
-
-//           return formatted;
-//         },
-//       },
-//       {
-//         accessorKey: "payment_date",
-//         header: ({ column }) => (
-//           <SortableColumn column={column}>Date</SortableColumn>
-//         ),
-//         cell: ({ row }) => {
-//           return new Date(row?.original?.payment_date).toLocaleString();
-//         },
-//       },
-//       {
-//         accessorKey: "discount_coupon",
-//         header: "Discount Coupon",
-//         cell: ({ row }) => {
-//           return (
-//             <>
-//               {row?.original?.discount_coupon ? (
-//                 <Accordion title="Discount Coupon">
-//                   <pre>{row.original.discount_coupon}</pre>
-//                 </Accordion>
-//               ) : (
-//                 <p>---</p>
-//               )}
-//             </>
-//           );
-//         },
-//       },
-//       {
-//         accessorKey: "user_plan",
-//         header: "User Plan",
-//         cell: ({ row }) => {
-//           return (
-//             <>
-//               {row?.original?.user_plan && row?.original?.user_plan?.plan ? (
-//                 <Tag type="success">Mapped</Tag>
-//               ) : row?.original?.payment_status === TRANSACTION_SUCCESS ? (
-//                 <Tag type="warning">Unmapped</Tag>
-//               ) : (
-//                 <p>---</p>
-//               )}
-//             </>
-//           );
-//         },
-//       },
-//       {
-//         accessorKey: "actions",
-//         header: "Actions",
-//         cell: ({ row }) => {
-//           return (
-//             <DropdownMenu>
-//               <DropdownMenuTrigger asChild>
-//                 <Button
-//                   variant="ghost"
-//                   className="h-8 w-8 p-0"
-//                   auto
-//                   scale={0.3}
-//                   icon={<MoreHorizontal className="h-4 w-4" />}
-//                 >
-//                   {/* <span className="sr-only">Open menu</span> */}
-//                 </Button>
-//               </DropdownMenuTrigger>
-//               <DropdownMenuContent align="end">
-//                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-//                 <DropdownMenuItem
-//                   onClick={() => {
-//                     navigator.clipboard.writeText(
-//                       row?.original.transaction_payment_id
-//                     );
-//                     toast("Copied to clipboard!");
-//                   }}
-//                 >
-//                   Copy payment ID
-//                 </DropdownMenuItem>
-//                 <DropdownMenuSeparator />
-//                 <DropdownMenuItem
-//                   onClick={() => toggleTransactionModal(row?.original)}
-//                 >
-//                   View Transaction Info
-//                 </DropdownMenuItem>
-//                 <DropdownMenuItem
-//                   onClick={() => toggleUserModal(row?.original)}
-//                 >
-//                   View User
-//                 </DropdownMenuItem>
-//                 <DropdownMenuItem
-//                   onClick={() => toggleUserPlanModal(row?.original)}
-//                 >
-//                   View User Plan
-//                 </DropdownMenuItem>
-//                 <DropdownMenuSeparator />
-//                 <DropdownMenuItem
-//                   onClick={() => toggleRefundModal(row?.original)}
-//                 >
-//                   Refund Payment
-//                 </DropdownMenuItem>
-//               </DropdownMenuContent>
-//             </DropdownMenu>
-//           );
-//         },
-//       },
-//     ],
-//     []
-//   );
-
-//   return (
-//     <AdminPageWrapper heading="All Transactions">
-//       {/* Date Range Pickers */}
-//       <div style={{ display: "flex", gap: "10px", marginBottom: "40px" }}>
-//         <DatePicker
-//           selected={startDate}
-//           onChange={(date) => setStartDate(date)}
-//           selectsStart
-//           startDate={startDate}
-//           endDate={endDate}
-//           placeholderText="Start Date"
-//         />
-//         <DatePicker
-//           selected={endDate}
-//           onChange={(date) => setEndDate(date)}
-//           selectsEnd
-//           startDate={startDate}
-//           endDate={endDate}
-//           minDate={startDate}
-//           placeholderText="End Date"
-//         />
-//       </div>
-
-//       <br />
-//       {/* Button to download filtered CSV */}
-//       <Button onClick={() => handleDownload(filteredTransactions)}>
-//         Download CSV
-//       </Button>
-
-//       <div>
-//         <TransactionModal
-//           open={transactionModal.open || false}
-//           data={transactionModal.data || null}
-//           handleClose={toggleTransactionModal}
-//         />
-//         <UserModal
-//           open={userModal.open || false}
-//           data={userModal.data || null}
-//           handleClose={toggleUserModal}
-//         />
-//         <UserPlanModal
-//           open={userPlanModal.open || false}
-//           data={userPlanModal.data || customUserPlans || null}
-//           handleClose={toggleUserPlanModal}
-//         />
-//         <RefundModal
-//           open={refundModal.open || false}
-//           data={refundModal.data || null}
-//           handleClose={toggleRefundModal}
-//         />
-//         <div className="max-w-7xl">
-//           <DataTable
-//             columns={columnsDataTable}
-//             data={filteredTransactions || []}
-//             refetch={getTransactions}
-//           ></DataTable>
-//         </div>
-//       </div>
-//     </AdminPageWrapper>
-//   );
-// }
-
 function RefundManagement() {
   const {
     isLoading,
@@ -410,8 +64,10 @@ function RefundManagement() {
         method: "GET",
         token: true,
       });
-
-      return res?.data?.transactions;
+      const sortedUsers = res.data.transactions.sort((a, b) => {
+        return new Date(b.created) - new Date(a.created);
+      });
+      return sortedUsers;
     },
   });
 
@@ -423,12 +79,6 @@ function RefundManagement() {
 
   const columnsDataTable = useMemo(
     () => [
-      // {
-      //   accessorKey: "transaction_id",
-      //   header: ({ column }) => (
-      //     <SortableColumn column={column}>Transaction ID</SortableColumn>
-      //   ),
-      // },
       {
         accessorKey: "name",
         header: ({ column }) => (
@@ -537,9 +187,7 @@ function RefundManagement() {
                   auto
                   scale={0.3}
                   icon={<MoreHorizontal className="h-4 w-4" />}
-                >
-                  {/* <span className="sr-only">Open menu</span> */}
-                </Button>
+                ></Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
@@ -597,7 +245,7 @@ function RefundManagement() {
   }, []);
 
   useEffect(() => {
-    setFilteredTransactions(transactions); // Initialize with all transactions
+    setFilteredTransactions(transactions);
   }, [transactions]);
 
   const handleFilter = () => {
