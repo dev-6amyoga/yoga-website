@@ -52,12 +52,24 @@ function StreamStackItem({
   handleFullscreen,
 }) {
   const playerRef = useRef(null);
+  const storageRef = useRef(null);
   const user = useUserStore((state) => state.user);
   const commitTimeInterval = useRef(null);
   const flushTimeInterval = useRef(null);
   const [metadataLoaded, setMetadataLoaded] = useState(false);
   const [autoplayInitialized, setAutoplayInitialized] = useState(false);
   const [playerLoaded, setPlayerLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!playerRef.current) return;
+    storageRef.current = new shaka.offline.Storage(playerRef.current.player);
+    return () => {
+      if (storageRef.current) {
+        storageRef.current.destroy();
+        storageRef.current = null;
+      }
+    };
+  }, []);
 
   // parse the video url from video object
   const videoUrl = useMemo(() => {
@@ -68,6 +80,38 @@ function StreamStackItem({
       ""
     );
   }, [video]);
+
+  const downloadVideo = useCallback(async () => {
+    if (!storageRef.current || !videoUrl) {
+      console.error("Storage not initialized or video URL missing");
+      return;
+    }
+
+    try {
+      console.log("Starting download...");
+      const offlineUri = await storageRef.current.store(videoUrl);
+      console.log("Download complete, offline URI:", offlineUri);
+    } catch (error) {
+      console.error("Error downloading video:", error);
+    }
+  }, [videoUrl]);
+
+  const loadVideo = useCallback(async () => {
+    try {
+      const isOffline = video?.offlineUri;
+      if (isOffline) {
+        console.log("Loading offline content:", video.offlineUri);
+        await playerRef.current.player.load(video.offlineUri);
+      } else {
+        console.log("Loading online content:", videoUrl);
+        await playerRef.current.player.load(videoUrl);
+      }
+      setMetadataLoaded(true);
+    } catch (error) {
+      console.error("Error loading video:", error);
+      handlePlaybackError(error);
+    }
+  }, [video, videoUrl, handlePlaybackError]);
 
   const isActiveRef = useRef(isActive);
 
@@ -1019,6 +1063,9 @@ function StreamStackItem({
     <div
       className={`relative h-full w-full ${isActive ? "block" : "invisible"}`}
     >
+      <button onClick={downloadVideo} className="download-button">
+        Download for Offline
+      </button>
       <ShakaPlayer ref={playerInit} className="custom-shaka w-full h-full" />
     </div>
   );

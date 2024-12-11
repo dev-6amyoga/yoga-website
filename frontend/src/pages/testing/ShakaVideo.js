@@ -3,19 +3,19 @@ import VideoPlayerWrapper from "../../components/StackVideoShaka/VideoPlayerWrap
 import useWatchHistoryStore from "../../store/WatchHistoryStore";
 
 export default function ShakaVideo() {
-	const setEnableWatchHistory = useWatchHistoryStore(
-		(state) => state.setEnableWatchHistory
-	);
+  const setEnableWatchHistory = useWatchHistoryStore(
+    (state) => state.setEnableWatchHistory
+  );
 
-	useEffect(() => {
-		setEnableWatchHistory(false);
-	}, []);
+  useEffect(() => {
+    setEnableWatchHistory(false);
+  }, []);
 
-	return (
-		// <PageWrapper heading="Player">
-		<div className="max-w-7xl mx-auto p-4">
-			<VideoPlayerWrapper page="testing" />
-		</div>
-		// </PageWrapper>
-	);
+  return (
+    // <PageWrapper heading="Player">
+    <div className="max-w-7xl mx-auto p-4">
+      <VideoPlayerWrapper page="testing" />
+    </div>
+    // </PageWrapper>
+  );
 }
