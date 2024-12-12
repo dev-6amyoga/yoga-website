@@ -21,9 +21,19 @@ export const useVideoStore = create(
 				return { offlineMode: om };
 			}),
 
-		shakaOfflineStore: () => {},
+		shakaOfflineStore: null,
 		setShakaOfflineStore: (shakaOfflineStore) =>
-			set(() => {
+			set((state) => {
+				if (
+					shakaOfflineStore !== null &&
+					state.shakaOfflineStore === null
+				) {
+					console.log(
+						"[VideoStore] setting shakaOfflineStore",
+						shakaOfflineStore
+					);
+				}
+
 				return { shakaOfflineStore };
 			}),
 

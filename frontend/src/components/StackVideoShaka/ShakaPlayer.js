@@ -1,5 +1,6 @@
 import React from "react";
 import shaka from "shaka-player/dist/shaka-player.ui";
+import useVideoStore from "../../store/VideoStore";
 
 /**
  * A React component for shaka-player.
@@ -23,10 +24,14 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
 
 	const uiContainerRef = React.useRef(null);
 	const videoRef = React.useRef(null);
-	const storageRef = React.useRef(null);
+	// const storageRef = React.useRef(null);
 
 	const [contentList, setContentList] = React.useState([]);
 	const [downloadProgress, setDownloadProgress] = React.useState(0);
+
+	const setShakaOfflineStore = useVideoStore(
+		(state) => state.setShakaOfflineStore
+	);
 
 	const [player, setPlayer] = React.useState(null);
 	const [ui, setUi] = React.useState(null);
@@ -54,7 +59,7 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
 		console.log("[ShakaPlayer] Setting up storage");
 		const storage = new shaka.offline.Storage(player);
 
-		storageRef.current = storage;
+		setShakaOfflineStore(new ShakaOfflineStore(storage));
 
 		return () => {
 			player.destroy();
@@ -97,10 +102,6 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
 			},
 			get videoElement() {
 				return videoRef.current;
-			},
-
-			get storage() {
-				return storageRef.current;
 			},
 		}),
 		[player, ui]
