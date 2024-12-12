@@ -424,15 +424,15 @@ function Playlist({ page }) {
           url: "/content/playlists/getAllPlaylists",
         });
         const data = response.data;
-        // if (currentRole === "STUDENT") {
-        //   const studentPlaylists = data.filter(
-        //     (playlist) => playlist.playlist_mode.toLowerCase() === "student"
-        //   );
+        if (currentRole === "STUDENT") {
+          const studentPlaylists = data.filter(
+            (playlist) => playlist.playlist_mode.toLowerCase() === "student"
+          );
 
-        //   setPlaylists(studentPlaylists);
-        // } else {
-        setPlaylists(data);
-        // }
+          setPlaylists(studentPlaylists);
+        } else {
+          setPlaylists(data);
+        }
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -605,28 +605,6 @@ function Playlist({ page }) {
           showDetails={showDetails}
           show={isInstitute}
           isFuture={false}
-        />
-
-        <PlaylistList
-          name="Schedule Playlists"
-          desc="Choose from your schedules to practice."
-          playlists={schedules}
-          query={query}
-          handleAddToQueue={handleAddToQueue}
-          showDetails={showDetails}
-          show={schedulePresent}
-          isFuture={false}
-        />
-
-        <PlaylistList
-          name="Next Month Schedule Playlists"
-          desc="Choose from your schedules to practice."
-          playlists={nextMonthSchedules}
-          query={query}
-          handleAddToQueue={handleAddToQueue}
-          showDetails={showDetails}
-          show={nextMonthSchedulePresent}
-          isFuture={true}
         />
 
         <PlaylistList
