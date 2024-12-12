@@ -21,39 +21,38 @@ function StudentHome() {
     state.userPlan,
   ]);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     const res = await Fetch({
-  //       url: `/customUserPlan/getCustomUserPlansByUser/${user.user_id}`,
-  //       token: true,
-  //       method: "GET",
-  //     });
-  //     if (res.status === 200) {
-  //       if (res.data.plans) {
-  //         const today = new Date();
-  //         const validPlans = res.data.plans.filter(
-  //           (plan) => new Date(plan.validity_to) > today
-  //         );
-
-  //         const sortedPlans = validPlans.sort(
-  //           (a, b) => new Date(b.created.$date) - new Date(a.created.$date)
-  //         );
-  //         if (sortedPlans.length > 0) {
-  //           setHasPlan(true);
-  //         } else {
-  //           setHasPlan(false);
-  //         }
-  //       }
-  //     }
-  //   };
-  //   fetchData();
-  // }, [user]);
-
   // check if user has plan
   const [hasPlan, setHasPlan] = useState(false);
+  const [hasUserPlan, setHasUserPlan] = useState(false);
 
   useEffect(() => {
+    const fetchPlanData = async () => {
+      try {
+        const response = await Fetch({
+          url: "/user-plan/get-user-plan-by-id",
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: { user_id: user?.user_id },
+        });
+        const data = response.data;
+        let res = data.userPlan.filter((d) =>
+          d.current_status.toLowerCase().includes("active")
+        );
+        console.log("DATA : ", res);
+        if (res != null) {
+          setHasUserPlan(true);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchPlanData();
+  }, [user]);
+  useEffect(() => {
     const fetchData = async () => {
+      console.log("user plan is : ", user);
       const res = await Fetch({
         url: `/customUserPlan/getCustomUserPlansByUser/${user.user_id}`,
         token: true,
@@ -101,7 +100,7 @@ function StudentHome() {
       <CssBaseline />
       <StudentNavMUI />
       <Hero heading="6AM Yoga Player" />
-      {hasPlan ? (
+      {hasPlan || hasUserPlan ? (
         <div className="max-w-7xl mx-auto">
           <Paper>
             <VideoRecorder />
