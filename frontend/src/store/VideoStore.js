@@ -15,6 +15,18 @@ export const useVideoStore = create(
 				return { devMode: dm };
 			}),
 
+		offlineMode: false,
+		setOfflineMode: (om) =>
+			set(() => {
+				return { offlineMode: om };
+			}),
+
+		shakaOfflineStore: () => {},
+		setShakaOfflineStore: (shakaOfflineStore) =>
+			set(() => {
+				return { shakaOfflineStore };
+			}),
+
 		fullScreen: false,
 		setFullScreen: (fs) =>
 			set(() => {
