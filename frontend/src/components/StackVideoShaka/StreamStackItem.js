@@ -63,6 +63,7 @@ function StreamStackItem({
   useEffect(() => {
     if (!playerRef.current) return;
     storageRef.current = new shaka.offline.Storage(playerRef.current.player);
+    console.log("[OFFLINE] storage setup");
     return () => {
       if (storageRef.current) {
         storageRef.current.destroy();
@@ -71,7 +72,6 @@ function StreamStackItem({
     };
   }, []);
 
-  // parse the video url from video object
   const videoUrl = useMemo(() => {
     return (
       (video?.video?.asana_dash_url ||
@@ -81,41 +81,84 @@ function StreamStackItem({
     );
   }, [video]);
 
-  const downloadVideo = useCallback(async () => {
-    if (!storageRef.current || !videoUrl) {
-      console.error("Storage not initialized or video URL missing");
-      return;
-    }
+  // useEffect(() => {
+  //   console.log("[OFFLINE] to be downloaded : ", videoUrl);
 
-    try {
-      console.log("Starting download...");
-      const offlineUri = await storageRef.current.store(videoUrl);
-      console.log("Download complete, offline URI:", offlineUri);
-    } catch (error) {
-      console.error("Error downloading video:", error);
-    }
-  }, [videoUrl]);
+  //   downloadVideo();
+  // }, [videoUrl]);
 
   const loadVideo = useCallback(async () => {
     try {
+      console.log("[OFFLINE] load video : ", video);
+
       const isOffline = video?.offlineUri;
       if (isOffline) {
-        console.log("Loading offline content:", video.offlineUri);
+        console.log("[OFFLINE] Loading offline content:", video.offlineUri);
         await playerRef.current.player.load(video.offlineUri);
       } else {
-        console.log("Loading online content:", videoUrl);
+        console.log("[OFFLINE] Loading online content:", videoUrl);
         await playerRef.current.player.load(videoUrl);
       }
       setMetadataLoaded(true);
     } catch (error) {
-      console.error("Error loading video:", error);
+      console.error("[OFFLINE] Error loading video:", error);
       handlePlaybackError(error);
     }
   }, [video, videoUrl, handlePlaybackError]);
 
+  // const downloadVideo = useCallback(async () => {
+  //   if (!storageRef.current || !videoUrl) {
+  //     console.error("[OFFLINE] Storage not initialized or video URL missing");
+  //     return;
+  //   }
+
+  //   try {
+  //     console.log("[OFFLINE] Starting download...");
+  //     const offlineUri = await storageRef.current.store(videoUrl);
+  //     console.log("[OFFLINE] Download complete, offline URI:", offlineUri);
+  //   } catch (error) {
+  //     console.error("[OFFLINE] Error downloading video:", error);
+  //   }
+  // }, [videoUrl]);
+
+  // const downloadVideo = useCallback(async () => {
+  //   if (!storageRef.current || !videoUrl) {
+  //     console.error("[OFFLINE] Storage not initialized or video URL missing");
+  //     return null;
+  //   }
+
+  //   try {
+  //     console.log("[OFFLINE] Starting download...");
+  //     const offlineUri = await storageRef.current.store(videoUrl);
+  //     console.log("[OFFLINE] Download complete, offline URI:", offlineUri);
+  //     return offlineUri;
+  //   } catch (error) {
+  //     console.error("[OFFLINE] Error downloading video:", error);
+  //     return null;
+  //   }
+  // }, [videoUrl]);
+
+  async function downloadVideo(manifestUri, title) {
+    try {
+      const metadata = {
+        title: title,
+        downloaded: new Date().toISOString(),
+      };
+
+      console.log("[DOWNLOAD] Starting download for:", manifestUri);
+      const downloadResult = await window.Storage.store(manifestUri, metadata)
+        .promise;
+
+      console.log("[DOWNLOAD] Completed successfully:", downloadResult);
+      return downloadResult;
+    } catch (error) {
+      console.error("[DOWNLOAD] Error during download:", error);
+      throw error;
+    }
+  }
+
   const isActiveRef = useRef(isActive);
 
-  // keep the isActiveRef updated
   useEffect(() => {
     isActiveRef.current = isActive;
     if (isActive) {
@@ -810,7 +853,7 @@ function StreamStackItem({
   );
 
   const playerInit = useCallback(
-    (ref) => {
+    async (ref) => {
       console.log("player init called", ref);
       if (ref != null) {
         // console.log("Player init, setting loading to true", video?.idx);
@@ -819,6 +862,20 @@ function StreamStackItem({
 
         // setPlayerRefSet({ done: true, ts: Date.now() });
         // player events
+
+        window.Storage = new shaka.offline.Storage(playerRef.current.player);
+        window.Storage.configure({
+          offline: {
+            progressCallback: (progress) => {
+              console.log(`[DOWNLOAD PROGRESS] ${progress * 100}%`);
+            },
+            trackSelectionCallback: (tracks) => {
+              console.log("[TRACK SELECTION]", tracks);
+              return tracks;
+            },
+          },
+        });
+        console.log("[OFFLINE] Offline storage initialized.");
 
         const check = isMobileTablet();
         const isMobile = { done: true, check: check };
@@ -954,7 +1011,7 @@ function StreamStackItem({
                 method: "POST",
                 token: false,
               })
-                .then((res) => {
+                .then(async (res) => {
                   const data = res.data;
                   // console.log(data);
 
@@ -968,16 +1025,38 @@ function StreamStackItem({
                       },
                     });
 
-                    //console.log("Trying to load video");
-                    playerRef.current.player
-                      .load(videoUrl)
-                      .then((res) => {
-                        console.log("Video Loaded");
-                        setMetadataLoaded(true);
-                      })
-                      .catch((err) => {
-                        playerOnError(err);
-                      });
+                    console.log("[OFFLINE] getting ready for download");
+                    const offlineUri = await downloadVideo(videoUrl, "new");
+                    if (offlineUri) {
+                      console.log(offlineUri);
+                      playerRef.current.player
+                        .load(offlineUri)
+                        .then(() => {
+                          console.log("Offline video loaded");
+                          setMetadataLoaded(true);
+                        })
+                        .catch(playerOnError);
+                    } else {
+                      console.error(
+                        "Failed to download video, falling back to online URL"
+                      );
+                      playerRef.current.player
+                        .load(videoUrl)
+                        .then(() => {
+                          console.log("Online video loaded");
+                          setMetadataLoaded(true);
+                        })
+                        .catch(playerOnError);
+                    }
+                    // playerRef.current.player
+                    //   .load(videoUrl)
+                    //   .then((res) => {
+                    //     console.log("Video Loaded");
+                    //     setMetadataLoaded(true);
+                    //   })
+                    //   .catch((err) => {
+                    //     playerOnError(err);
+                    //   });
                   }
                 })
                 .catch((err) => {
@@ -990,7 +1069,7 @@ function StreamStackItem({
                 method: "POST",
                 token: false,
               })
-                .then((res) => {
+                .then(async (res) => {
                   const data = res.data;
                   if (data && data.licenseAcquisitionUrl && data.token) {
                     // Non Mobile
@@ -1004,15 +1083,37 @@ function StreamStackItem({
                         },
                       },
                     });
-
-                    playerRef.current.player
-                      .load(videoUrl)
-                      .then((res) => {
-                        setMetadataLoaded(true);
-                      })
-                      .catch((err) => {
-                        playerOnError(err);
-                      });
+                    console.log("[OFFLINE] getting ready for download");
+                    const offlineUri = await downloadVideo(videoUrl, "new");
+                    if (offlineUri) {
+                      console.log(offlineUri);
+                      playerRef.current.player
+                        .load(offlineUri) // Load the offline URI
+                        .then(() => {
+                          console.log("Offline video loaded");
+                          setMetadataLoaded(true);
+                        })
+                        .catch(playerOnError);
+                    } else {
+                      console.error(
+                        "Failed to download video, falling back to online URL"
+                      );
+                      playerRef.current.player
+                        .load(videoUrl) // Fallback to online URL if download fails
+                        .then(() => {
+                          console.log("Online video loaded");
+                          setMetadataLoaded(true);
+                        })
+                        .catch(playerOnError);
+                    }
+                    // playerRef.current.player
+                    //   .load(videoUrl)
+                    //   .then((res) => {
+                    //     setMetadataLoaded(true);
+                    //   })
+                    //   .catch((err) => {
+                    //     playerOnError(err);
+                    //   });
                   }
                 })
                 .catch((err) => {
@@ -1021,6 +1122,11 @@ function StreamStackItem({
             }
           } else {
             console.log("no drm");
+            console.log("[OFFLINE] getting ready for download");
+            const offlineUri = await downloadVideo(videoUrl, "new");
+            if (offlineUri) {
+              console.log(offlineUri);
+            }
             playerRef.current.player
               .preload(videoUrl)
               .then((preloadManager) => {
@@ -1063,9 +1169,6 @@ function StreamStackItem({
     <div
       className={`relative h-full w-full ${isActive ? "block" : "invisible"}`}
     >
-      <button onClick={downloadVideo} className="download-button">
-        Download for Offline
-      </button>
       <ShakaPlayer ref={playerInit} className="custom-shaka w-full h-full" />
     </div>
   );
