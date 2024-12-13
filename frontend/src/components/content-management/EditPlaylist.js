@@ -190,15 +190,14 @@ function EditPlaylist() {
 
   useEffect(() => {
     const newNames = playlistCurrent.map((id) => {
-      if (typeof id === "string") {
-        const transition = transitions.find((t) => t.transition_id === id);
+      const asana = asanas.find((a) => a.id === id);
+      if (!asana) {
+        const transition = transitions.find((a) => a.transition_id === id);
         return transition
           ? transition.transition_video_name
           : "Unknown Transition";
-      } else {
-        const asana = asanas.find((a) => a.id === id);
-        return asana ? asana.asana_name : "Unknown Asana";
       }
+      return asana ? asana.asana_name : "Unknown Asana";
     });
     setNames(newNames);
   }, [playlistCurrent, asanas, transitions]);

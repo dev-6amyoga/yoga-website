@@ -2,7 +2,6 @@ import React from "react";
 import shaka from "shaka-player/dist/shaka-player.ui";
 import useVideoStore from "../../store/VideoStore";
 import ShakaOfflineStore from "../../lib/offline-storage";
-
 /**
  * A React component for shaka-player.
  * @param {string} src
@@ -40,10 +39,11 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
   // Effect to handle component mount & mount.
   // Not related to the src prop, this hook creates a shaka.Player instance.
   // This should always be the first effect to run.
-  React.useEffect(() => {
+  React.useEffect(async () => {
     const player = new shaka.Player(videoRef.current);
     setPlayer(player);
     console.log("HELLO THIS IS PLAYER!!!");
+    // await ShakaOfflineStore.deleteAll();
 
     let ui;
 
@@ -59,8 +59,18 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
     // setup player storage
     console.log("[ShakaPlayer] Setting up storage");
     const storage = new shaka.offline.Storage(player);
-
     setShakaOfflineStore(new ShakaOfflineStore(storage));
+
+    // const content = await storage.store("test:sintel").promise;
+    // expect(content).toBeTruthy();
+
+    //   const contentUri = content.offlineUri;
+    //   goog.asserts.assert(
+    //     contentUri != null,
+    //     "Stored content should have an offline uri."
+    //   );
+
+    //   await player.load(contentUri);
 
     return () => {
       player.destroy();

@@ -788,6 +788,12 @@ function RegisterNewPlaylistStudent() {
   useEffect(() => {
     const newNames = playlistCurrent.map((id) => {
       const asana = asanas.find((a) => a.id === id);
+      if (!asana) {
+        const transition = transitions.find((a) => a.transition_id === id);
+        return transition
+          ? transition.transition_video_name
+          : "Unknown Transition";
+      }
       return asana ? asana.asana_name : "Unknown Asana";
     });
     setNames(newNames);
