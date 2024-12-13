@@ -1,74 +1,70 @@
 class ShakaOfflineStore {
-	constructor(storage) {
-		this.storage = storage;
-		this.usePersistentLicense = true;
-		this.downloadSizeThreshold = 1024 * 1024 * 1024; // 1GB
+  constructor(storage) {
+    this.storage = storage;
+    this.usePersistentLicense = true;
+    this.downloadSizeThreshold = 1024 * 1024 * 1024; // 1GB
 
-		this.storage.configure({
-			progressCallback: this.progressCallback,
-			downloadSizeCallback: this.downloadSizeCallback,
-			trackSelectionCallback: this.trackSelectionCallback,
-			usePersistentLicense: this.usePersistentLicense,
-		});
-	}
+    this.storage.configure({
+      progressCallback: this.progressCallback,
+      downloadSizeCallback: this.downloadSizeCallback,
+      trackSelectionCallback: this.trackSelectionCallback,
+      usePersistentLicense: this.usePersistentLicense,
+    });
+  }
 
-	destroy() {
-		if (!this.storage) {
-			console.error(
-				"[ShakaOfflineStore:destroy] Storage not initialized"
-			);
-			return;
-		}
+  destroy() {
+    if (!this.storage) {
+      console.error("[ShakaOfflineStore:destroy] Storage not initialized");
+      return;
+    }
 
-		this.storage.destroy();
-	}
+    this.storage.destroy();
+  }
 
-	downloadSizeCallback(size) {
-		console.log("[ShakaOfflineStore:downloadSizeCallback]", size);
+  downloadSizeCallback(size) {
+    console.log("[ShakaOfflineStore:downloadSizeCallback]", size);
 
-		if (size > this.downloadSizeThreshold) {
-			return false;
-		}
+    if (size > this.downloadSizeThreshold) {
+      return false;
+    }
 
-		return true;
-	}
+    return true;
+  }
 
-	trackSelectionCallback(tracks) {
-		console.log("[ShakaOfflineStore:trackSelectionCallback]", tracks);
-		return tracks;
-	}
+  trackSelectionCallback(tracks) {
+    console.log("[ShakaOfflineStore:trackSelectionCallback]", tracks);
+    return tracks;
+  }
 
-	progressCallback(progress) {
-		console.log("[ShakaOfflineStore:progressCallback]", progress);
-	}
+  progressCallback(progress) {
+    console.log("[ShakaOfflineStore:progressCallback]", progress);
+  }
 
-	async store(uri) {
-		if (!this.storage) {
-			console.error(
-				"[ShakaOfflineStore:download] Storage not initialized"
-			);
-			return;
-		}
+  async store(uri) {
+    if (!this.storage) {
+      console.error("[ShakaOfflineStore:download] Storage not initialized");
+      return;
+    }
 
-		return this.storage.store(uri);
-	}
+    return this.storage.store(uri);
+  }
 
-	async remove(uri) {
-		if (!this.storage) {
-			console.error("[ShakaOfflineStore:remove] Storage not initialized");
-			return;
-		}
+  async remove(uri) {
+    if (!this.storage) {
+      console.error("[ShakaOfflineStore:remove] Storage not initialized");
+      return;
+    }
 
-		return this.storage.remove(uri);
-	}
+    return this.storage.remove(uri);
+  }
 
-	async list() {
-		if (!this.storage) {
-			console.error("[ShakaOfflineStore:list] Storage not initialized");
-			return;
-		}
+  async list() {
+    if (!this.storage) {
+      console.error("[ShakaOfflineStore:list] Storage not initialized");
+      return;
+    }
 
-		/*
+    /*
     []StoredContent
     - offlineUri
     - originalManifestUri
@@ -78,6 +74,6 @@ class ShakaOfflineStore {
     - appMetadata
     - isIncomplete
     */
-		contentList = this.storage.list();
-	}
+    contentList = this.storage.list();
+  }
 }
