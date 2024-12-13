@@ -95,15 +95,16 @@ function PlaylistSections() {
 							<p className="text-sm text-zinc-500">
 								CURRENT SECTION
 							</p>
-							<p className="h-8 text-sm">
-								{currMarker ? (
-									<p title={currMarker.name}>
-										{currMarker.name.substring(0, 45)}...
-									</p>
-								) : (
-									"---"
-								)}
-							</p>
+							<p className="h-8 text-sm"></p>
+							{currMarker ? (
+								<p
+									title={currMarker.name}
+									className="h-8 text-sm">
+									{currMarker.name.substring(0, 45)}...
+								</p>
+							) : (
+								<p className="h-8 text-sm">---</p>
+							)}
 						</div>
 					</div>
 				) : (

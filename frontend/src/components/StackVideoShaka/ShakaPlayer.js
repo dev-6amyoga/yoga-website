@@ -1,6 +1,7 @@
 import React from "react";
 import shaka from "shaka-player/dist/shaka-player.ui";
-
+import useVideoStore from "../../store/VideoStore";
+import ShakaOfflineStore from "../../lib/offline-storage";
 /**
  * A React component for shaka-player.
  * @param {string} src
@@ -13,7 +14,7 @@ import shaka from "shaka-player/dist/shaka-player.ui";
  * @constructor
  */
 function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
-  console.log("Props passed to ShakaPlayer:", {
+  console.log("[ShakaPlayer] Props passed to ShakaPlayer:", {
     src,
     config,
     chromeless,
@@ -23,20 +24,29 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
 
   const uiContainerRef = React.useRef(null);
   const videoRef = React.useRef(null);
-  const [storage, setStorage] = React.useState(null);
+  // const storageRef = React.useRef(null);
+
   const [contentList, setContentList] = React.useState([]);
   const [downloadProgress, setDownloadProgress] = React.useState(0);
+
+  const setShakaOfflineStore = useVideoStore(
+    (state) => state.setShakaOfflineStore
+  );
+
   const [player, setPlayer] = React.useState(null);
   const [ui, setUi] = React.useState(null);
 
   // Effect to handle component mount & mount.
   // Not related to the src prop, this hook creates a shaka.Player instance.
   // This should always be the first effect to run.
-  React.useEffect(() => {
+  React.useEffect(async () => {
     const player = new shaka.Player(videoRef.current);
     setPlayer(player);
     console.log("HELLO THIS IS PLAYER!!!");
+    // await ShakaOfflineStore.deleteAll();
+
     let ui;
+
     if (!chromeless) {
       const ui = new shaka.ui.Overlay(
         player,
@@ -46,10 +56,29 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
       setUi(ui);
     }
 
+    // setup player storage
+    console.log("[ShakaPlayer] Setting up storage");
+    const storage = new shaka.offline.Storage(player);
+    setShakaOfflineStore(new ShakaOfflineStore(storage));
+
+    // const content = await storage.store("test:sintel").promise;
+    // expect(content).toBeTruthy();
+
+    //   const contentUri = content.offlineUri;
+    //   goog.asserts.assert(
+    //     contentUri != null,
+    //     "Stored content should have an offline uri."
+    //   );
+
+    //   await player.load(contentUri);
+
     return () => {
       player.destroy();
       if (ui) {
         ui.destroy();
+      }
+      if (storage) {
+        storage.destroy();
       }
     };
   }, [chromeless]);
