@@ -195,7 +195,7 @@ function EditPlaylist() {
         const transition = transitions.find((a) => a.transition_id === id);
         return transition
           ? transition.transition_video_name
-          : "Unknown Transition";
+          : "Unknown Transition.";
       }
       return asana ? asana.asana_name : "Unknown Asana";
     });
