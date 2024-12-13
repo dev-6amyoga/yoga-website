@@ -77,3 +77,4 @@ class ShakaOfflineStore {
     contentList = this.storage.list();
   }
 }
+export default ShakaOfflineStore;
