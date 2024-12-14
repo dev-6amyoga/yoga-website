@@ -19,6 +19,7 @@ import { useState } from "react";
 import { SEEK_TYPE_MOVE } from "../../enums/seek_types";
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_TEACHING_MODE } from "../../enums/video_view_modes";
+import useShakaOfflineStore from "../../store/ShakaOfflineStore";
 import useTimeStore from "../../store/TimeStore";
 import { STATE_VIDEO_PAUSED } from "../../store/VideoStore";
 import StreamStackItem from "./StreamStackItem";
@@ -45,6 +46,10 @@ function VideoPlayer() {
 		state.queueMetadata,
 		state.setQueueMetadata,
 	]);
+
+	const [useDownloadedVideo, downloadProgress] = useShakaOfflineStore(
+		(state) => [state.useDownloadedVideo, state.downloadProgress]
+	);
 
 	const [
 		currentVideo,
@@ -334,6 +339,25 @@ function VideoPlayer() {
 									recordingStart &&
 									recordingPlaying ? (
 										<RecordingStatus className="absolute top-8 left-8 bg-red-500 w-4 h-4 rounded-full" />
+									) : (
+										<></>
+									)}
+
+									{useDownloadedVideo &&
+									downloadProgress !== 1 ? (
+										<div className="bg-red-500 bg-opacity-50 flex items-center justify-center z-[10000] text-white">
+											<div className="flex flex-col gap-4">
+												<p className="text-white">
+													Downloading video...
+												</p>
+												<p className="text-white">
+													{Math.round(
+														downloadProgress * 100
+													)}
+													%
+												</p>
+											</div>
+										</div>
 									) : (
 										<></>
 									)}

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import VideoPlayerWrapper from "../../components/StackVideoShaka/VideoPlayerWrapper";
+import useShakaOfflineStore from "../../store/ShakaOfflineStore";
 import useWatchHistoryStore from "../../store/WatchHistoryStore";
 
 export default function ShakaVideo() {
@@ -7,12 +8,16 @@ export default function ShakaVideo() {
 		(state) => state.setEnableWatchHistory
 	);
 
-	const [setOfflineMode] = useWatchHistoryStore(
-		(state) => state.setEnableWatchHistory
-	);
+	const [setOfflineMode, setUseDownloadedVideo, shakaOfflineStore] =
+		useShakaOfflineStore((state) => [
+			state.setOfflineMode,
+			state.setUseDownloadedVideo,
+			state.shakaOfflineStore,
+		]);
 
 	useEffect(() => {
 		setEnableWatchHistory(false);
+		setUseDownloadedVideo(true);
 	}, []);
 
 	useEffect(() => {
@@ -37,7 +42,14 @@ export default function ShakaVideo() {
 		// <PageWrapper heading="Player">
 		<div className="max-w-7xl mx-auto p-4">
 			<VideoPlayerWrapper page="testing" />
+			<button
+				onClick={() => {
+					shakaOfflineStore?.deleteAll();
+				}}>
+				delete all
+			</button>
 		</div>
+
 		// </PageWrapper>
 	);
 }

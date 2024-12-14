@@ -1,69 +1,143 @@
 class ShakaOfflineStore {
-  constructor(storage) {
-    this.storage = storage;
-    this.usePersistentLicense = true;
-    this.downloadSizeThreshold = 1024 * 1024 * 1024; // 1GB
-    this.storage.configure({
-      progressCallback: this.progressCallback,
-      downloadSizeCallback: this.downloadSizeCallback,
-      trackSelectionCallback: this.trackSelectionCallback,
-      usePersistentLicense: this.usePersistentLicense,
-    });
-  }
+	constructor(storage, progressHook) {
+		console.log("[ShakaOfflineStore] Initializing ShakaOfflineStore");
+		this.storage = storage;
+		this.usePersistentLicense = true;
+		this.downloadSizeThreshold = 1024 * 1024 * 1024; // 1GB
+		this.contentList = [];
+		// TODO : support for progress across parallel downloads
+		this.progress = 0;
 
-  destroy() {
-    if (!this.storage) {
-      console.error("[ShakaOfflineStore:destroy] Storage not initialized");
-      return;
-    }
+		this.progressHook = progressHook;
 
-    this.storage.destroy();
-  }
+		console.log("[ShakaOfflineStore] Configuring storage");
+		this.storage.configure({
+			offline: {
+				progressCallback: (c, p) => this.progressCallback(this, c, p),
+				downloadSizeCallback: this.downloadSizeCallback,
+				trackSelectionCallback: this.trackSelectionCallback,
+				usePersistentLicense: this.usePersistentLicense,
+			},
+		});
 
-  downloadSizeCallback(size) {
-    console.log("[ShakaOfflineStore:downloadSizeCallback]", size);
+		console.log("[ShakaOfflineStore] Storage configured");
+	}
 
-    if (size > this.downloadSizeThreshold) {
-      return false;
-    }
+	destroy() {
+		try {
+			if (this.storage === null || this.storage === undefined) {
+				console.error(
+					"[ShakaOfflineStore:destroy] Storage not initialized"
+				);
+				return;
+			}
 
-    return true;
-  }
+			console.log("[ShakaOfflineStore:destroy] Destroying storage");
+			this.storage.destroy();
+		} catch (e) {
+			console.error("[ShakaOfflineStore:destroy] Error:", e);
+		}
+	}
 
-  trackSelectionCallback(tracks) {
-    console.log("[ShakaOfflineStore:trackSelectionCallback]", tracks);
-    return tracks;
-  }
+	downloadSizeCallback(size) {
+		try {
+			console.log("[ShakaOfflineStore:downloadSizeCallback]", size);
 
-  progressCallback(progress) {
-    console.log("[ShakaOfflineStore:progressCallback]", progress);
-  }
+			if (size > this.downloadSizeThreshold) {
+				console.warn(
+					"[ShakaOfflineStore:downloadSizeCallback] Download size exceeds threshold"
+				);
+				return false;
+			}
 
-  async store(uri) {
-    if (!this.storage) {
-      console.error("[ShakaOfflineStore:download] Storage not initialized");
-      return;
-    }
+			return true;
+		} catch (e) {
+			console.error("[ShakaOfflineStore:downloadSizeCallback] Error:", e);
+			return false;
+		}
+	}
 
-    return this.storage.store(uri);
-  }
+	trackSelectionCallback(tracks) {
+		console.log("[ShakaOfflineStore:trackSelectionCallback]", tracks);
+		return tracks;
+	}
 
-  async remove(uri) {
-    if (!this.storage) {
-      console.error("[ShakaOfflineStore:remove] Storage not initialized");
-      return;
-    }
+	progressCallback(th, content, progress) {
+		try {
+			console.log(
+				"[ShakaOfflineStore:progressCallback] progress : ",
+				progress
+			);
 
-    return this.storage.remove(uri);
-  }
+			th.progress = progress;
+			if (th.progressHook) {
+				th.progressHook(content, progress);
+			}
+		} catch (e) {
+			console.error("[ShakaOfflineStore:progressCallback] Error:", e);
+		}
+	}
 
-  async list() {
-    if (!this.storage) {
-      console.error("[ShakaOfflineStore:list] Storage not initialized");
-      return;
-    }
+	async store(uri, title) {
+		try {
+			if (this.storage === null || this.storage === undefined) {
+				console.error(
+					"[ShakaOfflineStore:store] Storage not initialized"
+				);
+				return;
+			}
 
-    /*
+			const metadata = {
+				title: title,
+				downloaded: new Date().toISOString(),
+			};
+
+			console.log(
+				"[ShakaOfflineStore:store] Starting download for:",
+				uri
+			);
+
+			const fac = await this.storage.store(uri, metadata, "video/mp4")
+				.promise;
+
+			await this.list();
+
+			return fac;
+		} catch (e) {
+			console.error("[ShakaOfflineStore:store] Error:", e);
+			return null;
+		}
+	}
+
+	async remove(uri) {
+		try {
+			if (this.storage === null || this.storage === undefined) {
+				console.error(
+					"[ShakaOfflineStore:remove] Storage not initialized"
+				);
+				return;
+			}
+
+			console.error(
+				"[ShakaOfflineStore:remove] remove download for:",
+				uri
+			);
+			return await this.storage.remove(uri);
+		} catch (e) {
+			console.error("[ShakaOfflineStore:remove] Error:", e);
+		}
+	}
+
+	async list() {
+		try {
+			if (this.storage === null || this.storage === undefined) {
+				console.error(
+					"[ShakaOfflineStore:list] Storage not initialized"
+				);
+				return;
+			}
+
+			/*
     []StoredContent
     - offlineUri
     - originalManifestUri
@@ -73,8 +147,50 @@ class ShakaOfflineStore {
     - appMetadata
     - isIncomplete
     */
-    contentList = this.storage.list();
-  }
+			this.contentList = await this.storage.list();
+
+			console.debug(
+				"[ShakaOfflineStore:list] contentList:",
+				this.contentList
+			);
+
+			return this.contentList;
+		} catch (e) {
+			console.error("[ShakaOfflineStore:list] Error:", e);
+			return null;
+		}
+	}
+
+	async get(originalURI) {
+		try {
+			if (
+				this.storage === null ||
+				this.storage === undefined ||
+				this.contentList === null ||
+				this.contentList === undefined
+			) {
+				console.error(
+					"[ShakaOfflineStore:get] Storage not initialized"
+				);
+				return;
+			}
+
+			if (this.contentList.length === 0) {
+				await this.list();
+			}
+
+			const content = this.contentList.find(
+				(c) => c.originalManifestUri === originalURI
+			);
+
+			console.debug("[ShakaOfflineStore:get] content:", content);
+
+			return content ?? null;
+		} catch (e) {
+			console.error("[ShakaOfflineStore:get] Error:", e);
+			return null;
+		}
+	}
 }
 export default ShakaOfflineStore;
 
