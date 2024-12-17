@@ -59,7 +59,7 @@ function StreamStackItem({
   const [metadataLoaded, setMetadataLoaded] = useState(false);
   const [autoplayInitialized, setAutoplayInitialized] = useState(false);
   const [playerLoaded, setPlayerLoaded] = useState(false);
-
+  const [drmConfig1, setDrmConfig] = useState({});
   const shakaOfflineStore = useShakaOfflineStore(
     (state) => state.shakaOfflineStore
   );
@@ -794,33 +794,28 @@ function StreamStackItem({
   const loadVideo = useCallback(
     async (isDrm) => {
       if (isDrm) {
-        // let offlineUri = await shakaOfflineStore.get(videoUrl);
-        // console.log(offlineUri, "IN DOWNLOADS");
-        // console.warn(
-        //   "[StreamStackItem:loadVideo] DRM video detected, offline mode not available"
-        // );
-        // playerRef.current.player
-        //   .load(videoUrl)
-        //   .then(() => {
-        //     console.log("Online video loaded");
-        //     setMetadataLoaded(true);
-        //   })
-        //   .catch(playerOnError);
-        console.log(
-          "[StreamStackItem:loadVideo] DRM video, trying offline mode"
-        );
-
+        let drmConfig = {};
         let offlineUri = await shakaOfflineStore.get(videoUrl);
-        console.log(offlineUri, "IN DOWNLOADS");
-        if (offlineUri === null || offlineUri === undefined) {
-          console.log("[StreamStackItem:loadVideo] Downloading video");
-          const offlineVideo = await shakaOfflineStore.store(
-            videoUrl,
-            videoTitle,
-            useShakaOfflineStore.getState().drmConfig
-          );
-          offlineUri = offlineVideo?.offlineUri;
-        }
+        Fetch({
+          url: "/playback/get-widevine-token",
+          method: "POST",
+          token: false,
+        })
+          .then(async (res) => {
+            const data = res.data;
+            setDrmConfig(data);
+            drmConfig = data;
+            console.log("[StreamStackItem:loadVideo] Downloading video");
+            const offlineVideo = await shakaOfflineStore.store(
+              videoUrl,
+              videoTitle,
+              data
+            );
+            offlineUri = offlineVideo?.offlineUri;
+          })
+          .catch((err) => {
+            console.log("Error fetching DRM info :", err);
+          });
       } else {
         console.log(
           "[StreamStackItem:loadVideo] NON DRM video, trying offline mode"
@@ -864,7 +859,6 @@ function StreamStackItem({
             .catch(playerOnError);
         }
       }
-      console.log(offlineUri);
       if (offlineUri) {
         playerRef.current.player
           .load(offlineUri)
@@ -1036,7 +1030,7 @@ function StreamStackItem({
             video?.video?.drm_playlist
           ) {
             //   if (!isNaN(video.video.id) && typeof video.video.id !== "number") {
-            if (isMobile.check) {
+            if (!isMobile.check) {
               Fetch({
                 url: "/playback/get-widevine-token",
                 method: "POST",
@@ -1044,8 +1038,8 @@ function StreamStackItem({
               })
                 .then(async (res) => {
                   const data = res.data;
-                  // console.log(data);
-
+                  console.log(data);
+                  setDrmConfig(data);
                   if (data && data.licenseAcquisitionUrl) {
                     // Mobile
                     playerRef.current.player.configure({
@@ -1071,6 +1065,7 @@ function StreamStackItem({
               })
                 .then(async (res) => {
                   const data = res.data;
+                  console.log(data);
                   if (data && data.licenseAcquisitionUrl && data.token) {
                     // Non Mobile
                     const drmConfig = {

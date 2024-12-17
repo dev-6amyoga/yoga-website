@@ -1,4 +1,3 @@
-// import useShakaOfflineStore from "../store/ShakaOfflineStore";
 class ShakaOfflineStore {
   constructor(storage, progressHook) {
     console.log("[ShakaOfflineStore] Initializing ShakaOfflineStore");
@@ -24,17 +23,14 @@ class ShakaOfflineStore {
       },
     };
 
-    // if (this.drmConfig) {
-    //   storageConfig.drm = {
-    //     servers: {
-    //       "com.microsoft.playready": `${this.drmConfig.licenseAcquisitionUrl}?ExpressPlayToken=${this.drmConfig.token}`,
-    //     },
-    //   };
-    //   console.log("[ShakaOfflineStore] DRM configured:", storageConfig.drm);
-    // } else {
-    //   console.log("[ShakaOfflineStore] DRM Not configured:", storageConfig.drm);
-    // }
-
+    // storageConfig.drm = {
+    //   servers: {
+    //     // "com.widevine.alpha":
+    //     //   "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwASkDFXKdQAJDZmNjUxZThlLWEyYjktNGM1MC04NjllLTliNWVhODJmYzhmNgAAAIC9rOEL5GSspB1mbkLQuEQufZw7FbJDLemT6HtFdbbi3Df9RssFIpb7gHQKtevJSETY9dOUqennKPNq2gu1vTEOqaxdshmpNQyCICQF63YF0kzMqX3MwEzy-x2VjSgPBLbkwRtN515dsG2Px6fxjoPtO3ryy_RNkkVv0w0jBtVWfrYQZgEvheE2s_IWcZAZcG6HbqLE&id=3c924393612b008478d0c38518430b6b6be32aba",
+    //     "com.microsoft.playready":
+    //       "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=CAASkDFXN4QAJDZmNjUxZThlLWEyYjktNGM1MC04NjllLTliNWVhODJmYzhmNgAAAJBSEZZ1cAxeeVWU2t-V2xQE2tVFQTkwaSg2HMzNbKzhDVKZWOH31c-Dpdg4_HUJXixaq3VUlO4E86x2Ui9TTfG8-WNtGYiPg4kwEvXplOabrNA42QPrslNP0Wh877rmqdsqu7eCayx_hKPf7Gtw29XmK7sFLLP_0HpO2h0B_wdIbsCys0aKtX0Gb8k9cpzxAGh5ehJn32OkUfi_wfqx-oGNx7Wn3Q&id=3c924393612b008478d0c38518430b6b6be32aba",
+    //   },
+    // };
     this.storage.configure(storageConfig);
 
     console.log("[ShakaOfflineStore] Storage configured");
@@ -97,12 +93,13 @@ class ShakaOfflineStore {
         console.error("[ShakaOfflineStore:store] Storage not initialized");
         return null;
       }
+      console.log(drmConfig, "WAS OBTAINED!");
       if (drmConfig) {
         console.log("[ShakaOfflineStore] Applying DRM config...");
         this.storage.configure({
           drm: {
             servers: {
-              "com.microsoft.playready": `${drmConfig.licenseAcquisitionUrl}?ExpressPlayToken=${drmConfig.token}`,
+              "com.microsoft.widevine": drmConfig.licenseAcquisitionUrl,
             },
           },
         });
@@ -110,6 +107,7 @@ class ShakaOfflineStore {
           "[ShakaOfflineStore] DRM configuration applied:",
           drmConfig
         );
+        console.log("Storage Configuration:", this.storage);
       } else {
         console.log("[ShakaOfflineStore] No DRM config provided.");
       }
