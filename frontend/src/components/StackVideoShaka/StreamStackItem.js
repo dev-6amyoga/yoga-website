@@ -793,35 +793,41 @@ function StreamStackItem({
 
   const loadVideo = useCallback(
     async (isDrm) => {
+      let offlineUri = await shakaOfflineStore.get(videoUrl);
       if (isDrm) {
-        let drmConfig = {};
-        let offlineUri = await shakaOfflineStore.get(videoUrl);
-        Fetch({
-          url: "/playback/get-widevine-token",
-          method: "POST",
-          token: false,
-        })
-          .then(async (res) => {
-            const data = res.data;
-            setDrmConfig(data);
-            drmConfig = data;
-            console.log("[StreamStackItem:loadVideo] Downloading video");
+        console.log("[StreamStackItem:loadVideo] DRM video processing");
+        // let offlineUri = await shakaOfflineStore.get(videoUrl);
+        try {
+          const drmResponse = await Fetch({
+            url: "/playback/get-widevine-token",
+            method: "POST",
+            token: false,
+          });
+
+          const drmConfig = drmResponse.data;
+          setDrmConfig(drmConfig);
+
+          if (!offlineUri) {
+            console.log("[StreamStackItem:loadVideo] Downloading DRM video");
             const offlineVideo = await shakaOfflineStore.store(
               videoUrl,
               videoTitle,
-              data
+              drmConfig
             );
             offlineUri = offlineVideo?.offlineUri;
-          })
-          .catch((err) => {
-            console.log("Error fetching DRM info :", err);
-          });
+          }
+        } catch (err) {
+          console.error(
+            "[StreamStackItem:loadVideo] Error fetching DRM info:",
+            err
+          );
+          throw err;
+        }
       } else {
         console.log(
           "[StreamStackItem:loadVideo] NON DRM video, trying offline mode"
         );
-
-        let offlineUri = await shakaOfflineStore.get(videoUrl);
+        // let offlineUri = await shakaOfflineStore.get(videoUrl);
         console.log(offlineUri, "IN DOWNLOADS");
         if (offlineUri === null || offlineUri === undefined) {
           console.log("[StreamStackItem:loadVideo] Downloading video");
