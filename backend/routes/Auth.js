@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const requestIp = require('request-ip')
 const auth = require('../oauth')
+const axios = require('axios')
 const { User: UserSQL } = require('../models/sql/User')
 const brypt = require('bcrypt')
 const {
@@ -986,6 +987,30 @@ router.get('/get-login-history', async (req, res) => {
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ error: 'Internal server error' })
+  }
+})
+
+router.get('/countries', async (req, res) => {
+  try {
+    const response = await axios.get('https://api.first.org/data/v1/countries')
+
+    // Extract the countries data and format it as per your structure
+    const countries = response.data.data
+    const formattedCountries = []
+
+    for (const [code, country] of Object.entries(countries)) {
+      // formattedCountries[code] = {
+      //   country: country.country,
+      //   region: country.region,
+      // }
+      formattedCountries.push(country.country)
+    }
+
+    // Return the formatted response
+    res.json(formattedCountries)
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ error: 'Failed to fetch country data' })
   }
 })
 module.exports = router
