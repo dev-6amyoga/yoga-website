@@ -148,6 +148,37 @@ export default function Register({ switchForm }) {
         } else {
           toast.error(response.data?.message);
         }
+      } else {
+        // register as teacher
+
+        const newUser = {
+          ...generalInfo,
+          role_name: "TEACHER",
+          is_google_login: !!googleInfo?.verified,
+        };
+
+        let url = "/auth/register";
+        if (googleInfo?.verified) {
+          url += "-google";
+          newUser.client_id = clientID;
+          newUser.jwt_token = googleInfo?.jwt_token;
+        }
+
+        const response = await FetchRetry({
+          url,
+          method: "POST",
+          data: newUser,
+          retryDelayMs: 1000,
+          n: 10,
+        });
+
+        if (response?.status === 200) {
+          handleLogin(newUser.username, newUser.password);
+          toast.success("New User added successfully!");
+          navigate("/auth");
+        } else {
+          toast.error(response.data?.message);
+        }
       }
     };
 
