@@ -1231,7 +1231,7 @@ function RegisterPlaylistForm() {
             method: "POST",
           });
           if (response?.status === 200) {
-            toast("Manifest Generated!");
+            toast("Manifest Generated");
             navigate("/admin/playlist/view-all");
           }
         } catch (error) {
