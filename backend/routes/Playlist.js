@@ -205,7 +205,7 @@ router.post('/playlists/createManifest/:playlistId', async (req, res) => {
         }
       })
 
-      // console.log(files);
+      console.log(files)
 
       // combine them
       let mpdCombiner = new MPDCombiner(files, null)
@@ -213,6 +213,7 @@ router.post('/playlists/createManifest/:playlistId', async (req, res) => {
       let [combinedManifest, totalDuration, sections] =
         await mpdCombiner.getCombinedManifest()
 
+      console.log(combinedManifest, totalDuration, sections)
       // console.log(combinedManifest, totalDuration, sections);
       // save the file to cloudflare
       await R2.cloudflareAddFile(

@@ -398,7 +398,7 @@ export const TransitionEndProne = async (
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
       let res = handleTransition([
-        "Vajrasana Dyanmudra To Relax Position Side",
+        "Vajrasana Dyanmudra To Relax Position",
         "Vajra To Prone Transition",
       ]);
       res = res.map((transition) => transition.transition_id);
@@ -407,7 +407,7 @@ export const TransitionEndProne = async (
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
       let res = handleTransition([
-        "Vajrasana Dyanmudra To Relax Position Side",
+        "Vajrasana Dyanmudra To Relax Position",
         "Vajra To Prone Transition",
         "Arms Straight Feet Together Prone Transition",
       ]);

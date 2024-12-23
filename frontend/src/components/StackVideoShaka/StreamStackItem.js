@@ -1,29 +1,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "shaka-player/dist/controls.css";
 import {
-	SEEK_TYPE_MARKER,
-	SEEK_TYPE_MOVE,
-	SEEK_TYPE_SEEK,
+  SEEK_TYPE_MARKER,
+  SEEK_TYPE_MOVE,
+  SEEK_TYPE_SEEK,
 } from "../../enums/seek_types";
 import {
-	ShakaPlayerFullscreen,
-	ShakaPlayerGoNext,
-	ShakaPlayerGoPrev,
-	ShakaPlayerGoSeekBackward,
-	ShakaPlayerGoSeekForward,
-	ShakaPlayerNextMarker,
-	ShakaPlayerPrevMarker,
-	ShakaPlayerToggleMode,
-	shakaStreamConfig,
-	shakaUIConfig,
+  ShakaPlayerFullscreen,
+  ShakaPlayerGoNext,
+  ShakaPlayerGoPrev,
+  ShakaPlayerGoSeekBackward,
+  ShakaPlayerGoSeekForward,
+  ShakaPlayerNextMarker,
+  ShakaPlayerPrevMarker,
+  ShakaPlayerToggleMode,
+  shakaStreamConfig,
+  shakaUIConfig,
 } from "../../lib/shaka-controls";
 import usePlaylistStore from "../../store/PlaylistStore";
 import useUserStore from "../../store/UserStore";
 import useVideoStore, {
-	STATE_VIDEO_ERROR,
-	STATE_VIDEO_LOADING,
-	STATE_VIDEO_PAUSED,
-	STATE_VIDEO_PLAY,
+  STATE_VIDEO_ERROR,
+  STATE_VIDEO_LOADING,
+  STATE_VIDEO_PAUSED,
+  STATE_VIDEO_PLAY,
 } from "../../store/VideoStore";
 import useWatchHistoryStore from "../../store/WatchHistoryStore";
 import { Fetch } from "../../utils/Fetch";
@@ -36,670 +36,577 @@ import shaka from "shaka-player/dist/shaka-player.ui";
 import { VIDEO_EVENT_PLAY_INACTIVE } from "../../enums/video_event";
 import { VIDEO_PAUSE_MARKER } from "../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../enums/video_view_modes";
+import useShakaOfflineStore from "../../store/ShakaOfflineStore";
 import useTimeStore from "../../store/TimeStore";
 
 // shakaL.log.setLogLevel(shaka.log.Level.V1);
 
 function StreamStackItem({
-	video,
-	isActive,
-	handleEnd,
-	handleLoading,
-	handlePlaybackError,
-	setDuration,
-	setVideoStateVisible,
-	handleFullscreen,
+  video,
+  isActive,
+  handleEnd,
+  handleLoading,
+  handlePlaybackError,
+  setDuration,
+  setVideoStateVisible,
+  handleFullscreen,
 }) {
-	const playerRef = useRef(null);
-	const storageRef = useRef(null);
-	const user = useUserStore((state) => state.user);
-	const commitTimeInterval = useRef(null);
-	const flushTimeInterval = useRef(null);
-	const [metadataLoaded, setMetadataLoaded] = useState(false);
-	const [autoplayInitialized, setAutoplayInitialized] = useState(false);
-	const [playerLoaded, setPlayerLoaded] = useState(false);
+  const playerRef = useRef(null);
+  const storageRef = useRef(null);
+  const user = useUserStore((state) => state.user);
+  const commitTimeInterval = useRef(null);
+  const flushTimeInterval = useRef(null);
+  const [metadataLoaded, setMetadataLoaded] = useState(false);
+  const [autoplayInitialized, setAutoplayInitialized] = useState(false);
+  const [playerLoaded, setPlayerLoaded] = useState(false);
+  const [drmConfig1, setDrmConfig] = useState({});
+  const shakaOfflineStore = useShakaOfflineStore(
+    (state) => state.shakaOfflineStore
+  );
 
-	useEffect(() => {
-		if (!playerRef.current) return;
-		storageRef.current = new shaka.offline.Storage(
-			playerRef.current.player
-		);
-		console.log("[OFFLINE] storage setup");
-		return () => {
-			if (storageRef.current) {
-				storageRef.current.destroy();
-				storageRef.current = null;
-			}
-		};
-	}, []);
+  // useEffect(() => {
+  // 	if (!playerRef.current) return;
+  // 	storageRef.current = new shaka.offline.Storage(
+  // 		playerRef.current.player
+  // 	);
+  // 	console.log("[OFFLINE] storage setup");
+  // 	return () => {
+  // 		if (storageRef.current) {
+  // 			storageRef.current.destroy();
+  // 			storageRef.current = null;
+  // 		}
+  // 	};
+  // }, []);
 
-	const videoUrl = useMemo(() => {
-		return (
-			(video?.video?.asana_dash_url ||
-				video?.video?.transition_dash_url ||
-				video?.video?.playlist_dash_url) ??
-			""
-		);
-	}, [video]);
+  const videoUrl = useMemo(() => {
+    return (
+      (video?.video?.asana_dash_url ||
+        video?.video?.transition_dash_url ||
+        video?.video?.playlist_dash_url) ??
+      ""
+    );
+  }, [video]);
 
-	// useEffect(() => {
-	//   console.log("[OFFLINE] to be downloaded : ", videoUrl);
+  const videoTitle = useMemo(() => {
+    return (
+      (video?.video?.asana_name ||
+        video?.video?.transition_video_name ||
+        video?.video?.playlist_name) ??
+      ""
+    );
+  }, [video]);
 
-	//   downloadVideo();
-	// }, [videoUrl]);
+  const isActiveRef = useRef(isActive);
 
-	const loadVideo = useCallback(async () => {
-		try {
-			console.log("[OFFLINE] load video : ", video);
+  useEffect(() => {
+    isActiveRef.current = isActive;
+    if (isActive) {
+      console.log(
+        "IS ACTIVE",
+        video?.idx,
+        playerRef.current.videoElement.currentTime
+      );
+    }
+    console.log({
+      isActive,
+      videoidx: video?.idx,
+      isActiveRef: isActiveRef.current,
+    });
+  }, [isActive, video]);
 
-			const isOffline = video?.offlineUri;
-			if (isOffline) {
-				console.log(
-					"[OFFLINE] Loading offline content:",
-					video.offlineUri
-				);
-				await playerRef.current.player.load(video.offlineUri);
-			} else {
-				console.log("[OFFLINE] Loading online content:", videoUrl);
-				await playerRef.current.player.load(videoUrl);
-			}
-			setMetadataLoaded(true);
-		} catch (error) {
-			console.error("[OFFLINE] Error loading video:", error);
-			handlePlaybackError(error);
-		}
-	}, [video, videoUrl, handlePlaybackError]);
+  useEffect(() => {
+    return () => {
+      if (playerRef.current.player) {
+        console.log("Unloading video");
+        playerRef.current.player.unload();
+      }
+    };
+  }, []);
 
-	// const downloadVideo = useCallback(async () => {
-	//   if (!storageRef.current || !videoUrl) {
-	//     console.error("[OFFLINE] Storage not initialized or video URL missing");
-	//     return;
-	//   }
+  const [
+    // seek queue
+    seekQueue,
+    popFromSeekQueue,
+    addToSeekQueue,
+    // current video
+    currentVideo,
+    // video state
+    videoState,
+    setVideoState,
+    // current time
+    // volume
+    volume,
+    setVolume,
+    // autoplay initialized
+    // autoplayInitialized,
+    // setAutoplayInitialized,
+    // video event
+    videoEvent,
+    setVideoEvent,
+    clearVideoEvent,
+    // markers
+    currentMarkerIdx,
+    setCurrentMarkerIdx,
+    autoSetCurrentMarkerIdx,
+    markers,
+    // view mode
+    viewMode,
+    setViewMode,
+    // pause reason
+    pauseReason,
+    setPauseReason,
+    // commitSeekTime
+    commitSeekTime,
+    setCommitSeekTime,
+    // devmode
+    devMode,
+    // fullScreen
+    fullScreen,
 
-	//   try {
-	//     console.log("[OFFLINE] Starting download...");
-	//     const offlineUri = await storageRef.current.store(videoUrl);
-	//     console.log("[OFFLINE] Download complete, offline URI:", offlineUri);
-	//   } catch (error) {
-	//     console.error("[OFFLINE] Error downloading video:", error);
-	//   }
-	// }, [videoUrl]);
+    // videoStarted
+    videoStarted,
+  ] = useVideoStore((state) => [
+    //
+    state.seekQueue,
+    state.popFromSeekQueue,
+    state.addToSeekQueue,
+    //
+    state.currentVideo,
+    //
+    state.videoState,
+    state.setVideoState,
+    //
+    state.volume,
+    state.setVolume,
+    //
+    // state.autoplayInitialized,
+    // state.setAutoplayInitialized,
+    //
+    state.videoEvent,
+    state.setVideoEvent,
+    state.clearVideoEvent,
+    //
+    state.currentMarkerIdx,
+    state.setCurrentMarkerIdx,
+    state.autoSetCurrentMarkerIdx,
+    state.markers,
+    //
+    state.viewMode,
+    state.setViewMode,
+    //
+    state.pauseReason,
+    state.setPauseReason,
+    //
+    state.commitSeekTime,
+    state.setCommitSeekTime,
+    //
+    state.devMode,
+    //
+    state.fullScreen,
 
-	// const downloadVideo = useCallback(async () => {
-	//   if (!storageRef.current || !videoUrl) {
-	//     console.error("[OFFLINE] Storage not initialized or video URL missing");
-	//     return null;
-	//   }
+    //
+    state.videoStarted,
+  ]);
 
-	//   try {
-	//     console.log("[OFFLINE] Starting download...");
-	//     const offlineUri = await storageRef.current.store(videoUrl);
-	//     console.log("[OFFLINE] Download complete, offline URI:", offlineUri);
-	//     return offlineUri;
-	//   } catch (error) {
-	//     console.error("[OFFLINE] Error downloading video:", error);
-	//     return null;
-	//   }
-	// }, [videoUrl]);
+  const [popFromQueue, popFromArchive] = usePlaylistStore((state) => [
+    state.popFromQueue,
+    state.popFromArchive,
+  ]);
 
-	async function downloadVideo(manifestUri, title) {
-		try {
-			const metadata = {
-				title: title,
-				downloaded: new Date().toISOString(),
-			};
+  const [setCurrentTime] = useTimeStore((state) => [state.setCurrentTime]);
 
-			console.log("[DOWNLOAD] Starting download for:", manifestUri);
-			const downloadResult = await window.Storage.store(
-				manifestUri,
-				metadata
-			).promise;
+  let [
+    enableWatchHistory,
+    setCommittedTs,
+    addToCommittedTs,
+    updateWatchTimeBuffer,
+    watchTimeBuffer,
+    appendToWatchTimeBuffer,
+    setWatchTimeBuffer,
+    flushWatchTimeBuffer,
+  ] = useWatchHistoryStore((state) => [
+    state.enableWatchHistory,
+    state.setCommittedTs,
+    state.addToCommittedTs,
+    state.updateWatchTimeBuffer,
+    state.watchTimeBuffer,
+    state.appendToWatchTimeBuffer,
+    state.setWatchTimeBuffer,
+    state.flushWatchTimeBuffer,
+  ]);
 
-			console.log("[DOWNLOAD] Completed successfully:", downloadResult);
-			return downloadResult;
-		} catch (error) {
-			console.error("[DOWNLOAD] Error during download:", error);
-			throw error;
-		}
-	}
+  const tryToPlay = useCallback(() => {
+    // toast(`Try to play called : ${isActiveRef.current}`, { type: "info" });
+    if (!isActiveRef.current) return;
 
-	const isActiveRef = useRef(isActive);
+    console.log("Try to play called", video.idx, Date.now());
+    playerRef.current.videoElement
+      .play()
+      .then((res) => {
+        console.log("Autoplay initialized", video.idx);
+        if (volume === 0 && !autoplayInitialized) {
+          console.log("Setting volume to 0.5");
+          playerRef.current.videoElement.muted = false;
+          playerRef.current.videoElement.volume = 1;
+          setAutoplayInitialized(true);
+        } else {
+          console.log("Setting volume to ", volume);
+          playerRef.current.videoElement.muted = false;
+          // playerRef.current.videoElement.volume = volume;
+        }
+      })
+      .catch((err) => {
+        console.error("Error autoplay : ", err, video.idx);
+        // toast("Error playing video", { type: "error" });
+        if (
+          playerRef.current.videoElement !== null &&
+          playerRef.current.videoElement !== undefined
+        ) {
+          console.log("Trying to play using mute", video.idx);
+          playerRef.current.videoElement.muted = true;
+          playerRef.current.videoElement
+            .play()
+            .then((res) => {
+              console.log("Autoplay initialized after muting", video.idx);
+              playerRef.current.videoElement.muted = false;
+              if (volume === 0 && !autoplayInitialized) {
+                console.log("Setting volume to 1");
+                playerRef.current.videoElement.muted = false;
+                playerRef.current.videoElement.volume = 1;
+                setAutoplayInitialized(true);
+              } else {
+                console.log("Setting volume to ", volume);
+                playerRef.current.videoElement.muted = false;
+                // playerRef.current.videoElement.volume = volume;
+              }
+            })
+            .catch((err) => {
+              console.error("Error autoplay (with mute)", err, video.idx);
+            });
+        }
+      });
+  }, [autoplayInitialized, setAutoplayInitialized, video]);
 
-	useEffect(() => {
-		isActiveRef.current = isActive;
-		if (isActive) {
-			console.log(
-				"IS ACTIVE",
-				video?.idx,
-				playerRef.current.videoElement.currentTime
-			);
-		}
-		console.log({
-			isActive,
-			videoidx: video?.idx,
-			isActiveRef: isActiveRef.current,
-		});
-	}, [isActive, video]);
+  // pause and reset the video when its not active
+  useEffect(() => {
+    const pr = playerRef.current.videoElement;
+    if (!isActive && pr && pr.currentTime > 0) {
+      //console.log("PAUSE AND RESET ----------------------------->", video.idx);
+      pr.muted = true;
+      setVolume(0);
+      // pr.currentTime = 0.04;
+      pr.pause();
+      // pr.currentTime = 0;
+    }
 
-	useEffect(() => {
-		return () => {
-			if (playerRef.current.player) {
-				console.log("Unloading video");
-				playerRef.current.player.unload();
-			}
-		};
-	}, []);
+    return () => {
+      if (pr && !isActive) {
+        // pr.currentTime = 0;
+      }
+      pr?.pause();
+    };
+  }, [isActive, video.queue_id, setVolume]);
 
-	const [
-		// seek queue
-		seekQueue,
-		popFromSeekQueue,
-		addToSeekQueue,
-		// current video
-		currentVideo,
-		// video state
-		videoState,
-		setVideoState,
-		// current time
-		// volume
-		volume,
-		setVolume,
-		// autoplay initialized
-		// autoplayInitialized,
-		// setAutoplayInitialized,
-		// video event
-		videoEvent,
-		setVideoEvent,
-		clearVideoEvent,
-		// markers
-		currentMarkerIdx,
-		setCurrentMarkerIdx,
-		autoSetCurrentMarkerIdx,
-		markers,
-		// view mode
-		viewMode,
-		setViewMode,
-		// pause reason
-		pauseReason,
-		setPauseReason,
-		// commitSeekTime
-		commitSeekTime,
-		setCommitSeekTime,
-		// devmode
-		devMode,
-		// fullScreen
-		fullScreen,
+  // if its active, set the duration
+  useEffect(() => {
+    if (isActive && metadataLoaded && playerLoaded) {
+      console.log(
+        "PLAYING ----------------------------->",
+        video,
+        video.video.id,
+        playerRef?.current.videoElement
+      );
+      if (playerRef.current.videoElement.currentTime > 0.0) {
+        playerRef.current.videoElement.currentTime = 0.0;
+        setCommitSeekTime(0.0);
+      }
+    }
+  }, [
+    isActive,
+    setDuration,
+    metadataLoaded,
+    video,
+    playerLoaded,
+    setCommitSeekTime,
+  ]);
 
-		// videoStarted
-		videoStarted,
-	] = useVideoStore((state) => [
-		//
-		state.seekQueue,
-		state.popFromSeekQueue,
-		state.addToSeekQueue,
-		//
-		state.currentVideo,
-		//
-		state.videoState,
-		state.setVideoState,
-		//
-		state.volume,
-		state.setVolume,
-		//
-		// state.autoplayInitialized,
-		// state.setAutoplayInitialized,
-		//
-		state.videoEvent,
-		state.setVideoEvent,
-		state.clearVideoEvent,
-		//
-		state.currentMarkerIdx,
-		state.setCurrentMarkerIdx,
-		state.autoSetCurrentMarkerIdx,
-		state.markers,
-		//
-		state.viewMode,
-		state.setViewMode,
-		//
-		state.pauseReason,
-		state.setPauseReason,
-		//
-		state.commitSeekTime,
-		state.setCommitSeekTime,
-		//
-		state.devMode,
-		//
-		state.fullScreen,
+  // change play/pause based on video state
+  useEffect(() => {
+    console.log("VIDEO_STATE_CHANGE", {
+      videoState,
+      isActive,
+      metadataLoaded,
+      autoplayInitialized,
+      idx: video.idx,
+    });
+    // console.trace();
+    if (
+      isActive &&
+      metadataLoaded &&
+      playerRef.current !== null &&
+      playerRef.current !== undefined
+    ) {
+      setPauseReason(null);
+      if (videoState === STATE_VIDEO_PAUSED) {
+        console.log("useEffect : changing to pause", video.idx);
+        playerRef.current.videoElement.pause();
+      } else if (videoState === STATE_VIDEO_PLAY) {
+        console.log("useEffect : changing to play", video.idx);
+        tryToPlay();
+      }
+    }
+  }, [
+    video,
+    metadataLoaded,
+    videoState,
+    isActive,
+    autoplayInitialized,
+    setAutoplayInitialized,
+    setPauseReason,
+    setVolume,
+    tryToPlay,
+  ]);
 
-		//
-		state.videoStarted,
-	]);
+  // pop from seek queue and update the time
+  useEffect(() => {
+    if (isActive && seekQueue.length > 0) {
+      const seekEvent = seekQueue[0];
+      console.log("SEEKING --->", seekEvent);
+      // setVideoState(STATE_VIDEO_PLAY)
+      // setPauseReason(null)
+      if (seekEvent && playerRef.current) {
+        switch (seekEvent.type) {
+          case SEEK_TYPE_SEEK:
+            let ct = playerRef.current.videoElement.currentTime + seekEvent.t;
+            if (ct > playerRef.current.videoElement.duration) {
+              handleEnd();
+              popFromSeekQueue(0);
+              return;
+            }
+            if (ct < 0) ct = 0;
 
-	const [popFromQueue, popFromArchive] = usePlaylistStore((state) => [
-		state.popFromQueue,
-		state.popFromArchive,
-	]);
+            playerRef.current.videoElement.currentTime = ct;
+            // console.log(
+            //   "SEEKING ----------------------------->",
+            //   playerRef.current.videoElement.currentTime
+            // );
+            setCommitSeekTime(ct);
+            // autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
+            // popFromSeekQueue(0)
+            break;
+          case SEEK_TYPE_MOVE:
+            let st = seekEvent.t < 0 ? 0 : seekEvent.t;
+            if (st > playerRef.current.videoElement.duration) {
+              handleEnd();
+              popFromSeekQueue(0);
+              return;
+            }
 
-	const [setCurrentTime] = useTimeStore((state) => [state.setCurrentTime]);
+            playerRef.current.videoElement.currentTime = st;
+            // console.log(
+            //   "SEEKING ----------------------------->",
+            //   playerRef.current.videoElement.currentTime
+            // );
+            setCommitSeekTime(st);
+            // autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
+            // popFromSeekQueue(0)
+            break;
+          case SEEK_TYPE_MARKER:
+            if (seekEvent.t > playerRef.current.videoElement.duration) {
+              handleEnd();
+              popFromSeekQueue(0);
+              return;
+            }
 
-	let [
-		enableWatchHistory,
-		setCommittedTs,
-		addToCommittedTs,
-		updateWatchTimeBuffer,
-		watchTimeBuffer,
-		appendToWatchTimeBuffer,
-		setWatchTimeBuffer,
-		flushWatchTimeBuffer,
-	] = useWatchHistoryStore((state) => [
-		state.enableWatchHistory,
-		state.setCommittedTs,
-		state.addToCommittedTs,
-		state.updateWatchTimeBuffer,
-		state.watchTimeBuffer,
-		state.appendToWatchTimeBuffer,
-		state.setWatchTimeBuffer,
-		state.flushWatchTimeBuffer,
-	]);
+            playerRef.current.videoElement.currentTime = seekEvent.t;
+            // popFromSeekQueue(0)
+            setCommitSeekTime(seekEvent.t);
+            break;
+          default:
+            break;
+        }
+        addToCommittedTs(playerRef.current?.videoElement.currentTime);
+      }
+    }
+  }, [
+    isActive,
+    seekQueue,
+    popFromSeekQueue,
+    addToCommittedTs,
+    setVideoEvent,
+    setCurrentMarkerIdx,
+    autoSetCurrentMarkerIdx,
+    setCommitSeekTime,
+    setVideoState,
+    setPauseReason,
+    popFromQueue,
+    handleEnd,
+  ]);
 
-	const tryToPlay = useCallback(() => {
-		// toast(`Try to play called : ${isActiveRef.current}`, { type: "info" });
-		if (!isActiveRef.current) return;
+  // poll to update the current time, every 20ms, clear the timeout on unmount
+  useEffect(() => {
+    const checkSeek = (ct) => {
+      // check if seekQueue length is greater than 0,
+      // check if the current time is === to the marker time
+      // console.log("Checking seek", ct, commitSeekTime, seekQueue.length);
+      if (seekQueue.length > 0 && commitSeekTime.toFixed(0) === ct.toFixed(0)) {
+        if (isActive) handleLoading(false, isActive);
+        autoSetCurrentMarkerIdx(commitSeekTime);
+        return true;
+      } else {
+        return false;
+      }
+    };
 
-		console.log("Try to play called", video.idx, Date.now());
-		playerRef.current.videoElement
-			.play()
-			.then((res) => {
-				console.log("Autoplay initialized", video.idx);
-				if (volume === 0 && !autoplayInitialized) {
-					console.log("Setting volume to 0.5");
-					playerRef.current.videoElement.muted = false;
-					playerRef.current.videoElement.volume = 1;
-					setAutoplayInitialized(true);
-				} else {
-					console.log("Setting volume to ", volume);
-					playerRef.current.videoElement.muted = false;
-					// playerRef.current.videoElement.volume = volume;
-				}
-			})
-			.catch((err) => {
-				console.error("Error autoplay : ", err, video.idx);
-				// toast("Error playing video", { type: "error" });
-				if (
-					playerRef.current.videoElement !== null &&
-					playerRef.current.videoElement !== undefined
-				) {
-					console.log("Trying to play using mute", video.idx);
-					playerRef.current.videoElement.muted = true;
-					playerRef.current.videoElement
-						.play()
-						.then((res) => {
-							console.log(
-								"Autoplay initialized after muting",
-								video.idx
-							);
-							playerRef.current.videoElement.muted = false;
-							if (volume === 0 && !autoplayInitialized) {
-								console.log("Setting volume to 1");
-								playerRef.current.videoElement.muted = false;
-								playerRef.current.videoElement.volume = 1;
-								setAutoplayInitialized(true);
-							} else {
-								console.log("Setting volume to ", volume);
-								playerRef.current.videoElement.muted = false;
-								// playerRef.current.videoElement.volume = volume;
-							}
-						})
-						.catch((err) => {
-							console.error(
-								"Error autoplay (with mute)",
-								err,
-								video.idx
-							);
-						});
-				}
-			});
-	}, [autoplayInitialized, setAutoplayInitialized, video]);
+    const checkPauseOrLoop = (ct) => {
+      // console.log("checkPauseOrLoop : ", ct, viewMode);
+      if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
+        // console.log("STUDENT --------->");
+        return false;
+      } else {
+        // console.log("TEACHER --------->");
+        // either pause or loop
+        let currentMarker = markers[currentMarkerIdx];
 
-	// pause and reset the video when its not active
-	useEffect(() => {
-		const pr = playerRef.current.videoElement;
-		if (!isActive && pr && pr.currentTime > 0) {
-			//console.log("PAUSE AND RESET ----------------------------->", video.idx);
-			pr.muted = true;
-			setVolume(0);
-			// pr.currentTime = 0.04;
-			pr.pause();
-			// pr.currentTime = 0;
-		}
+        if (currentMarkerIdx === markers.length - 1) {
+          return false;
+        } else if (ct > markers[currentMarkerIdx + 1]?.timestamp) {
+          if (currentMarker.loop) {
+            console.log("LOOPING CUZ OF MARKER");
+            addToSeekQueue({
+              type: SEEK_TYPE_MARKER,
+              t: currentMarker.timestamp,
+            });
+            return true;
+          } else {
+            console.log("PAUSING CUZ OF MARKER");
+            setVideoState(STATE_VIDEO_PAUSED);
+            setPauseReason(VIDEO_PAUSE_MARKER);
+            return true;
+          }
+        }
+      }
+    };
 
-		return () => {
-			if (pr && !isActive) {
-				// pr.currentTime = 0;
-			}
-			pr?.pause();
-		};
-	}, [isActive, video.queue_id, setVolume]);
+    const int = setInterval(() => {
+      if (playerRef.current?.videoElement?.currentTime && isActive) {
+        if (checkSeek(playerRef.current?.videoElement?.currentTime)) {
+          popFromSeekQueue(0);
+          setVideoState(STATE_VIDEO_PLAY);
+          return;
+        }
 
-	// if its active, set the duration
-	useEffect(() => {
-		if (isActive && metadataLoaded && playerLoaded) {
-			console.log(
-				"PLAYING ----------------------------->",
-				video,
-				video.video.id,
-				playerRef?.current.videoElement
-			);
-			if (playerRef.current.videoElement.currentTime > 0.0) {
-				playerRef.current.videoElement.currentTime = 0.0;
-				setCommitSeekTime(0.0);
-			}
-		}
-	}, [
-		isActive,
-		setDuration,
-		metadataLoaded,
-		video,
-		playerLoaded,
-		setCommitSeekTime,
-	]);
+        // pause if currenttime is greater than the timestamp of next?
+        if (
+          videoState !== STATE_VIDEO_LOADING &&
+          checkPauseOrLoop(playerRef.current?.videoElement?.currentTime)
+        ) {
+          return;
+        }
 
-	// change play/pause based on video state
-	useEffect(() => {
-		console.log("VIDEO_STATE_CHANGE", {
-			videoState,
-			isActive,
-			metadataLoaded,
-			autoplayInitialized,
-			idx: video.idx,
-		});
-		// console.trace();
-		if (
-			isActive &&
-			metadataLoaded &&
-			playerRef.current !== null &&
-			playerRef.current !== undefined
-		) {
-			setPauseReason(null);
-			if (videoState === STATE_VIDEO_PAUSED) {
-				console.log("useEffect : changing to pause", video.idx);
-				playerRef.current.videoElement.pause();
-			} else if (videoState === STATE_VIDEO_PLAY) {
-				console.log("useEffect : changing to play", video.idx);
-				tryToPlay();
-			}
-		}
-	}, [
-		video,
-		metadataLoaded,
-		videoState,
-		isActive,
-		autoplayInitialized,
-		setAutoplayInitialized,
-		setPauseReason,
-		setVolume,
-		tryToPlay,
-	]);
+        if (
+          videoState !== STATE_VIDEO_LOADING ||
+          videoState !== STATE_VIDEO_ERROR ||
+          videoState !== STATE_VIDEO_PAUSED
+        ) {
+          autoSetCurrentMarkerIdx(playerRef.current?.videoElement?.currentTime);
+        }
 
-	// pop from seek queue and update the time
-	useEffect(() => {
-		if (isActive && seekQueue.length > 0) {
-			const seekEvent = seekQueue[0];
-			console.log("SEEKING --->", seekEvent);
-			// setVideoState(STATE_VIDEO_PLAY)
-			// setPauseReason(null)
-			if (seekEvent && playerRef.current) {
-				switch (seekEvent.type) {
-					case SEEK_TYPE_SEEK:
-						let ct =
-							playerRef.current.videoElement.currentTime +
-							seekEvent.t;
-						if (ct > playerRef.current.videoElement.duration) {
-							handleEnd();
-							popFromSeekQueue(0);
-							return;
-						}
-						if (ct < 0) ct = 0;
+        // before 0.05 seconds of video end, add a video event
+        // to play the inactive video
+        // console.log(
+        // 	"VIDEO_EVENT_PLAY_INACTIVE : ",
+        // 	playerRef.current?.videoElement?.currentTime -
+        // 		playerRef.current?.videoElement?.duration
+        // );
+        if (
+          viewMode === VIDEO_VIEW_STUDENT_MODE &&
+          playerRef.current?.videoElement?.duration -
+            playerRef.current?.videoElement?.currentTime <
+            0.1
+        ) {
+          console.log("VIDEO_EVENT_PLAY_INACTIVE");
+          if (videoEvent.length === 0) {
+            console.log("[StreamStackItem] Video event play inactive", {
+              currentTime: playerRef.current?.videoElement?.currentTime,
+              duration: playerRef.current?.videoElement?.duration,
+            });
+            setVideoEvent({
+              t: VIDEO_EVENT_PLAY_INACTIVE,
+            });
+          }
+        }
 
-						playerRef.current.videoElement.currentTime = ct;
-						// console.log(
-						//   "SEEKING ----------------------------->",
-						//   playerRef.current.videoElement.currentTime
-						// );
-						setCommitSeekTime(ct);
-						// autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
-						// popFromSeekQueue(0)
-						break;
-					case SEEK_TYPE_MOVE:
-						let st = seekEvent.t < 0 ? 0 : seekEvent.t;
-						if (st > playerRef.current.videoElement.duration) {
-							handleEnd();
-							popFromSeekQueue(0);
-							return;
-						}
+        setCurrentTime(playerRef.current?.videoElement?.currentTime);
+        setVolume(playerRef.current?.videoElement?.volume);
+      }
+    }, 50);
 
-						playerRef.current.videoElement.currentTime = st;
-						// console.log(
-						//   "SEEKING ----------------------------->",
-						//   playerRef.current.videoElement.currentTime
-						// );
-						setCommitSeekTime(st);
-						// autoSetCurrentMarkerIdx(playerRef.current?.currentTime)
-						// popFromSeekQueue(0)
-						break;
-					case SEEK_TYPE_MARKER:
-						if (
-							seekEvent.t >
-							playerRef.current.videoElement.duration
-						) {
-							handleEnd();
-							popFromSeekQueue(0);
-							return;
-						}
+    return () => {
+      // console.log('CLEANING INTERVAL --------------------------------------->')
+      clearInterval(int);
+    };
+  }, [
+    currentVideo,
+    isActive,
+    setCurrentTime,
+    videoState,
+    popFromSeekQueue,
+    autoSetCurrentMarkerIdx,
+    seekQueue,
+    setVideoEvent,
+    setCurrentMarkerIdx,
+    markers,
+    viewMode,
+    currentMarkerIdx,
+    setVideoState,
+    addToSeekQueue,
+    commitSeekTime,
+    setPauseReason,
+    handleLoading,
+    setVolume,
+    videoEvent,
+  ]);
 
-						playerRef.current.videoElement.currentTime =
-							seekEvent.t;
-						// popFromSeekQueue(0)
-						setCommitSeekTime(seekEvent.t);
-						break;
-					default:
-						break;
-				}
-				addToCommittedTs(playerRef.current?.videoElement.currentTime);
-			}
-		}
-	}, [
-		isActive,
-		seekQueue,
-		popFromSeekQueue,
-		addToCommittedTs,
-		setVideoEvent,
-		setCurrentMarkerIdx,
-		autoSetCurrentMarkerIdx,
-		setCommitSeekTime,
-		setVideoState,
-		setPauseReason,
-		popFromQueue,
-		handleEnd,
-	]);
+  const flushWatchTimeBufferE = useCallback(
+    (user_id) => {
+      const watch_time_logs = [...watchTimeBuffer];
 
-	// poll to update the current time, every 20ms, clear the timeout on unmount
-	useEffect(() => {
-		const checkSeek = (ct) => {
-			// check if seekQueue length is greater than 0,
-			// check if the current time is === to the marker time
-			// console.log("Checking seek", ct, commitSeekTime, seekQueue.length);
-			if (
-				seekQueue.length > 0 &&
-				commitSeekTime.toFixed(0) === ct.toFixed(0)
-			) {
-				if (isActive) handleLoading(false, isActive);
-				autoSetCurrentMarkerIdx(commitSeekTime);
-				return true;
-			} else {
-				return false;
-			}
-		};
+      // console.log({ watch_time_logs });
+      if (watch_time_logs.length === 0) {
+        return;
+      }
 
-		const checkPauseOrLoop = (ct) => {
-			// console.log("checkPauseOrLoop : ", ct, viewMode);
-			if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
-				// console.log("STUDENT --------->");
-				return false;
-			} else {
-				// console.log("TEACHER --------->");
-				// either pause or loop
-				let currentMarker = markers[currentMarkerIdx];
+      Fetch({
+        url: "/watch-time/update",
+        method: "POST",
+        token: true,
+        data: {
+          user_id: user_id,
+          watch_time_logs,
+          institute_id: null,
+        },
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            console.log("watch time buffer flushed");
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          localStorage.setItem(
+            "6amyoga_watch_time_logs",
+            JSON.stringify(watch_time_logs)
+          );
+          appendToWatchTimeBuffer(watch_time_logs);
+        });
 
-				if (currentMarkerIdx === markers.length - 1) {
-					return false;
-				} else if (ct > markers[currentMarkerIdx + 1]?.timestamp) {
-					if (currentMarker.loop) {
-						console.log("LOOPING CUZ OF MARKER");
-						addToSeekQueue({
-							type: SEEK_TYPE_MARKER,
-							t: currentMarker.timestamp,
-						});
-						return true;
-					} else {
-						console.log("PAUSING CUZ OF MARKER");
-						setVideoState(STATE_VIDEO_PAUSED);
-						setPauseReason(VIDEO_PAUSE_MARKER);
-						return true;
-					}
-				}
-			}
-		};
+      setWatchTimeBuffer([]);
+    },
+    [appendToWatchTimeBuffer, watchTimeBuffer, setWatchTimeBuffer]
+  );
 
-		const int = setInterval(() => {
-			if (playerRef.current?.videoElement?.currentTime && isActive) {
-				if (checkSeek(playerRef.current?.videoElement?.currentTime)) {
-					popFromSeekQueue(0);
-					setVideoState(STATE_VIDEO_PLAY);
-					return;
-				}
-
-				// pause if currenttime is greater than the timestamp of next?
-				if (
-					videoState !== STATE_VIDEO_LOADING &&
-					checkPauseOrLoop(
-						playerRef.current?.videoElement?.currentTime
-					)
-				) {
-					return;
-				}
-
-				if (
-					videoState !== STATE_VIDEO_LOADING ||
-					videoState !== STATE_VIDEO_ERROR ||
-					videoState !== STATE_VIDEO_PAUSED
-				) {
-					autoSetCurrentMarkerIdx(
-						playerRef.current?.videoElement?.currentTime
-					);
-				}
-
-				// before 0.05 seconds of video end, add a video event
-				// to play the inactive video
-				// console.log(
-				// 	"VIDEO_EVENT_PLAY_INACTIVE : ",
-				// 	playerRef.current?.videoElement?.currentTime -
-				// 		playerRef.current?.videoElement?.duration
-				// );
-				if (
-					viewMode === VIDEO_VIEW_STUDENT_MODE &&
-					playerRef.current?.videoElement?.duration -
-						playerRef.current?.videoElement?.currentTime <
-						0.1
-				) {
-					console.log("VIDEO_EVENT_PLAY_INACTIVE");
-					if (videoEvent.length === 0) {
-						console.log(
-							"[StreamStackItem] Video event play inactive",
-							{
-								currentTime:
-									playerRef.current?.videoElement
-										?.currentTime,
-								duration:
-									playerRef.current?.videoElement?.duration,
-							}
-						);
-						setVideoEvent({
-							t: VIDEO_EVENT_PLAY_INACTIVE,
-						});
-					}
-				}
-
-				setCurrentTime(playerRef.current?.videoElement?.currentTime);
-				setVolume(playerRef.current?.videoElement?.volume);
-			}
-		}, 50);
-
-		return () => {
-			// console.log('CLEANING INTERVAL --------------------------------------->')
-			clearInterval(int);
-		};
-	}, [
-		currentVideo,
-		isActive,
-		setCurrentTime,
-		videoState,
-		popFromSeekQueue,
-		autoSetCurrentMarkerIdx,
-		seekQueue,
-		setVideoEvent,
-		setCurrentMarkerIdx,
-		markers,
-		viewMode,
-		currentMarkerIdx,
-		setVideoState,
-		addToSeekQueue,
-		commitSeekTime,
-		setPauseReason,
-		handleLoading,
-		setVolume,
-		videoEvent,
-	]);
-
-	const flushWatchTimeBufferE = useCallback(
-		(user_id) => {
-			const watch_time_logs = [...watchTimeBuffer];
-
-			// console.log({ watch_time_logs });
-			if (watch_time_logs.length === 0) {
-				return;
-			}
-
-			Fetch({
-				url: "/watch-time/update",
-				method: "POST",
-				token: true,
-				data: {
-					user_id: user_id,
-					watch_time_logs,
-					institute_id: null,
-				},
-			})
-				.then((res) => {
-					if (res.status === 200) {
-						console.log("watch time buffer flushed");
-					}
-				})
-				.catch((err) => {
-					console.log(err);
-					localStorage.setItem(
-						"6amyoga_watch_time_logs",
-						JSON.stringify(watch_time_logs)
-					);
-					appendToWatchTimeBuffer(watch_time_logs);
-				});
-
-			setWatchTimeBuffer([]);
-		},
-		[appendToWatchTimeBuffer, watchTimeBuffer, setWatchTimeBuffer]
-	);
-
-	/* 
+  /* 
 		when video changes
 		- flush 
 		- reset committedTs
@@ -709,542 +616,535 @@ function StreamStackItem({
 		- start interval timer to commit time [5s]
 	*/
 
-	useEffect(() => {
-		console.log("Watch time useEffect : ", enableWatchHistory);
-		if (isActive && enableWatchHistory && user && video) {
-			console.log("setting up stuff");
-			// console.log('CURRENT VIDEO', video)
-			// flushing
-			flushWatchTimeBuffer(user?.user_id);
+  useEffect(() => {
+    console.log("Watch time useEffect : ", enableWatchHistory);
+    if (isActive && enableWatchHistory && user && video) {
+      console.log("setting up stuff");
+      // console.log('CURRENT VIDEO', video)
+      // flushing
+      flushWatchTimeBuffer(user?.user_id);
 
-			// resetting committedTs
-			// setCommittedTs(0);
+      // resetting committedTs
+      // setCommittedTs(0);
 
-			// clearing previous interval to flush
-			if (flushTimeInterval.current) {
-				clearInterval(flushTimeInterval.current);
-			}
+      // clearing previous interval to flush
+      if (flushTimeInterval.current) {
+        clearInterval(flushTimeInterval.current);
+      }
 
-			// clearing previous commitTimeInterval
-			if (commitTimeInterval.current) {
-				clearInterval(commitTimeInterval.current);
-			}
+      // clearing previous commitTimeInterval
+      if (commitTimeInterval.current) {
+        clearInterval(commitTimeInterval.current);
+      }
 
-			// TODO : send to watch history
-			// Fetch({
-			// 	url: "/watch-history/create",
-			// 	method: "POST",
-			// 	// TODO : fix thiss
-			// 	data: {
-			// 		user_id: user?.user_id,
-			// 		asana_id: video?.video?.id,
-			// 		playlist_id: video?.video?.playlist_id,
-			// 	},
-			// })
-			// 	.then((res) => {
-			// 		console.log("watch history created", res.data);
-			// 	})
-			// 	.catch((err) => {
-			// 		console.log(err);
-			// 	});
-			console.log("Starting watch time intervals!");
-			// starting interval timer to flush watch duration buffer
-			flushTimeInterval.current = setInterval(() => {
-				flushWatchTimeBuffer(user?.user_id, video?.video?.playlist_id);
-				// flushWatchTimeBufferE(user?.user_id);
-			}, 7000);
+      // TODO : send to watch history
+      // Fetch({
+      // 	url: "/watch-history/create",
+      // 	method: "POST",
+      // 	// TODO : fix thiss
+      // 	data: {
+      // 		user_id: user?.user_id,
+      // 		asana_id: video?.video?.id,
+      // 		playlist_id: video?.video?.playlist_id,
+      // 	},
+      // })
+      // 	.then((res) => {
+      // 		console.log("watch history created", res.data);
+      // 	})
+      // 	.catch((err) => {
+      // 		console.log(err);
+      // 	});
+      console.log("Starting watch time intervals!");
+      // starting interval timer to flush watch duration buffer
+      flushTimeInterval.current = setInterval(() => {
+        flushWatchTimeBuffer(user?.user_id, video?.video?.playlist_id);
+        // flushWatchTimeBufferE(user?.user_id);
+      }, 7000);
 
-			// starting interval timer to commit time
-			commitTimeInterval.current = setInterval(() => {
-				// TODO : fix this
-				updateWatchTimeBuffer({
-					user_id: user?.user_id,
-					asana_id: video?.video?.id,
-					playlist_id: video?.video?.playlist_id,
-					currentTime: playerRef?.current?.videoElement?.currentTime,
-				});
-				console.log(
-					"WATCH HISTORY ct : ",
-					playerRef?.current?.videoElement?.currentTime
-				);
-				addToCommittedTs(
-					playerRef?.current?.videoElement?.currentTime ?? 0
-				);
-			}, 3500);
-		} else {
-			if (flushTimeInterval.current) {
-				clearInterval(flushTimeInterval.current);
-			}
+      // starting interval timer to commit time
+      commitTimeInterval.current = setInterval(() => {
+        // TODO : fix this
+        updateWatchTimeBuffer({
+          user_id: user?.user_id,
+          asana_id: video?.video?.id,
+          playlist_id: video?.video?.playlist_id,
+          currentTime: playerRef?.current?.videoElement?.currentTime,
+        });
+        console.log(
+          "WATCH HISTORY ct : ",
+          playerRef?.current?.videoElement?.currentTime
+        );
+        addToCommittedTs(playerRef?.current?.videoElement?.currentTime ?? 0);
+      }, 3500);
+    } else {
+      if (flushTimeInterval.current) {
+        clearInterval(flushTimeInterval.current);
+      }
 
-			if (commitTimeInterval.current) {
-				clearInterval(commitTimeInterval.current);
-			}
-		}
+      if (commitTimeInterval.current) {
+        clearInterval(commitTimeInterval.current);
+      }
+    }
 
-		return () => {
-			console.log("Clearing watch time intervals!");
-			if (flushTimeInterval.current) {
-				clearInterval(flushTimeInterval.current);
-			}
+    return () => {
+      console.log("Clearing watch time intervals!");
+      if (flushTimeInterval.current) {
+        clearInterval(flushTimeInterval.current);
+      }
 
-			if (commitTimeInterval.current) {
-				clearInterval(commitTimeInterval.current);
-			}
-		};
-	}, [
-		isActive,
-		enableWatchHistory,
-		user,
-		video,
-		updateWatchTimeBuffer,
-		addToCommittedTs,
-		setCommittedTs,
-		flushWatchTimeBuffer,
-	]);
+      if (commitTimeInterval.current) {
+        clearInterval(commitTimeInterval.current);
+      }
+    };
+  }, [
+    isActive,
+    enableWatchHistory,
+    user,
+    video,
+    updateWatchTimeBuffer,
+    addToCommittedTs,
+    setCommittedTs,
+    flushWatchTimeBuffer,
+  ]);
 
-	// video events to play inactive video
-	useEffect(() => {
-		if (videoEvent.length > 0 && !isActive) {
-			const event = videoEvent[0];
-			if (event?.t === VIDEO_EVENT_PLAY_INACTIVE) {
-				console.log("[DASH PLAYER] : [INACTIVE] play event received");
-				// play the video
-				playerRef?.current?.videoElement.play();
-			}
-			clearVideoEvent();
-		}
-	}, [videoEvent, isActive, clearVideoEvent, setVideoState]);
+  // video events to play inactive video
+  useEffect(() => {
+    if (videoEvent.length > 0 && !isActive) {
+      const event = videoEvent[0];
+      if (event?.t === VIDEO_EVENT_PLAY_INACTIVE) {
+        console.log("[DASH PLAYER] : [INACTIVE] play event received");
+        // play the video
+        playerRef?.current?.videoElement.play();
+      }
+      clearVideoEvent();
+    }
+  }, [videoEvent, isActive, clearVideoEvent, setVideoState]);
 
-	const handlePlayerLoading = useCallback(
-		(e) => {
-			handleLoading(true, isActiveRef.current);
-		},
-		[handleLoading]
-	);
+  const handlePlayerLoading = useCallback(
+    (e) => {
+      handleLoading(true, isActiveRef.current);
+    },
+    [handleLoading]
+  );
 
-	const handlePlayerLoaded = useCallback(
-		(e) => {
-			handleLoading(false, isActiveRef.current);
-		},
-		[handleLoading]
-	);
+  const handlePlayerLoaded = useCallback(
+    (e) => {
+      handleLoading(false, isActiveRef.current);
+    },
+    [handleLoading]
+  );
 
-	// video events
-	const handleVideoSeeking = useCallback(
-		(e) => {
-			console.log("Seeking...", e.target.currentTime); // Log current time and seek reason
-			handleLoading(true, isActiveRef.current);
-		},
-		[handleLoading]
-	);
+  // video events
+  const handleVideoSeeking = useCallback(
+    (e) => {
+      console.log("Seeking...", e.target.currentTime); // Log current time and seek reason
+      handleLoading(true, isActiveRef.current);
+    },
+    [handleLoading]
+  );
 
-	const handleVideoSeeked = useCallback(
-		(e) => {
-			console.log("Seeked...");
-			setVideoState(STATE_VIDEO_PLAY);
-		},
-		[setVideoState]
-	);
+  const handleVideoSeeked = useCallback(
+    (e) => {
+      console.log("Seeked...");
+      setVideoState(STATE_VIDEO_PLAY);
+    },
+    [setVideoState]
+  );
 
-	const handleVideoCanPlayThrough = useCallback((e) => {
-		const state = useVideoStore.getState();
-		console.log("Can play through...", state.videoState);
-		// tryToPlay();
+  const handleVideoCanPlayThrough = useCallback((e) => {
+    const state = useVideoStore.getState();
+    console.log("Can play through...", state.videoState);
+    // tryToPlay();
 
-		if (!state.videoStarted) state.setVideoStarted(true);
-	}, []);
+    if (!state.videoStarted) state.setVideoStarted(true);
+  }, []);
 
-	// set the volume
-	const handleVideoVolumeChange = useCallback(() => {
-		if (playerRef.current !== null && playerRef.current.videoElement) {
-			setVolume(playerRef.current.videoElement.volume || 0);
-		}
-	}, [setVolume]);
+  // set the volume
+  const handleVideoVolumeChange = useCallback(() => {
+    if (playerRef.current !== null && playerRef.current.videoElement) {
+      setVolume(playerRef.current.videoElement.volume || 0);
+    }
+  }, [setVolume]);
 
-	const handleNextVideo = useCallback(() => {
-		popFromQueue(0);
-	}, [popFromQueue]);
+  const handleNextVideo = useCallback(() => {
+    popFromQueue(0);
+  }, [popFromQueue]);
 
-	const handlePrevVideo = useCallback(() => {
-		popFromArchive(-1);
-	}, [popFromArchive]);
+  const handlePrevVideo = useCallback(() => {
+    popFromArchive(-1);
+  }, [popFromArchive]);
 
-	const handleSeekFoward = useCallback(() => {
-		addToSeekQueue({ t: 5, type: "seek" });
-	}, [addToSeekQueue]);
+  const handleSeekFoward = useCallback(() => {
+    addToSeekQueue({ t: 5, type: "seek" });
+  }, [addToSeekQueue]);
 
-	const handleSeekBackward = useCallback(() => {
-		addToSeekQueue({ t: -5, type: "seek" });
-	}, [addToSeekQueue]);
+  const handleSeekBackward = useCallback(() => {
+    addToSeekQueue({ t: -5, type: "seek" });
+  }, [addToSeekQueue]);
 
-	const playerOnError = useCallback(
-		(e) => {
-			console.log("[StreamStackItem:error] Error playing video", e);
-			setVideoState(STATE_VIDEO_ERROR);
-			// alert(JSON.stringify({ err: e }));
-		},
-		[setVideoState]
-	);
+  const playerOnError = useCallback(
+    (e) => {
+      console.log("[StreamStackItem:error] Error playing video", e);
+      setVideoState(STATE_VIDEO_ERROR);
+      // alert(JSON.stringify({ err: e }));
+    },
+    [setVideoState]
+  );
 
-	const playerInit = useCallback(
-		async (ref) => {
-			console.log("player init called", ref);
-			if (ref != null) {
-				// console.log("Player init, setting loading to true", video?.idx);
-				// setVideoState(STATE_VIDEO_LOADING);
-				playerRef.current = ref;
+  const loadVideo = useCallback(
+    async (isDrm) => {
+      let offlineUri = await shakaOfflineStore.get(videoUrl);
+      if (isDrm) {
+        console.log("[StreamStackItem:loadVideo] DRM video processing");
+        // let offlineUri = await shakaOfflineStore.get(videoUrl);
+        try {
+          const drmResponse = await Fetch({
+            url: "/playback/get-widevine-token",
+            method: "POST",
+            token: false,
+          });
 
-				// setPlayerRefSet({ done: true, ts: Date.now() });
-				// player events
+          const drmConfig = drmResponse.data;
+          setDrmConfig(drmConfig);
 
-				// console.log("[OFFLINE] Offline storage initialized.");
+          if (!offlineUri) {
+            console.log("[StreamStackItem:loadVideo] Downloading DRM video");
+            const offlineVideo = await shakaOfflineStore.store(
+              videoUrl,
+              videoTitle,
+              drmConfig
+            );
+            offlineUri = offlineVideo?.offlineUri;
+          }
+        } catch (err) {
+          console.error(
+            "[StreamStackItem:loadVideo] Error fetching DRM info:",
+            err
+          );
+          throw err;
+        }
+      } else {
+        console.log(
+          "[StreamStackItem:loadVideo] NON DRM video, trying offline mode"
+        );
+        // let offlineUri = await shakaOfflineStore.get(videoUrl);
+        console.log(offlineUri, "IN DOWNLOADS");
+        if (offlineUri === null || offlineUri === undefined) {
+          console.log("[StreamStackItem:loadVideo] Downloading video");
+          const offlineVideo = await shakaOfflineStore.store(
+            videoUrl,
+            videoTitle
+          );
+          offlineUri = offlineVideo?.offlineUri;
+        }
 
-				const check = isMobileTablet();
-				const isMobile = { done: true, check: check };
-				console.log("Checking for isMobile", isMobile);
+        if (offlineUri) {
+          playerRef.current.player
+            .load(offlineUri)
+            .then(() => {
+              console.log("[StreamStackItem:loadVideo] Offline video loaded");
+              setMetadataLoaded(true);
+            })
+            .catch(playerOnError);
+        } else {
+          console.error(
+            "[StreamStackItem:loadVideo] Failed to download video, falling back to online URL"
+          );
 
-				if (playerRef.current.ui) {
-					console.log("Setting up UI");
-					shaka.ui.Controls.registerElement(
-						"next",
-						new ShakaPlayerGoNext.Factory(handleNextVideo)
-					);
-					shaka.ui.Controls.registerElement(
-						"prev",
-						new ShakaPlayerGoPrev.Factory(handlePrevVideo)
-					);
-					shaka.ui.Controls.registerElement(
-						"seek_forward",
-						new ShakaPlayerGoSeekForward.Factory(handleSeekFoward)
-					);
-					shaka.ui.Controls.registerElement(
-						"seek_backward",
-						new ShakaPlayerGoSeekBackward.Factory(
-							handleSeekBackward
-						)
-					);
-					shaka.ui.Controls.registerElement(
-						"toggle_mode",
-						new ShakaPlayerToggleMode.Factory()
-					);
-					shaka.ui.Controls.registerElement(
-						"prev_marker",
-						new ShakaPlayerPrevMarker.Factory()
-					);
-					shaka.ui.Controls.registerElement(
-						"next_marker",
-						new ShakaPlayerNextMarker.Factory()
-					);
-					shaka.ui.Controls.registerElement(
-						"custom_fullscreen",
-						new ShakaPlayerFullscreen.Factory(handleFullscreen)
-					);
+          playerRef.current.player
+            .preload(videoUrl)
+            .then((preloadManager) => {
+              playerRef.current.player
+                .load(preloadManager)
+                .then(() => {
+                  //console.log("Video Loaded");
+                  setMetadataLoaded(true);
+                })
+                .catch(playerOnError);
+            })
+            .catch(playerOnError);
+        }
+      }
+      if (offlineUri) {
+        playerRef.current.player
+          .load(offlineUri)
+          .then(() => {
+            console.log("[StreamStackItem:loadVideo] Offline video loaded");
+            setMetadataLoaded(true);
+          })
+          .catch(playerOnError);
+      } else {
+        console.error(
+          "[StreamStackItem:loadVideo] Failed to download video, falling back to online URL"
+        );
 
-					playerRef.current.ui.configure(shakaUIConfig);
-				}
+        playerRef.current.player
+          .preload(videoUrl)
+          .then((preloadManager) => {
+            playerRef.current.player
+              .load(preloadManager)
+              .then(() => {
+                //console.log("Video Loaded");
+                setMetadataLoaded(true);
+              })
+              .catch(playerOnError);
+          })
+          .catch(playerOnError);
+      }
+    },
+    [playerOnError, videoUrl, videoTitle, shakaOfflineStore, setMetadataLoaded]
+  );
 
-				if (playerRef.current.videoElement) {
-					console.log("Setting up videoElement events");
-					playerRef.current.videoElement.addEventListener(
-						"seeking",
-						handleVideoSeeking
-					);
-					playerRef.current.videoElement.addEventListener(
-						"seeked",
-						handleVideoSeeked
-					);
+  const playerInit = useCallback(
+    async (ref) => {
+      console.log("player init called", ref);
+      if (ref != null) {
+        // console.log("Player init, setting loading to true", video?.idx);
+        // setVideoState(STATE_VIDEO_LOADING);
+        playerRef.current = ref;
 
-					playerRef.current.videoElement.addEventListener(
-						"volumechange",
-						handleVideoVolumeChange
-					);
+        // setPlayerRefSet({ done: true, ts: Date.now() });
+        // player events
 
-					playerRef.current.videoElement.addEventListener(
-						"canplaythrough",
-						handleVideoCanPlayThrough
-					);
+        // console.log("[OFFLINE] Offline storage initialized.");
 
-					playerRef.current.videoElement.addEventListener(
-						"ended",
-						handleEnd
-					);
-				}
+        const check = isMobileTablet();
+        const isMobile = { done: true, check: check };
+        console.log("Checking for isMobile", isMobile);
 
-				if (playerRef.current.player) {
-					console.log("Setting up player events");
-					playerRef.current.player.addEventListener(
-						"loading",
-						handlePlayerLoading
-					);
+        if (playerRef.current.ui) {
+          console.log("Setting up UI");
+          shaka.ui.Controls.registerElement(
+            "next",
+            new ShakaPlayerGoNext.Factory(handleNextVideo)
+          );
+          shaka.ui.Controls.registerElement(
+            "prev",
+            new ShakaPlayerGoPrev.Factory(handlePrevVideo)
+          );
+          shaka.ui.Controls.registerElement(
+            "seek_forward",
+            new ShakaPlayerGoSeekForward.Factory(handleSeekFoward)
+          );
+          shaka.ui.Controls.registerElement(
+            "seek_backward",
+            new ShakaPlayerGoSeekBackward.Factory(handleSeekBackward)
+          );
+          shaka.ui.Controls.registerElement(
+            "toggle_mode",
+            new ShakaPlayerToggleMode.Factory()
+          );
+          shaka.ui.Controls.registerElement(
+            "prev_marker",
+            new ShakaPlayerPrevMarker.Factory()
+          );
+          shaka.ui.Controls.registerElement(
+            "next_marker",
+            new ShakaPlayerNextMarker.Factory()
+          );
+          shaka.ui.Controls.registerElement(
+            "custom_fullscreen",
+            new ShakaPlayerFullscreen.Factory(handleFullscreen)
+          );
 
-					playerRef.current.player.addEventListener(
-						"loaded",
-						handlePlayerLoaded
-					);
+          playerRef.current.ui.configure(shakaUIConfig);
+        }
 
-					playerRef.current.player.addEventListener(
-						"statechange",
-						(e) => {
-							console.log(
-								"State Change",
-								e.newstate,
-								isActiveRef.current === null
-									? "null"
-									: isActiveRef.current
-							);
-							if (isActiveRef.current) {
-								switch (e.newstate) {
-									case "buffering":
-										handleLoading(
-											true,
-											isActiveRef.current
-										);
-										break;
+        if (playerRef.current.videoElement) {
+          console.log("Setting up videoElement events");
+          playerRef.current.videoElement.addEventListener(
+            "seeking",
+            handleVideoSeeking
+          );
+          playerRef.current.videoElement.addEventListener(
+            "seeked",
+            handleVideoSeeked
+          );
 
-									case "playing":
-										// if (useVideoStore.getState().pauseReason === VIDEO_PAUSE_MARKER) {
-										// 	setPauseReason(null);
-										// }
-										setVideoState(STATE_VIDEO_PLAY);
-										break;
+          playerRef.current.videoElement.addEventListener(
+            "volumechange",
+            handleVideoVolumeChange
+          );
 
-									case "paused":
-										// setVideoState(STATE_VIDEO_PAUSED);
-										break;
+          playerRef.current.videoElement.addEventListener(
+            "canplaythrough",
+            handleVideoCanPlayThrough
+          );
 
-									default:
-										break;
-								}
-							}
-						}
-					);
+          playerRef.current.videoElement.addEventListener("ended", handleEnd);
+        }
 
-					// playerRef.current.player.configure(
-					// 	"manifest.dash.ignoreMinBufferTime",
-					// 	true
-					// );
+        if (playerRef.current.player) {
+          console.log("Setting up player events");
+          playerRef.current.player.addEventListener(
+            "loading",
+            handlePlayerLoading
+          );
 
-					// stream settings
-					playerRef.current.player.configure(shakaStreamConfig);
+          playerRef.current.player.addEventListener(
+            "loaded",
+            handlePlayerLoaded
+          );
 
-					//console.log("Fetching DRM Info");
-					//fetch only if it is not a transition video
+          playerRef.current.player.addEventListener("statechange", (e) => {
+            console.log(
+              "State Change",
+              e.newstate,
+              isActiveRef.current === null ? "null" : isActiveRef.current
+            );
+            if (isActiveRef.current) {
+              switch (e.newstate) {
+                case "buffering":
+                  handleLoading(true, isActiveRef.current);
+                  break;
 
-					if (
-						(!isNaN(video?.video?.id) &&
-							typeof video?.video?.id === "number" &&
-							video?.video?.drm_video) ||
-						String(video?.video?.transition_video_name)
-							.toLowerCase()
-							.search(/(drm)/) !== -1 ||
-						video?.video?.drm_playlist
-					) {
-						//   if (!isNaN(video.video.id) && typeof video.video.id !== "number") {
-						if (isMobile.check) {
-							Fetch({
-								url: "/playback/get-widevine-token",
-								method: "POST",
-								token: false,
-							})
-								.then(async (res) => {
-									const data = res.data;
-									// console.log(data);
+                case "playing":
+                  // if (useVideoStore.getState().pauseReason === VIDEO_PAUSE_MARKER) {
+                  // 	setPauseReason(null);
+                  // }
+                  setVideoState(STATE_VIDEO_PLAY);
+                  break;
 
-									if (data && data.licenseAcquisitionUrl) {
-										// Mobile
-										playerRef.current.player.configure({
-											drm: {
-												servers: {
-													"com.widevine.alpha":
-														data.licenseAcquisitionUrl,
-												},
-											},
-										});
+                case "paused":
+                  // setVideoState(STATE_VIDEO_PAUSED);
+                  break;
 
-										/*
-										console.log(
-											"[OFFLINE] getting ready for download"
-										);
-										const offlineUri = await downloadVideo(
-											videoUrl,
-											"new"
-										);
-										if (offlineUri) {
-											console.log(offlineUri);
-											playerRef.current.player
-												.load(offlineUri)
-												.then(() => {
-													console.log(
-														"Offline video loaded"
-													);
-													setMetadataLoaded(true);
-												})
-												.catch(playerOnError);
-										} else {
-											console.error(
-												"Failed to download video, falling back to online URL"
-											);
-											playerRef.current.player
-												.load(videoUrl)
-												.then(() => {
-													console.log(
-														"Online video loaded"
-													);
-													setMetadataLoaded(true);
-												})
-												.catch(playerOnError);
-										}
-                    */
+                default:
+                  break;
+              }
+            }
+          });
 
-										playerRef.current.player
-											.load(videoUrl)
-											.then((res) => {
-												console.log("Video Loaded");
-												setMetadataLoaded(true);
-											})
-											.catch((err) => {
-												playerOnError(err);
-											});
-									}
-								})
-								.catch((err) => {
-									console.log(
-										"Error fetching DRM info :",
-										err
-									);
-								});
-						} else {
-							console.log("Fetching Playready Token");
-							Fetch({
-								url: "/playback/get-playready-token",
-								method: "POST",
-								token: false,
-							})
-								.then(async (res) => {
-									const data = res.data;
-									if (
-										data &&
-										data.licenseAcquisitionUrl &&
-										data.token
-									) {
-										// Non Mobile
-										playerRef.current.player.configure({
-											drm: {
-												servers: {
-													"com.microsoft.playready":
-														data.licenseAcquisitionUrl +
-														"?ExpressPlayToken=" +
-														data.token,
-												},
-											},
-										});
-										/*
-										console.log(
-											"[OFFLINE] getting ready for download"
-										);
-										const offlineUri = await downloadVideo(
-											videoUrl,
-											"new"
-										);
-										if (offlineUri) {
-											console.log(offlineUri);
-											playerRef.current.player
-												.load(offlineUri) // Load the offline URI
-												.then(() => {
-													console.log(
-														"Offline video loaded"
-													);
-													setMetadataLoaded(true);
-												})
-												.catch(playerOnError);
-										} else {
-											console.error(
-												"Failed to download video, falling back to online URL"
-											);
-											playerRef.current.player
-												.load(videoUrl) // Fallback to online URL if download fails
-												.then(() => {
-													console.log(
-														"Online video loaded"
-													);
-													setMetadataLoaded(true);
-												})
-												.catch(playerOnError);
-										}
-                    */
-										playerRef.current.player
-											.load(videoUrl)
-											.then((res) => {
-												setMetadataLoaded(true);
-											})
-											.catch((err) => {
-												playerOnError(err);
-											});
-									}
-								})
-								.catch((err) => {
-									console.log(
-										"Error fetching DRM info :",
-										err
-									);
-								});
-						}
-					} else {
-						console.log("no drm");
-						/*
+          // playerRef.current.player.configure(
+          // 	"manifest.dash.ignoreMinBufferTime",
+          // 	true
+          // );
+
+          // stream settings
+          playerRef.current.player.configure(shakaStreamConfig);
+
+          //console.log("Fetching DRM Info");
+          //fetch only if it is not a transition video
+
+          if (
+            (!isNaN(video?.video?.id) &&
+              typeof video?.video?.id === "number" &&
+              video?.video?.drm_video) ||
+            String(video?.video?.transition_video_name)
+              .toLowerCase()
+              .search(/(drm)/) !== -1 ||
+            video?.video?.drm_playlist
+          ) {
+            //   if (!isNaN(video.video.id) && typeof video.video.id !== "number") {
+            if (!isMobile.check) {
+              Fetch({
+                url: "/playback/get-widevine-token",
+                method: "POST",
+                token: false,
+              })
+                .then(async (res) => {
+                  const data = res.data;
+                  console.log(data);
+                  setDrmConfig(data);
+                  if (data && data.licenseAcquisitionUrl) {
+                    // Mobile
+                    playerRef.current.player.configure({
+                      drm: {
+                        servers: {
+                          "com.widevine.alpha": data.licenseAcquisitionUrl,
+                        },
+                      },
+                    });
+
+                    loadVideo(true);
+                  }
+                })
+                .catch((err) => {
+                  console.log("Error fetching DRM info :", err);
+                });
+            } else {
+              console.log("Fetching Playready Token");
+              Fetch({
+                url: "/playback/get-playready-token",
+                method: "POST",
+                token: false,
+              })
+                .then(async (res) => {
+                  const data = res.data;
+                  console.log(data);
+                  if (data && data.licenseAcquisitionUrl && data.token) {
+                    // Non Mobile
+                    const drmConfig = {
+                      licenseAcquisitionUrl: data.licenseAcquisitionUrl,
+                      token: data.token,
+                    };
+                    console.log(
+                      "[ShakaOfflineStore] setting drm config:",
+                      drmConfig
+                    );
+                    useShakaOfflineStore.getState().setDrmConfig(drmConfig);
+                    playerRef.current.player.configure({
+                      drm: {
+                        servers: {
+                          "com.microsoft.playready":
+                            data.licenseAcquisitionUrl +
+                            "?ExpressPlayToken=" +
+                            data.token,
+                        },
+                      },
+                    });
+
+                    loadVideo(true);
+                  }
+                })
+                .catch((err) => {
+                  console.log("Error fetching DRM info :", err);
+                });
+            }
+          } else {
+            console.log("no drm");
+            /*
 						console.log("[OFFLINE] getting ready for download");
 						const offlineUri = await downloadVideo(videoUrl, "new");
 						if (offlineUri) {
 							console.log(offlineUri);
 						}
             */
-						playerRef.current.player
-							.preload(videoUrl)
-							.then((preloadManager) => {
-								playerRef.current.player
-									.load(preloadManager)
-									.then(() => {
-										//console.log("Video Loaded");
-										setMetadataLoaded(true);
-									})
-									.catch(playerOnError);
-							})
-							.catch(playerOnError);
-					}
-				}
-				setPlayerLoaded(true);
-			}
-		},
-		[
-			video,
-			videoUrl,
-			handleNextVideo,
-			handlePrevVideo,
-			handleSeekFoward,
-			handleSeekBackward,
-			playerOnError,
-			handlePlayerLoaded,
-			handlePlayerLoading,
-			handleVideoSeeking,
-			handleVideoSeeked,
-			handleVideoVolumeChange,
-			handleVideoCanPlayThrough,
-			handleEnd,
-			handleFullscreen,
-			handleLoading,
-			setVideoState,
-		]
-	);
+            loadVideo(false);
+          }
+        }
+        setPlayerLoaded(true);
+      }
+    },
+    [
+      video,
+      videoUrl,
+      handleNextVideo,
+      handlePrevVideo,
+      handleSeekFoward,
+      handleSeekBackward,
+      playerOnError,
+      handlePlayerLoaded,
+      handlePlayerLoading,
+      handleVideoSeeking,
+      handleVideoSeeked,
+      handleVideoVolumeChange,
+      handleVideoCanPlayThrough,
+      handleEnd,
+      handleFullscreen,
+      handleLoading,
+      setVideoState,
+      shakaOfflineStore,
+    ]
+  );
 
-	return (
-		<div
-			className={`relative h-full w-full ${isActive ? "block" : "invisible"}`}>
-			<ShakaPlayer
-				ref={playerInit}
-				className="custom-shaka w-full h-full"
-			/>
-		</div>
-	);
+  return (
+    <div
+      className={`relative h-full w-full ${isActive ? "block" : "invisible"}`}
+    >
+      <ShakaPlayer ref={playerInit} className="custom-shaka w-full h-full" />
+    </div>
+  );
 }
 
 export default StreamStackItem;

@@ -1232,11 +1232,11 @@ function RegisterPlaylistForm() {
           });
           if (response?.status === 200) {
             toast("Manifest Generated!");
+            navigate("/admin/playlist/view-all");
           }
         } catch (error) {
           console.log(error);
         }
-        // navigate("/admin/playlist/view-all");
       } else {
         console.error("Failed to add playlist");
       }

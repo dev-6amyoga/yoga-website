@@ -771,7 +771,7 @@ export const TransitionEndPranayama = async (
     if (break_status_start === "No Break") {
       if (start_video.teacher_mode == true) {
         let res = handleTransition([
-          "Vajrasana Dyanmudra To Relax Position Side",
+          "Vajrasana Dyanmudra To Relax Position",
           "Vajra To Sitting Transition",
           "Pranayama Start Sitting",
         ]);
@@ -780,7 +780,7 @@ export const TransitionEndPranayama = async (
         return res;
       }
       let res = handleTransition([
-        "Vajrasana Dyanmudra To Relax Position Side",
+        "Vajrasana Dyanmudra To Relax Position",
         "Vajra To Sitting Transition",
         "Pranayama Start Sitting",
       ]);

@@ -1,7 +1,8 @@
 import React from "react";
 import shaka from "shaka-player/dist/shaka-player.ui";
-import useVideoStore from "../../store/VideoStore";
 import ShakaOfflineStore from "../../lib/offline-storage";
+import useShakaOfflineStore from "../../store/ShakaOfflineStore";
+import { Fetch } from "../../utils/Fetch";
 /**
  * A React component for shaka-player.
  * @param {string} src
@@ -14,23 +15,21 @@ import ShakaOfflineStore from "../../lib/offline-storage";
  * @constructor
  */
 function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
-  console.log("[ShakaPlayer] Props passed to ShakaPlayer:", {
-    src,
-    config,
-    chromeless,
-    className,
-    rest,
-  });
+  React.useEffect(() => {
+    console.log("[ShakaPlayer] Props passed to ShakaPlayer:", {
+      src,
+      config,
+      chromeless,
+      className,
+      rest,
+    });
+  }, [src, config, chromeless, className, rest]);
 
   const uiContainerRef = React.useRef(null);
   const videoRef = React.useRef(null);
-  // const storageRef = React.useRef(null);
 
-  const [contentList, setContentList] = React.useState([]);
-  const [downloadProgress, setDownloadProgress] = React.useState(0);
-
-  const setShakaOfflineStore = useVideoStore(
-    (state) => state.setShakaOfflineStore
+  const [setShakaOfflineStore, setDownloadProgress] = useShakaOfflineStore(
+    (state) => [state.setShakaOfflineStore, state.setDownloadProgress]
   );
 
   const [player, setPlayer] = React.useState(null);
@@ -39,9 +38,9 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
   // Effect to handle component mount & mount.
   // Not related to the src prop, this hook creates a shaka.Player instance.
   // This should always be the first effect to run.
-  React.useEffect(async () => {
+  React.useEffect(() => {
     const player = new shaka.Player(videoRef.current);
-    setPlayer(player);
+
     console.log("HELLO THIS IS PLAYER!!!");
     // await ShakaOfflineStore.deleteAll();
 
@@ -53,13 +52,30 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
         uiContainerRef.current,
         videoRef.current
       );
-      setUi(ui);
     }
 
     // setup player storage
     console.log("[ShakaPlayer] Setting up storage");
     const storage = new shaka.offline.Storage(player);
-    setShakaOfflineStore(new ShakaOfflineStore(storage));
+
+    // TODO : remove reset of storage
+    shaka.offline.Storage.deleteAll()
+      .then((res) => {
+        console.log("All content deleted", res);
+      })
+      .catch((err) => {
+        console.error("Error deleting all content", err);
+      });
+
+    const shakaOfflineStore = new ShakaOfflineStore(
+      storage,
+      (content, progress) => {
+        setDownloadProgress(progress);
+      }
+    );
+    setShakaOfflineStore(shakaOfflineStore);
+    setPlayer(player);
+    setUi(ui);
 
     // const content = await storage.store("test:sintel").promise;
     // expect(content).toBeTruthy();
@@ -73,15 +89,18 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
     //   await player.load(contentUri);
 
     return () => {
+      console.log("[ShakaPlayer] Cleaning up ShakaPlayer");
       player.destroy();
       if (ui) {
+        console.log("[ShakaPlayer] Cleaning up UI");
         ui.destroy();
       }
-      if (storage) {
-        storage.destroy();
+      if (shakaOfflineStore) {
+        console.log("[ShakaPlayer] Cleaning up ShakaPlayerOfflineStore");
+        shakaOfflineStore.destroy();
       }
     };
-  }, [chromeless]);
+  }, [chromeless, setDownloadProgress, setPlayer, setShakaOfflineStore]);
 
   // Keep shaka.Player.configure in sync.
   React.useEffect(() => {

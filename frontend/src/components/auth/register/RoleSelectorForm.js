@@ -1,4 +1,5 @@
 import { Briefcase, UserCheck } from "@geist-ui/icons";
+import SchoolIcon from "@mui/icons-material/School";
 
 export default function RoleSelectorForm({ role, setRole, handleNextStep }) {
   return (
@@ -22,16 +23,15 @@ export default function RoleSelectorForm({ role, setRole, handleNextStep }) {
         {/* enable for institute */}
         <div
           className={`flex items-center gap-2 flex-col p-8 border rounded-lg ${
-            role === "INSTITUTE_OWNER" ? "border-blue-500" : ""
+            role === "TEACHER" ? "border-blue-500" : ""
           }`}
-          disabled
-          // onClick={() => {
-          //   setRole("INSTITUTE_OWNER");
-          //   handleNextStep();
-          // }}
+          onClick={() => {
+            setRole("TEACHER");
+            handleNextStep();
+          }}
         >
-          <Briefcase />
-          Institute
+          <SchoolIcon />
+          Teacher
         </div>
       </div>
     </form>
