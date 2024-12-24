@@ -338,7 +338,7 @@ export const TransitionEndVajrasana = async (
       let res = handleTransition([
         "Prone Breath After Asana",
         "Prone To Vajra Transition",
-        "Vajrasana Relax To Dyanmudra Position Side",
+        "Vajrasana Relax To Dyanmudra Position",
       ]);
       res = res.map((transition) => transition.transition_id);
       res = res.filter((element) => element !== undefined);
@@ -359,7 +359,7 @@ export const TransitionEndVajrasana = async (
         "Fold Hands Feet Apart Prone Transition",
         "Prone Breath After Asana",
         "Prone To Vajra Transition",
-        "Vajrasana Relax To Dyanmudra Position Side",
+        "Vajrasana Relax To Dyanmudra Position",
       ]);
       res = res.map((transition) => transition.transition_id);
       res = res.filter((element) => element !== undefined);
