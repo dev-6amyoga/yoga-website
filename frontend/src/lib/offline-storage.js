@@ -9,10 +9,6 @@ class ShakaOfflineStore {
     this.progress = 0;
 
     this.progressHook = progressHook;
-
-    // const [drmConfig] = useShakaOfflineStore((state) => [state.drmConfig]);
-
-    // console.log("[ShakaOfflineStore] Configuring drm", drmConfig);
     console.log("[ShakaOfflineStore] Configuring storage");
     const storageConfig = {
       offline: {
@@ -22,17 +18,7 @@ class ShakaOfflineStore {
         usePersistentLicense: this.usePersistentLicense,
       },
     };
-
-    // storageConfig.drm = {
-    //   servers: {
-    //     // "com.widevine.alpha":
-    //     //   "https://wv.service.expressplay.com/hms/wv/rights/?ExpressPlayToken=BwASkDFXKdQAJDZmNjUxZThlLWEyYjktNGM1MC04NjllLTliNWVhODJmYzhmNgAAAIC9rOEL5GSspB1mbkLQuEQufZw7FbJDLemT6HtFdbbi3Df9RssFIpb7gHQKtevJSETY9dOUqennKPNq2gu1vTEOqaxdshmpNQyCICQF63YF0kzMqX3MwEzy-x2VjSgPBLbkwRtN515dsG2Px6fxjoPtO3ryy_RNkkVv0w0jBtVWfrYQZgEvheE2s_IWcZAZcG6HbqLE&id=3c924393612b008478d0c38518430b6b6be32aba",
-    //     "com.microsoft.playready":
-    //       "https://pr.service.expressplay.com/playready/RightsManager.asmx?ExpressPlayToken=CAASkDFXN4QAJDZmNjUxZThlLWEyYjktNGM1MC04NjllLTliNWVhODJmYzhmNgAAAJBSEZZ1cAxeeVWU2t-V2xQE2tVFQTkwaSg2HMzNbKzhDVKZWOH31c-Dpdg4_HUJXixaq3VUlO4E86x2Ui9TTfG8-WNtGYiPg4kwEvXplOabrNA42QPrslNP0Wh877rmqdsqu7eCayx_hKPf7Gtw29XmK7sFLLP_0HpO2h0B_wdIbsCys0aKtX0Gb8k9cpzxAGh5ehJn32OkUfi_wfqx-oGNx7Wn3Q&id=3c924393612b008478d0c38518430b6b6be32aba",
-    //   },
-    // };
     this.storage.configure(storageConfig);
-
     console.log("[ShakaOfflineStore] Storage configured");
   }
 
