@@ -94,23 +94,23 @@ class ShakaOfflineStore {
         return null;
       }
       console.log(drmConfig, "WAS OBTAINED!");
-      // if (drmConfig) {
-      //   console.log("[ShakaOfflineStore] Applying DRM config...");
-      //   this.storage.configure({
-      //     drm: {
-      //       servers: {
-      //         "com.microsoft.widevine": drmConfig.licenseAcquisitionUrl,
-      //       },
-      //     },
-      //   });
-      //   console.log(
-      //     "[ShakaOfflineStore] DRM configuration applied:",
-      //     drmConfig
-      //   );
-      //   console.log("Storage Configuration:", this.storage);
-      // } else {
-      //   console.log("[ShakaOfflineStore] No DRM config provided.");
-      // }
+      if (drmConfig) {
+        console.log("[ShakaOfflineStore] Applying DRM config...");
+        this.storage.configure({
+          drm: {
+            servers: {
+              "com.microsoft.widevine": drmConfig.licenseAcquisitionUrl,
+            },
+          },
+        });
+        console.log(
+          "[ShakaOfflineStore] DRM configuration applied:",
+          drmConfig
+        );
+        console.log("Storage Configuration:", this.storage);
+      } else {
+        console.log("[ShakaOfflineStore] No DRM config provided.");
+      }
 
       const metadata = {
         title: title,
