@@ -791,105 +791,178 @@ function StreamStackItem({
     [setVideoState]
   );
 
+  // const loadVideo = useCallback(
+  //   async (isDrm) => {
+  //     let offlineUri = await shakaOfflineStore.get(videoUrl);
+  //     if (isDrm) {
+  //       console.log("[StreamStackItem:loadVideo] DRM video processing");
+  //       // let offlineUri = await shakaOfflineStore.get(videoUrl);
+  //       try {
+  //         const drmResponse = await Fetch({
+  //           url: "/playback/get-widevine-token",
+  //           method: "POST",
+  //           token: false,
+  //         });
+
+  //         const drmConfig = drmResponse.data;
+  //         setDrmConfig(drmConfig);
+
+  //         if (!offlineUri) {
+  //           console.log("[StreamStackItem:loadVideo] Downloading DRM video");
+  //           const offlineVideo = await shakaOfflineStore.store(
+  //             videoUrl,
+  //             videoTitle,
+  //             drmConfig
+  //           );
+  //           offlineUri = offlineVideo?.offlineUri;
+  //         }
+  //       } catch (err) {
+  //         console.error(
+  //           "[StreamStackItem:loadVideo] Error fetching DRM info:",
+  //           err
+  //         );
+  //         throw err;
+  //       }
+  //     } else {
+  //       console.log(
+  //         "[StreamStackItem:loadVideo] NON DRM video, trying offline mode"
+  //       );
+  //       let offlineUri = await shakaOfflineStore.get(videoUrl);
+  //       console.log(offlineUri, "IN DOWNLOADS");
+  //       if (offlineUri === null || offlineUri === undefined) {
+  //         console.log("[StreamStackItem:loadVideo] Downloading video");
+  //         const offlineVideo = await shakaOfflineStore.store(
+  //           videoUrl,
+  //           videoTitle
+  //         );
+  //         offlineUri = offlineVideo?.offlineUri;
+  //       }
+
+  //       if (offlineUri) {
+  //         console.log("loading now!!", offlineUri);
+  //         playerRef.current.player
+  //           .load(offlineUri)
+  //           .then(() => {
+  //             console.log("[StreamStackItem:loadVideo] Offline video loaded");
+  //             setMetadataLoaded(true);
+  //           })
+  //           .catch(playerOnError);
+  //       } else {
+  //         console.error(
+  //           "[StreamStackItem:loadVideo] Failed to download video, falling back to online URL"
+  //         );
+
+  //         playerRef.current.player
+  //           .preload(videoUrl)
+  //           .then((preloadManager) => {
+  //             playerRef.current.player
+  //               .load(preloadManager)
+  //               .then(() => {
+  //                 //console.log("Video Loaded");
+  //                 setMetadataLoaded(true);
+  //               })
+  //               .catch(playerOnError);
+  //           })
+  //           .catch(playerOnError);
+  //       }
+  //     }
+  //     if (offlineUri) {
+  //       playerRef.current.player
+  //         .load(offlineUri)
+  //         .then(() => {
+  //           console.log("[StreamStackItem:loadVideo] Offline video loaded");
+  //           setMetadataLoaded(true);
+  //         })
+  //         .catch(playerOnError);
+  //     } else {
+  //       console.error(
+  //         "[StreamStackItem:loadVideo] Failed to download video, falling back to online URL"
+  //       );
+
+  //       playerRef.current.player
+  //         .preload(videoUrl)
+  //         .then((preloadManager) => {
+  //           playerRef.current.player
+  //             .load(preloadManager)
+  //             .then(() => {
+  //               //console.log("Video Loaded");
+  //               setMetadataLoaded(true);
+  //             })
+  //             .catch(playerOnError);
+  //         })
+  //         .catch(playerOnError);
+  //     }
+  //   },
+  //   [playerOnError, videoUrl, videoTitle, shakaOfflineStore, setMetadataLoaded]
+  // );
+
   const loadVideo = useCallback(
     async (isDrm) => {
-      let offlineUri = await shakaOfflineStore.get(videoUrl);
-      if (isDrm) {
-        console.log("[StreamStackItem:loadVideo] DRM video processing");
-        // let offlineUri = await shakaOfflineStore.get(videoUrl);
-        try {
-          const drmResponse = await Fetch({
-            url: "/playback/get-widevine-token",
-            method: "POST",
-            token: false,
-          });
+      try {
+        let offlineUri = await shakaOfflineStore.get(videoUrl);
 
-          const drmConfig = drmResponse.data;
-          setDrmConfig(drmConfig);
+        if (isDrm) {
+          console.log("[StreamStackItem:loadVideo] DRM video processing");
+          try {
+            const drmResponse = await Fetch({
+              url: "/playback/get-widevine-token",
+              method: "POST",
+              token: false,
+            });
+
+            const drmConfig = drmResponse.data;
+            setDrmConfig(drmConfig);
+
+            if (!offlineUri) {
+              console.log("[StreamStackItem:loadVideo] Downloading DRM video");
+              const offlineVideo = await shakaOfflineStore.store(
+                videoUrl,
+                videoTitle,
+                drmConfig
+              );
+              offlineUri = offlineVideo?.offlineUri;
+            }
+          } catch (err) {
+            console.error(
+              "[StreamStackItem:loadVideo] Error fetching DRM info:",
+              err
+            );
+            throw err;
+          }
+        } else {
+          console.log(
+            "[StreamStackItem:loadVideo] NON DRM video, trying offline mode"
+          );
 
           if (!offlineUri) {
-            console.log("[StreamStackItem:loadVideo] Downloading DRM video");
+            console.log("[StreamStackItem:loadVideo] Downloading video");
             const offlineVideo = await shakaOfflineStore.store(
               videoUrl,
-              videoTitle,
-              drmConfig
+              videoTitle
             );
             offlineUri = offlineVideo?.offlineUri;
           }
-        } catch (err) {
-          console.error(
-            "[StreamStackItem:loadVideo] Error fetching DRM info:",
-            err
-          );
-          throw err;
-        }
-      } else {
-        console.log(
-          "[StreamStackItem:loadVideo] NON DRM video, trying offline mode"
-        );
-        // let offlineUri = await shakaOfflineStore.get(videoUrl);
-        console.log(offlineUri, "IN DOWNLOADS");
-        if (offlineUri === null || offlineUri === undefined) {
-          console.log("[StreamStackItem:loadVideo] Downloading video");
-          const offlineVideo = await shakaOfflineStore.store(
-            videoUrl,
-            videoTitle
-          );
-          offlineUri = offlineVideo?.offlineUri;
         }
 
         if (offlineUri) {
-          playerRef.current.player
-            .load(offlineUri)
-            .then(() => {
-              console.log("[StreamStackItem:loadVideo] Offline video loaded");
-              setMetadataLoaded(true);
-            })
-            .catch(playerOnError);
+          console.log("loading now!!", offlineUri);
+          await playerRef.current.player.load(offlineUri);
+          console.log("[StreamStackItem:loadVideo] Offline video loaded");
+          setMetadataLoaded(true);
         } else {
           console.error(
-            "[StreamStackItem:loadVideo] Failed to download video, falling back to online URL"
+            "[StreamStackItem:loadVideo] No offline video available, falling back to online URL"
           );
-
-          playerRef.current.player
-            .preload(videoUrl)
-            .then((preloadManager) => {
-              playerRef.current.player
-                .load(preloadManager)
-                .then(() => {
-                  //console.log("Video Loaded");
-                  setMetadataLoaded(true);
-                })
-                .catch(playerOnError);
-            })
-            .catch(playerOnError);
+          await playerRef.current.player.load(videoUrl);
+          console.log("[StreamStackItem:loadVideo] Online video loaded");
+          setMetadataLoaded(true);
         }
-      }
-      if (offlineUri) {
-        playerRef.current.player
-          .load(offlineUri)
-          .then(() => {
-            console.log("[StreamStackItem:loadVideo] Offline video loaded");
-            setMetadataLoaded(true);
-          })
-          .catch(playerOnError);
-      } else {
+      } catch (error) {
         console.error(
-          "[StreamStackItem:loadVideo] Failed to download video, falling back to online URL"
+          "[StreamStackItem:loadVideo] Error loading video:",
+          error
         );
-
-        playerRef.current.player
-          .preload(videoUrl)
-          .then((preloadManager) => {
-            playerRef.current.player
-              .load(preloadManager)
-              .then(() => {
-                //console.log("Video Loaded");
-                setMetadataLoaded(true);
-              })
-              .catch(playerOnError);
-          })
-          .catch(playerOnError);
+        playerOnError(error);
       }
     },
     [playerOnError, videoUrl, videoTitle, shakaOfflineStore, setMetadataLoaded]
