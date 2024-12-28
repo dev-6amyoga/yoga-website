@@ -3,6 +3,7 @@ import ClassModeTeacher from "../pages/class-mode/teacher/ClassModeTeacher";
 import FreeVideos from "../pages/teacher/FreeVideos";
 import SelfAudioUpload from "../pages/teacher/SelfAudioUpload";
 import TeacherHome from "../pages/teacher/TeacherHome";
+import TeacherPlan from "../pages/teacher/TeacherPlan";
 import TeacherPlaylist from "../pages/teacher/TeacherPlaylist";
 import TeacherPlaylistCreation from "../pages/teacher/TeacherPlaylistCreation";
 import TeacherManageClasses from "../pages/teacher/class/Manage";
@@ -13,6 +14,11 @@ export const TeacherRoutes = [
     path: "/teacher/free-videos",
     element: <FreeVideos />,
   },
+  {
+    path: "/teacher/purchase-a-plan",
+    element: <TeacherPlan />,
+  },
+
   {
     path: "/teacher/invite",
     element: <InvitePage />,

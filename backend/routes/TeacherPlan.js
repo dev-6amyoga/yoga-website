@@ -38,19 +38,52 @@ router.post('/purchase', async (req, res) => {
   }
 })
 
-router.get('/teacher/:teacher_id', async (req, res) => {
+router.get('/plans/:teacher_id', async (req, res) => {
   try {
     const { teacher_id } = req.params
+    const today = new Date()
+
     const plans = await TeacherPlan.findAll({ where: { teacher_id } })
 
     if (plans.length === 0) {
-      return res.status(404).json({ message: 'No plans found for the teacher' })
+      return res.status(200).json({
+        planId: -1,
+        plans: [],
+        message: 'No plans available for this user.',
+      })
     }
 
-    res.status(200).json(plans)
+    // Categorize plans
+    const categorizedPlans = plans.map((plan) => {
+      let status = 'expired'
+
+      if (today >= plan.validity_from && today <= plan.validity_to) {
+        status = 'active'
+      } else if (today < plan.validity_from) {
+        status = 'upcoming'
+      }
+
+      return {
+        user_plan_id: plan.user_plan_id,
+        teacher_id: plan.teacher_id,
+        purchase_date: plan.purchase_date,
+        validity_from: plan.validity_from,
+        validity_to: plan.validity_to,
+        transaction_order_id: plan.transaction_order_id,
+        current_status: plan.current_status,
+        auto_renewal_enabled: plan.auto_renewal_enabled,
+        user_type: plan.user_type,
+        categorized_status: status,
+      }
+    })
+
+    res.status(200).json({
+      planId: plans[0].user_plan_id,
+      plans: categorizedPlans,
+    })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Failed to retrieve plans', error })
+    res.status(500).json({ message: 'Failed to fetch plans', error })
   }
 })
 

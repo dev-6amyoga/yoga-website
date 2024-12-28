@@ -14,6 +14,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import useUserStore from "../../../store/UserStore";
 import { Fetch, FetchRetry } from "../../../utils/Fetch";
+import Tooltip from "@mui/material/Tooltip";
 
 const logoStyle = {
   width: "80px",
@@ -27,12 +28,26 @@ function TeacherNavbar({ mode, toggleColorMode }) {
   const navigate = useNavigate();
   const location = useLocation();
   let user = useUserStore((state) => state.user);
-  const setUser = useUserStore((state) => state.setUser);
-  let userPlan = useUserStore((state) => state.userPlan);
-  let setUserPlan = useUserStore((state) => state.setUserPlan);
   const [disabled, setDisabled] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [openProfileMenu, setOpenProfileMenu] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await Fetch({
+        url: `/teacher-plan/plans/${user.user_id}`,
+        method: "GET",
+      });
+      if (response.data.planId === -1) {
+        setDisabled(true);
+      } else {
+        setDisabled(false);
+      }
+    };
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
 
   const handleOpenProfileMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -86,21 +101,21 @@ function TeacherNavbar({ mode, toggleColorMode }) {
         path: "/teacher/playlist-view",
         title: "6AM Yoga Playlists",
         props: {
-          disabled: false,
+          disabled: disabled,
         },
       },
       {
         path: "/teacher/register-new-playlist",
         title: "Create Playlist",
         props: {
-          disabled: false,
+          disabled: disabled,
         },
       },
       {
         path: "/teacher/class/manage",
         title: "Class Mode",
         props: {
-          disabled: false,
+          disabled: disabled,
         },
       },
       {
@@ -184,29 +199,40 @@ function TeacherNavbar({ mode, toggleColorMode }) {
                 <div className="flex">
                   {paths.map((path, index) => {
                     return (
-                      <MenuItem
-                        key={index}
-                        onClick={() => {
-                          return handleNavigate(path.path);
-                        }}
-                        sx={{
-                          py: "6px",
-                          px: "12px",
-                          backgroundColor:
-                            location.pathname === path.path
-                              ? "rgba(153, 189, 247, 0.3)"
-                              : "",
-                          borderRadius: "1rem",
-                        }}
-                        disabled={path.props.disabled}
+                      <Tooltip
+                        title={
+                          path.props.disabled
+                            ? "Purchase a plan to access this feature"
+                            : ""
+                        }
                       >
-                        <Typography variant="body2" color="text.primary">
-                          {path.title}
-                        </Typography>
-                      </MenuItem>
+                        <span>
+                          <MenuItem
+                            key={index}
+                            onClick={() => {
+                              return handleNavigate(path.path);
+                            }}
+                            sx={{
+                              py: "6px",
+                              px: "12px",
+                              backgroundColor:
+                                location.pathname === path.path
+                                  ? "rgba(153, 189, 247, 0.3)"
+                                  : "",
+                              borderRadius: "1rem",
+                            }}
+                            disabled={path.props.disabled}
+                          >
+                            <Typography variant="body2" color="text.primary">
+                              {path.title}
+                            </Typography>
+                          </MenuItem>
+                        </span>
+                      </Tooltip>
                     );
                   })}
                 </div>
+
                 <div>
                   <Button>
                     <Avatar

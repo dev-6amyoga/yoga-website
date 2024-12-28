@@ -12,9 +12,8 @@ import useUserStore from "../../store/UserStore";
 import { Fetch, FetchRetry } from "../../utils/Fetch";
 import calculateTotalPrice from "../../utils/calculateTotalPrice";
 import getFormData from "../../utils/getFormData";
-import RenderRazorpay from "./RenderRazorpay";
-import Pricing from "./components/Pricing";
-
+import RenderRazorpay from "../student/RenderRazorpay";
+import Pricing from "../student/components/Pricing";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -26,7 +25,7 @@ import { html2pdf } from "html2pdf.js";
 import { useNavigate } from "react-router-dom";
 import { ROLE_TEACHER } from "../../enums/roles";
 import { withAuth } from "../../utils/withAuth";
-import Hero from "./components/Hero";
+import Hero from "../student/components/Hero";
 import TeacherNavbar from "../../components/Common/TeacherNavbar/TeacherNavbar";
 
 function DiscountCouponForm({ handleDiscountCouponFormSubmit }) {
@@ -145,80 +144,13 @@ function TeacherPlan() {
     return updatedValidityString;
   };
 
-  const fetchUserPlans = useCallback(async () => {
-    try {
-      const response = await Fetch({
-        url: "/user-plan/get-user-plan-by-id",
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        data: { user_id: user?.user_id },
-      });
-      const data = response.data;
-      data.userPlan.sort(
-        (a, b) => new Date(a.validity_to) - new Date(b.validity_to)
-      );
-
-      console.log(data.userPlan, "is plannnnz");
-
-      // filter out plans with no institute id
-      if (data?.userPlan.length !== 0) {
-        const filteredPlans = data.userPlan.filter(
-          (plan) => plan.institute_id === null
-        );
-
-        setMyPlans(filteredPlans);
-
-        // set current plan id if plan is active
-        if (data["userPlan"].length > 1) {
-          for (var j = 0; j !== data["userPlan"].length; j++) {
-            console.log(
-              data["userPlan"][j].current_status,
-              data["userPlan"][j].institute_id,
-              data["userPlan"][j]["plan_id"],
-              "current status"
-            );
-            if (
-              data["userPlan"][j].current_status === "ACTIVE" &&
-              data["userPlan"][j].institute_id === null
-            ) {
-              // console.log(
-              // 	"setting plan id",
-              // 	data["userPlan"][j]["plan_id"]
-              // );
-              setPlanId(data["userPlan"][j]["plan_id"]);
-              break;
-            }
-          }
-        } else {
-          // set current plan id if plan is active
-          if (
-            data["userPlan"][0].current_status === "ACTIVE" &&
-            data["userPlan"][0].institute_id === null
-          ) {
-            setPlanId(data["userPlan"][0]["plan_id"]);
-          } else {
-            // toast(
-            // 	"You don't have a plan yet! Purchase one to continue"
-            // );
-          }
-        }
-      } else {
-        // toast("You don't have a plan yet! Purchase one to continue");
-      }
-    } catch (error) {
-      // console.log(error);
-    }
-  }, [user, formattedDate]);
-
   const fetchPlans = useCallback(async () => {
     try {
       const response = await Fetch({
-        url: "/plan/get-all-student-plans",
+        url: "/plan/get-all-teacher-plans",
       });
       const filteredPlans = response.data?.plans?.filter(
-        (plan) => plan.plan_user_type === "STUDENT"
+        (plan) => plan.plan_user_type === "TEACHER"
       );
       console.log("filtered plans : ", filteredPlans);
       setAllPlans(filteredPlans);
@@ -512,7 +444,7 @@ function TeacherPlan() {
               setLoading(false);
             });
 
-          fetchUserPlans();
+          //   fetchUserPlans();
         } else {
           toast(response?.data?.message);
           setLoading(false);
@@ -533,10 +465,19 @@ function TeacherPlan() {
   };
 
   useEffect(() => {
+    const fetchData = async () => {
+      const response = await Fetch({
+        url: `/teacher-plan/plans/${user.user_id}`,
+        method: "GET",
+      });
+
+      console.log("teacher plans : ", response.data);
+      setPlanId(response.data.planId);
+    };
     if (user) {
-      fetchUserPlans();
+      fetchData();
     }
-  }, [user, fetchUserPlans]);
+  }, [user]);
 
   useEffect(() => {
     setValidityFromDate(getEndDate(myPlans));
@@ -615,6 +556,67 @@ function TeacherPlan() {
         setInvalidCountry(true);
       });
   }, []);
+
+  const subscribePlan = async (data) => {
+    if (data.plan_name) {
+      try {
+        let finalCustomCardData = { ...data };
+        console.log(finalCustomCardData);
+        console.log(currentCustomUserPlans);
+        const relevantPlans = currentCustomUserPlans.filter(
+          (plan) =>
+            plan.custom_plan_id === finalCustomCardData?._id &&
+            (plan.current_status === USER_PLAN_ACTIVE ||
+              plan.current_status === USER_PLAN_STAGED)
+        );
+        if (relevantPlans.length > 0) {
+          const existingPlan = relevantPlans.reduce(
+            (latestPlan, currentPlan) => {
+              const latestValidityTo = new Date(latestPlan.validity_to);
+              const currentValidityTo = new Date(currentPlan.validity_to);
+              return currentValidityTo > latestValidityTo
+                ? currentPlan
+                : latestPlan;
+            }
+          );
+          const existingValidityFrom = new Date(existingPlan.validity_to);
+          finalCustomCardData.validity_from =
+            existingValidityFrom.toISOString();
+          const newValidityTo = new Date(existingValidityFrom);
+          newValidityTo.setDate(
+            newValidityTo.getDate() + (data.planValidity || 0)
+          ); // Ensure planValidity is a number
+          finalCustomCardData.validity_to = newValidityTo.toISOString();
+          finalCustomCardData.current_status = USER_PLAN_STAGED;
+        } else {
+          finalCustomCardData.validity_from = new Date().toISOString();
+          const validityToDate = new Date(finalCustomCardData.validity_from);
+          validityToDate.setDate(
+            validityToDate.getDate() + (data.planValidity || 0)
+          );
+          finalCustomCardData.validity_to = validityToDate.toISOString();
+          finalCustomCardData.current_status = USER_PLAN_ACTIVE;
+        }
+        setCustomCardData(finalCustomCardData);
+        setShowCustomCard(true);
+        setDiscountCouponApplied(false);
+        setDiscountCoupon(null);
+        const selectedPricing = Number(data.prices[0][selectedCurrencyId]);
+        setPrice(selectedPricing);
+      } catch (error) {
+        console.error("Error processing plan data:", error);
+      }
+    } else {
+      setShowCard(true);
+      setCardData(data);
+      setDiscountCouponApplied(false);
+      setDiscountCoupon(null);
+      const pricing = data.pricing.find(
+        (p) => p.currency.short_tag === selectedCurrency
+      );
+      setPrice(pricing.denomination);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -696,7 +698,6 @@ function TeacherPlan() {
             selectedCurrency={selectedCurrency}
           />
         )}
-
         <Divider />
 
         <Modal visible={showCard} onClose={() => setShowCard(false)}>
