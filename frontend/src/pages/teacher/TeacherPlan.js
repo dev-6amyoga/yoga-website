@@ -692,7 +692,7 @@ function TeacherPlan() {
           </Alert>
         ) : (
           <Pricing
-            heading="6AM Yoga Plans"
+            // heading="6AM Yoga Plans"
             allPlans={allPlans}
             subscribePlan={subscribePlan}
             selectedCurrency={selectedCurrency}

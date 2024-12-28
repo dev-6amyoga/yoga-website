@@ -174,13 +174,13 @@ export default function Pricing({
                           plan.description !==
                             "Tailor made playlists as per your requirement",
                       },
-                      // {
-                      //   name: "Play 6AM Yoga playlists",
-                      //   enable:
-                      //     plan.has_basic_playlist &&
-                      //     plan.description !==
-                      //       "Tailor made playlists as per your requirement",
-                      // },
+                      {
+                        name: "Play 6AM Yoga playlists",
+                        enable:
+                          plan.has_basic_playlist &&
+                          plan.description !==
+                            "Tailor made playlists as per your requirement",
+                      },
                       {
                         name: "Monthly yoga sequence having warm up, suryanamaskara, yogasanas and pranayama (75 min/day)",
                         enable:
@@ -191,6 +191,7 @@ export default function Pricing({
                       {
                         name: "Exclusive Pranayama Sessions (20 min)",
                         enable:
+                          plan.plan_user_type !== "TEACHER" &&
                           plan.has_basic_playlist &&
                           plan.description !==
                             "Tailor made playlists as per your requirement",
@@ -198,6 +199,7 @@ export default function Pricing({
                       {
                         name: "Yoga for back strengthening (30 min)",
                         enable:
+                          plan.plan_user_type !== "TEACHER" &&
                           plan.has_basic_playlist &&
                           plan.description !==
                             "Tailor made playlists as per your requirement",
@@ -205,6 +207,7 @@ export default function Pricing({
                       {
                         name: "Yoga for knee strengthening (20 min)",
                         enable:
+                          plan.plan_user_type !== "TEACHER" &&
                           plan.has_basic_playlist &&
                           plan.description !==
                             "Tailor made playlists as per your requirement",
@@ -212,8 +215,15 @@ export default function Pricing({
                       {
                         name: "Tailor made playlists as per your requirement",
                         enable:
+                          plan.plan_user_type !== "TEACHER" &&
                           plan.description ===
-                          "Tailor made playlists as per your requirement",
+                            "Tailor made playlists as per your requirement",
+                      },
+                      {
+                        name: "Conduct classes using our instructional videos",
+                        enable:
+                          plan.plan_user_type === "TEACHER" &&
+                          plan.name.includes("Advanced"),
                       },
                       {
                         name: "Create custom curated playlists",
