@@ -1,5 +1,6 @@
 import ClassInfoTeacher from "../pages/class-mode/teacher/ClassInfoTeacher";
 import ClassModeTeacher from "../pages/class-mode/teacher/ClassModeTeacher";
+import FreeVideos from "../pages/teacher/FreeVideos";
 import SelfAudioUpload from "../pages/teacher/SelfAudioUpload";
 import TeacherHome from "../pages/teacher/TeacherHome";
 import TeacherPlaylist from "../pages/teacher/TeacherPlaylist";
@@ -9,8 +10,8 @@ import InvitePage from "../pages/teacher/invite/Index";
 
 export const TeacherRoutes = [
   {
-    path: "/teacher",
-    element: <TeacherHome />,
+    path: "/teacher/free-videos",
+    element: <FreeVideos />,
   },
   {
     path: "/teacher/invite",

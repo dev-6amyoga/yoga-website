@@ -77,6 +77,7 @@ const classRouter = require('./routes/Class')
 const postureRouter = require('./routes/Posture')
 const otpRouter = require('./routes/OTP')
 const r2Router = require('./routes/UploadToR2')
+const teacherPlanRouter = require('./routes/TeacherPlan')
 
 // ws routers
 
@@ -239,6 +240,7 @@ app.use('/customPlan', customPlanRouter)
 app.use('/customUserPlan', customUserPlanRouter)
 app.use('/r2', r2Router)
 app.use('/video-rec', videoRecordingRouter)
+app.use('/teacher-plan', teacherPlanRouter)
 
 // ws routers
 app.ws('/ws/class/teacher', classWsRouter.handleTeacherConnection)

@@ -23,6 +23,7 @@ const WatchHistory = require('../models/mongo/WatchHistory')
 const WatchTimeLog = require('../models/mongo/WatchTimeLog')
 const { authenticateToken } = require('../utils/jwt')
 const { ROLE_TEACHER } = require('../enums/role')
+
 router.get('/get-all-user-plans', async (req, res) => {
   try {
     const userplans = await UserPlan.findAll()

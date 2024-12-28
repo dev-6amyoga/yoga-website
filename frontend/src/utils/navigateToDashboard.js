@@ -7,7 +7,7 @@ export const navigateToDashboard = (currentRole, userPlan, navigate) => {
       navigate("/admin");
       break;
     case "TEACHER":
-      navigate("/teacher");
+      navigate("/teacher/free-videos");
       break;
     case "INSTITUTE_OWNER":
       navigate("/institute");

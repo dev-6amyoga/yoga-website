@@ -17,7 +17,11 @@ const TeacherPlan = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    teacher_Id: {
+    teacher_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    plan_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
