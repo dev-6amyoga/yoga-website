@@ -30,7 +30,6 @@ export const StudentRoutes = [
     path: "/student/about-us",
     element: <AboutUs />,
   },
-
   {
     path: "/student/purchase-a-plan",
     element: <StudentPlan />,

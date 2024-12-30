@@ -255,36 +255,9 @@ class MPDCombiner {
 
       console.log(this.files[0].url)
 
-      // if (this.files.length < 2) {
-      //   // Only one file, no need to combine
-      //   console.log('only 1 file')
-      //   console.log(data)
-      //   // here, return combinedManifest, totalDuration, sections
-      //   return data
-      // }
-
-      if (this.files.length === 1) {
-        // Only one file, parse and return it
-        const firstFile = this.files[0]
-        console.log('[MPDCombiner] Only one file provided')
-
-        this.parseInitialManifest(firstFile, data)
-
-        // Serialize the parsed document
-        const combinedManifest = this.getSerializer().serializeToString(
-          this.parent
-        )
-        const finalManifest = `<?xml version="1.0" ?>\n${combinedManifest}`
-
-        if (this.output) {
-          await fs.writeFile(this.output, finalManifest)
-        }
-
-        return {
-          manifest: finalManifest,
-          totalDuration: this.totalDuration,
-          sections: this.sections,
-        }
+      if (this.files.length < 2) {
+        // Only one file, no need to combine
+        return data
       }
 
       this.parseInitialManifest(this.files[0], data)

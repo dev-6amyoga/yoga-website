@@ -49,6 +49,7 @@ function TeacherPlan() {
   const [allPlans, setAllPlans] = useState([]);
   const [showCard, setShowCard] = useState(false);
   const navigate = useNavigate();
+
   const [cardData, setCardData] = useState(null);
   const [price, setPrice] = useState(0);
   const [discountCouponApplied, setDiscountCouponApplied] = useState(false);
@@ -138,7 +139,6 @@ function TeacherPlan() {
           highestValidityDate
         );
       } else {
-        // console.log("No valid validity_to dates found.");
       }
     }
     return updatedValidityString;
@@ -189,7 +189,6 @@ function TeacherPlan() {
       });
 
       if (res.status === 200) {
-        // console.log(res.data);
         setDiscountCoupon(res.data.discount_coupon);
         setDiscountCouponApplied(true);
         return null;
@@ -220,7 +219,7 @@ function TeacherPlan() {
           payment_method: "manual",
           amount: toBeRegistered.amount,
           signature: "n/a",
-          order_id: order_id, //may be unique, check again
+          order_id: order_id,
           payment_id: "n/a",
           currency_id: 1,
           discount_coupon_id: toBeRegistered.discount_coupon_id,
@@ -298,7 +297,6 @@ function TeacherPlan() {
             "You have an active plan! If you purchase a new plan, it will be staged."
           );
         }
-        // validity will start from the end of the previous plan
         const validityToDate = calculateEndDate(cardData.plan_validity_days);
         userPlanData.purchase_date = formattedDate;
         userPlanData.validity_from = validityFromDate;
@@ -394,12 +392,8 @@ function TeacherPlan() {
       retryDelayMs: 2000,
     })
       .then((response) => {
-        // console.log({ response });
         if (response?.status === 200) {
           toast("Plan subscribed successfully", { type: "success" });
-
-          //invoice download here!! order_id, toBeRegistered.user_id
-
           FetchRetry({
             url: "/invoice/student/mail-invoice",
             method: "POST",
@@ -434,7 +428,6 @@ function TeacherPlan() {
               setLoading(false);
             })
             .catch((error) => {
-              // console.log(error);
               setShowCard(false);
               setCardData(null);
               toast(
@@ -443,15 +436,12 @@ function TeacherPlan() {
               );
               setLoading(false);
             });
-
-          //   fetchUserPlans();
         } else {
           toast(response?.data?.message);
           setLoading(false);
         }
       })
       .catch((error) => {
-        // console.log(error);
         toast(
           "Error subscribing plan; Incase money has been debited from your account, it will be refunded within 4 to 5 business days! Please try again!",
           { type: "error" }
@@ -552,7 +542,6 @@ function TeacherPlan() {
         }
       })
       .catch((err) => {
-        // console.log(err);
         setInvalidCountry(true);
       });
   }, []);
@@ -585,7 +574,7 @@ function TeacherPlan() {
           const newValidityTo = new Date(existingValidityFrom);
           newValidityTo.setDate(
             newValidityTo.getDate() + (data.planValidity || 0)
-          ); // Ensure planValidity is a number
+          );
           finalCustomCardData.validity_to = newValidityTo.toISOString();
           finalCustomCardData.current_status = USER_PLAN_STAGED;
         } else {
@@ -675,7 +664,6 @@ function TeacherPlan() {
                         ? new Date(row?.validity_to).toDateString()
                         : ""}
                     </TableCell>
-                    {/* <TableCell>{row?.current_status}</TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>
@@ -692,7 +680,6 @@ function TeacherPlan() {
           </Alert>
         ) : (
           <Pricing
-            // heading="6AM Yoga Plans"
             allPlans={allPlans}
             subscribePlan={subscribePlan}
             selectedCurrency={selectedCurrency}
@@ -705,7 +692,6 @@ function TeacherPlan() {
             {cardData ? (
               <>
                 <h3>{cardData.name}</h3>
-
                 <Divider />
                 <Spacer />
                 <p>
