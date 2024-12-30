@@ -224,13 +224,20 @@ export const TransitionEndSuryanamaskaraStithi = async (
       return res;
     }
     if (break_status_start === "No Break") {
-      let res = handleTransition([
-        "Vajrasana Dyanmudra To Relax Position",
+      let transitions = [];
+      if (start_video.vajra_side === true) {
+        transitions.push("Vajrasana Dyanmudra To Relax Position Side");
+      } else {
+        transitions.push("Vajrasana Dyanmudra To Relax Position Front");
+      }
+      transitions.push(
         "Vajra To Standing Transition",
-        "Suryanamaskara Preparation And Mantra Stithi Type",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
+        "Suryanamaskara Preparation And Mantra Stithi Type"
+      );
+      let res = handleTransition(transitions);
+      res = res
+        .map((transition) => transition.transition_id)
+        .filter((id) => id !== undefined);
       return res;
     }
   }

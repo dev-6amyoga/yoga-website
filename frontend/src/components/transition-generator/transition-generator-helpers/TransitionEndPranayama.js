@@ -767,25 +767,21 @@ export const TransitionEndPranayama = async (
       res = res.filter((element) => element !== undefined);
       return res;
     }
-
     if (break_status_start === "No Break") {
-      if (start_video.teacher_mode == true) {
-        let res = handleTransition([
-          "Vajrasana Dyanmudra To Relax Position",
-          "Vajra To Sitting Transition",
-          "Pranayama Start Sitting",
-        ]);
-        res = res.map((transition) => transition.transition_id);
-        res = res.filter((element) => element !== undefined);
-        return res;
+      let transitions = [];
+      if (start_video.vajra_side === true) {
+        transitions.push("Vajrasana Dyanmudra To Relax Position Side");
+      } else {
+        transitions.push("Vajrasana Dyanmudra To Relax Position Front");
       }
-      let res = handleTransition([
-        "Vajrasana Dyanmudra To Relax Position",
+      transitions.push(
         "Vajra To Sitting Transition",
-        "Pranayama Start Sitting",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
+        "Pranayama Start Sitting"
+      );
+      let res = handleTransition(transitions);
+      res = res
+        .map((transition) => transition.transition_id)
+        .filter((id) => id !== undefined);
       return res;
     }
   }

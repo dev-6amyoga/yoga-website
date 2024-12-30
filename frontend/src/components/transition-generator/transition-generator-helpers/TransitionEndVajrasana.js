@@ -120,21 +120,19 @@ export const TransitionEndVajrasana = async (
   }
 
   if (start_category === "Closing Prayer Standing") {
-    if (start_category === "Closing Prayer Standing") {
-      let transitions = ["Prayer End Standing", "Standing To Vajra Transition"];
-      if (break_status_end === "No Break") {
-        if (end_video.vajra_side === true) {
-          transitions.push("Vajrasana Relax To Dyanmudra Position Side");
-        } else {
-          transitions.push("Vajrasana Relax To Dyanmudra Position Front");
-        }
+    let transitions = ["Prayer End Standing", "Standing To Vajra Transition"];
+    if (break_status_end === "No Break") {
+      if (end_video.vajra_side === true) {
+        transitions.push("Vajrasana Relax To Dyanmudra Position Side");
+      } else {
+        transitions.push("Vajrasana Relax To Dyanmudra Position Front");
       }
-      let res = handleTransition(transitions);
-      res = res
-        .map((transition) => transition.transition_id)
-        .filter((id) => id !== undefined);
-      return res;
     }
+    let res = handleTransition(transitions);
+    res = res
+      .map((transition) => transition.transition_id)
+      .filter((id) => id !== undefined);
+    return res;
   }
 
   if (start_category === "Starting Prayer Sitting") {

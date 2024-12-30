@@ -1065,45 +1065,71 @@ export const TransitionEndStanding = async (
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
       if (end_video.person_starting_position === "Front") {
-        let res = handleTransition([
-          "Vajrasana Dyanmudra To Relax Position",
-          "Vajra To Standing Transition",
-        ]);
-        res = res.map((transition) => transition.transition_id);
-        res = res.filter((element) => element !== undefined);
+        let transitions = [];
+        if (start_video.vajra_side === true) {
+          transitions.push("Vajrasana Dyanmudra To Relax Position Side");
+        } else {
+          transitions.push("Vajrasana Dyanmudra To Relax Position Front");
+        }
+        transitions.push("Vajra To Standing Transition");
+        let res = handleTransition(transitions);
+        res = res
+          .map((transition) => transition.transition_id)
+          .filter((id) => id !== undefined);
         return res;
       }
       if (end_video.person_starting_position === "Left") {
-        let res = handleTransition([
-          "Vajrasana Dyanmudra To Relax Position",
+        let transitions = [];
+        if (start_video.vajra_side === true) {
+          transitions.push("Vajrasana Dyanmudra To Relax Position Side");
+        } else {
+          transitions.push("Vajrasana Dyanmudra To Relax Position Front");
+        }
+        transitions.push(
           "Vajra To Standing Transition",
-          "Person Transit Front To Left",
-        ]);
-        res = res.map((transition) => transition.transition_id);
-        res = res.filter((element) => element !== undefined);
+          "Person Transit Front To Left"
+        );
+        let res = handleTransition(transitions);
+        res = res
+          .map((transition) => transition.transition_id)
+          .filter((id) => id !== undefined);
         return res;
       }
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
       if (end_video.person_starting_position === "Front") {
-        let res = handleTransition([
-          "Vajrasana Dyanmudra To Relax Position",
+        let transitions = [];
+        if (start_video.vajra_side === true) {
+          transitions.push("Vajrasana Dyanmudra To Relax Position Side");
+        } else {
+          transitions.push("Vajrasana Dyanmudra To Relax Position Front");
+        }
+        transitions.push(
           "Vajra To Standing Transition",
-          "Feet Together Hands Tight Standing Transition Front",
-        ]);
-        res = res.map((transition) => transition.transition_id);
-        res = res.filter((element) => element !== undefined);
+          "Feet Together Hands Tight Standing Transition Front"
+        );
+        let res = handleTransition(transitions);
+        res = res
+          .map((transition) => transition.transition_id)
+          .filter((id) => id !== undefined);
         return res;
       }
       if (end_video.person_starting_position === "Left") {
-        let res = handleTransition([
-          "Vajrasana Dyanmudra To Relax Position",
+        let transitions = [];
+        if (start_video.vajra_side === true) {
+          transitions.push("Vajrasana Dyanmudra To Relax Position Side");
+        } else {
+          transitions.push("Vajrasana Dyanmudra To Relax Position Front");
+        }
+        transitions.push(
           "Vajra To Standing Transition",
           "Person Transit Front To Left",
-          "Feet Together Hands Tight Standing Side Transition",
-        ]);
-        res = res.map((transition) => transition.transition_id);
-        res = res.filter((element) => element !== undefined);
+          "Feet Together Hands Tight Standing Side Transition"
+        );
+        let res = handleTransition(transitions);
+        res = res
+          .map((transition) => transition.transition_id)
+          .filter((id) => id !== undefined);
         return res;
       }
     }

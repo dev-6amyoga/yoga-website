@@ -202,25 +202,20 @@ export const TransitionEndClosingPrayerSitting = async (
   }
 
   if (start_category === "Vajrasana") {
-    if (break_status_start === "Break") {
-      let res = handleTransition([
-        "Vajra To Sitting Transition",
-        "Pranayama Start Sitting",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
-    }
+    let transitions = [];
     if (break_status_start === "No Break") {
-      let res = handleTransition([
-        "Vajrasana Dyanmudra To Relax Position",
-        "Vajra To Sitting Transition",
-        "Pranayama Start Sitting",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+      if (start_video.vajra_side === true) {
+        transitions.push("Vajrasana Dyanmudra To Relax Position Side");
+      } else {
+        transitions.push("Vajrasana Dyanmudra To Relax Position Front");
+      }
     }
+    transitions.push("Vajra To Sitting Transition", "Pranayama Start Sitting");
+    let res = handleTransition(transitions);
+    res = res
+      .map((transition) => transition.transition_id)
+      .filter((id) => id !== undefined);
+    return res;
   }
 
   if (start_category === "Pranayama") {

@@ -460,22 +460,34 @@ export const TransitionEndSupine = async (
       return res;
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
-      let res = handleTransition([
-        "Vajrasana Dyanmudra To Relax Position",
-        "Vajra To Supine Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
+      let transitions = [];
+      if (start_video.vajra_side === true) {
+        transitions.push("Vajrasana Dyanmudra To Relax Position Side");
+      } else {
+        transitions.push("Vajrasana Dyanmudra To Relax Position Front");
+      }
+      transitions.push("Vajra To Supine Transition");
+      let res = handleTransition(transitions);
+      res = res
+        .map((transition) => transition.transition_id)
+        .filter((id) => id !== undefined);
       return res;
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
-      let res = handleTransition([
-        "Vajrasana Dyanmudra To Relax Position",
+      let transitions = [];
+      if (start_video.vajra_side === true) {
+        transitions.push("Vajrasana Dyanmudra To Relax Position Side");
+      } else {
+        transitions.push("Vajrasana Dyanmudra To Relax Position Front");
+      }
+      transitions.push(
         "Vajra To Supine Transition",
-        "Arms Overhead Feet Together Supine Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
+        "Arms Overhead Feet Together Supine Transition"
+      );
+      let res = handleTransition(transitions);
+      res = res
+        .map((transition) => transition.transition_id)
+        .filter((id) => id !== undefined);
       return res;
     }
   }
