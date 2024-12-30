@@ -1,12 +1,5 @@
-import {
-  Button,
-  Grid,
-  Input,
-  Modal,
-  Table,
-  Text,
-  Tooltip,
-} from "@geist-ui/core";
+import { Grid, Input, Modal, Table, Text, Tooltip } from "@geist-ui/core";
+import { Button } from "@mui/material";
 import { Search, Edit, Delete, PenTool } from "@geist-ui/icons";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
@@ -15,6 +8,8 @@ import { toast } from "react-toastify";
 import { ROLE_ROOT } from "../../enums/roles";
 import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+
 import AdminPageWrapper from "../Common/AdminPageWrapper";
 import { useMemo } from "react";
 import SortableColumn from "../Common/DataTable/SortableColumn";
@@ -219,6 +214,23 @@ function AllTransitions() {
   return (
     <AdminPageWrapper heading="Content Management - View All Transitions">
       <div>
+        <Tooltip text="Register New Transition">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => {
+              navigate("/admin/video/create");
+            }}
+            sx={{
+              textTransform: "none", // Optional: keeps the label text in normal case
+              borderRadius: 2, // Optional: adds a subtle border radius
+            }}
+          >
+            Back
+          </Button>
+        </Tooltip>
+
         <Button
           onClick={() => {
             handleDownload(transitions);
@@ -227,12 +239,6 @@ function AllTransitions() {
           Download CSV
         </Button>
         <br />
-        {/* <Button
-					onClick={() => {
-						navigate('admin/video/transition/create');
-					}}>
-					Register Transition Video
-				</Button> */}
 
         <br />
         <Input

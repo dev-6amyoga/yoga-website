@@ -10,6 +10,7 @@ import {
   Card,
 } from "@geist-ui/core";
 import { Button, Box, Switch, FormControlLabel } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import { Search } from "@geist-ui/icons";
 import Papa from "papaparse";
@@ -379,6 +380,23 @@ function AllAsanas() {
   return (
     <AdminPageWrapper heading="Content Management - View All Videos">
       <div className="">
+        <Tooltip text="Register New Asana">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => {
+              navigate("/admin/video/create");
+            }}
+            sx={{
+              textTransform: "none", // Optional: keeps the label text in normal case
+              borderRadius: 2, // Optional: adds a subtle border radius
+            }}
+          >
+            Back
+          </Button>
+        </Tooltip>
+        <br />
         <Button
           onClick={() => {
             handleDownload(asanas);

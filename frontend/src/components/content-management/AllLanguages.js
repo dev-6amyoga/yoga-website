@@ -1,4 +1,4 @@
-import { Button, Input, Modal, Table, Tooltip } from "@geist-ui/core";
+import { Input, Modal, Table, Tooltip } from "@geist-ui/core";
 import { Search, Delete } from "@geist-ui/icons";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
@@ -6,7 +6,9 @@ import { ROLE_ROOT } from "../../enums/roles";
 import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
 import AdminPageWrapper from "../Common/AdminPageWrapper";
-
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 function AllLanguages() {
   const [delState, setDelState] = useState(false);
   const [delLanguageId, setDelLanguageId] = useState(0);
@@ -77,6 +79,7 @@ function AllLanguages() {
     }
   };
 
+  const navigate = useNavigate();
   const renderAction = (value, rowData, index) => {
     const handleDelete = async () => {
       try {
@@ -106,6 +109,23 @@ function AllLanguages() {
   return (
     <AdminPageWrapper heading="Content Management - View All Languages">
       <div className="elements">
+        <Tooltip text="Register New Language">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => {
+              navigate("/admin/language/create");
+            }}
+            sx={{
+              textTransform: "none", // Optional: keeps the label text in normal case
+              borderRadius: 2, // Optional: adds a subtle border radius
+            }}
+          >
+            Back
+          </Button>
+        </Tooltip>
+        <br />
         <Button
           onClick={() => {
             handleDownload(languages);
