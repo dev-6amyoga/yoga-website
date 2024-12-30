@@ -1,4 +1,4 @@
-import { Button, Grid, Input, Modal, Table, Tooltip } from "@geist-ui/core";
+import { Grid, Input, Modal, Table, Tooltip } from "@geist-ui/core";
 import { Search, Delete } from "@geist-ui/icons";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
@@ -7,6 +7,9 @@ import { ROLE_ROOT } from "../../enums/roles";
 import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
 import AdminPageWrapper from "../Common/AdminPageWrapper";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 function AllAsanaCategories() {
   const [delState, setDelState] = useState(false);
@@ -68,6 +71,8 @@ function AllAsanaCategories() {
       console.log(error);
     }
   };
+
+  const navigate = useNavigate();
   const handleDownload = (data1) => {
     const csv = Papa.unparse(data1);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -113,6 +118,22 @@ function AllAsanaCategories() {
   return (
     <AdminPageWrapper heading="Content Management - View All Asana Categories">
       <div className="elements">
+        <Tooltip text="Register New Asana Category">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => {
+              navigate("/admin/asana-category/create");
+            }}
+            sx={{
+              textTransform: "none", // Optional: keeps the label text in normal case
+              borderRadius: 2, // Optional: adds a subtle border radius
+            }}
+          >
+            Back
+          </Button>
+        </Tooltip>
         <Button
           onClick={() => {
             handleDownload(categories);
