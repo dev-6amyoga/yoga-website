@@ -1077,37 +1077,36 @@ function StreamStackItem({
 						// TODO : defaults to widevine here right now
 						if (!isMobile.check) {
 							loadVideo(true, {});
-							// console.log(
-							// 	"[StreamStackItem:playerInit] Fetching Widevine Token"
-							// );
-							// Fetch({
-							// 	url: "/playback/get-widevine-token",
-							// 	method: "POST",
-							// 	token: false,
-							// })
-							// 	.then(async (res) => {
-							// 		const data = res.data;
-							// 		console.log(data);
-							// 		setDrmConfig(data);
-							// 		if (data && data.licenseAcquisitionUrl) {
-							// 			// Mobile
-							// 			playerRef.current.player.configure({
-							// 				drm: {
-							// 					servers: {
-							// 						"com.widevine.alpha":
-							// 							data.licenseAcquisitionUrl,
-							// 					},
-							// 				},
-							// 			});
-
-							// 		}
-							// 	})
-							// 	.catch((err) => {
-							// 		console.log(
-							// 			"Error fetching DRM info :",
-							// 			err
-							// 		);
-							// 	});
+							console.log(
+								"[StreamStackItem:playerInit] Fetching Widevine Token"
+							);
+							Fetch({
+								url: "/playback/get-widevine-token",
+								method: "POST",
+								token: false,
+							})
+								.then(async (res) => {
+									const data = res.data;
+									console.log(data);
+									setDrmConfig(data);
+									if (data && data.licenseAcquisitionUrl) {
+										// Mobile
+										playerRef.current.player.configure({
+											drm: {
+												servers: {
+													"com.widevine.alpha":
+														data.licenseAcquisitionUrl,
+												},
+											},
+										});
+									}
+								})
+								.catch((err) => {
+									console.log(
+										"Error fetching DRM info :",
+										err
+									);
+								});
 						} else {
 							console.log(
 								"[StreamStackItem:playerInit] Fetching Playready Token"
