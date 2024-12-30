@@ -101,8 +101,6 @@ export const TransitionEndPranayama = async (
       }
     } else {
       if (pranayama.omkara) {
-        // is omkara
-        console.log("is omkara");
         console.log(filteredTransitions_all);
         let res = [];
         for (var i = 0; i !== filteredTransitions_all.length; i++) {
@@ -792,8 +790,6 @@ export const TransitionEndPranayama = async (
         transition.drm_transition === drm_status &&
         transition.teacher_mode === end_video.teacher_mode
     );
-    console.log("in pranayama!!!");
-    console.log(start_video, end_video);
     if (start_video.id === end_video.id) {
       return [];
     }
@@ -882,22 +878,22 @@ export const TransitionEndPranayama = async (
     } else {
       if (start_video.omkara) {
         let res = [];
-        for (var i = 0; i !== filteredTransitions_all.length; i++) {
-          if (filteredTransitions_all[i]) {
-            let transition_ind = filteredTransitions_all[i];
-            if (
-              transition_ind.transition_video_name
-                .toLowerCase()
-                .indexOf("om") !== -1 &&
-              transition_ind.transition_video_name
-                .toLowerCase()
-                .indexOf("chanting") !== -1
-            ) {
-              res.push(transition_ind);
-            }
-          }
-        }
-        let new_res = [...res, ...pending_2];
+        // for (var i = 0; i !== filteredTransitions_all.length; i++) {
+        //   if (filteredTransitions_all[i]) {
+        //     let transition_ind = filteredTransitions_all[i];
+        //     if (
+        //       transition_ind.transition_video_name
+        //         .toLowerCase()
+        //         .indexOf("om") !== -1 &&
+        //       transition_ind.transition_video_name
+        //         .toLowerCase()
+        //         .indexOf("chanting") !== -1
+        //     ) {
+        //       res.push(transition_ind);
+        //     }
+        //   }
+        // }
+        let new_res = [...res];
         new_res = new_res.filter((element) => element !== undefined);
         new_res = new_res.map((transition) => transition.transition_id);
 
