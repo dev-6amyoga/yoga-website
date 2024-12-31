@@ -148,6 +148,7 @@ class ShakaOfflineStore {
         console.error(
           "DRM Error (6001): Check license acquisition URL or DRM config."
         );
+        return this.store(uri, title, drmConfig); // Retry
       } else {
         console.error("Shaka Error:", e.code, e.message);
       }
