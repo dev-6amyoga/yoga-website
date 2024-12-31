@@ -215,7 +215,7 @@ function StudentNavMUI({ mode, toggleColorMode }) {
         path: "/student/class/my-classes",
         title: "Your Classes",
         props: {
-          disabled: false,
+          disabled: true,
         },
       },
       {
