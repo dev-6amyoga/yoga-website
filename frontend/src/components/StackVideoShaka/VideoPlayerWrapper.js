@@ -74,13 +74,15 @@ import Playlist from "../Sidebar/Playlist";
 import PlaylistSections from "./Sections";
 import VideoPlayer from "./VideoPlayer";
 import DownloadProgressCircle from "../DownloadProgressCircle";
+import { useState } from "react";
+import { Modal, Box, Typography, Button } from "@mui/material";
 
 export default function VideoPlayerWrapper({ page = "student" }) {
   const fullScreen = useVideoStore((state) => state.fullScreen);
 
   return (
     <>
-      <DownloadProgressCircle /> {/* Ensure it's above everything */}
+      <DownloadProgressCircle />
       <div
         className={fullScreen ? "" : "relative video-grid mb-12 w-full gap-6"}
       >

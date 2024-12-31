@@ -14,7 +14,7 @@ const DownloadProgressCircle = () => {
   useEffect(() => {
     if (downloadProgress > 0 && downloadProgress < 1) {
       setVisible(true);
-    } else if (downloadProgress >= 1) {
+    } else if (downloadProgress >= 0.98) {
       const timeout = setTimeout(() => setVisible(false), 500); // Small delay for UX
       return () => clearTimeout(timeout); // Cleanup timeout
     }

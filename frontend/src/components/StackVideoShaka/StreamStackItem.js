@@ -781,75 +781,118 @@ function StreamStackItem({
     [setVideoState]
   );
 
+  // const loadVideo = useCallback(
+  //   async (isDrm) => {
+  //     try {
+  //       let offlineRecord = await shakaOfflineStore.get(videoUrl);
+  //       let offlineUri = offlineRecord?.offlineUri;
+
+  //       if (!offlineUri) {
+  //         if (isDrm) {
+  //           console.log("[StreamStackItem:loadVideo] DRM video processing");
+
+  //           try {
+  //             console.log("[StreamStackItem:loadVideo] Downloading DRM video");
+
+  //             const drmResponse = await Fetch({
+  //               url: "/playback/get-widevine-token",
+  //               method: "POST",
+  //               token: false,
+  //             });
+
+  //             const drmConfig = drmResponse.data;
+
+  //             const offlineVideo = await shakaOfflineStore.store(
+  //               videoUrl,
+  //               videoTitle,
+  //               drmConfig
+  //             );
+
+  //             offlineUri = offlineVideo?.offlineUri;
+  //           } catch (err) {
+  //             console.error(
+  //               "[StreamStackItem:loadVideo] Error fetching DRM info:",
+  //               err
+  //             );
+  //             throw err;
+  //           }
+  //         } else {
+  //           console.log(
+  //             "[StreamStackItem:loadVideo] NON DRM video, trying offline mode"
+  //           );
+
+  //           console.log("[StreamStackItem:loadVideo] Downloading video");
+
+  //           const offlineVideo = await shakaOfflineStore.store(
+  //             videoUrl,
+  //             videoTitle
+  //           );
+
+  //           offlineUri = offlineVideo?.offlineUri;
+  //         }
+  //       }
+
+  //       if (offlineUri) {
+  //         console.log(
+  //           "[StreamStackItem:loadVideo] Loading offline URI : ",
+  //           offlineUri
+  //         );
+
+  //         await playerRef.current.player.load(offlineUri);
+
+  //         console.log("[StreamStackItem:loadVideo] Offline video loaded");
+  //         setMetadataLoaded(true);
+  //       } else {
+  //         console.error(
+  //           "[StreamStackItem:loadVideo] No offline video available, falling back to online URL"
+  //         );
+  //         await playerRef.current.player.load(videoUrl);
+  //         console.log("[StreamStackItem:loadVideo] Online video loaded");
+  //         setMetadataLoaded(true);
+  //       }
+  //     } catch (error) {
+  //       console.error(
+  //         "[StreamStackItem:loadVideo] Error loading video:",
+  //         error
+  //       );
+  //       playerOnError(error);
+  //     }
+  //   },
+  //   [playerOnError, videoUrl, videoTitle, shakaOfflineStore, setMetadataLoaded]
+  // );
+
   const loadVideo = useCallback(
     async (isDrm) => {
       try {
         let offlineRecord = await shakaOfflineStore.get(videoUrl);
         let offlineUri = offlineRecord?.offlineUri;
-
         if (!offlineUri) {
           if (isDrm) {
-            console.log("[StreamStackItem:loadVideo] DRM video processing");
-
-            try {
-              console.log("[StreamStackItem:loadVideo] Downloading DRM video");
-
-              const drmResponse = await Fetch({
-                url: "/playback/get-widevine-token",
-                method: "POST",
-                token: false,
-              });
-
-              const drmConfig = drmResponse.data;
-
-              const offlineVideo = await shakaOfflineStore.store(
-                videoUrl,
-                videoTitle,
-                drmConfig
-              );
-
-              offlineUri = offlineVideo?.offlineUri;
-            } catch (err) {
-              console.error(
-                "[StreamStackItem:loadVideo] Error fetching DRM info:",
-                err
-              );
-              throw err;
-            }
+            console.log(
+              "[StreamStackItem:loadVideo] DRM video detected. Processing..."
+            );
+            offlineUri = await handleDrmDownload(videoUrl, videoTitle);
           } else {
             console.log(
-              "[StreamStackItem:loadVideo] NON DRM video, trying offline mode"
+              "[StreamStackItem:loadVideo] Non-DRM video detected. Downloading..."
             );
-
-            console.log("[StreamStackItem:loadVideo] Downloading video");
-
-            const offlineVideo = await shakaOfflineStore.store(
-              videoUrl,
-              videoTitle
-            );
-
-            offlineUri = offlineVideo?.offlineUri;
+            offlineUri = await handleNonDrmDownload(videoUrl, videoTitle);
           }
         }
-
         if (offlineUri) {
           console.log(
-            "[StreamStackItem:loadVideo] Loading offline URI : ",
+            "[StreamStackItem:loadVideo] Loading offline URI:",
             offlineUri
           );
-
           await playerRef.current.player.load(offlineUri);
-
-          console.log("[StreamStackItem:loadVideo] Offline video loaded");
-          setMetadataLoaded(true);
         } else {
-          console.error(
-            "[StreamStackItem:loadVideo] No offline video available, falling back to online URL"
+          console.warn(
+            "[StreamStackItem:loadVideo] No offline URI. Falling back to online URL."
           );
           await playerRef.current.player.load(videoUrl);
-          console.log("[StreamStackItem:loadVideo] Online video loaded");
-          setMetadataLoaded(true);
         }
+        setMetadataLoaded(true);
+        console.log("[StreamStackItem:loadVideo] Video loaded successfully.");
       } catch (error) {
         console.error(
           "[StreamStackItem:loadVideo] Error loading video:",
@@ -860,6 +903,37 @@ function StreamStackItem({
     },
     [playerOnError, videoUrl, videoTitle, shakaOfflineStore, setMetadataLoaded]
   );
+
+  const handleDrmDownload = async (videoUrl, videoTitle) => {
+    try {
+      const drmResponse = await Fetch({
+        url: "/playback/get-widevine-token",
+        method: "POST",
+        token: false,
+      });
+      const drmConfig = drmResponse.data;
+
+      const offlineVideo = await shakaOfflineStore.store(
+        videoUrl,
+        videoTitle,
+        drmConfig
+      );
+      return offlineVideo?.offlineUri;
+    } catch (error) {
+      console.error("[handleDrmDownload] Error fetching DRM info:", error);
+      throw error;
+    }
+  };
+
+  const handleNonDrmDownload = async (videoUrl, videoTitle) => {
+    try {
+      const offlineVideo = await shakaOfflineStore.store(videoUrl, videoTitle);
+      return offlineVideo?.offlineUri;
+    } catch (error) {
+      console.error("[handleNonDrmDownload] Error downloading video:", error);
+      throw error;
+    }
+  };
 
   const setupUI = useCallback(() => {
     shaka.ui.Controls.registerElement(
