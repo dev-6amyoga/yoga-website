@@ -125,26 +125,22 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
   }
 
   if (start_category === "Standing") {
-    if (break_status_start === "Break") {
-      let res = handleTransition([
-        "Suryanamaskara Preparation And Mantra Non Stithi",
-        "Suryanamaskara Non AI Non Stithi Prefix",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+    let transitions = [];
+    if (start_video.mat_ending_position === "Side") {
+      transitions.push("Turn Mat Side To Front Standing Transition");
     }
-
     if (break_status_start === "No Break") {
-      let res = handleTransition([
-        "Feet Apart Hands Loose Standing Transition Front",
-        "Suryanamaskara Preparation And Mantra Non Stithi",
-        "Suryanamaskara Non AI Non Stithi Prefix",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+      transitions.push("Feet Apart Hands Loose Standing Transition Front");
     }
+    transitions.push(
+      "Suryanamaskara Preparation And Mantra Non Stithi",
+      "Suryanamaskara Non AI Non Stithi Prefix"
+    );
+    let res = handleTransition(transitions);
+    res = res
+      .map((transition) => transition.transition_id)
+      .filter((id) => id !== undefined);
+    return res;
   }
 
   if (start_category === "Sitting") {
