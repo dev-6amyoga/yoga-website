@@ -113,6 +113,8 @@ class ShakaOfflineStore {
 
       await this.list();
 
+      // [useShakaOfflineStore:setDownloadProgress] progress set :  0.0002121704732605919
+
       const storedContent = this.contentList.find(
         (content) => content.originalManifestUri === uri
       );
