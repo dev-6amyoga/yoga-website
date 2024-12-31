@@ -4,29 +4,30 @@ import useShakaOfflineStore from "../store/ShakaOfflineStore";
 import { toast } from "react-toastify";
 
 const DownloadProgressCircle = () => {
-  // Subscribe to the downloadProgress state
   const downloadProgress = useShakaOfflineStore(
     (state) => state.downloadProgress
   );
 
-  // State to control visibility of the component
   const [visible, setVisible] = useState(false);
 
+  // useEffect(() => {
+  //   if (!visible) {
+  //     return null;
+  //   }
+  // }, [visible]);
+
   useEffect(() => {
-    if (downloadProgress > 0 && downloadProgress < 1) {
+    const roundedProgress = Math.round(downloadProgress * 100);
+
+    if (roundedProgress > 0 && roundedProgress < 100) {
       setVisible(true);
-    } else if (downloadProgress >= 0.9) {
+    } else if (roundedProgress === 100) {
       setVisible(false);
       toast("Playing soon!");
-      // const timeout = setTimeout(() => setVisible(false), 500); // Small delay for UX
-      // return () => clearTimeout(timeout); // Cleanup timeout
     }
   }, [downloadProgress]);
 
-  // Convert progress to percentage for display
   const progressPercentage = Math.round(downloadProgress * 100);
-
-  // Don't render if not visible
   if (!visible) {
     return null;
   }
