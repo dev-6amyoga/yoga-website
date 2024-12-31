@@ -135,8 +135,22 @@ class ShakaOfflineStore {
         return null;
       }
     } catch (e) {
-      console.error("[ShakaOfflineStore:store] Error:", e);
-      return null;
+      // console.error("[ShakaOfflineStore:store] Error:", e);
+      // return null;
+
+      if (e.code === 6012) {
+        console.warn("Offline session missing. Clearing and retrying...");
+        await this.storage
+          .remove(uri)
+          .catch(() => console.error("Failed to clear storage for URI:", uri));
+        return this.store(uri, title, drmConfig); // Retry
+      } else if (e.code === 6001) {
+        console.error(
+          "DRM Error (6001): Check license acquisition URL or DRM config."
+        );
+      } else {
+        console.error("Shaka Error:", e.code, e.message);
+      }
     }
   }
 
