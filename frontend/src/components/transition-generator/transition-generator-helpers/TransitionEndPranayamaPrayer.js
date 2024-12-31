@@ -138,10 +138,8 @@ export const TransitionEndPranayamaPrayer = async (
           "Turn Mat Side To Front Sitting Transition",
           "Pranayama Start Sitting",
         ]);
-        console.log(res);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
-        console.log(res);
         return res;
       } else {
         let res = handleTransition(["Pranayama Start Sitting"]);

@@ -132,21 +132,24 @@ export const TransitionEndClosingPrayerSitting = async (
   }
 
   if (start_category === "Sitting") {
+    let transitions = [];
+    if (start_video.mat_ending_position === "Side") {
+      transitions.push("Turn Mat Side To Front Sitting Transition");
+    }
     if (break_status_start === "Break") {
-      let res = handleTransition(["Pranayama Start Sitting"]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+      transitions.push("Pranayama Start Sitting");
     }
     if (break_status_start === "No Break") {
-      let res = handleTransition([
+      transitions.push(
         "Feet Apart Hands Back Sitting Transition",
-        "Pranayama Start Sitting",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+        "Pranayama Start Sitting"
+      );
     }
+    let res = handleTransition(transitions);
+    res = res
+      .map((transition) => transition.transition_id)
+      .filter((id) => id !== undefined);
+    return res;
   }
 
   if (start_category === "Supine") {

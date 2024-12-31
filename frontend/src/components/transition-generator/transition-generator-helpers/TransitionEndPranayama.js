@@ -658,15 +658,12 @@ export const TransitionEndPranayama = async (
   }
 
   if (start_category === "Sitting") {
-    console.log("HELLO this is sitting");
     if (break_status_start === "Break") {
-      console.log("in break : ", start_video);
       if (start_video.mat_ending_position === "Side") {
         let res = handleTransition([
           "Turn Mat Side To Front Sitting Transition",
           "Pranayama Start Sitting",
         ]);
-        console.log(res);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
         console.log(res);
@@ -680,8 +677,6 @@ export const TransitionEndPranayama = async (
     }
 
     if (break_status_start === "No Break") {
-      console.log("in no break : ", start_video);
-
       if (start_video.mat_ending_position === "Side") {
         let res = handleTransition([
           "Feet Apart Hands Back Sitting Transition",

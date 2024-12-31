@@ -129,25 +129,28 @@ export const TransitionEndClosingPrayerStanding = async (
   }
 
   if (start_category === "Sitting") {
+    let transitions = [];
+    if (start_video.mat_ending_position === "Side") {
+      transitions.push("Turn Mat Side To Front Sitting Transition");
+    }
     if (break_status_start === "Break") {
-      let res = handleTransition([
+      transitions.push(
         "Sitting To Standing Transition",
-        "Prayer Start Standing",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+        "Prayer Start Standing"
+      );
     }
     if (break_status_start === "No Break") {
-      let res = handleTransition([
+      transitions.push(
         "Feet Apart Hands Back Sitting Transition",
         "Sitting To Standing Transition",
-        "Prayer Start Standing",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+        "Prayer Start Standing"
+      );
     }
+    let res = handleTransition(transitions);
+    res = res
+      .map((transition) => transition.transition_id)
+      .filter((id) => id !== undefined);
+    return res;
   }
 
   if (start_category === "Supine") {

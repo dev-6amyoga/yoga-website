@@ -41,242 +41,251 @@ export const TransitionEndSitting = async (
   };
 
   if (!start_category) {
-    if (break_status_end === "Break") {
-      let res = handleTransition(["Sitting Position Transition"]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+    let transitions = ["Sitting Position Transition"];
+    if (end_video.mat_starting_position === "Side") {
+      transitions.push("Turn Mat Front To Side Sitting Transition");
     }
     if (break_status_end === "No Break") {
-      let res = handleTransition([
-        "Sitting Position Transition",
-        "Feet Together Hands Side Sitting Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+      transitions.push("Feet Together Hands Side Sitting Transition");
     }
+    let res = handleTransition(transitions);
+    res = res.map((transition) => transition.transition_id);
+    res = res.filter((element) => element !== undefined);
+    return res;
   }
 
   if (start_category === "Closing Prayer Sitting") {
+    let transitions = [];
     if (break_status_end === "Break") {
-      if (start_video.namaskara_end === true) {
-        let res = handleTransition([
+      if (start_video.namaskara_end) {
+        transitions.push(
+          "Prayer Sitting Namaskara Unlock",
+          "Pranayama Unlock Legs"
+        );
+      } else {
+        transitions.push("Pranayama Unlock Legs");
+      }
+    } else if (break_status_end === "No Break") {
+      if (start_video.namaskara_end) {
+        transitions.push(
           "Prayer Sitting Namaskara Unlock",
           "Pranayama Unlock Legs",
-        ]);
-        res = res.map((transition) => transition.transition_id);
-        res = res.filter((element) => element !== undefined);
-        return res;
+          "Feet Together Hands Side Sitting Transition"
+        );
       } else {
-        let res = handleTransition(["Pranayama Unlock Legs"]);
-        res = res.map((transition) => transition.transition_id);
-        res = res.filter((element) => element !== undefined);
-        return res;
+        transitions.push(
+          "Pranayama Unlock Legs",
+          "Feet Together Hands Side Sitting Transition"
+        );
       }
     }
-    if (break_status_end === "No Break") {
-      if (start_video.namaskara_end === true) {
-        let res = handleTransition([
-          "Prayer Sitting Namaskara Unlock",
-          "Pranayama Unlock Legs",
-          "Feet Together Hands Side Sitting Transition",
-        ]);
-        res = res.map((transition) => transition.transition_id);
-        res = res.filter((element) => element !== undefined);
-        return res;
-      } else {
-        let res = handleTransition([
-          "Pranayama Unlock Legs",
-          "Feet Together Hands Side Sitting Transition",
-        ]);
-        res = res.map((transition) => transition.transition_id);
-        res = res.filter((element) => element !== undefined);
-        return res;
-      }
+    if (end_video.mat_starting_position === "Side") {
+      transitions.push("Turn Mat Front To Side Sitting Transition");
     }
+    let res = handleTransition(transitions);
+    res = res
+      .map((transition) => transition.transition_id)
+      .filter((id) => id !== undefined);
+    return res;
   }
 
   if (start_category === "Closing Prayer Standing") {
-    if (break_status_end === "Break") {
-      let res = handleTransition([
-        "Prayer End Standing",
-        "Standing To Sitting Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
-    }
+    let transitions = ["Prayer End Standing", "Standing To Sitting Transition"];
     if (break_status_end === "No Break") {
-      let res = handleTransition([
-        "Prayer End Standing",
-        "Standing To Sitting Transition",
-        "Feet Together Hands Side Sitting Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+      transitions.push("Feet Together Hands Side Sitting Transition");
     }
+    if (end_video.mat_starting_position === "Side") {
+      transitions.push("Turn Mat Front To Side Sitting Transition");
+    }
+    let res = handleTransition(transitions);
+    res = res
+      .map((transition) => transition.transition_id)
+      .filter((id) => id !== undefined);
+    return res;
   }
 
   if (start_category === "Starting Prayer Sitting") {
-    if (break_status_end === "Break") {
-      // if (start_video.namaskara_end === true) {
-      let res = handleTransition([
-        "Prayer Sitting Namaskara Unlock",
-        "Pranayama Unlock Legs",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
-      // } else {
-      //   let res = handleTransition(["Pranayama Unlock Legs"]);
-      //   res = res.map((transition) => transition.transition_id);
-      //   res = res.filter((element) => element !== undefined);
-      //   return res;
-      // }
-    }
+    let transitions = [
+      "Prayer Sitting Namaskara Unlock",
+      "Pranayama Unlock Legs",
+    ];
     if (break_status_end === "No Break") {
-      // if (start_video.namaskara_end === true) {
-      let res = handleTransition([
-        "Prayer Sitting Namaskara Unlock",
-        "Pranayama Unlock Legs",
-        "Feet Together Hands Side Sitting Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
-      // } else {
-      //   let res = handleTransition([
-      //     "Pranayama Unlock Legs",
-      //     "Feet Together Hands Side Sitting Transition",
-      //   ]);
-      //   res = res.map((transition) => transition.transition_id);
-      //   res = res.filter((element) => element !== undefined);
-      //   return res;
-      // }
+      transitions.push("Feet Together Hands Side Sitting Transition");
     }
+    if (end_video.mat_starting_position === "Side") {
+      transitions.push("Turn Mat Front To Side Sitting Transition");
+    }
+    let res = handleTransition(transitions);
+    res = res
+      .map((transition) => transition.transition_id)
+      .filter((id) => id !== undefined);
+    return res;
   }
 
   if (start_category === "Starting Prayer Standing") {
-    if (break_status_end === "Break") {
-      let res = handleTransition([
-        "Prayer End Standing",
-        "Standing To Sitting Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
-    }
+    let transitions = ["Prayer End Standing", "Standing To Sitting Transition"];
     if (break_status_end === "No Break") {
-      let res = handleTransition([
-        "Prayer End Standing",
-        "Standing To Sitting Transition",
-        "Feet Together Hands Side Sitting Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+      transitions.push("Feet Together Hands Side Sitting Transition");
     }
+    if (end_video.mat_starting_position === "Side") {
+      transitions.push("Turn Mat Front To Side Sitting Transition");
+    }
+    let res = handleTransition(transitions);
+    res = res
+      .map((transition) => transition.transition_id)
+      .filter((id) => id !== undefined);
+    return res;
   }
 
   if (start_category === "Suryanamaskara Stithi") {
-    if (break_status_end === "Break") {
-      let res = handleTransition([
-        "Feet Apart Hands Loose Standing Transition Front",
-        "Standing To Sitting Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
-    }
+    let transitions = [
+      "Feet Apart Hands Loose Standing Transition Front",
+      "Standing To Sitting Transition",
+    ];
     if (break_status_end === "No Break") {
-      let res = handleTransition([
-        "Feet Apart Hands Loose Standing Transition Front",
-        "Standing To Sitting Transition",
-        "Feet Together Hands Side Sitting Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+      transitions.push("Feet Together Hands Side Sitting Transition");
     }
+    if (end_video.mat_starting_position === "Side") {
+      transitions.push("Turn Mat Front To Side Sitting Transition");
+    }
+    let res = handleTransition(transitions);
+    res = res
+      .map((transition) => transition.transition_id)
+      .filter((id) => id !== undefined);
+    return res;
   }
 
   if (start_category === "Suryanamaskara Non Stithi") {
-    if (break_status_end === "Break") {
-      let res = handleTransition([
-        "Suryanamaskara Non AI Non Stithi Suffix",
-        "Standing To Sitting Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
-    }
+    let transitions = [
+      "Suryanamaskara Non AI Non Stithi Suffix",
+      "Standing To Sitting Transition",
+    ];
     if (break_status_end === "No Break") {
-      let res = handleTransition([
-        "Suryanamaskara Non AI Non Stithi Suffix",
-        "Standing To Sitting Transition",
-        "Feet Together Hands Side Sitting Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+      transitions.push("Feet Together Hands Side Sitting Transition");
     }
+    if (end_video.mat_starting_position === "Side") {
+      transitions.push("Turn Mat Front To Side Sitting Transition");
+    }
+    let res = handleTransition(transitions);
+    res = res
+      .map((transition) => transition.transition_id)
+      .filter((id) => id !== undefined);
+    return res;
   }
 
   if (start_category === "Standing") {
     if (break_status_start === "Break" && break_status_end === "Break") {
-      let res = handleTransition(["Standing To Sitting Transition"]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
+      let transitions = ["Standing To Sitting Transition"];
+      if (end_video.mat_starting_position === "Side") {
+        transitions.push("Turn Mat Front To Side Sitting Transition");
+      }
+      let res = handleTransition(transitions);
+      res = res
+        .map((transition) => transition.transition_id)
+        .filter((id) => id !== undefined);
       return res;
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
-      let res = handleTransition([
-        "Standing To Sitting Transition",
-        "Feet Together Hands Side Sitting Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
+      let transitions = ["Standing To Sitting Transition"];
+      if (end_video.mat_starting_position === "Side") {
+        transitions.push("Turn Mat Front To Side Sitting Transition");
+      } else {
+        transitions.push("Feet Together Hands Side Sitting Transition");
+      }
+      let res = handleTransition(transitions);
+      res = res
+        .map((transition) => transition.transition_id)
+        .filter((id) => id !== undefined);
       return res;
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
-      let res = handleTransition([
+      let transitions = [
         "Feet Apart Hands Loose Standing Transition Front",
         "Standing To Sitting Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
+      ];
+      if (end_video.mat_starting_position === "Side") {
+        transitions.push("Turn Mat Front To Side Sitting Transition");
+      }
+      let res = handleTransition(transitions);
+      res = res
+        .map((transition) => transition.transition_id)
+        .filter((id) => id !== undefined);
       return res;
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
-      let res = handleTransition([
+      let transitions = [
         "Feet Apart Hands Loose Standing Transition Front",
         "Standing To Sitting Transition",
-        "Feet Together Hands Side Sitting Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
+      ];
+      if (end_video.mat_starting_position === "Side") {
+        transitions.push("Turn Mat Front To Side Sitting Transition");
+      } else {
+        transitions.push("Feet Together Hands Side Sitting Transition");
+      }
+      let res = handleTransition(transitions);
+      res = res
+        .map((transition) => transition.transition_id)
+        .filter((id) => id !== undefined);
       return res;
     }
   }
 
   if (start_category === "Sitting") {
     if (break_status_start === "Break" && break_status_end === "Break") {
-      return [];
+      let transitions = [];
+      if (
+        end_video.mat_starting_position === "Side" &&
+        start_video.mat_ending_position === "Front"
+      ) {
+        transitions.push("Turn Mat Front To Side Sitting Transition");
+      }
+      if (
+        end_video.mat_starting_position === "Front" &&
+        start_video.mat_ending_position === "Side"
+      ) {
+        transitions.push("Turn Mat Side To Front Sitting Transition");
+      }
+      let res = handleTransition(transitions);
+      res = res
+        .map((transition) => transition.transition_id)
+        .filter((id) => id !== undefined);
+      return res;
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
-      let res = handleTransition([
-        "Feet Together Hands Side Sitting Transition",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
+      let transitions = [];
+      if (
+        end_video.mat_starting_position === "Side" &&
+        start_video.mat_ending_position === "Front"
+      ) {
+        transitions.push("Turn Mat Front To Side Sitting Transition");
+      }
+      if (
+        end_video.mat_starting_position === "Front" &&
+        start_video.mat_ending_position === "Side"
+      ) {
+        transitions.push(
+          "Turn Mat Side To Front Sitting Transition",
+          "Feet Together Hands Side Sitting Transition"
+        );
+      }
+      if (end_video.mat_starting_position === start_video.mat_ending_position) {
+        transitions.push("Feet Together Hands Side Sitting Transition");
+      }
+      let res = handleTransition(transitions);
+      res = res
+        .map((transition) => transition.transition_id)
+        .filter((id) => id !== undefined);
       return res;
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
-      let res = handleTransition(["Feet Apart Hands Back Sitting Transition"]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
+      let transitions = ["Feet Apart Hands Back Sitting Transition"];
+      if (end_video.mat_starting_position === "Side") {
+        transitions.push("Turn Mat Front To Side Sitting Transition");
+      }
+      let res = handleTransition(transitions);
+      res = res
+        .map((transition) => transition.transition_id)
+        .filter((id) => id !== undefined);
       return res;
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {

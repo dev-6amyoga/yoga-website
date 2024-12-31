@@ -140,25 +140,22 @@ export const TransitionEndSuryanamaskaraStithi = async (
   }
 
   if (start_category === "Sitting") {
-    if (break_status_start === "Break") {
-      let res = handleTransition([
-        "Sitting To Standing Transition",
-        "Suryanamaskara Preparation And Mantra Stithi Type",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+    let transitions = [];
+    if (start_video.mat_ending_position === "Side") {
+      transitions.push("Turn Mat Side To Front Sitting Transition");
     }
     if (break_status_start === "No Break") {
-      let res = handleTransition([
-        "Feet Apart Hands Back Sitting Transition",
-        "Sitting To Standing Transition",
-        "Suryanamaskara Preparation And Mantra Stithi Type",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+      transitions.push("Feet Apart Hands Back Sitting Transition");
     }
+    transitions.push(
+      "Sitting To Standing Transition",
+      "Suryanamaskara Preparation And Mantra Stithi Type"
+    );
+    let res = handleTransition(transitions);
+    res = res
+      .map((transition) => transition.transition_id)
+      .filter((id) => id !== undefined);
+    return res;
   }
 
   if (start_category === "Supine") {
