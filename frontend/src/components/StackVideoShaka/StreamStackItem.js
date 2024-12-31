@@ -5,6 +5,8 @@ import {
   SEEK_TYPE_MOVE,
   SEEK_TYPE_SEEK,
 } from "../../enums/seek_types";
+import { Modal, Box, Typography, Button } from "@mui/material";
+
 import {
   ShakaPlayerFullscreen,
   ShakaPlayerGoNext,
@@ -64,6 +66,11 @@ function StreamStackItem({
   const shakaOfflineStore = useShakaOfflineStore(
     (state) => state.shakaOfflineStore
   );
+
+  const [open, setOpen] = useState(false);
+
+  // Function to close the modal
+  const handleClose = () => setOpen(false);
 
   // useEffect(() => {
   // 	if (!playerRef.current) return;
@@ -849,6 +856,7 @@ function StreamStackItem({
         }
 
         if (!offlineUri) {
+          setOpen(true);
           if (isDrm) {
             console.log(
               "[StreamStackItem:loadVideo] DRM video detected. Processing..."
@@ -1249,6 +1257,43 @@ function StreamStackItem({
     <div
       className={`relative h-full w-full ${isActive ? "block" : "invisible"}`}
     >
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+          }}
+        >
+          <Typography id="modal-title" variant="h6" component="h2" mb={2}>
+            Downloading Video
+          </Typography>
+          <Typography id="modal-description" variant="body1" mb={3}>
+            The initial play may take approximately 5 minutes to download!
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleClose}
+            fullWidth
+          >
+            Okay
+          </Button>
+        </Box>
+      </Modal>
+
       <ShakaPlayer ref={playerInit} className="custom-shaka w-full h-full" />
     </div>
   );
