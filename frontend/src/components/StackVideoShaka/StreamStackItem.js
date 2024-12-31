@@ -43,6 +43,7 @@ import useTimeStore from "../../store/TimeStore";
 
 function StreamStackItem({
   video,
+  updatedAt,
   isActive,
   handleEnd,
   handleLoading,
@@ -786,70 +787,33 @@ function StreamStackItem({
   //     try {
   //       let offlineRecord = await shakaOfflineStore.get(videoUrl);
   //       let offlineUri = offlineRecord?.offlineUri;
-
   //       if (!offlineUri) {
   //         if (isDrm) {
-  //           console.log("[StreamStackItem:loadVideo] DRM video processing");
-
-  //           try {
-  //             console.log("[StreamStackItem:loadVideo] Downloading DRM video");
-
-  //             const drmResponse = await Fetch({
-  //               url: "/playback/get-widevine-token",
-  //               method: "POST",
-  //               token: false,
-  //             });
-
-  //             const drmConfig = drmResponse.data;
-
-  //             const offlineVideo = await shakaOfflineStore.store(
-  //               videoUrl,
-  //               videoTitle,
-  //               drmConfig
-  //             );
-
-  //             offlineUri = offlineVideo?.offlineUri;
-  //           } catch (err) {
-  //             console.error(
-  //               "[StreamStackItem:loadVideo] Error fetching DRM info:",
-  //               err
-  //             );
-  //             throw err;
-  //           }
+  //           console.log(
+  //             "[StreamStackItem:loadVideo] DRM video detected. Processing..."
+  //           );
+  //           offlineUri = await handleDrmDownload(videoUrl, videoTitle);
   //         } else {
   //           console.log(
-  //             "[StreamStackItem:loadVideo] NON DRM video, trying offline mode"
+  //             "[StreamStackItem:loadVideo] Non-DRM video detected. Downloading..."
   //           );
-
-  //           console.log("[StreamStackItem:loadVideo] Downloading video");
-
-  //           const offlineVideo = await shakaOfflineStore.store(
-  //             videoUrl,
-  //             videoTitle
-  //           );
-
-  //           offlineUri = offlineVideo?.offlineUri;
+  //           offlineUri = await handleNonDrmDownload(videoUrl, videoTitle);
   //         }
   //       }
-
   //       if (offlineUri) {
   //         console.log(
-  //           "[StreamStackItem:loadVideo] Loading offline URI : ",
+  //           "[StreamStackItem:loadVideo] Loading offline URI:",
   //           offlineUri
   //         );
-
   //         await playerRef.current.player.load(offlineUri);
-
-  //         console.log("[StreamStackItem:loadVideo] Offline video loaded");
-  //         setMetadataLoaded(true);
   //       } else {
-  //         console.error(
-  //           "[StreamStackItem:loadVideo] No offline video available, falling back to online URL"
+  //         console.warn(
+  //           "[StreamStackItem:loadVideo] No offline URI. Falling back to online URL."
   //         );
   //         await playerRef.current.player.load(videoUrl);
-  //         console.log("[StreamStackItem:loadVideo] Online video loaded");
-  //         setMetadataLoaded(true);
   //       }
+  //       setMetadataLoaded(true);
+  //       console.log("[StreamStackItem:loadVideo] Video loaded successfully.");
   //     } catch (error) {
   //       console.error(
   //         "[StreamStackItem:loadVideo] Error loading video:",
@@ -862,10 +826,28 @@ function StreamStackItem({
   // );
 
   const loadVideo = useCallback(
-    async (isDrm) => {
+    async (isDrm, lastUpdated) => {
       try {
         let offlineRecord = await shakaOfflineStore.get(videoUrl);
         let offlineUri = offlineRecord?.offlineUri;
+        const savedTimestamp = await showAllRecords(videoUrl);
+        console.log(isDrm, lastUpdated, savedTimestamp);
+
+        const unixDate = new Date(savedTimestamp);
+
+        const isoDate = new Date(lastUpdated);
+
+        if (
+          savedTimestamp &&
+          lastUpdated &&
+          isoDate.getTime() > unixDate.getTime()
+        ) {
+          console.log(
+            "[StreamStackItem:loadVideo] Video is outdated. Redownloading..."
+          );
+          offlineUri = null;
+        }
+
         if (!offlineUri) {
           if (isDrm) {
             console.log(
@@ -878,7 +860,12 @@ function StreamStackItem({
             );
             offlineUri = await handleNonDrmDownload(videoUrl, videoTitle);
           }
+
+          if (offlineUri) {
+            await saveDownloadTimestamp(videoUrl, Date.now());
+          }
         }
+
         if (offlineUri) {
           console.log(
             "[StreamStackItem:loadVideo] Loading offline URI:",
@@ -891,6 +878,7 @@ function StreamStackItem({
           );
           await playerRef.current.player.load(videoUrl);
         }
+
         setMetadataLoaded(true);
         console.log("[StreamStackItem:loadVideo] Video loaded successfully.");
       } catch (error) {
@@ -912,12 +900,14 @@ function StreamStackItem({
         token: false,
       });
       const drmConfig = drmResponse.data;
-
       const offlineVideo = await shakaOfflineStore.store(
         videoUrl,
         videoTitle,
         drmConfig
       );
+      if (offlineVideo?.offlineUri) {
+        await saveDownloadTimestamp(videoUrl, Date.now());
+      }
       return offlineVideo?.offlineUri;
     } catch (error) {
       console.error("[handleDrmDownload] Error fetching DRM info:", error);
@@ -928,11 +918,72 @@ function StreamStackItem({
   const handleNonDrmDownload = async (videoUrl, videoTitle) => {
     try {
       const offlineVideo = await shakaOfflineStore.store(videoUrl, videoTitle);
+      if (offlineVideo?.offlineUri) {
+        await saveDownloadTimestamp(videoUrl, Date.now());
+      }
       return offlineVideo?.offlineUri;
     } catch (error) {
       console.error("[handleNonDrmDownload] Error downloading video:", error);
       throw error;
     }
+  };
+
+  const saveDownloadTimestamp = async (videoUrl, timestamp) => {
+    const db = await openDatabase();
+    const transaction = db.transaction("video_metadata", "readwrite");
+    const store = transaction.objectStore("video_metadata");
+    store.put({ videoUrl, downloadedAt: timestamp });
+    await transaction.complete;
+  };
+
+  const showAllRecords = async (videoUrl) => {
+    try {
+      const db = await openDatabase();
+      const transaction = db.transaction("video_metadata", "readonly");
+      const store = transaction.objectStore("video_metadata");
+      const records = [];
+
+      return new Promise((resolve, reject) => {
+        const cursorRequest = store.openCursor();
+
+        cursorRequest.onsuccess = (event) => {
+          const cursor = event.target.result;
+          if (cursor) {
+            records.push(cursor.value);
+            cursor.continue();
+          } else {
+            for (let i = 0; i < records.length; i++) {
+              if (records[i].videoUrl === videoUrl) {
+                resolve(records[i].downloadedAt);
+                return;
+              }
+            }
+            resolve(null);
+          }
+        };
+
+        cursorRequest.onerror = (event) => {
+          reject("Error fetching records: " + event.target.error);
+        };
+      });
+    } catch (error) {
+      console.error("Error opening database or fetching records:", error);
+      return null;
+    }
+  };
+
+  const openDatabase = () => {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open("VideoStoreDB", 1);
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains("video_metadata")) {
+          db.createObjectStore("video_metadata", { keyPath: "videoUrl" });
+        }
+      };
+      request.onsuccess = (event) => resolve(event.target.result);
+      request.onerror = (event) => reject(event.target.error);
+    });
   };
 
   const setupUI = useCallback(() => {
@@ -1009,19 +1060,10 @@ function StreamStackItem({
     async (ref) => {
       console.log("player init called", ref);
       if (ref != null) {
-        // console.log("Player init, setting loading to true", video?.idx);
-        // setVideoState(STATE_VIDEO_LOADING);
         playerRef.current = ref;
-
-        // setPlayerRefSet({ done: true, ts: Date.now() });
-        // player events
-
-        // console.log("[OFFLINE] Offline storage initialized.");
-
         const check = isMobileTablet();
         const isMobile = { done: true, check: check };
         console.log("Checking for isMobile", isMobile);
-
         if (playerRef.current.ui) {
           console.log("Setting up UI");
           setupUI();
@@ -1098,7 +1140,7 @@ function StreamStackItem({
             //   if (!isNaN(video.video.id) && typeof video.video.id !== "number") {
             // TODO : defaults to widevine here right now
             if (!isMobile.check) {
-              loadVideo(true, {});
+              loadVideo(true, updatedAt);
               console.log(
                 "[StreamStackItem:playerInit] Fetching Widevine Token"
               );
@@ -1159,7 +1201,7 @@ function StreamStackItem({
                       },
                     });
 
-                    loadVideo(true);
+                    loadVideo(true, updatedAt);
                   }
                 })
                 .catch((err) => {
@@ -1175,7 +1217,7 @@ function StreamStackItem({
 							console.log(offlineUri);
 						}
             */
-            loadVideo(false);
+            loadVideo(false, updatedAt);
           }
         }
         setPlayerLoaded(true);

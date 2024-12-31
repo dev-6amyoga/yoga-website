@@ -18,10 +18,10 @@ import { VIDEO_VIEW_TEACHING_MODE } from "../../enums/video_view_modes";
 import { STATE_VIDEO_PAUSED } from "../../store/VideoStore.jsx";
 import { useWatchHistoryContext } from "../../store/WatchHistoryStore.jsx";
 import StreamStackItem from "./StreamStackItem";
-
 function VideoPlayer() {
 	const [playlistStore, { popFromQueue }] = usePlaylistStoreContext();
 
+	
 	const [
 		videoStore,
 		{
@@ -134,6 +134,8 @@ function VideoPlayer() {
 		}
 	};
 
+
+	
 	const handlePlaybackError = (isActive) => {
 		console.log("Error playing video ------------------->");
 		if (isActive) {
@@ -313,6 +315,7 @@ function VideoPlayer() {
 											<StreamStackItem
 												key={queueItem.queue_id}
 												video={queueItem}
+												updatedAt = {queueItem.last_updated}
 												handleEnd={handleEnd}
 												handleLoading={handleLoading}
 												handlePlaybackError={

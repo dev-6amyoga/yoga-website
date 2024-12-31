@@ -17,6 +17,7 @@ const PlaylistSchema6am = new mongoose.Schema({
       time: Number,
     },
   ],
+  last_updated: { type: Date, default: Date.now },
 })
 
 const Playlist = mongoose.model(
