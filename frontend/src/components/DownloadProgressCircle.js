@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { CircularProgress, Box, Typography } from "@mui/material";
 import useShakaOfflineStore from "../store/ShakaOfflineStore";
+import { toast } from "react-toastify";
 
 const DownloadProgressCircle = () => {
   // Subscribe to the downloadProgress state
@@ -14,9 +15,11 @@ const DownloadProgressCircle = () => {
   useEffect(() => {
     if (downloadProgress > 0 && downloadProgress < 1) {
       setVisible(true);
-    } else if (downloadProgress >= 0.98) {
-      const timeout = setTimeout(() => setVisible(false), 500); // Small delay for UX
-      return () => clearTimeout(timeout); // Cleanup timeout
+    } else if (downloadProgress >= 0.9) {
+      setVisible(false);
+      toast("Playing soon!");
+      // const timeout = setTimeout(() => setVisible(false), 500); // Small delay for UX
+      // return () => clearTimeout(timeout); // Cleanup timeout
     }
   }, [downloadProgress]);
 
