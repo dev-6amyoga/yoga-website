@@ -208,7 +208,7 @@ function StudentNavMUI({ mode, toggleColorMode }) {
         path: "/student/register-new-playlist",
         title: "Create Playlist",
         props: {
-          disabled: false,
+          disabled: true,
         },
       },
       {
