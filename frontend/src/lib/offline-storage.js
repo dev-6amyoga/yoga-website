@@ -87,6 +87,11 @@ class ShakaOfflineStore {
             servers: {
               "com.microsoft.widevine": drmConfig.licenseAcquisitionUrl,
             },
+            advanced: {
+              "com.widevine.alpha": {
+                persistentStateRequired: true,
+              },
+            },
           },
         });
         console.log(
