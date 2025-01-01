@@ -192,7 +192,7 @@ function StudentNavMUI({ mode, toggleColorMode }) {
       },
       {
         path: "/student/purchase-a-plan",
-        title: "Purchase a Plan",
+        title: "Purchase Subscription",
         props: {
           disabled: false,
         },
