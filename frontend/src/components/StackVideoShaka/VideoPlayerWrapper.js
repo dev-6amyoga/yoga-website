@@ -1,22 +1,18 @@
-// import { useEffect } from "react";
+// import React from "react";
 // import useVideoStore from "../../store/VideoStore";
 // import Playlist from "../Sidebar/Playlist";
 // import PlaylistSections from "./Sections";
 // import VideoPlayer from "./VideoPlayer";
 // import DownloadProgressCircle from "../DownloadProgressCircle";
+// import { Modal, Box, Typography, Button } from "@mui/material";
+// import { isMobileTablet } from "../../utils/isMobileOrTablet";
 
 // export default function VideoPlayerWrapper({ page = "student" }) {
 //   const fullScreen = useVideoStore((state) => state.fullScreen);
-//   // const [aiVisible, setAiVisible] = useState(false);
-
-//   // console.log("fullScreen", fullScreen);l
-
-//   useEffect(() => {
-//     console.log("[VideoPlayerWrapper] fullScreen changed", fullScreen);
-//   }, [fullScreen]);
 
 //   return (
 //     <>
+//       <DownloadProgressCircle />
 //       <div
 //         className={fullScreen ? "" : "relative video-grid mb-12 w-full gap-6"}
 //       >
@@ -28,57 +24,38 @@
 //           }
 //         >
 //           <VideoPlayer />
-//           <DownloadProgressCircle />
-
-//           {/* <Button
-// 						onClick={() => {
-// 							setAiVisible(!aiVisible);
-// 						}}
-// 						variant="contained">
-// 						{aiVisible ? "Disable AI Mode" : "Enable AI Mode"}
-// 					</Button> */}
 //         </div>
-//         {/* {!fullScreen ? (
-//           // {aiVisible?  (
-//           //             <div className="queue-area">
-//           //   <PoseDetector />
-//           // </div>
-//           // ) : <></>}
-//           <div className="queue-area">
-//             <PoseDetector />
-//           </div>
-//         ) : (
-//           <></>
-//         )} */}
 //         <div className="queue-area">
 //           <PlaylistSections />
 //         </div>
-
-//         {/* {aiVisible && (
-//           <div className="queue-area">
-//             <PoseDetector />
-//           </div>
-//         )} */}
 //       </div>
-
-//       {/* <Spacer h={4} /> */}
-
 //       <Playlist page={page} />
 //     </>
 //   );
 // }
-
 import React from "react";
 import useVideoStore from "../../store/VideoStore";
 import Playlist from "../Sidebar/Playlist";
 import PlaylistSections from "./Sections";
 import VideoPlayer from "./VideoPlayer";
 import DownloadProgressCircle from "../DownloadProgressCircle";
-import { useState } from "react";
-import { Modal, Box, Typography, Button } from "@mui/material";
+import { isMobileTablet } from "../../utils/isMobileOrTablet";
 
 export default function VideoPlayerWrapper({ page = "student" }) {
   const fullScreen = useVideoStore((state) => state.fullScreen);
+
+  // Check if the device is mobile or tablet
+  const isMobile = isMobileTablet();
+  console.log("Is mobile or tablet:", isMobile);
+
+  if (isMobile) {
+    return (
+      <div style={{ textAlign: "center", padding: "20px" }}>
+        <h2>Cannot be accessed on mobile devices</h2>
+        <p>Please try on a laptop or desktop for the best experience.</p>
+      </div>
+    );
+  }
 
   return (
     <>
