@@ -236,7 +236,7 @@ function StudentNavMUI({ mode, toggleColorMode }) {
         path: "/student/watch-history",
         title: "Watch History",
         props: {
-          disabled: false,
+          disabled: true,
         },
       },
     ];
