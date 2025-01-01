@@ -184,15 +184,15 @@ function StudentNavMUI({ mode, toggleColorMode }) {
   const paths = useMemo(() => {
     return [
       {
-        path: "/student/purchase-a-plan",
-        title: "Purchase a plan",
+        path: "/student/free-videos",
+        title: "Free Videos",
         props: {
           disabled: false,
         },
       },
       {
-        path: "/student/free-videos",
-        title: "Free Videos",
+        path: "/student/purchase-a-plan",
+        title: "Purchase a plan",
         props: {
           disabled: false,
         },
@@ -440,9 +440,9 @@ function StudentNavMUI({ mode, toggleColorMode }) {
                     <Divider />
                     {user ? (
                       <>
-                        <h2 className="text-center text-sm">
+                        {/* <h2 className="text-center text-sm">
                           Logged in as {user?.name}
-                        </h2>
+                        </h2> */}
                         <Button variant="destructive" onClick={handleLogout}>
                           Logout
                         </Button>
