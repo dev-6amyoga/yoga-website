@@ -192,14 +192,14 @@ function StudentNavMUI({ mode, toggleColorMode }) {
       },
       {
         path: "/student/purchase-a-plan",
-        title: "Purchase a plan",
+        title: "Purchase a Plan",
         props: {
           disabled: false,
         },
       },
       {
         path: "/student/playlist-view",
-        title: "6AM Yoga Playlists",
+        title: "Yoga Player",
         props: {
           disabled: disabled,
         },
