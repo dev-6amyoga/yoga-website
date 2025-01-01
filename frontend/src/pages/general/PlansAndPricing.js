@@ -45,7 +45,7 @@ function PlansAndPricing() {
                     yogasanas and pranayama (75 min/day)
                   </Typography>
                   <Typography variant="h6" color="primary" component="div">
-                    INR 2999
+                    INR 2999 / $72 / 72 EUR
                   </Typography>
                 </CardContent>
               </Card>
@@ -62,7 +62,7 @@ function PlansAndPricing() {
                     yogasanas and pranayama (75 min/day)
                   </Typography>
                   <Typography variant="h6" color="primary" component="div">
-                    INR 3999
+                    INR 3999 / $96 / 96 EUR
                   </Typography>
                 </CardContent>
               </Card>
