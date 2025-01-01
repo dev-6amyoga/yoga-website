@@ -308,10 +308,10 @@ export default function Register({ switchForm }) {
               We will send an email to <b>{generalInfo?.email_id}</b>
             </p>
             <p>
-              To access your account, please click on
               <Button onClick={sendEmail} disabled={regVerifyDisabled}>
-                Verify
+                Click Here
               </Button>
+              to send the email.
             </p>
             {checkInbox && (
               <p className="text-sm border p-2 rounded-lg text-zinc-500 border-red-500">
