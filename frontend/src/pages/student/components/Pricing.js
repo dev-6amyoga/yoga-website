@@ -61,17 +61,37 @@ export default function Pricing({
     };
     fetchData();
   }, []);
+
   const [selectedNeeds, setSelectedNeeds] = useState([]);
-
-  useEffect(() => {
-    console.log("selected needs is : ", selectedNeeds);
-  }, [selectedNeeds]);
   const [otherNeed, setOtherNeed] = useState("");
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null); // To control dropdown anchor
+  const [open, setOpen] = useState(false);
 
+  // Open the dropdown when user clicks
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+    setOpen(true);
+  };
+
+  // Handle the closing of the dropdown
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  // Handle selection change
   const handleNeedsChange = (event) => {
     setSelectedNeeds(event.target.value);
   };
 
+  // Handle "OK" button click
+  const handleConfirmSelection = (event) => {
+    setIsConfirmed(true);
+    setAnchorEl(event.currentTarget);
+    setOpen(false); // Close dropdown
+  };
+
+  // Handle "Other Needs" change
   const handleOtherNeedChange = (event) => {
     setOtherNeed(event.target.value);
   };
@@ -275,17 +295,15 @@ export default function Pricing({
                           <InputLabel
                             sx={{
                               color: "grey.200",
-                              "&.Mui-focused": {
-                                display: "none",
-                              },
-                              "&.MuiFormLabel-filled": {
-                                display: "none",
-                              },
+                              "&.Mui-focused": { display: "none" },
+                              "&.MuiFormLabel-filled": { display: "none" },
                             }}
                             id="yoga-needs-label"
                           >
                             Select Your Yoga Needs
                           </InputLabel>
+
+                          {/* Using Menu component for controlled dropdown */}
                           <Select
                             sx={{
                               color: "grey.200",
@@ -299,7 +317,7 @@ export default function Pricing({
                               "&:hover .MuiOutlinedInput-notchedOutline": {
                                 borderColor: "grey.200",
                               },
-                              ".MuiSvgIcon-root ": {
+                              ".MuiSvgIcon-root": {
                                 fill: "grey.200 !important",
                               },
                             }}
@@ -308,6 +326,9 @@ export default function Pricing({
                             value={selectedNeeds}
                             onChange={handleNeedsChange}
                             renderValue={(selected) => selected.join(", ")}
+                            open={open} // Control dropdown open state
+                            onOpen={handleClick} // Open dropdown
+                            onClose={handleClose} // Close dropdown
                           >
                             {[
                               "Knee Pain",
@@ -322,29 +343,42 @@ export default function Pricing({
                                   checked={selectedNeeds.indexOf(need) > -1}
                                   sx={{
                                     color: "grey.200",
-                                    "&.Mui-checked": {
-                                      color: "grey.200",
-                                    },
+                                    "&.Mui-checked": { color: "grey.200" },
                                   }}
                                 />
                                 <ListItemText primary={need} />
                               </MenuItem>
                             ))}
+
+                            {/* Custom OK Button inside the dropdown */}
+                            <MenuItem onClick={handleConfirmSelection}>
+                              <Button
+                                fullWidth
+                                variant="contained"
+                                color="primary"
+                              >
+                                OK
+                              </Button>
+                            </MenuItem>
                           </Select>
                         </FormControl>
+
+                        {isConfirmed && (
+                          <Box sx={{ mt: 2 }}>
+                            <Typography variant="h6" color="grey.200">
+                              Selected Needs: {selectedNeeds.join(", ")}
+                            </Typography>
+                          </Box>
+                        )}
 
                         <TextField
                           fullWidth
                           sx={{
                             mt: 2,
-                            ".MuiInputBase-input": {
-                              color: "grey.200",
-                            },
+                            ".MuiInputBase-input": { color: "grey.200" },
                             ".MuiInputLabel-root": {
                               color: "grey.200",
-                              "&.Mui-focused": {
-                                display: "none",
-                              },
+                              "&.Mui-focused": { display: "none" },
                             },
                             ".MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline":
                               {

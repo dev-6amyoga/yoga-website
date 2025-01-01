@@ -736,9 +736,7 @@ function StudentPlan() {
       finalUserPlan.transaction_order_id = order_id;
       finalUserPlan.user_type = "STUDENT";
       finalUserPlan.institute_id = null;
-      toast("Registering custom plan!");
-      console.log("REG custom plan :", order_id);
-      console.log("REG custom plan :", finalUserPlan);
+      // toast("Registering custom plan!");
 
       // TODO : currency id mapping for custom user   plans
       FetchRetry({
@@ -1102,12 +1100,14 @@ function StudentPlan() {
                     </TableCell>
                     <TableCell>
                       {row?.validity_from
-                        ? new Date(row?.validity_from).toDateString()
+                        ? new Date(row?.validity_from).toLocaleDateString(
+                            "en-GB"
+                          )
                         : ""}
                     </TableCell>
                     <TableCell>
                       {row?.validity_to
-                        ? new Date(row?.validity_to).toDateString()
+                        ? new Date(row?.validity_to).toLocaleDateString("en-GB")
                         : ""}
                     </TableCell>
                     {/* <TableCell>{row?.current_status}</TableCell> */}
@@ -1148,7 +1148,7 @@ function StudentPlan() {
           </Alert>
         ) : (
           <Pricing
-            heading="6AM Yoga Plans"
+            heading="Standard Subscriptions"
             allPlans={allPlans}
             subscribePlan={subscribePlan}
             selectedCurrency={selectedCurrency}

@@ -1281,7 +1281,8 @@ function StreamStackItem({
             Downloading Video
           </Typography>
           <Typography id="modal-description" variant="body1" mb={3}>
-            The initial play may take approximately 5 minutes to download!
+            Initializing the player for the first time may take around 5
+            minutes!
           </Typography>
           <Button
             variant="contained"
