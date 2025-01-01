@@ -86,15 +86,14 @@ export default function Register({ switchForm }) {
             toast.success("Email verified successfully!");
             setCheckEmailVerification(false);
           } else {
-            toast.error("Error verifying email; Retrying...");
+            console.log("Error verifying email; Retrying...");
           }
         } else {
-          toast.error("Error verifying email; Retrying...");
+          console.log("Error verifying email; Retrying...");
         }
-
         return null;
       } catch (err) {
-        toast.error("Error verifying email; Retrying...");
+        console.log("Error verifying email; Retrying...");
         return null;
       }
     },
