@@ -113,6 +113,9 @@ function VideoPlayer() {
     }
   }, [queue, playlistState, setCurrentVideo, setVideoState, setPlaylistState]);
 
+  useEffect(() => {
+    console.log("queue is : ", queue);
+  }, [queue]);
   const handleReset = useCallback(() => {
     setCurrentMarkerIdx(null);
     setPauseReason(null);
