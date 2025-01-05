@@ -317,7 +317,8 @@ function VideoPlayer() {
 										<StreamStackItem
 											key={queueItem.queue_id}
 											updatedAt={
-												queueItem?.video?.last_updated
+												queueItem?.video
+													?.last_updated || 0
 											}
 											video={queueItem}
 											handleEnd={handleEnd}
