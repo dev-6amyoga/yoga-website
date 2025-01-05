@@ -1,13 +1,6 @@
 // import PageWrapper from "../../components/Common/PageWrapper";
 import { useEffect, useState } from "react";
-import Playlist from "../../components/Sidebar/Playlist";
-import VideoPlayerWrapper from "../../components/StackVideoShaka/VideoPlayerWrapper";
 import AdminPageWrapper from "../../components/Common/AdminPageWrapper";
-import WebcamComponent from "../../components/webcam_component/WebcamComponent";
-import {
-  drawKeypoints,
-  drawSkeleton,
-} from "../../components/webcam_component/utilities";
 import ShakaVideo from "../testing/ShakaVideo";
 function PlayerPage() {
   const [position, setPosition] = useState(0);

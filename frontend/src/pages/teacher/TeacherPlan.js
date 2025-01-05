@@ -378,13 +378,16 @@ function TeacherPlan() {
   };
 
   const registerUserPlan = async (order_id) => {
-    let finalUserPlan = { ...toBeRegistered };
+    let finalUserPlan = {
+      ...toBeRegistered,
+      teacher_id: toBeRegistered.user_id,
+    };
+    delete finalUserPlan.user_id;
     finalUserPlan.transaction_order_id = order_id;
-    finalUserPlan.user_type = "STUDENT";
-    finalUserPlan.institute_id = null;
+    finalUserPlan.user_type = "TEACHER";
     console.log({ finalUserPlan });
     FetchRetry({
-      url: "/user-plan/register",
+      url: "/teacher-plan/purchase",
       method: "POST",
       token: true,
       data: finalUserPlan,

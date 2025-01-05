@@ -126,6 +126,7 @@ export default function Register({ switchForm }) {
           is_google_login: !!googleInfo?.verified,
         };
 
+        console.log(newUser);
         let url = "/auth/register";
         if (googleInfo?.verified) {
           url += "-google";
@@ -155,7 +156,7 @@ export default function Register({ switchForm }) {
           role_name: "TEACHER",
           is_google_login: !!googleInfo?.verified,
         };
-
+        console.log(newUser);
         let url = "/auth/register";
         if (googleInfo?.verified) {
           url += "-google";

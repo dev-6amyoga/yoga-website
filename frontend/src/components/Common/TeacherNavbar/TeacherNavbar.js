@@ -98,7 +98,7 @@ function TeacherNavbar({ mode, toggleColorMode }) {
         },
       },
       {
-        path: "/teacher/playlist-view",
+        path: "/teacher/playlist",
         title: "6AM Yoga Playlists",
         props: {
           disabled: disabled,
