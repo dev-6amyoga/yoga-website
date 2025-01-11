@@ -163,8 +163,9 @@ router.get('/video/getAllTransitions', async (req, res) => {
 
 router.get('/video/updateTransitionsTeacher', async (req, res) => {
   try {
-    let output = []
+    const output = []
     const transitions = await Asana.find()
+
     for (const transition of transitions) {
       if (!transition.hasOwnProperty('teacher_mode')) {
         output.push(transition)
@@ -174,6 +175,7 @@ router.get('/video/updateTransitionsTeacher', async (req, res) => {
         transition.teacher_mode = false
       }
     }
+
     res.status(200).json(output)
   } catch (error) {
     console.error(error)
@@ -184,10 +186,19 @@ router.get('/video/updateTransitionsTeacher', async (req, res) => {
 })
 
 router.post('/get-transition-by-id', async (req, res) => {
-  const asana_id = req.body.asana_id
+  const { asana_id, transition_id } = req.body
+
+  const final_asana_id = asana_id || transition_id
+
+  if (final_asana_id === null || final_asana_id === undefined) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Transition ID not provided',
+    })
+  }
+
   try {
     const asanas = await TransitionVideo.findOne({
-      transition_id: asana_id,
+      transition_id: final_asana_id,
     })
     res.json(asanas)
   } catch (error) {
@@ -222,7 +233,7 @@ router.delete('/video/deleteTransition/:id', async (req, res) => {
 })
 
 router.put('/video/updateAsana/:asanaId', async (req, res) => {
-  const asanaId = req.params.asanaId
+  const { asanaId } = req.params
   const updatedData = req.body
   if (updatedData.asana_hls_url !== '') {
     const hlsDuration = getVideoDuration(updatedData.asana_hls_url)
@@ -251,7 +262,7 @@ router.put('/video/updateAsana/:asanaId', async (req, res) => {
 })
 
 router.delete('/video/deleteAsana/:asanaId', async (req, res) => {
-  const asanaId = req.params.asanaId
+  const { asanaId } = req.params
   try {
     const deletedAsana = await Asana.findOneAndDelete({ id: asanaId })
     if (deletedAsana) {
@@ -332,7 +343,14 @@ router.get('/video/getTeacherAsanas', async (req, res) => {
 })
 
 router.post('/get-asana-by-id', async (req, res) => {
-  const asana_id = req.body.asana_id
+  const { asana_id } = req.body
+
+  if (asana_id === null || asana_id === undefined) {
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: 'Asana ID not provided',
+    })
+  }
+
   try {
     const asanas = await Asana.findOne({ id: asana_id })
     res.json(asanas)

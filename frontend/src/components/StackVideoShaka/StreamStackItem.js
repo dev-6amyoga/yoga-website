@@ -849,49 +849,6 @@ function StreamStackItem({
 		[setVideoState]
 	);
 
-	// const loadVideo = useCallback(
-	//   async (isDrm) => {
-	//     try {
-	//       let offlineRecord = await shakaOfflineStore.get(videoUrl);
-	//       let offlineUri = offlineRecord?.offlineUri;
-	//       if (!offlineUri) {
-	//         if (isDrm) {
-	//           console.log(
-	//             "[StreamStackItem:loadVideo] DRM video detected. Processing..."
-	//           );
-	//           offlineUri = await handleDrmDownload(videoUrl, videoTitle);
-	//         } else {
-	//           console.log(
-	//             "[StreamStackItem:loadVideo] Non-DRM video detected. Downloading..."
-	//           );
-	//           offlineUri = await handleNonDrmDownload(videoUrl, videoTitle);
-	//         }
-	//       }
-	//       if (offlineUri) {
-	//         console.log(
-	//           "[StreamStackItem:loadVideo] Loading offline URI:",
-	//           offlineUri
-	//         );
-	//         await playerRef.current.player.load(offlineUri);
-	//       } else {
-	//         console.warn(
-	//           "[StreamStackItem:loadVideo] No offline URI. Falling back to online URL."
-	//         );
-	//         await playerRef.current.player.load(videoUrl);
-	//       }
-	//       setMetadataLoaded(true);
-	//       console.log("[StreamStackItem:loadVideo] Video loaded successfully.");
-	//     } catch (error) {
-	//       console.error(
-	//         "[StreamStackItem:loadVideo] Error loading video:",
-	//         error
-	//       );
-	//       playerOnError(error);
-	//     }
-	//   },
-	//   [playerOnError, videoUrl, videoTitle, shakaOfflineStore, setMetadataLoaded]
-	// );
-
 	const loadVideo = useCallback(
 		async (isDrm, lastUpdated) => {
 			try {
@@ -1032,7 +989,6 @@ function StreamStackItem({
 			const db = await openDatabase();
 			const transaction = db.transaction("video_metadata", "readonly");
 			const store = transaction.objectStore("video_metadata");
-			const records = [];
 
 			return new Promise((resolve, reject) => {
 				const cursorRequest = store.openCursor();

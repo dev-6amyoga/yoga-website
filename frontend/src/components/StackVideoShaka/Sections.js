@@ -73,7 +73,6 @@ function PlaylistSections() {
 		<div
 			className={`relative mx-auto overflow-y-auto overflow-x-hidden rounded-xl bg-blue-50 ${fullScreen ? "" : "xl:h-full"}`}>
 			<div className="px-4 pt-4 pb-2 sticky top-0 bg-blue-50 z-[1000] rounded-xl">
-				<div className="py-4"></div>
 				<h6 className="uppercase">Currently Playing</h6>
 				{currVideo ? (
 					<div className="flex flex-col gap-2 py-2">
@@ -95,7 +94,6 @@ function PlaylistSections() {
 							<p className="text-sm text-zinc-500">
 								CURRENT SECTION
 							</p>
-							<p className="h-8 text-sm"></p>
 							{currMarker ? (
 								<p
 									title={currMarker.name}
@@ -115,14 +113,14 @@ function PlaylistSections() {
 			{/* <div className="flex flex-col gap-4 pb-4 max-h-72" ref={sectionsRef}> */}
 			<h6 className="uppercase px-4 py-2">Sections</h6>
 			<div
-				className="flex flex-col gap-4 px-4 pb-4 max-h-44 overflow-x-auto"
+				className="flex flex-col gap-0 px-4 pb-4 max-h-44 overflow-x-auto"
 				ref={sectionsRef}>
 				{currVideo?.video?.sections?.map((s, idx) => {
 					return (
 						<div
 							key={s.time}
 							id={`section-${idx}`}
-							className={`text-sm w-full border flex-shrink-0 flex flex-row items-center gap-2 p-2 hover:cursor-pointer hover:bg-blue-100 transition-colors ${currentMarkerIdx === idx ? "bg-blue-100" : ""}`}
+							className={`text-sm w-full flex-shrink-0 flex flex-row items-center gap-2 p-2 hover:cursor-pointer hover:bg-blue-100 transition-colors ${currentMarkerIdx === idx ? "bg-blue-100" : ""}`}
 							onClick={() => handleSeek(s, idx)}>
 							<div
 								className={`bg-blue-500 flex items-center justify-center text-white w-10 h-10 rounded-full ${
