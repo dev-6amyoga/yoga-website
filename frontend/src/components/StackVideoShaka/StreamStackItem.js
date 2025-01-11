@@ -991,6 +991,7 @@ function StreamStackItem({
 			const store = transaction.objectStore("video_metadata");
 
 			return new Promise((resolve, reject) => {
+				const records = [];
 				const cursorRequest = store.openCursor();
 
 				cursorRequest.onsuccess = (event) => {
