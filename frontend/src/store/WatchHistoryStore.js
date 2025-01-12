@@ -97,7 +97,7 @@ const useWatchHistoryStore = create((set, get) => ({
 		})
 			.then((res) => {
 				if (res.status === 200) {
-					console.log("watch time buffer flushed");
+					console.log("watch time buffer flushed", watch_time_logs);
 				}
 			})
 			.catch((err) => {

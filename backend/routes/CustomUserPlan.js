@@ -13,84 +13,92 @@ const {
   USER_PLAN_ACTIVE,
   USER_PLAN_STAGED,
 } = require('../enums/user_plan_status')
+const WatchTimeQuota = require('../models/mongo/WatchTimeQuota')
 
 router.post('/register', authenticateToken, async (req, res) => {
+  const {
+    plan_id,
+    institute_id,
+
+    purchase_date,
+    validity_from = null,
+    validity_to = null,
+
+    // cancellation_date,
+    auto_renewal_enabled = false,
+
+    discount_coupon_id,
+    referral_code_id,
+
+    current_status,
+    transaction_order_id,
+
+    user_type,
+  } = req.body
+
+  const { user_id } = req.user
+
+  console.log(req.body)
+
+  // check request body
+
+  if (
+    user_id === null ||
+    user_id === undefined ||
+    !plan_id ||
+    institute_id === undefined ||
+    !purchase_date ||
+    !current_status ||
+    !transaction_order_id ||
+    !user_type
+  ) {
+    console.log('Missing required fields1')
+
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ message: 'Missing required fields' })
+  }
+
+  // mongodb object id is string
+  if (typeof plan_id !== 'string') {
+    console.log('Missing required fields2')
+
+    return res.status(HTTP_BAD_REQUEST).json({
+      message: 'Invalid plan_id',
+    })
+  }
+
+  if (
+    current_status === USER_PLAN_ACTIVE &&
+    (validity_from === null ||
+      validity_from === undefined ||
+      validity_to === null ||
+      validity_to === undefined)
+  ) {
+    console.log('Missing required fields3')
+    // if status is active and either valid from or valid to are null;
+
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: 'Missing required fields' })
+  } else if (current_status === USER_PLAN_STAGED) {
+  } else {
+    console.log('INVALID STATUS', current_status)
+    if (
+      current_status !== USER_PLAN_ACTIVE &&
+      current_status !== USER_PLAN_STAGED
+    ) {
+      return res.status(HTTP_BAD_REQUEST).json({ error: 'Invalid status' })
+    }
+  }
+
+  const customUserPlanSession = await CustomUserPlan.startSession()
+  const watchTimeQuotaSession = await WatchTimeQuota.startSession()
+  customUserPlanSession.startTransaction()
+  watchTimeQuotaSession.startTransaction()
+
   try {
-    const {
-      plan_id,
-      institute_id,
-
-      purchase_date,
-      validity_from = null,
-      validity_to = null,
-
-      // cancellation_date,
-      auto_renewal_enabled = false,
-
-      discount_coupon_id,
-      referral_code_id,
-
-      current_status,
-      transaction_order_id,
-
-      user_type,
-    } = req.body
-
-    const { user_id } = req.user
-
-    console.log(req.body)
-
-    // check request body
-
-    if (
-      user_id === null ||
-      user_id === undefined ||
-      !plan_id ||
-      institute_id === undefined ||
-      !purchase_date ||
-      !current_status ||
-      !transaction_order_id ||
-      !user_type
-    ) {
-      console.log('Missing required fields1')
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ message: 'Missing required fields' })
-    }
-
-    // mongodb object id is string
-    if (typeof plan_id !== 'string') {
-      console.log('Missing required fields2')
-      return res.status(HTTP_BAD_REQUEST).json({
-        message: 'Invalid plan_id',
-      })
-    }
-
-    if (
-      current_status === USER_PLAN_ACTIVE &&
-      (validity_from === null ||
-        validity_from === undefined ||
-        validity_to === null ||
-        validity_to === undefined)
-    ) {
-      console.log('Missing required fields3')
-      // if status is active and either valid from or valid to are null;
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ error: 'Missing required fields' })
-    } else if (current_status === USER_PLAN_STAGED) {
-    } else {
-      console.log('INVALID STATUS', current_status)
-      if (
-        current_status !== USER_PLAN_ACTIVE &&
-        current_status !== USER_PLAN_STAGED
-      ) {
-        return res.status(HTTP_BAD_REQUEST).json({ error: 'Invalid status' })
-      }
-    }
-
     // check if plan exists with same status
-
     if (current_status === USER_PLAN_ACTIVE) {
       const existingPlan = await CustomUserPlan.findOne({
         user_id,
@@ -99,6 +107,11 @@ router.post('/register', authenticateToken, async (req, res) => {
       })
 
       if (existingPlan) {
+        await customUserPlanSession.abortTransaction()
+        await watchTimeQuotaSession.abortTransaction()
+        await customUserPlanSession.endSession()
+        await watchTimeQuotaSession.endSession()
+
         return res
           .status(HTTP_BAD_REQUEST)
           .json({ error: 'Plan already exists with same status' })
@@ -111,6 +124,11 @@ router.post('/register', authenticateToken, async (req, res) => {
     })
 
     if (!planExists) {
+      await customUserPlanSession.abortTransaction()
+      await watchTimeQuotaSession.abortTransaction()
+      await customUserPlanSession.endSession()
+      await watchTimeQuotaSession.endSession()
+
       return res.status(HTTP_BAD_REQUEST).json({
         error: 'Plan does not exist',
       })
@@ -129,10 +147,33 @@ router.post('/register', authenticateToken, async (req, res) => {
       user_type,
     })
 
-    const saveCustomPlan = await newCustomPlan.save()
+    const saveCustomPlan = await newCustomPlan.save({
+      session: customUserPlanSession,
+    })
+
+    // add quota
+    if (current_status === USER_PLAN_ACTIVE) {
+      await WatchTimeQuota.create(
+        {
+          user_plan_id: String(newUserPlan.user_plan_id),
+          quota: plan.watch_time_limit,
+        },
+        { session: watchTimeQuotaSession }
+      )
+    }
+
+    await customUserPlanSession.commitTransaction()
+    await watchTimeQuotaSession.commitTransaction()
+    await customUserPlanSession.endSession()
+    await watchTimeQuotaSession.endSession()
 
     res.status(HTTP_OK).json(saveCustomPlan)
   } catch (error) {
+    await customUserPlanSession.abortTransaction()
+    await watchTimeQuotaSession.abortTransaction()
+    await customUserPlanSession.endSession()
+    await watchTimeQuotaSession.endSession()
+
     console.error('Error saving new custom user plan:', error)
     res.status(HTTP_INTERNAL_SERVER_ERROR).json({
       error: 'Failed to save new custom user plan',
