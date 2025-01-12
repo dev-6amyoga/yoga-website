@@ -593,6 +593,16 @@ export const TransitionEndStanding = async (
               return res;
             }
           }
+          if (end_video.catch_waist_start === false) {
+            if (start_video.catch_waist_end === true) {
+              let res = handleTransition(["Release Your Waist"]);
+              res = res.map((transition) => transition.transition_id);
+              res = res.filter((element) => element !== undefined);
+              return res;
+            } else {
+              return [];
+            }
+          }
           return [];
         }
         if (start_video.person_starting_position === "Left") {
@@ -602,6 +612,18 @@ export const TransitionEndStanding = async (
                 "Jump Side To Front Transition",
                 "Feet Apart Hands Loose Standing Transition Front",
                 "Catch Your Waist",
+              ]);
+              res = res.map((transition) => transition.transition_id);
+              res = res.filter((element) => element !== undefined);
+              return res;
+            }
+          }
+          if (end_video.catch_waist_start === false) {
+            if (start_video.catch_waist_end === true) {
+              let res = handleTransition([
+                "Release Your Waist",
+                "Jump Side To Front Transition",
+                "Feet Apart Hands Loose Standing Transition Front",
               ]);
               res = res.map((transition) => transition.transition_id);
               res = res.filter((element) => element !== undefined);
