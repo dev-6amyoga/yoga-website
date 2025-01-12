@@ -14,13 +14,10 @@ const {
 const { Institute } = require('../models/sql/Institute')
 const { Role } = require('../models/sql/Role')
 const { Op } = require('sequelize')
-const { Plan } = require('../models/sql/Plan')
 const { sequelize } = require('../init.sequelize')
-const { timeout } = require('../utils/promise_timeout')
 const { validate_email } = require('../utils/validate_email')
 const { mailTransporter } = require('../init.nodemailer')
-const countries = require('countries-list') // Import countries-list
-
+const countries = require('countries-list')
 const {
   generateAccessToken,
   generateRefreshToken,
@@ -695,7 +692,6 @@ router.post('/register', async (req, res) => {
       { transaction: t }
     )
 
-    console.log('FOUND ROLE IS :', role)
     // return res.status(HTTP_OK).json({ role: role })
 
     if (!role) throw new Error("Role doesn't exist")
@@ -993,50 +989,6 @@ router.get('/get-login-history', async (req, res) => {
       .json({ error: 'Internal server error' })
   }
 })
-
-// router.get('/countries', async (req, res) => {
-//   try {
-//     const response = await axios.get('https://api.first.org/data/v1/countries')
-
-//     // Extract the countries data and format it as per your structure
-//     const countries = response.data.data
-//     const formattedCountries = []
-
-//     for (const [code, country] of Object.entries(countries)) {
-//       // formattedCountries[code] = {
-//       //   country: country.country,
-//       //   region: country.region,
-//       // }
-//       formattedCountries.push(country.country)
-//     }
-
-//     // Return the formatted response
-//     res.json(formattedCountries)
-//   } catch (error) {
-//     console.log(error)
-//     res.status(500).json({ error: 'Failed to fetch country data' })
-//   }
-// })
-
-// router.get('/countries', async (req, res) => {
-//   try {
-//     const response = await axios.get('https://restcountries.com/v3.1/all')
-
-//     // Extract the countries data and format it as per your structure
-//     const countries = response.data
-//     const formattedCountries = []
-
-//     for (const country of countries) {
-//       formattedCountries.push(country.name.common) // Push the country name
-//     }
-
-//     // Return the formatted response
-//     res.json(formattedCountries)
-//   } catch (error) {
-//     console.log(error)
-//     res.status(500).json({ error: 'Failed to fetch country data' })
-//   }
-// })
 
 router.get('/countries', async (req, res) => {
   try {

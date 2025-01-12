@@ -29,11 +29,12 @@ const {
 
 router.post('/update', authenticateToken, async (req, res) => {
   console.log('WatchTime /update')
-  const { institute_id, watch_time_logs, updated_at, playlist_id } = req.body
+  const { user_id, institute_id, watch_time_logs, updated_at, playlist_id } =
+    req.body
 
-  console.log(req.body)
-
-  const { user_id } = req.user
+  console.log(user_id)
+  console.log(watch_time_logs)
+  console.log(playlist_id)
 
   // validate request
   if (!user_id || !watch_time_logs || institute_id === undefined) {

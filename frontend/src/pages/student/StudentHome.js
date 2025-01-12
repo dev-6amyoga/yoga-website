@@ -13,9 +13,7 @@ import VideoRecorder from "../../components/video-recorder/VideoRecorder";
 
 function StudentHome() {
   const [mode, setMode] = useState("light");
-
   const defaultTheme = createTheme({ palette: { mode } });
-
   const [user, userPlan] = useUserStore((state) => [
     state.user,
     state.userPlan,
@@ -40,7 +38,6 @@ function StudentHome() {
         let res = data.userPlan.filter((d) =>
           d.current_status.toLowerCase().includes("active")
         );
-        console.log("DATA : ", res);
         if (res != null) {
           setHasUserPlan(true);
         }
@@ -50,6 +47,7 @@ function StudentHome() {
     };
     fetchPlanData();
   }, [user]);
+
   useEffect(() => {
     const fetchData = async () => {
       console.log("user plan is : ", user);
