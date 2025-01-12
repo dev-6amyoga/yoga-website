@@ -317,6 +317,7 @@ router.post('/register', authenticateToken, async (req, res) => {
       error: `User already has a plan that is ${current_status}; Any payment made will be refunded to your account in 4 to 5 business days.`,
     })
   const t = await sequelize.transaction()
+  const watchTimeQuotaSession = await WatchTimeQuota.startSession()
   try {
     // find plan by id
     let plan = null
@@ -371,10 +372,13 @@ router.post('/register', authenticateToken, async (req, res) => {
 
     // add quota
     if (current_status === USER_PLAN_ACTIVE) {
-      await WatchTimeQuota.create({
-        user_plan_id: String(newUserPlan.user_plan_id),
-        quota: plan.watch_time_limit,
-      })
+      await WatchTimeQuota.create(
+        {
+          user_plan_id: String(newUserPlan.user_plan_id),
+          quota: plan.watch_time_limit,
+        },
+        { session: watchTimeQuotaSession }
+      )
 
       // const x = await UserInstitutePlanRole.update(
       //   {
@@ -396,10 +400,12 @@ router.post('/register', authenticateToken, async (req, res) => {
     }
 
     await t.commit()
+    await watchTimeQuotaSession.commitTransaction()
     return res.status(HTTP_OK).json({ userPlan: newUserPlan })
   } catch (error) {
     console.error(error)
     await t.rollback()
+    await watchTimeQuotaSession.abortTransaction()
     switch (error.message) {
       case "Plan doesn't exist":
       case "User doesn't exist":

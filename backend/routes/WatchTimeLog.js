@@ -29,6 +29,10 @@ const {
 
 router.post('/update', authenticateToken, async (req, res) => {
   console.log('WatchTime /update')
+
+  /*
+   * watch_time_logs := []{user_id, asana_id, playlist_id, timedelta}
+   */
   const { institute_id, watch_time_logs, updated_at, playlist_id } = req.body
 
   console.log(req.body)
@@ -84,7 +88,7 @@ router.post('/update', authenticateToken, async (req, res) => {
       if (idx === -1) {
         const { timedelta, ...w } = wtl
         w.duration = timedelta
-        w.updated_at = updated_at ?? new Date()
+        w.updated_at = updated_at ? updated_at : new Date()
         reduced_watch_time.push(w)
       } else {
         if (wtl.timedelta > 0) {
@@ -136,16 +140,13 @@ router.post('/update', authenticateToken, async (req, res) => {
       )
     })
 
-    let quota = user_plan?.plan?.watch_time_limit || user_plan?.plan?.watchHours
+    let quota = user_plan?.plan?.watch_time_limit
+      ? user_plan?.plan?.watch_time_limit
+      : user_plan?.plan?.watchHours
 
-    let user_plan_id = user_plan?.user_plan_id || user_plan?._id
-
-    // console.log(user_plan_id, {
-    // 	user_plan_id:
-    // 		typeof user_plan_id === "number"
-    // 			? String(user_plan_id)
-    // 			: new mongoose.Types.ObjectId(user_plan_id).toString(),
-    // });
+    let user_plan_id = user_plan?.user_plan_id
+      ? user_plan?.user_plan_id
+      : user_plan?._id
 
     let updatedWatchTimeQuota = await WatchTimeQuota.findOneAndUpdate(
       {
@@ -170,9 +171,8 @@ router.post('/update', authenticateToken, async (req, res) => {
       { upsert: false, returnDocument: 'after', lean: true }
     )
 
-    // console.log({ updatedWatchTimeQuota });
-
-    if (!updatedWatchTimeQuota) {
+    if (updatedWatchTimeQuota === undefined || updatedWatchTimeQuota === null) {
+      console.log('did not update any WatchTimeQuota')
       await session.abortTransaction()
       await session.endSession()
 
@@ -189,8 +189,12 @@ router.post('/update', authenticateToken, async (req, res) => {
         // 	where: { user_plan_id: user_plan.user_plan_id },
         // });
         try {
+          console.log('Watch time quota exceeded')
           user_plan.current_status = USER_PLAN_EXPIRED_BY_USAGE
           await user_plan.save()
+
+          await UpdateUserPlanStatus(user_id, null, t, mt)
+
           await t.commit()
           await session.endSession()
 
