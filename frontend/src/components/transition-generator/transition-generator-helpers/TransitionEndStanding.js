@@ -686,12 +686,29 @@ export const TransitionEndStanding = async (
     if (break_status_start === "Break" && break_status_end === "No Break") {
       if (end_video.person_starting_position === "Front") {
         if (start_video.person_starting_position === "Front") {
-          let res = handleTransition([
-            "Feet Together Hands Tight Standing Transition Front",
-          ]);
-          res = res.map((transition) => transition.transition_id);
-          res = res.filter((element) => element !== undefined);
-          return res;
+          if (end_video.catch_waist_start === true) {
+            if (start_video.catch_waist_end === true) {
+              return [];
+            } else {
+              let res = handleTransition([
+                "Feet Together Hands Tight Standing Transition Front",
+                "Catch Your Waist",
+              ]);
+              res = res.map((transition) => transition.transition_id);
+              res = res.filter((element) => element !== undefined);
+              return res;
+            }
+          }
+          if (end_video.catch_waist_start === false) {
+            if (start_video.catch_waist_end === true) {
+              let res = handleTransition(["Release Your Waist"]);
+              res = res.map((transition) => transition.transition_id);
+              res = res.filter((element) => element !== undefined);
+              return res;
+            } else {
+              return ["Feet Together Hands Tight Standing Transition Front"];
+            }
+          }
         }
         if (start_video.person_starting_position === "Left") {
           let res = handleTransition(["Jump Side To Front Transition"]);
