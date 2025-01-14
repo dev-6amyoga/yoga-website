@@ -684,6 +684,7 @@ export const TransitionEndStanding = async (
       }
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
+      console.log("in break no break");
       if (end_video.person_starting_position === "Front") {
         if (start_video.person_starting_position === "Front") {
           if (end_video.catch_waist_start === true) {
@@ -701,12 +702,20 @@ export const TransitionEndStanding = async (
           }
           if (end_video.catch_waist_start === false) {
             if (start_video.catch_waist_end === true) {
+              console.log("in break no break BREAK");
               let res = handleTransition(["Release Your Waist"]);
+              console.log(res);
               res = res.map((transition) => transition.transition_id);
               res = res.filter((element) => element !== undefined);
               return res;
             } else {
-              return ["Feet Together Hands Tight Standing Transition Front"];
+              let res = handleTransition([
+                "Feet Together Hands Tight Standing Transition Front",
+              ]);
+              console.log(res);
+              res = res.map((transition) => transition.transition_id);
+              res = res.filter((element) => element !== undefined);
+              return res;
             }
           }
         }
