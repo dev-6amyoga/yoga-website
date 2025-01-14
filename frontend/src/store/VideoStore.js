@@ -9,6 +9,10 @@ export const STATE_VIDEO_PLAY = "PLAY",
 
 export const useVideoStore = create(
 	subscribeWithSelector((set) => ({
+		shakaSupported: true,
+		setShakaSupported: (supported) =>
+			set(() => ({ shakaSupported: supported })),
+
 		devMode: false,
 		setDevMode: (dm) =>
 			set(() => {
