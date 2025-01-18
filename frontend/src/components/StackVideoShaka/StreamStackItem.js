@@ -140,6 +140,9 @@ function StreamStackItem({
 
 		// videoStarted
 		videoStarted,
+
+		// playerSupported
+		setPlayerSupported,
 	] = useVideoStore((state) => [
 		//
 		state.seekQueue,
@@ -181,6 +184,9 @@ function StreamStackItem({
 
 		//
 		state.videoStarted,
+
+		//
+		state.setPlayerSupported,
 	]);
 
 	const [popFromQueue, popFromArchive] = usePlaylistStore((state) => [
@@ -933,6 +939,7 @@ function StreamStackItem({
 					offlineUri = null;
 				}
 
+				// if offline uri not available, try download
 				if (!offlineUri) {
 					setOpen(true);
 					if (isDrm) {
@@ -1004,13 +1011,23 @@ function StreamStackItem({
 					case browser.edge:
 					case browser.chrome:
 					case browser.opera:
+					case browser.firefox:
 						({ data: drmConfig, error } =
 							await GetWidevineTokenData());
+						playerRef.current.player.configure({
+							drm: {
+								servers: {
+									"com.widevine.alpha":
+										drmConfig.licenseAcquisitionUrl,
+								},
+							},
+						});
 						break;
 					case browser.safari:
 						({ data: drmConfig, error } =
 							await GetFairplayTokenData());
-					case browser.firefox:
+						// TODO : handle fairplay here
+						break;
 					case browser.ie:
 					case browser.unknown:
 						throw new Error("Browser not supported");
@@ -1018,6 +1035,14 @@ function StreamStackItem({
 					default:
 						({ data: drmConfig, error } =
 							await GetWidevineTokenData());
+						playerRef.current.player.configure({
+							drm: {
+								servers: {
+									"com.widevine.alpha":
+										drmConfig.licenseAcquisitionUrl,
+								},
+							},
+						});
 						break;
 				}
 
@@ -1076,6 +1101,7 @@ function StreamStackItem({
 		switch (detectedBrowser) {
 			case browser.chrome:
 			case browser.opera:
+			case browser.firefox:
 				({ data: drmConfig, error } = await GetWidevineTokenData());
 				playerRef.current.player.configure({
 					drm: {
@@ -1100,7 +1126,6 @@ function StreamStackItem({
 			case browser.safari:
 				({ data: drmConfig, error } = await GetFairplayTokenData());
 				break;
-			case browser.firefox:
 			case browser.ie:
 			case browser.unknown:
 				throw new Error("Browser not supported");
@@ -1219,7 +1244,6 @@ function StreamStackItem({
 
 				const check = isMobileTablet();
 				const isMobile = { check: check };
-				const detectedBrowser = detectBrowser();
 
 				const offlineSupported =
 					useShakaOfflineStore.getState()?.offlineSupported || false;
@@ -1269,6 +1293,7 @@ function StreamStackItem({
 							console.log(
 								"[StreamStackItem:playerInit] Mobile detected. Unsupported."
 							);
+							setPlayerSupported(false);
 							return;
 						}
 					} else {
@@ -1298,6 +1323,7 @@ function StreamStackItem({
 			handleLoading,
 			setVideoState,
 			shakaOfflineStore,
+			setPlayerSupported,
 		]
 	);
 
