@@ -70,6 +70,9 @@ export default function VideoPlayerWrapper({ page = "student" }) {
 			case browser.unknown:
 			case browser.ie:
 			case browser.firefox:
+				console.log(
+					"[VideoPlayerWrapper] Setting player supported to false"
+				);
 				setPlayerSupported(false);
 				break;
 			default:
