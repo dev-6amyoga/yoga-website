@@ -3,6 +3,7 @@ import shaka from "shaka-player/dist/shaka-player.ui";
 import ShakaOfflineStore from "../../lib/offline-storage";
 import useShakaOfflineStore from "../../store/ShakaOfflineStore";
 import useVideoStore from "../../store/VideoStore";
+import { browser, detectBrowser } from "../../utils/browser";
 /**
  * A React component for shaka-player.
  * @param {string} src
@@ -51,11 +52,16 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }, ref) {
 			}
 		}
 
-		console.log("[ShakaPlayer] Installing polyfills for Fairplay");
+		const detectedBrowser = detectBrowser();
 
 		try {
-			shaka.polyfill.PatchedMediaKeysApple.install();
-			console.log("[ShakaPlayer] Installed polyfills for Fairplay");
+			if (detectedBrowser == browser.safari) {
+				console.log("[ShakaPlayer] Installing polyfills for Fairplay");
+
+				shaka.polyfill.PatchedMediaKeysApple.install();
+
+				console.log("[ShakaPlayer] Installed polyfills for Fairplay");
+			}
 		} catch (e) {
 			console.error(
 				"[ShakaPlayer] Error installing polyfills for Fairplay",

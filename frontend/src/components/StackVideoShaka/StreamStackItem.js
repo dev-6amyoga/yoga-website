@@ -1011,7 +1011,6 @@ function StreamStackItem({
 					case browser.edge:
 					case browser.chrome:
 					case browser.opera:
-					case browser.firefox:
 						({ data: drmConfig, error } =
 							await GetWidevineTokenData());
 						playerRef.current.player.configure({
@@ -1030,6 +1029,7 @@ function StreamStackItem({
 						break;
 					case browser.ie:
 					case browser.unknown:
+					case browser.firefox:
 						throw new Error("Browser not supported");
 						break;
 					default:
@@ -1101,7 +1101,6 @@ function StreamStackItem({
 		switch (detectedBrowser) {
 			case browser.chrome:
 			case browser.opera:
-			case browser.firefox:
 				({ data: drmConfig, error } = await GetWidevineTokenData());
 				playerRef.current.player.configure({
 					drm: {
@@ -1127,8 +1126,10 @@ function StreamStackItem({
 				({ data: drmConfig, error } = await GetFairplayTokenData());
 				break;
 			case browser.ie:
+			case browser.firefox:
 			case browser.unknown:
 				throw new Error("Browser not supported");
+				setPlayerSupported(false);
 			default:
 				({ data: drmConfig, error } = await GetWidevineTokenData());
 				break;
