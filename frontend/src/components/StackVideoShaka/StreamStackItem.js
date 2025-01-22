@@ -6,7 +6,6 @@ import {
 	SEEK_TYPE_MOVE,
 	SEEK_TYPE_SEEK,
 } from "../../enums/seek_types";
-
 import {
 	ShakaPlayerFullscreen,
 	ShakaPlayerGoNext,
@@ -31,9 +30,7 @@ import useWatchHistoryStore from "../../store/WatchHistoryStore";
 import { Fetch } from "../../utils/Fetch";
 import { isMobileTablet } from "../../utils/isMobileOrTablet";
 import ShakaPlayer from "./ShakaPlayer";
-
 import shaka from "shaka-player/dist/shaka-player.ui";
-
 // import shakaLog from "shaka-player/dist/shaka-player"
 import {
 	GetFairplayTokenData,

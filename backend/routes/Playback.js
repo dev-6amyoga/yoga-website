@@ -11,14 +11,8 @@ const {
 dotenv.config()
 
 router.post('/get-playready-token', async (req, res) => {
-  // call the playback service to get the token
   try {
-    console.log('get-playready-token')
-
-    // `https://pr-gen.service.expressplay.com/hms/pr/token?customerAuthenticator=${process.env.EXPRESSPLAY_API_KEY}&errorFormat=json&kid=${process.env.EXPRESSPLAY_KID}&contentKey=${process.env.EXPRESSPLAY_CONTENT_KEY}&generalFlags=00000001&rightsType=Rental&prFlag=true&rental.playDuration=60&uncompressedDigitalVideoOPL=0&compressedDigitalVideoOPL=0&uncompressedDigitalAudioOPL=0&compressedDigitalAudioOPL=0&analogVideoOPL=0&useHttps=true`
-
     const r = await fetch(
-      // `https://pr-gen.service.expressplay.com/hms/pr/token?customerAuthenticator=${process.env.EXPRESSPLAY_API_KEY}&errorFormat=json&kid=${process.env.EXPRESSPLAY_KID}&contentKey=${process.env.EXPRESSPLAY_CONTENT_KEY}&generalFlags=00000001&rightsType=BuyToOwn&uncompressedDigitalVideoOPL=0&compressedDigitalVideoOPL=0&uncompressedDigitalAudioOPL=0&compressedDigitalAudioOPL=0&analogVideoOPL=0&useHttps=true`
       `https://pr-gen.service.expressplay.com/hms/pr/token?customerAuthenticator=${process.env.EXPRESSPLAY_API_KEY}&errorFormat=json&kid=${process.env.EXPRESSPLAY_KID}&contentKey=${process.env.EXPRESSPLAY_CONTENT_KEY}&generalFlags=00000001&rightsType=Rental&rental.periodEndTime=%2B3600&prFlag=true&rental.playDuration=60&uncompressedDigitalVideoOPL=0&compressedDigitalVideoOPL=0&uncompressedDigitalAudioOPL=0&compressedDigitalAudioOPL=0&analogVideoOPL=0&useHttps=true`
     )
     const data = await r.json()
@@ -32,13 +26,12 @@ router.post('/get-playready-token', async (req, res) => {
 })
 
 router.post('/get-widevine-token', async (req, res) => {
-  // call the playback service to get the token
   try {
     const r = await fetch(
       `https://wv-gen.service.expressplay.com/hms/wv/token?customerAuthenticator=${process.env.EXPRESSPLAY_API_KEY}&errorFormat=json&kid=${process.env.EXPRESSPLAY_KID}&contentKey=${process.env.EXPRESSPLAY_CONTENT_KEY}&generalFlags=00000001&rightsType=Rental&prFlag=true&rental.playDuration=60&uncompressedDigitalVideoOPL=0&compressedDigitalVideoOPL=0&uncompressedDigitalAudioOPL=0&compressedDigitalAudioOPL=0&analogVideoOPL=0&useHttps=true`
     )
     const data = await r.text()
-    // console.log(r, data);
+
     res.status(HTTP_OK).json({ licenseAcquisitionUrl: data })
   } catch (error) {
     console.error('Error fetching token:', error)

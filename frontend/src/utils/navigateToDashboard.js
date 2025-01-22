@@ -16,11 +16,12 @@ export const navigateToDashboard = (currentRole, userPlan, navigate) => {
       navigate("/institute");
       break;
     case "STUDENT":
-      if (userPlan === null) {
-        navigate("/student/free-videos");
-      } else {
-        navigate("/student/free-videos");
-      }
+      // if (userPlan === null) {
+      //   navigate("/student/free-videos");
+      // } else {
+      //   navigate("/student/free-videos");
+      // }
+      navigate("/student/free-videos");
       break;
     default:
       navigate("/");
