@@ -13,6 +13,7 @@ import VideoRecorder from "../../components/video-recorder/VideoRecorder";
 
 import useWatchHistoryStore from "../../store/WatchHistoryStore";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 function StudentHome() {
   let [watchHistoryExhausted] = useWatchHistoryStore((state) => [
     state.watchHistoryExhausted,
@@ -22,6 +23,7 @@ function StudentHome() {
   useEffect(() => {
     if (watchHistoryExhausted) {
       console.log("Watch time exhausted!");
+      toast("Watch time exhausted!");
       navigate("/student/purchase-a-plan");
     } else {
       console.log("Watch time not exhausted!");
