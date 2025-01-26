@@ -12,14 +12,17 @@ import { Fetch } from "../../utils/Fetch";
 import VideoRecorder from "../../components/video-recorder/VideoRecorder";
 
 import useWatchHistoryStore from "../../store/WatchHistoryStore";
+import { useNavigate } from "react-router-dom";
 function StudentHome() {
   let [watchHistoryExhausted] = useWatchHistoryStore((state) => [
     state.watchHistoryExhausted,
   ]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (watchHistoryExhausted) {
       console.log("Watch time exhausted!");
+      navigate("/student/purchase-a-plan");
     } else {
       console.log("Watch time not exhausted!");
     }
