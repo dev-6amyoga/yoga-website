@@ -11,7 +11,20 @@ import Hero from "./components/Hero";
 import { Fetch } from "../../utils/Fetch";
 import VideoRecorder from "../../components/video-recorder/VideoRecorder";
 
+import useWatchHistoryStore from "../../store/WatchHistoryStore";
 function StudentHome() {
+  let [watchHistoryExhausted] = useWatchHistoryStore((state) => [
+    state.watchHistoryExhausted,
+  ]);
+
+  useEffect(() => {
+    if (watchHistoryExhausted) {
+      console.log("Watch time exhausted!");
+    } else {
+      console.log("Watch time not exhausted!");
+    }
+  }, [watchHistoryExhausted]);
+
   const [mode, setMode] = useState("light");
   const defaultTheme = createTheme({ palette: { mode } });
   const [user, userPlan] = useUserStore((state) => [
@@ -98,7 +111,7 @@ function StudentHome() {
       <CssBaseline />
       <StudentNavMUI />
       <Hero heading="6AM Yoga Player" />
-      {hasPlan || hasUserPlan ? (
+      {hasPlan || (hasUserPlan && !watchHistoryExhausted) ? (
         <div className="max-w-7xl mx-auto">
           <Paper>
             <VideoRecorder />

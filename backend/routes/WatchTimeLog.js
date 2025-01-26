@@ -31,26 +31,15 @@ router.post('/update', authenticateToken, async (req, res) => {
   console.log('WatchTime /update')
   const { user_id, institute_id, watch_time_logs, updated_at, playlist_id } =
     req.body
-
-  console.log(user_id)
-  console.log(watch_time_logs)
-  console.log(playlist_id)
-
-  // validate request
   if (!user_id || !watch_time_logs || institute_id === undefined) {
     console.log('Missing required fields')
     return res
       .status(HTTP_BAD_REQUEST)
       .json({ message: 'Missing required fields' })
   }
-
-  // console.log(GetCurrentUserPlan(user_id);
   const session = await WatchTimeLog.startSession()
   session.startTransaction()
-
   try {
-    // get user plan
-    // console.log("GetCurrentUserPlan");
     let [user_plan, error] = await GetPlanForWatchQuotaDeduction(
       user_id,
       institute_id,
@@ -58,8 +47,6 @@ router.post('/update', authenticateToken, async (req, res) => {
       null,
       session
     )
-    // console.log({ user_plan, error });
-
     if (!user_plan || error) {
       console.log('User currenly has no active plan')
       await session.abortTransaction()
@@ -68,20 +55,14 @@ router.post('/update', authenticateToken, async (req, res) => {
         .status(HTTP_BAD_REQUEST)
         .json({ message: error || 'User currenly has no active plan' })
     }
-
     console.log('User plan found', user_plan)
-
-    // reduce it to unique asana_id, playlist_id
     let reduced_watch_time = []
     let total_watch_time = 0
-
     watch_time_logs.forEach((wtl) => {
       const idx = reduced_watch_time.findIndex(
         (x) => x.asana_id === wtl.asana_id && x.playlist_id === wtl.playlist_id
       )
-
       total_watch_time += wtl.timedelta
-
       if (idx === -1) {
         const { timedelta, ...w } = wtl
         w.duration = timedelta
@@ -97,22 +78,42 @@ router.post('/update', authenticateToken, async (req, res) => {
         }
       }
     })
-
-    // console.log({ reduced_watch_time, total_watch_time });
-
-    /*
-		{
-			user_id,
-			asana_id,
-			playlist_id,
-			duration
-		}
-		*/
-
     const promises = []
+    // reduced_watch_time.forEach((wtl) => {
+    //   // update watch time logs
+    //   // TODO : make watch time log per day?
+    //   promises.push(
+    //     WatchTimeLog.updateOne(
+    //       {
+    //         user_id: wtl.user_id,
+    //         asana_id: wtl.asana_id,
+    //         playlist_id: wtl.playlist_id,
+    //         user_plan_id: user_plan?.user_plan_id,
+    //       },
+    //       [
+    //         {
+    //           $project: {
+    //             ...wtl,
+    //             duration: {
+    //               $add: [{ $ifNull: ['$duration', 0] }, wtl.duration],
+    //             },
+    //             created_at: true,
+    //           },
+    //         },
+    //       ],
+    //       { upsert: true }
+    //     )
+    //   )
+    // })
+
+    const startOfDay = (date) => {
+      const d = new Date(date)
+      d.setHours(0, 0, 0, 0) // Normalize to start of the day
+      return d
+    }
+
     reduced_watch_time.forEach((wtl) => {
-      // update watch time logs
-      // TODO : make watch time log per day?
+      const dayStart = startOfDay(wtl.updated_at ?? new Date())
       promises.push(
         WatchTimeLog.updateOne(
           {
@@ -120,34 +121,29 @@ router.post('/update', authenticateToken, async (req, res) => {
             asana_id: wtl.asana_id,
             playlist_id: wtl.playlist_id,
             user_plan_id: user_plan?.user_plan_id,
+            created_at: {
+              $gte: dayStart,
+              $lt: new Date(dayStart.getTime() + 86400000),
+            }, // Match documents for the same day
           },
-          [
-            {
-              $project: {
-                ...wtl,
-                duration: {
-                  $add: [{ $ifNull: ['$duration', 0] }, wtl.duration],
-                },
-                created_at: true,
-              },
+          {
+            $setOnInsert: {
+              user_id: wtl.user_id,
+              asana_id: wtl.asana_id,
+              playlist_id: wtl.playlist_id,
+              user_plan_id: user_plan?.user_plan_id,
+              created_at: dayStart,
             },
-          ],
-          { upsert: true }
+            $inc: { duration: wtl.duration }, // Increment the duration
+            $set: { updated_at: wtl.updated_at ?? new Date() }, // Update the `updated_at` field
+          },
+          { upsert: true } // Insert if not found
         )
       )
     })
 
     let quota = user_plan?.plan?.watch_time_limit || user_plan?.plan?.watchHours
-
     let user_plan_id = user_plan?.user_plan_id || user_plan?._id
-
-    // console.log(user_plan_id, {
-    // 	user_plan_id:
-    // 		typeof user_plan_id === "number"
-    // 			? String(user_plan_id)
-    // 			: new mongoose.Types.ObjectId(user_plan_id).toString(),
-    // });
-
     let updatedWatchTimeQuota = await WatchTimeQuota.findOneAndUpdate(
       {
         user_plan_id:
@@ -171,52 +167,51 @@ router.post('/update', authenticateToken, async (req, res) => {
       { upsert: false, returnDocument: 'after', lean: true }
     )
 
-    // console.log({ updatedWatchTimeQuota });
-
     if (!updatedWatchTimeQuota) {
       await session.abortTransaction()
       await session.endSession()
-
       return res.status(HTTP_BAD_REQUEST).json({
         message: 'Could not update watch time quota',
       })
     } else {
-      // TODO : where to commit, do we show extra usage or show lesser usage
       await session.commitTransaction()
       if (updatedWatchTimeQuota.quota < 0) {
-        // update expiry
         const t = await sequelize.transaction()
-        // const up = await UserPlan.findOne({
-        // 	where: { user_plan_id: user_plan.user_plan_id },
-        // });
         try {
-          user_plan.current_status = USER_PLAN_EXPIRED_BY_USAGE
-          await user_plan.save()
-          await t.commit()
-          await session.endSession()
+          const [user_plan, error] = await UpdateUserPlanStatus(user_id, null)
 
-          return res.status(HTTP_BAD_REQUEST).json({
-            message: 'Watch time quota exceeded',
-            data: { committed: true },
-          })
+          if (error) {
+            return res.status(HTTP_BAD_REQUEST).json({ message: error })
+          }
+          try {
+            user_plan.current_status = USER_PLAN_EXPIRED_BY_USAGE
+            await user_plan.save()
+            await t.commit()
+
+            await session.endSession()
+            return res.status(HTTP_BAD_REQUEST).json({
+              message: 'Watch time quota exceeded',
+              data: { committed: true },
+            })
+          } catch (err) {
+            console.log(err)
+            await t.rollback()
+            await session.endSession()
+            return res.status(HTTP_BAD_REQUEST).json({
+              message: 'Watch time quota exceeded',
+              data: { committed: false },
+            })
+          }
         } catch (err) {
           console.log(err)
-          await t.rollback()
-          await session.endSession()
-
-          return res.status(HTTP_BAD_REQUEST).json({
-            message: 'Watch time quota exceeded',
-            data: { committed: false },
-          })
+          return res
+            .status(HTTP_INTERNAL_SERVER_ERROR)
+            .json({ message: 'Something went wrong' })
         }
       }
-
       await Promise.all(promises)
-
       await session.commitTransaction()
-
       await session.endSession()
-
       return res.status(HTTP_OK).json({ reduced_watch_time })
     }
   } catch (error) {
