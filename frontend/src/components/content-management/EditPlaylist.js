@@ -321,7 +321,7 @@ function EditPlaylist() {
             ];
           }
           if (curAsana.asana_category === "Starting Prayer Standing") {
-            let t1 = await TransitionEndStartingPrayerSitting(
+            let t1 = await TransitionEndStartingPrayerStanding(
               transitionData.end_category
                 ? transitionData.end_category
                 : transitionData.start_category,
@@ -587,7 +587,7 @@ function EditPlaylist() {
               ];
             }
             if (curAsana.asana_category === "Starting Prayer Sitting") {
-              let t1 = await TransitionEndStartingPrayerStanding(
+              let t1 = await TransitionEndStartingPrayerSitting(
                 transitionData.end_category
                   ? transitionData.end_category
                   : transitionData.start_category,
@@ -606,7 +606,7 @@ function EditPlaylist() {
               ];
             }
             if (curAsana.asana_category === "Starting Prayer Standing") {
-              let t1 = await TransitionEndStartingPrayerSitting(
+              let t1 = await TransitionEndStartingPrayerStanding(
                 transitionData.end_category
                   ? transitionData.end_category
                   : transitionData.start_category,
