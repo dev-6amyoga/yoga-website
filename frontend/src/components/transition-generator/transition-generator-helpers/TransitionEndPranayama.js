@@ -917,8 +917,23 @@ export const TransitionEndPranayama = async (
                   .toLowerCase()
                   .includes("prenatal")
             );
-
-          let new_res = [...res, ...pending_2];
+          let res4 = [];
+          if (start_video.chin_lock_end) {
+            for (var i = 0; i !== filteredTransitions_all.length; i++) {
+              let transition_ind = filteredTransitions_all[i];
+              if (
+                transition_ind.transition_video_name
+                  .toLowerCase()
+                  .indexOf("jalandhara") !== -1
+              ) {
+                res4.push(transition_ind);
+              }
+            }
+            res4 = res4.filter((transition) =>
+              transition.transition_video_name.toLowerCase().includes("unlock")
+            );
+          }
+          let new_res = [...res4, ...res, ...pending_2];
           new_res = new_res.filter((element) => element !== undefined);
           new_res = new_res.map((transition) => transition.transition_id);
 
