@@ -22,7 +22,6 @@ function StudentHome() {
 
   useEffect(() => {
     if (watchHistoryExhausted) {
-      console.log("Watch time exhausted!");
       toast("Watch time exhausted!");
       navigate("/student/purchase-a-plan");
     } else {
