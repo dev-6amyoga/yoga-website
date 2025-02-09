@@ -963,11 +963,13 @@ function StudentPlan() {
         return res.json();
       })
       .then((data) => {
+        console.log(data, "POPOPOPOP");
         if (!continentNames[data.continent_code]) {
           toast("Currency not available for your country", {
             type: "error",
           });
-          setInvalidCountry(true);
+          setSelectedCurrency("USD");
+          // setInvalidCountry(true);
         } else {
           if (continentNames[data.continent_code] === "Asia") {
             const southAsia = [
@@ -995,7 +997,8 @@ function StudentPlan() {
       })
       .catch((err) => {
         // console.log(err);
-        setInvalidCountry(true);
+        setSelectedCurrency("USD");
+        // setInvalidCountry(true);
       });
   }, []);
 
