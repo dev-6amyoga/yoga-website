@@ -905,12 +905,31 @@ export const TransitionEndStanding = async (
   if (start_category === "Sitting") {
     if (break_status_start === "Break" && break_status_end === "Break") {
       if (end_video.person_starting_position === "Front") {
+        if (end_video.catch_waist_start === true) {
+          let res = handleTransition([
+            "Sitting To Standing Transition",
+            "Catch Your Waist",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition(["Sitting To Standing Transition"]);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
         return res;
       }
       if (end_video.person_starting_position === "Left") {
+        if (end_video.catch_waist_start === true) {
+          let res = handleTransition([
+            "Sitting To Standing Transition",
+            "Catch Your Waist",
+            "Person Transit Front To Left",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Sitting To Standing Transition",
           "Person Transit Front To Left",

@@ -978,6 +978,7 @@ function StudentPlan() {
               "Maldives",
               "Nepal",
               "Pakistan",
+              "Vietnam",
               "Sri Lanka",
             ];
             if (southAsia.includes(data.country_name)) {

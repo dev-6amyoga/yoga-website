@@ -21,7 +21,6 @@ import {
   AccordionDetails,
 } from "@mui/material";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Fetch } from "../../utils/Fetch";
