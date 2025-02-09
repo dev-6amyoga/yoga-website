@@ -982,7 +982,6 @@ function StudentPlan() {
               "Sri Lanka",
             ];
             if (southAsia.includes(data.country_name)) {
-              console.log("currency is : INR");
               setSelectedCurrency("INR");
             } else {
               setSelectedCurrency("USD");
