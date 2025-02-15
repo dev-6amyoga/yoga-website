@@ -14,7 +14,6 @@ import calculateTotalPrice from "../../utils/calculateTotalPrice";
 import getFormData from "../../utils/getFormData";
 import RenderRazorpay from "./RenderRazorpay";
 import Pricing from "./components/Pricing";
-
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -28,31 +27,6 @@ import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
 import { ROLE_STUDENT } from "../../enums/roles";
 import { withAuth } from "../../utils/withAuth";
 import Hero from "./components/Hero";
-
-const allowedCountriesCurrencyMap = {
-  IND: "INR",
-  USA: "USD",
-  AUT: "EUR",
-  BEL: "EUR",
-  HRV: "EUR",
-  CYP: "EUR",
-  EST: "EUR",
-  FIN: "EUR",
-  FRA: "EUR",
-  DEU: "EUR",
-  GRC: "EUR",
-  IRL: "EUR",
-  ITA: "EUR",
-  LVA: "EUR",
-  LTU: "EUR",
-  LUX: "EUR",
-  MLT: "EUR",
-  NLD: "EUR",
-  PRT: "EUR",
-  SVK: "EUR",
-  SVN: "EUR",
-  ESP: "EUR",
-};
 
 function DiscountCouponForm({ handleDiscountCouponFormSubmit }) {
   return (
@@ -69,7 +43,6 @@ function DiscountCouponForm({ handleDiscountCouponFormSubmit }) {
     </form>
   );
 }
-
 function StudentPlan() {
   let user = useUserStore((state) => state.user);
   const [allPlans, setAllPlans] = useState([]);
@@ -87,49 +60,36 @@ function StudentPlan() {
     currency: null,
     amount: null,
   });
-
   const [myPlans, setMyPlans] = useState([]);
   const [currentStatus, setCurrentStatus] = useState("");
   const [validityFromDate, setValidityFromDate] = useState("");
-  // const [selectedValidity, setSelectedValidity] = useState(30);
-
   const [currencies, setAllCurrencies] = useState([]);
   const [selectedCurrency, setSelectedCurrency] = useState("INR");
   const [selectedCurrencyId, setSelectedCurrencyId] = useState(1);
-
   const [planId, setPlanId] = useState(-1);
   const [toBeRegistered, setToBeRegistered] = useState({});
-
   const [invalidCountry, setInvalidCountry] = useState(false);
-
   const [loading, setLoading] = useState(false);
-
   const [formattedDate, setFormattedDate] = useState(new Date().toISOString());
-
   const [customPlanSent, setCustomPlanSent] = useState(false);
   const [customPlansForUser, setCustomPlansForUser] = useState([]);
   const [currentCustomUserPlans, setCurrentCustomUserPlans] = useState([]);
-
+  const [trialPlanAvailed, setTrialPlanAvailed] = useState(false);
   useEffect(() => {
     if (showCard) {
       setLoading(false);
     }
   }, [showCard]);
-
   const calculateEndDate = (validityDays) => {
     const endDate = new Date(validityFromDate);
     endDate.setUTCDate(endDate.getUTCDate() + validityDays);
     return endDate.toISOString();
   };
-
   const handleDiscountCouponFormSubmit = async (e) => {
     e.preventDefault();
     const formData = getFormData(e);
-
     const discount_coupon = formData?.discount_coupon;
-    console.log(discount_coupon);
     const error = await validateDiscountCoupon(discount_coupon);
-
     if (error) {
       setDiscountCouponApplied(false);
       setDiscountCoupon(null);
@@ -139,25 +99,20 @@ function StudentPlan() {
       return;
     }
   };
-
   const getEndDate = (userPlan) => {
     var updatedValidityString = "";
-
     if (userPlan.length === 0) {
       setCurrentStatus(USER_PLAN_ACTIVE);
       var today = new Date();
       updatedValidityString = today?.toISOString();
-      console.log("1New plan starts from date:", updatedValidityString);
     } else if (userPlan.length === 1) {
       setCurrentStatus(USER_PLAN_STAGED);
       var validityDate = new Date(userPlan[0].validity_to);
       validityDate.setDate(validityDate.getDate() + 1);
       updatedValidityString = validityDate?.toISOString();
-      console.log("2New plan validity from date:", updatedValidityString);
     } else {
       var highestValidityDate = null;
       setCurrentStatus(USER_PLAN_STAGED);
-
       for (var i = 0; i !== userPlan.length; i++) {
         var validityDate = new Date(userPlan[i].validity_to);
         if (
@@ -167,22 +122,13 @@ function StudentPlan() {
           highestValidityDate = validityDate;
         }
       }
-
       if (highestValidityDate !== null) {
         highestValidityDate.setDate(highestValidityDate.getDate() + 1);
         updatedValidityString = highestValidityDate?.toISOString();
-        console.log(
-          "3New plan validity from date:",
-          updatedValidityString,
-          highestValidityDate
-        );
-      } else {
-        // console.log("No valid validity_to dates found.");
       }
     }
     return updatedValidityString;
   };
-
   const fetchUserPlans = useCallback(async () => {
     try {
       const response = await Fetch({
@@ -194,94 +140,44 @@ function StudentPlan() {
         data: { user_id: user?.user_id },
       });
       const data = response.data;
+      console.log(data, "huhuuhuhu");
       data.userPlan.sort(
         (a, b) => new Date(a.validity_to) - new Date(b.validity_to)
       );
-
-      console.log(data.userPlan, "is plannnnz");
-
-      // filter out plans with no institute id
+      for (var j = 0; j !== data["userPlan"].length; j++) {
+        if (data["userPlan"][j].plan.name === "Trial Plan") {
+          setTrialPlanAvailed(true);
+          break;
+        }
+      }
       if (data?.userPlan.length !== 0) {
         const filteredPlans = data.userPlan.filter(
           (plan) => plan.institute_id === null
         );
-
         setMyPlans(filteredPlans);
-
-        // for (var i = 0; i !== data?.userPlan.length; i++) {
-        // 	if (data?.userPlan[i].validity_to < formattedDate) {
-        // 		if (
-        // 			data?.userPlan[i].current_status !==
-        // 				USER_PLAN_EXPIRED_BY_DATE &&
-        // 			data?.userPlan[i].current_status !==
-        // 				USER_PLAN_EXPIRED_BY_USAGE
-        // 		) {
-        // 			const updatedUserPlanData = {
-        // 				...data?.userPlan[i],
-        // 				current_status: "EXPIRED_BY_DATE",
-        // 			};
-        // 			try {
-        // 				const response = await Fetch({
-        // 					url: "/user-plan/update-user-plan",
-        // 					method: "PUT",
-        // 					data: updatedUserPlanData,
-        // 				});
-
-        // 				if (response.status !== 200) {
-        // 					const errorMessage = response.data;
-        // 					throw new Error(errorMessage.error);
-        // 				}
-        // 			} catch (error) {
-        // 				toast(
-        // 					error?.message || "Error updating user plan"
-        // 				);
-        // 			}
-        // 		}
-        // 	}
-        // }
-
-        // set current plan id if plan is active
         if (data["userPlan"].length > 1) {
           for (var j = 0; j !== data["userPlan"].length; j++) {
-            console.log(
-              data["userPlan"][j].current_status,
-              data["userPlan"][j].institute_id,
-              data["userPlan"][j]["plan_id"],
-              "current status"
-            );
             if (
               data["userPlan"][j].current_status === "ACTIVE" &&
               data["userPlan"][j].institute_id === null
             ) {
-              // console.log(
-              // 	"setting plan id",
-              // 	data["userPlan"][j]["plan_id"]
-              // );
               setPlanId(data["userPlan"][j]["plan_id"]);
               break;
             }
           }
         } else {
-          // set current plan id if plan is active
           if (
             data["userPlan"][0].current_status === "ACTIVE" &&
             data["userPlan"][0].institute_id === null
           ) {
             setPlanId(data["userPlan"][0]["plan_id"]);
-          } else {
-            // toast(
-            // 	"You don't have a plan yet! Purchase one to continue"
-            // );
           }
         }
-      } else {
-        // toast("You don't have a plan yet! Purchase one to continue");
       }
     } catch (error) {
-      // console.log(error);
+      console.log(error);
     }
   }, [user, formattedDate]);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -290,7 +186,6 @@ function StudentPlan() {
           method: "GET",
         });
         if (res.status === 200) {
-          console.log(res.data.plans);
           if (res.data.plans?.length > 0) {
             setCustomPlansForUser(res.data.plans);
           }
@@ -303,7 +198,6 @@ function StudentPlan() {
       fetchData();
     }
   }, [user]);
-
   const fetchCustomUserPlans = async () => {
     try {
       const res = await Fetch({
@@ -313,7 +207,6 @@ function StudentPlan() {
       });
       if (res.status === 200) {
         if (res.data.plans) {
-          // sort desc order of created time
           setCurrentCustomUserPlans(
             res.data.plans.sort(
               (a, b) => new Date(b.created_at) - new Date(a.created_at)
@@ -325,14 +218,11 @@ function StudentPlan() {
       console.log(err);
     }
   };
-
   useEffect(() => {
     if (user) {
       fetchCustomUserPlans();
     }
   }, [user]);
-
-  // get all student plans
   const fetchPlans = useCallback(async () => {
     try {
       const response = await Fetch({
@@ -341,13 +231,11 @@ function StudentPlan() {
       const filteredPlans = response.data?.plans?.filter(
         (plan) => plan.plan_user_type === "STUDENT"
       );
-      console.log("filtered plans : ", filteredPlans);
       setAllPlans(filteredPlans);
     } catch (error) {
       toast("Error fetching plans", { type: "error" });
     }
   }, []);
-
   const fetchCurrencies = useCallback(async () => {
     try {
       const response = await Fetch({
@@ -358,25 +246,17 @@ function StudentPlan() {
       toast("Error fetching plans", { type: "error" });
     }
   }, []);
-
   const validateDiscountCoupon = async (discount_coupon) => {
     if (!discount_coupon) {
-      console.log("invalid ya!");
       return new Error("Invalid discount coupon");
     }
     try {
-      console.log("fetching now");
       let isCustom = false;
       if (showCustomCard) {
         isCustom = true;
       } else if (showCard) {
         isCustom = false;
       }
-      console.log(
-        discount_coupon,
-        isCustom,
-        isCustom ? customCardData._id : cardData.plan_id
-      );
       const res = await Fetch({
         url: "/discount-coupon/check-plan-mapping",
         method: "POST",
@@ -387,16 +267,13 @@ function StudentPlan() {
           plan_id: isCustom ? customCardData._id : cardData.plan_id,
         },
       });
-
       if (res.status === 200) {
-        // console.log(res.data);
         setDiscountCoupon(res.data.discount_coupon);
         setDiscountCouponApplied(true);
         return null;
       }
       return new Error(res?.data?.message);
     } catch (err) {
-      console.log(err);
       if (err?.response?.data?.error) {
         return new Error(err?.response?.data?.error);
       } else {
@@ -404,11 +281,9 @@ function StudentPlan() {
       }
     }
   };
-
   useEffect(() => {
     const fetchData = async () => {
       const order_id = `ord_${toBeRegistered.user_id}_${toBeRegistered.validity_from}`;
-
       FetchRetry({
         url: "/payment/commit",
         method: "POST",
@@ -443,24 +318,18 @@ function StudentPlan() {
           );
         });
     };
-
     if (Object.keys(toBeRegistered).length !== 0) {
       if (toBeRegistered.amount === 0) {
         fetchData();
       }
     }
-
-    console.log(toBeRegistered);
   }, [toBeRegistered]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     let t = false;
     if (t) {
       return;
     }
-
     if (!user) {
       toast("Please login to continue", { type: "error" });
       return;
@@ -475,7 +344,6 @@ function StudentPlan() {
       toast("Please select a currency to continue", { type: "error" });
       return;
     }
-
     if (customCardData) {
       let userPlanData = {
         cancellation_date: null,
@@ -502,9 +370,7 @@ function StudentPlan() {
         custom_plan: true,
         current_status: customCardData.current_status,
       };
-
       setToBeRegistered(userPlanData);
-
       if (userPlanData.amount === 0) {
         setToBeRegistered(userPlanData);
       } else {
@@ -535,8 +401,6 @@ function StudentPlan() {
           });
         }
       }
-
-      //   console.log(currentCustomUserPlans);
     } else if (cardData) {
       let userPlanData = {
         cancellation_date: null,
@@ -564,7 +428,6 @@ function StudentPlan() {
             "You have an active plan! If you purchase a new plan, it will be staged."
           );
         }
-        // validity will start from the end of the previous plan
         const validityToDate = calculateEndDate(cardData.plan_validity_days);
         userPlanData.purchase_date = formattedDate;
         userPlanData.validity_from = validityFromDate;
@@ -581,7 +444,6 @@ function StudentPlan() {
         userPlanData.current_status = USER_PLAN_ACTIVE;
         setToBeRegistered(userPlanData);
       }
-
       if (userPlanData.amount === 0) {
         setToBeRegistered(userPlanData);
       } else {
@@ -614,10 +476,8 @@ function StudentPlan() {
       }
     }
   };
-
   const subscribePlan = async (data) => {
     if (data.plan) {
-      console.log(data, "being sent!");
       toast("Sending enquiry!");
       let finalData = {};
       const selectedNeeds = data.selectedNeeds;
@@ -630,19 +490,15 @@ function StudentPlan() {
         method: "POST",
         data: finalData,
       });
-
       if (res.status === 200) {
         toast(res.data.message);
         setCustomPlanSent(true);
       }
       return;
     }
-
     if (data.plan_name) {
       try {
         let finalCustomCardData = { ...data };
-        console.log(finalCustomCardData);
-        console.log(currentCustomUserPlans);
         const relevantPlans = currentCustomUserPlans.filter(
           (plan) =>
             plan.custom_plan_id === finalCustomCardData?._id &&
@@ -665,7 +521,7 @@ function StudentPlan() {
           const newValidityTo = new Date(existingValidityFrom);
           newValidityTo.setDate(
             newValidityTo.getDate() + (data.planValidity || 0)
-          ); // Ensure planValidity is a number
+          );
           finalCustomCardData.validity_to = newValidityTo.toISOString();
           finalCustomCardData.current_status = USER_PLAN_STAGED;
         } else {
@@ -697,15 +553,12 @@ function StudentPlan() {
       setPrice(pricing.denomination);
     }
   };
-
   const downloadInvoice = async (response) => {
     try {
       const dataBuffer = new Blob([response.data], {
         type: "text/html;charset=utf-8;",
       });
-
       const htmlString = await dataBuffer.text();
-
       var opt = {
         margin: 0.25,
         image: { type: "png", quality: 1 },
@@ -716,7 +569,6 @@ function StudentPlan() {
           orientation: "portrait",
         },
       };
-
       const doc = html2pdf()
         .set(opt)
         .from(htmlString)
@@ -727,18 +579,12 @@ function StudentPlan() {
       console.error(err);
     }
   };
-
   const registerUserPlan = async (order_id) => {
-    // account for custom plan here
-
     if (toBeRegistered.custom_plan) {
       let finalUserPlan = { ...toBeRegistered };
       finalUserPlan.transaction_order_id = order_id;
       finalUserPlan.user_type = "STUDENT";
       finalUserPlan.institute_id = null;
-      // toast("Registering custom plan!");
-
-      // TODO : currency id mapping for custom user   plans
       FetchRetry({
         url: "/customUserPlan/register",
         method: "POST",
@@ -751,8 +597,6 @@ function StudentPlan() {
             toast("Plan subscribed successfully", {
               type: "success",
             });
-
-            //invoice download here!! order_id, toBeRegistered.user_id
             FetchRetry({
               url: "/invoice/student/mail-invoice",
               method: "POST",
@@ -789,7 +633,6 @@ function StudentPlan() {
                 navigate("/student/playlist-view");
               })
               .catch((error) => {
-                // console.log(error);
                 setShowCustomCard(false);
                 setCustomCardData(null);
                 setLoading(false);
@@ -798,7 +641,6 @@ function StudentPlan() {
                   { type: "error" }
                 );
               });
-
             setShowCustomCard(false);
             setCustomCardData(null);
             setLoading(false);
@@ -829,7 +671,6 @@ function StudentPlan() {
     finalUserPlan.transaction_order_id = order_id;
     finalUserPlan.user_type = "STUDENT";
     finalUserPlan.institute_id = null;
-    console.log({ finalUserPlan });
     FetchRetry({
       url: "/user-plan/register",
       method: "POST",
@@ -839,12 +680,8 @@ function StudentPlan() {
       retryDelayMs: 2000,
     })
       .then((response) => {
-        // console.log({ response });
         if (response?.status === 200) {
           toast("Plan subscribed successfully", { type: "success" });
-
-          //invoice download here!! order_id, toBeRegistered.user_id
-
           FetchRetry({
             url: "/invoice/student/mail-invoice",
             method: "POST",
@@ -861,7 +698,6 @@ function StudentPlan() {
                   type: "success",
                 });
               }
-
               return downloadInvoice(responseInvoice);
             })
             .then(async (res) => {
@@ -879,7 +715,6 @@ function StudentPlan() {
               setLoading(false);
             })
             .catch((error) => {
-              // console.log(error);
               setShowCard(false);
               setCardData(null);
               toast(
@@ -888,7 +723,6 @@ function StudentPlan() {
               );
               setLoading(false);
             });
-
           fetchUserPlans();
         } else {
           toast(response?.data?.message);
@@ -896,47 +730,28 @@ function StudentPlan() {
         }
       })
       .catch((error) => {
-        // console.log(error);
         toast(
           "Error subscribing plan; Incase money has been debited from your account, it will be refunded within 4 to 5 business days! Please try again!",
           { type: "error" }
         );
       });
   };
-
   const registerErrorCallback = () => {
     setShowCard(false);
     setCardData(null);
   };
-
   useEffect(() => {
     if (user) {
       fetchUserPlans();
     }
   }, [user, fetchUserPlans]);
-
-  // Staging plan validity from date
   useEffect(() => {
     setValidityFromDate(getEndDate(myPlans));
   }, [myPlans]);
-
-  // on mount get student plans & currencies
   useEffect(() => {
     fetchPlans();
     fetchCurrencies();
   }, [fetchPlans, fetchCurrencies]);
-
-  const handleCurrencyChange = (val) => {
-    setSelectedCurrency(val);
-    setSelectedCurrencyId(
-      currencies.find((x) => x.short_tag === val)?.currency_id || null
-    );
-  };
-
-  useEffect(() => {
-    console.log("kkkk", currentCustomUserPlans);
-  }, [currentCustomUserPlans]);
-
   const continentNames = {
     AF: "Africa",
     AN: "Antarctica",
@@ -946,7 +761,6 @@ function StudentPlan() {
     OC: "Oceania",
     SA: "South America",
   };
-
   const continentCurrencyMap = {
     Asia: "INR",
     Africa: "USD",
@@ -956,20 +770,17 @@ function StudentPlan() {
     "South America": "USD",
     "North America": "USD",
   };
-
   useEffect(() => {
     fetch("https://ipapi.co/json/")
       .then((res) => {
         return res.json();
       })
       .then((data) => {
-        console.log(data, "POPOPOPOP");
         if (!continentNames[data.continent_code]) {
           toast("Currency not available for your country", {
             type: "error",
           });
           setSelectedCurrency("USD");
-          // setInvalidCountry(true);
         } else {
           if (continentNames[data.continent_code] === "Asia") {
             const southAsia = [
@@ -996,12 +807,17 @@ function StudentPlan() {
         }
       })
       .catch((err) => {
-        // console.log(err);
         setSelectedCurrency("USD");
-        // setInvalidCountry(true);
       });
   }, []);
-
+  const [filteredPlans, setFilteredPlans] = useState([]);
+  useEffect(() => {
+    if (trialPlanAvailed) {
+      setFilteredPlans(allPlans.filter((x) => x.name !== "Trial Plan"));
+    } else {
+      setFilteredPlans(allPlans);
+    }
+  }, [trialPlanAvailed, allPlans]);
   return (
     <div className="max-w-7xl mx-auto">
       <StudentNavMUI />
@@ -1017,13 +833,10 @@ function StudentPlan() {
           </Alert>
         )}
       </div>
-
       <Spacer h={2} />
-
       {myPlans && myPlans.length > 0 && (
         <div className="mx-auto max-w-7xl">
           <h4>Plan History</h4>
-
           <TableContainer component={Paper} sx={{ margin: "2rem 0" }}>
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead
@@ -1035,7 +848,7 @@ function StudentPlan() {
                   <TableCell>Plan Name</TableCell>
                   <TableCell>Validity From</TableCell>
                   <TableCell>Validity To</TableCell>
-                  {/* <TableCell>Status</TableCell> */}
+                  <TableCell>Status</TableCell>
                 </TableRow>
               </TableHead>
               {/* customPlansForUser */}
@@ -1060,7 +873,7 @@ function StudentPlan() {
                         ? new Date(row?.validity_to).toDateString()
                         : ""}
                     </TableCell>
-                    {/* <TableCell>{row?.current_status}</TableCell> */}
+                    <TableCell>{row?.current_status}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -1152,7 +965,7 @@ function StudentPlan() {
         ) : (
           <Pricing
             heading="Standard Subscriptions"
-            allPlans={allPlans}
+            allPlans={filteredPlans}
             subscribePlan={subscribePlan}
             selectedCurrency={selectedCurrency}
           />
