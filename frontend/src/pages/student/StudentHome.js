@@ -71,7 +71,7 @@ function StudentHome() {
           d.current_status.toLowerCase().includes("active")
         );
         console.log(res, "hello");
-        if (res != null) {
+        if (res !== null && res.length !== 0) {
           setHasUserPlan(true);
         }
       } catch (err) {
