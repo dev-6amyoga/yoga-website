@@ -24,11 +24,10 @@ function StudentHome() {
     const userAgent = navigator.userAgent;
     const match = userAgent.match(/Windows NT (\d+\.\d+)/);
     if (match) {
-      console.log(match);
       const version = parseFloat(match[1]);
       return version < 10.0;
     }
-    return false;
+    return true;
   };
 
   if (isOldWindows()) {
@@ -43,8 +42,6 @@ function StudentHome() {
     if (watchHistoryExhausted) {
       toast("Watch time exhausted!");
       navigate("/student/purchase-a-plan");
-    } else {
-      console.log("Watch time not exhausted!");
     }
   }, [watchHistoryExhausted]);
 
@@ -73,6 +70,7 @@ function StudentHome() {
         let res = data.userPlan.filter((d) =>
           d.current_status.toLowerCase().includes("active")
         );
+        console.log(res, "hello");
         if (res != null) {
           setHasUserPlan(true);
         }
@@ -90,21 +88,13 @@ function StudentHome() {
         token: true,
         method: "GET",
       });
-      if (res.status === 200) {
-        if (res.data.plans) {
-          const today = new Date();
-          const validPlans = res.data.plans.filter(
-            (plan) => new Date(plan.validity_to) > today
-          );
-          const sortedPlans = validPlans.sort(
-            (a, b) => new Date(b.created.$date) - new Date(a.created.$date)
-          );
-          if (sortedPlans.length > 0) {
-            setHasPlan(true);
-          } else {
-            setHasPlan(false);
-          }
-        }
+
+      if (res.status === 200 && res.data.plans) {
+        const today = new Date();
+        const hasValidPlan = res.data.plans.some(
+          (plan) => new Date(plan.validity_to) > today
+        );
+        setHasPlan(hasValidPlan);
       }
     };
 
