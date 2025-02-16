@@ -677,6 +677,7 @@ function StudentPlan() {
                   type: "success",
                 });
               }
+              navigate("/student/purchase-a-plan");
               return downloadInvoice(responseInvoice);
             })
             .then(async (res) => {
@@ -814,127 +815,6 @@ function StudentPlan() {
         )}
       </div>
       <Spacer h={2} />
-      {myPlans && myPlans.length > 0 && (
-        <div className="mx-auto max-w-7xl">
-          <h4>Plan History</h4>
-          <TableContainer component={Paper} sx={{ margin: "2rem 0" }}>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
-              <TableHead
-                sx={{
-                  bgcolor: "linear-gradient(#033363, #021F3B)",
-                }}
-              >
-                <TableRow>
-                  <TableCell>Plan Name</TableCell>
-                  <TableCell>Validity From</TableCell>
-                  <TableCell>Validity To</TableCell>
-                  <TableCell>Status</TableCell>
-                </TableRow>
-              </TableHead>
-              {/* customPlansForUser */}
-              <TableBody>
-                {myPlans?.map((row) => (
-                  <TableRow
-                    key={row?.id}
-                    sx={{
-                      "&:last-child td, &:last-child th": { border: 0 },
-                    }}
-                  >
-                    <TableCell component="th" scope="row">
-                      {row?.plan.name}
-                    </TableCell>
-                    <TableCell>
-                      {row?.validity_from
-                        ? new Date(row?.validity_from).toDateString()
-                        : ""}
-                    </TableCell>
-                    <TableCell>
-                      {row?.validity_to
-                        ? new Date(row?.validity_to).toDateString()
-                        : ""}
-                    </TableCell>
-                    <TableCell>{row?.current_status}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </div>
-      )}
-
-      {currentCustomUserPlans && currentCustomUserPlans.length > 0 && (
-        <div className="mx-auto max-w-7xl">
-          <h4>Custom Plan History</h4>
-
-          <TableContainer component={Paper} sx={{ margin: "2rem 0" }}>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
-              <TableHead
-                sx={{
-                  bgcolor: "linear-gradient(#033363, #021F3B)",
-                }}
-              >
-                <TableRow>
-                  <TableCell>Plan Name</TableCell>
-                  <TableCell>Validity From</TableCell>
-                  <TableCell>Validity To</TableCell>
-                  {/* <TableCell>Status</TableCell> */}
-                </TableRow>
-              </TableHead>
-              {/* customPlansForUser */}
-              <TableBody>
-                {currentCustomUserPlans?.map((row) => (
-                  <TableRow
-                    key={row?.custom_plan_id}
-                    sx={{
-                      "&:last-child td, &:last-child th": { border: 0 },
-                    }}
-                  >
-                    <TableCell component="th" scope="row">
-                      {customPlansForUser.find(
-                        (obj) => obj._id === row?.custom_plan_id
-                      )?.plan_name || "Plan not found"}
-                    </TableCell>
-                    <TableCell>
-                      {row?.validity_from
-                        ? new Date(row?.validity_from).toLocaleDateString(
-                            "en-GB"
-                          )
-                        : ""}
-                    </TableCell>
-                    <TableCell>
-                      {row?.validity_to
-                        ? new Date(row?.validity_to).toLocaleDateString("en-GB")
-                        : ""}
-                    </TableCell>
-                    {/* <TableCell>{row?.current_status}</TableCell> */}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </div>
-      )}
-
-      <div className="w-full flex flex-col items-center justify-center pt-4 ">
-        {customPlansForUser.length > 0 && (
-          <Pricing
-            heading="Personalized Plans"
-            allPlans={customPlansForUser}
-            subscribePlan={subscribePlan}
-            selectedCurrency={selectedCurrency}
-          />
-        )}
-      </div>
-      {customPlanSent && (
-        <p
-          className={
-            "text-sm border p-2 rounded-lg text-zinc-500 border-red-500"
-          }
-        >
-          Your request has been recorded! Our admin will reach out to you within
-          24 hours.
-        </p>
-      )}
 
       <div className="flex flex-col items-center justify-center pt-4">
         {invalidCountry ? (
@@ -949,6 +829,27 @@ function StudentPlan() {
             subscribePlan={subscribePlan}
             selectedCurrency={selectedCurrency}
           />
+        )}
+
+        <div className="w-full flex flex-col items-center justify-center pt-4 ">
+          {customPlansForUser.length > 0 && (
+            <Pricing
+              heading="Personalized Plans"
+              allPlans={customPlansForUser}
+              subscribePlan={subscribePlan}
+              selectedCurrency={selectedCurrency}
+            />
+          )}
+        </div>
+        {customPlanSent && (
+          <p
+            className={
+              "text-sm border p-2 rounded-lg text-zinc-500 border-red-500"
+            }
+          >
+            Your request has been recorded! Our admin will reach out to you
+            within 24 hours.
+          </p>
         )}
 
         <Divider />
@@ -1223,6 +1124,109 @@ function StudentPlan() {
             Close
           </Modal.Action>
         </Modal>
+
+        {myPlans && myPlans.length > 0 && (
+          <div className="mx-auto max-w-7xl">
+            <h4>Plan History</h4>
+            <TableContainer component={Paper} sx={{ margin: "2rem 0" }}>
+              <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <TableHead
+                  sx={{
+                    bgcolor: "linear-gradient(#033363, #021F3B)",
+                  }}
+                >
+                  <TableRow>
+                    <TableCell>Plan Name</TableCell>
+                    <TableCell>Validity From</TableCell>
+                    <TableCell>Validity To</TableCell>
+                    <TableCell>Status</TableCell>
+                  </TableRow>
+                </TableHead>
+                {/* customPlansForUser */}
+                <TableBody>
+                  {myPlans?.map((row) => (
+                    <TableRow
+                      key={row?.id}
+                      sx={{
+                        "&:last-child td, &:last-child th": { border: 0 },
+                      }}
+                    >
+                      <TableCell component="th" scope="row">
+                        {row?.plan.name}
+                      </TableCell>
+                      <TableCell>
+                        {row?.validity_from
+                          ? new Date(row?.validity_from).toDateString()
+                          : ""}
+                      </TableCell>
+                      <TableCell>
+                        {row?.validity_to
+                          ? new Date(row?.validity_to).toDateString()
+                          : ""}
+                      </TableCell>
+                      <TableCell>{row?.current_status}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
+        )}
+
+        {currentCustomUserPlans && currentCustomUserPlans.length > 0 && (
+          <div className="mx-auto max-w-7xl">
+            <h4>Custom Plan History</h4>
+
+            <TableContainer component={Paper} sx={{ margin: "2rem 0" }}>
+              <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <TableHead
+                  sx={{
+                    bgcolor: "linear-gradient(#033363, #021F3B)",
+                  }}
+                >
+                  <TableRow>
+                    <TableCell>Plan Name</TableCell>
+                    <TableCell>Validity From</TableCell>
+                    <TableCell>Validity To</TableCell>
+                    {/* <TableCell>Status</TableCell> */}
+                  </TableRow>
+                </TableHead>
+                {/* customPlansForUser */}
+                <TableBody>
+                  {currentCustomUserPlans?.map((row) => (
+                    <TableRow
+                      key={row?.custom_plan_id}
+                      sx={{
+                        "&:last-child td, &:last-child th": { border: 0 },
+                      }}
+                    >
+                      <TableCell component="th" scope="row">
+                        {customPlansForUser.find(
+                          (obj) => obj._id === row?.custom_plan_id
+                        )?.plan_name || "Plan not found"}
+                      </TableCell>
+                      <TableCell>
+                        {row?.validity_from
+                          ? new Date(row?.validity_from).toLocaleDateString(
+                              "en-GB"
+                            )
+                          : ""}
+                      </TableCell>
+                      <TableCell>
+                        {row?.validity_to
+                          ? new Date(row?.validity_to).toLocaleDateString(
+                              "en-GB"
+                            )
+                          : ""}
+                      </TableCell>
+                      {/* <TableCell>{row?.current_status}</TableCell> */}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
+        )}
       </div>
 
       <RenderRazorpay
