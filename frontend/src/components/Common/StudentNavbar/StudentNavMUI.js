@@ -31,7 +31,6 @@ const logoStyle = {
 
 function StudentNavMUI({ mode, toggleColorMode }) {
   const [open, setOpen] = useState(false);
-
   const navigate = useNavigate();
   const location = useLocation();
   let user = useUserStore((state) => state.user);
@@ -41,7 +40,6 @@ function StudentNavMUI({ mode, toggleColorMode }) {
   const [planId, setPlanId] = useState(0);
   const [disabled, setDisabled] = useState(false);
   const [disabledTailorMade, setDisabledTailorMade] = useState(false);
-
   const [anchorEl, setAnchorEl] = useState(null);
   const [openProfileMenu, setOpenProfileMenu] = useState(false);
 
@@ -67,6 +65,7 @@ function StudentNavMUI({ mode, toggleColorMode }) {
     setAnchorEl(event.currentTarget);
     setOpenProfileMenu(true);
   };
+
   const handleCloseProfileMenu = () => {
     setAnchorEl(null);
     setOpenProfileMenu(false);
@@ -108,78 +107,47 @@ function StudentNavMUI({ mode, toggleColorMode }) {
         const response = await Fetch({
           url: "/user-plan/get-user-plan-by-id",
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           data: { user_id: user?.user_id },
         });
-        console.log("active plans in navbar are", response.data);
-        const data = response.data;
-        if (data["userPlan"].length !== 0) {
-          const indexOfActiveUserPlan = data["userPlan"].findIndex(
-            (plan) => plan.current_status === USER_PLAN_ACTIVE
-          );
-
-          if (indexOfActiveUserPlan === -1) {
-            setDisabled(true);
-            setDisabledTailorMade(true);
-            return;
-          }
-
-          setUserPlan(data["userPlan"][indexOfActiveUserPlan]);
-          setPlanId(data["userPlan"][indexOfActiveUserPlan]["plan_id"]);
-          if (
-            data["userPlan"][indexOfActiveUserPlan]["plan"]
-              .has_playlist_creation
-          ) {
-            setDisabledTailorMade(false);
-          } else {
-            setDisabledTailorMade(true);
-          }
-          if (
-            data["userPlan"][indexOfActiveUserPlan]["plan"].has_basic_playlist
-          ) {
-            setDisabled(false);
-          } else {
-            setDisabled(true);
-          }
-        } else {
+        const userPlans = response.data?.userPlan || [];
+        if (userPlans.length === 0) {
           const res = await Fetch({
             url: `/customUserPlan/getCustomUserPlansByUser/${user.user_id}`,
             token: true,
             method: "GET",
           });
-          if (res.status === 200) {
-            if (res.data.plans) {
-              const today = new Date();
-              const validPlans = res.data.plans.filter(
-                (plan) => new Date(plan.validity_to) > today
-              );
-
-              const sortedPlans = validPlans.sort(
-                (a, b) => new Date(b.created.$date) - new Date(a.created.$date)
-              );
-              console.log(sortedPlans, "are sorted");
-              if (sortedPlans.length > 0) {
-                setDisabled(false);
-              } else {
-                setDisabled(true);
-              }
-            }
+          if (res.status === 200 && res.data?.plans?.length) {
+            const today = new Date();
+            const validPlans = res.data.plans.filter(
+              (plan) => new Date(plan.validity_to) > today
+            );
+            setDisabled(validPlans.length === 0);
+          } else {
+            setDisabled(true);
           }
-
-          // setDisabled(true);
-          // setDisabledTailorMade(true);
+          return;
         }
+        const activePlan = userPlans.find(
+          (plan) => plan.current_status === USER_PLAN_ACTIVE
+        );
+        if (!activePlan) {
+          setDisabled(true);
+          setDisabledTailorMade(true);
+          return;
+        }
+        setUserPlan(activePlan);
+        setPlanId(activePlan.plan_id);
+        setDisabledTailorMade(!activePlan.plan.has_playlist_creation);
+        setDisabled(!activePlan.plan.has_basic_playlist);
       } catch (error) {
+        console.error("Error fetching plans:", error);
         setDisabled(true);
         setDisabledTailorMade(true);
-        console.log(error);
       }
     };
-    if (user) {
-      fetchPlanData();
-    }
+
+    if (user) fetchPlanData();
   }, [user, setUserPlan]);
 
   const paths = useMemo(() => {

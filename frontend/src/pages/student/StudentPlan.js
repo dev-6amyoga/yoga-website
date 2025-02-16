@@ -129,55 +129,34 @@ function StudentPlan() {
     }
     return updatedValidityString;
   };
+
   const fetchUserPlans = useCallback(async () => {
     try {
       const response = await Fetch({
         url: "/user-plan/get-user-plan-by-id",
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         data: { user_id: user?.user_id },
       });
       const data = response.data;
-      console.log(data, "huhuuhuhu");
+      if (!data?.userPlan?.length) return;
       data.userPlan.sort(
         (a, b) => new Date(a.validity_to) - new Date(b.validity_to)
       );
-      for (var j = 0; j !== data["userPlan"].length; j++) {
-        if (data["userPlan"][j].plan.name === "Trial Plan") {
-          setTrialPlanAvailed(true);
-          break;
-        }
-      }
-      if (data?.userPlan.length !== 0) {
-        const filteredPlans = data.userPlan.filter(
-          (plan) => plan.institute_id === null
-        );
-        setMyPlans(filteredPlans);
-        if (data["userPlan"].length > 1) {
-          for (var j = 0; j !== data["userPlan"].length; j++) {
-            if (
-              data["userPlan"][j].current_status === "ACTIVE" &&
-              data["userPlan"][j].institute_id === null
-            ) {
-              setPlanId(data["userPlan"][j]["plan_id"]);
-              break;
-            }
-          }
-        } else {
-          if (
-            data["userPlan"][0].current_status === "ACTIVE" &&
-            data["userPlan"][0].institute_id === null
-          ) {
-            setPlanId(data["userPlan"][0]["plan_id"]);
-          }
-        }
-      }
+      setTrialPlanAvailed(
+        data.userPlan.some((plan) => plan.plan.name === "Trial Plan")
+      );
+      setMyPlans(data.userPlan.filter((plan) => plan.institute_id === null));
+      const activePlan = data.userPlan.find(
+        (plan) => plan.current_status === "ACTIVE"
+      );
+      console.log("ACTIVE : ", activePlan);
+      if (activePlan) setPlanId(activePlan.plan_id);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching user plans:", error);
     }
   }, [user, formattedDate]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -823,7 +802,8 @@ function StudentPlan() {
       <StudentNavMUI />
       <Hero heading="Plans" />
       <div className="mx-auto max-w-7xl">
-        {planId === -1 && currentCustomUserPlans.length === 0 ? (
+        {/* {planId === -1 && currentCustomUserPlans.length === 0 ? ( */}
+        {planId === -1 ? (
           <Alert variant="outlined" severity="info">
             Please purchase a subscription to unlock all features!
           </Alert>

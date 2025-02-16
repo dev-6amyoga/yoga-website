@@ -168,7 +168,7 @@ export default function Login({ switchForm }) {
 
   useEffect(() => {
     if (user && currentRole) {
-      console.log("navigating to dashboard");
+      console.log("ohohoo", user);
       navigateToDashboard(currentRole, userPlan, navigate);
     }
   }, [user, currentRole, navigate, userPlan]);
