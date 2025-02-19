@@ -324,4 +324,69 @@ router.post('/getFactorial', (req, res) => {
   })
 })
 
+router.post('/playlists/calculateDuration', async (req, res) => {
+  try {
+    const { items } = req.body // Input example: [1, 2, "T_9", 4, "T-8", "T_9"]
+
+    if (!Array.isArray(items)) {
+      return res.status(400).json({ message: 'Invalid input format' })
+    }
+    const asanaIds = items.filter((id) => typeof id === 'number')
+    const transitionIds = items.filter((id) => typeof id === 'string')
+    let files = []
+    if (asanaIds.length > 0) {
+      const asanas = await Asana.find(
+        { id: { $in: asanaIds } },
+        'id asana_name asana_dash_url'
+      )
+      asanas.forEach((asana) => {
+        if (asana.asana_dash_url) {
+          const split = asana.asana_dash_url.split('/')
+          const name =
+            split.length > 2 ? split[split.length - 2] : `asana_${asana.id}`
+          files.push({
+            original: asana.asana_name || `Unknown Asana ${asana.id}`,
+            name: name || `asana_${asana.id}`, // Ensure name is set
+            url: asana.asana_dash_url,
+          })
+        }
+      })
+    }
+    if (transitionIds.length > 0) {
+      const transitions = await TransitionVideo.find(
+        { transition_id: { $in: transitionIds } },
+        'transition_id transition_video_name transition_dash_url'
+      )
+      transitions.forEach((transition) => {
+        if (transition.transition_dash_url) {
+          const split = transition.transition_dash_url.split('/')
+          const name =
+            split.length > 2
+              ? split[split.length - 2]
+              : `transition_${transition.transition_id}`
+          files.push({
+            original:
+              transition.transition_video_name ||
+              `Unknown Transition ${transition.transition_id}`,
+            name: name || `transition_${transition.transition_id}`, // Ensure name is set
+            url: transition.transition_dash_url,
+          })
+        }
+      })
+    }
+    if (files.length === 0) {
+      return res
+        .status(404)
+        .json({ message: 'No valid asanas or transitions found' })
+    }
+    console.log('Files being sent to MPDCombiner:', files)
+    let mpdCombiner = new MPDCombiner(files, null)
+    let [_, totalDuration] = await mpdCombiner.getCombinedManifest()
+    return res.status(200).json({ totalDuration })
+  } catch (error) {
+    console.error('Error in calculateDuration:', error)
+    return res.status(500).json({ error: 'Failed to calculate duration' })
+  }
+})
+
 module.exports = router

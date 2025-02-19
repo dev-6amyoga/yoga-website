@@ -21,6 +21,7 @@ import {
   Select,
   MenuItem,
   Grid,
+  Typography,
 } from "@mui/material";
 
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
@@ -61,6 +62,7 @@ function RegisterPlaylistForm() {
   const [playlistType, setPlaylistType] = useState("");
   const [sortedAsanas, setSortedAsanas] = useState([]);
   const [allLanguages, setAllLanguages] = useState([]);
+
   const handleNoBreakFilterChange = (event) => {
     setNoBreakFilter(event.target.checked);
   };
@@ -129,19 +131,46 @@ function RegisterPlaylistForm() {
     fetchData();
   }, []);
 
+  const [currentTotalDuration, setCurrentTotalDuration] = useState(0);
   useEffect(() => {
-    const newNames = playlistCurrent.map((id) => {
-      if (typeof id === "string") {
-        const transition = transitions.find((t) => t.transition_id === id);
-        return transition
-          ? transition.transition_video_name
-          : "Unknown Transition";
-      } else {
-        const asana = asanas.find((a) => a.id === id);
-        return asana ? asana.asana_name : "Unknown Asana";
+    console.log("New Duration:", currentTotalDuration);
+  }, [currentTotalDuration]); // Re-run when newDuration changes
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!playlistCurrent || !playlistCurrent.length) return; // Prevent API call if data is missing
+
+      try {
+        const response = await Fetch({
+          url: "/content/playlists/calculateDuration",
+          method: "POST",
+          data: { items: playlistCurrent }, // Wrap in an object to match expected API format
+        });
+
+        if (response.status === 200) {
+          console.log(response.data);
+          setCurrentTotalDuration(response.data.totalDuration / 60);
+        }
+      } catch (err) {
+        console.error("Error fetching duration:", err);
       }
-    });
-    setNames(newNames);
+    };
+
+    if (playlistCurrent && asanas.length && transitions.length) {
+      const newNames = playlistCurrent.map((id) => {
+        if (typeof id === "string") {
+          const transition = transitions.find((t) => t.transition_id === id);
+          return transition
+            ? transition.transition_video_name
+            : "Unknown Transition";
+        } else {
+          const asana = asanas.find((a) => a.id === id);
+          return asana ? asana.asana_name : "Unknown Asana";
+        }
+      });
+      fetchData(); // Call only if playlistCurrent is valid
+      setNames(newNames);
+    }
   }, [playlistCurrent, asanas, transitions]);
 
   useEffect(() => {
@@ -1339,45 +1368,6 @@ function RegisterPlaylistForm() {
           </div>
           <div className="flex flex-row gap-3">
             <div>
-              {/* {filteredCategories.map((x, index) => (
-                <Accordion key={index} className="flex flex-col gap-2">
-                  <AccordionSummary
-                    expandIcon={<ExpandMore />}
-                    aria-controls="panel1-content"
-                    id="panel1-header"
-                  >
-                    {x.category}
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <TableContainer component={Paper}>
-                      <Table>
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Asana Name</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {x.asanas.map((asana, idx) => (
-                            <TableRow key={idx}>
-                              <TableCell>{asana.asana_name}</TableCell>
-                              <TableCell>
-                                <Button
-                                  variant="contained"
-                                  onClick={() => {
-                                    addToPlaylist(asana);
-                                  }}
-                                >
-                                  Add
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </AccordionDetails>
-                </Accordion>
-              ))} */}
               {filteredCategories.map((x, index) => (
                 <Accordion key={index} className="flex flex-col gap-2">
                   <AccordionSummary
@@ -1397,10 +1387,10 @@ function RegisterPlaylistForm() {
                         </TableHead>
                         <TableBody>
                           {x.asanas
-                            .slice() // Create a copy to avoid mutating the original array
+                            .slice()
                             .sort((a, b) =>
                               a.asana_name.localeCompare(b.asana_name)
-                            ) // Sort alphabetically by asana_name
+                            )
                             .map((asana, idx) => (
                               <TableRow key={idx}>
                                 <TableCell>{asana.asana_name}</TableCell>
@@ -1424,6 +1414,27 @@ function RegisterPlaylistForm() {
               ))}
             </div>
             <div>
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 2,
+                  textAlign: "center",
+                  backgroundColor: "#f5f5f5",
+                  borderRadius: 2,
+                  width: "fit-content",
+                  mx: "auto",
+                }}
+              >
+                <Typography variant="h6" fontWeight="bold" color="primary">
+                  Current Duration
+                </Typography>
+                <Typography variant="h4" fontWeight="bold" color="secondary">
+                  {currentTotalDuration
+                    ? currentTotalDuration.toFixed(1)
+                    : "0.0"}{" "}
+                  mins
+                </Typography>
+              </Paper>
               <List>
                 {names.map((name, index) => (
                   <ListItem
