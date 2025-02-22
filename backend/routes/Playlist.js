@@ -33,6 +33,7 @@ router.post('/playlists/addPlaylist', async (req, res) => {
     })
   }
 })
+
 router.get('/playlists/getAllPlaylists', async (req, res) => {
   try {
     const playlists = await Playlist.find()
@@ -47,37 +48,6 @@ router.get('/playlists/getAllPlaylists', async (req, res) => {
     })
   }
 })
-
-// router.put('/playlists/updatePlaylist/:playlistId', async (req, res) => {
-//   const playlistId = req.params.playlistId
-//   const updatedData = req.body
-//   console.log(playlistId, updatedData)
-//   try {
-//     const existingPlaylist = await Playlist.findOne({
-//       playlist_id: playlistId,
-//     })
-//     if (!existingPlaylist) {
-//       return res.status(HTTP_NOT_FOUND).json({ error: 'Playlist not found' })
-//     }
-//     const mergedData = {
-//       ...existingPlaylist.toObject(),
-//       ...updatedData,
-//     }
-//     const updatedPlaylist = await Playlist.findOneAndUpdate(
-//       { playlist_id: playlistId },
-//       mergedData,
-//       {
-//         new: true,
-//       }
-//     )
-//     res.json(updatedPlaylist)
-//   } catch (error) {
-//     console.error(error)
-//     res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-//       error: 'Failed to update Playlist',
-//     })
-//   }
-// })
 
 router.put('/playlists/updatePlaylist/:playlistId', async (req, res) => {
   const playlistId = req.params.playlistId
@@ -286,42 +256,6 @@ router.post('/playlists/createManifest/:playlistId', async (req, res) => {
       error: 'Failed to generate manifest for playlist',
     })
   }
-})
-
-router.post('/getFactorial', (req, res) => {
-  const num = req.body.number
-  console.log(num)
-
-  const pythonProcess = spawn('python3', ['demo.py', num])
-
-  let responseSent = false
-
-  pythonProcess.stdout.on('data', (data) => {
-    if (!responseSent) {
-      const result = parseInt(data.toString().trim(), 10)
-      console.log(result)
-      res.json({ factorial: result })
-      responseSent = true
-    }
-  })
-
-  pythonProcess.stderr.on('data', (data) => {
-    if (!responseSent) {
-      console.error(`stderr: ${data}`)
-      res.status(500).json({ error: 'Failed to calculate factorial' })
-      responseSent = true
-    }
-  })
-
-  pythonProcess.on('close', (code) => {
-    if (!responseSent) {
-      if (code !== 0) {
-        console.error(`Python process exited with code ${code}`)
-        res.status(500).json({ error: 'Failed to calculate factorial' })
-      }
-      responseSent = true
-    }
-  })
 })
 
 router.post('/playlists/calculateDuration', async (req, res) => {

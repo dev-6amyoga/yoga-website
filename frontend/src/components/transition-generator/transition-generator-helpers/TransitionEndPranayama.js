@@ -22,6 +22,7 @@ export const TransitionEndPranayama = async (
   transitions
 ) => {
   const pranayamaFinder = (pranayama, filteredTransitions_all) => {
+    console.log(pranayama, "lplplpl");
     if (pranayama.vibhagiya) {
       if (pranayama.vibhagiya === "Abdomen") {
         // is vibhagiya Abdomen
@@ -340,7 +341,6 @@ export const TransitionEndPranayama = async (
     if (t1) {
       result.push(t1);
     }
-    console.log(t1);
     let new_res = [...result, ...pending_2];
     new_res = new_res.filter((element) => element !== undefined);
     new_res = new_res.map((transition) => transition.transition_id);
@@ -727,6 +727,7 @@ export const TransitionEndPranayama = async (
     }
     let pending_2 = pranayamaFinder(end_video, filteredTransitions_all);
     if (start_video.vibhagiya) {
+      console.log("prev vid is vibhagiya");
       if (start_video.vibhagiya === "Abdomen") {
         let res = [];
         for (var i = 0; i !== filteredTransitions_all.length; i++) {
