@@ -22,7 +22,7 @@ export const TransitionEndPranayama = async (
   transitions
 ) => {
   const pranayamaFinder = (pranayama, filteredTransitions_all) => {
-    console.log(pranayama, "lplplpl");
+    console.log("obtained :", pranayama);
     if (pranayama.vibhagiya) {
       if (pranayama.vibhagiya === "Abdomen") {
         // is vibhagiya Abdomen
@@ -946,9 +946,8 @@ export const TransitionEndPranayama = async (
     );
     console.log(transition_1);
     let t1 = getUniqueTransition(transition_1);
-    console.log(t1);
     let pending_2 = pranayamaFinder(end_video, filteredTransitions);
-    console.log(pending_2);
+    console.log(pending_2, "for", end_video);
     const result = [];
     if (t1) {
       result.push(t1);

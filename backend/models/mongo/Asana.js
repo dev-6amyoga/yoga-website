@@ -44,7 +44,7 @@ const asanaSchema = new mongoose.Schema({
   eye_close_end: Boolean,
   shanmuga_start: Boolean,
   shanmuga_end: Boolean,
-  vibhagiya: String,
+  vibhagiya: Boolean,
   vajra_side: Boolean,
   vajra_start: Boolean,
   vajra_end: Boolean,
