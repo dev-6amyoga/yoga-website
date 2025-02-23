@@ -137,13 +137,24 @@ export const TransitionEndClosingPrayerSitting = async (
       transitions.push("Turn Mat Side To Front Sitting Transition");
     }
     if (break_status_start === "Break") {
-      transitions.push("Pranayama Start Sitting");
+      if (end_video.namaskara_start === false) {
+        transitions.push("Pranayama Legs Lock");
+      } else {
+        transitions.push("Pranayama Start Sitting");
+      }
     }
     if (break_status_start === "No Break") {
-      transitions.push(
-        "Feet Apart Hands Back Sitting Transition",
-        "Pranayama Start Sitting"
-      );
+      if (end_video.namaskara_start === false) {
+        transitions.push(
+          "Feet Apart Hands Back Sitting Transition",
+          "Pranayama Legs Lock"
+        );
+      } else {
+        transitions.push(
+          "Feet Apart Hands Back Sitting Transition",
+          "Pranayama Start Sitting"
+        );
+      }
     }
     let res = handleTransition(transitions);
     res = res
@@ -153,7 +164,18 @@ export const TransitionEndClosingPrayerSitting = async (
   }
 
   if (start_category === "Supine") {
+    //Pranayama Legs Lock
     if (break_status_start === "Break") {
+      if (end_video.namaskara_start === false) {
+        let res = handleTransition([
+          "Supine To Sitting Transition",
+          "Turn Mat Side To Front Sitting Transition",
+          "Pranayama Legs Lock",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Supine To Sitting Transition",
         "Turn Mat Side To Front Sitting Transition",
@@ -165,6 +187,17 @@ export const TransitionEndClosingPrayerSitting = async (
     }
 
     if (break_status_start === "No Break") {
+      if (end_video.namaskara_start === false) {
+        let res = handleTransition([
+          "Arms Down Feet Apart Supine Transition",
+          "Supine To Sitting Transition",
+          "Turn Mat Side To Front Sitting Transition",
+          "Pranayama Legs Lock",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Arms Down Feet Apart Supine Transition",
         "Supine To Sitting Transition",
@@ -180,6 +213,16 @@ export const TransitionEndClosingPrayerSitting = async (
   if (start_category === "Prone") {
     if (break_status_start === "Break") {
       if (start_video.prone_breath === false) {
+        if (end_video.namaskara_start === false) {
+          let res = handleTransition([
+            "Prone To Sitting Transition",
+            "Turn Mat Side To Front Sitting Transition",
+            "Pranayama Legs Lock",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Prone To Sitting Transition",
           "Turn Mat Side To Front Sitting Transition",
@@ -202,6 +245,17 @@ export const TransitionEndClosingPrayerSitting = async (
 
     if (break_status_start === "No Break") {
       if (start_video.prone_breath === false) {
+        if (end_video.namaskara_start === false) {
+          let res = handleTransition([
+            "Fold Hands Feet Apart Prone Transition",
+            "Prone To Sitting Transition",
+            "Turn Mat Side To Front Sitting Transition",
+            "Pranayama Legs Lock",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Fold Hands Feet Apart Prone Transition",
           "Prone To Sitting Transition",
