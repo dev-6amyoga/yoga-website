@@ -39,6 +39,16 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
   };
 
   if (!start_category) {
+    if (end_video.vinyasa_suryanamaskara === true) {
+      let res = handleTransition([
+        "Feet Apart Hands Loose Standing Transition Front",
+        "Feet Together Hands Tight Standing Transition Front",
+        "Suryanamaskara Non AI Non Stithi Prefix",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
     let res = handleTransition([
       "Feet Apart Hands Loose Standing Transition Front",
       "Suryanamaskara Preparation And Mantra Non Stithi",
@@ -51,6 +61,18 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
 
   if (start_category === "Closing Prayer Sitting") {
     if (start_video.namaskara_end === true) {
+      if (end_video.vinyasa_suryanamaskara === true) {
+        let res = handleTransition([
+          "Prayer Sitting Namaskara Unlock",
+          "Pranayama Unlock Legs",
+          "Sitting To Standing Transition",
+          "Feet Together Hands Tight Standing Transition Front",
+          "Suryanamaskara Non AI Non Stithi Prefix",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Prayer Sitting Namaskara Unlock",
         "Pranayama Unlock Legs",
@@ -62,6 +84,17 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
       res = res.filter((element) => element !== undefined);
       return res;
     } else {
+      if (end_video.vinyasa_suryanamaskara === true) {
+        let res = handleTransition([
+          "Pranayama Unlock Legs",
+          "Sitting To Standing Transition",
+          "Feet Together Hands Tight Standing Transition Front",
+          "Suryanamaskara Non AI Non Stithi Prefix",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Pranayama Unlock Legs",
         "Sitting To Standing Transition",
@@ -75,6 +108,16 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
   }
 
   if (start_category === "Closing Prayer Standing") {
+    if (end_video.vinyasa_suryanamaskara === true) {
+      let res = handleTransition([
+        "Prayer End Standing",
+        "Feet Together Hands Tight Standing Transition Front",
+        "Suryanamaskara Non AI Non Stithi Prefix",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
     let res = handleTransition([
       "Prayer End Standing",
       "Suryanamaskara Preparation And Mantra Non Stithi",
@@ -86,6 +129,18 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
   }
 
   if (start_category === "Starting Prayer Sitting") {
+    if (end_video.vinyasa_suryanamaskara === true) {
+      let res = handleTransition([
+        "Pranayama Inhale Hands Up Exhale Down",
+        "Pranayama Unlock Legs",
+        "Sitting To Standing Transition",
+        "Feet Together Hands Tight Standing Transition Front",
+        "Suryanamaskara Non AI Non Stithi Prefix",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
     let res = handleTransition([
       "Pranayama Inhale Hands Up Exhale Down",
       "Pranayama Unlock Legs",
@@ -99,6 +154,16 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
   }
 
   if (start_category === "Starting Prayer Standing") {
+    if (end_video.vinyasa_suryanamaskara === true) {
+      let res = handleTransition([
+        "Prayer End Standing",
+        "Feet Together Hands Tight Standing Transition Front",
+        "Suryanamaskara Non AI Non Stithi Prefix",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
     let res = handleTransition([
       "Prayer End Standing",
       "Suryanamaskara Preparation And Mantra Non Stithi",
@@ -110,6 +175,16 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
   }
 
   if (start_category === "Suryanamaskara Stithi") {
+    if (end_video.vinyasa_suryanamaskara === true) {
+      let res = handleTransition([
+        "Feet Apart Hands Loose Standing Transition Front",
+        "Feet Together Hands Tight Standing Transition Front",
+        "Suryanamaskara Non AI Non Stithi Prefix",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
     let res = handleTransition([
       "Feet Apart Hands Loose Standing Transition Front",
       "Suryanamaskara Preparation And Mantra Non Stithi",
@@ -132,10 +207,17 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
     if (break_status_start === "No Break") {
       transitions.push("Feet Apart Hands Loose Standing Transition Front");
     }
-    transitions.push(
-      "Suryanamaskara Preparation And Mantra Non Stithi",
-      "Suryanamaskara Non AI Non Stithi Prefix"
-    );
+    if (end_video.vinyasa_suryanamaskara === true) {
+      transitions.push(
+        "Feet Together Hands Tight Standing Transition Front",
+        "Suryanamaskara Non AI Non Stithi Prefix"
+      );
+    } else {
+      transitions.push(
+        "Suryanamaskara Preparation And Mantra Non Stithi",
+        "Suryanamaskara Non AI Non Stithi Prefix"
+      );
+    }
     let res = handleTransition(transitions);
     res = res
       .map((transition) => transition.transition_id)
@@ -151,11 +233,20 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
     if (break_status_start === "No Break") {
       transitions.push("Feet Apart Hands Back Sitting Transition");
     }
-    transitions.push(
-      "Sitting To Standing Transition",
-      "Suryanamaskara Preparation And Mantra Non Stithi",
-      "Suryanamaskara Non AI Non Stithi Prefix"
-    );
+    if (end_video.vinyasa_suryanamaskara === true) {
+      transitions.push(
+        "Sitting To Standing Transition",
+        "Feet Together Hands Tight Standing Transition Front",
+        "Suryanamaskara Non AI Non Stithi Prefix"
+      );
+    } else {
+      transitions.push(
+        "Sitting To Standing Transition",
+        "Suryanamaskara Preparation And Mantra Non Stithi",
+        "Suryanamaskara Non AI Non Stithi Prefix"
+      );
+    }
+
     let res = handleTransition(transitions);
     res = res
       .map((transition) => transition.transition_id)
@@ -165,6 +256,17 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
 
   if (start_category === "Supine") {
     if (break_status_start === "Break") {
+      if (end_video.vinyasa_suryanamaskara === true) {
+        let res = handleTransition([
+          "Supine To Standing Transition",
+          "Turn Mat Side To Front Standing Transition",
+          "Feet Together Hands Tight Standing Transition Front",
+          "Suryanamaskara Non AI Non Stithi Prefix",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Supine To Standing Transition",
         "Turn Mat Side To Front Standing Transition",
@@ -177,6 +279,18 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
     }
 
     if (break_status_start === "No Break") {
+      if (end_video.vinyasa_suryanamaskara === true) {
+        let res = handleTransition([
+          "Arms Down Feet Apart Supine Transition",
+          "Supine To Standing Transition",
+          "Turn Mat Side To Front Standing Transition",
+          "Feet Together Hands Tight Standing Transition Front",
+          "Suryanamaskara Non AI Non Stithi Prefix",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Arms Down Feet Apart Supine Transition",
         "Supine To Standing Transition",
@@ -193,10 +307,33 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
   if (start_category === "Prone") {
     if (break_status_start === "Break") {
       if (start_video.prone_breath === false) {
+        if (end_video.vinyasa_suryanamaskara === true) {
+          let res = handleTransition([
+            "Prone To Standing Transition",
+            "Turn Mat Side To Front Standing Transition",
+            "Feet Together Hands Tight Standing Transition Front",
+            "Suryanamaskara Non AI Non Stithi Prefix",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Prone To Standing Transition",
           "Turn Mat Side To Front Standing Transition",
           "Suryanamaskara Preparation And Mantra Non Stithi",
+          "Suryanamaskara Non AI Non Stithi Prefix",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
+      if (end_video.vinyasa_suryanamaskara === true) {
+        let res = handleTransition([
+          "Prone Breath After Asana",
+          "Prone To Standing Transition",
+          "Turn Mat Side To Front Standing Transition",
+          "Feet Together Hands Tight Standing Transition Front",
           "Suryanamaskara Non AI Non Stithi Prefix",
         ]);
         res = res.map((transition) => transition.transition_id);
@@ -217,11 +354,36 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
 
     if (break_status_start === "No Break") {
       if (start_video.prone_breath === false) {
+        if (end_video.vinyasa_suryanamaskara === true) {
+          let res = handleTransition([
+            "Fold Hands Feet Apart Prone Transition",
+            "Prone To Standing Transition",
+            "Turn Mat Side To Front Standing Transition",
+            "Feet Together Hands Tight Standing Transition Front",
+            "Suryanamaskara Non AI Non Stithi Prefix",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Fold Hands Feet Apart Prone Transition",
           "Prone To Standing Transition",
           "Turn Mat Side To Front Standing Transition",
           "Suryanamaskara Preparation And Mantra Non Stithi",
+          "Suryanamaskara Non AI Non Stithi Prefix",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
+      if (end_video.vinyasa_suryanamaskara === true) {
+        let res = handleTransition([
+          "Fold Hands Feet Apart Prone Transition",
+          "Prone Breath After Asana",
+          "Prone To Standing Transition",
+          "Turn Mat Side To Front Standing Transition",
+          "Feet Together Hands Tight Standing Transition Front",
           "Suryanamaskara Non AI Non Stithi Prefix",
         ]);
         res = res.map((transition) => transition.transition_id);
@@ -244,6 +406,16 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
 
   if (start_category === "Vajrasana") {
     if (break_status_start === "Break") {
+      if (end_video.vinyasa_suryanamaskara === true) {
+        let res = handleTransition([
+          "Vajra To Standing Transition",
+          "Feet Together Hands Tight Standing Transition Front",
+          "Suryanamaskara Non AI Non Stithi Prefix",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Vajra To Standing Transition",
         "Suryanamaskara Preparation And Mantra Non Stithi",
@@ -260,6 +432,19 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
       } else {
         transitions.push("Vajrasana Dyanmudra To Relax Position Front");
       }
+      if (end_video.vinyasa_suryanamaskara === true) {
+        transitions.push(
+          "Vajra To Standing Transition",
+          "Feet Together Hands Tight Standing Transition Front",
+          "Suryanamaskara Non AI Non Stithi Prefix"
+        );
+      } else {
+        transitions.push(
+          "Vajra To Standing Transition",
+          "Suryanamaskara Preparation And Mantra Non Stithi",
+          "Suryanamaskara Non AI Non Stithi Prefix"
+        );
+      }
       transitions.push(
         "Vajra To Standing Transition",
         "Suryanamaskara Preparation And Mantra Non Stithi",
@@ -274,12 +459,22 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
   }
 
   if (start_category === "Pranayama") {
-    let res1 = handleTransition([
-      "Pranayama Unlock Legs",
-      "Sitting To Standing Transition",
-      "Suryanamaskara Preparation And Mantra Non Stithi",
-      "Suryanamaskara Non AI Non Stithi Prefix",
-    ]);
+    let res1 = [];
+    if (end_video.vinyasa_suryanamaskara === true) {
+      res1 = handleTransition([
+        "Pranayama Unlock Legs",
+        "Sitting To Standing Transition",
+        "Feet Together Hands Tight Standing Transition Front",
+        "Suryanamaskara Non AI Non Stithi Prefix",
+      ]);
+    } else {
+      res1 = handleTransition([
+        "Pranayama Unlock Legs",
+        "Sitting To Standing Transition",
+        "Suryanamaskara Preparation And Mantra Non Stithi",
+        "Suryanamaskara Non AI Non Stithi Prefix",
+      ]);
+    }
     const pending_2 = res1;
     if (start_video.vibhagiya) {
       if (start_video.vibhagiya === "Abdomen") {
@@ -455,6 +650,18 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
   }
 
   if (start_category === "Pranayama Prayer") {
+    if (end_video.vinyasa_suryanamaskara === true) {
+      let res = handleTransition([
+        "Pranayama Inhale Hands Up Exhale Down",
+        "Pranayama Unlock Legs",
+        "Sitting To Standing Transition",
+        "Feet Together Hands Tight Standing Transition Front",
+        "Suryanamaskara Non AI Non Stithi Prefix",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
     let res = handleTransition([
       "Pranayama Inhale Hands Up Exhale Down",
       "Pranayama Unlock Legs",
@@ -468,6 +675,16 @@ export const TransitionEndSuryanamaskaraNonStithi = async (
   }
 
   if (start_category === "Special") {
+    if (end_video.vinyasa_suryanamaskara === true) {
+      let res = handleTransition([
+        "Feet Apart Hands Loose Standing Transition Front",
+        "Feet Together Hands Tight Standing Transition Front",
+        "Suryanamaskara Non AI Non Stithi Prefix",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
+    }
     let res = handleTransition([
       "Feet Apart Hands Loose Standing Transition Front",
       "Suryanamaskara Preparation And Mantra Non Stithi",
