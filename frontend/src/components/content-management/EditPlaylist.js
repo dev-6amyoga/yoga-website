@@ -41,6 +41,7 @@ import { TransitionEndSpecial } from "../transition-generator/transition-generat
 import { TransitionEndSuryanamaskaraStithi } from "../transition-generator/transition-generator-helpers/TransitionEndSuryanamaskaraStithi";
 import { TransitionEndSuryanamaskaraNonStithi } from "../transition-generator/transition-generator-helpers/TransitionEndSuryanamaskaraNonStithi";
 import { TransitionEndVajrasana } from "../transition-generator/transition-generator-helpers/TransitionEndVajrasana";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 function EditPlaylist() {
   const { playlist_id } = useParams();
@@ -848,6 +849,16 @@ function EditPlaylist() {
     }
   };
 
+  const handleDragEnd = (result) => {
+    if (!result.destination) return; // If dropped outside, do nothing
+
+    const newPlaylist = [...playlistCurrent];
+    const [movedItem] = newPlaylist.splice(result.source.index, 1); // Remove item
+    newPlaylist.splice(result.destination.index, 0, movedItem); // Insert at new position
+
+    setPlaylistCurrent(newPlaylist);
+  };
+
   const handleDelete = async (index) => {
     if (typeof playlistCurrent[index] === "number") {
       toast("Deleting!!");
@@ -1024,7 +1035,60 @@ function EditPlaylist() {
         </Container>
         <Container component={Paper} maxWidth="md" sx={{ padding: 3 }}>
           <div>
-            <List>
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="playlist">
+                {(provided) => (
+                  <List
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    style={{ minHeight: "50px" }}
+                  >
+                    {names.map((name, index) => (
+                      <Draggable
+                        key={index}
+                        draggableId={String(index)}
+                        index={index}
+                      >
+                        {(provided, snapshot) => (
+                          <ListItem
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            style={{
+                              ...provided.draggableProps.style,
+                              border: "1px solid #ccc",
+                              borderRadius: "8px",
+                              marginBottom: "8px",
+                              padding: "8px",
+                              background: snapshot.isDragging
+                                ? "#f0f0f0"
+                                : "#fff",
+                            }}
+                          >
+                            <Grid container alignItems="center" spacing={2}>
+                              <Grid item xs>
+                                <ListItemText primary={name} />
+                              </Grid>
+                              <Grid item>
+                                <Button
+                                  variant="contained"
+                                  color="secondary"
+                                  onClick={() => handleDelete(index)}
+                                >
+                                  Delete
+                                </Button>
+                              </Grid>
+                            </Grid>
+                          </ListItem>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </List>
+                )}
+              </Droppable>
+            </DragDropContext>
+            {/* <List>
               {names.map((name, index) => (
                 <ListItem
                   key={index}
@@ -1069,7 +1133,7 @@ function EditPlaylist() {
                   </Grid>
                 </ListItem>
               ))}
-            </List>
+            </List> */}
           </div>
         </Container>
       </div>
