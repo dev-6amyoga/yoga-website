@@ -320,6 +320,12 @@ export const TransitionEndProne = async (
 
   if (start_category === "Supine") {
     if (break_status_start === "Break" && break_status_end === "Break") {
+      if (end_video.prone_breath == false) {
+        let res = handleTransition(["Supine To Prone Transition"]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Supine To Prone Transition With Prone Breath",
       ]);

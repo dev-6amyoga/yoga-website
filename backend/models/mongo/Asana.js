@@ -37,6 +37,7 @@ const asanaSchema = new mongoose.Schema({
   catch_waist_start: Boolean,
   catch_waist_end: Boolean,
   nose_lock_start: Boolean,
+  prone_breath: Boolean,
   nose_lock_end: Boolean,
   chin_lock_start: Boolean,
   chin_lock_end: Boolean,
