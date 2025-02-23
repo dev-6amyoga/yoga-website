@@ -320,7 +320,7 @@ export const TransitionEndProne = async (
 
   if (start_category === "Supine") {
     if (break_status_start === "Break" && break_status_end === "Break") {
-      if (end_video.prone_breath == false) {
+      if (end_video.prone_breath === false) {
         let res = handleTransition(["Supine To Prone Transition"]);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
@@ -334,6 +334,15 @@ export const TransitionEndProne = async (
       return res;
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
+      if (end_video.prone_breath === false) {
+        let res = handleTransition([
+          "Supine To Prone Transition",
+          "Arms Straight Feet Together Prone Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Supine To Prone Transition With Prone Breath",
         "Arms Straight Feet Together Prone Transition",
@@ -343,6 +352,15 @@ export const TransitionEndProne = async (
       return res;
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
+      if (end_video.prone_breath === false) {
+        let res = handleTransition([
+          "Arms Down Feet Apart Supine Transition",
+          "Supine To Prone Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Arms Down Feet Apart Supine Transition",
         "Supine To Prone Transition With Prone Breath",
@@ -352,6 +370,16 @@ export const TransitionEndProne = async (
       return res;
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
+      if (end_video.prone_breath === false) {
+        let res = handleTransition([
+          "Arms Down Feet Apart Supine Transition",
+          "Supine To Prone Transition",
+          "Arms Straight Feet Together Prone Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Arms Down Feet Apart Supine Transition",
         "Supine To Prone Transition With Prone Breath",

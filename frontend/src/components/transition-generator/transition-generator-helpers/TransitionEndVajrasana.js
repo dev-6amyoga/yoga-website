@@ -362,6 +362,12 @@ export const TransitionEndVajrasana = async (
 
   if (start_category === "Prone") {
     if (break_status_start === "Break" && break_status_end === "Break") {
+      if (start_video.prone_breath === false) {
+        let res = handleTransition(["Prone To Vajra Transition"]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Prone Breath After Asana",
         "Prone To Vajra Transition",
@@ -371,6 +377,25 @@ export const TransitionEndVajrasana = async (
       return res;
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
+      if (start_video.prone_breath === false) {
+        if (end_video.vajra_side === true) {
+          let res = handleTransition([
+            "Prone To Vajra Transition",
+            "Vajrasana Relax To Dyanmudra Position Side",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        } else {
+          let res = handleTransition([
+            "Prone To Vajra Transition",
+            "Vajrasana Relax To Dyanmudra Position Front",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
+      }
       let transitions = [
         "Prone Breath After Asana",
         "Prone To Vajra Transition",
@@ -387,6 +412,15 @@ export const TransitionEndVajrasana = async (
       return res;
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
+      if (start_video.prone_breath === false) {
+        let res = handleTransition([
+          "Fold Hands Feet Apart Prone Transition",
+          "Prone To Vajra Transition",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Fold Hands Feet Apart Prone Transition",
         "Prone Breath After Asana",
@@ -397,6 +431,27 @@ export const TransitionEndVajrasana = async (
       return res;
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
+      if (start_video.prone_breath === false) {
+        if (end_video.vajra_side === true) {
+          let res = handleTransition([
+            "Fold Hands Feet Apart Prone Transition",
+            "Prone To Vajra Transition",
+            "Vajrasana Relax To Dyanmudra Position Side",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        } else {
+          let res = handleTransition([
+            "Fold Hands Feet Apart Prone Transition",
+            "Prone To Vajra Transition",
+            "Vajrasana Relax To Dyanmudra Position Front",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
+      }
       let transitions = [
         "Fold Hands Feet Apart Prone Transition",
         "Prone Breath After Asana",

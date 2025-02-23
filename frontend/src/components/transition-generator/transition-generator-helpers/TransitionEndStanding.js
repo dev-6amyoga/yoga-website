@@ -1104,6 +1104,15 @@ export const TransitionEndStanding = async (
   if (start_category === "Prone") {
     if (break_status_start === "Break" && break_status_end === "Break") {
       if (end_video.person_starting_position === "Front") {
+        if (start_video.prone_breath === false) {
+          let res = handleTransition([
+            "Prone To Standing Transition",
+            "Turn Mat Side To Front Standing Transition",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Prone Breath After Asana",
           "Prone To Standing Transition",
@@ -1114,6 +1123,16 @@ export const TransitionEndStanding = async (
         return res;
       }
       if (end_video.person_starting_position === "Left") {
+        if (start_video.prone_breath === false) {
+          let res = handleTransition([
+            "Prone To Standing Transition",
+            "Turn Mat Side To Front Standing Transition",
+            "Person Transit Front To Left",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Prone Breath After Asana",
           "Prone To Standing Transition",
@@ -1127,6 +1146,16 @@ export const TransitionEndStanding = async (
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
       if (end_video.person_starting_position === "Front") {
+        if (start_video.prone_breath === false) {
+          let res = handleTransition([
+            "Prone To Standing Transition",
+            "Turn Mat Side To Front Standing Transition",
+            "Feet Together Hands Tight Standing Transition Front",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Prone Breath After Asana",
           "Prone To Standing Transition",
@@ -1138,6 +1167,17 @@ export const TransitionEndStanding = async (
         return res;
       }
       if (end_video.person_starting_position === "Left") {
+        if (start_video.prone_breath === false) {
+          let res = handleTransition([
+            "Prone To Standing Transition",
+            "Turn Mat Side To Front Standing Transition",
+            "Person Transit Front To Left",
+            "Feet Together Hands Tight Standing Side Transition",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Prone Breath After Asana",
           "Prone To Standing Transition",
@@ -1152,6 +1192,16 @@ export const TransitionEndStanding = async (
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
       if (end_video.person_starting_position === "Front") {
+        if (start_video.prone_breath === false) {
+          let res = handleTransition([
+            "Fold Hands Feet Apart Prone Transition",
+            "Prone To Standing Transition",
+            "Turn Mat Side To Front Standing Transition",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Fold Hands Feet Apart Prone Transition",
           "Prone Breath After Asana",
@@ -1163,6 +1213,17 @@ export const TransitionEndStanding = async (
         return res;
       }
       if (end_video.person_starting_position === "Left") {
+        if (start_video.prone_breath === false) {
+          let res = handleTransition([
+            "Fold Hands Feet Apart Prone Transition",
+            "Prone To Standing Transition",
+            "Turn Mat Side To Front Standing Transition",
+            "Person Transit Front To Left",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Fold Hands Feet Apart Prone Transition",
           "Prone Breath After Asana",
@@ -1177,6 +1238,17 @@ export const TransitionEndStanding = async (
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
       if (end_video.person_starting_position === "Front") {
+        if (start_video.prone_breath === false) {
+          let res = handleTransition([
+            "Fold Hands Feet Apart Prone Transition",
+            "Prone To Standing Transition",
+            "Turn Mat Side To Front Standing Transition",
+            "Feet Together Hands Tight Standing Transition Front",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Fold Hands Feet Apart Prone Transition",
           "Prone Breath After Asana",
@@ -1189,6 +1261,18 @@ export const TransitionEndStanding = async (
         return res;
       }
       if (end_video.person_starting_position === "Left") {
+        if (start_video.prone_breath === false) {
+          let res = handleTransition([
+            "Fold Hands Feet Apart Prone Transition",
+            "Prone To Standing Transition",
+            "Turn Mat Side To Front Standing Transition",
+            "Person Transit Front To Left",
+            "Feet Together Hands Tight Standing Side Transition",
+          ]);
+          res = res.map((transition) => transition.transition_id);
+          res = res.filter((element) => element !== undefined);
+          return res;
+        }
         let res = handleTransition([
           "Fold Hands Feet Apart Prone Transition",
           "Prone Breath After Asana",

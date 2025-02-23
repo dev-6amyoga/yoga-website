@@ -179,6 +179,16 @@ export const TransitionEndClosingPrayerSitting = async (
 
   if (start_category === "Prone") {
     if (break_status_start === "Break") {
+      if (start_video.prone_breath === false) {
+        let res = handleTransition([
+          "Prone To Sitting Transition",
+          "Turn Mat Side To Front Sitting Transition",
+          "Pranayama Start Sitting",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Prone Breath After Asana",
         "Prone To Sitting Transition",
@@ -191,6 +201,17 @@ export const TransitionEndClosingPrayerSitting = async (
     }
 
     if (break_status_start === "No Break") {
+      if (start_video.prone_breath === false) {
+        let res = handleTransition([
+          "Fold Hands Feet Apart Prone Transition",
+          "Prone To Sitting Transition",
+          "Turn Mat Side To Front Sitting Transition",
+          "Pranayama Start Sitting",
+        ]);
+        res = res.map((transition) => transition.transition_id);
+        res = res.filter((element) => element !== undefined);
+        return res;
+      }
       let res = handleTransition([
         "Fold Hands Feet Apart Prone Transition",
         "Prone Breath After Asana",
