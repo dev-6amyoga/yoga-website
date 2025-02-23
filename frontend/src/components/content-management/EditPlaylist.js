@@ -1075,7 +1075,7 @@ function EditPlaylist() {
                                   color="secondary"
                                   onClick={() => handleDelete(index)}
                                 >
-                                  Delete
+                                  Delete!
                                 </Button>
                               </Grid>
                             </Grid>
