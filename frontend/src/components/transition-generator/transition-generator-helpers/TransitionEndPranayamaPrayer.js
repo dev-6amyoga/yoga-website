@@ -366,6 +366,27 @@ export const TransitionEndPranayamaPrayer = async (
         new_res = new_res.filter((element) => element !== undefined);
         return new_res;
       } else {
+        if (start_video.nose_lock_start && start_video.chin_lock_end) {
+          console.log("pratiloma last cycle");
+          let res = [];
+          for (var i = 0; i !== filteredTransitions_all.length; i++) {
+            let transition_ind = filteredTransitions_all[i];
+            if (
+              transition_ind.transition_video_name
+                .toLowerCase()
+                .indexOf("jalandhara") !== -1
+            ) {
+              res.push(transition_ind);
+            }
+          }
+          res = res.filter((transition) =>
+            transition.transition_video_name.toLowerCase().includes("unlock")
+          );
+          let new_res = [...res, ...pending_2, res1];
+          new_res = new_res.filter((element) => element !== undefined);
+          new_res = new_res.map((transition) => transition.transition_id);
+          return new_res;
+        }
         if (start_video.nose_lock_start && start_video.nose_lock_end) {
           let res = [];
           for (var i = 0; i !== filteredTransitions_all.length; i++) {
