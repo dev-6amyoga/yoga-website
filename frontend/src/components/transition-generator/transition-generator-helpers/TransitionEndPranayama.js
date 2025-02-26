@@ -22,7 +22,6 @@ export const TransitionEndPranayama = async (
   transitions
 ) => {
   const pranayamaFinder = (pranayama, filteredTransitions_all) => {
-    console.log("obtained :", pranayama);
     if (pranayama.vibhagiya) {
       if (pranayama.vibhagiya === "Abdomen") {
         // is vibhagiya Abdomen
@@ -102,12 +101,10 @@ export const TransitionEndPranayama = async (
       }
     } else {
       if (pranayama.omkara) {
-        console.log(filteredTransitions_all);
         let res = [];
         for (var i = 0; i !== filteredTransitions_all.length; i++) {
           if (filteredTransitions_all[i]) {
             let transition_ind = filteredTransitions_all[i];
-            // console.log(transition_ind);
             if (
               transition_ind.transition_video_name
                 .toLowerCase()
@@ -123,7 +120,6 @@ export const TransitionEndPranayama = async (
         return res;
       } else {
         if (pranayama.nose_lock_start && pranayama.nose_lock_end) {
-          console.log("in nasika");
           let res = [];
           for (var i = 0; i !== filteredTransitions_all.length; i++) {
             let transition_ind = filteredTransitions_all[i];
@@ -148,7 +144,6 @@ export const TransitionEndPranayama = async (
                   .toLowerCase()
                   .includes("prenatal")
             );
-          console.log(res);
           return res;
         } else {
           if (pranayama.chin_lock_start && pranayama.chin_lock_end) {
@@ -194,7 +189,6 @@ export const TransitionEndPranayama = async (
               return res;
             } else {
               // return nothing
-              console.log("nothing");
               return [];
             }
           }
@@ -332,11 +326,8 @@ export const TransitionEndPranayama = async (
         transition.transition_video_name ===
         "Pranayama Inhale Hands Up Exhale Down"
     );
-    console.log(transition_1);
     let t1 = getUniqueTransition(transition_1);
-    console.log(t1);
     let pending_2 = pranayamaFinder(end_video, filteredTransitions);
-    console.log(pending_2);
     const result = [];
     if (t1) {
       result.push(t1);
@@ -518,6 +509,7 @@ export const TransitionEndPranayama = async (
       if (t1) {
         result.push(t1);
       }
+      console.log("break, break", result);
       return result;
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
@@ -527,18 +519,19 @@ export const TransitionEndPranayama = async (
       );
       const transition_2 = filteredTransitions_all.filter(
         (transition) =>
-          transition.transition_video_name ===
-          "Feet Together Hands Side Sitting Transition"
+          transition.transition_video_name === "Pranayama Legs Lock"
       );
       let t1 = getUniqueTransition(transition_1);
       let t2 = getUniqueTransition(transition_2);
       const result = [];
       if (t1) {
-        result.push(t1);
+        result.push(t1.transition_id);
       }
       if (t2) {
-        result.push(t2);
+        result.push(t2.transition_id);
       }
+      console.log("break, no break", result);
+
       return result;
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
@@ -560,6 +553,7 @@ export const TransitionEndPranayama = async (
       if (t2) {
         result.push(t2);
       }
+      console.log("no break, break", result);
       return result;
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
@@ -590,11 +584,13 @@ export const TransitionEndPranayama = async (
       if (t3) {
         result.push(t3);
       }
+      console.log("no break,no break", result);
       return result;
     }
   }
 
   if (start_category === "Sitting") {
+    console.log("IN SITTING! TO PRANAYAMA");
     if (break_status_start === "Break") {
       if (start_video.mat_ending_position === "Side") {
         let res = handleTransition([
@@ -603,9 +599,9 @@ export const TransitionEndPranayama = async (
         ]);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
-        console.log(res);
         return res;
       } else {
+        console.log(start_video);
         let res = handleTransition(["Pranayama Start Sitting"]);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
@@ -748,7 +744,6 @@ export const TransitionEndPranayama = async (
     }
     let pending_2 = pranayamaFinder(end_video, filteredTransitions_all);
     if (start_video.vibhagiya) {
-      console.log("prev vid is vibhagiya");
       if (start_video.vibhagiya === "Abdomen") {
         let res = [];
         for (var i = 0; i !== filteredTransitions_all.length; i++) {
@@ -853,7 +848,6 @@ export const TransitionEndPranayama = async (
         return new_res;
       } else {
         if (start_video.nose_lock_start && start_video.chin_lock_end) {
-          console.log("pratiloma last cycle");
           let res = [];
           for (var i = 0; i !== filteredTransitions_all.length; i++) {
             let transition_ind = filteredTransitions_all[i];
@@ -964,7 +958,6 @@ export const TransitionEndPranayama = async (
               return new_res;
             } else {
               let new_res = [...pending_2];
-              console.log(new_res);
               new_res = new_res.filter((element) => element !== undefined);
               new_res = new_res.map((transition) => transition.transition_id);
               return new_res;
@@ -986,15 +979,12 @@ export const TransitionEndPranayama = async (
         transition.transition_video_name ===
         "Pranayama Inhale Hands Up Exhale Down"
     );
-    console.log(transition_1);
     let t1 = getUniqueTransition(transition_1);
     let pending_2 = pranayamaFinder(end_video, filteredTransitions);
-    console.log(pending_2, "for", end_video);
     const result = [];
     if (t1) {
       result.push(t1);
     }
-    console.log(t1);
     let new_res = [...result, ...pending_2];
     new_res = new_res.filter((element) => element !== undefined);
     new_res = new_res.map((transition) => transition.transition_id);
