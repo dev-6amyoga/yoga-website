@@ -297,10 +297,12 @@ export const TransitionEndClosingPrayerSitting = async (
   }
 
   if (start_category === "Pranayama") {
-    if (end_video.asana_name == "Rub Your Palms") {
-      return [];
+    let res1;
+    if (end_video.namaskara_start === false) {
+      res1 = [];
+    } else {
+      res1 = handleTransition(["Pranayama Inhale Arms Up Exhale Namaskara"]);
     }
-    let res1 = handleTransition(["Pranayama Inhale Arms Up Exhale Namaskara"]);
     const pending_2 = [];
     if (start_video.vibhagiya) {
       if (start_video.vibhagiya === "Abdomen") {
