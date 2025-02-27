@@ -499,17 +499,29 @@ export const TransitionEndPranayama = async (
   }
 
   if (start_category === "Standing") {
+    const filteredTransitions = transitions.filter(
+      (transition) =>
+        transition.drm_transition === drm_status &&
+        transition.asana_category_end === "Pranayama" &&
+        transition.teacher_mode === end_video.teacher_mode
+    );
+    let pending_2 = pranayamaFinder(end_video, filteredTransitions);
+    const transitionIds = pending_2.map(
+      (transition) => transition.transition_id
+    );
+    console.log(transitionIds);
     if (break_status_start === "Break" && break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
           transition.transition_video_name === "Standing To Sitting Transition"
       );
       let t1 = getUniqueTransition(transition_1);
+
       const result = [];
       if (t1) {
         result.push(t1);
+        result.push(transitionIds);
       }
-      console.log("break, break", result);
       return result;
     }
     if (break_status_start === "Break" && break_status_end === "No Break") {
@@ -530,8 +542,8 @@ export const TransitionEndPranayama = async (
       if (t2) {
         result.push(t2.transition_id);
       }
-      console.log("break, no break", result);
-
+      result.push(...transitionIds);
+      console.log(result);
       return result;
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {
@@ -553,7 +565,6 @@ export const TransitionEndPranayama = async (
       if (t2) {
         result.push(t2);
       }
-      console.log("no break, break", result);
       return result;
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
@@ -584,13 +595,11 @@ export const TransitionEndPranayama = async (
       if (t3) {
         result.push(t3);
       }
-      console.log("no break,no break", result);
       return result;
     }
   }
 
   if (start_category === "Sitting") {
-    console.log("IN SITTING! TO PRANAYAMA");
     if (break_status_start === "Break") {
       if (start_video.mat_ending_position === "Side") {
         let res = handleTransition([
@@ -601,7 +610,6 @@ export const TransitionEndPranayama = async (
         res = res.filter((element) => element !== undefined);
         return res;
       } else {
-        console.log(start_video);
         let res = handleTransition(["Pranayama Start Sitting"]);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
