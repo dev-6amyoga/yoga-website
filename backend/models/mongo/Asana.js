@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const Schema = mongoose.Schema
 
 const MarkerSchema = new mongoose.Schema({
   title: String,
@@ -32,9 +33,9 @@ const asanaSchema = new mongoose.Schema({
   mat_ending_position: String,
   asana_stithi_start: String,
   asana_stithi_end: String,
-  vibhagiya: Boolean,
   omkara: Boolean,
   catch_waist_start: Boolean,
+  vinyasa_suryanamaskara: Boolean,
   catch_waist_end: Boolean,
   nose_lock_start: Boolean,
   prone_breath: Boolean,
@@ -45,7 +46,7 @@ const asanaSchema = new mongoose.Schema({
   eye_close_end: Boolean,
   shanmuga_start: Boolean,
   shanmuga_end: Boolean,
-  vibhagiya: Boolean,
+  vibhagiya: Schema.Types.Mixed,
   vajra_side: Boolean,
   vajra_start: Boolean,
   vajra_end: Boolean,
