@@ -297,6 +297,7 @@ export const TransitionEndClosingPrayerSitting = async (
   }
 
   if (start_category === "Pranayama") {
+    console.log("hohoho");
     let res1;
     if (end_video.namaskara_start === false) {
       res1 = [];

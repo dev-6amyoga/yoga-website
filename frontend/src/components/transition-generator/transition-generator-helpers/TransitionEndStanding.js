@@ -785,7 +785,10 @@ export const TransitionEndStanding = async (
           }
           if (end_video.catch_waist_start === false) {
             if (start_video.catch_waist_end === true) {
-              let res = handleTransition(["Release Your Waist"]);
+              let res = handleTransition([
+                "Release Your Waist",
+                "Feet Together Hands Tight Standing Transition Front",
+              ]);
               res = res.map((transition) => transition.transition_id);
               res = res.filter((element) => element !== undefined);
               return res;
