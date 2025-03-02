@@ -2,7 +2,6 @@ package timer
 
 import (
 	"errors"
-	"fmt"
 	"syncer-backend/src/events"
 	"time"
 
@@ -70,7 +69,9 @@ func (t *TimerMap) AddTimerNew(
 	velocity float32,
 	acceleration float32,
 ) (*Timer, error) {
-	zap.S().Infof("Adding timer for class %s", classID)
+	log := zap.S()
+
+	log.Debugf("Adding timer for class %s", classID)
 	// TODO: decide the interval
 	newTimer := Timer{
 		CurrentTime: 0,
@@ -87,9 +88,9 @@ func (t *TimerMap) AddTimerNew(
 		LastUpdated:  time.Now().UnixMilli(),
 	}
 
-	zap.S().Infof("Storing timer to %s", classID)
+	log.Debugf("Storing timer to %s", classID)
 	t.Map.Store(classID, &newTimer)
-	zap.S().Infof("Stored to %s", classID)
+	log.Debugf("Stored to %s", classID)
 
 	return &newTimer, nil
 }
@@ -116,8 +117,9 @@ func (t *TimerMap) UpdateTimeNew(
 	acceleration float32,
 	eventTime int64,
 ) error {
-	// zap.S().Info("Updating timer for class ", classID, position, velocity, acceleration, eventTime)
-	fmt.Println("Updating timer for class ", classID, position, velocity, acceleration, eventTime)
+	log := zap.S()
+
+	// log.Debugf("Updating timer for class ", classID, position, velocity, acceleration, eventTime)
 	ct, ok := t.Map.Load(classID)
 
 	if !ok {
@@ -137,8 +139,7 @@ func (t *TimerMap) UpdateTimeNew(
 	// TODO : check if this is correct
 	// ct.LastUpdated = eventTime
 
-	// zap.S().Info("Updated timer : ", ct)
-	fmt.Println("Updated timer : ", ct.Position, ct.Velocity, ct.Acceleration, ct.LastUpdated)
+	log.Debugf("Updated timer : ", ct.Position, ct.Velocity, ct.Acceleration, ct.LastUpdated)
 
 	t.Map.Store(classID, ct)
 

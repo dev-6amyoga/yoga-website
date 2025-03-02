@@ -17,7 +17,7 @@ type WsServer struct {
 }
 
 type WsEndpoints struct {
-	// timers
+	// timers for each class
 	Timers timer.TimerMap
 
 	// update channels map for each classID with a channel for each joinee

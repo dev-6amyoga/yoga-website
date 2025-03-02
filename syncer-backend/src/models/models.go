@@ -19,3 +19,11 @@ type EndpointInterface interface {
 type DaoInterface interface {
 	AddToActionsQueue(classID string, action *events.QueueEvent) error
 }
+
+type ConnInterface interface {
+	ReadMessage() (messageType int, p []byte, err error)
+	WriteMessage(messageType int, data []byte) error
+	ReadJSON(v any) error
+	WriteJSON(v any) error
+	Close() error
+}
