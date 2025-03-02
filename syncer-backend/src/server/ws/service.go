@@ -35,25 +35,23 @@ func (e *WsEndpoints) HandleTeacherConnection(w http.ResponseWriter, r *http.Req
 	log := zap.S()
 
 	lock := &sync.Mutex{}
-	conn, ch, closeChan := e.teacherConnectionInit(w, r, lock)
+	conn, timerChan, closeChan := e.teacherConnectionInit(w, r, lock)
 
-	if conn == nil || ch == nil {
+	if conn == nil || timerChan == nil {
 		return
 	}
 
-	conn.EnableWriteCompression(true)
-
 	defer conn.Close()
 
-	log.Info("Teacher connected")
+	log.Debugf("Teacher connected")
 
 	go (func() {
 		for {
 			select {
 			case <-closeChan:
-				log.Info("Closing go routine for teacher connection")
+				log.Debugf("Closing go routine for teacher connection")
 				return
-			case updatedVec := <-ch:
+			case updatedVec := <-timerChan:
 				// TODO : lock to write to conn? [concurrent write error]
 				err := tryToWriteJSON(conn, lock, updatedVec)
 
@@ -70,7 +68,7 @@ func (e *WsEndpoints) HandleTeacherConnection(w http.ResponseWriter, r *http.Req
 		// read
 		_, message, err := conn.ReadMessage()
 
-		log.Infof("Received message: %v", message)
+		log.Debugf("Received message: %v", message)
 
 		if err != nil {
 			log.Error("Error reading from WebSocket:", err)
@@ -78,7 +76,7 @@ func (e *WsEndpoints) HandleTeacherConnection(w http.ResponseWriter, r *http.Req
 		}
 
 		if len(message) == 0 {
-			log.Info("Empty message received")
+			log.Debugf("Empty message received")
 			continue
 		}
 
@@ -124,7 +122,7 @@ func (e *WsEndpoints) HandleTeacherConnection(w http.ResponseWriter, r *http.Req
 		case events.EVENT_QUEUE:
 			queueEvent := events.QueueEvent{}
 			err = json.Unmarshal(eventData, &queueEvent)
-			log.Infof("Received event: %s %v", event.Type, queueEvent)
+			log.Debugf("Received event: %s %v", event.Type, queueEvent)
 
 			if err != nil {
 				log.Error("Error unmarshalling message:", err)
@@ -145,7 +143,7 @@ func (e *WsEndpoints) HandleTeacherConnection(w http.ResponseWriter, r *http.Req
 			e.processQueueEvent(event.ClassID, queueEvent, conn)
 
 		case events.EVENT_CONTROLS:
-			log.Infof("Received event: %s", event.Type)
+			log.Debugf("Received event: %s", event.Type)
 			controlsEvent := events.ControlsEvent{}
 
 			err = json.Unmarshal(message, &controlsEvent)
@@ -169,7 +167,7 @@ func (e *WsEndpoints) HandleTeacherConnection(w http.ResponseWriter, r *http.Req
 			e.processControlsEvent(event.ClassID, controlsEvent, conn)
 
 		case events.EVENT_TIMER_QUERY:
-			log.Infof("Received event: %s", event.Type)
+			log.Debugf("Received event: %s", event.Type)
 
 			// timerEvent := events.TimerEventQueryData{}
 
@@ -222,7 +220,7 @@ func (e *WsEndpoints) HandleTeacherConnection(w http.ResponseWriter, r *http.Req
 			}
 
 		case events.EVENT_TIMER_UPDATE:
-			log.Infof("Received event: %s", event.Type)
+			log.Debugf("Received event: %s", event.Type)
 
 			timerEvent := events.TimerEventUpdateData{
 				TimerVector: &events.TimerVector{},
@@ -247,7 +245,7 @@ func (e *WsEndpoints) HandleTeacherConnection(w http.ResponseWriter, r *http.Req
 			}
 
 			err = json.Unmarshal(temp, &timerEvent)
-			log.Infof("[EVENT_TIMER_UPDATE] unmarshalled")
+			log.Debugf("[EVENT_TIMER_UPDATE] unmarshalled")
 
 			if err != nil {
 				log.Errorf("Error unmarshalling timer event: %v", timerEvent)
@@ -267,7 +265,7 @@ func (e *WsEndpoints) HandleTeacherConnection(w http.ResponseWriter, r *http.Req
 
 			eventTime := time.Now().UnixMilli()
 
-			log.Infof(
+			log.Debugf(
 				"[EVENT_TIMER_UPDATE] updating",
 				utils.ValueOrDefaultFloat32(timerEvent.Position, -1),
 				utils.ValueOrDefaultFloat32(timerEvent.Velocity, -1),
@@ -283,7 +281,7 @@ func (e *WsEndpoints) HandleTeacherConnection(w http.ResponseWriter, r *http.Req
 				utils.ValueOrDefaultFloat32(timerEvent.Acceleration, -1),
 				eventTime,
 			)
-			log.Infof("[EVENT_TIMER_UPDATE] updated")
+			log.Debugf("[EVENT_TIMER_UPDATE] updated")
 
 			if err != nil {
 				log.Error("Error updating timer vector:", err)
@@ -335,13 +333,13 @@ func (e *WsEndpoints) HandleTeacherConnection(w http.ResponseWriter, r *http.Req
 			)
 
 		case events.EVENT_TIMER:
-			log.Infof("Received event: %s", event.Type)
+			log.Debugf("Received event: %s", event.Type)
 
 		case events.EVENT_TIMER_TIMEUPDATE:
-			log.Infof("Received event: %s", event.Type)
+			log.Debugf("Received event: %s", event.Type)
 
 		case events.EVENT_TIMER_CHANGE:
-			log.Infof("Received event: %s", event.Type)
+			log.Debugf("Received event: %s", event.Type)
 
 		default:
 			log.Errorf("[ERROR] Received event: %s", event.Type)
@@ -367,127 +365,50 @@ Student connection handler
 func (e *WsEndpoints) HandleStudentConnection(w http.ResponseWriter, r *http.Request) {
 	log := zap.S()
 
-	conn, err := upgrader.Upgrade(w, r, nil)
+	lock := &sync.Mutex{}
+	conn, timerChan, closeChan, err := e.studentConnectionInit(w, r, lock)
 
 	if err != nil {
-		log.Error("Error upgrading to WebSocket:", err)
+		log.Errorf("Error initializing student connection: %v", err)
 		return
 	}
 
-	log.Info("Teacher connected")
+	if conn == nil || timerChan == nil {
+		return
+	}
 
 	defer conn.Close()
 
-	// // read class id to initialize the connection
-	// studentEventInitReq := events.StudentEventInitRequest{}
+	log.Debugf("Teacher connected")
 
-	// conn.ReadJSON(&studentEventInitReq)
+	go (func() {
+		for {
+			select {
+			case <-closeChan:
+				log.Debugf("Closing go routine for teacher connection")
+				return
+			case updatedVec := <-timerChan:
+				// lock to write to conn [concurrent write error]
+				err := tryToWriteJSON(conn, lock, updatedVec)
 
-	// classID := studentEventInitReq.ClassID
+				if err != nil {
+					log.Error("Error writing to WebSocket:", err)
+					return
+				}
+			}
+		}
+	})()
 
-	// if classID == "" {
-	// 	conn.WriteJSON(events.EventStudentResponse{
-	// 		Status:  events.EVENT_STATUS_NACK,
-	// 		Message: "Invalid class ID",
-	// 	})
-	// 	return
-	// }
-
-	// // initialize the subscription to update channel for the class
-	// ch := make(chan float32)
-	// chs, ok := e.UpdateChannels.Load(classID)
-
-	// if !ok {
-	// 	conn.WriteJSON(events.EventStudentResponse{
-	// 		Status:  events.EVENT_STATUS_NACK,
-	// 		Message: "Class not found",
-	// 	})
-	// 	return
-	// }
-
-	// chs = append(chs, ch)
-	// e.UpdateChannels.Store(classID, chs)
-
-	// // close the channel when the function returns/errors out
-	// defer close(ch)
-
-	// timer := time.NewTicker(2 * time.Second)
-
-	// conn.WriteJSON(events.EventStudentResponse{
-	// 	Status:  events.EVENT_STATUS_ACK,
-	// 	Message: "Connection established",
-	// })
-
-	// // var max_update_time time.Time
-
-	// // max_update_time = time.Now()
-
-	// for {
-	// 	select {
-
-	// 	case <-timer.C:
-	// 		// TODO : poll for events
-
-	// 		evs, err := e.ProcessQueueEventsPoll()
-
-	// 		if err != nil {
-	// 			conn.WriteJSON(events.EventStudentResponse{
-	// 				Status:  events.EVENT_STATUS_NACK,
-	// 				Message: "Error polling for events",
-	// 			})
-	// 			log.Error("Error polling for events:", err)
-	// 		}
-
-	// 		// get the max of event time
-
-	// 		// send events to students
-	// 		msg := events.EventStudentResponse{
-	// 			Status:      events.EVENT_STATUS_ACK,
-	// 			Message:     fmt.Sprintf("[FIRED BY TIMER] Event from class %s", classID),
-	// 			QueueEvents: evs,
-	// 		}
-
-	// 		err = conn.WriteJSON(msg)
-
-	// 		if err != nil {
-	// 			conn.WriteJSON(events.EventTeacherResponse{
-	// 				Status:  events.EVENT_STATUS_NACK,
-	// 				Message: "Error writing to WebSocket",
-	// 			})
-	// 			log.Error("Error writing to WebSocket:", err)
-	// 			return
-	// 		}
-
-	// 	case <-ch:
-	// 		// poll for events
-	// 		// send events to students
-	// 		msg := events.EventStudentResponse{
-	// 			Status:  events.EVENT_STATUS_ACK,
-	// 			Message: fmt.Sprintf("[FIRED BY UPDATE] Event from class %s", classID),
-	// 		}
-
-	// 		err := conn.WriteJSON(msg)
-
-	// 		if err != nil {
-	// 			conn.WriteJSON(events.EventTeacherResponse{
-	// 				Status:  events.EVENT_STATUS_NACK,
-	// 				Message: "Error writing to WebSocket",
-	// 			})
-	// 			log.Error("Error writing to WebSocket:", err)
-	// 			return
-	// 		}
-
-	// 		timer.Reset(2 * time.Second)
-
-	// 	}
-	// }
-
+	// loop to read messages from the WebSocket
+	for {
+		time.Sleep(5 * time.Second)
+	}
 }
 
 func (w *WsEndpoints) processQueueEvent(classID string, queueEvent events.QueueEvent, conn *websocket.Conn) {
 	log := zap.S()
 
-	log.Infof("Processing : %s %s", queueEvent.SubType, classID)
+	log.Debugf("Processing : %s %s", queueEvent.SubType, classID)
 
 	eventData, err := json.Marshal(queueEvent.Data)
 

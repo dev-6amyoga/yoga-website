@@ -49,7 +49,7 @@ func (s *WsServer) Start() error {
 	http.HandleFunc("/teacher/ws", s.Endpoints.HandleTeacherConnection)
 	http.HandleFunc("/student/ws", s.Endpoints.HandleStudentConnection)
 
-	log.Info("HTTP server for WebSocket started at port 4949")
+	log.Debugf("HTTP server for WebSocket started at port 4949")
 	err := http.ListenAndServe(":4949", nil)
 
 	if err != nil {
