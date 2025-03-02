@@ -1,27 +1,33 @@
-package server
+package wssyncer
 
 import (
 	"syncer-backend/src/events"
+	"syncer-backend/src/models"
 	"syncer-backend/src/timer"
 
 	"github.com/puzpuzpuz/xsync"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.uber.org/zap"
 )
 
-type Server struct {
+type WsServer struct {
 	// socker server instance
 
-	// db
-	dbClient *mongo.Client
+	// Endpointer
+	Endpoints models.EndpointInterface
+}
 
-	// logger
-	logger *zap.SugaredLogger
-
+type WsEndpoints struct {
 	// timers
 	Timers timer.TimerMap
 
 	// update channels map for each classID with a channel for each joinee
 	// {classID: {userId: chan float32}}
 	UpdateChannels *xsync.MapOf[string, *xsync.MapOf[string, chan events.TimerEventResponse]]
+
+	Dao models.DaoInterface
+}
+
+type WsDao struct {
+	// mongo connector
+	dbClient *mongo.Client
 }
