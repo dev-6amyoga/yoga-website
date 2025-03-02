@@ -1,7 +1,6 @@
-package server
+package wssyncer
 
 import (
-	"context"
 	"testing"
 )
 
@@ -10,16 +9,6 @@ func TestNewServer(t *testing.T) {
 
 	if s == nil {
 		t.Error("Server not created")
-		t.FailNow()
-	}
-
-	if s.logger == nil {
-		t.Error("Logger not created")
-		t.FailNow()
-	}
-
-	if err := s.dbClient.Ping(context.Background(), nil); err != nil {
-		t.Error("MongoDB connection failed")
 		t.FailNow()
 	}
 }

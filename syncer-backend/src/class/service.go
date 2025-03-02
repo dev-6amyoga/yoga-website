@@ -19,7 +19,7 @@ func NewClass() (*ClassModel, error) {
 }
 
 // add to mongo db
-func AddToActionsQueue(db *mongo.Client, classID string, action events.QueueEvent) error {
+func AddToActionsQueue(db *mongo.Client, classID string, action *events.QueueEvent) error {
 	// Get the collection you want to update from
 	ss, err := db.StartSession()
 
@@ -42,7 +42,7 @@ func AddToActionsQueue(db *mongo.Client, classID string, action events.QueueEven
 
 	// Define the update document specifying changes
 	update := bson.D{
-		{Key: "$push", Value: bson.D{{Key: "actions_queue", Value: action}}},
+		{Key: "$push", Value: bson.D{{Key: "actions_queue", Value: *action}}},
 	}
 
 	// Update the document in the collection
@@ -143,7 +143,7 @@ func GetQueueEventsSince(db *mongo.Client, classID string, _ time.Time) ([]event
 	return classModel.ActionsQueue, nil
 }
 
-func AddToControlsQueue(db *mongo.Client, classID string, action events.ControlsEvent) error {
+func AddToControlsQueue(db *mongo.Client, classID string, action *events.ControlsEvent) error {
 	// Get the collection you want to update from
 	collection := db.Database("db_name").Collection("class")
 
@@ -154,7 +154,7 @@ func AddToControlsQueue(db *mongo.Client, classID string, action events.Controls
 
 	// Define the update document specifying changes
 	update := bson.D{
-		{Key: "$push", Value: bson.D{{Key: "controls_queue", Value: action}}},
+		{Key: "$push", Value: bson.D{{Key: "controls_queue", Value: *action}}},
 	}
 
 	// Update the document in the collection
