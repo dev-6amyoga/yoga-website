@@ -84,6 +84,15 @@ function StreamStackItem({
     );
   }, [video]);
 
+  const oldVideoUrl = useMemo(() => {
+    return (
+      (video?.video?.old_asana_dash_url ||
+        video?.video?.old_transition_dash_url ||
+        video?.video?.old_playlist_dash_url) ??
+      ""
+    );
+  }, [video]);
+
   const videoTitle = useMemo(() => {
     return (
       (video?.video?.asana_name ||
@@ -887,6 +896,24 @@ function StreamStackItem({
     });
   }, []);
 
+  async function removeByManifestUri(manifestUri) {
+    const storage = new shaka.offline.Storage(playerRef.current.player);
+    const storedContent = await storage.list();
+    const contentToRemove = storedContent.find(
+      (c) => c.originalManifestUri === manifestUri
+    );
+    if (contentToRemove) {
+      try {
+        await storage.remove(contentToRemove.offlineUri);
+        console.log("Successfully removed:", manifestUri);
+      } catch (error) {
+        console.error("Failed to remove video:", error);
+      }
+    } else {
+      console.warn("Video not found in storage:", manifestUri);
+    }
+  }
+
   const loadVideo = useCallback(
     async (offlineSupported, isDrm, lastUpdated) => {
       if (!offlineSupported) {
@@ -916,7 +943,12 @@ function StreamStackItem({
           console.log(
             "[StreamStackItem:loadVideo] Video is outdated. Redownloading..."
           );
+          await shakaOfflineStore.remove(videoUrl);
           offlineUri = null;
+        }
+
+        if (oldVideoUrl !== "") {
+          removeByManifestUri(oldVideoUrl);
         }
 
         // if offline uri not available, try download

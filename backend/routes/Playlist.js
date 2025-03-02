@@ -51,14 +51,17 @@ router.get('/playlists/getAllPlaylists', async (req, res) => {
 
 router.put('/playlists/updatePlaylist/:playlistId', async (req, res) => {
   const playlistId = req.params.playlistId
-  const newData = req.body
+  let newData = req.body
   try {
+    const oldPlaylist = await Playlist.findOne({ playlist_id: playlistId })
+    let oldPlaylistDashUrl = oldPlaylist ? oldPlaylist.playlist_dash_url : null
     await Playlist.findOneAndDelete({ playlist_id: playlistId })
     delete newData._id
     const newPlaylist = new Playlist({
       ...newData,
-      playlist_id: playlistId, // Ensure the same ID is maintained
-      last_updated: new Date(), // Set last updated time
+      playlist_id: playlistId,
+      last_updated: new Date(),
+      old_playlist_dash_url: oldPlaylistDashUrl,
     })
     await newPlaylist.save()
     res.status(200).json(newPlaylist)

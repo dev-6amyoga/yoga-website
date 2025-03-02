@@ -5,6 +5,7 @@ const PlaylistSchema6am = new mongoose.Schema({
   playlist_name: String,
   asana_ids: [mongoose.Schema.Types.Mixed],
   playlist_dash_url: String,
+  old_playlist_dash_url: String,
   duration: Number,
   playlist_start_date: Date,
   playlist_end_date: Date,
