@@ -145,7 +145,7 @@ function EditPlaylist() {
         });
         setAsanas(response.data);
       } catch (error) {
-        console.log(error);
+        console.log("error");
       }
     };
     fetchData();
@@ -159,7 +159,7 @@ function EditPlaylist() {
         });
         setTransitions(response.data);
       } catch (error) {
-        console.log(error);
+        console.log("error");
       }
     };
     fetchData();
@@ -177,7 +177,7 @@ function EditPlaylist() {
         const asanasOnlyPlaylist = filterAsanas(response.data.asana_ids);
         setPlaylistCurrent(asanasOnlyPlaylist);
       } catch (error) {
-        console.log(error);
+        console.log("error");
       }
     };
 
@@ -213,9 +213,7 @@ function EditPlaylist() {
       const currentId = asanasOnlyPlaylist[i];
       if (typeof currentId === "number") {
         if (i === 0) {
-          console.log(currentId);
           const curAsana = await fetchAsanaById(currentId);
-          console.log(curAsana);
           let transitionData = {
             start_category: null,
             end_category: null,
@@ -226,7 +224,6 @@ function EditPlaylist() {
             drm_status: curAsana.drm_video,
             transitions: transitions,
           };
-          console.log(transitionData);
           if (curAsana.asana_category === "Sitting") {
             let t1 = await TransitionEndSitting(
               transitionData.start_category,
@@ -782,6 +779,7 @@ function EditPlaylist() {
       }
     }
     setPlaylistCurrent(recalculatedPlaylist);
+    console.log(recalculatedPlaylist);
     formValues.asana_ids = recalculatedPlaylist;
     const response = await Fetch({
       url: `/content/playlists/updatePlaylist/${playlist_id}`,
@@ -790,7 +788,6 @@ function EditPlaylist() {
     });
     if (response.status === 200) {
       toast("Playlist updated successfully!");
-
       try {
         const manifestResponse = await Fetch({
           url: `/content/playlists/createManifest/${playlist_id}`,
@@ -803,7 +800,6 @@ function EditPlaylist() {
       } catch (manifestError) {
         console.error("Error generating manifest:", manifestError);
       }
-
       navigate("/admin/playlist/view-all");
     } else {
       toast("Error updating playlist:", response.status);
@@ -1075,7 +1071,7 @@ function EditPlaylist() {
                                   color="secondary"
                                   onClick={() => handleDelete(index)}
                                 >
-                                  Delete!
+                                  Delete
                                 </Button>
                               </Grid>
                             </Grid>

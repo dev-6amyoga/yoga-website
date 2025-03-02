@@ -1,11 +1,7 @@
 const mongoose = require('mongoose')
 
 const UserPlaylistSchema = new mongoose.Schema({
-  user_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: 'User',
-  },
+  user_id: Number,
   playlists: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Playlists' }],
   month: { type: String, required: true },
   created_at: { type: Date, default: Date.now },

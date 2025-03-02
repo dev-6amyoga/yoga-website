@@ -51,39 +51,58 @@ router.get('/playlists/getAllPlaylists', async (req, res) => {
 
 router.put('/playlists/updatePlaylist/:playlistId', async (req, res) => {
   const playlistId = req.params.playlistId
-  const updatedData = req.body
-  console.log(playlistId, updatedData)
+  const newData = req.body
   try {
-    const existingPlaylist = await Playlist.findOne({
-      playlist_id: playlistId,
+    await Playlist.findOneAndDelete({ playlist_id: playlistId })
+    delete newData._id
+    const newPlaylist = new Playlist({
+      ...newData,
+      playlist_id: playlistId, // Ensure the same ID is maintained
+      last_updated: new Date(), // Set last updated time
     })
-    if (!existingPlaylist) {
-      return res.status(HTTP_NOT_FOUND).json({ error: 'Playlist not found' })
-    }
-
-    // Set the last_updated field to the current time
-    const mergedData = {
-      ...existingPlaylist.toObject(),
-      ...updatedData,
-      last_updated: new Date(), // Add the current date and time
-    }
-
-    const updatedPlaylist = await Playlist.findOneAndUpdate(
-      { playlist_id: playlistId },
-      mergedData,
-      {
-        new: true,
-      }
-    )
-
-    res.json(updatedPlaylist)
+    await newPlaylist.save()
+    res.status(200).json(newPlaylist)
   } catch (error) {
-    console.error(error)
-    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-      error: 'Failed to update Playlist',
-    })
+    console.error('Error updating playlist:', error)
+    res.status(500).json({ error: 'Failed to update playlist' })
   }
 })
+
+// router.put('/playlists/updatePlaylist/:playlistId', async (req, res) => {
+//   const playlistId = req.params.playlistId
+//   const updatedData = req.body
+//   console.log(playlistId, updatedData)
+//   try {
+//     const existingPlaylist = await Playlist.findOne({
+//       playlist_id: playlistId,
+//     })
+//     if (!existingPlaylist) {
+//       return res.status(HTTP_NOT_FOUND).json({ error: 'Playlist not found' })
+//     }
+
+//     // Set the last_updated field to the current time
+//     const mergedData = {
+//       ...existingPlaylist.toObject(),
+//       ...updatedData,
+//       last_updated: new Date(), // Add the current date and time
+//     }
+
+//     const updatedPlaylist = await Playlist.findOneAndUpdate(
+//       { playlist_id: playlistId },
+//       mergedData,
+//       {
+//         new: true,
+//       }
+//     )
+
+//     res.json(updatedPlaylist)
+//   } catch (error) {
+//     console.error(error)
+//     res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+//       error: 'Failed to update Playlist',
+//     })
+//   }
+// })
 
 router.get('/playlists/getPlaylistById/:playlistId', async (req, res) => {
   const playlistId = req.params.playlistId
@@ -210,9 +229,6 @@ router.post('/playlists/createManifest/:playlistId', async (req, res) => {
           }
         }
       })
-
-      console.log(files)
-
       // combine them
       let mpdCombiner = new MPDCombiner(files, null)
       // save the combined mpd file
