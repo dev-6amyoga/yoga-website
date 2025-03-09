@@ -201,7 +201,7 @@ function ViewAllPlaylists() {
                 </TableCell>
                 <TableCell>{playlist.playlist_language}</TableCell>
                 <TableCell>
-                  {/* <div className="flex flex-row gap-2">
+                  <div className="flex flex-row gap-2">
                     <Tooltip title={"Edit"}>
                       <Button
                         variant="contained"
@@ -212,7 +212,7 @@ function ViewAllPlaylists() {
                         <EditIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title={"Delete"}>
+                    {/* <Tooltip title={"Delete"}>
                       <Button
                         variant="contained"
                         onClick={() => {
@@ -222,8 +222,8 @@ function ViewAllPlaylists() {
                       >
                         <DeleteIcon />
                       </Button>
-                    </Tooltip>
-                  </div> */}
+                    </Tooltip> */}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
