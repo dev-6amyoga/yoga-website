@@ -101,16 +101,6 @@ router.post('/create', async (req, res) => {
 
     console.log(combinedManifest, totalDuration, sections)
 
-    // Save the combined MPD file to Cloudflare
-    await R2.cloudflareAddFile(`${Date.now()}.mpd`, combinedManifest)
-
-    if (!process.env.CLOUDFLARE_R2_PUBLIC_URL) {
-      throw new Error('CLOUDFLARE_R2_PUBLIC_URL not set')
-    }
-
-    const playlist_dash_url = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${Date.now()}.mpd`
-
-    // Create the playlist
     const newPlaylist = new Playlist({
       playlist_id: Date.now(),
       playlist_name,
@@ -118,12 +108,26 @@ router.post('/create', async (req, res) => {
       playlist_language,
       playlist_mode,
       drm_playlist: true,
-      playlist_dash_url,
       duration: totalDuration || 0,
       sections: sections || [],
       playlist_start_date: new Date(),
       last_updated: new Date(),
     })
+
+    // Save the combined MPD file to Cloudflare
+    await R2.cloudflareAddFile(
+      `${newPlaylist._id.toString()}.mpd`,
+      combinedManifest
+    )
+
+    if (!process.env.CLOUDFLARE_R2_PUBLIC_URL) {
+      throw new Error('CLOUDFLARE_R2_PUBLIC_URL not set')
+    }
+
+    const playlist_dash_url = `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${newPlaylist._id.toString()}.mpd`
+
+    newPlaylist.playlist_dash_url = playlist_dash_url
+    // Create the playlist
 
     await newPlaylist.save()
 
