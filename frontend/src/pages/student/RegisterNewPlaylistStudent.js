@@ -310,7 +310,7 @@ function RegisterNewPlaylistStudent() {
             ];
           }
           if (curAsana.asana_category === "Starting Prayer Standing") {
-            let t1 = await TransitionEndStartingPrayerSitting(
+            let t1 = await TransitionEndStartingPrayerStanding(
               transitionData.end_category
                 ? transitionData.end_category
                 : transitionData.start_category,
