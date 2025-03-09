@@ -22,6 +22,14 @@ import {
   MenuItem,
   Grid,
 } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+} from "@mui/material";
+
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { TransitionEndStanding } from "../../components/transition-generator/transition-generator-helpers/TransitionEndStanding";
 import { TransitionEndSitting } from "../../components/transition-generator/transition-generator-helpers/TransitionEndSitting";
@@ -57,6 +65,8 @@ function RegisterNewPlaylistStudent() {
   const [sortedAsanas, setSortedAsanas] = useState([]);
   const [names, setNames] = useState([]);
   const [playlistCurrent, setPlaylistCurrent] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [pendingSaveObject, setPendingSaveObject] = useState(null); // Store pending data
 
   const handleDragEnd = (result) => {
     if (!result.destination) return; // If dropped outside, do nothing
@@ -764,17 +774,41 @@ function RegisterNewPlaylistStudent() {
       playlist_language: language,
       playlist_mode: "student_personal",
     };
-    const response = await Fetch({
-      url: "/user-playlists/create",
-      method: "POST",
-      data: saveObject,
-    });
-    if (response.status === 200) {
-      toast("Playlist updated successfully!");
+    setPendingSaveObject(saveObject);
+    setOpen(true);
+    // const response = await Fetch({
+    //   url: "/user-playlists/create",
+    //   method: "POST",
+    //   data: saveObject,
+    // });
+    // if (response.status === 200) {
+    //   toast("Playlist updated successfully!");
+    //   navigate("/student/view-all-playlists");
+    // } else {
+    //   toast(response.data.message);
+    //   navigate("/student/view-all-playlists");
+    // }
+  };
+
+  const handleCreatePlaylist = async () => {
+    setOpen(false); // Close modal before API call
+    if (!pendingSaveObject) return; // Ensure there's data
+
+    try {
+      const response = await Fetch({
+        url: "/user-playlists/create",
+        method: "POST",
+        data: pendingSaveObject,
+      });
+
+      if (response.status === 200) {
+        toast.success("Playlist created successfully!");
+      } else {
+        toast.error(response.data.message || "Failed to create playlist.");
+      }
       navigate("/student/view-all-playlists");
-    } else {
-      toast(response.data.message);
-      navigate("/student/view-all-playlists");
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
     }
   };
 
@@ -1006,6 +1040,28 @@ function RegisterNewPlaylistStudent() {
           Add Playlist
         </Button>
       </div>
+
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>Confirm Playlist Creation</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Once you create this playlist, you can only edit it **once**. Do you
+            want to proceed?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpen(false)} color="secondary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCreatePlaylist}
+            color="primary"
+            variant="contained"
+          >
+            Yes, Create Playlist
+          </Button>
+        </DialogActions>
+      </Dialog>
     </StudentPageWrapper>
   );
 }
