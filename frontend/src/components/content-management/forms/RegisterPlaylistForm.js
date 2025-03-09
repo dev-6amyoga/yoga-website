@@ -45,6 +45,7 @@ import { TransitionEndSpecial } from "../../transition-generator/transition-gene
 import { TransitionEndSuryanamaskaraStithi } from "../../transition-generator/transition-generator-helpers/TransitionEndSuryanamaskaraStithi";
 import { TransitionEndSuryanamaskaraNonStithi } from "../../transition-generator/transition-generator-helpers/TransitionEndSuryanamaskaraNonStithi";
 import { TransitionEndVajrasana } from "../../transition-generator/transition-generator-helpers/TransitionEndVajrasana";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 function RegisterPlaylistForm() {
   const navigate = useNavigate();
@@ -104,18 +105,27 @@ function RegisterPlaylistForm() {
   }, []);
 
   useEffect(() => {
+    console.log(playlistType);
     const fetchData = async () => {
       try {
         const response = await Fetch({
           url: "/content/video/getAllAsanas",
         });
-        setAsanas(response.data);
+        console.log(playlistType);
+        if (playlistType === "teacher") {
+          setAsanas(response.data.filter((x) => x.drm_video === false));
+        }
+        if (playlistType === "student") {
+          setAsanas(response.data.filter((x) => x.drm_video === true));
+        } else {
+          setAsanas(response.data);
+        }
       } catch (error) {
         console.log(error);
       }
     };
     fetchData();
-  }, []);
+  }, [playlistType]);
 
   useEffect(() => {
     const fetchData = async () => {

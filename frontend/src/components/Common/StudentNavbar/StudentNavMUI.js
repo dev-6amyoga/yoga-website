@@ -138,6 +138,7 @@ function StudentNavMUI({ mode, toggleColorMode }) {
         }
         setUserPlan(activePlan);
         setPlanId(activePlan.plan_id);
+        console.log(activePlan.plan);
         setDisabledTailorMade(!activePlan.plan.has_playlist_creation);
         setDisabled(!activePlan.plan.has_basic_playlist);
       } catch (error) {
@@ -177,7 +178,7 @@ function StudentNavMUI({ mode, toggleColorMode }) {
         path: "/student/register-new-playlist",
         title: "Create Playlist",
         props: {
-          disabled: true,
+          disabled: disabledTailorMade,
         },
       },
       {

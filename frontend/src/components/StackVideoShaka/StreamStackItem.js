@@ -928,6 +928,7 @@ function StreamStackItem({
         let offlineRecord = await shakaOfflineStore.get(videoUrl);
         let offlineUri = offlineRecord?.offlineUri;
         const savedTimestamp = await showAllRecords(videoUrl);
+
         // console.log(isDrm, lastUpdated, savedTimestamp);
 
         const unixDate = new Date(savedTimestamp);

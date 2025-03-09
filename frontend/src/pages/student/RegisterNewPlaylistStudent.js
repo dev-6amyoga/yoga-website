@@ -37,7 +37,7 @@ import { TransitionEndSpecial } from "../../components/transition-generator/tran
 import { TransitionEndSuryanamaskaraStithi } from "../../components/transition-generator/transition-generator-helpers/TransitionEndSuryanamaskaraStithi";
 import { TransitionEndSuryanamaskaraNonStithi } from "../../components/transition-generator/transition-generator-helpers/TransitionEndSuryanamaskaraNonStithi";
 import { TransitionEndVajrasana } from "../../components/transition-generator/transition-generator-helpers/TransitionEndVajrasana";
-
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -57,6 +57,16 @@ function RegisterNewPlaylistStudent() {
   const [sortedAsanas, setSortedAsanas] = useState([]);
   const [names, setNames] = useState([]);
   const [playlistCurrent, setPlaylistCurrent] = useState([]);
+
+  const handleDragEnd = (result) => {
+    if (!result.destination) return; // If dropped outside, do nothing
+
+    const newPlaylist = [...playlistCurrent];
+    const [movedItem] = newPlaylist.splice(result.source.index, 1); // Remove item
+    newPlaylist.splice(result.destination.index, 0, movedItem); // Insert at new position
+
+    setPlaylistCurrent(newPlaylist);
+  };
 
   const predefinedOrder = [
     "Starting Prayer Standing",
@@ -168,7 +178,6 @@ function RegisterNewPlaylistStudent() {
     .filter((category) => category.asanas.length > 0);
 
   const addToPlaylist = async (rowData) => {
-    // console.log(rowData);
     setPlaylistCurrent([...playlistCurrent, rowData.id]);
   };
 
@@ -748,6 +757,22 @@ function RegisterNewPlaylistStudent() {
     }
     console.log(recalculatedPlaylist);
     setPlaylistCurrent(recalculatedPlaylist);
+    let saveObject = {
+      user_id: user.user_id,
+      playlist_name: playlistName,
+      asana_ids: recalculatedPlaylist,
+      playlist_language: language,
+      playlist_mode: "Student",
+    };
+    const response = await Fetch({
+      url: "/user-playlists/create",
+      method: "POST",
+      data: saveObject,
+    });
+    if (response.status === 200) {
+      toast("Playlist updated successfully!");
+    }
+
     // formValues.asana_ids = recalculatedPlaylist;
     // const response = await Fetch({
     //   url: `/content/playlists/updatePlaylist/${playlist_id}`,
@@ -777,7 +802,6 @@ function RegisterNewPlaylistStudent() {
   };
 
   const handleAddPlaylist = async () => {
-    console.log("hi");
     try {
       await recalculateTransitions(playlistCurrent);
     } catch (error) {
@@ -849,9 +873,11 @@ function RegisterNewPlaylistStudent() {
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
           >
-            {allLanguages.map((x) => {
-              return <MenuItem value={x.language}>{x.language}</MenuItem>;
-            })}
+            {allLanguages.map((x) => (
+              <MenuItem key={x.language} value={x.language}>
+                {x.language}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
       </div>
@@ -888,9 +914,7 @@ function RegisterNewPlaylistStudent() {
                               <TableCell>
                                 <Button
                                   variant="contained"
-                                  onClick={() => {
-                                    addToPlaylist(asana);
-                                  }}
+                                  onClick={() => addToPlaylist(asana)}
                                 >
                                   Add
                                 </Button>
@@ -904,61 +928,197 @@ function RegisterNewPlaylistStudent() {
               </Accordion>
             ))}
           </div>
+
+          {/* Drag-and-Drop Playlist */}
           <div>
-            <List>
-              {names.map((name, index) => (
-                <ListItem
-                  key={index}
-                  style={{
-                    border: "1px solid #ccc",
-                    borderRadius: "8px",
-                    marginBottom: "8px",
-                    padding: "8px",
-                  }}
-                >
-                  <Grid container alignItems="center" spacing={2}>
-                    <Grid item xs>
-                      <ListItemText primary={name} />
-                    </Grid>
-                    {typeof playlistCurrent[index] === "number" && (
-                      <Grid item>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => handleUp(index)}
-                          style={{ marginRight: 8 }}
-                        >
-                          Up
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => handleDown(index)}
-                          style={{ marginRight: 8 }}
-                        >
-                          Down
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          onClick={() => handleDelete(index)}
-                        >
-                          Delete
-                        </Button>
-                      </Grid>
-                    )}
-                  </Grid>
-                </ListItem>
-              ))}
-            </List>
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="playlist">
+                {(provided) => (
+                  <List
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    style={{ minHeight: "50px" }}
+                  >
+                    {names.map((name, index) => (
+                      <Draggable
+                        key={index}
+                        draggableId={String(index)}
+                        index={index}
+                      >
+                        {(provided, snapshot) => (
+                          <ListItem
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            style={{
+                              ...provided.draggableProps.style,
+                              border: "1px solid #ccc",
+                              borderRadius: "8px",
+                              marginBottom: "8px",
+                              padding: "8px",
+                              background: snapshot.isDragging
+                                ? "#f0f0f0"
+                                : "#fff",
+                            }}
+                          >
+                            <Grid container alignItems="center" spacing={2}>
+                              <Grid item xs>
+                                <ListItemText primary={name} />
+                              </Grid>
+                              <Grid item>
+                                <Button
+                                  variant="contained"
+                                  color="secondary"
+                                  onClick={() => handleDelete(index)}
+                                >
+                                  Delete
+                                </Button>
+                              </Grid>
+                            </Grid>
+                          </ListItem>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </List>
+                )}
+              </Droppable>
+            </DragDropContext>
           </div>
         </div>
+
         <Button variant="contained" color="primary" onClick={handleAddPlaylist}>
           Add Playlist
         </Button>
       </div>
     </StudentPageWrapper>
   );
+
+  // return (
+  //   <StudentPageWrapper heading="Create Playlist">
+  //     <div className="flex flex-col gap-4 mb-4">
+  //       <TextField
+  //         label="Playlist Name"
+  //         value={playlistName}
+  //         onChange={(e) => setPlaylistName(e.target.value)}
+  //         fullWidth
+  //       />
+  //       <FormControl fullWidth>
+  //         <InputLabel>Language</InputLabel>
+  //         <Select
+  //           value={language}
+  //           onChange={(e) => setLanguage(e.target.value)}
+  //         >
+  //           {allLanguages.map((x) => {
+  //             return <MenuItem value={x.language}>{x.language}</MenuItem>;
+  //           })}
+  //         </Select>
+  //       </FormControl>
+  //     </div>
+
+  //     <div className="flex flex-col gap-4">
+  //       <div className="flex flex-row gap-3">
+  //         <div>
+  //           {filteredCategories.map((x, index) => (
+  //             <Accordion key={index} className="flex flex-col gap-2">
+  //               <AccordionSummary
+  //                 expandIcon={<ExpandMore />}
+  //                 aria-controls="panel1-content"
+  //                 id="panel1-header"
+  //               >
+  //                 {x.category}
+  //               </AccordionSummary>
+  //               <AccordionDetails>
+  //                 <TableContainer component={Paper}>
+  //                   <Table>
+  //                     <TableHead>
+  //                       <TableRow>
+  //                         <TableCell>Asana Name</TableCell>
+  //                       </TableRow>
+  //                     </TableHead>
+  //                     <TableBody>
+  //                       {x.asanas
+  //                         .slice()
+  //                         .sort((a, b) =>
+  //                           a.asana_name.localeCompare(b.asana_name)
+  //                         )
+  //                         .map((asana, idx) => (
+  //                           <TableRow key={idx}>
+  //                             <TableCell>{asana.asana_name}</TableCell>
+  //                             <TableCell>
+  //                               <Button
+  //                                 variant="contained"
+  //                                 onClick={() => {
+  //                                   addToPlaylist(asana);
+  //                                 }}
+  //                               >
+  //                                 Add
+  //                               </Button>
+  //                             </TableCell>
+  //                           </TableRow>
+  //                         ))}
+  //                     </TableBody>
+  //                   </Table>
+  //                 </TableContainer>
+  //               </AccordionDetails>
+  //             </Accordion>
+  //           ))}
+  //         </div>
+  //         <div>
+  //           <List>
+  //             {names.map((name, index) => (
+  //               <ListItem
+  //                 key={index}
+  //                 style={{
+  //                   border: "1px solid #ccc",
+  //                   borderRadius: "8px",
+  //                   marginBottom: "8px",
+  //                   padding: "8px",
+  //                 }}
+  //               >
+  //                 <Grid container alignItems="center" spacing={2}>
+  //                   <Grid item xs>
+  //                     <ListItemText primary={name} />
+  //                   </Grid>
+  //                   {typeof playlistCurrent[index] === "number" && (
+  //                     <Grid item>
+  //                       <Button
+  //                         variant="contained"
+  //                         color="primary"
+  //                         onClick={() => handleUp(index)}
+  //                         style={{ marginRight: 8 }}
+  //                       >
+  //                         Up
+  //                       </Button>
+  //                       <Button
+  //                         variant="contained"
+  //                         color="primary"
+  //                         onClick={() => handleDown(index)}
+  //                         style={{ marginRight: 8 }}
+  //                       >
+  //                         Down
+  //                       </Button>
+  //                       <Button
+  //                         variant="contained"
+  //                         color="secondary"
+  //                         onClick={() => handleDelete(index)}
+  //                       >
+  //                         Delete
+  //                       </Button>
+  //                     </Grid>
+  //                   )}
+  //                 </Grid>
+  //               </ListItem>
+  //             ))}
+  //           </List>
+  //         </div>
+  //       </div>
+  //       <Button variant="contained" color="primary" onClick={handleAddPlaylist}>
+  //         Add Playlist
+  //       </Button>
+  //     </div>
+  //   </StudentPageWrapper>
+  // );
 }
 
 export default withAuth(RegisterNewPlaylistStudent, "STUDENT");
