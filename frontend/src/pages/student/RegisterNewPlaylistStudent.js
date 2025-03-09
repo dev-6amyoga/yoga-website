@@ -762,7 +762,7 @@ function RegisterNewPlaylistStudent() {
       playlist_name: playlistName,
       asana_ids: recalculatedPlaylist,
       playlist_language: language,
-      playlist_mode: "Student",
+      playlist_mode: "student_personal",
     };
     const response = await Fetch({
       url: "/user-playlists/create",
