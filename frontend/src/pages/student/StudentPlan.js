@@ -693,6 +693,7 @@ function StudentPlan() {
               setShowCard(false);
               setCardData(null);
               setLoading(false);
+              window.location.reload();
             })
             .catch((error) => {
               setShowCard(false);
