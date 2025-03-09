@@ -111,31 +111,41 @@ function StudentNavMUI({ mode, toggleColorMode }) {
           data: { user_id: user?.user_id },
         });
         const userPlans = response.data?.userPlan || [];
+
         if (userPlans.length === 0) {
+          // If no plans, check for custom user plans
           const res = await Fetch({
             url: `/customUserPlan/getCustomUserPlansByUser/${user.user_id}`,
             token: true,
             method: "GET",
           });
+
           if (res.status === 200 && res.data?.plans?.length) {
             const today = new Date();
             const validPlans = res.data.plans.filter(
               (plan) => new Date(plan.validity_to) > today
             );
             setDisabled(validPlans.length === 0);
+            setDisabledTailorMade(validPlans.length === 0); // Explicitly disable tailor-made plans too
           } else {
             setDisabled(true);
+            setDisabledTailorMade(true); // Ensure tailor-made plans are disabled
           }
           return;
         }
+
+        // Check for active plans
         const activePlan = userPlans.find(
           (plan) => plan.current_status === USER_PLAN_ACTIVE
         );
+
         if (!activePlan) {
           setDisabled(true);
           setDisabledTailorMade(true);
           return;
         }
+
+        // Set user plan and features availability
         setUserPlan(activePlan);
         setPlanId(activePlan.plan_id);
         console.log(activePlan.plan);
