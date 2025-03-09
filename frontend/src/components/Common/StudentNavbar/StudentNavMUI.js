@@ -182,6 +182,14 @@ function StudentNavMUI({ mode, toggleColorMode }) {
         },
       },
       {
+        path: "/student/view-all-playlists",
+        title: "View Your Playlists",
+        props: {
+          disabled: disabledTailorMade,
+        },
+      },
+
+      {
         path: "/student/class/my-classes",
         title: "Your Classes",
         props: {

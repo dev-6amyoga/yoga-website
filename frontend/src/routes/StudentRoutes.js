@@ -2,6 +2,7 @@ import ClassInfoStudent from "../pages/class-mode/student/ClassInfoStudent";
 import ClassModeStudent from "../pages/class-mode/student/ClassModeStudent";
 import AboutUs from "../pages/student/AboutUs";
 import ContactUs from "../pages/student/ContactUs";
+import EditPlaylistStudent from "../pages/student/EditPlaylistStudent";
 import FreeVideos from "../pages/student/FreeVideos";
 import RegisterNewPlaylistStudent from "../pages/student/RegisterNewPlaylistStudent";
 import StudentHome from "../pages/student/StudentHome";
@@ -45,6 +46,10 @@ export const StudentRoutes = [
   {
     path: "/student/register-new-playlist",
     element: <RegisterNewPlaylistStudent />,
+  },
+  {
+    path: "/student/playlist/edit/:playlist_id",
+    element: <EditPlaylistStudent />,
   },
   {
     path: "/student/view-all-playlists",

@@ -1,3 +1,8 @@
+import { ROLE_STUDENT } from "../../enums/roles";
+import useUserStore from "../../store/UserStore";
+import { Fetch } from "../../utils/Fetch";
+import { withAuth } from "../../utils/withAuth";
+import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
 import {
   Button,
   TextField,
@@ -14,8 +19,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  FormControlLabel,
-  Checkbox,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -23,32 +26,29 @@ import {
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Fetch } from "../../utils/Fetch";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import { toast } from "react-toastify";
-import AdminPageWrapper from "../Common/AdminPageWrapper";
-import { TransitionEndStanding } from "../transition-generator/transition-generator-helpers/TransitionEndStanding";
-import { TransitionEndSitting } from "../transition-generator/transition-generator-helpers/TransitionEndSitting";
-import { TransitionEndSupine } from "../transition-generator/transition-generator-helpers/TransitionEndSupine";
-import { TransitionEndProne } from "../transition-generator/transition-generator-helpers/TransitionEndProne";
-import { TransitionEndPranayama } from "../transition-generator/transition-generator-helpers/TransitionEndPranayama";
-import { TransitionEndClosingPrayerSitting } from "../transition-generator/transition-generator-helpers/TransitionEndClosingPrayerSitting";
-import { TransitionEndClosingPrayerStanding } from "../transition-generator/transition-generator-helpers/TransitionEndClosingPrayerStanding";
-import { TransitionEndStartingPrayerStanding } from "../transition-generator/transition-generator-helpers/TransitionEndStartingPrayerStanding";
-import { TransitionEndStartingPrayerSitting } from "../transition-generator/transition-generator-helpers/TransitionEndStartingPrayerSitting";
-import { TransitionEndPranayamaPrayer } from "../transition-generator/transition-generator-helpers/TransitionEndPranayamaPrayer";
-import { TransitionEndSpecial } from "../transition-generator/transition-generator-helpers/TransitionEndSpecial";
-import { TransitionEndSuryanamaskaraStithi } from "../transition-generator/transition-generator-helpers/TransitionEndSuryanamaskaraStithi";
-import { TransitionEndSuryanamaskaraNonStithi } from "../transition-generator/transition-generator-helpers/TransitionEndSuryanamaskaraNonStithi";
-import { TransitionEndVajrasana } from "../transition-generator/transition-generator-helpers/TransitionEndVajrasana";
+import { TransitionEndStanding } from "../../components/transition-generator/transition-generator-helpers/TransitionEndStanding";
+import { TransitionEndSitting } from "../../components/transition-generator/transition-generator-helpers/TransitionEndSitting";
+import { TransitionEndSupine } from "../../components/transition-generator/transition-generator-helpers/TransitionEndSupine";
+import { TransitionEndProne } from "../../components/transition-generator/transition-generator-helpers/TransitionEndProne";
+import { TransitionEndPranayama } from "../../components/transition-generator/transition-generator-helpers/TransitionEndPranayama";
+import { TransitionEndClosingPrayerSitting } from "../../components/transition-generator/transition-generator-helpers/TransitionEndClosingPrayerSitting";
+import { TransitionEndClosingPrayerStanding } from "../../components/transition-generator/transition-generator-helpers/TransitionEndClosingPrayerStanding";
+import { TransitionEndStartingPrayerStanding } from "../../components/transition-generator/transition-generator-helpers/TransitionEndStartingPrayerStanding";
+import { TransitionEndStartingPrayerSitting } from "../../components/transition-generator/transition-generator-helpers/TransitionEndStartingPrayerSitting";
+import { TransitionEndPranayamaPrayer } from "../../components/transition-generator/transition-generator-helpers/TransitionEndPranayamaPrayer";
+import { TransitionEndSpecial } from "../../components/transition-generator/transition-generator-helpers/TransitionEndSpecial";
+import { TransitionEndSuryanamaskaraStithi } from "../../components/transition-generator/transition-generator-helpers/TransitionEndSuryanamaskaraStithi";
+import { TransitionEndSuryanamaskaraNonStithi } from "../../components/transition-generator/transition-generator-helpers/TransitionEndSuryanamaskaraNonStithi";
+import { TransitionEndVajrasana } from "../../components/transition-generator/transition-generator-helpers/TransitionEndVajrasana";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
-function EditPlaylist() {
+function EditPlaylistStudent() {
+  let user = useUserStore((state) => state.user);
   const { playlist_id } = useParams();
   const [playlist, setPlaylist] = useState(null);
   const [asanas, setAsanas] = useState([]);
   const [names, setNames] = useState([]);
-  const [teacherModeFilter, setTeacherModeFilter] = useState(false);
   const [sortedAsanas, setSortedAsanas] = useState([]);
 
   const predefinedOrder = [
@@ -76,23 +76,6 @@ function EditPlaylist() {
     });
     setSortedAsanas(s1);
   }, [asanas]);
-
-  const handleTeacherModeFilterChange = (event) => {
-    setTeacherModeFilter(event.target.checked);
-  };
-
-  const [drmVideoFilter, setDrmVideoFilter] = useState(false);
-
-  const handleDrmVideoFilterChange = (event) => {
-    setDrmVideoFilter(event.target.checked);
-  };
-
-  const [noBreakFilter, setNoBreakFilter] = useState(false);
-
-  const handleNoBreakFilterChange = (event) => {
-    setNoBreakFilter(event.target.checked);
-  };
-
   const [playlistCurrent, setPlaylistCurrent] = useState([]);
   const [transitions, setTransitions] = useState([]);
   const [formValues, setFormValues] = useState({});
@@ -110,9 +93,9 @@ function EditPlaylist() {
       ...category,
       asanas: category.asanas.filter((asana) => {
         return (
-          (!teacherModeFilter || asana.teacher_mode === teacherModeFilter) &&
-          (!drmVideoFilter || asana.drm_video === drmVideoFilter) &&
-          (!noBreakFilter || asana.nobreak_asana === noBreakFilter)
+          asana.teacher_mode === false &&
+          asana.drm_video === true &&
+          asana.nobreak_asana === true
         );
       }),
     }))
@@ -775,16 +758,15 @@ function EditPlaylist() {
             }
           }
         }
-        // recalculatedPlaylist.push(currentId);
       }
     }
     setPlaylistCurrent(recalculatedPlaylist);
     console.log(recalculatedPlaylist);
     formValues.asana_ids = recalculatedPlaylist;
     const response = await Fetch({
-      url: `/content/playlists/updatePlaylist/${playlist_id}`,
+      url: `/user-playlists/edit/${playlist_id}`,
       method: "PUT",
-      data: formValues,
+      data: { user_id: user.user_id, updates: formValues },
     });
     if (response.status === 200) {
       toast("Playlist updated successfully!");
@@ -800,7 +782,7 @@ function EditPlaylist() {
       } catch (manifestError) {
         console.error("Error generating manifest:", manifestError);
       }
-      navigate("/admin/playlist/view-all");
+      navigate("/student/view-all-playlists");
     } else {
       toast("Error updating playlist:", response.status);
     }
@@ -835,12 +817,8 @@ function EditPlaylist() {
       setPlaylistCurrent(newPlaylist);
     }
   };
-
   return (
-    <AdminPageWrapper
-      heading="Edit Playlist"
-      className="flex flex-col items-center justify-items-center"
-    >
+    <StudentPageWrapper heading="View Your Playlists">
       <Button variant="contained" color="primary" onClick={handleSave}>
         Save Changes
       </Button>
@@ -876,15 +854,6 @@ function EditPlaylist() {
                 margin="normal"
               />
               <TextField
-                label="End Date"
-                name="playlist_end_date"
-                type="date"
-                value={formValues.playlist_end_date?.slice(0, 10) || ""}
-                onChange={handleChange}
-                fullWidth
-                margin="normal"
-              />
-              <TextField
                 label="Language"
                 name="playlist_language"
                 value={formValues.playlist_language || ""}
@@ -892,69 +861,12 @@ function EditPlaylist() {
                 fullWidth
                 margin="normal"
               />
-              <TextField
-                label="Mode"
-                name="playlist_mode"
-                value={formValues.playlist_mode || ""}
-                onChange={handleChange}
-                fullWidth
-                margin="normal"
-              />
-              <TextField
-                label="DRM Playlist"
-                name="drm_playlist"
-                select
-                SelectProps={{ native: true }}
-                value={formValues.drm_playlist ? "true" : "false"}
-                onChange={handleChange}
-                fullWidth
-                margin="normal"
-              >
-                <option value="true">Yes</option>
-                <option value="false">No</option>
-              </TextField>
             </Grid>
 
             <Grid item xs={12}>
               {/* asana picker */}
 
               <div className="flex flex-col gap-4">
-                <div className="filter-options flex flex-row items-center justify-center gap-4 p-4 mb-4 border rounded-lg">
-                  <FilterAltIcon />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={teacherModeFilter}
-                        onChange={handleTeacherModeFilterChange}
-                        name="teacherMode"
-                        color="primary"
-                      />
-                    }
-                    label="Teacher Mode"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={drmVideoFilter}
-                        onChange={handleDrmVideoFilterChange}
-                        name="drmVideo"
-                        color="primary"
-                      />
-                    }
-                    label="DRM Video"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={noBreakFilter}
-                        onChange={handleNoBreakFilterChange}
-                        name="noBreak"
-                        color="primary"
-                      />
-                    }
-                    label="No Break"
-                  />
-                </div>
                 <div className="flex flex-row gap-3">
                   <div>
                     {filteredCategories.map((x, index) => (
@@ -1003,7 +915,7 @@ function EditPlaylist() {
           </Grid>
         </Container>
         <Container component={Paper} maxWidth="md" sx={{ padding: 3 }}>
-          <div>
+          {/* <div>
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="playlist">
                 {(provided) => (
@@ -1057,57 +969,104 @@ function EditPlaylist() {
                 )}
               </Droppable>
             </DragDropContext>
-            {/* <List>
-              {names.map((name, index) => (
-                <ListItem
-                  key={index}
-                  style={{
-                    border: "1px solid #ccc",
-                    borderRadius: "8px",
-                    marginBottom: "8px",
-                    padding: "8px",
-                  }}
-                >
-                  <Grid container alignItems="center" spacing={2}>
-                    <Grid item xs>
-                      <ListItemText primary={name} />
-                    </Grid>
-                    {typeof playlistCurrent[index] === "number" && (
-                      <Grid item>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => handleUp(index)}
-                          style={{ marginRight: 8 }}
+          </div> */}
+
+          <div>
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="playlist">
+                {(provided) => (
+                  <List
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    style={{ minHeight: "50px" }}
+                  >
+                    {names.map((name, index) => {
+                      const id = playlistCurrent[index];
+                      const isAsana = asanas.some((a) => a.id === id);
+                      const isTransition = transitions.some(
+                        (t) => t.transition_id === id
+                      );
+
+                      return isAsana ? (
+                        // Draggable Asanas
+                        <Draggable
+                          key={index}
+                          draggableId={String(index)}
+                          index={index}
                         >
-                          Up
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => handleDown(index)}
-                          style={{ marginRight: 8 }}
+                          {(provided, snapshot) => (
+                            <ListItem
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              style={{
+                                ...provided.draggableProps.style,
+                                border: "1px solid #ccc",
+                                borderRadius: "8px",
+                                marginBottom: "8px",
+                                padding: "8px",
+                                background: snapshot.isDragging
+                                  ? "#f0f0f0"
+                                  : "#fff",
+                              }}
+                            >
+                              <Grid container alignItems="center" spacing={2}>
+                                <Grid item xs>
+                                  <ListItemText primary={name} />
+                                </Grid>
+                                <Grid item>
+                                  <Button
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={() => handleDelete(index)}
+                                  >
+                                    Delete
+                                  </Button>
+                                </Grid>
+                              </Grid>
+                            </ListItem>
+                          )}
+                        </Draggable>
+                      ) : (
+                        // Non-Draggable Transitions
+                        <ListItem
+                          key={index}
+                          style={{
+                            border: "1px solid #ccc",
+                            borderRadius: "8px",
+                            marginBottom: "8px",
+                            padding: "8px",
+                            background: "#e0e0e0", // Different background for clarity
+                            opacity: 0.6, // Slightly faded to indicate it's not draggable
+                          }}
                         >
-                          Down
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          onClick={() => handleDelete(index)}
-                        >
-                          Delete
-                        </Button>
-                      </Grid>
-                    )}
-                  </Grid>
-                </ListItem>
-              ))}
-            </List> */}
+                          <Grid container alignItems="center" spacing={2}>
+                            <Grid item xs>
+                              <ListItemText primary={name} />
+                            </Grid>
+                            <Grid item>
+                              <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={() => handleDelete(index)}
+                              >
+                                Delete
+                              </Button>
+                            </Grid>
+                          </Grid>
+                        </ListItem>
+                      );
+                    })}
+                    {provided.placeholder}
+                  </List>
+                )}
+              </Droppable>
+            </DragDropContext>
           </div>
         </Container>
       </div>
-    </AdminPageWrapper>
+    </StudentPageWrapper>
   );
 }
 
-export default EditPlaylist;
+export default withAuth(EditPlaylistStudent, ROLE_STUDENT);

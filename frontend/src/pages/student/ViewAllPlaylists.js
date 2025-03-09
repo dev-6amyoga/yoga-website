@@ -1,542 +1,286 @@
-import { Button, Grid, Input, Modal, Table, Tooltip } from "@geist-ui/core";
-import { PlusCircle } from "@geist-ui/icons";
-import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import StudentNavbar from "../../components/Common/StudentNavbar/StudentNavbar";
-import { transitionGenerator } from "../../components/transition-generator/TransitionGenerator";
 import { ROLE_STUDENT } from "../../enums/roles";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
+import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Card,
+  CardContent,
+  Button,
+  TextField,
+  Tooltip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Typography,
+} from "@mui/material";
+
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import { useNavigate } from "react-router-dom";
 
 function ViewAllPlaylists() {
-  // const navigate = useNavigate();
-  const [transitions, setTransitions] = useState([]);
-  const [delState, setDelState] = useState(false);
-  const [delPlaylistId, setDelPlaylistId] = useState("");
-  const [modalState, setModalState] = useState(false);
-  const [unmodifiedData, setUnmodifiedData] = useState({
-    playlist_id: "",
-    playlist_name: "",
-    asana_ids: [],
-  });
-  const [modalData, setModalData] = useState({
-    playlist_id: "",
-    playlist_name: "",
-    asana_ids: [],
-  });
   let user = useUserStore((state) => state.user);
+  const [allPlaylists, setAllPlaylists] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
-  const [playlistEditLimit, setPlaylistEditLimit] = useState(0);
-  const [monthlyPlaylistLimit, setMonthlyPlaylistLimit] = useState(0);
-  const [playlistAsanas, setPlaylistAsanas] = useState([]);
-  const [newAsana, setNewAsana] = useState({ id: "", asana_name: "" });
+  const [filteredPlaylists, setFilteredPlaylists] = useState([]);
+  const [allAsanas, setAllAsanas] = useState([]);
+  const [allTransitions, setAllTransitions] = useState([]);
+  const [delOpen, setDelOpen] = useState(false);
+  const [delPlaylistId, setDelPlaylistId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [asanaNames, setAsanaNames] = useState({});
+  const [transitionNames, setTransitionNames] = useState({});
+  const [showModal, setShowModal] = useState(false);
+  const [editsRemaining, setEditsRemaining] = useState(0);
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState(null);
 
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await Fetch({
-          url: "/content/video/getAllTransitions",
-        });
-        const data = response.data;
-        setTransitions(data);
+        const [playlistsResponse, asanasResponse, transitionsResponse] =
+          await Promise.all([
+            Fetch({ url: "/user-playlists/user/" + user.user_id }),
+            Fetch({ url: "/content/video/getAllAsanas" }),
+            Fetch({ url: "/content/video/getAllTransitions" }),
+          ]);
+        setUserPlaylists(playlistsResponse.data.userPlaylists);
+        setAllPlaylists(playlistsResponse.data.playlists);
+        setFilteredPlaylists(playlistsResponse.data.playlists);
+        setAllAsanas(asanasResponse.data);
+        setAllTransitions(transitionsResponse.data);
       } catch (error) {
         console.log(error);
       }
     };
+
     fetchData();
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { data } = await Fetch({
-          url: "/playlist-configs/getAllConfigs",
-        });
-        const playlistEditCount = data.find(
-          (config) => config.playlist_config_name === "PLAYLIST_EDIT_LIMIT"
+    if (allAsanas.length === 0 || allTransitions.length === 0) return;
+    const fetchNames = () => {
+      const asanaNameMap = allAsanas.reduce((acc, asana) => {
+        acc[asana.id] = asana.asana_name;
+        return acc;
+      }, {});
+      const transitionNameMap = allTransitions.reduce((acc, transition) => {
+        acc[transition.transition_id] = transition.transition_video_name;
+        return acc;
+      }, {});
+      const playlistAsanaNames = allPlaylists.reduce((acc, playlist) => {
+        acc[playlist.playlist_id] = playlist.asana_ids.map(
+          (id) => asanaNameMap[id] || "Unknown"
         );
-        setPlaylistEditLimit(playlistEditCount.playlist_config_value);
-        const monthlyLimit = data.find(
-          (config) => config.playlist_config_name === "MONTHLY_PLAYLIST_LIMIT"
-        );
-        setPlaylistEditLimit(playlistEditCount.playlist_config_value);
-        setMonthlyPlaylistLimit(monthlyLimit.playlist_config_value);
-      } catch (err) {
-        toast(err);
-      }
-    };
-    fetchData();
-  }, []);
+        return acc;
+      }, {});
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await Fetch({
-          url: `/user-playlists/getAllUserPlaylists/${user?.user_id}`,
-          method: "GET",
+      const playlistTransitionNames = allPlaylists.reduce((acc, playlist) => {
+        acc[playlist.playlist_id] = playlist.sections.map((section) => {
+          return section.transition_ids
+            ? section.transition_ids.map(
+                (id) => transitionNameMap[id] || "Unknown"
+              )
+            : [];
         });
-        const data = response.data;
-        setUserPlaylists(data);
-      } catch (error) {
-        console.log(error);
-      }
+        return acc;
+      }, {});
+      setAsanaNames(playlistAsanaNames);
+      setTransitionNames(playlistTransitionNames);
     };
-    if (user) {
-      fetchData();
-    }
-  }, [user]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await Fetch({
-          url: "/content/video/getAllAsanas",
-        });
-        const data = response.data;
-        setPlaylistAsanas(data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
-  }, []);
+    fetchNames();
+  }, [allPlaylists, allAsanas, allTransitions]);
 
-  const renderAction = (value, rowData, index) => {
-    const handleDelete = async () => {
-      try {
-        setDelPlaylistId(rowData.playlist_id);
-        setDelState(true);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    const handleUpdate = async () => {
-      setModalData(rowData);
-      setUnmodifiedData(rowData);
-      setModalState(true);
-    };
-    const disabledUpdate =
-      rowData.current_edit_count === playlistEditLimit ? true : false;
-    const tooltipText = `You have ${playlistEditLimit - rowData.current_edit_count} edits remaining`;
-
-    return (
-      <Grid.Container gap={0.1}>
-        <Grid>
-          <Button
-            type="error"
-            auto
-            scale={1 / 3}
-            font="12px"
-            onClick={handleDelete}
-          >
-            Remove
-          </Button>
-        </Grid>
-        <Grid>
-          <Tooltip text={tooltipText} type="dark">
-            <Button
-              type="warning"
-              auto
-              scale={1 / 3}
-              font="12px"
-              onClick={() => handleUpdate(rowData.playlist_id)}
-              disabled={disabledUpdate}
-            >
-              Update
-            </Button>
-          </Tooltip>
-        </Grid>
-      </Grid.Container>
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+    const filtered = allPlaylists.filter((playlist) =>
+      playlist.playlist_name.toLowerCase().includes(query)
     );
+    setFilteredPlaylists(filtered);
+  };
+
+  const updateData = async (playlistId) => {
+    const editablePlaylist = filteredPlaylists.find(
+      (x) => x.playlist_id === playlistId
+    );
+    console.log(editablePlaylist);
+    console.log(editablePlaylist._id);
+    let userPlaylistEditable = userPlaylists.filter((x) =>
+      x.playlists.includes(editablePlaylist._id)
+    );
+    console.log(userPlaylistEditable);
+    if (userPlaylistEditable[0].edits_left === 0) {
+      toast(
+        "You have " + userPlaylistEditable[0].edits_left + " edits remaining! "
+      );
+    } else {
+      toast("show modal");
+      setEditsRemaining(userPlaylistEditable[0].edits_left);
+      setSelectedPlaylistId(playlistId);
+      setShowModal(true);
+      // navigate(`/student/playlist/edit/${playlistId}`);
+    }
   };
 
   const deletePlaylist = async () => {
     try {
       const playlistId = delPlaylistId;
       const response = await Fetch({
-        url: `/user-playlists/deleteUserPlaylist/${playlistId}`,
-        method: "DELETE",
+        url: "/user-playlists/delete",
+        method: "POST",
+        data: { user_id: user.user_id, playlistId: playlistId },
       });
       if (response?.status === 200) {
         toast("Deleted Successfully!");
-        setUserPlaylists((prev) =>
-          prev.filter((playlist) => playlist.playlist_id !== playlistId)
-        );
+        window.location.reload();
+        setDelOpen(false);
       } else {
-        toast("Error deleting playlist:", response.status);
+        console.log(response);
+        toast(response.data.message);
+        setDelOpen(false);
       }
-      setDelState(false);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const updateData = async () => {
-    try {
-      if (modalData === unmodifiedData) {
-        toast("There are no changes to be updated.");
-      } else {
-        if (modalData.current_edit_count === playlistEditLimit) {
-          toast("Maximum edit count has been attained.");
-        } else {
-          const playlistId = modalData.playlist_id;
-          modalData.current_edit_count = modalData.current_edit_count + 1;
-          const response = await Fetch({
-            url: `/user-playlists/updateUserPlaylist/${playlistId}`,
-            method: "PUT",
-            data: modalData,
-          });
-          if (response?.status === 200) {
-            toast("Updated Successfully!");
-            setUserPlaylists((prev) =>
-              prev.map((p1) => (p1.playlist_id === playlistId ? modalData : p1))
-            );
-            setModalState(false);
-          } else {
-            toast("Error updating playlist:", response.status);
-          }
-        }
-      }
-    } catch (error) {
-      console.error(error);
-    }
+  const proceedToEdit = () => {
+    setShowModal(false);
+    navigate(`/student/playlist/edit/${selectedPlaylistId}`);
   };
 
-  const handleAsanaNameChange = (value, index) => {
-    const updatedAsanaIds = [...modalData.asana_ids];
-    const selectedAsana = playlistAsanas.find(
-      (asana) => asana.asana_name === value
-    );
-    updatedAsanaIds[index] = selectedAsana ? selectedAsana.id : value;
-    setModalData((prevData) => ({
-      ...prevData,
-      asana_ids: updatedAsanaIds,
-    }));
-  };
-
-  const handleAsanaReorder = (index, direction) => {
-    let asanas_before = [];
-    let asanas_after = [];
-    for (var i = 0; i < modalData.asana_ids.length; i++) {
-      if (
-        !Number(modalData.asana_ids[i]) &&
-        modalData.asana_ids[i].startsWith("T_")
-      ) {
-      } else {
-        if (i < index) {
-          asanas_before.push({
-            index: i,
-            asana_id: modalData.asana_ids[i],
-          });
-        }
-        if (i > index) {
-          asanas_after.push({
-            index: i,
-            asana_id: modalData.asana_ids[i],
-          });
-        }
-      }
-    }
-    let nowOrderAsanaIds = [];
-    if (direction === "up" && asanas_before.length > 0) {
-      const temp = asanas_before[asanas_before.length - 1];
-      asanas_before[asanas_before.length - 1] = {
-        index: index,
-        asana_id: modalData.asana_ids[index],
-      };
-      asanas_before.push(temp);
-      nowOrderAsanaIds = [...asanas_before, ...asanas_after].map(
-        (asana) => asana.asana_id
-      );
-    }
-
-    if (direction === "down" && asanas_after.length > 0) {
-      const updated_list = [
-        ...asanas_after.slice(0, 1),
-        {
-          index: index,
-          asana_id: modalData.asana_ids[index],
-        },
-        ...asanas_after.slice(1),
-      ];
-      asanas_after = updated_list;
-      nowOrderAsanaIds = [...asanas_before, ...asanas_after].map(
-        (asana) => asana.asana_id
-      );
-    }
-
-    let resultArray = [];
-    const asanaData1 = playlistAsanas.find(
-      (asana) => asana.id === nowOrderAsanaIds[0]
-    );
-    const transitionResult = transitionGenerator(
-      "start",
-      asanaData1,
-      transitions
-    );
-    transitionResult?.forEach((element) => {
-      resultArray.push(element.transition_id);
-    });
-    resultArray.push(asanaData1.id);
-    for (let i = 0; i < nowOrderAsanaIds.length - 1; i++) {
-      const asanaData2 = playlistAsanas.find(
-        (asana) => asana.id === nowOrderAsanaIds[i]
-      );
-      const asanaData3 = playlistAsanas.find(
-        (asana) => asana.id === nowOrderAsanaIds[i + 1]
-      );
-      if (asanaData2 && asanaData3) {
-        const result = transitionGenerator(asanaData2, asanaData3, transitions);
-        result?.forEach((element) => {
-          resultArray.push(element.transition_id);
-        });
-        resultArray.push(asanaData3.id);
-      } else {
-        console.error("Asana data not found for IDs:");
-      }
-    }
-    setModalData((prevModalData) => ({
-      ...prevModalData,
-      asana_ids: resultArray,
-    }));
-  };
-
-  const handleRemoveAsana = (indexToRemove) => {
-    setModalData((prevData) => {
-      const newAsanaIds = prevData.asana_ids.filter(
-        (_, index) => index !== indexToRemove
-      );
-
-      return {
-        ...prevData,
-        asana_ids: newAsanaIds,
-      };
-    });
-  };
-
-  const handleDownload = (data1) => {
-    const csv = Papa.unparse(data1);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", "data.csv");
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
-  const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    setModalData({ ...modalData, [id]: value });
-  };
-
-  const handleAddNewAsana = () => {
-    setModalData((prevData) => ({
-      ...prevData,
-      asana_ids: [...prevData.asana_ids, newAsana.id],
-    }));
+  // Cancel edit
+  const cancelEdit = () => {
+    setShowModal(false);
   };
 
   return (
-    <div>
-      <div>
-        <StudentNavbar />
+    <StudentPageWrapper heading="View Your Playlists">
+      <div className="flex justify-between items-center mb-4">
+        <br />
+        <TextField
+          label="Search Playlists"
+          variant="outlined"
+          value={searchQuery}
+          onChange={handleSearch}
+        />
       </div>
-      <div>
-        <Button
-          onClick={() => {
-            handleDownload(userPlaylists);
-          }}
-        >
-          Download CSV
-        </Button>
-      </div>
-      <div className="flex flex-col items-center justify-center py-20">
-        <Table width={100} data={userPlaylists} className="bg-white ">
-          <Table.Column prop="playlist_id" label="Playlist ID" />
-          <Table.Column prop="playlist_name" label="Playlist Name" />
-          {/* <Table.Column
-              prop="asana_ids"
-              label="Asana Names"
-              render={(value, rowData) => (
-                <div>
-                  {value.map((asanaId, index) => {
-                    const asana =
-                      playlistAsanas.find((asana) => asana.id === asanaId) ||
-                      transitions.find(
-                        (transition) => transition.transition_id === asanaId
-                      );
-                    return <Tag key={index}>{asana?.asana_name || ""}</Tag>;
-                  })}
-                </div>
-              )}
-            /> */}
 
-          <Table.Column
-            prop="operation"
-            label="ACTIONS"
-            width={150}
-            render={renderAction}
-          />
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Playlist Name</TableCell>
+              <TableCell>Duration (mins)</TableCell>
+              <TableCell>Start Date</TableCell>
+              <TableCell>Language</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredPlaylists.map((playlist) => (
+              <TableRow key={playlist.playlist_id}>
+                <TableCell>{playlist.playlist_name}</TableCell>
+                <TableCell>{(playlist.duration / 60).toFixed(1)}</TableCell>
+                <TableCell>
+                  {new Date(playlist.playlist_start_date).toDateString()}
+                </TableCell>
+                <TableCell>{playlist.playlist_language}</TableCell>
+                <TableCell>
+                  {/* <div className="flex flex-row gap-2">
+                    <Tooltip title={"Edit"}>
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          updateData(playlist.playlist_id);
+                        }}
+                      >
+                        <EditIcon />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title={"Delete"}>
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          setDelPlaylistId(playlist.playlist_id);
+                          setDelOpen(true);
+                        }}
+                      >
+                        <DeleteIcon />
+                      </Button>
+                    </Tooltip>
+                  </div> */}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
         </Table>
-      </div>
-      <div>
-        <Modal
-          visible={modalState}
-          onClose={() => setModalState(false)}
-          width="50rem"
-        >
-          <Modal.Title>Update Playlist</Modal.Title>
-          <Modal.Subtitle>{modalData.playlist_name}</Modal.Subtitle>
-          <Modal.Content>
-            <form>
-              <Input
-                width="100%"
-                id="playlist_name"
-                placeholder={modalData.playlist_name}
-                onChange={handleInputChange}
-              >
-                Playlist Name
-              </Input>
-              <br />
-              <br />
-              {/*
-                {modalData.asana_ids.map((asanaId, index) => {
-                  let isAsana = true;
-                  let asanaName = "";
-                  if (asanaId !== "") {
-                    const asana =
-                      playlistAsanas.find((asana) => asana.id === asanaId) ||
-                      transitions.find(
-                        (transition) => transition.transition_id === asanaId
-                      );
-                    isAsana = asana.asana_name ? true : false;
-                    asanaName = asana.asana_name || "";
-                  }
-                  return (
-                    <div>
-                      {isAsana && (
-                        <div>
-                          <Text type="error">Asana {index + 1}</Text>
-                          <Grid.Container gap={1} justify="left" height="40px">
-                            <Grid>
-                              {" "}
-                              <Select
-                                key={index}
-                                width="100%"
-                                placeholder={`Select Asana ${index + 1}`}
-                                value={asanaName}
-                                onChange={(value) =>
-                                  handleAsanaNameChange(value, index)
-                                }
-                              >
-                                {playlistAsanas.map((asanaOption) => (
-                                  <Select.Option
-                                    key={asanaOption.id}
-                                    value={asanaOption.asana_name}
-                                  >
-                                    {asanaOption.asana_name +
-                                      " " +
-                                      asanaOption.language}
-                                  </Select.Option>
-                                ))}
-                              </Select>
-                            </Grid>
-                            <Grid>
-                              {" "}
-                              {index > 0 && (
-                                <Tooltip text={"Move Up"} type="dark">
-                                  {" "}
-                                  <Button
-                                    icon={<ArrowUpCircle />}
-                                    auto
-                                    scale={2 / 3}
-                                    onClick={() =>
-                                      handleAsanaReorder(index, "up")
-                                    }
-                                  />
-                                </Tooltip>
-                              )}
-                            </Grid>
-                            <Grid>
-                              {" "}
-                              {index < modalData.asana_ids.length - 1 && (
-                                <Tooltip text={"Move Down"} type="dark">
-                                  {" "}
-                                  <Button
-                                    icon={<ArrowDownCircle />}
-                                    auto
-                                    scale={2 / 3}
-                                    onClick={() =>
-                                      handleAsanaReorder(index, "down")
-                                    }
-                                  />
-                                </Tooltip>
-                              )}
-                            </Grid>
-                            <Grid>
-                              <Tooltip text={"Delete Asana"} type="dark">
-                                {" "}
-                                <Button
-                                  type="error"
-                                  icon={<XCircle />}
-                                  auto
-                                  scale={2 / 3}
-                                  onClick={() => handleRemoveAsana(index)}
-                                />
-                              </Tooltip>
-                            </Grid>
-                          </Grid.Container>
-                          <br />
-                        </div>
-                      )}
-                      {!isAsana && (
-                        <div>
-                          <Text type="success">Transition Video</Text>
-                          <h5>{asanaName}</h5>
-                          <br />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })} */}
-              <br />
-              <Tooltip text={"Add New Asana"} type="dark">
-                {" "}
-                <Button
-                  iconRight={<PlusCircle />}
-                  auto
-                  scale={2 / 3}
-                  onClick={handleAddNewAsana}
-                />
-              </Tooltip>
-            </form>
-          </Modal.Content>
-          <Modal.Action passive onClick={() => setModalState(false)}>
-            Cancel
-          </Modal.Action>
-          <Modal.Action onClick={updateData}>Update</Modal.Action>
-        </Modal>
-      </div>
-      <div>
-        <Modal visible={delState} onClose={() => setDelState(false)}>
-          <Modal.Title>Delete Playlist</Modal.Title>
-          <Modal.Content>
-            <p>Do you really wish to delete this playlist?</p>
-          </Modal.Content>
-          <Modal.Action passive onClick={() => setDelState(false)}>
+      </TableContainer>
+
+      <Dialog
+        open={delOpen}
+        onClose={() => {
+          setDelOpen(false);
+        }}
+      >
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Are you sure you want to delete this playlist?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setDelOpen(false);
+            }}
+            color="primary"
+          >
             No
-          </Modal.Action>
-          <Modal.Action onClick={deletePlaylist}>Yes</Modal.Action>
-        </Modal>
-      </div>
-    </div>
+          </Button>
+          <Button
+            onClick={() => {
+              deletePlaylist(delPlaylistId);
+            }}
+            color="secondary"
+          >
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={showModal} onClose={cancelEdit}>
+        <DialogTitle>Edit Playlist</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            You have <strong>{editsRemaining}</strong> edits left. Would you
+            like to proceed?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelEdit} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={proceedToEdit} color="primary" variant="contained">
+            Proceed
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </StudentPageWrapper>
   );
 }
 

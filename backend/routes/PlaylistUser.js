@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const UserPlaylist = require('../models/mongo/UserPlaylist')
 const Playlist = require('../models/mongo/Playlist')
+const mongoose = require('mongoose')
 const {
   HTTP_OK,
   HTTP_NOT_FOUND,
@@ -25,14 +26,14 @@ router.post('/create', async (req, res) => {
   const currentMonth = new Date().toISOString().slice(0, 7) // "YYYY-MM"
 
   try {
-    let userPlaylists = await UserPlaylist.findOne({
+    let userPlaylists = await UserPlaylist.find({
       user_id,
       month: currentMonth,
     })
 
-    if (userPlaylists && userPlaylists.playlists.length >= 2) {
+    if (userPlaylists && userPlaylists.length >= 2) {
       return res
-        .status(400)
+        .status(201)
         .json({ message: 'You can only create 2 playlists per month.' })
     }
 
@@ -127,20 +128,17 @@ router.post('/create', async (req, res) => {
     await newPlaylist.save()
 
     // Update or create UserPlaylist entry
-    if (!userPlaylists) {
-      userPlaylists = new UserPlaylist({
-        user_id,
-        month: currentMonth,
-        playlists: [],
-        edits_left: 2,
-      })
-    }
+    const newUserPlaylist = new UserPlaylist({
+      user_id,
+      month: currentMonth,
+      playlists: [newPlaylist._id],
+      edits_left: 1,
+    })
 
-    userPlaylists.playlists.push(newPlaylist._id)
-    await userPlaylists.save()
+    await newUserPlaylist.save()
 
     res
-      .status(201)
+      .status(200)
       .json({ message: 'Playlist created successfully', playlist: newPlaylist })
   } catch (error) {
     console.error(error)
@@ -152,38 +150,110 @@ router.put('/edit/:playlistId', async (req, res) => {
   const { user_id, updates } = req.body // updates = { playlist_name, asana_ids, etc. }
   const { playlistId } = req.params
   const currentMonth = new Date().toISOString().slice(0, 7)
+  try {
+    const userPlaylists = await UserPlaylist.find({
+      user_id,
+      month: currentMonth,
+    })
+    const playlistObject = await Playlist.findOne({ playlist_id: playlistId })
+    if (!playlistObject) {
+      return res.status(404).json({ message: 'Playlist not found' })
+    }
+    const playlistObjectId = new mongoose.Types.ObjectId(playlistObject._id)
+    let userPlaylistToBeEdited = null
+    let playlistFound = false
+    for (let userPlaylist of userPlaylists) {
+      if (userPlaylist.playlists.some((id) => id.equals(playlistObjectId))) {
+        userPlaylistToBeEdited = userPlaylist
+        playlistFound = true
+        break
+      }
+    }
+    if (playlistFound) {
+      if (!userPlaylistToBeEdited || userPlaylistToBeEdited.edits_left <= 0) {
+        return res
+          .status(400)
+          .json({ message: 'No edits left for this month.' })
+      }
+      let oldPlaylistDashUrl = playlistObject.playlist_dash_url
+      await Playlist.findOneAndDelete({ playlist_id: playlistId })
+      const newPlaylist = new Playlist({
+        ...updates,
+        playlist_id: playlistId,
+        last_updated: new Date(),
+        old_playlist_dash_url: oldPlaylistDashUrl,
+      })
+
+      console.log(newPlaylist)
+
+      await newPlaylist.save()
+      userPlaylistToBeEdited.edits_left -= 1
+      await userPlaylistToBeEdited.save()
+      res.status(200).json({
+        message: 'Playlist updated successfully',
+        playlist: newPlaylist,
+      })
+    }
+  } catch (error) {
+    console.error('Error updating playlist:', error)
+    res.status(500).json({ error: 'Failed to update playlist' })
+  }
+})
+
+router.post('/delete', async (req, res) => {
+  const { user_id, playlistId } = req.body
+  const currentMonth = new Date().toISOString().slice(0, 7)
 
   try {
-    const userPlaylists = await UserPlaylist.findOne({
+    // Fetch all UserPlaylist documents for this user in the current month
+    const userPlaylists = await UserPlaylist.find({
       user_id,
       month: currentMonth,
     })
 
-    if (!userPlaylists || userPlaylists.edits_left <= 0) {
-      return res.status(400).json({ message: 'No edits left for this month.' })
+    if (!userPlaylists.length) {
+      return res.status(404).json({ message: 'User has no playlists' })
     }
 
-    const playlist = await Playlist.findById(playlistId)
-    if (!playlist) {
+    // Fetch the playlist document
+    const playlistObject = await Playlist.findOne({ playlist_id: playlistId })
+
+    if (!playlistObject) {
       return res.status(404).json({ message: 'Playlist not found' })
     }
 
-    // Apply updates
-    Object.keys(updates).forEach((key) => {
-      playlist[key] = updates[key]
-    })
-    playlist.last_updated = new Date()
+    const playlistObjectId = new mongoose.Types.ObjectId(playlistObject._id)
 
-    await playlist.save()
+    let playlistFound = false
 
-    // Deduct edit count
-    userPlaylists.edits_left -= 1
-    await userPlaylists.save()
+    // Loop through all user playlists and remove the playlist ID
+    for (let userPlaylist of userPlaylists) {
+      if (userPlaylist.playlists.some((id) => id.equals(playlistObjectId))) {
+        await UserPlaylist.findOneAndDelete({ _id: userPlaylist._id })
 
-    res.json({ message: 'Playlist updated successfully', playlist })
+        // userPlaylist.playlists = userPlaylist.playlists.filter(
+        //   (id) => !id.equals(playlistObjectId)
+        // )
+        // await userPlaylist.save()
+        playlistFound = true
+        break
+      }
+    }
+
+    if (!playlistFound) {
+      return res
+        .status(404)
+        .json({ message: 'Playlist not found in user playlists' })
+    }
+
+    // Delete the actual playlist
+
+    await Playlist.findByIdAndDelete(playlistObjectId)
+
+    res.json({ message: 'Playlist deleted successfully' })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ error: 'Failed to edit playlist' })
+    res.status(500).json({ error: 'Failed to delete playlist' })
   }
 })
 
@@ -227,21 +297,36 @@ router.get('/user/:userId', async (req, res) => {
   const currentMonth = new Date().toISOString().slice(0, 7)
 
   try {
-    const userPlaylists = await UserPlaylist.findOne({
+    const userPlaylists = await UserPlaylist.find({
       user_id: userId,
       month: currentMonth,
-    }).populate('playlists')
+    }).populate('playlists') // Populates the playlists for each document
 
-    if (!userPlaylists) {
+    const userPlaylistsOg = await UserPlaylist.find({
+      user_id: userId,
+      month: currentMonth,
+    }) // Populates the playlists for each document
+
+    if (!userPlaylists || userPlaylists.length === 0) {
       return res.json({
         message: 'No playlists found for this month.',
         playlists: [],
       })
     }
 
+    // Flatten all playlists from multiple documents into a single array
+    const allPlaylists = userPlaylists.flatMap((doc) => doc.playlists)
+    const totalEditsLeft = userPlaylists.reduce(
+      (sum, doc) => sum + doc.edits_left,
+      0
+    )
+
+    console.log('User Playlists:', userPlaylists) // Debugging output
+
     res.json({
-      playlists: userPlaylists.playlists,
-      edits_left: userPlaylists.edits_left,
+      userPlaylists: userPlaylistsOg,
+      playlists: allPlaylists, // Send all collected playlists
+      edits_left: totalEditsLeft, // Sum of remaining edits across documents
     })
   } catch (error) {
     console.error(error)
@@ -249,84 +334,4 @@ router.get('/user/:userId', async (req, res) => {
   }
 })
 
-// router.get('/getAllUserPlaylists/:user_id', async (req, res) => {
-//   try {
-//     const user_id = Number(req.params['user_id'])
-//     const userPlaylists = await UserPlaylist.find({
-//       playlist_user_id: user_id,
-//     })
-//     res.json(userPlaylists)
-//   } catch (error) {
-//     console.error(error)
-//     res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-//       error: 'Failed to fetch videos',
-//     })
-//   }
-// })
-
-// router.post('/addUserPlaylist', async (req, res) => {
-//   try {
-//     const requestData = req.body
-//     console.log(requestData)
-//     const newUserPlaylist = new UserPlaylist(requestData)
-//     const savedUserPlaylist = await newUserPlaylist.save()
-//     res.status(200).json(savedUserPlaylist)
-//   } catch (error) {
-//     console.error('Error saving new Playlist:', error)
-//     res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-//       error: 'Failed to save new Playlist',
-//     })
-//   }
-// })
-
-// router.put('/updateUserPlaylist/:playlistId', async (req, res) => {
-//   const playlistId = req.params.playlistId
-//   const updatedData = req.body
-//   try {
-//     const existingPlaylist = await UserPlaylist.findOne({
-//       playlist_id: playlistId,
-//     })
-//     if (!existingPlaylist) {
-//       return res.status(HTTP_NOT_FOUND).json({ error: 'Playlist not found' })
-//     }
-//     const mergedData = {
-//       ...existingPlaylist.toObject(),
-//       ...updatedData,
-//     }
-//     const updatedPlaylist = await UserPlaylist.findOneAndUpdate(
-//       { playlist_id: playlistId },
-//       mergedData,
-//       {
-//         new: true,
-//       }
-//     )
-//     res.json(updatedPlaylist)
-//   } catch (error) {
-//     console.error(error)
-//     res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-//       error: 'Failed to update Playlist',
-//     })
-//   }
-// })
-
-// router.delete('/deleteUserPlaylist/:playlistId', async (req, res) => {
-//   const playlistId = req.params.playlistId
-//   try {
-//     const deletedPlaylist = await UserPlaylist.findOneAndDelete({
-//       playlist_id: playlistId,
-//     })
-//     if (deletedPlaylist) {
-//       res.status(HTTP_OK).json({
-//         message: 'Playlist deleted successfully',
-//       })
-//     } else {
-//       res.status(HTTP_NOT_FOUND).json({ message: 'Playlist not found' })
-//     }
-//   } catch (error) {
-//     console.error(error)
-//     res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-//       error: 'Failed to delete Playlist',
-//     })
-//   }
-// })
 module.exports = router

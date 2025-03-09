@@ -771,34 +771,11 @@ function RegisterNewPlaylistStudent() {
     });
     if (response.status === 200) {
       toast("Playlist updated successfully!");
+      navigate("/student/view-all-playlists");
+    } else {
+      toast(response.data.message);
+      navigate("/student/view-all-playlists");
     }
-
-    // formValues.asana_ids = recalculatedPlaylist;
-    // const response = await Fetch({
-    //   url: `/content/playlists/updatePlaylist/${playlist_id}`,
-    //   method: "PUT",
-    //   data: formValues,
-    // });
-    // if (response.status === 200) {
-    //   toast("Playlist updated successfully!");
-
-    //   try {
-    //     const manifestResponse = await Fetch({
-    //       url: `/content/playlists/createManifest/${playlist_id}`,
-    //       method: "POST",
-    //     });
-
-    //     if (manifestResponse?.status === 200) {
-    //       toast("Manifest Generated!");
-    //     }
-    //   } catch (manifestError) {
-    //     console.error("Error generating manifest:", manifestError);
-    //   }
-
-    //   navigate("/admin/playlist/view-all");
-    // } else {
-    //   toast("Error updating playlist:", response.status);
-    // }
   };
 
   const handleAddPlaylist = async () => {
@@ -930,6 +907,7 @@ function RegisterNewPlaylistStudent() {
           </div>
 
           {/* Drag-and-Drop Playlist */}
+
           <div>
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="playlist">
@@ -939,46 +917,83 @@ function RegisterNewPlaylistStudent() {
                     ref={provided.innerRef}
                     style={{ minHeight: "50px" }}
                   >
-                    {names.map((name, index) => (
-                      <Draggable
-                        key={index}
-                        draggableId={String(index)}
-                        index={index}
-                      >
-                        {(provided, snapshot) => (
-                          <ListItem
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            style={{
-                              ...provided.draggableProps.style,
-                              border: "1px solid #ccc",
-                              borderRadius: "8px",
-                              marginBottom: "8px",
-                              padding: "8px",
-                              background: snapshot.isDragging
-                                ? "#f0f0f0"
-                                : "#fff",
-                            }}
-                          >
-                            <Grid container alignItems="center" spacing={2}>
-                              <Grid item xs>
-                                <ListItemText primary={name} />
+                    {names.map((name, index) => {
+                      const id = playlistCurrent[index];
+                      const isAsana = asanas.some((a) => a.id === id);
+                      const isTransition = transitions.some(
+                        (t) => t.transition_id === id
+                      );
+
+                      return isAsana ? (
+                        // Draggable Asanas
+                        <Draggable
+                          key={index}
+                          draggableId={String(index)}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <ListItem
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              style={{
+                                ...provided.draggableProps.style,
+                                border: "1px solid #ccc",
+                                borderRadius: "8px",
+                                marginBottom: "8px",
+                                padding: "8px",
+                                background: snapshot.isDragging
+                                  ? "#f0f0f0"
+                                  : "#fff",
+                              }}
+                            >
+                              <Grid container alignItems="center" spacing={2}>
+                                <Grid item xs>
+                                  <ListItemText primary={name} />
+                                </Grid>
+                                <Grid item>
+                                  <Button
+                                    variant="contained"
+                                    color="secondary"
+                                    onClick={() => handleDelete(index)}
+                                  >
+                                    Delete
+                                  </Button>
+                                </Grid>
                               </Grid>
-                              <Grid item>
-                                <Button
-                                  variant="contained"
-                                  color="secondary"
-                                  onClick={() => handleDelete(index)}
-                                >
-                                  Delete
-                                </Button>
-                              </Grid>
+                            </ListItem>
+                          )}
+                        </Draggable>
+                      ) : (
+                        // Non-Draggable Transitions
+                        <ListItem
+                          key={index}
+                          style={{
+                            border: "1px solid #ccc",
+                            borderRadius: "8px",
+                            marginBottom: "8px",
+                            padding: "8px",
+                            background: "#e0e0e0", // Different background for clarity
+                            opacity: 0.6, // Slightly faded to indicate it's not draggable
+                          }}
+                        >
+                          <Grid container alignItems="center" spacing={2}>
+                            <Grid item xs>
+                              <ListItemText primary={name} />
                             </Grid>
-                          </ListItem>
-                        )}
-                      </Draggable>
-                    ))}
+                            <Grid item>
+                              <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={() => handleDelete(index)}
+                              >
+                                Delete
+                              </Button>
+                            </Grid>
+                          </Grid>
+                        </ListItem>
+                      );
+                    })}
                     {provided.placeholder}
                   </List>
                 )}
@@ -993,132 +1008,6 @@ function RegisterNewPlaylistStudent() {
       </div>
     </StudentPageWrapper>
   );
-
-  // return (
-  //   <StudentPageWrapper heading="Create Playlist">
-  //     <div className="flex flex-col gap-4 mb-4">
-  //       <TextField
-  //         label="Playlist Name"
-  //         value={playlistName}
-  //         onChange={(e) => setPlaylistName(e.target.value)}
-  //         fullWidth
-  //       />
-  //       <FormControl fullWidth>
-  //         <InputLabel>Language</InputLabel>
-  //         <Select
-  //           value={language}
-  //           onChange={(e) => setLanguage(e.target.value)}
-  //         >
-  //           {allLanguages.map((x) => {
-  //             return <MenuItem value={x.language}>{x.language}</MenuItem>;
-  //           })}
-  //         </Select>
-  //       </FormControl>
-  //     </div>
-
-  //     <div className="flex flex-col gap-4">
-  //       <div className="flex flex-row gap-3">
-  //         <div>
-  //           {filteredCategories.map((x, index) => (
-  //             <Accordion key={index} className="flex flex-col gap-2">
-  //               <AccordionSummary
-  //                 expandIcon={<ExpandMore />}
-  //                 aria-controls="panel1-content"
-  //                 id="panel1-header"
-  //               >
-  //                 {x.category}
-  //               </AccordionSummary>
-  //               <AccordionDetails>
-  //                 <TableContainer component={Paper}>
-  //                   <Table>
-  //                     <TableHead>
-  //                       <TableRow>
-  //                         <TableCell>Asana Name</TableCell>
-  //                       </TableRow>
-  //                     </TableHead>
-  //                     <TableBody>
-  //                       {x.asanas
-  //                         .slice()
-  //                         .sort((a, b) =>
-  //                           a.asana_name.localeCompare(b.asana_name)
-  //                         )
-  //                         .map((asana, idx) => (
-  //                           <TableRow key={idx}>
-  //                             <TableCell>{asana.asana_name}</TableCell>
-  //                             <TableCell>
-  //                               <Button
-  //                                 variant="contained"
-  //                                 onClick={() => {
-  //                                   addToPlaylist(asana);
-  //                                 }}
-  //                               >
-  //                                 Add
-  //                               </Button>
-  //                             </TableCell>
-  //                           </TableRow>
-  //                         ))}
-  //                     </TableBody>
-  //                   </Table>
-  //                 </TableContainer>
-  //               </AccordionDetails>
-  //             </Accordion>
-  //           ))}
-  //         </div>
-  //         <div>
-  //           <List>
-  //             {names.map((name, index) => (
-  //               <ListItem
-  //                 key={index}
-  //                 style={{
-  //                   border: "1px solid #ccc",
-  //                   borderRadius: "8px",
-  //                   marginBottom: "8px",
-  //                   padding: "8px",
-  //                 }}
-  //               >
-  //                 <Grid container alignItems="center" spacing={2}>
-  //                   <Grid item xs>
-  //                     <ListItemText primary={name} />
-  //                   </Grid>
-  //                   {typeof playlistCurrent[index] === "number" && (
-  //                     <Grid item>
-  //                       <Button
-  //                         variant="contained"
-  //                         color="primary"
-  //                         onClick={() => handleUp(index)}
-  //                         style={{ marginRight: 8 }}
-  //                       >
-  //                         Up
-  //                       </Button>
-  //                       <Button
-  //                         variant="contained"
-  //                         color="primary"
-  //                         onClick={() => handleDown(index)}
-  //                         style={{ marginRight: 8 }}
-  //                       >
-  //                         Down
-  //                       </Button>
-  //                       <Button
-  //                         variant="contained"
-  //                         color="secondary"
-  //                         onClick={() => handleDelete(index)}
-  //                       >
-  //                         Delete
-  //                       </Button>
-  //                     </Grid>
-  //                   )}
-  //                 </Grid>
-  //               </ListItem>
-  //             ))}
-  //           </List>
-  //         </div>
-  //       </div>
-  //       <Button variant="contained" color="primary" onClick={handleAddPlaylist}>
-  //         Add Playlist
-  //       </Button>
-  //     </div>
-  //   </StudentPageWrapper>
-  // );
 }
 
 export default withAuth(RegisterNewPlaylistStudent, "STUDENT");
