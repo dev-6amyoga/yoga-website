@@ -81,6 +81,7 @@ function RegisterNewPlaylistStudent() {
   const predefinedOrder = [
     "Starting Prayer Standing",
     "Starting Prayer Sitting",
+    "Warmup",
     "Suryanamaskara Non Stithi",
     "Suryanamaskara Stithi",
     "Standing",
@@ -151,7 +152,11 @@ function RegisterNewPlaylistStudent() {
   const filteredAsanasByCategory = predefinedOrder.map((category) => {
     return {
       category: category,
-      asanas: sortedAsanas.filter((asana) => asana.asana_category === category),
+      asanas: sortedAsanas.filter((asana) => {
+        // If the asana has is_warmup = true, categorize it under "Warmup"
+        if (asana.is_warmup) return category === "Warmup";
+        return asana.asana_category === category;
+      }),
     };
   });
 

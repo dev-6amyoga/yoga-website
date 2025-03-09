@@ -23,6 +23,12 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -50,10 +56,14 @@ function EditPlaylistStudent() {
   const [asanas, setAsanas] = useState([]);
   const [names, setNames] = useState([]);
   const [sortedAsanas, setSortedAsanas] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [pendingSaveObject, setPendingSaveObject] = useState(null); // Store pending data
+  const [playlistId, setPlaylistId] = useState(null);
 
   const predefinedOrder = [
     "Starting Prayer Standing",
     "Starting Prayer Sitting",
+    "Warmup",
     "Suryanamaskara Non Stithi",
     "Suryanamaskara Stithi",
     "Standing",
@@ -84,7 +94,11 @@ function EditPlaylistStudent() {
   const filteredAsanasByCategory = predefinedOrder.map((category) => {
     return {
       category: category,
-      asanas: sortedAsanas.filter((asana) => asana.asana_category === category),
+      asanas: sortedAsanas.filter((asana) => {
+        // If the asana has is_warmup = true, categorize it under "Warmup"
+        if (asana.is_warmup) return category === "Warmup";
+        return asana.asana_category === category;
+      }),
     };
   });
 
@@ -763,16 +777,26 @@ function EditPlaylistStudent() {
     setPlaylistCurrent(recalculatedPlaylist);
     console.log(recalculatedPlaylist);
     formValues.asana_ids = recalculatedPlaylist;
+    setPendingSaveObject(formValues);
+    setPlaylistId(playlist_id);
+    setOpen(true);
+  };
+
+  const handleCreatePlaylist = async () => {
+    setOpen(false); // Close modal before API call
+    if (!pendingSaveObject) return; // Ensure there's data
+    if (!playlistId) return; // Ensure there's data
+
     const response = await Fetch({
-      url: `/user-playlists/edit/${playlist_id}`,
+      url: `/user-playlists/edit/${playlistId}`,
       method: "PUT",
-      data: { user_id: user.user_id, updates: formValues },
+      data: { user_id: user.user_id, updates: pendingSaveObject },
     });
     if (response.status === 200) {
       toast("Playlist updated successfully!");
       try {
         const manifestResponse = await Fetch({
-          url: `/content/playlists/createManifest/${playlist_id}`,
+          url: `/content/playlists/createManifest/${playlistId}`,
           method: "POST",
         });
 
@@ -787,7 +811,6 @@ function EditPlaylistStudent() {
       toast("Error updating playlist:", response.status);
     }
   };
-
   const filterAsanas = (playlist) => {
     return playlist.filter((id) => typeof id === "number");
   };
@@ -1065,6 +1088,30 @@ function EditPlaylistStudent() {
           </div>
         </Container>
       </div>
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>Confirm Playlist Creation</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Once you create this playlist, you can only edit it **once**. Do you
+            want to proceed?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => navigate("/student/view-all-playlists")}
+            color="secondary"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCreatePlaylist}
+            color="primary"
+            variant="contained"
+          >
+            Yes, Create Playlist
+          </Button>
+        </DialogActions>
+      </Dialog>
     </StudentPageWrapper>
   );
 }
