@@ -202,9 +202,7 @@ function RegisterNewPlaylistStudent() {
       const currentId = asanasOnlyPlaylist[i];
       if (typeof currentId === "number") {
         if (i === 0) {
-          console.log(currentId);
           const curAsana = await fetchAsanaById(currentId);
-          console.log(curAsana);
           let transitionData = {
             start_category: null,
             end_category: null,
@@ -215,7 +213,6 @@ function RegisterNewPlaylistStudent() {
             drm_status: curAsana.drm_video,
             transitions: transitions,
           };
-          console.log(transitionData);
           if (curAsana.asana_category === "Sitting") {
             let t1 = await TransitionEndSitting(
               transitionData.start_category,
@@ -1038,6 +1035,32 @@ function RegisterNewPlaylistStudent() {
                 )}
               </Droppable>
             </DragDropContext>
+          </div>
+
+          <div>
+            <Paper elevation={3} sx={{ maxWidth: 400, p: 3, borderRadius: 2 }}>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>
+                Order of Asanas for Playlist
+              </Typography>
+              <List>
+                {predefinedOrder.map((asana, index) => {
+                  let displayText = asana;
+                  if (index === 0 && predefinedOrder[1]) {
+                    displayText = `${asana} / ${predefinedOrder[1]}`;
+                  } else if (index === 3 && predefinedOrder[4]) {
+                    displayText = `${asana} / ${predefinedOrder[4]}`;
+                  } else if (index === 1 || index === 4) {
+                    return null; // Skip rendering these since they are merged with the previous one
+                  }
+
+                  return (
+                    <ListItem key={index} sx={{ px: 0 }}>
+                      <ListItemText primary={`${index + 1}. ${displayText}`} />
+                    </ListItem>
+                  );
+                })}
+              </List>
+            </Paper>
           </div>
         </div>
 
