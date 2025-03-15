@@ -186,7 +186,7 @@ function RegisterNewPlaylistStudent() {
         return (
           asana.teacher_mode === false &&
           asana.drm_video === true &&
-          asana.nobreak_asana === true
+          (asana.is_warmup === true || asana.nobreak_asana === true)
         );
       }),
     }))
