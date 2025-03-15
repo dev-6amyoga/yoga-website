@@ -1092,7 +1092,7 @@ function EditPlaylistStudent() {
         <DialogTitle>Confirm Playlist Creation</DialogTitle>
         <DialogContent>
           <Typography>
-            Once you create this playlist, you can only edit it **once**. Do you
+            Once you create this playlist, you can no longer edit it. Do you
             want to proceed?
           </Typography>
         </DialogContent>

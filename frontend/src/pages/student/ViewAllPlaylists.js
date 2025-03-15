@@ -5,6 +5,7 @@ import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
 import { withAuth } from "../../utils/withAuth";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Table,
   TableBody,
@@ -25,6 +26,7 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
+import { Modal, Box, List, ListItem } from "@mui/material";
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -45,8 +47,8 @@ function ViewAllPlaylists() {
   const [showModal, setShowModal] = useState(false);
   const [editsRemaining, setEditsRemaining] = useState(0);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState(null);
-
   const navigate = useNavigate();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -81,12 +83,16 @@ function ViewAllPlaylists() {
         return acc;
       }, {});
       const playlistAsanaNames = allPlaylists.reduce((acc, playlist) => {
-        acc[playlist.playlist_id] = playlist.asana_ids.map(
-          (id) => asanaNameMap[id] || "Unknown"
-        );
+        acc[playlist.playlist_id] = playlist.asana_ids
+          .map((id) => {
+            if (typeof id === "number") {
+              return asanaNameMap[id] || "Unknown";
+            }
+            return null; // Return null for non-number values (you can also filter them out later)
+          })
+          .filter(Boolean); // Remove null values from the list
         return acc;
       }, {});
-
       const playlistTransitionNames = allPlaylists.reduce((acc, playlist) => {
         acc[playlist.playlist_id] = playlist.sections.map((section) => {
           return section.transition_ids
@@ -117,22 +123,17 @@ function ViewAllPlaylists() {
     const editablePlaylist = filteredPlaylists.find(
       (x) => x.playlist_id === playlistId
     );
-    console.log(editablePlaylist);
-    console.log(editablePlaylist._id);
     let userPlaylistEditable = userPlaylists.filter((x) =>
       x.playlists.includes(editablePlaylist._id)
     );
-    console.log(userPlaylistEditable);
     if (userPlaylistEditable[0].edits_left === 0) {
       toast(
         "You have " + userPlaylistEditable[0].edits_left + " edits remaining! "
       );
     } else {
-      toast("show modal");
       setEditsRemaining(userPlaylistEditable[0].edits_left);
       setSelectedPlaylistId(playlistId);
       setShowModal(true);
-      // navigate(`/student/playlist/edit/${playlistId}`);
     }
   };
 
@@ -149,7 +150,6 @@ function ViewAllPlaylists() {
         window.location.reload();
         setDelOpen(false);
       } else {
-        console.log(response);
         toast(response.data.message);
         setDelOpen(false);
       }
@@ -163,9 +163,61 @@ function ViewAllPlaylists() {
     navigate(`/student/playlist/edit/${selectedPlaylistId}`);
   };
 
-  // Cancel edit
   const cancelEdit = () => {
     setShowModal(false);
+  };
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const viewPlaylist = (playlistId) => {
+    const playlist = allPlaylists.find((p) => p.playlist_id === playlistId);
+    setSelectedPlaylist(playlist);
+    setModalOpen(true);
+  };
+
+  const ViewPlaylistModal = ({ open, onClose, playlist, asanaNames }) => {
+    if (!playlist) return null;
+    const asanaList = asanaNames[playlist.playlist_id];
+    return (
+      <Modal open={open} onClose={onClose}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+            maxHeight: "80vh", // Limit height
+            overflowY: "auto", // Enable scrolling
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            {playlist.playlist_name}
+          </Typography>
+          <List>
+            {asanaList.length > 0 ? (
+              asanaList.map((asana, index) => (
+                <ListItem key={index}>{asana}</ListItem>
+              ))
+            ) : (
+              <Typography>No Asanas Found</Typography>
+            )}
+          </List>
+          <Button
+            onClick={onClose}
+            variant="contained"
+            color="primary"
+            sx={{ mt: 2 }}
+          >
+            Close
+          </Button>
+        </Box>
+      </Modal>
+    );
   };
 
   return (
@@ -210,6 +262,16 @@ function ViewAllPlaylists() {
                         }}
                       >
                         <EditIcon />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title={"View"}>
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          viewPlaylist(playlist.playlist_id);
+                        }}
+                      >
+                        <VisibilityIcon />
                       </Button>
                     </Tooltip>
                     {/* <Tooltip title={"Delete"}>
@@ -280,6 +342,13 @@ function ViewAllPlaylists() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ViewPlaylistModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        playlist={selectedPlaylist}
+        asanaNames={asanaNames}
+      />
     </StudentPageWrapper>
   );
 }
