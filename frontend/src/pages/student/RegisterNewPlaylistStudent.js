@@ -91,7 +91,6 @@ function RegisterNewPlaylistStudent() {
     "Vajrasana",
     "Pranayama Prayer",
     "Pranayama",
-    "Special",
     "Closing Prayer Sitting",
   ];
 
