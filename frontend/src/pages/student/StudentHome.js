@@ -24,10 +24,10 @@ function StudentHome() {
     // return false;
     const userAgent = navigator.userAgent;
     const match = userAgent.match(/Windows NT (\d+\.\d+)/);
-    if (match) {
-      const version = parseFloat(match[1]);
-      return version < 10.0;
-    }
+    // if (match) {
+    //   const version = parseFloat(match[1]);
+    //   return version <= 10.0;
+    // }
     return true;
   };
 
