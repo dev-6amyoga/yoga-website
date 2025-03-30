@@ -34,7 +34,6 @@ function Playlist({ page }) {
   const [teacherPlaylists, setTeacherPlaylists] = useState([]);
   const [madeForTeacher, setMadeForTeacher] = useState([]);
   const [playlists, setPlaylists] = useState([]);
-
   const [customPlaylists, setCustomPlaylists] = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
