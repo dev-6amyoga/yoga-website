@@ -194,13 +194,13 @@ export default function Pricing({
                           plan.description !==
                             "Tailor made playlists as per your requirement",
                       },
-                      {
-                        name: "Play 6AM Yoga playlists",
-                        enable:
-                          plan.has_basic_playlist &&
-                          plan.description !==
-                            "Tailor made playlists as per your requirement",
-                      },
+                      // {
+                      //   name: "Play 6AM Yoga playlists",
+                      //   enable:
+                      //     plan.has_basic_playlist &&
+                      //     plan.description !==
+                      //       "Tailor made playlists as per your requirement",
+                      // },
                       {
                         name: "Monthly yoga sequence having warm up, suryanamaskara, yogasanas and pranayama (75 min/day)",
                         enable:
@@ -209,10 +209,16 @@ export default function Pricing({
                             "Tailor made playlists as per your requirement",
                       },
                       {
+                        name: "Create custom curated playlists",
+                        enable: plan.has_playlist_creation,
+                      },
+                      {
                         name: "Exclusive Pranayama Sessions (20 min)",
                         enable:
                           plan.plan_user_type !== "TEACHER" &&
                           plan.has_basic_playlist &&
+                          plan.plan_id === 12 &&
+                          !plan.has_playlist_creation &&
                           plan.description !==
                             "Tailor made playlists as per your requirement",
                       },
@@ -221,6 +227,8 @@ export default function Pricing({
                         enable:
                           plan.plan_user_type !== "TEACHER" &&
                           plan.has_basic_playlist &&
+                          plan.plan_id === 12 &&
+                          !plan.has_playlist_creation &&
                           plan.description !==
                             "Tailor made playlists as per your requirement",
                       },
@@ -229,6 +237,8 @@ export default function Pricing({
                         enable:
                           plan.plan_user_type !== "TEACHER" &&
                           plan.has_basic_playlist &&
+                          plan.plan_id === 12 &&
+                          !plan.has_playlist_creation &&
                           plan.description !==
                             "Tailor made playlists as per your requirement",
                       },
@@ -244,10 +254,6 @@ export default function Pricing({
                         enable:
                           plan.plan_user_type === "TEACHER" &&
                           plan.name.includes("Advanced"),
-                      },
-                      {
-                        name: "Create custom curated playlists",
-                        enable: plan.has_playlist_creation,
                       },
                     ].map((feature) => (
                       <Box
