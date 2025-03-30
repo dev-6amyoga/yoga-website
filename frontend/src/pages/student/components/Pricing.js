@@ -181,7 +181,11 @@ export default function Pricing({
                     />
                     {[
                       {
-                        name: `Validity for ${plan.plan_validity_days} Days`,
+                        name: "Create your own yoga sequence (2 per month + 2 edits each)",
+                        enable: plan.has_playlist_creation,
+                      },
+                      {
+                        name: `Valid for ${plan.plan_validity_days} Days`,
                         enable:
                           true &&
                           plan.description !==
@@ -207,10 +211,6 @@ export default function Pricing({
                           plan.has_basic_playlist &&
                           plan.description !==
                             "Tailor made playlists as per your requirement",
-                      },
-                      {
-                        name: "Create custom curated playlists",
-                        enable: plan.has_playlist_creation,
                       },
                       {
                         name: "Only on Laptops and Desktops (no phones)",
