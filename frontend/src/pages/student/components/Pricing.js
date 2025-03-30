@@ -202,7 +202,7 @@ export default function Pricing({
                       //       "Tailor made playlists as per your requirement",
                       // },
                       {
-                        name: "Monthly yoga sequence having warm up, suryanamaskara, yogasanas and pranayama (75 min/day)",
+                        name: "Fixed Yoga Sequence (warm up, suryanamaskara, yogasanas and pranayama) Updated monthly",
                         enable:
                           plan.has_basic_playlist &&
                           plan.description !==
@@ -211,6 +211,14 @@ export default function Pricing({
                       {
                         name: "Create custom curated playlists",
                         enable: plan.has_playlist_creation,
+                      },
+                      {
+                        name: "Only on Laptops and Desktops (no phones)",
+                        enable: true,
+                      },
+                      {
+                        name: "24X7 Customer Assistance",
+                        enable: true,
                       },
                       {
                         name: "Exclusive Pranayama Sessions (20 min)",
