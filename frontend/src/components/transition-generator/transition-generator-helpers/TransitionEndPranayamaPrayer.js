@@ -40,8 +40,9 @@ export const TransitionEndPranayamaPrayer = async (
 
   if (!start_category) {
     let res = handleTransition([
-      "Feet Apart Hands Loose Standing Transition Front",
-      "Standing To Sitting Transition",
+      // "Feet Apart Hands Loose Standing Transition Front",
+      // "Standing To Sitting Transition",
+      "Sitting Position Transition",
       "Pranayama Start Sitting",
     ]);
     res = res.map((transition) => transition.transition_id);
