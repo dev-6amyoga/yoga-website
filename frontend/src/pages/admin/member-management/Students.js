@@ -30,12 +30,10 @@ function Students() {
           url: "/user/get-all-students",
           method: "GET",
         });
-
         const data = response.data;
         const sortedUsers = data.users.sort((a, b) => {
           return new Date(b.created) - new Date(a.created);
         });
-
         setStudents(sortedUsers);
         setStudentData(sortedUsers);
         setFilteredData(sortedUsers);

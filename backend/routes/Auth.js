@@ -724,66 +724,66 @@ router.post('/register', async (req, res) => {
 
     t.commit()
 
-    // mailTransporter.sendMail(
-    //   {
-    //     from: 'dev.6amyoga@gmail.com',
-    //     to: email_id,
-    //     subject: '6AM Yoga | Successful Registration',
-    //     html: `
-    //       <p>Greetings,</p>
-    //       <p>Your registration at ai.6amyoga.com was successful. These are the details we received : </p>
+    mailTransporter.sendMail(
+      {
+        from: 'dev.6amyoga@gmail.com',
+        to: email_id,
+        subject: '6AM Yoga | Successful Registration',
+        html: `
+          <p>Greetings,</p>
+          <p>Your registration at ai.6amyoga.com was successful. These are the details we received : </p>
 
-    //       <p>Name : ${name}</p>
-    //       <p>Email ID : ${email_id}.</p>
-    //       <p>Phone Number : ${phone_no}.</p>
-    //       <p>Username : ${username}.</p>
+          <p>Name : ${name}</p>
+          <p>Email ID : ${email_id}.</p>
+          <p>Phone Number : ${phone_no}.</p>
+          <p>Username : ${username}.</p>
 
-    //       <p>Regards, </p>
-    //       <p>My Yoga Teacher, 6AM Yoga </p>
-    //     `,
-    //   },
-    //   async (err, info) => {
-    //     if (err) {
-    //       console.error(err)
-    //       res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-    //         message: 'Internal server error; try again',
-    //       })
-    //     } else {
-    //       // console.log("Registration mail sent to admin!");
-    //       mailTransporter.sendMail(
-    //         {
-    //           from: 'dev.6amyoga@gmail.com',
-    //           to: '992351@gmail.com',
-    //           subject: '6AM Yoga | New User Registration',
-    //           html: `
-    //             <p>Greetings,</p>
-    //             <p>You received a new registration on ai.6amyoga.com ! Congratulations :) The users' details are as follows : </p>
+          <p>Regards, </p>
+          <p>My Yoga Teacher, 6AM Yoga </p>
+        `,
+      },
+      async (err, info) => {
+        if (err) {
+          console.error(err)
+          res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+            message: 'Internal server error; try again',
+          })
+        } else {
+          // console.log("Registration mail sent to admin!");
+          mailTransporter.sendMail(
+            {
+              from: 'dev.6amyoga@gmail.com',
+              to: '992351@gmail.com',
+              subject: '6AM Yoga | New User Registration',
+              html: `
+                <p>Greetings,</p>
+                <p>You received a new registration on ai.6amyoga.com ! Congratulations :) The users' details are as follows : </p>
 
-    //             <p>Name : ${name}</p>
-    //             <p>Email ID : ${email_id}.</p>
-    //             <p>Phone Number : ${phone_no}.</p>
+                <p>Name : ${name}</p>
+                <p>Email ID : ${email_id}.</p>
+                <p>Phone Number : ${phone_no}.</p>
 
-    //             <p>Regards, </p>
-    //             <p>My Yoga Teacher, 6AM Yoga </p>
-    //           `,
-    //         },
-    //         async (err, info) => {
-    //           if (err) {
-    //             console.error(err)
-    //             res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-    //               message: 'Internal server error; try again',
-    //             })
-    //           } else {
-    //             res.status(HTTP_OK).json({
-    //               message: 'Registration mail sent to admin!',
-    //               user: newUser,
-    //             })
-    //           }
-    //         }
-    //       )
-    //     }
-    //   }
-    // )
+                <p>Regards, </p>
+                <p>My Yoga Teacher, 6AM Yoga </p>
+              `,
+            },
+            async (err, info) => {
+              if (err) {
+                console.error(err)
+                res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+                  message: 'Internal server error; try again',
+                })
+              } else {
+                res.status(HTTP_OK).json({
+                  message: 'Registration mail sent to admin!',
+                  user: newUser,
+                })
+              }
+            }
+          )
+        }
+      }
+    )
 
     return res.status(HTTP_OK).json({ user: newUser })
   } catch (error) {
