@@ -3,7 +3,7 @@ const expressWs = require('express-ws')
 const requestIp = require('request-ip')
 
 const mongoose = require('mongoose')
-const cron = require('node-cron')
+// const cron = require('node-cron')
 
 const cors = require('cors')
 const dotenv = require('dotenv')
@@ -13,11 +13,12 @@ const compression = require('compression')
 const helmet = require('helmet')
 const glob = require('glob')
 
+const morgan = require('morgan')
+
 const getFrontendDomain = require('./utils/getFrontendDomain')
 
 // LOGGING
 // const logger = require('pino-http')
-const morgan = require('morgan')
 
 // JOB SCHEUDLER
 // const Bree = require('bree')
@@ -42,7 +43,7 @@ glob.sync('./models/mongo/*.js').forEach((file) => {
 
 // routers
 const asanaRouter = require('./routes/Asana')
-const reminderRouter = require('./routes/ReminderScript')
+// const reminderRouter = require('./routes/ReminderScript')
 const videoRecordingRouter = require('./routes/VideoRecordings')
 const videoPackagingRouter = require('./routes/VideoPackaging')
 const authRouter = require('./routes/Auth')
@@ -196,8 +197,6 @@ const limiter = RateLimit({
 
 app.use(limiter);
 */
-app.use(limiter);
-*/
 
 // static files
 app.use('/static', express.static(path.join(__dirname, 'public')))
@@ -284,30 +283,6 @@ initializeSequelize()
         //     console.log(err);
         //   });
 
-let start = performance.now()
-initializeSequelize()
-  .then(() => {
-    console.log('Sequelize initialized, took', performance.now() - start, 'ms')
-
-    start = performance.now()
-
-    mongoose
-      .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-      .then(() => {
-        console.log(
-          'Connected to MongoDB Atlas, took',
-          performance.now() - start,
-          'ms'
-        )
-        start = performance.now()
-        // bulkCreateSampleData()
-        //   .then(() => {
-        //     console.log("Sample data created!");
-        //   })
-        //   .catch((err) => {
-        //     console.log(err);
-        //   });
-
         app.listen(port || 4000, () => {
           console.log(
             `Server is running on port ${port}, took`,
@@ -326,5 +301,3 @@ initializeSequelize()
       })
   })
   .catch((err) => console.log(err))
-
-
