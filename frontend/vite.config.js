@@ -1,7 +1,7 @@
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig, transformWithEsbuild } from "vite";
 import Inspect from "vite-plugin-inspect";
-import solidPlugin from "vite-plugin-solid";
+// import solidPlugin from "vite-plugin-solid";
 
 export default defineConfig({
 	plugins: [
@@ -32,13 +32,7 @@ export default defineConfig({
 				});
 			},
 		},
-		react(),
-		solidPlugin({
-			include: [
-				"src/solidjs-src/src/**/**/**/**/*.jsx",
-				"src/solidjs-src/src/**/**/**/**/*.js",
-			],
-		}),
+		react({}),
 
 		Inspect(),
 	],

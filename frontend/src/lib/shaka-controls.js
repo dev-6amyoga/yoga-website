@@ -729,6 +729,7 @@ const shakaStreamConfig = {
 };
 
 export {
+	shakaClassModeUIConfig,
 	ShakaPlayerCustomPlayPause,
 	ShakaPlayerFullscreen,
 	ShakaPlayerGoNext,
@@ -738,7 +739,6 @@ export {
 	ShakaPlayerNextMarker,
 	ShakaPlayerPrevMarker,
 	ShakaPlayerToggleMode,
-	shakaClassModeUIConfig,
 	shakaPlayerToggleModeInstance,
 	shakaStreamConfig,
 	shakaUIConfig,

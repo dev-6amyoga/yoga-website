@@ -3,7 +3,7 @@ const expressWs = require('express-ws')
 const requestIp = require('request-ip')
 
 const mongoose = require('mongoose')
-const cron = require('node-cron')
+// const cron = require('node-cron')
 
 const cors = require('cors')
 const dotenv = require('dotenv')
@@ -13,11 +13,12 @@ const compression = require('compression')
 const helmet = require('helmet')
 const glob = require('glob')
 
+const morgan = require('morgan')
+
 const getFrontendDomain = require('./utils/getFrontendDomain')
 
 // LOGGING
 // const logger = require('pino-http')
-const morgan = require('morgan')
 
 // JOB SCHEUDLER
 // const Bree = require('bree')
@@ -42,7 +43,7 @@ glob.sync('./models/mongo/*.js').forEach((file) => {
 
 // routers
 const asanaRouter = require('./routes/Asana')
-const reminderRouter = require('./routes/ReminderScript')
+// const reminderRouter = require('./routes/ReminderScript')
 const videoRecordingRouter = require('./routes/VideoRecordings')
 const videoPackagingRouter = require('./routes/VideoPackaging')
 const authRouter = require('./routes/Auth')
@@ -138,6 +139,11 @@ expressWs(app)
 // app.use(logger())
 
 // CORS
+
+// logger
+// app.use(logger())
+
+// CORS
 app.use(cors(corsOptions))
 
 // parse json body
@@ -178,7 +184,12 @@ app.use(
 )
 
 /*
+/*
 // Apply rate limiter to all requests
+const limiter = RateLimit({
+  windowMs: 30 * 1000, // 30s
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000,
+})
 const limiter = RateLimit({
   windowMs: 30 * 1000, // 30s
   max: process.env.NODE_ENV === 'production' ? 100 : 1000,
@@ -271,7 +282,6 @@ initializeSequelize()
         //   .catch((err) => {
         //     console.log(err);
         //   });
-
         app.listen(port || 4000, () => {
           console.log(
             `Server is running on port ${port}, took`,

@@ -21,6 +21,13 @@ Example :
 }
 */
 
+type TimerVector struct {
+	Position     *float32 `json:"position"`
+	Velocity     *float32 `json:"velocity"`
+	Acceleration *float32 `json:"acceleration"`
+	Timestamp    int64    `json:"timestamp"`
+}
+
 type EventType string
 
 const (
@@ -31,14 +38,23 @@ const (
 
 type Event struct {
 	// objectID string of the class in mongodb
-	ClassID string      `json:"class_id"`
-	Type    EventType   `json:"type"`
-	Data    interface{} `json:"data"`
+	ClassID string `json:"class_id"`
+	UserID  string `json:"user_id"`
+	// TODO : accessToken
+	Type EventType   `json:"type"`
+	Data interface{} `json:"data"`
 }
 
 type StudentEventInitRequest struct {
 	ClassID   string `json:"class_id"`
 	StudentID string `json:"student_id"`
+}
+
+type TeacherEventInitRequest struct {
+	*TimerVector
+
+	StartPosition float32 `json:"start_position"`
+	EndPosition   float32 `json:"end_position"`
 }
 
 // ----------------------------------------------------------
@@ -84,7 +100,7 @@ type ControlsEvent struct {
 }
 
 type ControlsEventSeekToData struct {
-	Time float64 `json:"time"`
+	Time float32 `json:"time"`
 }
 
 type ControlsEventSeekMarkerData struct {
@@ -93,9 +109,35 @@ type ControlsEventSeekMarkerData struct {
 
 // ----------------------------------------------------------
 
+const (
+	EVENT_TIMER_UPDATE EventType = "EVENT_TIMER_UPDATE"
+	EVENT_TIMER_QUERY  EventType = "EVENT_TIMER_QUERY"
+
+	EVENT_TIMER_TIMEUPDATE EventType = "EVENT_TIMER_TIMEUPDATE"
+	EVENT_TIMER_CHANGE     EventType = "EVENT_TIMER_CHANGE"
+)
+
 type TimerEvent struct {
-	CurrentTime float64 `json:"current_time"`
-	EventTime   string  `json:"event_time"`
+	// EventTime string `json:"event_time"`
+}
+
+type TimerEventUpdateData struct {
+	*TimerEvent
+	*TimerVector
+}
+
+type TimerEventUpdateResponse struct {
+	Status EventStatus `json:"status"`
+}
+
+type TimerEventQueryData struct {
+	*TimerEvent
+}
+
+type TimerEventResponse struct {
+	Type   EventType   `json:"type"`
+	Status EventStatus `json:"status"`
+	Data   interface{} `json:"data"`
 }
 
 // ----------------------------------------------------------
@@ -107,9 +149,9 @@ const (
 )
 
 type EventStudentResponse struct {
-	Status  EventStatus `json:"status"`
-	Message string      `json:"message"`
-	Events  []Event     `json:"events"`
+	Status      EventStatus  `json:"status"`
+	Message     string       `json:"message"`
+	QueueEvents []QueueEvent `json:"queue_events"`
 }
 
 type EventTeacherResponse struct {

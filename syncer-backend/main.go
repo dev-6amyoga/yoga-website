@@ -1,8 +1,14 @@
 package main
 
-import "syncer-backend/src/server"
+import (
+	wssyncer "syncer-backend/src/server/ws"
+)
 
 func main() {
-	server := server.NewServer()
-	server.Start()
+	server := wssyncer.NewServer()
+	err := server.Start()
+
+	if err != nil {
+		panic(err)
+	}
 }
