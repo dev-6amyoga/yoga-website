@@ -485,7 +485,10 @@ function Playlist({ page }) {
 
           setPlaylists(studentPlaylists);
         } else {
-          setPlaylists(data);
+          const activePlaylists = data.filter(
+            (playlist) => playlist.playlist_mode.toLowerCase() !== "disabled"
+          );
+          setPlaylists(activePlaylists);
         }
         setLoading(false);
       } catch (error) {
