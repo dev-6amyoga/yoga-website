@@ -95,7 +95,7 @@ function RegisterPlaylistForm() {
           url: "/content/language/getAllLanguages",
         });
         const data = response.data;
-        console.log(data);
+        console.log(data, "IS LANGUAGE");
         setAllLanguages(data);
       } catch (error) {
         console.log(error);
@@ -105,21 +105,23 @@ function RegisterPlaylistForm() {
   }, []);
 
   useEffect(() => {
-    console.log(playlistType);
     const fetchData = async () => {
       try {
         const response = await Fetch({
           url: "/content/video/getAllAsanas",
         });
-        console.log(playlistType);
+        let filtered = response.data;
         if (playlistType === "teacher") {
-          setAsanas(response.data.filter((x) => x.drm_video === false));
-        }
-        if (playlistType === "student") {
-          setAsanas(response.data.filter((x) => x.drm_video === true));
+          filtered = filtered.filter((x) => x.drm_video === false);
+        } else if (playlistType === "student") {
+          filtered = filtered.filter((x) => x.drm_video === true);
         } else {
-          setAsanas(response.data);
+          // Default: show only drm_video === false and teacher_mode === false
+          filtered = filtered.filter(
+            (x) => x.drm_video === false && x.teacher_mode === false
+          );
         }
+        setAsanas(filtered);
       } catch (error) {
         console.log(error);
       }
