@@ -41,6 +41,7 @@ import DownloadProgressCircle from "../DownloadProgressCircle";
 import Playlist from "../Sidebar/Playlist";
 import PlaylistSections from "./Sections";
 import VideoPlayer from "./VideoPlayer";
+import PoseDetector from "../webcam_component/PoseDetector";
 
 export default function VideoPlayerWrapper({ page = "student" }) {
   const [fullScreen, playerSupported, setPlayerSupported] = useVideoStore(
@@ -112,6 +113,7 @@ export default function VideoPlayerWrapper({ page = "student" }) {
               <VideoPlayer />
             </div>
             <div className="queue-area">
+              <PoseDetector />
               <PlaylistSections />
             </div>
           </div>

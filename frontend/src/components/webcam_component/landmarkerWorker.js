@@ -1,13 +1,3 @@
-// landmarkerWorker.ts
-
-/* eslint-disable no-restricted-globals */
-
-// import {
-//   DrawingUtils,
-//   FilesetResolver,
-//   PoseLandmarker,
-// } from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0";
-
 let poseLandmarker = null;
 let drawingUtils = null;
 let module = null;
@@ -286,33 +276,27 @@ const detectVrikshasanaRight = (landmarks) => {
 };
 
 self.onmessage = async (event) => {
-  // console.log("worker in on message");
   const { type, data } = event;
-  // console.log("worker", type, data);
   if (data.type === "init") {
     console.log("[LANDMARKER] received init");
-
     const [m1] = await Promise.all([
       import("https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0"),
     ]);
-
     module = m1;
-
     DrawingUtilsModule = module.DrawingUtils;
-
     const vision = await module.FilesetResolver.forVisionTasks(
       "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
     );
-
     poseLandmarker = await module.PoseLandmarker.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
+        modelAssetPath:
+          "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task",
         delegate: "GPU",
       },
-      runningMode: "IMAGE",
+      runningMode: "VIDEO",
       numPoses: 1,
-      minDetectionConfidence: 0.5, // adjust confidence thresholds
-      minTrackingConfidence: 0.5,
+      minDetectionConfidence: 0.7,
+      minTrackingConfidence: 0.7,
     });
 
     offscreenCanvas = data.canvas;
@@ -330,34 +314,13 @@ self.onmessage = async (event) => {
     self.postMessage({ type: "init-complete" });
   }
 
-  // if (data.type === "predict") {
-  //   console.log("[LANDMARKER] received predict");
-  //   // console.log("worker data:", data);
-  //   const { imageData, width, height } = data.data;
-  //   console.log("worker :", imageData);
-  //   const canvas = new OffscreenCanvas(width, height);
-  //   const ctx = canvas.getContext("2d");
-  //   const imageBitmap = await createImageBitmap(
-  //     new ImageData({ imageData, width, height })
-  //   );
-  //   console.log(imageBitmap);
-  //   // ctx.drawImage(imageBitmap, 0, 0, width, height);
-
-  //   // const result = await poseLandmarker.detect(canvas);
-  //   // console.log("[LANDMARKER] result :", result);
-  //   self.postMessage({ type: "result", data: result });
-  // }
-
   if (data.type === "predict") {
-    // console.log("[LANDMARKER] received predict");
     const { imageData, width, height, side = "left" } = data.data;
     const canvas = new OffscreenCanvas(width, height);
     const ctx = canvas.getContext("2d");
     const imgData = new ImageData(imageData, width, height);
     const imageBitmap = await createImageBitmap(imgData);
-    // console.log(imageData);
     ctx.drawImage(imageBitmap, 0, 0, width, height);
-
     if (!module) {
       self.postMessage({
         type: "result",
@@ -366,34 +329,23 @@ self.onmessage = async (event) => {
       });
       return;
     }
-
     if (!canvas) {
       return;
     }
-
-    const result = await poseLandmarker.detect(canvas);
-    // console.log(result.landmarks);
-
+    const result = await poseLandmarker.detectForVideo(
+      canvas,
+      performance.now()
+    );
     if (!offscreenCanvas) {
       return;
     }
-
     const screenCanvasCtx = offscreenCanvas.getContext("2d");
-
     offscreenCanvas.width = width;
     offscreenCanvas.height = height;
-
     screenCanvasCtx.save();
-
     screenCanvasCtx.clearRect(0, 0, width, height);
-
-    // const ct = performance.now();
-
     let score = 0;
     let message = "";
-
-    console.log("SIDE: ", side);
-
     for (const landmark of result.landmarks) {
       if (side === "left") {
         [score, message] = detectVrikshasanaLeft(landmark);
@@ -409,23 +361,8 @@ self.onmessage = async (event) => {
       });
       drawingUtils.drawConnectors(landmark, POSE_CONNECTIONS);
     }
-    // console.log("time taken to update : ", performance.now() - ct);
-
     screenCanvasCtx.restore();
-
     self.postMessage({ type: "result", score, message });
-
-    // Corrected ImageData constructor
-    // const imageBitmap = await createImageBitmap(
-    //   new ImageData(new Uint8ClampedArray(imageData), width, height)
-    // );
-
-    // console.log(imageBitmap);
-    // ctx.drawImage(imageBitmap, 0, 0, width, height);
-
-    // const result = await poseLandmarker.detect(canvas);
-    // console.log("[LANDMARKER] result :", result);
-    // self.postMessage({ type: "result", data: result });
   }
 };
 
