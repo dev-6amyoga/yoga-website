@@ -110,24 +110,13 @@ function RegisterPlaylistForm() {
         const response = await Fetch({
           url: "/content/video/getAllAsanas",
         });
-        let filtered = response.data;
-        if (playlistType === "teacher") {
-          filtered = filtered.filter((x) => x.drm_video === false);
-        } else if (playlistType === "student") {
-          filtered = filtered.filter((x) => x.drm_video === true);
-        } else {
-          // Default: show only drm_video === false and teacher_mode === false
-          filtered = filtered.filter(
-            (x) => x.drm_video === false && x.teacher_mode === false
-          );
-        }
-        setAsanas(filtered);
+        setAsanas(response.data); // Always set all asanas
       } catch (error) {
         console.log(error);
       }
     };
     fetchData();
-  }, [playlistType]);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -654,10 +643,15 @@ function RegisterPlaylistForm() {
     .map((category) => ({
       ...category,
       asanas: category.asanas.filter((asana) => {
+        // Default: show only drm_video === false and teacher_mode === false
+        if (!teacherModeFilter && !drmVideoFilter && !noBreakFilter) {
+          return asana.drm_video === false && asana.teacher_mode === false;
+        }
+        // Otherwise, filter by checkboxes
         return (
-          (!teacherModeFilter || asana.teacher_mode === teacherModeFilter) &&
-          (!drmVideoFilter || asana.drm_video === drmVideoFilter) &&
-          (!noBreakFilter || asana.nobreak_asana === noBreakFilter)
+          (!teacherModeFilter || asana.teacher_mode === true) &&
+          (!drmVideoFilter || asana.drm_video === true) &&
+          (!noBreakFilter || asana.nobreak_asana === true)
         );
       }),
     }))
