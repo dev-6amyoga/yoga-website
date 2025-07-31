@@ -109,10 +109,13 @@ function EditPlaylist() {
     .map((category) => ({
       ...category,
       asanas: category.asanas.filter((asana) => {
+        if (!teacherModeFilter && !drmVideoFilter) {
+          return asana.drm_video === false && asana.teacher_mode === false;
+        }
         return (
-          (!teacherModeFilter || asana.teacher_mode === teacherModeFilter) &&
-          (!drmVideoFilter || asana.drm_video === drmVideoFilter) &&
-          (!noBreakFilter || asana.nobreak_asana === noBreakFilter)
+          (!teacherModeFilter || asana.teacher_mode === true) &&
+          (!drmVideoFilter || asana.drm_video === true) &&
+          (!noBreakFilter || asana.nobreak_asana === true)
         );
       }),
     }))
