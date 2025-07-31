@@ -113,7 +113,8 @@ export default function VideoPlayerWrapper({ page = "student" }) {
               <VideoPlayer />
             </div>
             <div className="queue-area">
-              <PoseDetector />
+              {/* uncomment for pose detector */}
+              {/* <PoseDetector /> */}
               <PlaylistSections />
             </div>
           </div>
