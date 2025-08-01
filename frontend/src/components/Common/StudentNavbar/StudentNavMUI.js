@@ -149,7 +149,6 @@ function StudentNavMUI({ mode, toggleColorMode }) {
         setUserPlan(activePlan);
         setPlanId(activePlan.plan_id);
         console.log(activePlan.plan);
-        // Disable playlist creation and view if plan is 'Solo Plan 1 Month'
         if (activePlan.plan.name === "Solo Plan 1 Month") {
           setDisabledTailorMade(true);
         } else {
