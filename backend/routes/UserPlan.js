@@ -349,12 +349,20 @@ router.post('/register', authenticateToken, async (req, res) => {
 
     if (!role) throw new Error("Role doesn't exist")
 
+    let computed_validity_to = validity_to
+    if (validity_from) {
+      const fromDate = new Date(validity_from)
+      const toDate = new Date(fromDate)
+      toDate.setDate(fromDate.getDate() + 30)
+      computed_validity_to = toDate
+    }
+
     // create userPlan
     const newUserPlan = await UserPlan.create(
       {
         purchase_date: purchase_date,
         validity_from: validity_from,
-        validity_to: validity_to,
+        validity_to: computed_validity_to,
         cancellation_date: cancellation_date,
         auto_renewal_enabled: auto_renewal_enabled,
         discount_coupon_id: discount_coupon_id,
