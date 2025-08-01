@@ -149,7 +149,12 @@ function StudentNavMUI({ mode, toggleColorMode }) {
         setUserPlan(activePlan);
         setPlanId(activePlan.plan_id);
         console.log(activePlan.plan);
-        setDisabledTailorMade(!activePlan.plan.has_playlist_creation);
+        // Disable playlist creation and view if plan is 'Solo Plan 1 Month'
+        if (activePlan.plan.name === "Solo Plan 1 Month") {
+          setDisabledTailorMade(true);
+        } else {
+          setDisabledTailorMade(!activePlan.plan.has_playlist_creation);
+        }
         setDisabled(!activePlan.plan.has_basic_playlist);
       } catch (error) {
         console.error("Error fetching plans:", error);
