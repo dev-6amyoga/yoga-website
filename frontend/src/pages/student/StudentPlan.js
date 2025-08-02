@@ -28,6 +28,8 @@ import { ROLE_STUDENT } from "../../enums/roles";
 import { withAuth } from "../../utils/withAuth";
 import Hero from "./components/Hero";
 
+//add trial plan
+
 function DiscountCouponForm({ handleDiscountCouponFormSubmit }) {
   return (
     <form
