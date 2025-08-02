@@ -198,19 +198,17 @@ export default function Pricing({
                           plan.description !==
                             "Tailor made playlists as per your requirement",
                       },
-                      // {
-                      //   name: "Play 6AM Yoga playlists",
-                      //   enable:
-                      //     plan.has_basic_playlist &&
-                      //     plan.description !==
-                      //       "Tailor made playlists as per your requirement",
-                      // },
+                      {
+                        name: "Play Standing Warmup Sequence",
+                        enable: plan.name !== "Warmup Plan",
+                      },
                       {
                         name: "Fixed Yoga Sequence (warm up, suryanamaskara, yogasanas and pranayama) Updated monthly",
                         enable:
                           plan.has_basic_playlist &&
                           plan.description !==
-                            "Tailor made playlists as per your requirement",
+                            "Tailor made playlists as per your requirement" &&
+                          plan.name !== "Warmup Plan",
                       },
                       {
                         name: "Only on Laptops and Desktops (no phones)",
