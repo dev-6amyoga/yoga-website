@@ -17,15 +17,23 @@ import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
 import { Fetch } from "../../../utils/Fetch";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
 
 export default function Pricing({
   heading,
   allPlans,
   subscribePlan,
   selectedCurrency,
+  handleTryTrial,
+  trialPlanAvailed,
 }) {
   const [allCurrencies, setAllCurrencies] = useState([]);
   const [currentCurrencyId, setCurrentCurrencyId] = useState(0);
+  const [trialDialogOpen, setTrialDialogOpen] = useState(false);
+  const [trialPlanToTry, setTrialPlanToTry] = useState(null);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -107,6 +115,7 @@ export default function Pricing({
       <div className="my-10 grid w-full grid-cols-1 place-content-center place-items-center gap-4 md:grid-cols-3 lg:gap-8">
         {allPlans?.map((plan) => {
           let selectedPricing;
+          console.log(plan);
           if (plan.pricing) {
             selectedPricing = plan.pricing.find(
               (x) => x.currency.short_tag === selectedCurrency
@@ -300,7 +309,6 @@ export default function Pricing({
                         )}
                       </Box>
                     ))}
-
                     {plan.name === "Customized Plan" && (
                       <>
                         <FormControl fullWidth sx={{ mt: 2 }}>
@@ -412,15 +420,43 @@ export default function Pricing({
                       </>
                     )}
                   </CardContent>
-                  <CardActions className="flex flex-col items-center">
-                    {plan.name !== "Customized Plan" && (
+                  <CardActions className="flex flex-row items-center justify-center gap-3">
+                    {plan.name === "Warmup Plan" ? (
+                      <>
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          disabled={trialPlanAvailed}
+                          onClick={() => {
+                            setTrialPlanToTry(plan);
+                            setTrialDialogOpen(true);
+                          }}
+                          sx={
+                            trialPlanAvailed
+                              ? {
+                                  backgroundColor: "#e0e0e0",
+                                  color: "#333",
+                                  borderColor: "#bdbdbd",
+                                  opacity: 1,
+                                  fontWeight: 600,
+                                }
+                              : {}
+                          }
+                        >
+                          {trialPlanAvailed
+                            ? "Trial Availed"
+                            : "Try for 30 days"}
+                        </Button>
+                        <Button
+                          variant="contained"
+                          onClick={() => subscribePlan(plan)}
+                        >
+                          Purchase
+                        </Button>
+                      </>
+                    ) : (
                       <Button
-                        // fullWidth
-                        variant={
-                          plan.name === "Customized Plan"
-                            ? "contained"
-                            : "contained"
-                        }
+                        variant="contained"
                         onClick={() => subscribePlan(plan)}
                       >
                         Purchase
@@ -547,10 +583,9 @@ export default function Pricing({
                       </Box>
                     ))}
                   </CardContent>
-                  <CardActions className="flex flex-col items-center">
+                  <CardActions className="flex flex-row items-center">
                     <Button
-                      // fullWidth
-                      variant={"contained"}
+                      variant="contained"
                       onClick={() => subscribePlan(plan)}
                     >
                       Purchase
@@ -562,6 +597,32 @@ export default function Pricing({
           );
         })}
       </div>
+
+      <Dialog open={trialDialogOpen} onClose={() => setTrialDialogOpen(false)}>
+        <DialogTitle>Start Free Trial</DialogTitle>
+        <DialogContent>
+          The free trial period is for <b>30 days</b>, during which you can
+          access the playlist for free.
+          <br />
+          After that, you will have to purchase the plan for continued access to
+          the playlist.
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTrialDialogOpen(false)} color="secondary">
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              setTrialDialogOpen(false);
+              if (trialPlanToTry) handleTryTrial(trialPlanToTry);
+            }}
+            color="primary"
+            variant="contained"
+          >
+            Proceed
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

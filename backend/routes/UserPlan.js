@@ -249,31 +249,17 @@ router.post('/register', authenticateToken, async (req, res) => {
 
     current_status,
     transaction_order_id,
-
+    is_trial,
     user_type,
   } = req.body
-  // console.log(req.body);
-  // current_status: 'ACTIVE'
-  // discount_coupon_id: 0
-  // institute_id: 0
-  // is_active: true
-  // plan_id: 11
-  // purchase_date: '2024-11-30'
-  // referral_code_id: 0
-  // transaction_order_id: 'MANUAL12/6/2024, 10:25:17 PM'
-  // user_id: 18
-  // user_type: 'STUDENT'
-  // validity_to: '2024-12-30'
-
   console.log('registering!!')
-
+  console.log(req.body)
   if (
     !user_id ||
     !plan_id ||
     !purchase_date ||
     !transaction_order_id ||
-    !user_type ||
-    institute_id === undefined
+    !user_type
   )
     return res
       .status(HTTP_BAD_REQUEST)
@@ -307,6 +293,7 @@ router.post('/register', authenticateToken, async (req, res) => {
     },
     attributes: ['user_plan_id', 'user_id', 'validity_from', 'validity_to'],
   })
+  console.log(user_plan, 'user_plan')
 
   if (
     user_plan &&
@@ -328,6 +315,7 @@ router.post('/register', authenticateToken, async (req, res) => {
         { transaction: t }
       )
       if (!plan) throw new Error("Plan doesn't exist")
+      console.log(plan, 'plan found')
     } else {
       throw new Error("Plan doesn't exist")
     }
@@ -341,13 +329,14 @@ router.post('/register', authenticateToken, async (req, res) => {
       { transaction: t }
     )
     if (!user) throw new Error("User doesn't exist")
-
+    console.log(user, 'user found')
     const role = await Role.findOne({
       where: { name: user_type },
       attributes: ['role_id'],
     })
 
     if (!role) throw new Error("Role doesn't exist")
+    console.log(role, 'role found')
 
     let computed_validity_to = validity_to
     if (validity_from) {
@@ -369,6 +358,7 @@ router.post('/register', authenticateToken, async (req, res) => {
         referral_code_id: referral_code_id,
         user_id: user_id,
         plan_id: plan_id,
+        is_trial: is_trial,
         institute_id: institute_id,
         current_status: current_status,
         transaction_order_id: transaction_order_id,

@@ -56,10 +56,12 @@ router.post('/add-transaction', async (req, res) => {
     transaction_signature,
     user_id,
   } = req.body
+  console.log(req.body)
   if (
     !payment_for ||
     !payment_method ||
-    !amount ||
+    amount === undefined ||
+    amount === null ||
     !payment_status ||
     !payment_date ||
     !transaction_order_id ||
@@ -71,7 +73,7 @@ router.post('/add-transaction', async (req, res) => {
       .status(HTTP_BAD_REQUEST)
       .json({ error: 'Missing required fields' })
   }
-
+  console.log('Adding new transaction:', req.body)
   try {
     const newTransaction = await Transaction.create({
       payment_for,

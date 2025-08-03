@@ -1,11 +1,11 @@
-const { sequelize } = require("../../init.sequelize");
-const { DataTypes } = require("sequelize");
-const { options } = require("./defaultOptions");
+const { sequelize } = require('../../init.sequelize')
+const { DataTypes } = require('sequelize')
+const { options } = require('./defaultOptions')
 // const { Role } = require('./Role');
 // const { User } = require('./User');
 
 const Plan = sequelize.define(
-  "plan",
+  'plan',
   {
     plan_id: {
       type: DataTypes.INTEGER,
@@ -61,10 +61,10 @@ const Plan = sequelize.define(
     },
   },
   { ...options }
-);
+)
 
 // Plan.belongsToMany(User, {
 //   through: "user_plan",
 // });
 
-module.exports = { Plan };
+module.exports = { Plan }

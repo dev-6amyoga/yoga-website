@@ -77,6 +77,93 @@ function StudentPlan() {
   const [customPlansForUser, setCustomPlansForUser] = useState([]);
   const [currentCustomUserPlans, setCurrentCustomUserPlans] = useState([]);
   const [trialPlanAvailed, setTrialPlanAvailed] = useState(false);
+
+  const randomUUID = () => {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  };
+
+  const handleTryTrial = async (plan) => {
+    if (trialPlanAvailed) {
+      toast("You have already availed a trial plan.", { type: "info" });
+      return;
+    }
+    const validity_from = new Date().toISOString();
+    const validity_to = new Date(
+      Date.now() + 30 * 24 * 60 * 60 * 1000
+    ).toISOString();
+    const transaction_order_id = "trial_" + randomUUID();
+    const trialPlanData = {
+      cancellation_date: null,
+      auto_renewal_enabled: false,
+      user_id: user?.user_id,
+      plan_id: plan.plan_id,
+      discount_coupon_id: null,
+      referral_code_id: null,
+      amount: 0,
+      currency: selectedCurrency,
+      user_type: "STUDENT",
+      purchase_date: new Date().toISOString(),
+      validity_from: validity_from,
+      validity_to: validity_to,
+      transaction_order_id,
+      current_status: USER_PLAN_ACTIVE,
+      is_trial: true,
+    };
+    setLoading(true);
+    try {
+      // 1. Add transaction first
+      const transactionRes = await Fetch({
+        url: "/transaction/add-transaction",
+        method: "POST",
+        data: {
+          payment_for: "USER_PLAN",
+          payment_method: "TRIAL",
+          amount: 0,
+          payment_status: "TRIAL",
+          payment_date: new Date().toISOString(),
+          transaction_order_id,
+          transaction_payment_id: "TRIAL",
+          transaction_signature: "TRIAL",
+          user_id: user?.user_id,
+        },
+      });
+      if (transactionRes.status === 200) {
+        // 2. Register user plan only if transaction is successful
+        const res = await Fetch({
+          url: "/user-plan/register",
+          method: "POST",
+          token: true,
+          data: trialPlanData,
+        });
+        if (res.status === 200) {
+          toast("Trial activated! Enjoy 30 days of free access.", {
+            type: "success",
+          });
+          setTrialPlanAvailed(true);
+          fetchUserPlans();
+        } else {
+          toast(res?.data?.message || "Could not activate trial.", {
+            type: "error",
+          });
+        }
+      } else {
+        toast(
+          transactionRes?.data?.error || "Could not create trial transaction.",
+          {
+            type: "error",
+          }
+        );
+      }
+    } catch (err) {
+      toast("Error activating trial.", { type: "error" });
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (showCard) {
       setLoading(false);
@@ -146,7 +233,9 @@ function StudentPlan() {
         (a, b) => new Date(a.validity_to) - new Date(b.validity_to)
       );
       setTrialPlanAvailed(
-        data.userPlan.some((plan) => plan.plan.name === "Trial Plan")
+        data.userPlan.some(
+          (plan) => plan.plan.name === "Warmup Plan" && plan.is_trial === true
+        )
       );
       setMyPlans(data.userPlan.filter((plan) => plan.institute_id === null));
       const activePlan = data.userPlan.find(
@@ -652,6 +741,7 @@ function StudentPlan() {
     finalUserPlan.transaction_order_id = order_id;
     finalUserPlan.user_type = "STUDENT";
     finalUserPlan.institute_id = null;
+    finalUserPlan.is_trial = false;
     FetchRetry({
       url: "/user-plan/register",
       method: "POST",
@@ -831,6 +921,8 @@ function StudentPlan() {
             allPlans={filteredPlans}
             subscribePlan={subscribePlan}
             selectedCurrency={selectedCurrency}
+            handleTryTrial={handleTryTrial}
+            trialPlanAvailed={trialPlanAvailed}
           />
         )}
 
