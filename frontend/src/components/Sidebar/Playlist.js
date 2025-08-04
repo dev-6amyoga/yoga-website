@@ -51,12 +51,14 @@ function Playlist({ page }) {
 
   const curatedPlaylistsToShow = (() => {
     if (userPlan && userPlan.plan && userPlan.plan.name === "Warmup Plan") {
-      console.log(playlists);
       return playlists.filter(
         (playlist) => playlist.playlist_name === "Warmup Playlist"
       );
     }
-    return playlists;
+    // For all other plans, show all curated playlists except 'Warmup Playlist'
+    return playlists.filter(
+      (playlist) => playlist.playlist_name !== "Warmup Playlist"
+    );
   })();
 
   useEffect(() => {
