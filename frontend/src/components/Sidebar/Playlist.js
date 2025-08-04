@@ -49,6 +49,16 @@ function Playlist({ page }) {
       ])
     );
 
+  const curatedPlaylistsToShow = (() => {
+    if (userPlan && userPlan.plan && userPlan.plan.name === "Warmup Plan") {
+      console.log(playlists);
+      return playlists.filter(
+        (playlist) => playlist.playlist_name === "Warmup Playlist"
+      );
+    }
+    return playlists;
+  })();
+
   useEffect(() => {
     const fetchCustomPlanDetails = async (planId) => {
       try {
@@ -718,7 +728,7 @@ function Playlist({ page }) {
         <PlaylistList
           name={"6AM Yoga Curated Playlists"}
           desc={"Choose from curated playlists to practice."}
-          playlists={playlists}
+          playlists={curatedPlaylistsToShow}
           query={query}
           handleAddToQueue={handleAddToQueue}
           showDetails={showDetails}
