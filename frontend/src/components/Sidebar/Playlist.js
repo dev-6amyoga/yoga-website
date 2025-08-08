@@ -55,9 +55,22 @@ function Playlist({ page }) {
         (playlist) => playlist.playlist_name === "Warmup Playlist"
       );
     }
-    // For all other plans, show all curated playlists except 'Warmup Playlist'
+    if (
+      userPlan &&
+      userPlan.plan &&
+      userPlan.plan.name === "15 Minute Daily Yoga"
+    ) {
+      return playlists.filter(
+        (playlist) => playlist.playlist_name === "15 Minute Yoga"
+      );
+    }
     return playlists.filter(
-      (playlist) => playlist.playlist_name !== "Warmup Playlist"
+      (playlist) =>
+        !(
+          (playlist.playlist_name === "Warmup Playlist" ||
+            playlist.playlist_name === "15 Minute Yoga") &&
+          playlist.playlist_mode === "student"
+        )
     );
   })();
 
