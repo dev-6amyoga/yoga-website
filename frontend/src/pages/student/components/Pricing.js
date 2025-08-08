@@ -209,7 +209,9 @@ export default function Pricing({
                       },
                       {
                         name: "Play Standing Warmup Sequence",
-                        enable: plan.name !== "Warmup Plan",
+                        enable:
+                          plan.name !== "Warmup Plan" ||
+                          plan.name !== "15 Minute Daily Yoga",
                       },
                       {
                         name: "Fixed Yoga Sequence (warm up, suryanamaskara, yogasanas and pranayama) Updated monthly",
@@ -217,7 +219,8 @@ export default function Pricing({
                           plan.has_basic_playlist &&
                           plan.description !==
                             "Tailor made playlists as per your requirement" &&
-                          plan.name !== "Warmup Plan",
+                          plan.name !== "Warmup Plan" &&
+                          plan.name !== "15 Minute Daily Yoga",
                       },
                       {
                         name: "Only on Laptops and Desktops (no phones)",

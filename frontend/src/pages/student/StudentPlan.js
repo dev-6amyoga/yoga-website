@@ -234,7 +234,10 @@ function StudentPlan() {
       );
       setTrialPlanAvailed(
         data.userPlan.some(
-          (plan) => plan.plan.name === "Warmup Plan" && plan.is_trial === true
+          (plan) =>
+            (plan.plan.name === "Warmup Plan" ||
+              plan.plan.name === "15 Minute Daily Yoga") &&
+            plan.is_trial === true
         )
       );
       setMyPlans(data.userPlan.filter((plan) => plan.institute_id === null));
@@ -885,12 +888,8 @@ function StudentPlan() {
   }, []);
   const [filteredPlans, setFilteredPlans] = useState([]);
   useEffect(() => {
-    if (trialPlanAvailed) {
-      setFilteredPlans(allPlans.filter((x) => x.name !== "Trial Plan"));
-    } else {
-      setFilteredPlans(allPlans);
-    }
-  }, [trialPlanAvailed, allPlans]);
+    setFilteredPlans(allPlans);
+  }, [allPlans]);
   return (
     <div className="max-w-7xl mx-auto">
       <StudentNavMUI />
