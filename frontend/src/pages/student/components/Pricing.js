@@ -421,7 +421,8 @@ export default function Pricing({
                     )}
                   </CardContent>
                   <CardActions className="flex flex-row items-center justify-center gap-3">
-                    {plan.name === "Warmup Plan" ? (
+                    {plan.name === "Warmup Plan" ||
+                    plan.name === "15 Minute Daily Yoga" ? (
                       <>
                         <Button
                           variant="outlined"
