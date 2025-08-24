@@ -40,14 +40,12 @@ export const TransitionEndSuryanamaskaraStithi = async (
 
   if (!start_category) {
     if (end_video.vinyasa_suryanamaskara === true) {
-      // let res = handleTransition([
-      //   "Feet Apart Hands Loose Standing Transition Front",
-      //   "Feet Together Hands Tight Standing Transition Front",
-      // ]);
-      // res = res.map((transition) => transition.transition_id);
-      // res = res.filter((element) => element !== undefined);
-      // return res;
-      return [];
+      let res = handleTransition([
+        "Feet Together Hands Tight Standing Transition Front",
+      ]);
+      res = res.map((transition) => transition.transition_id);
+      res = res.filter((element) => element !== undefined);
+      return res;
     }
     let res = handleTransition([
       "Feet Apart Hands Loose Standing Transition Front",
