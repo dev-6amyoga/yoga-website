@@ -50,27 +50,34 @@ function Playlist({ page }) {
     );
 
   const curatedPlaylistsToShow = (() => {
+    let filteredPlaylists;
+
     if (userPlan && userPlan.plan && userPlan.plan.name === "Warmup Plan") {
-      return playlists.filter(
+      filteredPlaylists = playlists.filter(
         (playlist) => playlist.playlist_name === "Warmup Playlist"
       );
-    }
-    if (
+    } else if (
       userPlan &&
       userPlan.plan &&
       userPlan.plan.name === "15 Minute Daily Yoga"
     ) {
-      return playlists.filter(
+      filteredPlaylists = playlists.filter(
         (playlist) => playlist.playlist_name === "15 Minute Yoga"
       );
+    } else {
+      filteredPlaylists = playlists.filter(
+        (playlist) =>
+          !(
+            (playlist.playlist_name === "Warmup Playlist" ||
+              playlist.playlist_name === "15 Minute Yoga") &&
+            playlist.playlist_mode === "student"
+          )
+      );
     }
-    return playlists.filter(
-      (playlist) =>
-        !(
-          (playlist.playlist_name === "Warmup Playlist" ||
-            playlist.playlist_name === "15 Minute Yoga") &&
-          playlist.playlist_mode === "student"
-        )
+
+    // sort by last_updated descending
+    return filteredPlaylists.sort(
+      (a, b) => new Date(b.last_updated) - new Date(a.last_updated)
     );
   })();
 
