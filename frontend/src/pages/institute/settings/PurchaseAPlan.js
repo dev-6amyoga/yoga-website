@@ -454,7 +454,7 @@ function PurchaseAPlan() {
         price,
         selectedCurrency,
         true,
-        18,
+        5,
         discountCoupon
       ),
       currency: selectedCurrency,
@@ -760,7 +760,7 @@ function PurchaseAPlan() {
                           <></>
                         )}{" "}
                         {selectedCurrency === "INR" ? (
-                          <span>+ 18% GST</span>
+                          <span>+ 5% GST (2.5% SGST + 2.5% CGST)</span>
                         ) : (
                           <></>
                         )}{" "}
@@ -772,7 +772,7 @@ function PurchaseAPlan() {
                                 price,
                                 selectedCurrency,
                                 true,
-                                18,
+                                5,
                                 discountCoupon,
                                 1
                               )}

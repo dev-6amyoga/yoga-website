@@ -285,7 +285,7 @@ function TeacherPlan() {
           price,
           selectedCurrency,
           true,
-          18,
+          5,
           discountCoupon
         ),
         currency: selectedCurrency,
@@ -711,7 +711,7 @@ function TeacherPlan() {
                         <></>
                       )}{" "}
                       {selectedCurrency === "INR" ? (
-                        <span>+ 18% GST</span>
+                        <span>+ 5% GST (2.5% SGST + 2.5% CGST)</span>
                       ) : (
                         <></>
                       )}{" "}
@@ -723,7 +723,7 @@ function TeacherPlan() {
                               price,
                               selectedCurrency,
                               true,
-                              18,
+                              5,
                               discountCoupon,
                               1
                             )}

@@ -433,7 +433,7 @@ function StudentPlan() {
           price,
           selectedCurrency,
           true,
-          18,
+          5,
           discountCoupon
         ),
         currency: selectedCurrency,
@@ -489,7 +489,7 @@ function StudentPlan() {
           price,
           selectedCurrency,
           true,
-          18,
+          5,
           discountCoupon
         ),
         currency: selectedCurrency,
@@ -973,7 +973,7 @@ function StudentPlan() {
                         <></>
                       )}{" "}
                       {selectedCurrency === "INR" ? (
-                        <span>+ 18% GST</span>
+                        <span>+ 5% GST (2.5% SGST + 2.5% CGST)</span>
                       ) : (
                         <></>
                       )}{" "}
@@ -985,7 +985,7 @@ function StudentPlan() {
                               price,
                               selectedCurrency,
                               true,
-                              18,
+                              5,
                               discountCoupon,
                               1
                             )}
@@ -1105,7 +1105,7 @@ function StudentPlan() {
                         <></>
                       )}{" "}
                       {selectedCurrency === "INR" ? (
-                        <span>+ 18% GST</span>
+                        <span>+ 5% GST (2.5% SGST + 2.5% CGST)</span>
                       ) : (
                         <></>
                       )}{" "}
@@ -1117,7 +1117,7 @@ function StudentPlan() {
                               price,
                               selectedCurrency,
                               true,
-                              18,
+                              5,
                               discountCoupon,
                               1
                             )}
