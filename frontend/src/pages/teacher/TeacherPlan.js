@@ -507,6 +507,7 @@ function TeacherPlan() {
     "South America": "USD",
     "North America": "USD",
   };
+  // Get user's location to set currency
 
   useEffect(() => {
     fetch("https://ipapi.co/json/")
