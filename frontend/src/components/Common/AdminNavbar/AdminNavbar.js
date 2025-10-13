@@ -19,8 +19,15 @@ const paths = [
     title: "Dashboard",
   },
   {
-    title: "Customer Assistance Videos",
-    path: "/admin/customer-assistance-videos",
+    title: "Class Management",
+    type: "group",
+    subPaths: [
+      { path: "/admin/create-class", title: "Create New Class" },
+
+      { path: "/admin/view-classes", title: "View All Classes" },
+
+      { path: "/admin/join-class", title: "Join Class" },
+    ],
   },
   {
     title: "Package Videos",

@@ -12,7 +12,7 @@ const path = require('path')
 const compression = require('compression')
 const helmet = require('helmet')
 const glob = require('glob')
-
+const { bulkCreateSampleData } = require('./sample_data')
 const getFrontendDomain = require('./utils/getFrontendDomain')
 
 // LOGGING
@@ -78,7 +78,7 @@ const postureRouter = require('./routes/Posture')
 const otpRouter = require('./routes/OTP')
 const r2Router = require('./routes/UploadToR2')
 const teacherPlanRouter = require('./routes/TeacherPlan')
-
+const zoomIntegrationRouter = require('./routes/ZoomIntegration')
 // ws routers
 
 const classWsRouter = require('./websocket-routes/Class')
@@ -241,7 +241,7 @@ app.use('/customUserPlan', customUserPlanRouter)
 app.use('/r2', r2Router)
 app.use('/video-rec', videoRecordingRouter)
 app.use('/teacher-plan', teacherPlanRouter)
-
+app.use('/zoom', zoomIntegrationRouter)
 // ws routers
 app.ws('/ws/class/teacher', classWsRouter.handleTeacherConnection)
 app.ws('/ws/class/student', classWsRouter.handleStudentConnection)

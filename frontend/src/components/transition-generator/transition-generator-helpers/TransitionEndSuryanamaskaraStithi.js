@@ -189,16 +189,32 @@ export const TransitionEndSuryanamaskaraStithi = async (
   if (start_category === "Standing") {
     if (break_status_start === "Break") {
       if (end_video.vinyasa_suryanamaskara === true) {
-        let res = handleTransition([
-          "Feet Together Hands Tight Standing Transition Front",
-        ]);
+        let res = [];
+        if (start_video.mat_ending_position === "Side") {
+          res = handleTransition([
+            "Turn Mat Side To Front Standing Transition",
+            "Feet Together Hands Tight Standing Transition Front",
+          ]);
+        } else {
+          res = handleTransition([
+            "Feet Together Hands Tight Standing Transition Front",
+          ]);
+        }
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
         return res;
       }
-      let res = handleTransition([
-        "Suryanamaskara Preparation And Mantra Stithi Type",
-      ]);
+      let res = [];
+      if (start_video.mat_ending_position === "Side") {
+        res = handleTransition([
+          "Turn Mat Side To Front Standing Transition",
+          "Suryanamaskara Preparation And Mantra Stithi Type",
+        ]);
+      } else {
+        res = handleTransition([
+          "Suryanamaskara Preparation And Mantra Stithi Type",
+        ]);
+      }
       res = res.map((transition) => transition.transition_id);
       res = res.filter((element) => element !== undefined);
       return res;
@@ -206,18 +222,36 @@ export const TransitionEndSuryanamaskaraStithi = async (
 
     if (break_status_start === "No Break") {
       if (end_video.vinyasa_suryanamaskara === true) {
-        let res = handleTransition([
-          "Feet Apart Hands Loose Standing Transition Front",
-          "Feet Together Hands Tight Standing Transition Front",
-        ]);
+        let res = [];
+        if (start_video.mat_ending_position === "Side") {
+          res = handleTransition([
+            "Turn Mat Side To Front Standing Transition",
+            "Feet Apart Hands Loose Standing Transition Front",
+            "Feet Together Hands Tight Standing Transition Front",
+          ]);
+        } else {
+          res = handleTransition([
+            "Feet Apart Hands Loose Standing Transition Front",
+            "Feet Together Hands Tight Standing Transition Front",
+          ]);
+        }
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
         return res;
       }
-      let res = handleTransition([
-        "Feet Apart Hands Loose Standing Transition Front",
-        "Suryanamaskara Preparation And Mantra Stithi Type",
-      ]);
+      let res = [];
+      if (start_video.mat_ending_position === "Side") {
+        res = handleTransition([
+          "Turn Mat Side To Front Standing Transition",
+          "Feet Apart Hands Loose Standing Transition Front",
+          "Feet Together Hands Tight Standing Transition Front",
+        ]);
+      } else {
+        res = handleTransition([
+          "Feet Apart Hands Loose Standing Transition Front",
+          "Feet Together Hands Tight Standing Transition Front",
+        ]);
+      }
       res = res.map((transition) => transition.transition_id);
       res = res.filter((element) => element !== undefined);
       return res;

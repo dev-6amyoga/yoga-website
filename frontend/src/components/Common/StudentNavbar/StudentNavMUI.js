@@ -170,9 +170,8 @@ function StudentNavMUI() {
         disabled: disabledTailorMade,
       },
       {
-        path: "/student/class/my-classes",
+        path: "/student/join-class",
         title: "Your Classes",
-        disabled: true,
       },
       {
         path: "/student/contact-us",

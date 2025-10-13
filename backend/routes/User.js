@@ -802,6 +802,30 @@ router.get('/get-all-teachers', async (req, res) => {
   }
 })
 
+router.get('/is-teacher/:user_id', async (req, res) => {
+  const { user_id } = req.params
+  if (!user_id) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: 'Missing required fields' })
+  }
+  try {
+    const teacher = await UserInstitutePlanRole.findOne({
+      where: { user_id: user_id, role_id: 4 },
+    })
+    if (teacher) {
+      return res.status(HTTP_OK).json({ isTeacher: true })
+    } else {
+      return res.status(HTTP_OK).json({ isTeacher: false })
+    }
+  } catch (error) {
+    console.error(error)
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: 'Failed to check teacher status' })
+  }
+})
+
 router.get('/get-all-institutes', async (req, res) => {
   try {
     const userInstituteData = await UserInstitutePlanRole.findAll({

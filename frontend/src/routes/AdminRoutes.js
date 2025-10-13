@@ -33,6 +33,9 @@ import EditPlaylist from "../components/content-management/EditPlaylist";
 import PackagingVideos from "../pages/admin/packing-videos/PackagingVideos";
 import LoginHistory from "../pages/admin/member-management/LoginHistory";
 import UserPlanPage from "../pages/admin/member-management/UserPlanPage";
+import CreateNewClass from "../pages/admin/classes/CreateNewClass";
+import ViewAllClasses from "../pages/admin/classes/ViewAllClasses";
+import JoinClass from "../pages/admin/classes/JoinClass";
 export const AdminRoutes = [
   {
     path: "/admin",
@@ -88,6 +91,18 @@ export const AdminRoutes = [
   {
     path: "/admin/player-page",
     element: <PlayerPage />,
+  },
+  {
+    path: "/admin/create-class",
+    element: <CreateNewClass />,
+  },
+  {
+    path: "/admin/view-classes",
+    element: <ViewAllClasses />,
+  },
+  {
+    path: "/admin/join-class",
+    element: <JoinClass />,
   },
   // schedule
   {

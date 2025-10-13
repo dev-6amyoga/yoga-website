@@ -14,6 +14,7 @@ import StudentTransactionHistory from "../pages/student/StudentTransactionHistor
 import StudentWatchHistory from "../pages/student/StudentWatchHistory";
 import ViewAllPlaylists from "../pages/student/ViewAllPlaylists";
 import ViewMyClasses from "../pages/student/class-mode/ViewMyClasses";
+import StudentJoinClass from "../pages/student/StudentJoinClass";
 export const StudentRoutes = [
   {
     path: "/student/playlist-view",
@@ -34,6 +35,10 @@ export const StudentRoutes = [
   {
     path: "/student/purchase-a-plan",
     element: <StudentPlan />,
+  },
+  {
+    path: "/student/join-class",
+    element: <StudentJoinClass />,
   },
   {
     path: "/student/free-videos",

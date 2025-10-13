@@ -1,0 +1,76 @@
+"use client";
+import React, { useEffect, useState } from "react";
+import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
+import YogaClassCard from "./YogaClassCard";
+import { Fetch } from "../../../utils/Fetch";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import useUserStore from "../../../store/UserStore";
+
+export default function JoinClass() {
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const user = useUserStore((state) => state.user);
+
+  useEffect(() => {
+    setLoading(true);
+    Fetch({
+      //   url: `/user/is-teacher/${user.user_id}`,
+      url: `/user/is-teacher/4`,
+      method: "GET",
+    })
+      .then((res) => {
+        if (res.data.isTeacher) {
+          return Fetch({
+            url: `/zoom/api/classes/today?teacher_id=4`,
+            // url: `/zoom/api/classes/today?teacher_id=${user.user_id}`,
+            method: "GET",
+          });
+        } else {
+          return Fetch({
+            url: `/zoom/api/classes/today?plan_id=${user.plan_id || ""}`,
+            method: "GET",
+          });
+        }
+      })
+      .then((res) => {
+        setClasses(res.data);
+      })
+      .catch((err) => {
+        console.error("Error fetching today's classes:", err);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <AdminPageWrapper heading={"Join Class"}>
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : classes.length === 0 ? (
+        <Typography sx={{ textAlign: "center", mt: 4 }}>
+          No classes scheduled for today.
+        </Typography>
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            justifyContent: "center",
+            alignItems: "center",
+            mt: 2,
+          }}
+        >
+          {classes.map((classObj) => (
+            <YogaClassCard
+              key={classObj.zoom_class_id}
+              classDetails={classObj}
+              isStudentView={false}
+            />
+          ))}
+        </Box>
+      )}
+    </AdminPageWrapper>
+  );
+}
