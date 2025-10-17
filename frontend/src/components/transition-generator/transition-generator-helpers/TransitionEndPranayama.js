@@ -604,13 +604,13 @@ export const TransitionEndPranayama = async (
       if (start_video.mat_ending_position === "Side") {
         let res = handleTransition([
           "Turn Mat Side To Front Sitting Transition",
-          "Pranayama Start Sitting",
+          "Pranayama Legs Lock",
         ]);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
         return res;
       } else {
-        let res = handleTransition(["Pranayama Start Sitting"]);
+        let res = handleTransition(["Pranayama Legs Lock"]);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
         return res;
@@ -622,7 +622,7 @@ export const TransitionEndPranayama = async (
         let res = handleTransition([
           "Feet Apart Hands Back Sitting Transition",
           "Turn Mat Side To Front Sitting Transition",
-          "Pranayama Start Sitting",
+          "Pranayama Legs Lock",
         ]);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
@@ -630,7 +630,7 @@ export const TransitionEndPranayama = async (
       } else {
         let res = handleTransition([
           "Feet Apart Hands Back Sitting Transition",
-          "Pranayama Start Sitting",
+          "Pranayama Legs Lock",
         ]);
         res = res.map((transition) => transition.transition_id);
         res = res.filter((element) => element !== undefined);
