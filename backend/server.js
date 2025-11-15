@@ -42,6 +42,7 @@ glob.sync('./models/mongo/*.js').forEach((file) => {
 
 // routers
 const asanaRouter = require('./routes/Asana')
+const classAttendanceRouter = require('./routes/Attendance')
 const reminderRouter = require('./routes/ReminderScript')
 const videoRecordingRouter = require('./routes/VideoRecordings')
 const videoPackagingRouter = require('./routes/VideoPackaging')
@@ -206,6 +207,7 @@ app.get('/error', async (req, res) =>
 )
 
 app.use('/content', asanaRouter)
+app.use('/class-attendance', classAttendanceRouter)
 app.use('/video-packaging', videoPackagingRouter)
 app.use('/content', playlistRouter)
 app.use('/schedule', scheduleRouter)
@@ -266,11 +268,11 @@ initializeSequelize()
         start = performance.now()
         // bulkCreateSampleData()
         //   .then(() => {
-        //     console.log("Sample data created!");
+        //     console.log('Sample data created!')
         //   })
         //   .catch((err) => {
-        //     console.log(err);
-        //   });
+        //     console.log(err)
+        //   })
 
         app.listen(port || 4000, () => {
           console.log(

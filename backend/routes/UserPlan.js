@@ -23,6 +23,7 @@ const WatchHistory = require('../models/mongo/WatchHistory')
 const WatchTimeLog = require('../models/mongo/WatchTimeLog')
 const { authenticateToken } = require('../utils/jwt')
 const { ROLE_TEACHER } = require('../enums/role')
+const { UserPlanAttendance } = require('../models/sql/UserPlanAttendance')
 
 router.get('/get-all-user-plans', async (req, res) => {
   try {
@@ -334,10 +335,8 @@ router.post('/register', authenticateToken, async (req, res) => {
       where: { name: user_type },
       attributes: ['role_id'],
     })
-
     if (!role) throw new Error("Role doesn't exist")
     console.log(role, 'role found')
-
     let computed_validity_to = validity_to
     if (validity_from) {
       const fromDate = new Date(validity_from)
@@ -345,7 +344,6 @@ router.post('/register', authenticateToken, async (req, res) => {
       toDate.setDate(fromDate.getDate() + 30)
       computed_validity_to = toDate
     }
-
     // create userPlan
     const newUserPlan = await UserPlan.create(
       {
@@ -366,7 +364,19 @@ router.post('/register', authenticateToken, async (req, res) => {
       },
       { transaction: t }
     )
-
+    const userPlanAttendance = await UserPlanAttendance.create(
+      {
+        user_id,
+        plan_id,
+        user_plan_id: newUserPlan.user_plan_id,
+        start_date: validity_from,
+        expiry_date: computed_validity_to,
+        classes_allowed: plan.number_of_zoom_classes,
+        classes_attended: 0,
+        status: 'ACTIVE',
+      },
+      { transaction: t }
+    )
     // add quota
     if (current_status === USER_PLAN_ACTIVE) {
       await WatchTimeQuota.create({
@@ -392,9 +402,12 @@ router.post('/register', authenticateToken, async (req, res) => {
       //   throw new Error('Failed to update user')
       // }
     }
-
     await t.commit()
-    return res.status(HTTP_OK).json({ userPlan: newUserPlan })
+    res.status(HTTP_OK).json({
+      message: 'User plan registered successfully',
+      newUserPlan,
+      userPlanAttendance,
+    })
   } catch (error) {
     console.error(error)
     await t.rollback()

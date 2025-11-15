@@ -9,6 +9,8 @@ const { Currency } = require('./models/sql/Currency')
 const { UserInstitutePlanRole } = require('./models/sql/UserInstitutePlanRole')
 const { RolePermission } = require('./models/sql/RolePermission')
 const { ZoomClassModel } = require('./models/sql/ZoomClassModel')
+const { UserPlanAttendance } = require('./models/sql/UserPlanAttendance')
+const { ClassAttendance } = require('./models/sql/ClassAttendance')
 
 const institutes = [
   {
@@ -175,6 +177,8 @@ const plans = [
     has_playlist_creation: false,
     playlist_creation_limit: 0,
     has_self_audio_upload: false,
+    has_zoom_classes: true,
+    number_of_zoom_classes: 20,
     number_of_teachers: 0,
     plan_validity_days: 30,
     plan_user_type: 'STUDENT',
@@ -188,6 +192,8 @@ const plans = [
     playlist_creation_limit: 1000,
     has_self_audio_upload: false,
     number_of_teachers: 0,
+    has_zoom_classes: true,
+    number_of_zoom_classes: 20,
     plan_validity_days: 30,
     plan_user_type: 'STUDENT',
   },
@@ -199,6 +205,8 @@ const plans = [
     has_playlist_creation: true,
     playlist_creation_limit: 1000,
     has_self_audio_upload: false,
+    has_zoom_classes: true,
+    number_of_zoom_classes: 20,
     number_of_teachers: 1,
     plan_validity_days: 30,
     plan_user_type: 'INSTITUTE',
@@ -211,6 +219,8 @@ const plans = [
     has_playlist_creation: true,
     playlist_creation_limit: 1000,
     has_self_audio_upload: true,
+    has_zoom_classes: true,
+    number_of_zoom_classes: 4,
     number_of_teachers: 5,
     plan_validity_days: 30,
     plan_user_type: 'INSTITUTE',
@@ -223,6 +233,8 @@ const plans = [
     has_playlist_creation: true,
     playlist_creation_limit: 1000,
     has_self_audio_upload: true,
+    has_zoom_classes: true,
+    number_of_zoom_classes: 20,
     number_of_teachers: 10,
     plan_validity_days: 30,
     plan_user_type: 'INSTITUTE',
@@ -234,6 +246,8 @@ const plans = [
     has_basic_playlist: true,
     has_playlist_creation: false,
     playlist_creation_limit: 0,
+    has_zoom_classes: true,
+    number_of_zoom_classes: 20,
     has_self_audio_upload: false,
     number_of_teachers: 0,
     plan_validity_days: 90,
@@ -247,6 +261,8 @@ const plans = [
     has_playlist_creation: true,
     playlist_creation_limit: 1000,
     has_self_audio_upload: false,
+    has_zoom_classes: true,
+    number_of_zoom_classes: 20,
     number_of_teachers: 0,
     plan_validity_days: 90,
     plan_user_type: 'STUDENT',
@@ -259,6 +275,8 @@ const plans = [
     has_playlist_creation: true,
     playlist_creation_limit: 1000,
     has_self_audio_upload: false,
+    has_zoom_classes: true,
+    number_of_zoom_classes: 20,
     number_of_teachers: 1,
     plan_validity_days: 90,
     plan_user_type: 'INSTITUTE',
@@ -270,6 +288,8 @@ const plans = [
     has_basic_playlist: true,
     has_playlist_creation: true,
     playlist_creation_limit: 1000,
+    has_zoom_classes: true,
+    number_of_zoom_classes: 20,
     has_self_audio_upload: true,
     number_of_teachers: 5,
     plan_validity_days: 90,
@@ -281,6 +301,8 @@ const plans = [
     watch_time_limit: 2000 * (60 * 60),
     has_basic_playlist: true,
     has_playlist_creation: true,
+    has_zoom_classes: true,
+    number_of_zoom_classes: 20,
     playlist_creation_limit: 1000,
     has_self_audio_upload: true,
     number_of_teachers: 10,
@@ -333,95 +355,164 @@ const plan_pricing = [
   { plan_id: 10, currency_id: 3, denomination: 1150 },
 ]
 
-// const zoom_classes = [
-//   // One-time classes (unchanged)
-//   {
-//     zoom_class_id: 1,
-//     zoom_class_name: 'Morning Vinyasa Flow',
-//     plan_id: 101,
-//     institute_id: 10,
-//     teacher_id: 501,
-//     start_time: new Date('2025-10-06T06:30:00Z'),
-//     end_time: new Date('2025-10-06T07:30:00Z'),
-//     zoom_url: 'https://zoom.us/j/1234567890?pwd=abc123',
-//     zoom_meeting_id: '1234567890',
-//     zoom_meeting_password: 'abc123',
-//     class_type: 'one_time',
-//     recurring_days: null,
-//     recurring_start_time: null,
-//     recurring_end_time: null,
-//   },
-//   {
-//     zoom_class_id: 2,
-//     zoom_class_name: 'Evening Hatha Yoga',
-//     plan_id: 102,
-//     institute_id: 10,
-//     teacher_id: 502,
-//     start_time: new Date('2025-10-06T13:00:00Z'),
-//     end_time: new Date('2025-10-06T14:00:00Z'),
-//     zoom_url: 'https://zoom.us/j/2345678901?pwd=def456',
-//     zoom_meeting_id: '2345678901',
-//     zoom_meeting_password: 'def456',
-//     class_type: 'one_time',
-//     recurring_days: null,
-//     recurring_start_time: null,
-//     recurring_end_time: null,
-//   },
-//   // Recurring class example
-//   {
-//     zoom_class_id: 6,
-//     zoom_class_name: 'Weekly Power Yoga',
-//     plan_id: 103,
-//     institute_id: 11,
-//     teacher_id: 503,
-//     start_time: null,
-//     end_time: null,
-//     zoom_url: 'https://zoom.us/j/3456789012?pwd=ghi789',
-//     zoom_meeting_id: '3456789012',
-//     zoom_meeting_password: 'ghi789',
-//     class_type: 'recurring',
-//     recurring_days: [1, 3, 5], // Monday, Wednesday, Friday
-//     recurring_start_time: '07:00', // 7:00 AM
-//     recurring_end_time: '08:00', // 8:00 AM
-//   },
-//   {
-//     zoom_class_id: 7,
-//     zoom_class_name: 'Daily Gentle Stretch',
-//     plan_id: 104,
-//     institute_id: 12,
-//     teacher_id: 504,
-//     start_time: null,
-//     end_time: null,
-//     zoom_url: 'https://zoom.us/j/4567890123?pwd=jkl012',
-//     zoom_meeting_id: '4567890123',
-//     zoom_meeting_password: 'jkl012',
-//     class_type: 'recurring',
-//     recurring_days: [0, 1, 2, 3, 4, 5, 6], // All days
-//     recurring_start_time: '18:30', // 6:30 PM
-//     recurring_end_time: '19:15', // 7:15 PM
-//   },
-//   // Another one-time class for completeness
-//   {
-//     zoom_class_id: 5,
-//     zoom_class_name: 'Pranayama and Meditation',
-//     plan_id: 105,
-//     institute_id: 13,
-//     teacher_id: 505,
-//     start_time: new Date('2025-10-09T02:00:00Z'),
-//     end_time: new Date('2025-10-09T03:00:00Z'),
-//     zoom_url: 'https://zoom.us/j/5678901234?pwd=mno345',
-//     zoom_meeting_id: '5678901234',
-//     zoom_meeting_password: 'mno345',
-//     class_type: 'one_time',
-//     recurring_days: null,
-//     recurring_start_time: null,
-//     recurring_end_time: null,
-//   },
-// ]
+const user_plan_attendance = [
+  {
+    user_id: 8, // student1
+    plan_id: 1, // Basic Plan
+    start_date: new Date('2025-10-01'),
+    expiry_date: new Date('2025-10-31'),
+    classes_allowed: 30,
+    classes_attended: 5,
+    status: 'ACTIVE',
+  },
+  {
+    user_id: 9, // student2
+    plan_id: 2, // Family Plan
+    start_date: new Date('2025-10-01'),
+    expiry_date: new Date('2025-10-31'),
+    classes_allowed: 60,
+    classes_attended: 12,
+    status: 'ACTIVE',
+  },
+]
+
+const class_attendance = [
+  {
+    user_id: 8,
+    plan_id: 1,
+    user_plan_id: 1,
+    class_id: 1,
+    device_id: 'Mozilla/5.0 (Windows NT 10.0)',
+    date: new Date('2025-10-06T06:30:00Z'),
+    attendance_status: 'ATTENDED',
+    join_time: new Date('2025-10-06T06:28:00Z'),
+    leave_time: new Date('2025-10-06T07:30:00Z'),
+    duration_minutes: 62,
+    marked_by: 'SYSTEM',
+    instructor_id: 4, // ins1_teacher
+    remarks: 'Completed full class',
+  },
+  {
+    user_id: 8,
+    plan_id: 1,
+    user_plan_id: 1,
+    class_id: 2,
+    device_id: 'Mozilla/5.0 (Windows NT 10.0)',
+    date: new Date('2025-10-06T13:00:00Z'),
+    attendance_status: 'JOINED_LATE',
+    join_time: new Date('2025-10-06T13:15:00Z'),
+    leave_time: new Date('2025-10-06T14:00:00Z'),
+    duration_minutes: 45,
+    marked_by: 'INSTRUCTOR',
+    instructor_id: 4,
+    remarks: 'Joined 15 minutes late',
+  },
+  {
+    user_id: 9,
+    plan_id: 2,
+    user_plan_id: 2,
+    class_id: 6,
+    device_id: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0)',
+    date: new Date('2025-10-07T07:00:00Z'),
+    attendance_status: 'ATTENDED',
+    join_time: new Date('2025-10-07T06:55:00Z'),
+    leave_time: new Date('2025-10-07T08:00:00Z'),
+    duration_minutes: 65,
+    marked_by: 'SYSTEM',
+    instructor_id: 7, // ins2_teacher
+    remarks: null,
+  },
+]
+
+const zoom_classes = [
+  // One-time classes (unchanged)
+  {
+    zoom_class_id: 1,
+    zoom_class_name: 'Morning Vinyasa Flow',
+    plan_id: 101,
+    institute_id: 10,
+    teacher_id: 501,
+    start_time: new Date('2025-10-06T06:30:00Z'),
+    end_time: new Date('2025-10-06T07:30:00Z'),
+    zoom_url: 'https://zoom.us/j/1234567890?pwd=abc123',
+    zoom_meeting_id: '1234567890',
+    zoom_meeting_password: 'abc123',
+    class_type: 'one_time',
+    recurring_days: null,
+    recurring_start_time: null,
+    recurring_end_time: null,
+  },
+  {
+    zoom_class_id: 2,
+    zoom_class_name: 'Evening Hatha Yoga',
+    plan_id: 102,
+    institute_id: 10,
+    teacher_id: 502,
+    start_time: new Date('2025-10-06T13:00:00Z'),
+    end_time: new Date('2025-10-06T14:00:00Z'),
+    zoom_url: 'https://zoom.us/j/2345678901?pwd=def456',
+    zoom_meeting_id: '2345678901',
+    zoom_meeting_password: 'def456',
+    class_type: 'one_time',
+    recurring_days: null,
+    recurring_start_time: null,
+    recurring_end_time: null,
+  },
+  // Recurring class example
+  {
+    zoom_class_id: 6,
+    zoom_class_name: 'Weekly Power Yoga',
+    plan_id: 103,
+    institute_id: 11,
+    teacher_id: 503,
+    start_time: null,
+    end_time: null,
+    zoom_url: 'https://zoom.us/j/3456789012?pwd=ghi789',
+    zoom_meeting_id: '3456789012',
+    zoom_meeting_password: 'ghi789',
+    class_type: 'recurring',
+    recurring_days: [1, 3, 5], // Monday, Wednesday, Friday
+    recurring_start_time: '07:00', // 7:00 AM
+    recurring_end_time: '08:00', // 8:00 AM
+  },
+  {
+    zoom_class_id: 7,
+    zoom_class_name: 'Daily Gentle Stretch',
+    plan_id: 104,
+    institute_id: 12,
+    teacher_id: 504,
+    start_time: null,
+    end_time: null,
+    zoom_url: 'https://zoom.us/j/4567890123?pwd=jkl012',
+    zoom_meeting_id: '4567890123',
+    zoom_meeting_password: 'jkl012',
+    class_type: 'recurring',
+    recurring_days: [0, 1, 2, 3, 4, 5, 6], // All days
+    recurring_start_time: '18:30', // 6:30 PM
+    recurring_end_time: '19:15', // 7:15 PM
+  },
+  // Another one-time class for completeness
+  {
+    zoom_class_id: 5,
+    zoom_class_name: 'Pranayama and Meditation',
+    plan_id: 105,
+    institute_id: 13,
+    teacher_id: 505,
+    start_time: new Date('2025-10-09T02:00:00Z'),
+    end_time: new Date('2025-10-09T03:00:00Z'),
+    zoom_url: 'https://zoom.us/j/5678901234?pwd=mno345',
+    zoom_meeting_id: '5678901234',
+    zoom_meeting_password: 'mno345',
+    class_type: 'one_time',
+    recurring_days: null,
+    recurring_start_time: null,
+    recurring_end_time: null,
+  },
+]
 
 const bulkCreateSampleData = async () => {
   const t = await sequelize.transaction()
-  // INSTITUTE
+  // // INSTITUTE
   // try {
   //   const ri = await Institute.bulkCreate(institutes, { transaction: t })
   //   console.log(
@@ -432,7 +523,7 @@ const bulkCreateSampleData = async () => {
   //   throw err
   // }
 
-  // ROLE
+  // // ROLE
   // try {
   //   const rr = await Role.bulkCreate(roles, { transaction: t })
   //   console.log(`Roles sample data inserted : ${roles.length}/${rr.length}`)
@@ -441,7 +532,7 @@ const bulkCreateSampleData = async () => {
   //   throw err
   // }
 
-  // USER
+  // // USER
   // try {
   //   const ru = await User.bulkCreate(users, { transaction: t })
   //   console.log(`Users sample data inserted : ${users.length}/${ru.length}`)
@@ -547,7 +638,30 @@ const bulkCreateSampleData = async () => {
   //   await t.rollback()
   //   throw err
   // }
+  // try {
+  //   const rupa = await UserPlanAttendance.bulkCreate(user_plan_attendance, {
+  //     transaction: t,
+  //   })
+  //   console.log(
+  //     `UserPlanAttendance sample data inserted : ${user_plan_attendance.length}/${rupa.length}`
+  //   )
+  // } catch (err) {
+  //   await t.rollback()
+  //   throw err
+  // }
 
+  // // CLASS ATTENDANCE
+  // try {
+  //   const rca = await ClassAttendance.bulkCreate(class_attendance, {
+  //     transaction: t,
+  //   })
+  //   console.log(
+  //     `ClassAttendance sample data inserted : ${class_attendance.length}/${rca.length}`
+  //   )
+  // } catch (err) {
+  //   await t.rollback()
+  //   throw err
+  // }
   await t.commit()
 }
 

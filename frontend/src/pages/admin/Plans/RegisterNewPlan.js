@@ -1,316 +1,193 @@
-import { Card, Input, Select, Spacer, Text } from "@geist-ui/core";
-import { useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+  Paper,
+  Divider,
+} from "@mui/material";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { ROLE_ROOT } from "../../../enums/roles";
 import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Checkbox,
-  Button,
-  Typography,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
+import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 
 function RegisterNewPlan() {
   const navigate = useNavigate();
-  const [isChecked, setChecked] = useState(true);
   const notify = (x) => toast(x);
-  const [selfVoiceStatus, setSelfVoiceStatus] = useState(true);
-  const handler = (value) => {
-    setSelfVoiceStatus(value);
-  };
-  const [userType, setUserType] = useState("");
-  const handler1 = (value) => {
-    setUserType(value);
-  };
-  const [allStudents, setAllStudents] = useState([]);
-  const [selectedStudents, setSelectedStudents] = useState([]);
 
-  const handleCheckboxChange = () => {
-    setChecked(!isChecked);
-    console.log(!isChecked);
-  };
+  const [planData, setPlanData] = useState({
+    name: "",
+    description: "",
+    has_basic_playlist: true,
+    has_zoom_classes: true,
+    number_of_zoom_classes: 0,
+    has_playlist_creation: false,
+    playlist_creation_limit: 0,
+    has_self_audio_upload: false,
+    number_of_teachers: 0,
+    plan_validity_days: 0,
+    watch_time_limit: 0,
+    plan_user_type: "",
+  });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await Fetch({
-          url: "/user/get-all-students",
-          method: "GET",
-        });
-        const data = response.data;
-        setAllStudents(data.users);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    const fetchData1 = async () => {
-      try {
-        const response = await Fetch({
-          url: "/user/get-all-institutes",
-          method: "GET",
-        });
-        const data = response.data;
-        setAllStudents(data.userInstituteData);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    if (userType === "student") {
-      fetchData();
-    } else if (userType === "institute") {
-      fetchData1();
-    }
-  }, [userType]);
-
-  const handleSelectAll = (event) => {
-    if (event.target.checked) {
-      const newSelected = allStudents.map(
-        (student) => student.user_id || student.institute_id
-      );
-      setSelectedStudents(newSelected);
-    } else {
-      setSelectedStudents([]);
-    }
+  const handleChange = (field) => (e) => {
+    const value =
+      e.target.type === "number" ? Number(e.target.value) : e.target.value;
+    setPlanData({ ...planData, [field]: value });
   };
 
-  const handleSelectOne = (event, id) => {
-    const selectedIndex = selectedStudents.indexOf(id);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selectedStudents, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selectedStudents.slice(1));
-    } else if (selectedIndex === selectedStudents.length - 1) {
-      newSelected = newSelected.concat(selectedStudents.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selectedStudents.slice(0, selectedIndex),
-        selectedStudents.slice(selectedIndex + 1)
-      );
-    }
-    setSelectedStudents(newSelected);
-  };
-
-  const handleAssign = () => {
-    console.log(selectedStudents);
-    toast("Plan assigned to selected users!");
+  const handleCheckboxChange = (field) => (e) => {
+    setPlanData({ ...planData, [field]: e.target.checked });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const plan_name = document.querySelector("#plan_name").value;
-    const playlist_6am = 1;
-    const instituteplaylist_count = document.querySelector(
-      "#institute_playlist_count"
-    ).value;
-    const institute_playlist_creation = isChecked ? 1 : 0;
-    const teacher_count = document.querySelector("#teacher_count").value;
-    const new_plan = {
-      name: plan_name,
-      has_basic_playlist: playlist_6am,
-      playlist_creation_limit: instituteplaylist_count,
-      number_of_teachers: teacher_count,
-      has_self_audio_upload: selfVoiceStatus,
-      has_playlist_creation: institute_playlist_creation,
-      plan_user_type: userType,
-      plan_validity: 0,
-    };
-
+    console.log("Submitting plan data:", planData);
     try {
-      const response = await Fetch({
+      Fetch({
         url: "/plan/register",
         method: "POST",
-        body: new_plan,
-      });
-      if (response?.status === 200) {
-        notify("New Plan added successfully");
-        console.log(response.data.plan);
-        setTimeout(() => {
-          navigate("/admin");
-        }, 2000);
-      } else {
-        const errorData = response.data;
-        notify(errorData.error);
-      }
+        data: { planData },
+      })
+        .then((res) => {
+          notify("New plan added successfully!");
+          navigate("/admin/plan/view-all");
+        })
+        .catch((err) => {
+          console.log("Something went wrong", { type: "error" });
+        });
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      notify("An error occurred while registering the plan");
     }
   };
 
-  const isSelected = (id) => selectedStudents.indexOf(id) !== -1;
-
-  const [selectedMode, setSelectedMode] = useState(null);
-  const handleModeChange = (event) => {
-    setSelectedMode(event.target.value);
-  };
-
-  const [selectedNeeds, setSelectedNeeds] = useState([]);
-  const handleNeedsChange = (event) => {
-    setSelectedNeeds(event.target.value);
-  };
   return (
-    <AdminPageWrapper heading="Plan Management - Register New Plan">
-      <Card>
-        <Text h3>Register New Plan</Text>
-        <hr />
-        <Spacer h={1} />
-
-        <form className="flex flex-col gap-1" onSubmit={handleSubmit}>
-          <Typography variant="h5">Plan Name:</Typography>
-          <Input fullWidth id="plan_name" />
-          <br />
-          <Typography>Allow Playlist Creation</Typography>
-          <Checkbox
-            id="institute_playlist_creation"
-            checked={isChecked}
-            onChange={handleCheckboxChange}
+    <AdminPageWrapper heading={"Register New Plan"}>
+      <Paper sx={{ padding: 4, maxWidth: 600, margin: "auto", mt: 4 }}>
+        <Divider sx={{ mb: 2 }} />
+        <Box
+          component="form"
+          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+          onSubmit={handleSubmit}
+        >
+          {/* Plan Name */}
+          <TextField
+            label="Plan Name"
+            value={planData.name}
+            onChange={handleChange("name")}
+            required
           />
-          <br />
-          <Typography variant="h5">Institute Playlist Count:</Typography>
-          <Input fullWidth id="institute_playlist_count" />
-          <br />
-          <Typography variant="h5">Self Voice Enabled?</Typography>
-          <Select placeholder="Yes" onChange={handleModeChange} id="self_voice">
-            <MenuItem value="Yes">Yes</MenuItem>
-            <MenuItem value="No">No</MenuItem>
-          </Select>
-          <br />
-          <Typography variant="h5">Teacher Count:</Typography>
-          <Input fullWidth id="teacher_count" />
-          <br />
-          <Typography variant="h5">User Type</Typography>
-          <Select
-            placeholder="institute"
-            onChange={handleModeChange}
-            id="user_type"
-          >
-            <MenuItem value="student">Student</MenuItem>
-            <MenuItem value="institute">Institute</MenuItem>
-          </Select>
-          <br />
-          <Button
-            value="general"
-            variant={selectedMode === "general" ? "contained" : "outlined"}
-            onClick={handleModeChange}
-          >
-            General
-          </Button>
-          <Button
-            value="customization"
-            variant={
-              selectedMode === "customization" ? "contained" : "outlined"
+
+          {/* Description */}
+          <TextField
+            label="Description"
+            value={planData.description}
+            onChange={handleChange("description")}
+            multiline
+            rows={2}
+          />
+
+          {/* Playlist Creation */}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={planData.has_playlist_creation}
+                onChange={handleCheckboxChange("has_playlist_creation")}
+              />
             }
-            onClick={handleModeChange}
-          >
-            Customization
-          </Button>
-          {selectedMode === "customization" && (
-            <FormControl fullWidth sx={{ mt: 2 }}>
-              <InputLabel sx={{ color: "grey.200" }} id="yoga-needs-label">
-                Select Your Yoga Needs
-              </InputLabel>
-              <Select
-                sx={{
-                  color: "grey.200",
-                  ".MuiOutlinedInput-notchedOutline": {
-                    borderColor: "grey.200",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "grey.200",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "grey.200",
-                  },
-                  ".MuiSvgIcon-root": { fill: "grey.200 !important" },
-                }}
-                labelId="yoga-needs-label"
-                multiple
-                value={selectedNeeds}
-                onChange={handleNeedsChange}
-                renderValue={(selected) => selected.join(", ")}
-              >
-                <MenuItem value="Knee Pain">Knee Pain</MenuItem>
-                <MenuItem value="Back Pain">Back Pain</MenuItem>
-                <MenuItem value="Neck Pain">Neck Pain</MenuItem>
-                <MenuItem value="Pre Natal Yoga">Pre Natal Yoga</MenuItem>
-              </Select>
-            </FormControl>
+            label="Allow Playlist Creation"
+          />
+
+          {/* Playlist Creation Limit */}
+          <TextField
+            label="Playlist Creation Limit"
+            type="number"
+            value={planData.playlist_creation_limit}
+            onChange={handleChange("playlist_creation_limit")}
+          />
+
+          {/* Zoom Classes */}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={planData.has_zoom_classes}
+                onChange={handleCheckboxChange("has_zoom_classes")}
+              />
+            }
+            label="Allow Zoom Classes"
+          />
+          {planData.has_zoom_classes && (
+            <TextField
+              label="Number of Zoom Classes"
+              type="number"
+              value={planData.number_of_zoom_classes}
+              onChange={handleChange("number_of_zoom_classes")}
+            />
           )}
-          <br />
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      indeterminate={
-                        selectedStudents.length > 0 &&
-                        selectedStudents.length < allStudents.length
-                      }
-                      checked={
-                        allStudents.length > 0 &&
-                        selectedStudents.length === allStudents.length
-                      }
-                      onChange={handleSelectAll}
-                    />
-                  </TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Email</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {allStudents.map((student) => {
-                  const isItemSelected =
-                    selectedStudents.indexOf(
-                      student.user_id || student.institute_id
-                    ) !== -1;
-                  return (
-                    <TableRow
-                      key={student.user_id || student.institute_id}
-                      hover
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      selected={isItemSelected}
-                    >
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={isItemSelected}
-                          onChange={(event) =>
-                            handleSelectOne(
-                              event,
-                              student.user_id || student.institute_id
-                            )
-                          }
-                        />
-                      </TableCell>
-                      <TableCell>{student.name}</TableCell>
-                      <TableCell>{student.email}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-            <Button onClick={handleAssign} variant="contained" color="primary">
-              Assign
-            </Button>
-          </TableContainer>
-          <br />
-          <Button type="submit">Submit</Button>
-        </form>
-      </Card>
+
+          {/* Self Audio Upload */}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={planData.has_self_audio_upload}
+                onChange={handleCheckboxChange("has_self_audio_upload")}
+              />
+            }
+            label="Allow Self Audio Upload"
+          />
+
+          {/* Number of Teachers */}
+          <TextField
+            label="Number of Teachers"
+            type="number"
+            value={planData.number_of_teachers}
+            onChange={handleChange("number_of_teachers")}
+          />
+
+          {/* Plan Validity */}
+          <TextField
+            label="Plan Validity (days)"
+            type="number"
+            value={planData.plan_validity_days}
+            onChange={handleChange("plan_validity_days")}
+          />
+
+          {/* Watch Time Limit */}
+          <TextField
+            label="Watch Time Limit (minutes)"
+            type="number"
+            value={planData.watch_time_limit}
+            onChange={handleChange("watch_time_limit")}
+          />
+
+          {/* User Type */}
+          <FormControl fullWidth>
+            <InputLabel>User Type</InputLabel>
+            <Select
+              value={planData.plan_user_type}
+              onChange={handleChange("plan_user_type")}
+              required
+            >
+              <MenuItem value="student">Student</MenuItem>
+              <MenuItem value="institute">Institute</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Button variant="contained" color="primary" type="submit">
+            Submit
+          </Button>
+        </Box>
+      </Paper>
     </AdminPageWrapper>
   );
 }

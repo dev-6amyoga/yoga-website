@@ -25,6 +25,15 @@ const Plan = sequelize.define(
       allowNull: false,
       defaultValue: true,
     },
+    has_zoom_classes: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
+    number_of_zoom_classes: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
     has_playlist_creation: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
@@ -62,9 +71,5 @@ const Plan = sequelize.define(
   },
   { ...options }
 )
-
-// Plan.belongsToMany(User, {
-//   through: "user_plan",
-// });
 
 module.exports = { Plan }

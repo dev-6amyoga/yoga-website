@@ -32,23 +32,36 @@ const getZoomAccessToken = async () => {
   }
 }
 
-const createZoomMeeting = async (topic, startTime) => {
+const createZoomMeeting = async (topic, startTime, isRecurring = false) => {
   const accessToken = await getZoomAccessToken()
   try {
+    const meetingData = {
+      topic,
+      type: isRecurring ? 3 : 2, // type 2 = scheduled, type 3 = recurring
+      timezone: 'Asia/Kolkata',
+      pre_schedule: true, // Enable pre-scheduling
+      settings: {
+        host_video: true,
+        participant_video: true,
+        waiting_room: false,
+        join_before_host: true, // Allow participants to join before host starts meeting
+        auto_recording: 'cloud', // Optional: auto-record meetings
+      },
+    }
+
+    // Only add start_time and duration for one-time classes
+    if (!isRecurring && startTime) {
+      // Subtract 5 minutes for early access
+      const meetingStartTime = new Date(
+        new Date(startTime).getTime() - 5 * 60000
+      )
+      meetingData.start_time = meetingStartTime.toISOString()
+      meetingData.duration = 65 // Add 5 minutes to duration
+    }
+
     const res = await axios.post(
       'https://api.zoom.us/v2/users/me/meetings',
-      {
-        topic,
-        type: 2,
-        start_time: startTime,
-        duration: 60,
-        timezone: 'Asia/Kolkata',
-        settings: {
-          host_video: true,
-          participant_video: true,
-          waiting_room: true,
-        },
-      },
+      meetingData,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -334,6 +347,9 @@ router.get('/api/classes/today', async (req, res) => {
       class_type: 'recurring',
       recurring_days: { [Op.contains]: [todayDayNum] },
     }
+
+    console.log(oneTimeClause)
+    console.log(recurringClause)
 
     const classes = await ZoomClassModel.findAll({
       where: {

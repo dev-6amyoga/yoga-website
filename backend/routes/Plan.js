@@ -230,10 +230,12 @@ router.post('/register', async (req, res) => {
     has_self_audio_upload,
     has_playlist_creation,
     plan_user_type,
-    plan_validity,
     watch_time_limit,
-  } = req.body
-  // validate inputs
+    has_zoom_classes,
+    number_of_zoom_classes,
+    plan_validity_days,
+  } = req.body.planData
+  console.log(req.body)
   if (!name || !plan_user_type || !watch_time_limit)
     return res
       .status(HTTP_BAD_REQUEST)
@@ -249,7 +251,9 @@ router.post('/register', async (req, res) => {
         { number_of_teachers: number_of_teachers },
         { has_self_audio_upload: has_self_audio_upload ? true : false },
         { plan_user_type: plan_user_type },
-        { plan_validity: plan_validity },
+        { has_zoom_classes: has_zoom_classes ? true : false },
+        { number_of_zoom_classes: number_of_zoom_classes },
+        { plan_validity_days: plan_validity_days },
         { watch_time_limit: watch_time_limit },
       ],
     },
@@ -271,8 +275,10 @@ router.post('/register', async (req, res) => {
         number_of_teachers,
         has_self_audio_upload,
         plan_user_type,
-        plan_validity,
+        plan_validity_days,
         watch_time_limit,
+        has_zoom_classes,
+        number_of_zoom_classes,
       },
       { transaction: t }
     )

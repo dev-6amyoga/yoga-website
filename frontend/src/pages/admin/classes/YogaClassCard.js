@@ -13,14 +13,55 @@ import {
   Tooltip,
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import useUserStore from "../../../store/UserStore";
+import { Fetch } from "../../../utils/Fetch";
+import { toast } from "react-toastify";
 
 export default function YogaClassCard({ classDetails, isStudentView = true }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const [joining, setJoining] = useState(false);
+  const [user, userPlan] = useUserStore((state) => [
+    state.user,
+    state.userPlan,
+  ]);
+
   let timingStr = "";
   let startTime, endTime;
   let joinDisabled = false;
   let joinTooltip = "";
 
+  const handleJoin = async (e) => {
+    e.preventDefault(); // Prevent default anchor behavior
+    setJoining(true);
+
+    try {
+      const response = await Fetch({
+        url: "/class-attendance/join",
+        method: "POST",
+        data: {
+          userId: user.user_id,
+          classId: classDetails.zoom_class_id,
+          planId: userPlan.plan_id,
+          userPlanId: userPlan.user_plan_id,
+          deviceId: navigator.userAgent, // Using user agent as device ID
+        },
+      });
+      console.log(response);
+
+      if (response.data.allowed) {
+        // If attendance recorded successfully, open Zoom link
+        window.open(classDetails.zoom_url, "_blank");
+        toast.success(response.data.message);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.error("Join error:", error);
+      toast.error(error.response?.data?.message || "Failed to join class");
+    } finally {
+      setJoining(false);
+    }
+  };
   if (classDetails.class_type === "one_time") {
     startTime = new Date(classDetails.start_time);
     endTime = new Date(classDetails.end_time);
@@ -195,13 +236,10 @@ Meeting Password: ${classDetails.zoom_meeting_password}
                 color="success"
                 size="medium"
                 sx={{ borderRadius: 2, px: 5, minWidth: 120 }}
-                component="a"
-                href={classDetails.zoom_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                disabled={joinDisabled}
+                onClick={handleJoin}
+                disabled={joinDisabled || joining}
               >
-                JOIN
+                {joining ? "JOINING..." : "JOIN"}
               </Button>
             </span>
           </Tooltip>
