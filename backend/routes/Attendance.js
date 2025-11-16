@@ -3,6 +3,7 @@ const router = express.Router()
 const { Op } = require('sequelize')
 const { ZoomClassModel } = require('../models/sql/ZoomClassModel')
 const { ClassAttendance } = require('../models/sql/ClassAttendance')
+const { Plan } = require('../models/sql/Plan')
 const { UserPlanAttendance } = require('../models/sql/UserPlanAttendance')
 const { sequelize } = require('../init.sequelize')
 
@@ -193,6 +194,43 @@ router.post('/join', async (req, res) => {
     await t.rollback()
     console.error('Join error:', err)
     return res.status(500).json({ allowed: false, message: 'Server error' })
+  }
+})
+
+router.get('/api/attendance/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params
+    const attendanceRecords = await ClassAttendance.findAll({
+      where: { user_id: userId },
+      order: [['date', 'DESC']],
+    })
+
+    // attach class, plan and userPlanAttendance objects for each record
+    const enriched = await Promise.all(
+      attendanceRecords.map(async (rec) => {
+        const recJson = rec.toJSON ? rec.toJSON() : rec
+        const [cls, plan, upa] = await Promise.all([
+          ZoomClassModel.findByPk(recJson.class_id),
+          Plan.findByPk(recJson.plan_id),
+          recJson.user_plan_id
+            ? UserPlanAttendance.findOne({
+                where: { user_plan_id: recJson.user_plan_id },
+              })
+            : Promise.resolve(null),
+        ])
+        return {
+          ...recJson,
+          class: cls ? (cls.toJSON ? cls.toJSON() : cls) : null,
+          plan: plan ? (plan.toJSON ? plan.toJSON() : plan) : null,
+          userPlanAttendance: upa ? (upa.toJSON ? upa.toJSON() : upa) : null,
+        }
+      })
+    )
+
+    res.status(200).json(enriched)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Failed to fetch attendance records' })
   }
 })
 

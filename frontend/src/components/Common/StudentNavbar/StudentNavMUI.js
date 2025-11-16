@@ -1,4 +1,4 @@
-import { Logout, PersonOutline } from "@mui/icons-material";
+import { Logout, PersonOutline, ExpandMore } from "@mui/icons-material";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
   Avatar,
@@ -13,6 +13,7 @@ import {
   Drawer,
   MenuItem,
   Toolbar,
+  Collapse,
 } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -36,6 +37,7 @@ const logoStyle = {
 
 function StudentNavMUI() {
   const [open, setOpen] = useState(false);
+  const [classesSubmenuOpen, setClassesSubmenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const user = useUserStore((state) => state.user);
@@ -108,6 +110,7 @@ function StudentNavMUI() {
         const activePlan = userPlans.find(
           (plan) => plan.current_status === USER_PLAN_ACTIVE
         );
+        console.log(activePlan);
         if (!activePlan) {
           setDisabled(true);
           setDisabledTailorMade(true);
@@ -123,6 +126,7 @@ function StudentNavMUI() {
         );
         setDisabled(!activePlan.plan.has_basic_playlist);
         setHasZoomClasses(!activePlan.plan.has_zoom_classes);
+        console.log(hasZoomClasses);
       } catch (error) {
         setDisabled(true);
         setDisabledTailorMade(true);
@@ -139,52 +143,67 @@ function StudentNavMUI() {
         path: "/student/free-videos",
         title: "Free Videos",
         disabled: false,
+        submenu: null,
       },
       {
         path: "/student/purchase-a-plan",
         title: "Subscription",
         disabled: false,
+        submenu: null,
       },
       {
         path: "/student/playlist-view",
         title: "Yoga Player",
         disabled: disabled,
+        submenu: null,
       },
       {
         path: "/student/register-new-playlist",
         title: "Create Playlist",
         disabled: disabledTailorMade,
+        submenu: null,
       },
       {
         path: "/student/view-all-playlists",
         title: "View Your Playlists",
         disabled: disabledTailorMade,
+        submenu: null,
       },
       {
         path: "/student/join-class",
         title: "Your Classes",
         disabled: hasZoomClasses,
+        submenu: [
+          { path: "/student/join-class", title: "Join Class" },
+          { path: "/student/attendance-data", title: "Attendance History" },
+        ],
       },
       {
         path: "/student/contact-us",
         title: "Contact Us",
         disabled: false,
+        submenu: null,
       },
       {
         path: "/student/transactions",
         title: "Transaction History",
         disabled: false,
+        submenu: null,
       },
       {
         path: "/student/watch-history",
         title: "Watch History",
         disabled: false,
+        submenu: null,
       },
     ],
-    [disabled, disabledTailorMade]
+    [disabled, disabledTailorMade, hasZoomClasses]
   );
 
-  const handleNavigate = (path) => navigate(path);
+  const handleNavigate = (path) => {
+    navigate(path);
+    setOpen(false);
+  };
 
   return (
     <AppBar
@@ -237,24 +256,83 @@ function StudentNavMUI() {
             <div className="flex flex-row gap-4 justify-between w-full">
               <div className="flex">
                 {paths.map((path, index) => (
-                  <MenuItem
-                    key={path.path}
-                    onClick={() => handleNavigate(path.path)}
-                    sx={{
-                      py: "6px",
-                      px: "12px",
-                      backgroundColor:
-                        location.pathname === path.path
-                          ? "rgba(153, 189, 247, 0.3)"
-                          : "",
-                      borderRadius: "1rem",
-                    }}
-                    disabled={path.disabled}
-                  >
-                    <Typography variant="body2" color="text.primary">
-                      {path.title}
-                    </Typography>
-                  </MenuItem>
+                  <Box key={path.path} sx={{ position: "relative" }}>
+                    <MenuItem
+                      onClick={() => {
+                        if (path.submenu) {
+                          setClassesSubmenuOpen(!classesSubmenuOpen);
+                        } else {
+                          handleNavigate(path.path);
+                        }
+                      }}
+                      sx={{
+                        py: "6px",
+                        px: "12px",
+                        backgroundColor:
+                          location.pathname === path.path
+                            ? "rgba(153, 189, 247, 0.3)"
+                            : "",
+                        borderRadius: "1rem",
+                      }}
+                      disabled={path.disabled}
+                    >
+                      <Typography variant="body2" color="text.primary">
+                        {path.title}
+                      </Typography>
+                      {path.submenu && (
+                        <ExpandMore
+                          sx={{
+                            ml: 1,
+                            transform: classesSubmenuOpen
+                              ? "rotate(180deg)"
+                              : "rotate(0deg)",
+                            transition: "transform 0.3s ease",
+                            fontSize: "1rem",
+                          }}
+                        />
+                      )}
+                    </MenuItem>
+
+                    {/* Submenu */}
+                    {path.submenu && (
+                      <Collapse
+                        in={classesSubmenuOpen}
+                        timeout="auto"
+                        unmountOnExit
+                        sx={{
+                          position: "absolute",
+                          top: "100%",
+                          left: 0,
+                          backgroundColor: "rgba(255, 255, 255, 0.95)",
+                          borderRadius: "0.5rem",
+                          boxShadow: 2,
+                          minWidth: "150px",
+                          zIndex: 1000,
+                        }}
+                      >
+                        {path.submenu.map((item) => (
+                          <MenuItem
+                            key={item.path}
+                            onClick={() => {
+                              handleNavigate(item.path);
+                              setClassesSubmenuOpen(false);
+                            }}
+                            sx={{
+                              py: "6px",
+                              px: "12px",
+                              "&:hover": {
+                                backgroundColor: "rgba(153, 189, 247, 0.2)",
+                              },
+                            }}
+                          >
+                            <Typography variant="body2" color="text.primary">
+                              {item.title}
+                            </Typography>
+                          </MenuItem>
+                        ))}
+                      </Collapse>
+                    )}
+                  </Box>
                 ))}
               </div>
               <div>
@@ -345,21 +423,67 @@ function StudentNavMUI() {
                   }}
                 >
                   {paths.map((path) => (
-                    <MenuItem
-                      key={path.path}
-                      onClick={() => handleNavigate(path.path)}
-                      sx={{
-                        backgroundColor:
-                          location.pathname === path.path
-                            ? "rgba(153, 189, 247, 0.3)"
-                            : "",
-                        borderRadius: "1rem",
-                        transition: `background-color 0.3s ease-in-out`,
-                      }}
-                      disabled={path.disabled}
-                    >
-                      {path.title}
-                    </MenuItem>
+                    <Box key={path.path} sx={{ width: "100%" }}>
+                      <MenuItem
+                        onClick={() => {
+                          if (path.submenu) {
+                            setClassesSubmenuOpen(!classesSubmenuOpen);
+                          } else {
+                            handleNavigate(path.path);
+                          }
+                        }}
+                        sx={{
+                          backgroundColor:
+                            location.pathname === path.path
+                              ? "rgba(153, 189, 247, 0.3)"
+                              : "",
+                          borderRadius: "1rem",
+                          transition: `background-color 0.3s ease-in-out`,
+                        }}
+                        disabled={path.disabled}
+                      >
+                        {path.title}
+                        {path.submenu && (
+                          <ExpandMore
+                            sx={{
+                              ml: "auto",
+                              transform: classesSubmenuOpen
+                                ? "rotate(180deg)"
+                                : "rotate(0deg)",
+                              transition: "transform 0.3s ease",
+                            }}
+                          />
+                        )}
+                      </MenuItem>
+
+                      {/* Mobile Submenu */}
+                      {path.submenu && (
+                        <Collapse
+                          in={classesSubmenuOpen}
+                          timeout="auto"
+                          unmountOnExit
+                        >
+                          {path.submenu.map((item) => (
+                            <MenuItem
+                              key={item.path}
+                              onClick={() => {
+                                handleNavigate(item.path);
+                                setClassesSubmenuOpen(false);
+                              }}
+                              sx={{
+                                pl: 4,
+                                py: "6px",
+                                "&:hover": {
+                                  backgroundColor: "rgba(153, 189, 247, 0.2)",
+                                },
+                              }}
+                            >
+                              {item.title}
+                            </MenuItem>
+                          ))}
+                        </Collapse>
+                      )}
+                    </Box>
                   ))}
                   <Divider />
                   {user ? (

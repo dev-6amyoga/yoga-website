@@ -27,7 +27,7 @@ import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
 import { ROLE_STUDENT } from "../../enums/roles";
 import { withAuth } from "../../utils/withAuth";
 import Hero from "./components/Hero";
-
+import InstitutePlansAccordion from "../../components/student/InstitutePlansAccordion";
 //add trial plan
 
 function DiscountCouponForm({ handleDiscountCouponFormSubmit }) {
@@ -48,6 +48,7 @@ function DiscountCouponForm({ handleDiscountCouponFormSubmit }) {
 function StudentPlan() {
   let user = useUserStore((state) => state.user);
   const [allPlans, setAllPlans] = useState([]);
+  const [allInstitutePlans, setAllInstitutePlans] = useState([]);
   const [showCard, setShowCard] = useState(false);
   const navigate = useNavigate();
   const [showCustomCard, setShowCustomCard] = useState(false);
@@ -169,11 +170,13 @@ function StudentPlan() {
       setLoading(false);
     }
   }, [showCard]);
+
   const calculateEndDate = (validityDays) => {
     const endDate = new Date(validityFromDate);
     endDate.setUTCDate(endDate.getUTCDate() + validityDays);
     return endDate.toISOString();
   };
+
   const handleDiscountCouponFormSubmit = async (e) => {
     e.preventDefault();
     const formData = getFormData(e);
@@ -188,6 +191,7 @@ function StudentPlan() {
       return;
     }
   };
+
   const getEndDate = (userPlan) => {
     var updatedValidityString = "";
     if (userPlan.length === 0) {
@@ -296,6 +300,7 @@ function StudentPlan() {
       fetchCustomUserPlans();
     }
   }, [user]);
+
   const fetchPlans = useCallback(async () => {
     try {
       const response = await Fetch({
@@ -308,7 +313,19 @@ function StudentPlan() {
     } catch (error) {
       toast("Error fetching plans", { type: "error" });
     }
+    try {
+      const response = await Fetch({
+        url: "/plan/get-all-institute-plans",
+      });
+      const filteredPlans = response.data?.plans?.filter(
+        (plan) => plan.plan_user_type === "INSTITUTE"
+      );
+      setAllInstitutePlans(filteredPlans);
+    } catch (error) {
+      toast("Error fetching plans", { type: "error" });
+    }
   }, []);
+
   const fetchCurrencies = useCallback(async () => {
     try {
       const response = await Fetch({
@@ -319,6 +336,7 @@ function StudentPlan() {
       toast("Error fetching plans", { type: "error" });
     }
   }, []);
+
   const validateDiscountCoupon = async (discount_coupon) => {
     if (!discount_coupon) {
       return new Error("Invalid discount coupon");
@@ -354,6 +372,7 @@ function StudentPlan() {
       }
     }
   };
+
   useEffect(() => {
     const fetchData = async () => {
       const order_id = `ord_${toBeRegistered.user_id}_${toBeRegistered.validity_from}`;
@@ -397,6 +416,7 @@ function StudentPlan() {
       }
     }
   }, [toBeRegistered]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     let t = false;
@@ -545,8 +565,8 @@ function StudentPlan() {
         });
       }
     }
-    // }
   };
+
   const subscribePlan = async (data) => {
     if (data.plan) {
       toast("Sending enquiry!");
@@ -624,6 +644,7 @@ function StudentPlan() {
       setPrice(pricing.denomination);
     }
   };
+
   const downloadInvoice = async (response) => {
     try {
       const dataBuffer = new Blob([response.data], {
@@ -650,94 +671,8 @@ function StudentPlan() {
       console.error(err);
     }
   };
-  const registerUserPlan = async (order_id) => {
-    // if (toBeRegistered.custom_plan) {
-    //   let finalUserPlan = { ...toBeRegistered };
-    //   finalUserPlan.transaction_order_id = order_id;
-    //   finalUserPlan.user_type = "STUDENT";
-    //   finalUserPlan.institute_id = null;
-    //   FetchRetry({
-    //     url: "/customUserPlan/register",
-    //     method: "POST",
-    //     token: true,
-    //     data: finalUserPlan,
-    //     n: 5,
-    //   })
-    //     .then((response) => {
-    //       if (response?.status === 200) {
-    //         toast("Plan subscribed successfully", {
-    //           type: "success",
-    //         });
-    //         FetchRetry({
-    //           url: "/invoice/student/mail-invoice",
-    //           method: "POST",
-    //           data: JSON.stringify({
-    //             user_id: finalUserPlan.user_id,
-    //             transaction_order_id: order_id,
-    //             plan_type: "CUSTOM_PLAN",
-    //           }),
-    //           n: 2,
-    //           retryDelayMs: 2000,
-    //         })
-    //           .then((responseInvoice) => {
-    //             if (responseInvoice.status === 200) {
-    //               toast("Invoice generated successfully", {
-    //                 type: "success",
-    //               });
-    //             }
-    //             return downloadInvoice(responseInvoice);
-    //           })
-    //           .then(async (res) => {
-    //             const res1 = await Fetch({
-    //               url: "/invoice/student/notify-admin",
-    //               method: "POST",
-    //               token: true,
-    //               data: {
-    //                 user_id: finalUserPlan.user_id,
-    //                 transaction_order_id: order_id,
-    //                 plan_type: "CUSTOM_PLAN",
-    //               },
-    //             });
-    //             setShowCustomCard(false);
-    //             setCustomCardData(null);
-    //             setLoading(false);
-    //             navigate("/student/playlist-view");
-    //           })
-    //           .catch((error) => {
-    //             setShowCustomCard(false);
-    //             setCustomCardData(null);
-    //             setLoading(false);
-    //             toast(
-    //               "Error downloading invoice; Download invoice in Transaction History",
-    //               { type: "error" }
-    //             );
-    //           });
-    //         setShowCustomCard(false);
-    //         setCustomCardData(null);
-    //         setLoading(false);
-    //         fetchCustomUserPlans();
-    //       } else {
-    //         toast(response?.data?.message);
-    //         setShowCustomCard(false);
-    //         setCustomCardData(null);
-    //         setLoading(false);
-    //         fetchCustomUserPlans();
-    //       }
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //       toast(
-    //         "Error subscribing plan; Incase money has been debited from your account, it will be refunded within 4 to 5 business days! Please try again!",
-    //         { type: "error" }
-    //       );
-    //       setShowCustomCard(false);
-    //       setCustomCardData(null);
-    //       setLoading(false);
-    //       fetchCustomUserPlans();
-    //     });
 
-    //   return;
-    // }
+  const registerUserPlan = async (order_id) => {
     let finalUserPlan = { ...toBeRegistered };
     finalUserPlan.transaction_order_id = order_id;
     finalUserPlan.user_type = "STUDENT";
@@ -810,22 +745,27 @@ function StudentPlan() {
         );
       });
   };
+
   const registerErrorCallback = () => {
     setShowCard(false);
     setCardData(null);
   };
+
   useEffect(() => {
     if (user) {
       fetchUserPlans();
     }
   }, [user, fetchUserPlans]);
+
   useEffect(() => {
     setValidityFromDate(getEndDate(myPlans));
   }, [myPlans]);
+
   useEffect(() => {
     fetchPlans();
     fetchCurrencies();
   }, [fetchPlans, fetchCurrencies]);
+
   const continentNames = {
     AF: "Africa",
     AN: "Antarctica",
@@ -835,6 +775,7 @@ function StudentPlan() {
     OC: "Oceania",
     SA: "South America",
   };
+
   const continentCurrencyMap = {
     Asia: "INR",
     Africa: "USD",
@@ -844,6 +785,7 @@ function StudentPlan() {
     "South America": "USD",
     "North America": "USD",
   };
+
   useEffect(() => {
     fetch("https://ipapi.co/json/")
       .then((res) => {
@@ -884,10 +826,13 @@ function StudentPlan() {
         setSelectedCurrency("USD");
       });
   }, []);
+
   const [filteredPlans, setFilteredPlans] = useState([]);
+
   useEffect(() => {
     setFilteredPlans(allPlans);
   }, [allPlans]);
+
   return (
     <div className="max-w-7xl mx-auto">
       <StudentNavMUI />
@@ -922,163 +867,12 @@ function StudentPlan() {
             trialPlanAvailed={trialPlanAvailed}
           />
         )}
-        {/* <div className="w-full flex flex-col items-center justify-center pt-4 ">
-          {customPlansForUser.length > 0 && (
-            <Pricing
-              heading="Personalized Plans"
-              allPlans={customPlansForUser}
-              subscribePlan={subscribePlan}
-              selectedCurrency={selectedCurrency}
-            />
-          )}
-        </div> */}
-        {customPlanSent && (
-          <p
-            className={
-              "text-sm border p-2 rounded-lg text-zinc-500 border-red-500"
-            }
-          >
-            Your request has been recorded! Our admin will reach out to you
-            within 24 hours.
-          </p>
-        )}
-
         <Divider />
-        {/* <Modal
-          visible={showCustomCard}
-          onClose={() => setShowCustomCard(false)}
-        >
-          <Modal.Content>
-            {customCardData ? (
-              <>
-                <h3>{customCardData.plan_name}</h3>
-
-                <Divider />
-                <Spacer />
-                <p>
-                  <strong>Price</strong>
-                  <br />
-                  {customCardData ? (
-                    <>
-                      <span>{selectedCurrency}</span> <span>{price}</span>{" "}
-                      {discountCouponApplied ? (
-                        <span className="text-green-600">
-                          - {(price * discountCoupon.discount_percentage) / 100}
-                        </span>
-                      ) : (
-                        <></>
-                      )}{" "}
-                      {selectedCurrency === "INR" ? (
-                        <span>+ 5% GST (2.5% SGST + 2.5% CGST)</span>
-                      ) : (
-                        <></>
-                      )}{" "}
-                      {selectedCurrency === "INR" || discountCouponApplied ? (
-                        <>
-                          <span> = </span>{" "}
-                          <span>
-                            {calculateTotalPrice(
-                              price,
-                              selectedCurrency,
-                              true,
-                              5,
-                              discountCoupon,
-                              1
-                            )}
-                          </span>
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                      <br />
-                      {discountCouponApplied ? (
-                        <span className="rounded-full bg-green-600 px-2 py-1 text-sm text-white">
-                          Coupon Applied : {discountCoupon.coupon_name} |{" "}
-                          {discountCoupon?.discount_percentage}
-                          {"%"}
-                          OFF
-                          <button
-                            className="mx-2 rounded-full border-0 bg-red-500 px-1"
-                            onClick={() => {
-                              setDiscountCouponApplied(false);
-                              setDiscountCoupon(null);
-                            }}
-                          >
-                            Remove
-                          </button>
-                        </span>
-                      ) : (
-                        <></>
-                      )}
-                    </>
-                  ) : (
-                    ""
-                  )}
-                </p>
-                <Spacer />
-                <DiscountCouponForm
-                  handleDiscountCouponFormSubmit={
-                    handleDiscountCouponFormSubmit
-                  }
-                />
-                <Spacer />
-                <Divider />
-                <Spacer />
-                <h5>Validity</h5>
-                <Spacer />
-                <div className="flex flex-col gap-2">
-                  <div className="flex flex-row gap-2">
-                    <p className="flex flex-1 flex-col items-center rounded-lg border p-2 text-sm">
-                      <span className="font-medium">Plan Start Date</span>
-                      <span className="text-center">
-                        {new Date(
-                          customCardData.validity_from
-                        ).toLocaleString()}
-                      </span>
-                    </p>
-
-                    <p className="flex flex-1 flex-col items-center rounded-lg border p-2 text-sm">
-                      <span className="font-medium">Plan End Date</span>
-                      <span className="text-center">
-                        {new Date(customCardData.validity_to).toLocaleString()}
-                      </span>
-                    </p>
-                  </div>
-
-                  <p className="flex flex-1 flex-col items-center rounded-lg border p-2 text-sm">
-                    <span className="font-medium">Watch Hours Limit</span>
-                    <span className="text-center">
-                      <>{customCardData?.watchHours} Hours</>
-                    </span>
-                  </p>
-                </div>
-                <Spacer />
-                <Divider />
-                <Spacer />
-                <Button
-                  onClick={handleSubmit}
-                  fullWidth
-                  variant="contained"
-                  disabled={loading}
-                >
-                  {loading ? "..." : "Purchase"}
-                </Button>
-              </>
-            ) : (
-              <></>
-            )}
-          </Modal.Content>
-          <Modal.Action
-            onClick={() => {
-              setShowCard(false);
-              setCardData(null);
-              setDisplayRazorpay(false);
-            }}
-          >
-            Close
-          </Modal.Action>
-        </Modal> */}
-
+        <InstitutePlansAccordion
+          allInstitutePlans={allInstitutePlans}
+          subscribePlan={subscribePlan}
+          selectedCurrency={selectedCurrency}
+        />
         <Modal visible={showCard} onClose={() => setShowCard(false)}>
           <Modal.Content>
             {cardData ? (
@@ -1214,7 +1008,6 @@ function StudentPlan() {
             Close
           </Modal.Action>
         </Modal>
-
         {myPlans && myPlans.length > 0 && (
           <div className="mx-auto max-w-7xl">
             <h4>Plan History</h4>
@@ -1262,58 +1055,6 @@ function StudentPlan() {
             </TableContainer>
           </div>
         )}
-        {/* 
-        {currentCustomUserPlans && currentCustomUserPlans.length > 0 && (
-          <div className="mx-auto max-w-7xl">
-            <h4>Custom Plan History</h4>
-
-            <TableContainer component={Paper} sx={{ margin: "2rem 0" }}>
-              <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                <TableHead
-                  sx={{
-                    bgcolor: "linear-gradient(#033363, #021F3B)",
-                  }}
-                >
-                  <TableRow>
-                    <TableCell>Plan Name</TableCell>
-                    <TableCell>Validity From</TableCell>
-                    <TableCell>Validity To</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {currentCustomUserPlans?.map((row) => (
-                    <TableRow
-                      key={row?.custom_plan_id}
-                      sx={{
-                        "&:last-child td, &:last-child th": { border: 0 },
-                      }}
-                    >
-                      <TableCell component="th" scope="row">
-                        {customPlansForUser.find(
-                          (obj) => obj._id === row?.custom_plan_id
-                        )?.plan_name || "Plan not found"}
-                      </TableCell>
-                      <TableCell>
-                        {row?.validity_from
-                          ? new Date(row?.validity_from).toLocaleDateString(
-                              "en-GB"
-                            )
-                          : ""}
-                      </TableCell>
-                      <TableCell>
-                        {row?.validity_to
-                          ? new Date(row?.validity_to).toLocaleDateString(
-                              "en-GB"
-                            )
-                          : ""}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </div>
-        )} */}
       </div>
 
       <RenderRazorpay

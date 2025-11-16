@@ -15,6 +15,8 @@ import StudentWatchHistory from "../pages/student/StudentWatchHistory";
 import ViewAllPlaylists from "../pages/student/ViewAllPlaylists";
 import ViewMyClasses from "../pages/student/class-mode/ViewMyClasses";
 import StudentJoinClass from "../pages/student/StudentJoinClass";
+import AttendancePage from "../pages/student/AttendancePage";
+
 export const StudentRoutes = [
   {
     path: "/student/playlist-view",
@@ -23,6 +25,10 @@ export const StudentRoutes = [
   {
     path: "/student/class/my-classes",
     element: <ViewMyClasses />,
+  },
+  {
+    path: "/student/attendance-data",
+    element: <AttendancePage />,
   },
   {
     path: "/student/contact-us",
