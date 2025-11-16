@@ -341,7 +341,7 @@ router.post('/register', authenticateToken, async (req, res) => {
     if (validity_from) {
       const fromDate = new Date(validity_from)
       const toDate = new Date(fromDate)
-      toDate.setDate(fromDate.getDate() + 30)
+      toDate.setDate(fromDate.getDate() + plan.plan_validity_days)
       computed_validity_to = toDate
     }
     // create userPlan

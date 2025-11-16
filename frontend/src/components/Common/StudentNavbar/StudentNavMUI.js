@@ -45,6 +45,8 @@ function StudentNavMUI() {
   const [planId, setPlanId] = useState(0);
   const [disabled, setDisabled] = useState(false);
   const [disabledTailorMade, setDisabledTailorMade] = useState(false);
+  const [hasZoomClasses, setHasZoomClasses] = useState(false);
+
   const [anchorEl, setAnchorEl] = useState(null);
   const [openProfileMenu, setOpenProfileMenu] = useState(false);
 
@@ -97,23 +99,9 @@ function StudentNavMUI() {
         });
         const userPlans = response.data?.userPlan || [];
         if (userPlans.length === 0) {
-          // If no plans, check for custom user plans
-          const res = await Fetch({
-            url: `/customUserPlan/getCustomUserPlansByUser/${user.user_id}`,
-            token: true,
-            method: "GET",
-          });
-          if (res.status === 200 && res.data?.plans?.length) {
-            const today = new Date();
-            const validPlans = res.data.plans.filter(
-              (plan) => new Date(plan.validity_to) > today
-            );
-            setDisabled(validPlans.length === 0);
-            setDisabledTailorMade(validPlans.length === 0);
-          } else {
-            setDisabled(true);
-            setDisabledTailorMade(true);
-          }
+          setDisabled(true);
+          setDisabledTailorMade(true);
+          setHasZoomClasses(true);
           return;
         }
         // Check for active plans
@@ -123,6 +111,7 @@ function StudentNavMUI() {
         if (!activePlan) {
           setDisabled(true);
           setDisabledTailorMade(true);
+          setHasZoomClasses(true);
           return;
         }
         setUserPlan(activePlan);
@@ -133,9 +122,11 @@ function StudentNavMUI() {
             : !activePlan.plan.has_playlist_creation
         );
         setDisabled(!activePlan.plan.has_basic_playlist);
+        setHasZoomClasses(!activePlan.plan.has_zoom_classes);
       } catch (error) {
         setDisabled(true);
         setDisabledTailorMade(true);
+        setHasZoomClasses(true);
       }
     };
     if (user) fetchPlanData();
@@ -172,6 +163,7 @@ function StudentNavMUI() {
       {
         path: "/student/join-class",
         title: "Your Classes",
+        disabled: hasZoomClasses,
       },
       {
         path: "/student/contact-us",
