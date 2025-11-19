@@ -74,7 +74,7 @@ const createZoomMeeting = async (topic, startTime, isRecurring = false) => {
     return {
       joinUrl: res.data.join_url,
       meetingId: res.data.id,
-      password: res.data.password,
+      password: res.data.password ? res.data.password : '',
     }
   } catch (err) {
     console.error('Error creating Zoom meeting:', err.response?.data || err)
