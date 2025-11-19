@@ -5,6 +5,7 @@ const { ZoomClassModel } = require('../models/sql/ZoomClassModel')
 const { ClassAttendance } = require('../models/sql/ClassAttendance')
 const { Plan } = require('../models/sql/Plan')
 const { UserPlanAttendance } = require('../models/sql/UserPlanAttendance')
+const { UserPlan } = require('../models/sql/UserPlan')
 const { sequelize } = require('../init.sequelize')
 const moment = require('moment-timezone')
 
@@ -12,8 +13,7 @@ router.post('/join', async (req, res) => {
   const t = await sequelize.transaction()
   try {
     const { userId, classId, planId, userPlanId, deviceId } = req.body
-    const now = moment().tz('Asia/Kolkata') // 🔥 always use IST
-
+    const now = moment().tz('Asia/Kolkata')
     if (!userId || !classId || !planId || !userPlanId) {
       await t.rollback()
       return res
@@ -22,17 +22,50 @@ router.post('/join', async (req, res) => {
     }
 
     // 1. load user plan attendance (single record) with row lock
-    const userPlan = await UserPlanAttendance.findOne({
+    let userPlan = await UserPlanAttendance.findOne({
       where: { user_plan_id: userPlanId },
       transaction: t,
       lock: t.LOCK.UPDATE,
     })
 
+    // Create UserPlanAttendance if it doesn't exist
     if (!userPlan) {
-      await t.rollback()
-      return res
-        .status(404)
-        .json({ allowed: false, message: 'User plan not found' })
+      // Fetch the UserPlan to get validity dates
+      const userPlanRecord = await UserPlan.findOne({
+        where: { user_plan_id: userPlanId },
+        transaction: t,
+      })
+
+      if (!userPlanRecord) {
+        await t.rollback()
+        return res
+          .status(404)
+          .json({ allowed: false, message: 'User plan not found' })
+      }
+
+      // Fetch plan to get classes_allowed
+      const plan = await Plan.findByPk(planId, { transaction: t })
+      if (!plan) {
+        await t.rollback()
+        return res
+          .status(404)
+          .json({ allowed: false, message: 'Plan not found' })
+      }
+
+      // Create UserPlanAttendance record
+      userPlan = await UserPlanAttendance.create(
+        {
+          user_id: userId,
+          plan_id: planId,
+          user_plan_id: userPlanId,
+          start_date: userPlanRecord.validity_from,
+          expiry_date: userPlanRecord.validity_to,
+          classes_allowed: plan.number_of_zoom_classes || 0,
+          classes_attended: 0,
+          status: 'ACTIVE',
+        },
+        { transaction: t }
+      )
     }
 
     // validate plan period and status
