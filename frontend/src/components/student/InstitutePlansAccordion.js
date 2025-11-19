@@ -1,20 +1,19 @@
+// ...existing code...
+import React from "react";
 import {
+  Box,
+  Grid,
   Accordion,
   AccordionSummary,
   AccordionDetails,
   Typography,
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  CardActions,
   Button,
   Chip,
-  Collapse,
-  IconButton,
+  Stack,
+  useMediaQuery,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import React from "react";
+import { useTheme } from "@mui/material/styles";
 
 function InstitutePlansAccordion({
   allInstitutePlans,
@@ -22,191 +21,168 @@ function InstitutePlansAccordion({
   selectedCurrency,
 }) {
   const [expandedPlanId, setExpandedPlanId] = React.useState(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const toggleExpand = (planId) =>
-    setExpandedPlanId((prev) => (prev === planId ? null : planId));
+  const handleChange = (planId) => (_, expanded) => {
+    setExpandedPlanId(expanded ? planId : null);
+  };
 
   return (
-    <Box sx={{ my: 4, width: "100%" }}>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
-        6AM Yoga Plans
-      </Typography>
+    <Box
+      sx={{ width: "100%", px: { xs: 1, sm: 2 }, maxWidth: 1100, mx: "auto" }}
+    >
+      {Array.isArray(allInstitutePlans) && allInstitutePlans.length === 0 && (
+        <Typography sx={{ py: 3 }} align="center" color="textSecondary">
+          No plans available
+        </Typography>
+      )}
 
-      <Accordion defaultExpanded sx={{ width: "100%" }}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="institute-plans-content"
-          id="institute-plans-header"
-          sx={{
-            backgroundColor: "#f5f5f5",
-            "&:hover": { backgroundColor: "#eeeeee" },
-            width: "100%",
-          }}
+      {allInstitutePlans?.map((plan) => (
+        <Accordion
+          key={plan.plan_id}
+          expanded={expandedPlanId === plan.plan_id}
+          onChange={handleChange(plan.plan_id)}
+          sx={{ mb: 1 }}
         >
-          <Typography variant="h6">Institute Plans</Typography>
-        </AccordionSummary>
-
-        <AccordionDetails
-          sx={{ p: 0, backgroundColor: "#fafafa", width: "100%" }}
-        >
-          <Box sx={{ width: "100%", px: 2, py: 2 }}>
-            <Grid container spacing={2}>
-              {allInstitutePlans && allInstitutePlans.length > 0 ? (
-                allInstitutePlans.map((plan) => {
-                  const pricing = plan.pricing?.[0];
-                  const priceDisplay = pricing
-                    ? `${pricing.currency.short_tag} ${pricing.denomination}`
-                    : "N/A";
-                  const isExpanded = expandedPlanId === plan.plan_id;
-
-                  return (
-                    // force each plan to take full container width
-                    <Grid item xs={12} key={plan.plan_id}>
-                      <Card
-                        sx={{
-                          width: "100%",
-                          display: "flex",
-                          flexDirection: "column",
-                          boxShadow: 2,
-                        }}
-                        elevation={1}
-                      >
-                        <CardContent sx={{ flexGrow: 1, px: 3, py: 2 }}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                              gap: 2,
-                              width: "100%",
-                            }}
-                          >
-                            <Box sx={{ minWidth: 0 }}>
-                              <Typography
-                                variant="subtitle1"
-                                sx={{
-                                  fontWeight: "bold",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {plan.name}
-                              </Typography>
-                              <Typography
-                                variant="h6"
-                                sx={{ mt: 0.5, color: "primary.main" }}
-                              >
-                                {priceDisplay}
-                              </Typography>
-                            </Box>
-
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() => subscribePlan(plan)}
-                                sx={{ mr: 1 }}
-                              >
-                                Purchase
-                              </Button>
-
-                              <IconButton
-                                onClick={() => toggleExpand(plan.plan_id)}
-                                aria-expanded={isExpanded}
-                                aria-label="show details"
-                                sx={{
-                                  transform: isExpanded
-                                    ? "rotate(180deg)"
-                                    : "rotate(0deg)",
-                                  transition: "transform 0.2s ease",
-                                }}
-                              >
-                                <ExpandMoreIcon />
-                              </IconButton>
-                            </Box>
-                          </Box>
-
-                          <Collapse
-                            in={isExpanded}
-                            timeout="auto"
-                            unmountOnExit
-                          >
-                            <Box sx={{ mt: 2 }}>
-                              <Typography
-                                variant="body2"
-                                color="textSecondary"
-                                sx={{ mb: 1 }}
-                              >
-                                {plan.description}
-                              </Typography>
-
-                              <Box
-                                sx={{
-                                  mb: 1,
-                                  display: "flex",
-                                  gap: 1,
-                                  flexWrap: "wrap",
-                                }}
-                              >
-                                <Chip
-                                  label={`${plan.number_of_zoom_classes} Classes/Month`}
-                                  size="small"
-                                  variant="outlined"
-                                />
-                                <Chip
-                                  label={`${plan.plan_validity_days} Days Validity`}
-                                  size="small"
-                                  variant="outlined"
-                                />
-                              </Box>
-
-                              <Typography variant="caption" display="block">
-                                ✓ Zoom Classes:{" "}
-                                {plan.has_zoom_classes ? "Yes" : "No"}
-                              </Typography>
-                              <Typography variant="caption" display="block">
-                                ✓ Teachers: {plan.number_of_teachers}
-                              </Typography>
-                              <Typography variant="caption" display="block">
-                                ✓ Playlist Creation:{" "}
-                                {plan.has_playlist_creation ? "Yes" : "No"}
-                              </Typography>
-                            </Box>
-                          </Collapse>
-                        </CardContent>
-
-                        {/* <CardActions sx={{ px: 3, pb: 2 }}>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                            onClick={() => subscribePlan(plan)}
-                          >
-                            Purchase
-                          </Button>
-                        </CardActions> */}
-                      </Card>
-                    </Grid>
-                  );
-                })
-              ) : (
-                <Grid item xs={12}>
-                  <Typography
-                    variant="body1"
-                    color="textSecondary"
-                    sx={{ p: 2 }}
-                  >
-                    No institute plans available at the moment.
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Grid container alignItems="center" spacing={1}>
+              <Grid item xs={8} sm={6}>
+                <Typography
+                  variant={isMobile ? "subtitle2" : "h6"}
+                  noWrap
+                  sx={{ textOverflow: "ellipsis", maxWidth: "100%" }}
+                >
+                  {plan.name}
+                </Typography>
+                {!isMobile && (
+                  <Typography variant="caption" color="text.secondary" noWrap>
+                    {plan.description || ""}
                   </Typography>
-                </Grid>
-              )}
+                )}
+              </Grid>
+
+              <Grid
+                item
+                xs={4}
+                sm={3}
+                sx={{ textAlign: { xs: "right", sm: "center" } }}
+              >
+                <Typography
+                  variant={isMobile ? "subtitle1" : "h5"}
+                  sx={{ fontWeight: 700 }}
+                >
+                  {(selectedCurrency?.symbol || "₹") + (plan.price ?? 0)}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  display="block"
+                >
+                  {plan.plan_validity_days ?? "30"} days
+                </Typography>
+              </Grid>
+
+              <Grid
+                item
+                xs={12}
+                sm={3}
+                sx={{ display: "flex", justifyContent: "flex-end" }}
+              >
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  size={isMobile ? "small" : "medium"}
+                  onClick={(e) => {
+                    e.stopPropagation(); // don't toggle accordion when user taps buy
+                    subscribePlan(plan);
+                  }}
+                  fullWidth={isMobile}
+                >
+                  {isMobile ? "Buy" : "Buy / Subscribe"}
+                </Button>
+              </Grid>
             </Grid>
-          </Box>
-        </AccordionDetails>
-      </Accordion>
+          </AccordionSummary>
+
+          <AccordionDetails>
+            <Stack direction="column" spacing={2}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={8}>
+                  <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
+                    {plan.description || "No description available"}
+                  </Typography>
+
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ mt: 2, flexWrap: "wrap" }}
+                  >
+                    {(plan.tags || []).slice(0, 8).map((t) => (
+                      <Chip key={t} label={t} size="small" sx={{ mb: 1 }} />
+                    ))}
+                  </Stack>
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <Box
+                    sx={{
+                      borderLeft: { xs: "none", sm: "1px solid #eee" },
+                      pl: { sm: 2 },
+                    }}
+                  >
+                    <Typography variant="subtitle2">Plan details</Typography>
+                    <Typography variant="body2">
+                      Classes: {plan.number_of_zoom_classes ?? "Unlimited"}
+                    </Typography>
+                    <Typography variant="body2">
+                      Teachers: {plan.number_of_teachers ?? 1}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Validity: {plan.plan_validity_days} days
+                    </Typography>
+
+                    <Box sx={{ mt: 2 }}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        onClick={() => subscribePlan(plan)}
+                      >
+                        Purchase
+                      </Button>
+                      <Button
+                        variant="text"
+                        sx={{ mt: 1 }}
+                        fullWidth
+                        onClick={() => window.open("/terms", "_blank")}
+                      >
+                        Terms
+                      </Button>
+                    </Box>
+                  </Box>
+                </Grid>
+              </Grid>
+
+              {isMobile && (
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    fullWidth
+                    onClick={() => subscribePlan(plan)}
+                  >
+                    Quick purchase
+                  </Button>
+                </Box>
+              )}
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+      ))}
     </Box>
   );
 }
 
 export default InstitutePlansAccordion;
+// ...existing code...
