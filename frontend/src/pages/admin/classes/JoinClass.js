@@ -14,24 +14,9 @@ export default function JoinClass() {
   useEffect(() => {
     setLoading(true);
     Fetch({
-      //   url: `/user/is-teacher/${user.user_id}`,
-      url: `/user/is-teacher/4`,
+      url: "/zoom/admin/classes/today",
       method: "GET",
     })
-      .then((res) => {
-        if (res.data.isTeacher) {
-          return Fetch({
-            url: `/zoom/api/classes/today?teacher_id=4`,
-            // url: `/zoom/api/classes/today?teacher_id=${user.user_id}`,
-            method: "GET",
-          });
-        } else {
-          return Fetch({
-            url: `/zoom/api/classes/today?plan_id=${user.plan_id || ""}`,
-            method: "GET",
-          });
-        }
-      })
       .then((res) => {
         setClasses(res.data);
       })
@@ -66,7 +51,7 @@ export default function JoinClass() {
             <YogaClassCard
               key={classObj.zoom_class_id}
               classDetails={classObj}
-              isStudentView={false}
+              isStudentView={true}
             />
           ))}
         </Box>

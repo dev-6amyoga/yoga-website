@@ -9,6 +9,7 @@ const {
 } = require('../utils/http_status_codes')
 const { Op } = require('sequelize')
 const router = express.Router()
+const moment = require('moment-timezone')
 
 const getZoomAccessToken = async () => {
   try {
@@ -305,27 +306,12 @@ router.get('/api/classes/today', async (req, res) => {
   try {
     const { teacher_id, plan_id } = req.query
     console.log('GOT : ', teacher_id, plan_id)
-    const now = new Date()
-    const startOfDay = new Date(
-      Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate(),
-        0,
-        0,
-        0
-      )
-    )
-    const endOfDay = new Date(
-      Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate(),
-        23,
-        59,
-        59
-      )
-    )
+
+    // Use Asia/Kolkata timezone
+    const now = moment.tz('Asia/Kolkata')
+    const startOfDay = now.clone().startOf('day')
+    const endOfDay = now.clone().endOf('day')
+    const todayDayNum = now.day() // 0 (Sun) - 6 (Sat)
 
     let whereClause = {}
 
@@ -338,18 +324,20 @@ router.get('/api/classes/today', async (req, res) => {
     const oneTimeClause = {
       ...whereClause,
       class_type: 'one_time',
-      start_time: { [Op.gte]: startOfDay, [Op.lte]: endOfDay },
+      start_time: {
+        [Op.gte]: startOfDay.toDate(),
+        [Op.lte]: endOfDay.toDate(),
+      },
     }
 
-    const todayDayNum = now.getUTCDay() // 0 (Sun) - 6 (Sat)
     const recurringClause = {
       ...whereClause,
       class_type: 'recurring',
       recurring_days: { [Op.contains]: [todayDayNum] },
     }
 
-    console.log(oneTimeClause)
-    console.log(recurringClause)
+    console.log('oneTimeClause:', oneTimeClause)
+    console.log('recurringClause:', recurringClause)
 
     const classes = await ZoomClassModel.findAll({
       where: {
@@ -363,6 +351,88 @@ router.get('/api/classes/today', async (req, res) => {
     res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ error: "Failed to fetch today's classes" })
+  }
+})
+
+router.get('/admin/classes/today', async (req, res) => {
+  try {
+    // Use Asia/Kolkata timezone consistently
+    const today = moment.tz('Asia/Kolkata')
+    const dayOfWeek = today.day() // 0 = Sunday, 6 = Saturday
+
+    const allClasses = await ZoomClassModel.findAll({
+      where: {
+        deletedAt: null,
+      },
+      raw: true,
+    })
+
+    // Filter classes scheduled for today
+    const todayClasses = allClasses.filter((cls) => {
+      if (cls.class_type === 'one_time') {
+        // Convert start_time to Asia/Kolkata and compare dates
+        const classDate = moment.tz(cls.start_time, 'Asia/Kolkata')
+        return classDate.format('YYYY-MM-DD') === today.format('YYYY-MM-DD')
+      }
+
+      // recurring class
+      if (cls.class_type === 'recurring') {
+        let days = cls.recurring_days
+        if (typeof days === 'string') {
+          // Handle both array string and JSON string formats
+          days = days.startsWith('[')
+            ? JSON.parse(days)
+            : days.split(',').map(Number)
+        }
+        return Array.isArray(days) && days.includes(dayOfWeek)
+      }
+
+      return false
+    })
+
+    // Remove duplicates by zoom_url
+    const distinctMap = new Map()
+    todayClasses.forEach((cls) => {
+      if (!distinctMap.has(cls.zoom_url)) {
+        distinctMap.set(cls.zoom_url, cls)
+      }
+    })
+
+    const distinctClasses = Array.from(distinctMap.values())
+
+    // Sort by time (using Asia/Kolkata timezone)
+    distinctClasses.sort((a, b) => {
+      let aTime, bTime
+
+      if (a.class_type === 'one_time' && a.start_time) {
+        aTime = moment.tz(a.start_time, 'Asia/Kolkata')
+      } else if (a.class_type === 'recurring' && a.recurring_start_time) {
+        aTime = moment.tz(
+          `1970-01-01T${a.recurring_start_time}`,
+          'Asia/Kolkata'
+        )
+      } else {
+        aTime = moment.tz('1970-01-01T00:00:00', 'Asia/Kolkata')
+      }
+
+      if (b.class_type === 'one_time' && b.start_time) {
+        bTime = moment.tz(b.start_time, 'Asia/Kolkata')
+      } else if (b.class_type === 'recurring' && b.recurring_start_time) {
+        bTime = moment.tz(
+          `1970-01-01T${b.recurring_start_time}`,
+          'Asia/Kolkata'
+        )
+      } else {
+        bTime = moment.tz('1970-01-01T00:00:00', 'Asia/Kolkata')
+      }
+
+      return aTime.diff(bTime)
+    })
+
+    res.status(200).json(distinctClasses)
+  } catch (err) {
+    console.error('Error fetching today classes:', err)
+    res.status(500).json({ error: err.message || 'Failed to fetch classes' })
   }
 })
 
