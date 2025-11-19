@@ -56,6 +56,7 @@ export default function StudentJoinClass() {
               key={classObj.zoom_class_id}
               classDetails={classObj}
               isStudentView={true}
+              isAdminView={false}
             />
           ))}
         </Box>

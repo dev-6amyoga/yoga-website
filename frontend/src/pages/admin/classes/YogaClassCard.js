@@ -17,7 +17,11 @@ import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import { toast } from "react-toastify";
 
-export default function YogaClassCard({ classDetails, isStudentView = true }) {
+export default function YogaClassCard({
+  classDetails,
+  isStudentView = true,
+  isAdminView = false,
+}) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [joining, setJoining] = useState(false);
   const [user, userPlan] = useUserStore((state) => [
@@ -62,6 +66,35 @@ export default function YogaClassCard({ classDetails, isStudentView = true }) {
       setJoining(false);
     }
   };
+
+  const handleAdminJoin = async (e) => {
+    e.preventDefault();
+    setJoining(true);
+
+    try {
+      const response = await Fetch({
+        url: "/class-attendance/admin/join-class",
+        method: "POST",
+        token: true,
+        data: {
+          classId: classDetails.zoom_class_id,
+        },
+      });
+
+      if (response.data.allowed) {
+        window.open(response.data.zoom_url, "_blank");
+        toast.success(response.data.message);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.error("Admin join error:", error);
+      toast.error(error.response?.data?.message || "Failed to join class");
+    } finally {
+      setJoining(false);
+    }
+  };
+
   if (classDetails.class_type === "one_time") {
     startTime = new Date(classDetails.start_time);
     endTime = new Date(classDetails.end_time);
@@ -98,14 +131,14 @@ export default function YogaClassCard({ classDetails, isStudentView = true }) {
     endTime
   ) {
     const now = new Date();
-    const thirtyMinsBeforeStart = new Date(startTime.getTime() - 30 * 60000);
+    const thirtyMinsBeforeStart = new Date(startTime.getTime() - 15 * 60000);
     if (now > endTime) {
       joinDisabled = true;
       joinTooltip = "Class has ended.";
     } else if (now < thirtyMinsBeforeStart) {
       joinDisabled = true;
       joinTooltip =
-        "JOIN button will be enabled only 30 mins before class start time.";
+        "JOIN button will be enabled only 15 mins before class start time.";
     }
   }
 
@@ -116,14 +149,12 @@ export default function YogaClassCard({ classDetails, isStudentView = true }) {
     classDetails.recurring_days.length > 0
   ) {
     const now = new Date();
-    const todayDayNum = now.getDay(); // 0 (Sun) - 6 (Sat)
+    const todayDayNum = now.getDay();
 
-    // Check if today is a recurring day
     if (!classDetails.recurring_days.includes(todayDayNum)) {
       joinDisabled = true;
       joinTooltip = "No class scheduled for today.";
     } else {
-      // Build today's start and end Date objects using today's date and recurring times
       const [startHour, startMinute] = classDetails.recurring_start_time
         .split(":")
         .map(Number);
@@ -147,7 +178,7 @@ export default function YogaClassCard({ classDetails, isStudentView = true }) {
         endMinute,
         0
       );
-      const thirtyMinsBeforeStart = new Date(todayStart.getTime() - 30 * 60000);
+      const thirtyMinsBeforeStart = new Date(todayStart.getTime() - 15 * 60000);
 
       if (now > todayEnd) {
         joinDisabled = true;
@@ -155,7 +186,7 @@ export default function YogaClassCard({ classDetails, isStudentView = true }) {
       } else if (now < thirtyMinsBeforeStart) {
         joinDisabled = true;
         joinTooltip =
-          "JOIN button will be enabled only 30 mins before class start time.";
+          "JOIN button will be enabled only 15 mins before class start time.";
       }
     }
   }
@@ -163,9 +194,6 @@ export default function YogaClassCard({ classDetails, isStudentView = true }) {
   const infoData = `
 Class Name: ${classDetails.zoom_class_name}
 Type: ${classDetails.class_type}
-Institute ID: ${classDetails.institute_id}
-Teacher ID: ${classDetails.teacher_id}
-Plan ID: ${classDetails.plan_id}
 ${
   classDetails.class_type === "one_time"
     ? `Start: ${classDetails.start_time ? new Date(classDetails.start_time).toLocaleString() : ""}
@@ -174,9 +202,6 @@ End: ${classDetails.end_time ? new Date(classDetails.end_time).toLocaleString() 
 Start Time: ${classDetails.recurring_start_time}
 End Time: ${classDetails.recurring_end_time}`
 }
-Zoom URL: ${classDetails.zoom_url}
-Meeting ID: ${classDetails.zoom_meeting_id}
-Meeting Password: ${classDetails.zoom_meeting_password}
 `;
 
   return (
@@ -225,25 +250,42 @@ Meeting Password: ${classDetails.zoom_meeting_password}
         </Box>
 
         <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 2 }}>
-          <Tooltip
-            title={joinDisabled ? joinTooltip : ""}
-            arrow
-            disableHoverListener={!joinDisabled}
-          >
-            <span>
-              <Button
-                variant="contained"
-                color="success"
-                size="medium"
-                sx={{ borderRadius: 2, px: 5, minWidth: 120 }}
-                onClick={handleJoin}
-                disabled={joinDisabled || joining}
-              >
-                {joining ? "JOINING..." : "JOIN"}
-              </Button>
-            </span>
-          </Tooltip>
-          {!isStudentView && (
+          {isAdminView ? (
+            <Tooltip title="Join class without attendance tracking">
+              <span>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="medium"
+                  sx={{ borderRadius: 2, px: 5, minWidth: 120 }}
+                  onClick={handleAdminJoin}
+                  disabled={joining}
+                >
+                  {joining ? "JOINING..." : "ADMIN JOIN"}
+                </Button>
+              </span>
+            </Tooltip>
+          ) : (
+            <Tooltip
+              title={joinDisabled ? joinTooltip : ""}
+              arrow
+              disableHoverListener={!joinDisabled}
+            >
+              <span>
+                <Button
+                  variant="contained"
+                  color="success"
+                  size="medium"
+                  sx={{ borderRadius: 2, px: 5, minWidth: 120 }}
+                  onClick={handleJoin}
+                  disabled={joinDisabled || joining}
+                >
+                  {joining ? "JOINING..." : "JOIN"}
+                </Button>
+              </span>
+            </Tooltip>
+          )}
+          {/* {!isStudentView && (
             <>
               <Button
                 variant="outlined"
@@ -268,7 +310,7 @@ Meeting Password: ${classDetails.zoom_meeting_password}
                 DELETE
               </Button>
             </>
-          )}
+          )} */}
         </Box>
       </CardContent>
       <Dialog open={infoOpen} onClose={() => setInfoOpen(false)}>

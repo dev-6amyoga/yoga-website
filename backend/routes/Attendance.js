@@ -234,6 +234,42 @@ router.post('/join', async (req, res) => {
   }
 })
 
+router.post('/admin/join-class', async (req, res) => {
+  try {
+    const { classId } = req.body
+
+    if (!classId) {
+      return res.status(400).json({
+        allowed: false,
+        message: 'classId is required',
+      })
+    }
+
+    // Fetch class details
+    const yogaClass = await ZoomClassModel.findByPk(classId)
+
+    if (!yogaClass) {
+      return res.status(404).json({
+        allowed: false,
+        message: 'Class not found',
+      })
+    }
+
+    // Return zoom URL and meeting details without any attendance tracking
+    res.status(200).json({
+      allowed: true,
+      message: 'Admin access granted',
+      class: yogaClass.toJSON ? yogaClass.toJSON() : yogaClass,
+      zoom_url: yogaClass.zoom_url,
+      zoom_meeting_id: yogaClass.zoom_meeting_id,
+      zoom_meeting_password: yogaClass.zoom_meeting_password,
+    })
+  } catch (err) {
+    console.error('Admin join class error:', err)
+    res.status(500).json({ allowed: false, message: 'Server error' })
+  }
+})
+
 router.get('/api/attendance/:userId', async (req, res) => {
   try {
     const { userId } = req.params

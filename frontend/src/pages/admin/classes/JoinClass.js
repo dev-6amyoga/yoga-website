@@ -51,7 +51,8 @@ export default function JoinClass() {
             <YogaClassCard
               key={classObj.zoom_class_id}
               classDetails={classObj}
-              isStudentView={true}
+              isStudentView={false}
+              isAdminView={true}
             />
           ))}
         </Box>
