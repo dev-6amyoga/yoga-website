@@ -16,7 +16,7 @@ import RegisterCustomizedPlan from "../pages/admin/Plans/RegisterCustomizedPlan"
 import ViewAllCustomPlans from "../pages/admin/Plans/ViewAllCustomPlans";
 import ViewAllPlans from "../pages/admin/Plans/ViewAllPlans";
 import PlayerPage from "../pages/admin/PlayerPage";
-import AdminManageClasses from "../pages/admin/classes/AdminManageClasses";
+import AdminManageClasses from "../pages/admin/classes/AdminLogAttendance";
 import RegisterPlaylist from "../pages/admin/content-management/playlist/RegisterPlaylist";
 import EditAsana from "../pages/admin/content-management/video/EditAsana";
 import EditTransition from "../pages/admin/content-management/video/EditTransition";
@@ -36,6 +36,7 @@ import UserPlanPage from "../pages/admin/member-management/UserPlanPage";
 import CreateNewClass from "../pages/admin/classes/CreateNewClass";
 import ViewAllClasses from "../pages/admin/classes/ViewAllClasses";
 import JoinClass from "../pages/admin/classes/JoinClass";
+import AdminLogAttendance from "../pages/admin/classes/AdminLogAttendance";
 export const AdminRoutes = [
   {
     path: "/admin",
@@ -103,6 +104,10 @@ export const AdminRoutes = [
   {
     path: "/admin/join-class",
     element: <JoinClass />,
+  },
+  {
+    path: "/admin/log-attendance",
+    element: <AdminLogAttendance />,
   },
   // schedule
   {
