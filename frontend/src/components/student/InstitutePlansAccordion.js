@@ -209,9 +209,9 @@ function InstitutePlansAccordion({
                       <Typography variant="body2">
                         Classes: {plan.number_of_zoom_classes ?? "Unlimited"}
                       </Typography>
-                      <Typography variant="body2">
+                      {/* <Typography variant="body2">
                         Teachers: {plan.number_of_teachers ?? 1}
-                      </Typography>
+                      </Typography> */}
                       <Typography variant="caption" color="text.secondary">
                         Validity: {plan.plan_validity_days} days
                       </Typography>
