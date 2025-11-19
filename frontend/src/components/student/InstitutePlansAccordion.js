@@ -75,6 +75,23 @@ function InstitutePlansAccordion({
     return pricingArray[0] || null;
   };
 
+  const sortedPlans = useMemo(() => {
+    if (!Array.isArray(allInstitutePlans)) return [];
+    const parseNum = (v) => {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : 0;
+    };
+    return [...allInstitutePlans].sort((a, b) => {
+      const aValidity = parseNum(a.plan_validity_days);
+      const bValidity = parseNum(b.plan_validity_days);
+      if (aValidity !== bValidity) return bValidity - aValidity;
+
+      const aClasses = parseNum(a.number_of_zoom_classes);
+      const bClasses = parseNum(b.number_of_zoom_classes);
+      return bClasses - aClasses;
+    });
+  }, [allInstitutePlans]);
+
   return (
     <Box
       sx={{ width: "100%", px: { xs: 1, sm: 2 }, maxWidth: 1100, mx: "auto" }}
@@ -85,7 +102,7 @@ function InstitutePlansAccordion({
         </Typography>
       )}
 
-      {allInstitutePlans?.map((plan) => {
+      {sortedPlans?.map((plan) => {
         const pricingItem = getPricingForPlan(plan);
         const currencyTag =
           pricingItem?.currency?.short_tag ||
