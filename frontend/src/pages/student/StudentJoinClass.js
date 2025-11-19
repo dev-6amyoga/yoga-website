@@ -14,6 +14,8 @@ export default function StudentJoinClass() {
     state.userPlan,
   ]);
 
+  //dummy commit
+
   useEffect(() => {
     console.log(userPlan);
     if (user && userPlan) {
