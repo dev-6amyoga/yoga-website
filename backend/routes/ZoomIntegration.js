@@ -383,42 +383,74 @@ router.get('/api/classes/:id', async (req, res) => {
 
 router.put('/api/classes/:id', async (req, res) => {
   try {
-    const { name, startTime, endTime } = req.body
+    const {
+      zoom_class_name,
+      recurring_start_time,
+      recurring_end_time,
+      recurring_days,
+    } = req.body
     const classItem = await ZoomClassModel.findByPk(req.params.id)
 
     if (!classItem) {
       return res.status(HTTP_NOT_FOUND).json({ error: 'Class not found' })
     }
-    if (name || startTime) {
+
+    // If it's a one-time class with new start/end times, update Zoom meeting
+    if (
+      classItem.class_type === 'one_time' &&
+      req.body.start_time &&
+      req.body.end_time
+    ) {
       const accessToken = await getZoomAccessToken()
       await axios.patch(
         `https://api.zoom.us/v2/meetings/${classItem.zoom_meeting_id}`,
-        { topic: name, start_time: startTime },
+        {
+          topic: zoom_class_name || classItem.zoom_class_name,
+          start_time: new Date(req.body.start_time).toISOString(),
+        },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       )
     }
 
-    await classItem.update({
-      zoom_class_name: name || classItem.zoom_class_name,
-      start_time: startTime || classItem.start_time,
-      end_time: endTime || classItem.end_time,
-    })
+    // Update class record
+    const updateData = {
+      zoom_class_name: zoom_class_name || classItem.zoom_class_name,
+    }
 
-    res.status(HTTP_OK).json(classItem)
+    if (classItem.class_type === 'one_time') {
+      updateData.start_time = req.body.start_time || classItem.start_time
+      updateData.end_time = req.body.end_time || classItem.end_time
+    } else if (classItem.class_type === 'recurring') {
+      updateData.recurring_start_time =
+        recurring_start_time || classItem.recurring_start_time
+      updateData.recurring_end_time =
+        recurring_end_time || classItem.recurring_end_time
+      updateData.recurring_days = recurring_days || classItem.recurring_days
+    }
+
+    await classItem.update(updateData)
+
+    res.status(HTTP_OK).json({
+      message: 'Class updated successfully',
+      class: classItem,
+    })
   } catch (err) {
-    console.error(err)
-    res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: 'Failed to update class' })
+    console.error('Error updating class:', err)
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: err.message || 'Failed to update class',
+    })
   }
 })
 
 router.delete('/api/classes/:id', async (req, res) => {
   try {
     const classItem = await ZoomClassModel.findByPk(req.params.id)
+
     if (!classItem) {
       return res.status(HTTP_NOT_FOUND).json({ error: 'Class not found' })
     }
+
+    // Delete Zoom meeting
     try {
       const accessToken = await getZoomAccessToken()
       await axios.delete(
@@ -434,13 +466,17 @@ router.delete('/api/classes/:id', async (req, res) => {
       )
     }
 
+    // Delete from database
     await classItem.destroy()
-    res.status(HTTP_OK).json({ message: 'Class deleted successfully' })
+
+    res.status(HTTP_OK).json({
+      message: 'Class deleted successfully',
+    })
   } catch (err) {
-    console.error(err)
-    res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: 'Failed to delete class' })
+    console.error('Error deleting class:', err)
+    res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      error: err.message || 'Failed to delete class',
+    })
   }
 })
 
