@@ -244,7 +244,7 @@ function StudentPlan() {
             plan.is_trial === true
         )
       );
-      setMyPlans(data.userPlan.filter((plan) => plan.institute_id === null));
+      setMyPlans(data.userPlan);
       const activePlan = data.userPlan.find(
         (plan) => plan.current_status === "ACTIVE"
       );
@@ -850,6 +850,53 @@ function StudentPlan() {
         )}
       </div>
       <Spacer h={2} />
+      {myPlans && myPlans.length > 0 && (
+        <div className="mx-auto max-w-7xl">
+          <h4>Plan History</h4>
+          <TableContainer component={Paper} sx={{ margin: "2rem 0" }}>
+            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+              <TableHead
+                sx={{
+                  bgcolor: "linear-gradient(#033363, #021F3B)",
+                }}
+              >
+                <TableRow>
+                  <TableCell>Plan Name</TableCell>
+                  <TableCell>Validity From</TableCell>
+                  <TableCell>Validity To</TableCell>
+                  <TableCell>Status</TableCell>
+                </TableRow>
+              </TableHead>
+              {/* customPlansForUser */}
+              <TableBody>
+                {myPlans?.map((row) => (
+                  <TableRow
+                    key={row?.id}
+                    sx={{
+                      "&:last-child td, &:last-child th": { border: 0 },
+                    }}
+                  >
+                    <TableCell component="th" scope="row">
+                      {row?.plan.name}
+                    </TableCell>
+                    <TableCell>
+                      {row?.validity_from
+                        ? new Date(row?.validity_from).toDateString()
+                        : ""}
+                    </TableCell>
+                    <TableCell>
+                      {row?.validity_to
+                        ? new Date(row?.validity_to).toDateString()
+                        : ""}
+                    </TableCell>
+                    <TableCell>{row?.current_status}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+      )}
 
       <div className="flex flex-col items-center justify-center pt-4">
         {invalidCountry ? (
@@ -1008,53 +1055,6 @@ function StudentPlan() {
             Close
           </Modal.Action>
         </Modal>
-        {myPlans && myPlans.length > 0 && (
-          <div className="mx-auto max-w-7xl">
-            <h4>Plan History</h4>
-            <TableContainer component={Paper} sx={{ margin: "2rem 0" }}>
-              <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                <TableHead
-                  sx={{
-                    bgcolor: "linear-gradient(#033363, #021F3B)",
-                  }}
-                >
-                  <TableRow>
-                    <TableCell>Plan Name</TableCell>
-                    <TableCell>Validity From</TableCell>
-                    <TableCell>Validity To</TableCell>
-                    <TableCell>Status</TableCell>
-                  </TableRow>
-                </TableHead>
-                {/* customPlansForUser */}
-                <TableBody>
-                  {myPlans?.map((row) => (
-                    <TableRow
-                      key={row?.id}
-                      sx={{
-                        "&:last-child td, &:last-child th": { border: 0 },
-                      }}
-                    >
-                      <TableCell component="th" scope="row">
-                        {row?.plan.name}
-                      </TableCell>
-                      <TableCell>
-                        {row?.validity_from
-                          ? new Date(row?.validity_from).toDateString()
-                          : ""}
-                      </TableCell>
-                      <TableCell>
-                        {row?.validity_to
-                          ? new Date(row?.validity_to).toDateString()
-                          : ""}
-                      </TableCell>
-                      <TableCell>{row?.current_status}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </div>
-        )}
       </div>
 
       <RenderRazorpay
