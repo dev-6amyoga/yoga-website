@@ -148,7 +148,14 @@ export default function ClassInfoStudent() {
   return (
     <StudentPageWrapper heading="Class Info Student">
       {validUser && (
-        <div className="elements">
+        <div
+          className="elements"
+          style={{
+            maxHeight: "calc(100vh - 80px)",
+            overflowY: "auto",
+            paddingBottom: "2rem",
+          }}
+        >
           {classDetails && (
             <>
               <div className="flex flex-row gap-2">
@@ -281,7 +288,13 @@ export default function ClassInfoStudent() {
         </div>
       )}
       {!validUser && (
-        <div className="elements">
+        <div
+          className="elements"
+          style={{
+            maxHeight: "calc(100vh - 80px)",
+            overflowY: "auto",
+          }}
+        >
           <p>You do not have permissions to join this class!</p>
         </div>
       )}
