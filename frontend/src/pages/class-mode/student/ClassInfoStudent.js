@@ -87,6 +87,12 @@ export default function ClassInfoStudent() {
     }
   }, [user, classDetails]);
 
+  const sortedClasses = [...classDetails].sort((a, b) => {
+    const timeA = a.onetime_class_start_time;
+    const timeB = b.onetime_class_start_time;
+    return new Date(`1970-01-01T${timeA}`) - new Date(`1970-01-01T${timeB}`);
+  });
+
   useEffect(() => {
     let countdownInterval;
     if (classDetails) {
@@ -156,7 +162,7 @@ export default function ClassInfoStudent() {
             paddingBottom: "2rem",
           }}
         >
-          {classDetails && (
+          {sortedClasses && (
             <>
               <div className="flex flex-row gap-2">
                 <Card
