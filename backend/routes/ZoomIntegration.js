@@ -70,16 +70,12 @@ const createZoomMeeting = async (topic, startTime, isRecurring = false) => {
         },
       }
     )
-
     console.log(res)
-    const meetingId = res.data.id
-    const encryptedPassword = res.data.encrypted_password
-    const inviteUrl = `https://us02web.zoom.us/j/${meetingId}?pwd=${encryptedPassword}`
-
     return {
-      joinUrl: inviteUrl,
+      joinUrl: res.data.join_url, // already contains ?pwd=...
       meetingId: res.data.id,
-      password: res.data.password ? res.data.password : '',
+      password: res.data.password,
+      encryptedPassword: res.data.encrypted_password,
     }
   } catch (err) {
     console.error('Error creating Zoom meeting:', err.response?.data || err)

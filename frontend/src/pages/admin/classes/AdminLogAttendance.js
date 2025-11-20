@@ -14,6 +14,7 @@ import {
   Stack,
   Typography,
   CircularProgress,
+  Autocomplete,
 } from "@mui/material";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { Fetch } from "../../../utils/Fetch";
@@ -52,6 +53,20 @@ export default function AdminLogAttendance() {
     fetchClasses();
   }, []);
 
+  const computeDuration = (join, leave) => {
+    if (!join || !leave) return "";
+
+    const [jh, jm] = join.split(":").map(Number);
+    const [lh, lm] = leave.split(":").map(Number);
+
+    const start = jh * 60 + jm;
+    const end = lh * 60 + lm;
+
+    if (end < start) return ""; // prevent negative duration
+
+    return end - start;
+  };
+
   const fetchUsers = async () => {
     setLoadingUsers(true);
     try {
@@ -87,10 +102,13 @@ export default function AdminLogAttendance() {
   };
 
   // Fetch user plan details when user is selected
-  const handleUserSelect = async (index, userId) => {
-    if (!userId) {
-      updateEntry(index, "plan_id", "");
-      updateEntry(index, "user_plan_id", "");
+  const handleUserSelect = async (index, user) => {
+    if (!user) {
+      updateEntry(index, {
+        user_id: "",
+        plan_id: "",
+        user_plan_id: "",
+      });
       return;
     }
 
@@ -98,7 +116,7 @@ export default function AdminLogAttendance() {
       const res = await Fetch({
         url: "/user-plan/get-user-plan-by-id",
         method: "POST",
-        data: { user_id: userId },
+        data: { user_id: user.user_id },
       });
 
       if (res.data.userPlan && res.data.userPlan.length > 0) {
@@ -106,7 +124,7 @@ export default function AdminLogAttendance() {
           res.data.userPlan.find((up) => up.current_status === "ACTIVE") ||
           res.data.userPlan[0];
         updateEntry(index, {
-          user_id: userId,
+          user_id: user.user_id,
           plan_id: activePlan.plan_id,
           user_plan_id: activePlan.user_plan_id,
         });
@@ -118,9 +136,15 @@ export default function AdminLogAttendance() {
 
   const updateEntry = (index, keyValue) => {
     const next = [...entries];
-    Object.entries(keyValue).forEach(([key, value]) => {
-      next[index][key] = value;
-    });
+    const updated = { ...next[index], ...keyValue };
+    if ("join_time" in keyValue || "leave_time" in keyValue) {
+      updated.duration_minutes = computeDuration(
+        updated.join_time,
+        updated.leave_time
+      );
+    }
+
+    next[index] = updated;
     setEntries(next);
   };
 
@@ -167,6 +191,7 @@ export default function AdminLogAttendance() {
       if (res.status === 200) {
         setResult(res.data);
         setError("");
+        setEntries([emptyEntry()]);
       } else {
         setError(res.data.error || "Unknown server error");
         setResult(null);
@@ -179,47 +204,54 @@ export default function AdminLogAttendance() {
     }
   };
 
+  const getSelectedUser = (index) => {
+    if (!entries[index].user_id) return null;
+    return users.find((u) => u.user_id === entries[index].user_id) || null;
+  };
+
+  const isMobile = window.innerWidth < 600;
+
   return (
     <AdminPageWrapper heading={"Log Attendance Manually"}>
       <form onSubmit={handleSubmit}>
-        <Stack spacing={3} mt={3}>
+        <Stack spacing={isMobile ? 2 : 3} mt={3}>
           {entries.map((entry, idx) => (
-            <Card key={idx} variant="outlined">
-              <CardContent>
-                <Stack spacing={2}>
-                  <Typography variant="h6">Entry {idx + 1}</Typography>
+            <Card
+              key={idx}
+              variant="outlined"
+              sx={{
+                p: isMobile ? 1.5 : 2.5,
+                borderRadius: 2,
+              }}
+            >
+              <CardContent sx={{ p: isMobile ? 1 : 2 }}>
+                <Stack spacing={isMobile ? 1.5 : 2}>
+                  <Typography variant="h6" fontSize={isMobile ? 16 : 20}>
+                    Entry {idx + 1}
+                  </Typography>
 
-                  {/* Row 1: User Dropdown, Plan ID, User Plan ID */}
-                  <Grid container spacing={2}>
+                  {/* Row 1 */}
+                  <Grid container spacing={isMobile ? 1.5 : 2}>
                     <Grid item xs={12} sm={4}>
-                      <FormControl fullWidth>
-                        <InputLabel>User</InputLabel>
-                        <Select
-                          label="User"
-                          value={entry.user_id}
-                          onChange={(e) =>
-                            handleUserSelect(idx, Number(e.target.value))
-                          }
-                          disabled={loadingUsers}
-                        >
-                          {loadingUsers ? (
-                            <MenuItem disabled>
-                              <CircularProgress size={20} />
-                            </MenuItem>
-                          ) : users.length > 0 ? (
-                            users.map((user) => (
-                              <MenuItem
-                                key={user.user_id}
-                                value={String(user.user_id)}
-                              >
-                                {user.name} ({user.user_id})
-                              </MenuItem>
-                            ))
-                          ) : (
-                            <MenuItem disabled>No users available</MenuItem>
-                          )}
-                        </Select>
-                      </FormControl>
+                      <Autocomplete
+                        options={users}
+                        getOptionLabel={(option) =>
+                          `${option.name} (${option.user_id})`
+                        }
+                        value={getSelectedUser(idx)}
+                        onChange={(event, value) =>
+                          handleUserSelect(idx, value)
+                        }
+                        loading={loadingUsers}
+                        noOptionsText="No users found"
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Search User"
+                            size={isMobile ? "small" : "medium"}
+                          />
+                        )}
+                      />
                     </Grid>
 
                     <Grid item xs={12} sm={4}>
@@ -228,7 +260,7 @@ export default function AdminLogAttendance() {
                         label="Plan ID"
                         value={entry.plan_id}
                         disabled
-                        helperText="Auto-populated from user"
+                        size={isMobile ? "small" : "medium"}
                       />
                     </Grid>
 
@@ -238,15 +270,18 @@ export default function AdminLogAttendance() {
                         label="User Plan ID"
                         value={entry.user_plan_id}
                         disabled
-                        helperText="Auto-populated from user"
+                        size={isMobile ? "small" : "medium"}
                       />
                     </Grid>
                   </Grid>
 
-                  {/* Row 2: Class Dropdown, Date, Status */}
-                  <Grid container spacing={2}>
+                  {/* Row 2 */}
+                  <Grid container spacing={isMobile ? 1.5 : 2}>
                     <Grid item xs={12} sm={4}>
-                      <FormControl fullWidth>
+                      <FormControl
+                        fullWidth
+                        size={isMobile ? "small" : "medium"}
+                      >
                         <InputLabel>Class</InputLabel>
                         <Select
                           label="Class"
@@ -254,7 +289,6 @@ export default function AdminLogAttendance() {
                           onChange={(e) =>
                             updateEntry(idx, { class_id: e.target.value })
                           }
-                          disabled={loadingClasses}
                         >
                           {loadingClasses ? (
                             <MenuItem disabled>
@@ -286,11 +320,15 @@ export default function AdminLogAttendance() {
                         onChange={(e) =>
                           updateEntry(idx, { date: e.target.value })
                         }
+                        size={isMobile ? "small" : "medium"}
                       />
                     </Grid>
 
                     <Grid item xs={12} sm={4}>
-                      <FormControl fullWidth>
+                      <FormControl
+                        fullWidth
+                        size={isMobile ? "small" : "medium"}
+                      >
                         <InputLabel>Status</InputLabel>
                         <Select
                           label="Status"
@@ -310,7 +348,7 @@ export default function AdminLogAttendance() {
                   </Grid>
 
                   {/* Row 3 */}
-                  <Grid container spacing={2}>
+                  <Grid container spacing={isMobile ? 1.5 : 2}>
                     <Grid item xs={12} sm={4}>
                       <TextField
                         fullWidth
@@ -321,6 +359,7 @@ export default function AdminLogAttendance() {
                         onChange={(e) =>
                           updateEntry(idx, { join_time: e.target.value })
                         }
+                        size={isMobile ? "small" : "medium"}
                       />
                     </Grid>
 
@@ -334,6 +373,7 @@ export default function AdminLogAttendance() {
                         onChange={(e) =>
                           updateEntry(idx, { leave_time: e.target.value })
                         }
+                        size={isMobile ? "small" : "medium"}
                       />
                     </Grid>
 
@@ -346,24 +386,14 @@ export default function AdminLogAttendance() {
                         onChange={(e) =>
                           updateEntry(idx, { duration_minutes: e.target.value })
                         }
+                        size={isMobile ? "small" : "medium"}
                       />
                     </Grid>
                   </Grid>
 
                   {/* Row 4 */}
-                  <Grid container spacing={2}>
-                    {/* <Grid item xs={12} sm={4}>
-                      <TextField
-                        fullWidth
-                        label="Instructor ID"
-                        value={entry.instructor_id}
-                        onChange={(e) =>
-                          updateEntry(idx, { instructor_id: e.target.value })
-                        }
-                      />
-                    </Grid> */}
-
-                    <Grid item xs={12} sm={4}>
+                  <Grid container spacing={isMobile ? 1.5 : 2}>
+                    <Grid item xs={12} sm={12}>
                       <TextField
                         fullWidth
                         label="Remarks"
@@ -371,28 +401,16 @@ export default function AdminLogAttendance() {
                         onChange={(e) =>
                           updateEntry(idx, { remarks: e.target.value })
                         }
+                        size={isMobile ? "small" : "medium"}
                       />
                     </Grid>
-
-                    {/* <Grid item xs={12} sm={4}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={entry.force}
-                            onChange={(e) =>
-                              updateEntry(idx, { force: e.target.checked })
-                            }
-                          />
-                        }
-                        label="Force"
-                      />
-                    </Grid> */}
                   </Grid>
 
                   <Button
                     variant="outlined"
                     color="error"
                     onClick={() => removeEntry(idx)}
+                    fullWidth={isMobile}
                   >
                     Remove Entry
                   </Button>
@@ -401,28 +419,55 @@ export default function AdminLogAttendance() {
             </Card>
           ))}
 
-          <Stack direction="row" spacing={2}>
-            <Button variant="contained" onClick={addEntry}>
+          {/* Buttons */}
+          <Stack
+            direction={isMobile ? "column" : "row"}
+            spacing={2}
+            alignItems={isMobile ? "stretch" : "flex-start"}
+          >
+            <Button variant="contained" onClick={addEntry} fullWidth={isMobile}>
               Add Entry
             </Button>
-            <Button variant="contained" type="submit" disabled={loading}>
+
+            <Button
+              variant="contained"
+              type="submit"
+              disabled={loading}
+              fullWidth={isMobile}
+            >
               {loading ? "Submitting..." : "Submit"}
             </Button>
           </Stack>
 
-          {error && <Typography color="error">{error}</Typography>}
+          {/* Error Message */}
+          {error && (
+            <Typography color="error" fontSize={isMobile ? 14 : 16}>
+              {error}
+            </Typography>
+          )}
 
+          {/* Result Card */}
           {result && (
-            <Card variant="outlined">
+            <Card variant="outlined" sx={{ mt: 2, p: isMobile ? 1 : 2 }}>
               <CardContent>
                 <Typography color="success.main">
                   {result.message || "Success"}
                 </Typography>
-                <pre
-                  style={{ background: "#f5f5f5", padding: 8, marginTop: 8 }}
+
+                <div
+                  style={{
+                    maxWidth: "100%",
+                    overflowX: "auto",
+                    marginTop: 8,
+                    background: "#f5f5f5",
+                    padding: 8,
+                    borderRadius: 4,
+                  }}
                 >
-                  {JSON.stringify(result, null, 2)}
-                </pre>
+                  <pre style={{ margin: 0 }}>
+                    {JSON.stringify(result, null, 2)}
+                  </pre>
+                </div>
               </CardContent>
             </Card>
           )}
