@@ -88,9 +88,36 @@ export default function ClassInfoStudent() {
   }, [user, classDetails]);
 
   const sortedClasses = [...classDetails].sort((a, b) => {
-    const timeA = a.onetime_class_start_time;
-    const timeB = b.onetime_class_start_time;
-    return new Date(`1970-01-01T${timeA}`) - new Date(`1970-01-01T${timeB}`);
+    const isARecurring = a.class_type === "recurring";
+    const isBRecurring = b.class_type === "recurring";
+
+    // 1️⃣ Both one-time → sort by actual start time
+    if (!isARecurring && !isBRecurring) {
+      const dateA = new Date(a.start_time);
+      const dateB = new Date(b.start_time);
+      return dateA - dateB;
+    }
+
+    // 2️⃣ Both recurring → sort by earliest day → then by start time
+    if (isARecurring && isBRecurring) {
+      const minDayA = Math.min(...a.recurring_days);
+      const minDayB = Math.min(...b.recurring_days);
+
+      if (minDayA !== minDayB) return minDayA - minDayB;
+
+      // Days equal → compare times
+      return (
+        new Date(`1970-01-01T${a.recurring_start_time}`) -
+        new Date(`1970-01-01T${b.recurring_start_time}`)
+      );
+    }
+
+    // 3️⃣ Mixed → upcoming one-time class should come first
+    // A is one-time, B is recurring → A goes first
+    if (!isARecurring && isBRecurring) return -1;
+
+    // A is recurring, B is one-time → B goes first
+    return 1;
   });
 
   useEffect(() => {
