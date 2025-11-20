@@ -71,8 +71,13 @@ const createZoomMeeting = async (topic, startTime, isRecurring = false) => {
       }
     )
 
+    console.log(res)
+    const meetingId = res.data.id
+    const encryptedPassword = res.data.encrypted_password
+    const inviteUrl = `https://us02web.zoom.us/j/${meetingId}?pwd=${encryptedPassword}`
+
     return {
-      joinUrl: res.data.join_url,
+      joinUrl: inviteUrl,
       meetingId: res.data.id,
       password: res.data.password ? res.data.password : '',
     }
@@ -231,7 +236,7 @@ router.post('/api/classes', async (req, res) => {
       for (const tId of teacher_id) {
         // Create a unique Zoom meeting for this teacher's recurring slot
         const meeting = await createZoomMeeting(zoom_class_name, null) // No specific start_time for recurring
-
+        console.log(meeting)
         for (const pId of plan_id) {
           const iId = institute_id
           // Check if recurring class already exists for this teacher/plan/institute/days/time
