@@ -88,8 +88,6 @@ export default function AdminLogAttendance() {
 
   // Fetch user plan details when user is selected
   const handleUserSelect = async (index, userId) => {
-    updateEntry(index, "user_id", userId);
-
     if (!userId) {
       updateEntry(index, "plan_id", "");
       updateEntry(index, "user_plan_id", "");
@@ -107,18 +105,22 @@ export default function AdminLogAttendance() {
         const activePlan =
           res.data.userPlan.find((up) => up.current_status === "ACTIVE") ||
           res.data.userPlan[0];
-
-        updateEntry(index, "plan_id", activePlan.plan_id);
-        updateEntry(index, "user_plan_id", activePlan.user_plan_id);
+        updateEntry(index, {
+          user_id: userId,
+          plan_id: activePlan.plan_id,
+          user_plan_id: activePlan.user_plan_id,
+        });
       }
     } catch (err) {
       console.error("Failed to fetch user plan:", err);
     }
   };
 
-  const updateEntry = (index, key, value) => {
+  const updateEntry = (index, keyValue) => {
     const next = [...entries];
-    next[index] = { ...next[index], [key]: value };
+    Object.entries(keyValue).forEach(([key, value]) => {
+      next[index][key] = value;
+    });
     setEntries(next);
   };
 
@@ -157,7 +159,7 @@ export default function AdminLogAttendance() {
     setLoading(true);
     try {
       const res = await Fetch({
-        url: "/admin/log-attendance",
+        url: "/class-attendance/admin/log-attendance",
         method: "POST",
         data: { entries: payloadEntries },
       });
@@ -250,7 +252,7 @@ export default function AdminLogAttendance() {
                           label="Class"
                           value={entry.class_id}
                           onChange={(e) =>
-                            updateEntry(idx, "class_id", e.target.value)
+                            updateEntry(idx, { class_id: e.target.value })
                           }
                           disabled={loadingClasses}
                         >
@@ -282,7 +284,7 @@ export default function AdminLogAttendance() {
                         InputLabelProps={{ shrink: true }}
                         value={entry.date}
                         onChange={(e) =>
-                          updateEntry(idx, "date", e.target.value)
+                          updateEntry(idx, { date: e.target.value })
                         }
                       />
                     </Grid>
@@ -294,11 +296,9 @@ export default function AdminLogAttendance() {
                           label="Status"
                           value={entry.attendance_status}
                           onChange={(e) =>
-                            updateEntry(
-                              idx,
-                              "attendance_status",
-                              e.target.value
-                            )
+                            updateEntry(idx, {
+                              attendance_status: e.target.value,
+                            })
                           }
                         >
                           <MenuItem value="ATTENDED">ATTENDED</MenuItem>
@@ -319,7 +319,7 @@ export default function AdminLogAttendance() {
                         InputLabelProps={{ shrink: true }}
                         value={entry.join_time}
                         onChange={(e) =>
-                          updateEntry(idx, "join_time", e.target.value)
+                          updateEntry(idx, { join_time: e.target.value })
                         }
                       />
                     </Grid>
@@ -332,7 +332,7 @@ export default function AdminLogAttendance() {
                         InputLabelProps={{ shrink: true }}
                         value={entry.leave_time}
                         onChange={(e) =>
-                          updateEntry(idx, "leave_time", e.target.value)
+                          updateEntry(idx, { leave_time: e.target.value })
                         }
                       />
                     </Grid>
@@ -344,7 +344,7 @@ export default function AdminLogAttendance() {
                         label="Duration (minutes)"
                         value={entry.duration_minutes}
                         onChange={(e) =>
-                          updateEntry(idx, "duration_minutes", e.target.value)
+                          updateEntry(idx, { duration_minutes: e.target.value })
                         }
                       />
                     </Grid>
@@ -352,16 +352,16 @@ export default function AdminLogAttendance() {
 
                   {/* Row 4 */}
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={4}>
+                    {/* <Grid item xs={12} sm={4}>
                       <TextField
                         fullWidth
                         label="Instructor ID"
                         value={entry.instructor_id}
                         onChange={(e) =>
-                          updateEntry(idx, "instructor_id", e.target.value)
+                          updateEntry(idx, { instructor_id: e.target.value })
                         }
                       />
-                    </Grid>
+                    </Grid> */}
 
                     <Grid item xs={12} sm={4}>
                       <TextField
@@ -369,24 +369,24 @@ export default function AdminLogAttendance() {
                         label="Remarks"
                         value={entry.remarks}
                         onChange={(e) =>
-                          updateEntry(idx, "remarks", e.target.value)
+                          updateEntry(idx, { remarks: e.target.value })
                         }
                       />
                     </Grid>
 
-                    <Grid item xs={12} sm={4}>
+                    {/* <Grid item xs={12} sm={4}>
                       <FormControlLabel
                         control={
                           <Checkbox
                             checked={entry.force}
                             onChange={(e) =>
-                              updateEntry(idx, "force", e.target.checked)
+                              updateEntry(idx, { force: e.target.checked })
                             }
                           />
                         }
                         label="Force"
                       />
-                    </Grid>
+                    </Grid> */}
                   </Grid>
 
                   <Button

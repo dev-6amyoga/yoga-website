@@ -343,6 +343,11 @@ router.post('/admin/log-attendance', async (req, res) => {
       }
 
       const when = new Date(date)
+      if (isNaN(when.getTime())) {
+        await t.rollback()
+        return res.status(400).json({ error: 'Invalid date format' })
+      }
+
       const startOfDay = new Date(
         when.getFullYear(),
         when.getMonth(),
@@ -354,6 +359,26 @@ router.post('/admin/log-attendance', async (req, res) => {
       )
       const nextDay = new Date(startOfDay)
       nextDay.setDate(startOfDay.getDate() + 1)
+
+      // Parse join_time and leave_time (HH:mm format) into full timestamps
+      let parsedJoinTime = null
+      let parsedLeaveTime = null
+
+      if (join_time && typeof join_time === 'string') {
+        const [hours, minutes] = join_time.split(':').map(Number)
+        if (!isNaN(hours) && !isNaN(minutes)) {
+          parsedJoinTime = new Date(when)
+          parsedJoinTime.setHours(hours, minutes, 0, 0)
+        }
+      }
+
+      if (leave_time && typeof leave_time === 'string') {
+        const [hours, minutes] = leave_time.split(':').map(Number)
+        if (!isNaN(hours) && !isNaN(minutes)) {
+          parsedLeaveTime = new Date(when)
+          parsedLeaveTime.setHours(hours, minutes, 0, 0)
+        }
+      }
 
       // Lock user_plan_attendance row
       let upa = await UserPlanAttendance.findOne({
@@ -386,8 +411,8 @@ router.post('/admin/log-attendance', async (req, res) => {
         await ClassAttendance.update(
           {
             attendance_status,
-            join_time,
-            leave_time,
+            join_time: parsedJoinTime,
+            leave_time: parsedLeaveTime,
             duration_minutes,
             marked_by: 'INSTRUCTOR',
             instructor_id,
@@ -428,11 +453,11 @@ router.post('/admin/log-attendance', async (req, res) => {
           device_id,
           date: when,
           attendance_status,
-          join_time,
-          leave_time,
+          join_time: parsedJoinTime,
+          leave_time: parsedLeaveTime,
           duration_minutes,
           marked_by: 'INSTRUCTOR',
-          instructor_id,
+          instructor_id: null,
           remarks,
         },
         { transaction: t }
