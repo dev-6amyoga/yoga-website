@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { Fetch } from "../../../utils/Fetch";
+import { createFilterOptions } from "@mui/material/Autocomplete";
 
 const emptyEntry = () => ({
   user_id: "",
@@ -172,6 +173,16 @@ export default function AdminLogAttendance() {
   const updateEntry = (index, keyValue) => {
     const next = [...entries];
     const updated = { ...next[index], ...keyValue };
+
+    // Auto-populate leave_time if join_time is set
+    if ("join_time" in keyValue && keyValue.join_time) {
+      const [hours, minutes] = keyValue.join_time.split(":").map(Number);
+      const leaveHours = hours + Math.floor((minutes + 60) / 60);
+      const leaveMinutes = (minutes + 60) % 60;
+      const leaveTime = `${String(leaveHours).padStart(2, "0")}:${String(leaveMinutes).padStart(2, "0")}`;
+      updated.leave_time = leaveTime;
+    }
+
     if ("join_time" in keyValue || "leave_time" in keyValue) {
       updated.duration_minutes = computeDuration(
         updated.join_time,
@@ -239,6 +250,11 @@ export default function AdminLogAttendance() {
     }
   };
 
+  const filterOptions = createFilterOptions({
+    matchFrom: "any",
+    stringify: (option) => `${option.name} ${option.user_id}`,
+  });
+
   const getSelectedUser = (index) => {
     if (!entries[index].user_id) return null;
     return users.find((u) => u.user_id === entries[index].user_id) || null;
@@ -278,11 +294,10 @@ export default function AdminLogAttendance() {
                           handleUserSelect(idx, value)
                         }
                         loading={loadingUsers}
-                        // ★ NEW: fix matching issue
+                        filterOptions={filterOptions}
                         isOptionEqualToValue={(option, value) =>
                           option.user_id === value.user_id
                         }
-                        // ★ NEW: handle input typing separately
                         inputValue={entry.searchText || ""}
                         onInputChange={(e, newInput) => {
                           updateEntry(idx, { searchText: newInput });
@@ -295,7 +310,7 @@ export default function AdminLogAttendance() {
                             size={isMobile ? "small" : "medium"}
                           />
                         )}
-                      />
+                      />{" "}
                     </Grid>
 
                     <Grid item xs={12} sm={4}>

@@ -1,84 +1,84 @@
-const express = require("express");
-const pdfkit = require("pdfkit");
-const fs = require("fs");
-const eta = require("eta");
-const path = require("path");
+const express = require('express')
+const pdfkit = require('pdfkit')
+const fs = require('fs')
+const eta = require('eta')
+const path = require('path')
 const {
   HTTP_BAD_REQUEST,
   HTTP_OK,
   HTTP_INTERNAL_SERVER_ERROR,
-} = require("../utils/http_status_codes");
-const { mailTransporter } = require("../init.nodemailer");
+} = require('../utils/http_status_codes')
+const { mailTransporter } = require('../init.nodemailer')
 
-const { Transaction } = require("../models/sql/Transaction");
-const { Plan } = require("../models/sql/Plan");
-const { User } = require("../models/sql/User");
-const { UserPlan } = require("../models/sql/UserPlan");
-const { PlanPricing } = require("../models/sql/PlanPricing");
-const HTMLToPDF = require("html-pdf-node");
-const CustomUserPlan = require("../models/mongo/CustomUserPlan");
-const CustomPlan = require("../models/mongo/CustomPlan");
+const { Transaction } = require('../models/sql/Transaction')
+const { Plan } = require('../models/sql/Plan')
+const { User } = require('../models/sql/User')
+const { UserPlan } = require('../models/sql/UserPlan')
+const { PlanPricing } = require('../models/sql/PlanPricing')
+const HTMLToPDF = require('html-pdf-node')
+const CustomUserPlan = require('../models/mongo/CustomUserPlan')
+const CustomPlan = require('../models/mongo/CustomPlan')
 
-const router = express.Router();
+const router = express.Router()
 
 const renderer = new eta.Eta({
-  views: path.join(__dirname, "../invoice-templates"),
+  views: path.join(__dirname, '../invoice-templates'),
   cache: true,
-});
+})
 
-router.get("/temp", async (req, res) => {
+router.get('/temp', async (req, res) => {
   const deets = {
     transaction: {
       transaction_id: 30,
-      payment_for: "user_plan",
-      payment_method: "wallet",
+      payment_for: 'user_plan',
+      payment_method: 'wallet',
       amount: 590,
-      payment_status: "succeeded",
-      payment_date: "2024-01-25T16:18:34.503Z",
-      transaction_order_id: "order_NSuODFKbpUz2AE",
-      transaction_payment_id: "pay_NSuOIWXD13Unmm",
+      payment_status: 'succeeded',
+      payment_date: '2024-01-25T16:18:34.503Z',
+      transaction_order_id: 'order_NSuODFKbpUz2AE',
+      transaction_payment_id: 'pay_NSuOIWXD13Unmm',
       transaction_signature:
-        "e5371b8b02614d96f4e2ca33c8b1e7cf44439494216b82642265c91cd0b88be8",
-      created: "2024-01-25T16:18:34.504Z",
-      updated: "2024-01-25T16:18:34.504Z",
+        'e5371b8b02614d96f4e2ca33c8b1e7cf44439494216b82642265c91cd0b88be8',
+      created: '2024-01-25T16:18:34.504Z',
+      updated: '2024-01-25T16:18:34.504Z',
       deleted_at: null,
       user_id: 14,
     },
     user: {
       user_id: 14,
-      username: "smitha",
-      name: "Smitha Chandran",
-      email: "smritisivakumar2002abc@gmail.com",
-      phone: "+919449767074",
-      password: "$2b$10$/A3cGIWAaTQqUW1dG.R8q.sV4pBbNAzybTX2l26JhMi10i/PNP576",
+      username: 'smitha',
+      name: 'Smitha Chandran',
+      email: 'smritisivakumar2002abc@gmail.com',
+      phone: '+919449767074',
+      password: '$2b$10$/A3cGIWAaTQqUW1dG.R8q.sV4pBbNAzybTX2l26JhMi10i/PNP576',
       is_google_login: false,
       last_login: null,
-      created: "2024-01-19T08:59:01.400Z",
-      updated: "2024-01-19T08:59:01.400Z",
+      created: '2024-01-19T08:59:01.400Z',
+      updated: '2024-01-19T08:59:01.400Z',
       deleted_at: null,
       role_id: null,
     },
     user_plan: {
       user_plan_id: 17,
-      purchase_date: "2024-01-25T00:00:00.000Z",
-      validity_from: "2024-02-25T00:00:00.000Z",
-      validity_to: "2024-04-25T00:00:00.000Z",
+      purchase_date: '2024-01-25T00:00:00.000Z',
+      validity_from: '2024-02-25T00:00:00.000Z',
+      validity_to: '2024-04-25T00:00:00.000Z',
       is_active: true,
       cancellation_date: null,
       auto_renewal_enabled: false,
       discount_coupon_id: 0,
       referral_code_id: 0,
-      created: "2024-01-25T16:19:05.202Z",
-      updated: "2024-01-25T16:19:05.202Z",
+      created: '2024-01-25T16:19:05.202Z',
+      updated: '2024-01-25T16:19:05.202Z',
       deleted_at: null,
       user_id: 14,
       plan_id: 37,
-      current_status: "STAGED",
-      transaction_order_id: "order_NSuOlOcXmxLvmg",
+      current_status: 'STAGED',
+      transaction_order_id: 'order_NSuOlOcXmxLvmg',
     },
     plan: {
       plan_id: 37,
-      name: "Fixed Plan Student",
+      name: 'Fixed Plan Student',
       description: null,
       has_basic_playlist: true,
       has_playlist_creation: false,
@@ -86,87 +86,85 @@ router.get("/temp", async (req, res) => {
       has_self_audio_upload: false,
       number_of_teachers: 0,
       plan_validity: 0,
-      plan_user_type: "student",
-      created: "2024-01-17T16:06:21.772Z",
-      updated: "2024-01-17T16:06:21.772Z",
+      plan_user_type: 'student',
+      created: '2024-01-17T16:06:21.772Z',
+      updated: '2024-01-17T16:06:21.772Z',
       deleted_at: null,
     },
     plan_pricing: {
       plan_pricing_id: 37,
       denomination: 5,
-      created: "2024-01-17T16:06:21.807Z",
-      updated: "2024-01-17T16:06:21.807Z",
+      created: '2024-01-17T16:06:21.807Z',
+      updated: '2024-01-17T16:06:21.807Z',
       deleted_at: null,
       plan_id: 37,
       currency_id: 1,
     },
-  };
+  }
 
-  const content = await renderer.renderAsync("/student/plan-purchase", deets);
+  const content = await renderer.renderAsync('/student/plan-purchase', deets)
 
   HTMLToPDF.generatePdf(
     { content: content },
-    { format: "A4", printBackground: true, preferCSSPageSize: true }
+    { format: 'A4', printBackground: true, preferCSSPageSize: true }
   )
     .then((buffer) => {
       return res
         .status(200)
-        .header("Content-Type", "application/pdf")
-        .send(buffer);
+        .header('Content-Type', 'application/pdf')
+        .send(buffer)
     })
     .catch((err) => {
-      console.log(err);
-      return res.status(500).send();
-    });
-});
+      console.log(err)
+      return res.status(500).send()
+    })
+})
 
-router.post("/student/plan", async (req, res) => {
-  const { user_id, transaction_order_id } = req.body;
+router.post('/student/plan', async (req, res) => {
+  const { user_id, transaction_order_id } = req.body
   if (!user_id || !transaction_order_id) {
     return res
       .status(HTTP_BAD_REQUEST)
-      .json({ message: "Missing required fields" });
+      .json({ message: 'Missing required fields' })
   }
 
   const transaction = await Transaction.findOne({
     where: { transaction_order_id: transaction_order_id },
-  });
+  })
   if (!transaction) {
     return res
       .status(HTTP_BAD_REQUEST)
-      .json({ message: "Transaction not found" });
+      .json({ message: 'Transaction not found' })
   }
   const user = await User.findOne({
     where: { user_id: user_id },
-  });
+  })
   if (!user) {
-    return res.status(HTTP_BAD_REQUEST).json({ message: "User not found" });
+    return res.status(HTTP_BAD_REQUEST).json({ message: 'User not found' })
   }
   const userPlan = await UserPlan.findOne({
     where: { transaction_order_id: transaction_order_id, user_id: user_id },
-  });
+  })
   if (!userPlan) {
-    return res
-      .status(HTTP_BAD_REQUEST)
-      .json({ message: "User plan not found" });
+    return res.status(HTTP_BAD_REQUEST).json({ message: 'User plan not found' })
   }
 
   const plan = await Plan.findOne({
     where: { plan_id: userPlan.plan_id },
-  });
+  })
   if (!plan) {
     return res
       .status(HTTP_BAD_REQUEST)
-      .json({ message: "Plan details not found" });
+      .json({ message: 'Plan details not found' })
   }
 
   const pricing = await PlanPricing.findOne({
     where: { plan_id: userPlan.plan_id, currency_id: 1 },
-  });
+  })
   if (!pricing) {
     return res
       .status(HTTP_BAD_REQUEST)
-      .json({ message: "Pricing details not found" });
+      .json({ message: 'Pricing details not found' })
   }
 
   const details = {
@@ -175,13 +173,10 @@ router.post("/student/plan", async (req, res) => {
     user_plan: userPlan.toJSON(),
     plan: plan.toJSON(),
     plan_pricing: pricing.toJSON(),
-  };
-  const content = await renderer.renderAsync("/student/plan-purchase", details);
+  }
+  const content = await renderer.renderAsync('/student/plan-purchase', details)
 
-  return res
-    .status(200)
-    .header("Content-Type", "application/pdf")
-    .send(content);
+  return res.status(200).header('Content-Type', 'application/pdf').send(content)
 
   // HTMLToPDF.generatePdf(
   //   { content: content },
@@ -197,52 +192,52 @@ router.post("/student/plan", async (req, res) => {
   //     console.log(err);
   //     return res.status(500).send();
   //   });
-});
+})
 
-router.post("/student/mail-invoice", async (req, res) => {
-  const { user_id, transaction_order_id, plan_type } = req.body;
+router.post('/student/mail-', async (req, res) => {
+  const { user_id, transaction_order_id, plan_type } = req.body
 
   if (!user_id || !transaction_order_id) {
     return res
       .status(HTTP_BAD_REQUEST)
-      .json({ message: "Missing required fields" });
+      .json({ message: 'Missing required fields' })
   }
 
   const transaction = await Transaction.findOne({
     where: { transaction_order_id: transaction_order_id },
-  });
+  })
 
   if (!transaction) {
     return res
       .status(HTTP_BAD_REQUEST)
-      .json({ message: "Transaction not found" });
+      .json({ message: 'Transaction not found' })
   }
   const user = await User.findOne({
     where: { user_id: user_id },
-  });
+  })
   if (!user) {
-    return res.status(HTTP_BAD_REQUEST).json({ message: "User not found" });
+    return res.status(HTTP_BAD_REQUEST).json({ message: 'User not found' })
   }
 
-  let details = null;
+  let details = null
 
-  if (plan_type === "CUSTOM_PLAN") {
+  if (plan_type === 'CUSTOM_PLAN') {
     const userPlan = await CustomUserPlan.findOne({
       transaction_order_id: transaction_order_id,
       user_id: user_id,
-    });
+    })
 
     if (!userPlan) {
       return res
         .status(HTTP_BAD_REQUEST)
-        .json({ message: "User plan not found" });
+        .json({ message: 'User plan not found' })
     }
 
     // console.log(userPlan.custom_plan_id);
 
     const plan = await CustomPlan.findOne({
       _id: userPlan.custom_plan_id,
-    });
+    })
 
     // console.log(plan.prices);
 
@@ -250,38 +245,38 @@ router.post("/student/mail-invoice", async (req, res) => {
       user: user.toJSON(),
       transaction: transaction.toJSON(),
       user_plan: userPlan.toJSON(),
-      plan: { ...plan.toJSON(), plan_type: "CUSTOM_PLAN" },
+      plan: { ...plan.toJSON(), plan_type: 'CUSTOM_PLAN' },
       plan_pricing: { denomination: plan.prices[0][1] },
-    };
+    }
   } else {
     const userPlan = await UserPlan.findOne({
       where: {
         transaction_order_id: transaction_order_id,
         user_id: user_id,
       },
-    });
+    })
     if (!userPlan) {
       return res
         .status(HTTP_BAD_REQUEST)
-        .json({ message: "User plan not found" });
+        .json({ message: 'User plan not found' })
     }
 
     const plan = await Plan.findOne({
       where: { plan_id: userPlan.plan_id },
-    });
+    })
     if (!plan) {
       return res
         .status(HTTP_BAD_REQUEST)
-        .json({ message: "Plan details not found" });
+        .json({ message: 'Plan details not found' })
     }
 
     const pricing = await PlanPricing.findOne({
       where: { plan_id: userPlan.plan_id, currency_id: 1 },
-    });
+    })
     if (!pricing) {
       return res
         .status(HTTP_BAD_REQUEST)
-        .json({ message: "Pricing details not found" });
+        .json({ message: 'Pricing details not found' })
     }
 
     details = {
@@ -290,10 +285,10 @@ router.post("/student/mail-invoice", async (req, res) => {
       user_plan: userPlan.toJSON(),
       plan: plan.toJSON(),
       plan_pricing: pricing.toJSON(),
-    };
+    }
   }
 
-  const content = await renderer.renderAsync("/student/plan-purchase", details);
+  const content = await renderer.renderAsync('/student/plan-purchase', details)
 
   /*
 	HTMLToPDF.generatePdf(
@@ -337,63 +332,63 @@ router.post("/student/mail-invoice", async (req, res) => {
 		});
 	*/
 
-  return res.status(200).send(content);
-});
+  return res.status(200).send(content)
+})
 
-router.post("/student/notify-admin", async (req, res) => {
-  console.log("in notify admin!");
-  const { user_id, transaction_order_id, plan_type } = req.body;
+router.post('/student/notify-admin', async (req, res) => {
+  console.log('in notify admin!')
+  const { user_id, transaction_order_id, plan_type } = req.body
   if (!user_id || !transaction_order_id) {
     return res
       .status(HTTP_BAD_REQUEST)
-      .json({ message: "Missing required fields" });
+      .json({ message: 'Missing required fields' })
   }
 
   const transaction = await Transaction.findOne({
     where: { transaction_order_id: transaction_order_id },
-  });
+  })
 
   if (!transaction) {
     return res
       .status(HTTP_BAD_REQUEST)
-      .json({ message: "Transaction not found" });
+      .json({ message: 'Transaction not found' })
   }
   const user = await User.findOne({
     where: { user_id: user_id },
-  });
+  })
   if (!user) {
-    return res.status(HTTP_BAD_REQUEST).json({ message: "User not found" });
+    return res.status(HTTP_BAD_REQUEST).json({ message: 'User not found' })
   }
 
-  if (plan_type === "CUSTOM_PLAN") {
+  if (plan_type === 'CUSTOM_PLAN') {
     const userPlan = await CustomUserPlan.findOne({
       transaction_order_id: transaction_order_id,
       user_id: user_id,
-    });
+    })
 
     if (!userPlan) {
       return res
         .status(HTTP_BAD_REQUEST)
-        .json({ message: "User plan not found" });
+        .json({ message: 'User plan not found' })
     }
 
     const plan = await CustomPlan.findOne({
       _id: userPlan.custom_plan_id,
-    });
+    })
 
     // console.log(plan.prices);
     details = {
       user: user.toJSON(),
       transaction: transaction.toJSON(),
       user_plan: userPlan.toJSON(),
-      plan: { ...plan.toJSON(), plan_type: "CUSTOM_PLAN" },
+      plan: { ...plan.toJSON(), plan_type: 'CUSTOM_PLAN' },
       plan_pricing: { denomination: plan.prices[0][1] },
-    };
+    }
     mailTransporter.sendMail(
       {
-        from: "dev.6amyoga@gmail.com",
-        to: "992351@gmail.com",
-        subject: "6AM Yoga | New User Subscription Purchased.",
+        from: 'dev.6amyoga@gmail.com',
+        to: '992351@gmail.com',
+        subject: '6AM Yoga | New User Subscription Purchased.',
         html: `
                 <p>Greetings,</p>
                 <p>You received a new payment on ai.6amyoga.com ! Congratulations :) The users and their plan details are as follows : </p>
@@ -421,46 +416,46 @@ router.post("/student/notify-admin", async (req, res) => {
       },
       async (err, info) => {
         if (err) {
-          console.error(err);
+          console.error(err)
           res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            message: "Internal server error; try again",
-          });
+            message: 'Internal server error; try again',
+          })
         } else {
           res.status(HTTP_OK).json({
-            message: "Admin Notified!",
-          });
+            message: 'Admin Notified!',
+          })
         }
       }
-    );
+    )
   } else {
     const userPlan = await UserPlan.findOne({
       where: {
         transaction_order_id: transaction_order_id,
         user_id: user_id,
       },
-    });
+    })
     if (!userPlan) {
       return res
         .status(HTTP_BAD_REQUEST)
-        .json({ message: "User plan not found" });
+        .json({ message: 'User plan not found' })
     }
 
     const plan = await Plan.findOne({
       where: { plan_id: userPlan.plan_id },
-    });
+    })
     if (!plan) {
       return res
         .status(HTTP_BAD_REQUEST)
-        .json({ message: "Plan details not found" });
+        .json({ message: 'Plan details not found' })
     }
 
     const pricing = await PlanPricing.findOne({
       where: { plan_id: userPlan.plan_id, currency_id: 1 },
-    });
+    })
     if (!pricing) {
       return res
         .status(HTTP_BAD_REQUEST)
-        .json({ message: "Pricing details not found" });
+        .json({ message: 'Pricing details not found' })
     }
 
     details = {
@@ -469,13 +464,13 @@ router.post("/student/notify-admin", async (req, res) => {
       user_plan: userPlan.toJSON(),
       plan: plan.toJSON(),
       plan_pricing: pricing.toJSON(),
-    };
+    }
 
     mailTransporter.sendMail(
       {
-        from: "dev.6amyoga@gmail.com",
-        to: "992351@gmail.com",
-        subject: "6AM Yoga | New User Subscription Purchased.",
+        from: 'dev.6amyoga@gmail.com',
+        to: '992351@gmail.com',
+        subject: '6AM Yoga | New User Subscription Purchased.',
         html: `
                 <p>Greetings,</p>
                 <p>You received a new payment on ai.6amyoga.com ! Congratulations :) The users and their plan details are as follows : </p>
@@ -507,18 +502,18 @@ router.post("/student/notify-admin", async (req, res) => {
       },
       async (err, info) => {
         if (err) {
-          console.error(err);
+          console.error(err)
           res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-            message: "Internal server error; try again",
-          });
+            message: 'Internal server error; try again',
+          })
         } else {
           res.status(HTTP_OK).json({
-            message: "Admin Notified!",
-          });
+            message: 'Admin Notified!',
+          })
         }
       }
-    );
+    )
   }
-});
+})
 
-module.exports = router;
+module.exports = router

@@ -655,17 +655,18 @@ function LogPayment() {
                   <h5>Price : INR {amount}</h5>
                   <h5>
                     <Text type="secondary">
-                      SGST (9%) : INR {amount * 0.09}
+                      SGST (2.5%) : INR {amount * 0.025}
                     </Text>
                   </h5>
                   <h5>
                     <Text type="secondary">
-                      CGST (9%) : INR {amount * 0.09}
+                      CGST (2.5%) : INR {amount * 0.025}
                     </Text>
                   </h5>
                   <h4>
                     <Text type="success">
-                      Net Amount : INR {amount + amount * 0.09 + amount * 0.09}
+                      Net Amount : INR{" "}
+                      {amount + amount * 0.025 + amount * 0.025}
                     </Text>
                   </h4>
                   <br />

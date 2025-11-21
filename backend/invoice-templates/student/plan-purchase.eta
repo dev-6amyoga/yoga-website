@@ -110,14 +110,14 @@ h2 {
         <td>
           <p><% const multipliedValue = (it.plan_pricing.denomination * 0.18).toFixed(2);%>INR <%=multipliedValue%></p><br/>
           <small>
-            9% SGST (INR <%=it.plan_pricing?.denomination %>  * 0.09) = INR <% const sgst = (it.plan_pricing.denomination * 0.09).toFixed(2) %><%=sgst%>
+            2.5% SGST (INR <%=it.plan_pricing?.denomination %>  * 0.025) = INR <% const sgst = (it.plan_pricing.denomination * 0.025).toFixed(2) %><%=sgst%>
           </small><br/>
           <small>
-            9% CGST (INR <%=it.plan_pricing?.denomination %>  * 0.09) = INR <% const cgst = (it.plan_pricing.denomination * 0.09).toFixed(2) %><%=cgst%>
+            2.5% CGST (INR <%=it.plan_pricing?.denomination %>  * 0.025) = INR <% const cgst = (it.plan_pricing.denomination * 0.025).toFixed(2) %><%=cgst%>
           </small>
         </td>
         <td>
-          <p>INR <% const res = (it.plan_pricing?.denomination * 1.18).toFixed(2);%><%=res%></p>
+          <p>INR <% const res = (it.plan_pricing?.denomination * 0.05).toFixed(2);%><%=res%></p>
         </td>
       </tr>
     </tbody>
