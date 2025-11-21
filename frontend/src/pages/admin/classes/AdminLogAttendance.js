@@ -284,33 +284,37 @@ export default function AdminLogAttendance() {
                   {/* Row 1 */}
                   <Grid container spacing={isMobile ? 1.5 : 2}>
                     <Grid item xs={12} sm={4}>
-                      <Autocomplete
-                        options={users}
-                        getOptionLabel={(option) =>
-                          `${option.name} (${option.user_id})`
-                        }
-                        value={getSelectedUser(idx)}
-                        onChange={(event, value) =>
-                          handleUserSelect(idx, value)
-                        }
-                        loading={loadingUsers}
-                        filterOptions={filterOptions}
-                        isOptionEqualToValue={(option, value) =>
-                          option.user_id === value.user_id
-                        }
-                        inputValue={entry.searchText || ""}
-                        onInputChange={(e, newInput) => {
-                          updateEntry(idx, { searchText: newInput });
-                        }}
-                        noOptionsText="No users found"
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Search User"
-                            size={isMobile ? "small" : "medium"}
-                          />
-                        )}
-                      />{" "}
+                      <FormControl
+                        fullWidth
+                        size={isMobile ? "small" : "medium"}
+                      >
+                        <InputLabel>Student</InputLabel>
+                        <Select
+                          label="Student"
+                          value={entry.user_id}
+                          onChange={(e) =>
+                            handleUserSelect(
+                              idx,
+                              users.find((u) => u.user_id === e.target.value)
+                            )
+                          }
+                        >
+                          <MenuItem value="">Select a student</MenuItem>
+                          {loadingUsers ? (
+                            <MenuItem disabled>
+                              <CircularProgress size={20} />
+                            </MenuItem>
+                          ) : users.length > 0 ? (
+                            users.map((user) => (
+                              <MenuItem key={user.user_id} value={user.user_id}>
+                                {user.name} ({user.user_id})
+                              </MenuItem>
+                            ))
+                          ) : (
+                            <MenuItem disabled>No students found</MenuItem>
+                          )}
+                        </Select>
+                      </FormControl>
                     </Grid>
 
                     <Grid item xs={12} sm={4}>
