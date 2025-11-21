@@ -76,7 +76,11 @@ export default function AdminLogAttendance() {
         method: "GET",
       });
       if (res.data.users) {
-        setUsers(res.data.users);
+        // Sort users by name in ascending order
+        const sortedUsers = res.data.users.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+        setUsers(sortedUsers);
       }
     } catch (err) {
       console.error("Failed to fetch users:", err);
