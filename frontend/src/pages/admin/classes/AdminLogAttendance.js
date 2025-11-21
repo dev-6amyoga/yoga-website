@@ -278,6 +278,15 @@ export default function AdminLogAttendance() {
                           handleUserSelect(idx, value)
                         }
                         loading={loadingUsers}
+                        // ★ NEW: fix matching issue
+                        isOptionEqualToValue={(option, value) =>
+                          option.user_id === value.user_id
+                        }
+                        // ★ NEW: handle input typing separately
+                        inputValue={entry.searchText || ""}
+                        onInputChange={(e, newInput) => {
+                          updateEntry(idx, { searchText: newInput });
+                        }}
                         noOptionsText="No users found"
                         renderInput={(params) => (
                           <TextField
