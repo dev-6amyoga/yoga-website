@@ -101,19 +101,20 @@ export default function AdminLogAttendance() {
     }
   };
 
-  // Filter classes by plan_id and deduplicate by class name
+  // Filter classes by plan_id and deduplicate by class name + recurring_start_time
   const getFilteredClasses = (planId) => {
     if (!planId) return [];
 
     const filteredByPlan = classes.filter((cls) => cls.plan_id === planId);
 
-    // Deduplicate by class name, keeping first occurrence
-    const seenNames = new Set();
+    // Deduplicate by class name + recurring_start_time combination, keeping first occurrence
+    const seenCombinations = new Set();
     return filteredByPlan.filter((cls) => {
-      if (seenNames.has(cls.zoom_class_name)) {
+      const key = `${cls.zoom_class_name}|${cls.recurring_start_time}`;
+      if (seenCombinations.has(key)) {
         return false;
       }
-      seenNames.add(cls.zoom_class_name);
+      seenCombinations.add(key);
       return true;
     });
   };
@@ -338,7 +339,9 @@ export default function AdminLogAttendance() {
                                 key={cls.zoom_class_id}
                                 value={cls.zoom_class_id}
                               >
-                                {cls.zoom_class_name}
+                                {cls.zoom_class_name} -{" "}
+                                {cls.recurring_start_time} to{" "}
+                                {cls.recurring_end_time}
                               </MenuItem>
                             ))
                           ) : (
