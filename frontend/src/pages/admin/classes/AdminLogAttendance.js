@@ -101,6 +101,36 @@ export default function AdminLogAttendance() {
     }
   };
 
+  // Filter classes by plan_id and deduplicate by class name
+  const getFilteredClasses = (planId) => {
+    if (!planId) return [];
+
+    const filteredByPlan = classes.filter((cls) => cls.plan_id === planId);
+
+    // Deduplicate by class name, keeping first occurrence
+    const seenNames = new Set();
+    return filteredByPlan.filter((cls) => {
+      if (seenNames.has(cls.zoom_class_name)) {
+        return false;
+      }
+      seenNames.add(cls.zoom_class_name);
+      return true;
+    });
+  };
+
+  // Get all start times for a specific class
+  const getClassStartTimes = (classId) => {
+    const cls = classes.find((c) => c.zoom_class_id === classId);
+    if (!cls || !cls.recurring_start_time) return [];
+
+    // Handle if recurring_start_time is an array or single value
+    const startTimes = Array.isArray(cls.recurring_start_time)
+      ? cls.recurring_start_time
+      : [cls.recurring_start_time];
+
+    return startTimes;
+  };
+
   // Fetch user plan details when user is selected
   const handleUserSelect = async (index, user) => {
     if (!user) {
@@ -108,6 +138,8 @@ export default function AdminLogAttendance() {
         user_id: "",
         plan_id: "",
         user_plan_id: "",
+        class_id: "",
+        join_time: "",
       });
       return;
     }
@@ -127,6 +159,8 @@ export default function AdminLogAttendance() {
           user_id: user.user_id,
           plan_id: activePlan.plan_id,
           user_plan_id: activePlan.user_plan_id,
+          class_id: "",
+          join_time: "",
         });
       }
     } catch (err) {
@@ -281,21 +315,25 @@ export default function AdminLogAttendance() {
                       <FormControl
                         fullWidth
                         size={isMobile ? "small" : "medium"}
+                        disabled={!entry.plan_id}
                       >
                         <InputLabel>Class</InputLabel>
                         <Select
                           label="Class"
                           value={entry.class_id}
                           onChange={(e) =>
-                            updateEntry(idx, { class_id: e.target.value })
+                            updateEntry(idx, {
+                              class_id: e.target.value,
+                              join_time: "",
+                            })
                           }
                         >
                           {loadingClasses ? (
                             <MenuItem disabled>
                               <CircularProgress size={20} />
                             </MenuItem>
-                          ) : classes.length > 0 ? (
-                            classes.map((cls) => (
+                          ) : getFilteredClasses(entry.plan_id).length > 0 ? (
+                            getFilteredClasses(entry.plan_id).map((cls) => (
                               <MenuItem
                                 key={cls.zoom_class_id}
                                 value={cls.zoom_class_id}
@@ -350,17 +388,26 @@ export default function AdminLogAttendance() {
                   {/* Row 3 */}
                   <Grid container spacing={isMobile ? 1.5 : 2}>
                     <Grid item xs={12} sm={4}>
-                      <TextField
+                      <FormControl
                         fullWidth
-                        label="Join Time"
-                        type="time"
-                        InputLabelProps={{ shrink: true }}
-                        value={entry.join_time}
-                        onChange={(e) =>
-                          updateEntry(idx, { join_time: e.target.value })
-                        }
                         size={isMobile ? "small" : "medium"}
-                      />
+                        disabled={!entry.class_id}
+                      >
+                        <InputLabel>Join Time</InputLabel>
+                        <Select
+                          label="Join Time"
+                          value={entry.join_time}
+                          onChange={(e) =>
+                            updateEntry(idx, { join_time: e.target.value })
+                          }
+                        >
+                          {getClassStartTimes(entry.class_id).map((time) => (
+                            <MenuItem key={time} value={time}>
+                              {time}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </Grid>
 
                     <Grid item xs={12} sm={4}>
