@@ -17,6 +17,7 @@ const {
 } = require('@mediapipe/tasks-vision')
 
 const { Plan } = require('../models/sql/Plan')
+const { ZoomClassModel } = require('../models/sql/ZoomClassModel')
 const { Institute } = require('../models/sql/Institute')
 const { Role } = require('../models/sql/Role')
 const { sequelize } = require('../init.sequelize')
@@ -879,6 +880,53 @@ router.get('/get-all-students', async (req, res) => {
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ error: 'Failed to fetch Students' })
+  }
+})
+
+router.post('/get-class-users', async (req, res) => {
+  try {
+    const { class_ids } = req.body
+    if (!class_ids || !Array.isArray(class_ids) || class_ids.length === 0) {
+      return res.status(400).json({ error: 'class_ids is required' })
+    }
+    const classes = await ZoomClassModel.findAll({
+      where: {
+        zoom_class_id: class_ids,
+      },
+      attributes: ['plan_id'],
+      raw: true,
+    })
+
+    if (classes.length === 0) {
+      return res.status(200).json({ users: [] })
+    }
+    const planIds = [...new Set(classes.map((cls) => cls.plan_id))]
+    const userPlans = await UserPlan.findAll({
+      where: {
+        plan_id: planIds,
+      },
+      include: [
+        {
+          model: User,
+          attributes: ['user_id', 'name', 'email', 'phone', 'username'],
+        },
+      ],
+      raw: false,
+    })
+
+    const uniqueUsers = {}
+    userPlans.forEach((up) => {
+      if (up.User && up.User.user_id) {
+        uniqueUsers[up.User.user_id] = up.User
+      }
+    })
+
+    const users = Object.values(uniqueUsers)
+
+    return res.status(200).json({ users })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({ error: 'Failed to load class users' })
   }
 })
 

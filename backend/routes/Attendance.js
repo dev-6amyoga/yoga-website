@@ -306,6 +306,207 @@ router.get('/api/attendance/:userId', async (req, res) => {
   }
 })
 
+router.post('/admin/log-attendance-by-class', async (req, res) => {
+  const t = await sequelize.transaction()
+  try {
+    const { entries } = req.body
+
+    if (
+      !entries ||
+      !entries.class_name ||
+      !entries.class_type ||
+      !entries.join_time ||
+      !entries.users ||
+      !Array.isArray(entries.users)
+    ) {
+      await t.rollback()
+      return res.status(400).json({
+        error:
+          'Missing required fields: class_name, class_type, join_time, users array',
+      })
+    }
+
+    const created = []
+    const updatedUserPlans = []
+
+    for (const user of entries.users) {
+      const {
+        user_id,
+        plan_id,
+        user_plan_id,
+        date,
+        end_time,
+        duration_minutes,
+        remarks,
+      } = user
+
+      if (!user_id || !plan_id || !user_plan_id || !date) {
+        await t.rollback()
+        return res.status(400).json({
+          error: `Missing required fields for user ${user_id}`,
+        })
+      }
+
+      // 1. Find the applicable class for this user
+      const userApplicableClass = await ZoomClassModel.findOne({
+        where: {
+          plan_id: plan_id,
+          zoom_class_name: entries.class_name,
+          class_type: entries.class_type,
+          recurring_start_time: entries.join_time,
+        },
+        transaction: t,
+      })
+
+      if (!userApplicableClass) {
+        await t.rollback()
+        return res.status(400).json({
+          error: `Class ${entries.class_name} not applicable for user_plan_id ${user_plan_id}`,
+        })
+      }
+
+      // 2. Parse date and times
+      const when = new Date(date)
+      if (isNaN(when.getTime())) {
+        await t.rollback()
+        return res
+          .status(400)
+          .json({ error: `Invalid date format for user ${user_id}` })
+      }
+
+      const startOfDay = new Date(
+        when.getFullYear(),
+        when.getMonth(),
+        when.getDate(),
+        0,
+        0,
+        0,
+        0
+      )
+      const nextDay = new Date(startOfDay)
+      nextDay.setDate(startOfDay.getDate() + 1)
+
+      // Parse join_time (HH:mm format)
+      let parsedJoinTime = null
+      if (entries.join_time && typeof entries.join_time === 'string') {
+        const [hours, minutes] = entries.join_time.split(':').map(Number)
+        if (!isNaN(hours) && !isNaN(minutes)) {
+          parsedJoinTime = new Date(when)
+          parsedJoinTime.setHours(hours, minutes, 0, 0)
+        }
+      }
+
+      // Parse leave_time (HH:mm format)
+      let parsedLeaveTime = null
+      if (end_time && typeof end_time === 'string') {
+        const [hours, minutes] = end_time.split(':').map(Number)
+        if (!isNaN(hours) && !isNaN(minutes)) {
+          parsedLeaveTime = new Date(when)
+          parsedLeaveTime.setHours(hours, minutes, 0, 0)
+        }
+      }
+
+      // 3. Lock and fetch UserPlanAttendance
+      let upa = await UserPlanAttendance.findOne({
+        where: { user_plan_id },
+        transaction: t,
+        lock: t.LOCK.UPDATE,
+      })
+
+      if (!upa) {
+        await t.rollback()
+        return res.status(404).json({
+          error: `UserPlanAttendance not found for user_plan_id ${user_plan_id}`,
+        })
+      }
+
+      // 4. Check if attendance already exists for that user/class on that date
+      const existing = await ClassAttendance.findOne({
+        where: {
+          user_id,
+          class_id: userApplicableClass.zoom_class_id,
+          date: { [Op.gte]: startOfDay, [Op.lt]: nextDay },
+        },
+        transaction: t,
+        lock: t.LOCK.UPDATE,
+      })
+
+      if (existing) {
+        // Update existing attendance record
+        await ClassAttendance.update(
+          {
+            attendance_status: 'ATTENDED',
+            join_time: parsedJoinTime,
+            leave_time: parsedLeaveTime,
+            duration_minutes: duration_minutes || null,
+            marked_by: 'INSTRUCTOR',
+            remarks: remarks || null,
+            device_id: 'ADMIN_MANUAL',
+            updated: sequelize.literal('NOW()'),
+          },
+          { where: { id: existing.id }, transaction: t }
+        )
+
+        created.push({
+          attendanceId: existing.id,
+          action: 'updated',
+          user_id,
+          class_id: userApplicableClass.zoom_class_id,
+        })
+      } else {
+        // 5. Create new attendance record
+        const newAttendance = await ClassAttendance.create(
+          {
+            user_id,
+            plan_id,
+            user_plan_id,
+            class_id: userApplicableClass.zoom_class_id,
+            device_id: 'ADMIN_MANUAL',
+            date: when,
+            attendance_status: 'ATTENDED',
+            join_time: parsedJoinTime,
+            leave_time: parsedLeaveTime,
+            duration_minutes: duration_minutes || null,
+            marked_by: 'INSTRUCTOR',
+            instructor_id: null,
+            remarks: remarks || null,
+          },
+          { transaction: t }
+        )
+
+        // 6. Increment classes_attended in UserPlanAttendance
+        await UserPlanAttendance.update(
+          { classes_attended: (upa.classes_attended || 0) + 1 },
+          { where: { user_plan_id }, transaction: t }
+        )
+
+        created.push(
+          newAttendance.toJSON ? newAttendance.toJSON() : newAttendance
+        )
+      }
+
+      // 7. Fetch fresh UPA row for response
+      upa = await UserPlanAttendance.findOne({
+        where: { user_plan_id },
+        transaction: t,
+      })
+
+      updatedUserPlans.push(upa.toJSON ? upa.toJSON() : upa)
+    }
+
+    await t.commit()
+    return res.status(200).json({
+      message: 'Attendance logged successfully',
+      created,
+      updatedUserPlans,
+    })
+  } catch (err) {
+    await t.rollback()
+    console.error('admin/log-attendance-by-class error:', err)
+    return res.status(500).json({ error: 'Server error' })
+  }
+})
+
 router.post('/admin/log-attendance', async (req, res) => {
   const t = await sequelize.transaction()
   try {
