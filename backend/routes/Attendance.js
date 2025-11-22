@@ -309,7 +309,11 @@ router.get('/api/attendance/:userId', async (req, res) => {
 router.post('/admin/log-attendance-by-class', async (req, res) => {
   const t = await sequelize.transaction()
   try {
+    console.log('=== /admin/log-attendance-by-class START ===')
     const { entries } = req.body
+
+    console.log('Request body:', JSON.stringify(req.body, null, 2))
+    console.log('Entries:', entries)
 
     if (
       !entries ||
@@ -319,6 +323,13 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
       !entries.users ||
       !Array.isArray(entries.users)
     ) {
+      console.log('❌ Validation failed')
+      console.log('  class_name:', entries?.class_name)
+      console.log('  class_type:', entries?.class_type)
+      console.log('  join_time:', entries?.join_time)
+      console.log('  users:', entries?.users)
+      console.log('  users is array:', Array.isArray(entries?.users))
+
       await t.rollback()
       return res.status(400).json({
         error:
@@ -326,48 +337,99 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
       })
     }
 
+    console.log(`✓ Validation passed`)
+    console.log(`Processing ${entries.users.length} users`)
+
     const created = []
     const updatedUserPlans = []
 
-    for (const user of entries.users) {
+    for (const [userIdx, user] of entries.users.entries()) {
+      console.log(
+        `\n--- Processing User ${userIdx + 1}/${entries.users.length} ---`
+      )
+      const { user_id, plan_id, user_plan_id } = user
+
+      // Extract from entries, NOT from entries.users[userIdx]
       const {
+        class_name,
+        date,
+        join_time,
+        leave_time,
+        duration_minutes,
+        class_type,
+      } = entries
+
+      console.log('User data:', {
         user_id,
         plan_id,
         user_plan_id,
+        class_name,
         date,
-        end_time,
+        join_time,
+        leave_time,
         duration_minutes,
-        remarks,
-      } = user
+        class_type,
+      })
 
       if (!user_id || !plan_id || !user_plan_id || !date) {
+        console.log('❌ Missing required user fields')
         await t.rollback()
         return res.status(400).json({
           error: `Missing required fields for user ${user_id}`,
         })
       }
 
+      console.log('✓ User fields validated')
+
       // 1. Find the applicable class for this user
+      console.log(
+        `Finding class: name="${class_name}", type="${class_type}", plan_id=${plan_id}, start_time="${join_time}"`
+      )
+
       const userApplicableClass = await ZoomClassModel.findOne({
         where: {
           plan_id: plan_id,
-          zoom_class_name: entries.class_name,
-          class_type: entries.class_type,
-          recurring_start_time: entries.join_time,
+          zoom_class_name: class_name,
+          class_type: class_type,
+          recurring_start_time: join_time,
         },
         transaction: t,
       })
 
+      console.log(
+        'Class search result:',
+        userApplicableClass ? '✓ Found' : '❌ Not found'
+      )
+      if (userApplicableClass) {
+        console.log('  Class details:', {
+          zoom_class_id: userApplicableClass.zoom_class_id,
+          zoom_class_name: userApplicableClass.zoom_class_name,
+          plan_id: userApplicableClass.plan_id,
+          recurring_start_time: userApplicableClass.recurring_start_time,
+          recurring_end_time: userApplicableClass.recurring_end_time,
+        })
+      }
+
       if (!userApplicableClass) {
+        console.log(`❌ Class not found for user_plan_id ${user_plan_id}`)
         await t.rollback()
         return res.status(400).json({
-          error: `Class ${entries.class_name} not applicable for user_plan_id ${user_plan_id}`,
+          error: `Class ${class_name} not applicable for user_plan_id ${user_plan_id}`,
         })
       }
 
       // 2. Parse date and times
+      console.log(`Parsing date: "${date}"`)
       const when = new Date(date)
+      console.log(
+        'Parsed date:',
+        when.toISOString(),
+        'Valid:',
+        !isNaN(when.getTime())
+      )
+
       if (isNaN(when.getTime())) {
+        console.log('❌ Invalid date format')
         await t.rollback()
         return res
           .status(400)
@@ -386,34 +448,61 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
       const nextDay = new Date(startOfDay)
       nextDay.setDate(startOfDay.getDate() + 1)
 
+      console.log('Day range:', {
+        startOfDay: startOfDay.toISOString(),
+        nextDay: nextDay.toISOString(),
+      })
+
       // Parse join_time (HH:mm format)
+      console.log(`Parsing join_time: "${join_time}"`)
       let parsedJoinTime = null
-      if (entries.join_time && typeof entries.join_time === 'string') {
-        const [hours, minutes] = entries.join_time.split(':').map(Number)
+      if (join_time && typeof join_time === 'string') {
+        const [hours, minutes] = join_time.split(':').map(Number)
+        console.log(`  Hours: ${hours}, Minutes: ${minutes}`)
         if (!isNaN(hours) && !isNaN(minutes)) {
           parsedJoinTime = new Date(when)
           parsedJoinTime.setHours(hours, minutes, 0, 0)
+          console.log(`  ✓ Parsed: ${parsedJoinTime.toISOString()}`)
         }
       }
 
       // Parse leave_time (HH:mm format)
+      console.log(`Parsing leave_time: "${leave_time}"`)
       let parsedLeaveTime = null
-      if (end_time && typeof end_time === 'string') {
-        const [hours, minutes] = end_time.split(':').map(Number)
+      if (leave_time && typeof leave_time === 'string') {
+        const [hours, minutes] = leave_time.split(':').map(Number)
+        console.log(`  Hours: ${hours}, Minutes: ${minutes}`)
         if (!isNaN(hours) && !isNaN(minutes)) {
           parsedLeaveTime = new Date(when)
           parsedLeaveTime.setHours(hours, minutes, 0, 0)
+          console.log(`  ✓ Parsed: ${parsedLeaveTime.toISOString()}`)
         }
       }
 
       // 3. Lock and fetch UserPlanAttendance
+      console.log(
+        `Fetching UserPlanAttendance for user_plan_id: ${user_plan_id}`
+      )
       let upa = await UserPlanAttendance.findOne({
         where: { user_plan_id },
         transaction: t,
         lock: t.LOCK.UPDATE,
       })
 
+      console.log('UPA result:', upa ? '✓ Found' : '❌ Not found')
+      if (upa) {
+        console.log('  UPA details:', {
+          user_plan_id: upa.user_plan_id,
+          classes_attended: upa.classes_attended,
+          classes_allowed: upa.classes_allowed,
+          status: upa.status,
+        })
+      }
+
       if (!upa) {
+        console.log(
+          `❌ UserPlanAttendance not found for user_plan_id ${user_plan_id}`
+        )
         await t.rollback()
         return res.status(404).json({
           error: `UserPlanAttendance not found for user_plan_id ${user_plan_id}`,
@@ -421,6 +510,9 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
       }
 
       // 4. Check if attendance already exists for that user/class on that date
+      console.log(
+        `Checking existing attendance for user_id=${user_id}, class_id=${userApplicableClass.zoom_class_id}`
+      )
       const existing = await ClassAttendance.findOne({
         where: {
           user_id,
@@ -431,7 +523,10 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
         lock: t.LOCK.UPDATE,
       })
 
+      console.log('Existing attendance:', existing ? '✓ Found' : '✗ Not found')
+
       if (existing) {
+        console.log(`Updating existing attendance record (id=${existing.id})`)
         // Update existing attendance record
         await ClassAttendance.update(
           {
@@ -440,12 +535,13 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
             leave_time: parsedLeaveTime,
             duration_minutes: duration_minutes || null,
             marked_by: 'INSTRUCTOR',
-            remarks: remarks || null,
             device_id: 'ADMIN_MANUAL',
             updated: sequelize.literal('NOW()'),
           },
           { where: { id: existing.id }, transaction: t }
         )
+
+        console.log('✓ Attendance record updated')
 
         created.push({
           attendanceId: existing.id,
@@ -454,6 +550,7 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
           class_id: userApplicableClass.zoom_class_id,
         })
       } else {
+        console.log('Creating new attendance record')
         // 5. Create new attendance record
         const newAttendance = await ClassAttendance.create(
           {
@@ -469,16 +566,22 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
             duration_minutes: duration_minutes || null,
             marked_by: 'INSTRUCTOR',
             instructor_id: null,
-            remarks: remarks || null,
           },
           { transaction: t }
         )
 
+        console.log(`✓ New attendance record created (id=${newAttendance.id})`)
+
         // 6. Increment classes_attended in UserPlanAttendance
+        console.log(
+          `Incrementing classes_attended: ${upa.classes_attended} -> ${(upa.classes_attended || 0) + 1}`
+        )
         await UserPlanAttendance.update(
           { classes_attended: (upa.classes_attended || 0) + 1 },
           { where: { user_plan_id }, transaction: t }
         )
+
+        console.log('✓ classes_attended incremented')
 
         created.push(
           newAttendance.toJSON ? newAttendance.toJSON() : newAttendance
@@ -486,26 +589,44 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
       }
 
       // 7. Fetch fresh UPA row for response
+      console.log('Fetching updated UPA row')
       upa = await UserPlanAttendance.findOne({
         where: { user_plan_id },
         transaction: t,
       })
 
+      console.log('Updated UPA:', {
+        user_plan_id: upa.user_plan_id,
+        classes_attended: upa.classes_attended,
+        classes_allowed: upa.classes_allowed,
+      })
+
       updatedUserPlans.push(upa.toJSON ? upa.toJSON() : upa)
     }
 
+    console.log('\nCommitting transaction...')
     await t.commit()
+    console.log('✓ Transaction committed')
+    console.log('=== /admin/log-attendance-by-class END (SUCCESS) ===\n')
+
     return res.status(200).json({
       message: 'Attendance logged successfully',
       created,
       updatedUserPlans,
     })
   } catch (err) {
+    console.error('=== /admin/log-attendance-by-class ERROR ===')
+    console.error('Error message:', err.message)
+    console.error('Error stack:', err.stack)
+    console.error('Full error:', err)
+    console.error('=== /admin/log-attendance-by-class END (FAILED) ===\n')
+
     await t.rollback()
-    console.error('admin/log-attendance-by-class error:', err)
     return res.status(500).json({ error: 'Server error' })
   }
 })
+
+module.exports = router
 
 router.post('/admin/log-attendance', async (req, res) => {
   const t = await sequelize.transaction()

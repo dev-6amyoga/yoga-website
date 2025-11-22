@@ -32,7 +32,9 @@ export default function AttendanceByClass() {
   const [selectedClassIndex, setSelectedClassIndex] = useState(""); // Changed: store index
   const [selectedClassName, setSelectedClassName] = useState(""); // New: store class name
   const [selectedStartTime, setSelectedStartTime] = useState("");
-
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  ); // Add this
   const [endTime, setEndTime] = useState("");
   const [duration, setDuration] = useState("");
 
@@ -155,23 +157,30 @@ export default function AttendanceByClass() {
   const filteredUsers = classUsers.filter((u) =>
     u.name.toLowerCase().includes(search.toLowerCase())
   );
-
   const handleSubmit = async () => {
-    if (!selectedClass || !selectedStartTime || selectedUsers.length === 0)
+    if (
+      !selectedClassName ||
+      !selectedStartTime ||
+      selectedUsers.length === 0 ||
+      !selectedDate
+    )
       return alert("Missing fields");
 
     const payload = {
-      class_name: selectedClassName,
-      class_type: "recurring",
-      join_time: selectedStartTime,
-      leave_time: endTime,
-      duration_minutes: duration,
-      users: selectedUsers.map((u) => ({
-        user_id: u.user_id,
-        plan_id: u.plan_id,
-        user_plan_id: u.user_plan_id,
-      })),
-      institute_id: 3,
+      entries: {
+        class_name: selectedClassName,
+        class_type: "recurring",
+        join_time: selectedStartTime,
+        leave_time: endTime,
+        duration_minutes: duration,
+        date: selectedDate,
+        users: selectedUsers.map((u) => ({
+          user_id: u.user_id,
+          plan_id: u.plan_id,
+          user_plan_id: u.user_plan_id,
+        })),
+        institute_id: 3,
+      },
     };
 
     try {
@@ -197,7 +206,7 @@ export default function AttendanceByClass() {
 
         {/* Row 1 - Class & Time */}
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             <FormControl fullWidth>
               <InputLabel>Class</InputLabel>
               <Select
@@ -220,7 +229,7 @@ export default function AttendanceByClass() {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             <TextField
               fullWidth
               label="Class Name"
@@ -229,7 +238,18 @@ export default function AttendanceByClass() {
             />
           </Grid>
 
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
+            <TextField
+              fullWidth
+              label="Date"
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={3}>
             <TextField
               fullWidth
               label="Start Time"
@@ -269,7 +289,7 @@ export default function AttendanceByClass() {
               <List
                 dense
                 sx={{
-                  maxHeight: 250,
+                  maxHeight: 300,
                   overflowY: "auto",
                   border: "1px solid #eee",
                   borderRadius: 1,
@@ -305,7 +325,7 @@ export default function AttendanceByClass() {
                       />
                     </ListItemIcon>
                     <ListItemText
-                      primary={`${u.name} (${u.user_id})`}
+                      primary={`${u.name} (ID: ${u.user_id})`}
                       secondary={`Plan: ${u.plan_id} | UserPlan: ${u.user_plan_id}`}
                     />
                   </ListItem>
@@ -319,16 +339,19 @@ export default function AttendanceByClass() {
         {selectedUsers.length > 0 && (
           <>
             <Typography mt={3} mb={1} fontWeight={600}>
-              Selected Students
+              Selected Students ({selectedUsers.length})
             </Typography>
 
-            <Table size="small">
-              <TableHead>
+            <Table size="small" sx={{ border: "1px solid #eee" }}>
+              <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
                 <TableRow>
-                  <TableCell>User</TableCell>
-                  <TableCell>Plan ID</TableCell>
-                  <TableCell>User Plan ID</TableCell>
-                  <TableCell></TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>User ID</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Plan ID</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>User Plan ID</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600 }}>
+                    Action
+                  </TableCell>
                 </TableRow>
               </TableHead>
 
@@ -336,11 +359,13 @@ export default function AttendanceByClass() {
                 {selectedUsers.map((u) => (
                   <TableRow key={u.user_id}>
                     <TableCell>{u.name}</TableCell>
+                    <TableCell>{u.user_id}</TableCell>
                     <TableCell>{u.plan_id}</TableCell>
                     <TableCell>{u.user_plan_id}</TableCell>
-                    <TableCell>
+                    <TableCell align="center">
                       <Button
                         color="error"
+                        size="small"
                         onClick={() =>
                           setSelectedUsers((prev) =>
                             prev.filter((x) => x.user_id !== u.user_id)
@@ -364,6 +389,7 @@ export default function AttendanceByClass() {
             disabled={
               selectedClassIndex === "" ||
               !selectedStartTime ||
+              !selectedDate ||
               selectedUsers.length === 0
             }
             onClick={handleSubmit}
