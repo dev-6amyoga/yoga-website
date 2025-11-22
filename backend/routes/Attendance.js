@@ -503,10 +503,43 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
         console.log(
           `❌ UserPlanAttendance not found for user_plan_id ${user_plan_id}`
         )
-        await t.rollback()
-        return res.status(404).json({
-          error: `UserPlanAttendance not found for user_plan_id ${user_plan_id}`,
+        const userPlanRecord = await UserPlan.findOne({
+          where: { user_id: user_id, current_status: 'ACTIVE' },
+          transaction: t,
         })
+
+        if (!userPlanRecord) {
+          await t.rollback()
+          return res
+            .status(404)
+            .json({ allowed: false, message: 'User plan not found' })
+        }
+
+        // Fetch plan to get classes_allowed
+        const plan = await Plan.findByPk(userPlanRecord.plan_id, {
+          transaction: t,
+        })
+        if (!plan) {
+          await t.rollback()
+          return res
+            .status(404)
+            .json({ allowed: false, message: 'Plan not found' })
+        }
+
+        // Create UserPlanAttendance record
+        const userPlanAttendance = await UserPlanAttendance.create(
+          {
+            user_id: user_id,
+            plan_id: userPlanRecord.plan_id,
+            user_plan_id: userPlanRecord.user_plan_id,
+            start_date: userPlanRecord.validity_from,
+            expiry_date: userPlanRecord.validity_to,
+            classes_allowed: plan.number_of_zoom_classes || 0,
+            classes_attended: 0,
+            status: 'ACTIVE',
+          },
+          { transaction: t }
+        )
       }
 
       // 4. Check if attendance already exists for that user/class on that date
