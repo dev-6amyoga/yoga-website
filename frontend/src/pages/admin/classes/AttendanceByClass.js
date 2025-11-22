@@ -22,19 +22,22 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  useMediaQuery,
 } from "@mui/material";
 import { Fetch } from "../../../utils/Fetch";
 
 export default function AttendanceByClass() {
+  const isMobile = useMediaQuery("(max-width:600px)");
+
   const [classes, setClasses] = useState([]);
   const [loadingClasses, setLoadingClasses] = useState(false);
 
-  const [selectedClassIndex, setSelectedClassIndex] = useState(""); // Changed: store index
-  const [selectedClassName, setSelectedClassName] = useState(""); // New: store class name
+  const [selectedClassIndex, setSelectedClassIndex] = useState("");
+  const [selectedClassName, setSelectedClassName] = useState("");
   const [selectedStartTime, setSelectedStartTime] = useState("");
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
-  ); // Add this
+  );
   const [endTime, setEndTime] = useState("");
   const [duration, setDuration] = useState("");
 
@@ -44,7 +47,6 @@ export default function AttendanceByClass() {
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
 
-  // fetch classes
   useEffect(() => {
     loadClasses();
   }, []);
@@ -65,7 +67,6 @@ export default function AttendanceByClass() {
     setLoadingClasses(false);
   };
 
-  // load users enrolled in selected class
   const loadClassUsers = async (classIds) => {
     if (!classIds || classIds.length === 0) return;
     setLoadingUsers(true);
@@ -74,7 +75,7 @@ export default function AttendanceByClass() {
       const res = await Fetch({
         url: "/user/get-class-users",
         method: "POST",
-        data: { class_ids: classIds }, // send array
+        data: { class_ids: classIds },
       });
 
       setClassUsers(res.data.users || []);
@@ -112,19 +113,15 @@ export default function AttendanceByClass() {
     return Object.values(map);
   };
 
-  // When class changes → load times + users
   const handleClassChange = (index) => {
     const group = classes[index];
-    console.log(group);
     setSelectedClassIndex(index);
-    setSelectedClassName(group.class_name); // Set the class name
+    setSelectedClassName(group.class_name);
 
-    // Auto-populate start time, end time, and duration
     setSelectedStartTime(group.start_time);
     handleStartTimeChange(group.start_time);
     setSelectedUsers([]);
 
-    // Load users for ALL class_ids
     loadClassUsers(group.class_ids);
   };
 
@@ -157,6 +154,7 @@ export default function AttendanceByClass() {
   const filteredUsers = classUsers.filter((u) =>
     u.name.toLowerCase().includes(search.toLowerCase())
   );
+
   const handleSubmit = async () => {
     if (
       !selectedClassName ||
@@ -184,7 +182,7 @@ export default function AttendanceByClass() {
     };
 
     try {
-      const res = await Fetch({
+      await Fetch({
         url: "/class-attendance/admin/log-attendance-by-class",
         method: "POST",
         data: payload,
@@ -198,16 +196,22 @@ export default function AttendanceByClass() {
   };
 
   return (
-    <Card variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-      <CardContent>
-        <Typography variant="h6" mb={2}>
+    <Card
+      variant="outlined"
+      sx={{
+        p: isMobile ? 1 : 2,
+        borderRadius: 2,
+      }}
+    >
+      <CardContent sx={{ p: isMobile ? 1 : 2 }}>
+        <Typography variant={isMobile ? "subtitle1" : "h6"} mb={2}>
           Enter Attendance by Class
         </Typography>
 
-        {/* Row 1 - Class & Time */}
-        <Grid container spacing={2}>
+        {/* CLASS SELECTION */}
+        <Grid container spacing={isMobile ? 1.5 : 2}>
           <Grid item xs={12} sm={3}>
-            <FormControl fullWidth>
+            <FormControl fullWidth size={isMobile ? "small" : "medium"}>
               <InputLabel>Class</InputLabel>
               <Select
                 label="Class"
@@ -234,6 +238,7 @@ export default function AttendanceByClass() {
               fullWidth
               label="Class Name"
               value={selectedClassName}
+              size={isMobile ? "small" : "medium"}
               disabled
             />
           </Grid>
@@ -244,6 +249,7 @@ export default function AttendanceByClass() {
               label="Date"
               type="date"
               value={selectedDate}
+              size={isMobile ? "small" : "medium"}
               onChange={(e) => setSelectedDate(e.target.value)}
               InputLabelProps={{ shrink: true }}
             />
@@ -254,23 +260,41 @@ export default function AttendanceByClass() {
               fullWidth
               label="Start Time"
               value={selectedStartTime}
+              size={isMobile ? "small" : "medium"}
               disabled
             />
           </Grid>
 
           <Grid item xs={6} sm={2}>
-            <TextField fullWidth label="End Time" value={endTime} disabled />
+            <TextField
+              fullWidth
+              label="End Time"
+              value={endTime}
+              size={isMobile ? "small" : "medium"}
+              disabled
+            />
           </Grid>
 
           <Grid item xs={6} sm={2}>
-            <TextField fullWidth label="Duration" value={duration} disabled />
+            <TextField
+              fullWidth
+              label="Duration"
+              value={duration}
+              size={isMobile ? "small" : "medium"}
+              disabled
+            />
           </Grid>
         </Grid>
 
-        {/* User Search */}
+        {/* USER SEARCH */}
         {selectedClassIndex !== "" && (
           <>
-            <Typography mt={3} mb={1} fontWeight={600}>
+            <Typography
+              mt={3}
+              mb={1}
+              fontWeight={600}
+              variant={isMobile ? "body2" : "body1"}
+            >
               Students in this class
             </Typography>
 
@@ -278,8 +302,8 @@ export default function AttendanceByClass() {
               fullWidth
               placeholder="Search student..."
               value={search}
+              size={isMobile ? "small" : "medium"}
               onChange={(e) => setSearch(e.target.value)}
-              size="small"
               sx={{ mb: 2 }}
             />
 
@@ -287,9 +311,9 @@ export default function AttendanceByClass() {
               <CircularProgress />
             ) : (
               <List
-                dense
+                dense={isMobile}
                 sx={{
-                  maxHeight: 300,
+                  maxHeight: isMobile ? 250 : 300,
                   overflowY: "auto",
                   border: "1px solid #eee",
                   borderRadius: 1,
@@ -302,7 +326,7 @@ export default function AttendanceByClass() {
                 {filteredUsers.map((u) => (
                   <ListItem
                     key={u.user_id}
-                    disablePadding
+                    disablePadding={isMobile}
                     secondaryAction={
                       <Checkbox
                         checked={
@@ -326,7 +350,13 @@ export default function AttendanceByClass() {
                     </ListItemIcon>
                     <ListItemText
                       primary={`${u.name} (ID: ${u.user_id})`}
+                      primaryTypographyProps={{
+                        fontSize: isMobile ? 13 : 14,
+                      }}
                       secondary={`Plan: ${u.plan_id} | UserPlan: ${u.user_plan_id}`}
+                      secondaryTypographyProps={{
+                        fontSize: isMobile ? 11 : 12,
+                      }}
                     />
                   </ListItem>
                 ))}
@@ -335,57 +365,67 @@ export default function AttendanceByClass() {
           </>
         )}
 
-        {/* Selected users table */}
+        {/* SELECTED USERS */}
         {selectedUsers.length > 0 && (
           <>
             <Typography mt={3} mb={1} fontWeight={600}>
               Selected Students ({selectedUsers.length})
             </Typography>
 
-            <Table size="small" sx={{ border: "1px solid #eee" }}>
-              <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>User ID</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Plan ID</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>User Plan ID</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600 }}>
-                    Action
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {selectedUsers.map((u) => (
-                  <TableRow key={u.user_id}>
-                    <TableCell>{u.name}</TableCell>
-                    <TableCell>{u.user_id}</TableCell>
-                    <TableCell>{u.plan_id}</TableCell>
-                    <TableCell>{u.user_plan_id}</TableCell>
-                    <TableCell align="center">
-                      <Button
-                        color="error"
-                        size="small"
-                        onClick={() =>
-                          setSelectedUsers((prev) =>
-                            prev.filter((x) => x.user_id !== u.user_id)
-                          )
-                        }
-                      >
-                        Remove
-                      </Button>
+            <div style={{ overflowX: "auto" }}>
+              <Table
+                size="small"
+                sx={{
+                  minWidth: isMobile ? 600 : "100%",
+                  border: "1px solid #eee",
+                }}
+              >
+                <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>User ID</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Plan ID</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>User Plan ID</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 600 }}>
+                      Action
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+
+                <TableBody>
+                  {selectedUsers.map((u) => (
+                    <TableRow key={u.user_id}>
+                      <TableCell>{u.name}</TableCell>
+                      <TableCell>{u.user_id}</TableCell>
+                      <TableCell>{u.plan_id}</TableCell>
+                      <TableCell>{u.user_plan_id}</TableCell>
+                      <TableCell align="center">
+                        <Button
+                          color="error"
+                          size={isMobile ? "small" : "medium"}
+                          onClick={() =>
+                            setSelectedUsers((prev) =>
+                              prev.filter((x) => x.user_id !== u.user_id)
+                            )
+                          }
+                        >
+                          Remove
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </>
         )}
 
-        {/* Submit button */}
+        {/* SUBMIT */}
         <Stack mt={3} direction="row" justifyContent="flex-end">
           <Button
             variant="contained"
+            size={isMobile ? "small" : "medium"}
+            fullWidth={isMobile}
             disabled={
               selectedClassIndex === "" ||
               !selectedStartTime ||
