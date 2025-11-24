@@ -192,7 +192,7 @@ router.get('/get-all-institute-plans', async (req, res) => {
     let plans = await Plan.findAll({
       where: {
         plan_user_type: PLAN_USER_TYPE_INSTITUTE,
-        name: { [Op.iLike]: '%HATHAYOGA%' }, // only plans whose name includes HATHAYOGA (case-insensitive)
+        name: { [Op.iLike]: '%YOGA%' }, // only plans whose name includes HATHAYOGA (case-insensitive)
       },
     })
 
