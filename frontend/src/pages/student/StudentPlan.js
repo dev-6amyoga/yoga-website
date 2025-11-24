@@ -905,21 +905,26 @@ function StudentPlan() {
             making it available soon!
           </Alert>
         ) : (
-          <Pricing
-            heading="Standard Subscriptions"
-            allPlans={filteredPlans}
-            subscribePlan={subscribePlan}
-            selectedCurrency={selectedCurrency}
-            handleTryTrial={handleTryTrial}
-            trialPlanAvailed={trialPlanAvailed}
-          />
+          <>
+            <Divider />
+
+            <InstitutePlansAccordion
+              allInstitutePlans={allInstitutePlans}
+              subscribePlan={subscribePlan}
+              selectedCurrency={selectedCurrency}
+            />
+            <Divider />
+
+            <Pricing
+              heading="Standard Subscriptions"
+              allPlans={filteredPlans}
+              subscribePlan={subscribePlan}
+              selectedCurrency={selectedCurrency}
+              handleTryTrial={handleTryTrial}
+              trialPlanAvailed={trialPlanAvailed}
+            />
+          </>
         )}
-        <Divider />
-        <InstitutePlansAccordion
-          allInstitutePlans={allInstitutePlans}
-          subscribePlan={subscribePlan}
-          selectedCurrency={selectedCurrency}
-        />
         <Modal visible={showCard} onClose={() => setShowCard(false)}>
           <Modal.Content>
             {cardData ? (
