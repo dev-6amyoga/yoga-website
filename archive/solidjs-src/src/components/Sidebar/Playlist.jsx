@@ -78,7 +78,7 @@ function Playlist() {
 				//console.log(asanas);
 				addToQueue(asanas.filter((v) => v !== null));
 			})
-			.catch((err) => //console.log(err));
+			.catch((err) => {});
 	};
 
 	const showDetails = (x) => {
