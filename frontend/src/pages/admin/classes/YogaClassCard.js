@@ -17,6 +17,11 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import { toast } from "react-toastify";
+import {
+  getLocalDateForRecurringClass,
+  formatTimeWithTimezone,
+  getUserTimezoneAbbr,
+} from "../../../utils/TimezoneConverter";
 
 const liveBlinkingKeyframes = `
   @keyframes liveBlink {
@@ -135,7 +140,16 @@ export default function YogaClassCard({
             .map((d) => ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d])
             .join(", ")
         : "";
-    timingStr = `${days} | ${classDetails.recurring_start_time} - ${classDetails.recurring_end_time}`;
+    // Convert IST times to local timezone for display
+    const startTimeLocal = formatTimeWithTimezone(
+      classDetails.recurring_start_time,
+      true
+    );
+    const endTimeLocal = formatTimeWithTimezone(
+      classDetails.recurring_end_time,
+      true
+    );
+    timingStr = `${days} | ${startTimeLocal} - ${endTimeLocal}`;
   }
 
   if (
@@ -169,35 +183,21 @@ export default function YogaClassCard({
       joinDisabled = true;
       joinTooltip = "No class scheduled for today.";
     } else {
-      const [startHour, startMinute] = classDetails.recurring_start_time
-        .split(":")
-        .map(Number);
-      const [endHour, endMinute] = classDetails.recurring_end_time
-        .split(":")
-        .map(Number);
-
-      const todayStart = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        startHour,
-        startMinute,
-        0
+      // Convert IST times to local timezone
+      const todayStart = getLocalDateForRecurringClass(
+        classDetails.recurring_start_time
       );
-      const todayEnd = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        endHour,
-        endMinute,
-        0
+      const todayEnd = getLocalDateForRecurringClass(
+        classDetails.recurring_end_time
       );
-      const thirtyMinsBeforeStart = new Date(todayStart.getTime() - 15 * 60000);
+      const fifteenMinsBeforeStart = new Date(
+        todayStart.getTime() - 15 * 60000
+      );
 
       if (now > todayEnd) {
         joinDisabled = true;
         joinTooltip = "Class has ended.";
-      } else if (now < thirtyMinsBeforeStart) {
+      } else if (now < fifteenMinsBeforeStart) {
         joinDisabled = true;
         joinTooltip =
           "JOIN button will be enabled only 15 mins before class start time.";
@@ -213,8 +213,8 @@ ${
     ? `Start: ${classDetails.start_time ? new Date(classDetails.start_time).toLocaleString() : ""}
 End: ${classDetails.end_time ? new Date(classDetails.end_time).toLocaleString() : ""}`
     : `Days: ${Array.isArray(classDetails.recurring_days) ? classDetails.recurring_days.join(", ") : ""}
-Start Time: ${classDetails.recurring_start_time}
-End Time: ${classDetails.recurring_end_time}`
+Start Time: ${formatTimeWithTimezone(classDetails.recurring_start_time, true)}
+End Time: ${formatTimeWithTimezone(classDetails.recurring_end_time, true)}`
 }
 `;
 

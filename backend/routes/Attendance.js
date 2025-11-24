@@ -1102,4 +1102,94 @@ router.get('/admin/get-class-attendance-by-day/:class_id', async (req, res) => {
   }
 })
 
+router.get('/history/date/:date', async (req, res) => {
+  try {
+    const { date } = req.params
+
+    if (!date) {
+      return res.status(400).json({ error: 'Missing required parameter: date' })
+    }
+
+    // Parse date (expecting YYYY-MM-DD format)
+    const queryDate = moment(date, 'YYYY-MM-DD', true)
+    if (!queryDate.isValid()) {
+      return res
+        .status(400)
+        .json({ error: 'Invalid date format. Use YYYY-MM-DD' })
+    }
+
+    // Get start and end of day for timezone-aware query
+    const startOfDay = queryDate.clone().startOf('day').toDate()
+    const endOfDay = queryDate.clone().endOf('day').toDate()
+
+    // Fetch all attendance records for the date
+    const attendanceRecords = await ClassAttendance.findAll({
+      where: {
+        date: {
+          [Op.gte]: startOfDay,
+          [Op.lte]: endOfDay,
+        },
+      },
+      include: [
+        {
+          model: ZoomClassModel,
+          attributes: [
+            'zoom_class_id',
+            'zoom_class_name',
+            'class_type',
+            'recurring_start_time',
+            'recurring_end_time',
+          ],
+        },
+      ],
+      order: [
+        ['class_id', 'ASC'],
+        ['join_time', 'ASC'],
+      ],
+      raw: true,
+    })
+
+    // Group attendance by class (by name, start_time, end_time)
+    const groupedByClass = {}
+
+    attendanceRecords.forEach((record) => {
+      const classKey = `${record['ZoomClassModel.zoom_class_name']}_${record['ZoomClassModel.recurring_start_time']}_${record['ZoomClassModel.recurring_end_time']}`
+
+      if (!groupedByClass[classKey]) {
+        groupedByClass[classKey] = {
+          class_name: record['ZoomClassModel.zoom_class_name'],
+          class_type: record['ZoomClassModel.class_type'],
+          recurring_start_time: record['ZoomClassModel.recurring_start_time'],
+          recurring_end_time: record['ZoomClassModel.recurring_end_time'],
+          total_records: 0,
+          total_attended: 0,
+          total_absent: 0,
+          attendance_records: [],
+        }
+      }
+
+      groupedByClass[classKey].total_records++
+      if (record.attendance_status === 'ATTENDED') {
+        groupedByClass[classKey].total_attended++
+      } else if (record.attendance_status === 'ABSENT') {
+        groupedByClass[classKey].total_absent++
+      }
+
+      groupedByClass[classKey].attendance_records.push(record)
+    })
+
+    const classHistory = Object.values(groupedByClass)
+
+    return res.status(200).json({
+      date: queryDate.format('YYYY-MM-DD'),
+      total_classes: classHistory.length,
+      total_attendance_records: attendanceRecords.length,
+      class_history: classHistory,
+    })
+  } catch (err) {
+    console.error('Error fetching attendance history by date:', err.message)
+    return res.status(500).json({ error: 'Failed to fetch attendance history' })
+  }
+})
+
 module.exports = router

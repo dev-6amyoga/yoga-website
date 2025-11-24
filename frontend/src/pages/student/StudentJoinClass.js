@@ -4,6 +4,7 @@ import { Fetch } from "../../utils/Fetch";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import useUserStore from "../../store/UserStore";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
+import { getLocalDateForRecurringClass } from "../../utils/TimezoneConverter";
 
 export default function StudentJoinClass() {
   const [classes, setClasses] = useState([]);
@@ -17,18 +18,8 @@ export default function StudentJoinClass() {
     if (classObj.class_type === "one_time") {
       return new Date(classObj.end_time);
     } else if (classObj.class_type === "recurring") {
-      const now = new Date();
-      const [endHour, endMinute] = classObj.recurring_end_time
-        .split(":")
-        .map(Number);
-      return new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        endHour,
-        endMinute,
-        0
-      );
+      // Convert IST time to local timezone
+      return getLocalDateForRecurringClass(classObj.recurring_end_time);
     }
   };
 
@@ -36,18 +27,8 @@ export default function StudentJoinClass() {
     if (classObj.class_type === "one_time") {
       return new Date(classObj.start_time);
     } else if (classObj.class_type === "recurring") {
-      const now = new Date();
-      const [startHour, startMinute] = classObj.recurring_start_time
-        .split(":")
-        .map(Number);
-      return new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        startHour,
-        startMinute,
-        0
-      );
+      // Convert IST time to local timezone
+      return getLocalDateForRecurringClass(classObj.recurring_start_time);
     }
   };
 
