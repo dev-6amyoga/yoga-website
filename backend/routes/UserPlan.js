@@ -257,8 +257,8 @@ router.post('/register', authenticateToken, async (req, res) => {
     is_trial,
     user_type,
   } = req.body
-  console.log('registering!!')
-  console.log(req.body)
+  //console.log('registering!!')
+  //console.log(req.body)
   if (
     !user_id ||
     !plan_id ||
@@ -298,7 +298,7 @@ router.post('/register', authenticateToken, async (req, res) => {
     },
     attributes: ['user_plan_id', 'user_id', 'validity_from', 'validity_to'],
   })
-  console.log(user_plan, 'user_plan')
+  //console.log(user_plan, 'user_plan')
 
   if (
     user_plan &&
@@ -320,7 +320,7 @@ router.post('/register', authenticateToken, async (req, res) => {
         { transaction: t }
       )
       if (!plan) throw new Error("Plan doesn't exist")
-      console.log(plan, 'plan found')
+      //console.log(plan, 'plan found')
     } else {
       throw new Error("Plan doesn't exist")
     }
@@ -334,13 +334,13 @@ router.post('/register', authenticateToken, async (req, res) => {
       { transaction: t }
     )
     if (!user) throw new Error("User doesn't exist")
-    console.log(user, 'user found')
+    //console.log(user, 'user found')
     const role = await Role.findOne({
       where: { name: user_type },
       attributes: ['role_id'],
     })
     if (!role) throw new Error("Role doesn't exist")
-    console.log(role, 'role found')
+    //console.log(role, 'role found')
     let computed_validity_to = validity_to
     if (validity_from) {
       const fromDate = new Date(validity_from)
@@ -424,7 +424,7 @@ router.post('/register', authenticateToken, async (req, res) => {
 })
 
 // router.delete("/watch-time-quota-delete-all", async (req, res) => {
-// 	console.log("in delete quota");
+// 	//console.log("in delete quota");
 // 	try {
 // 		// await WatchTimeQuota.deleteMany({});
 // 		await WatchTimeLog.deleteMany({});
@@ -574,7 +574,7 @@ router.post('/get-user-plan-by-details', async (req, res) => {
       include: [{ model: User, attributes: ['name'] }],
       order: [['validity_to', 'DESC']],
     })
-    console.log(userPlan, 'IS SENDING!')
+    //console.log(userPlan, 'IS SENDING!')
     return res.status(HTTP_OK).json({ userPlan: userPlan ? userPlan : null })
   } catch (error) {
     console.error(error)

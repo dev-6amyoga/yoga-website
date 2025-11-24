@@ -17,7 +17,7 @@ function RefundModal({ data, open, handleClose }) {
   } = useQuery({
     queryKey: ["refund-history", data?.transaction_order_id],
     queryFn: async () => {
-      console.log({ transaction_id: data?.transaction_id });
+      //console.log({ transaction_id: data?.transaction_id });
       try {
         const res = await Fetch({
           url: `/payment/refund/history`,
@@ -25,10 +25,10 @@ function RefundModal({ data, open, handleClose }) {
           data: { transaction_id: data?.transaction_id },
           token: true,
         });
-        console.log({ refunds: res?.data?.refunds });
+        //console.log({ refunds: res?.data?.refunds });
         return res?.data?.refunds;
       } catch (err) {
-        console.log(err);
+        //console.log(err);
         toast("Failed to fetch refund history", { type: "error" });
         return null;
       }
@@ -47,8 +47,8 @@ function RefundModal({ data, open, handleClose }) {
   }, [data, open]);
 
   const handleRefund = async () => {
-    console.log("Refunding...");
-    console.log(data);
+    //console.log("Refunding...");
+    //console.log(data);
     Fetch({
       url: "/payment/refund/create",
       method: "POST",
@@ -67,7 +67,7 @@ function RefundModal({ data, open, handleClose }) {
         }
       })
       .catch((err) => {
-        console.log(err);
+        //console.log(err);
         toast("Refund Failed, try again!", { type: "error" });
         getRefundHistory();
       });

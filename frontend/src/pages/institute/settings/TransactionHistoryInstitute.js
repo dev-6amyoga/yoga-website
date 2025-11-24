@@ -22,10 +22,10 @@ function TransactionHistoryInstitute() {
           data: { user_id: user?.user_id },
         });
         const data = response.data;
-        console.log(data);
+        //console.log(data);
         setTransactions(data["all_transaction_for_user"]);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     if (user) {

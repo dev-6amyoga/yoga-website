@@ -29,15 +29,15 @@ function StudentTransactionHistory() {
           data: { user_id: user?.user_id },
         });
         const data = response.data;
-        // console.log("data of transac :", data);
+        // //console.log("data of transac :", data);
         data.all_transaction_for_user.sort(
           (a, b) => new Date(b.payment_date) - new Date(a.payment_date)
         );
-        // console.log("data of transac :", data);
+        // //console.log("data of transac :", data);
 
         setTransactions(data.all_transaction_for_user);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     if (user) {
@@ -82,7 +82,7 @@ function StudentTransactionHistory() {
 
       const htmlString = await dataBuffer.text();
 
-      // console.log(htmlString);
+      // //console.log(htmlString);
 
       // const doc = new jsPDF();
 

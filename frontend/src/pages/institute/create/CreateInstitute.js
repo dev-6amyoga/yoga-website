@@ -33,7 +33,7 @@ function CreateInstitute() {
       phone: info?.phone,
       gstin: info?.gstin,
     };
-    console.log(institute);
+    //console.log(institute);
     setLoading(true);
     Fetch({
       url: "/institute/register",
@@ -50,7 +50,7 @@ function CreateInstitute() {
         setLoading(false);
       })
       .catch((err) => {
-        console.log(err);
+        //console.log(err);
         toast("Error adding institute", {
           type: "error",
         });

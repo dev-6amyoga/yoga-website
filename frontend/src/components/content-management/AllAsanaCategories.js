@@ -22,7 +22,7 @@ function AllAsanaCategories() {
   const [filteredTransitions, setFilteredTransitions] = useState([]);
   useEffect(() => {
     if (searchTerm.length > 0) {
-      console.log(searchTerm);
+      //console.log(searchTerm);
       setFilteredTransitions(
         categories.filter((transition) =>
           transition.asana_category
@@ -45,7 +45,7 @@ function AllAsanaCategories() {
         setCategories(data);
         setFilteredTransitions(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -68,7 +68,7 @@ function AllAsanaCategories() {
       }
       setDelState(false);
     } catch (error) {
-      console.log(error);
+      //console.log(error);
     }
   };
 

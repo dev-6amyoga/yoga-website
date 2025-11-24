@@ -236,7 +236,7 @@ router.post('/register', async (req, res) => {
     number_of_zoom_classes,
     plan_validity_days,
   } = req.body.planData
-  console.log(req.body)
+  //console.log(req.body)
   if (!name || !plan_user_type || !watch_time_limit)
     return res
       .status(HTTP_BAD_REQUEST)
@@ -388,7 +388,7 @@ router.delete('/deletePlan/:plan_id', async (req, res) => {
 
 router.post('/custom-plan-enquiry', async (req, res) => {
   const { user, selectedNeeds, otherNeed } = req.body
-  console.log(user, selectedNeeds, otherNeed)
+  //console.log(user, selectedNeeds, otherNeed)
 
   mailTransporter.sendMail(
     {

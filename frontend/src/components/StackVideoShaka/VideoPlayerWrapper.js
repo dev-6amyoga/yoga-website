@@ -58,20 +58,20 @@ export default function VideoPlayerWrapper({ page = "student" }) {
 
   useEffect(() => {
     const check = isMobileTablet();
-    console.log("[VideoPlayerWrapper] Is mobile or tablet:", check);
+    //console.log("[VideoPlayerWrapper] Is mobile or tablet:", check);
 
     setIsMobile(check);
   }, []);
 
   useEffect(() => {
     const detectedBrowser = detectBrowser();
-    console.log("[VideoPlayerWrapper] Detected browser:", detectedBrowser);
+    //console.log("[VideoPlayerWrapper] Detected browser:", detectedBrowser);
 
     switch (detectedBrowser) {
       case browser.unknown:
       case browser.ie:
       case browser.firefox:
-        console.log("[VideoPlayerWrapper] Setting player supported to false");
+        //console.log("[VideoPlayerWrapper] Setting player supported to false");
         setPlayerSupported(false);
         break;
       default:

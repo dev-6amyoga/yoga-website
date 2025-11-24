@@ -3,7 +3,7 @@
 // const helloWorld = async (name) => {
 // 	return new Promise((resolve) => {
 // 		setTimeout(() => {
-// 			console.log(`Hello ${name}!`);
+// 			//console.log(`Hello ${name}!`);
 // 			resolve("done");
 // 		}, 5000);
 // 	});

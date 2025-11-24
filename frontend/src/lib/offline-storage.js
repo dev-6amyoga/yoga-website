@@ -1,6 +1,6 @@
 class ShakaOfflineStore {
   constructor(storage, progressHook) {
-    console.log("[ShakaOfflineStore] Initializing ShakaOfflineStore");
+    //console.log("[ShakaOfflineStore] Initializing ShakaOfflineStore");
     this.storage = storage;
     this.usePersistentLicense = true;
     this.downloadSizeThreshold = 1024 * 1024 * 1024; // 1GB
@@ -9,7 +9,7 @@ class ShakaOfflineStore {
     this.progress = 0;
 
     this.progressHook = progressHook;
-    console.log("[ShakaOfflineStore] Configuring storage");
+    //console.log("[ShakaOfflineStore] Configuring storage");
     const storageConfig = {
       offline: {
         progressCallback: (c, p) => this.progressCallback(this, c, p),
@@ -19,7 +19,7 @@ class ShakaOfflineStore {
       },
     };
     this.storage.configure(storageConfig);
-    console.log("[ShakaOfflineStore] Storage configured");
+    //console.log("[ShakaOfflineStore] Storage configured");
   }
 
   destroy() {
@@ -29,7 +29,7 @@ class ShakaOfflineStore {
         return;
       }
 
-      console.log("[ShakaOfflineStore:destroy] Destroying storage");
+      //console.log("[ShakaOfflineStore:destroy] Destroying storage");
       this.storage.destroy();
     } catch (e) {
       console.error("[ShakaOfflineStore:destroy] Error:", e);
@@ -38,7 +38,7 @@ class ShakaOfflineStore {
 
   downloadSizeCallback(size) {
     try {
-      console.log("[ShakaOfflineStore:downloadSizeCallback]", size);
+      //console.log("[ShakaOfflineStore:downloadSizeCallback]", size);
 
       if (size > this.downloadSizeThreshold) {
         console.warn(
@@ -55,13 +55,13 @@ class ShakaOfflineStore {
   }
 
   trackSelectionCallback(tracks) {
-    console.log("[ShakaOfflineStore:trackSelectionCallback]", tracks);
+    //console.log("[ShakaOfflineStore:trackSelectionCallback]", tracks);
     return tracks;
   }
 
   progressCallback(th, content, progress) {
     try {
-      console.log("[ShakaOfflineStore:progressCallback] progress : ", progress);
+      //console.log("[ShakaOfflineStore:progressCallback] progress : ", progress);
 
       th.progress = progress;
       if (th.progressHook) {
@@ -73,15 +73,15 @@ class ShakaOfflineStore {
   }
 
   async store(uri, title, drmConfig) {
-    console.log("[ShakaOfflineStore] DRM Config obtained:", drmConfig);
+    //console.log("[ShakaOfflineStore] DRM Config obtained:", drmConfig);
     try {
       if (this.storage === null || this.storage === undefined) {
         console.error("[ShakaOfflineStore:store] Storage not initialized");
         return null;
       }
-      console.log(drmConfig, "WAS OBTAINED!");
+      //console.log(drmConfig, "WAS OBTAINED!");
       if (drmConfig) {
-        console.log("[ShakaOfflineStore] Applying DRM config...");
+        //console.log("[ShakaOfflineStore] Applying DRM config...");
         this.storage.configure({
           drm: {
             servers: {
@@ -94,13 +94,9 @@ class ShakaOfflineStore {
             },
           },
         });
-        console.log(
-          "[ShakaOfflineStore] DRM configuration applied:",
-          drmConfig
-        );
-        console.log("Storage Configuration:", this.storage);
+        //console.log("Storage Configuration:", this.storage);
       } else {
-        console.log("[ShakaOfflineStore] No DRM config provided.");
+        //console.log("[ShakaOfflineStore] No DRM config provided.");
       }
 
       const metadata = {
@@ -108,7 +104,7 @@ class ShakaOfflineStore {
         downloaded: new Date().toISOString(),
       };
 
-      console.log("[ShakaOfflineStore:store] Starting download for:", uri);
+      //console.log("[ShakaOfflineStore:store] Starting download for:", uri);
 
       const fac = await this.storage.store(
         uri,
@@ -125,10 +121,6 @@ class ShakaOfflineStore {
       );
 
       if (storedContent) {
-        console.log(
-          "[ShakaOfflineStore:store] Video successfully stored:",
-          storedContent
-        );
         return storedContent;
       } else {
         console.warn("[ShakaOfflineStore:store] Video not found after storing");

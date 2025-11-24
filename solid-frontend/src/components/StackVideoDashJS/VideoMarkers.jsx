@@ -8,12 +8,12 @@ export default function VideoMarkers() {
 
 	createEffect(
 		on([() => videoStore.currentVideo], () => {
-			console.log(
+			//console.log(
 				"currentVideo changed : ",
 				videoStore.currentVideo.video?.markers
 			);
 			if (videoStore.currentVideo) {
-				console.log("currentVideo changed : ", "SEEK QUEUE CLEARED!")
+				//console.log("currentVideo changed : ", "SEEK QUEUE CLEARED!")
 				clearSeekQueue();
 				setMarkers(videoStore.currentVideo?.video?.markers || []);
 				if (videoStore.currentVideo?.video?.markers?.length > 0) {
@@ -47,7 +47,7 @@ export default function VideoMarkers() {
 									}`}
 									onClick={() => {
 										// TODO : fix this, bug when you go to previous marker
-										console.log("CLICKED MARKER : ", idx());
+										//console.log("CLICKED MARKER : ", idx());
 										addToSeekQueue({
 											type: SEEK_TYPE_MARKER,
 											t: k.timestamp,

@@ -12,7 +12,7 @@ if (!fs.existsSync(TEMP_DIR)) {
 }
 
 const cleanUpTempDir = async () => {
-  console.log('cleaning!')
+  //console.log('cleaning!')
   const files = await promisify(fs.readdir)(TEMP_DIR)
   const now = Date.now()
 
@@ -21,7 +21,7 @@ const cleanUpTempDir = async () => {
     const stats = await promisify(fs.stat)(filePath)
 
     if (now - stats.mtimeMs > EXPIRATION_MS) {
-      console.log(`[CleanUp] Deleting expired file: ${filePath}`)
+      //console.log(`[CleanUp] Deleting expired file: ${filePath}`)
       await promisify(fs.unlink)(filePath)
     }
   }
@@ -32,11 +32,11 @@ const getVideoFromTempOrDownload = async (uri, videoTitle) => {
   const filePath = path.join(TEMP_DIR, fileName)
 
   if (fs.existsSync(filePath)) {
-    console.log(`[VideoFetch] File exists in temp: ${filePath}`)
+    //console.log(`[VideoFetch] File exists in temp: ${filePath}`)
     return filePath
   }
 
-  console.log(`[VideoFetch] Downloading video: ${uri}`)
+  //console.log(`[VideoFetch] Downloading video: ${uri}`)
   const response = await axios({
     url: uri,
     method: 'GET',
@@ -48,7 +48,7 @@ const getVideoFromTempOrDownload = async (uri, videoTitle) => {
 
   return new Promise((resolve, reject) => {
     writer.on('finish', () => {
-      console.log(`[VideoFetch] File downloaded to temp: ${filePath}`)
+      //console.log(`[VideoFetch] File downloaded to temp: ${filePath}`)
       resolve(filePath)
     })
     writer.on('error', (err) => {
@@ -75,7 +75,7 @@ const getVideoFromTempOrDownload = async (uri, videoTitle) => {
 // }
 
 // const cleanUpTempDir = async () => {
-//   console.log('cleaning!')
+//   //console.log('cleaning!')
 //   const files = await promisify(fs.readdir)(TEMP_DIR)
 //   const now = Date.now()
 
@@ -84,7 +84,7 @@ const getVideoFromTempOrDownload = async (uri, videoTitle) => {
 //     const stats = await promisify(fs.stat)(filePath)
 
 //     if (now - stats.mtimeMs > EXPIRATION_MS) {
-//       console.log(`[CleanUp] Deleting expired file: ${filePath}`)
+//       //console.log(`[CleanUp] Deleting expired file: ${filePath}`)
 //       await promisify(fs.unlink)(filePath)
 //     }
 //   }
@@ -96,21 +96,21 @@ const getVideoFromTempOrDownload = async (uri, videoTitle) => {
 
 //   // Check if the video exists in the temp directory
 //   if (fs.existsSync(filePath)) {
-//     console.log(`[VideoFetch] File exists in temp: ${filePath}`)
+//     //console.log(`[VideoFetch] File exists in temp: ${filePath}`)
 //     return filePath
 //   }
 
-//   console.log(`[VideoFetch] Downloading video: ${uri}`)
+//   //console.log(`[VideoFetch] Downloading video: ${uri}`)
 //   try {
 //     // Use ShakaOfflineStore to download and store the video
 //     let offlineUri = await shakaOfflineStore.get(uri)
 //     if (!offlineUri) {
-//       console.log(`[VideoFetch] Video not found in offline store, starting download.`)
+//       //console.log(`[VideoFetch] Video not found in offline store, starting download.`)
 
 //       // Assuming DRM or non-DRM logic handled here
 //       offlineUri = await shakaOfflineStore.store(uri, videoTitle)
 
-//       console.log(`[VideoFetch] Video stored offline at: ${offlineUri}`)
+//       //console.log(`[VideoFetch] Video stored offline at: ${offlineUri}`)
 //     }
 
 //     // After downloading, store the video in the temp directory
@@ -125,7 +125,7 @@ const getVideoFromTempOrDownload = async (uri, videoTitle) => {
 
 //     return new Promise((resolve, reject) => {
 //       writer.on('finish', () => {
-//         console.log(`[VideoFetch] File downloaded and saved to temp: ${filePath}`)
+//         //console.log(`[VideoFetch] File downloaded and saved to temp: ${filePath}`)
 //         resolve(filePath)
 //       })
 //       writer.on('error', (err) => {
@@ -143,11 +143,11 @@ const getVideoFromTempOrDownload = async (uri, videoTitle) => {
 // const loadVideo = async (videoUrl, videoTitle, shakaOfflineStore) => {
 //   try {
 //     const tempFilePath = await getVideoFromTempOrDownload(videoUrl, videoTitle, shakaOfflineStore)
-//     console.log(`[Stream] Loading video from temp: ${tempFilePath}`)
+//     //console.log(`[Stream] Loading video from temp: ${tempFilePath}`)
 
 //     // Assuming you have a video player instance (playerRef)
 //     await playerRef.current.player.load(tempFilePath)
-//     console.log('[Stream] Video loaded successfully.')
+//     //console.log('[Stream] Video loaded successfully.')
 //   } catch (error) {
 //     console.error('[Stream] Error loading video:', error)
 //   }

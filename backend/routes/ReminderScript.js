@@ -21,7 +21,7 @@ const sendReminders = async () => {
       return
     }
 
-    console.log(`Sending reminders to ${usersToNotify.length} users...`)
+    //console.log(`Sending reminders to ${usersToNotify.length} users...`)
     for (const user of usersToNotify) {
       const response = await axios.post(
         'http://localhost:4000/user/get-by-id',
@@ -63,18 +63,18 @@ const sendReminders = async () => {
               message: 'Internal server error; try again',
             })
           } else {
-            console.log(`Reminder sent to user_id: ${user.name}`)
+            //console.log(`Reminder sent to user_id: ${user.name}`)
           }
         }
       )
     }
-    console.log('All reminders sent successfully!')
+    //console.log('All reminders sent successfully!')
   } catch (error) {
     console.error('Error while sending reminders:', error.message)
   }
 }
 
 cron.schedule('0 0 * * *', () => {
-  console.log('Running reminder script: ', new Date().toLocaleTimeString())
+  //console.log('Running reminder script: ', new Date().toLocaleTimeString())
   sendReminders()
 })

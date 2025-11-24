@@ -85,7 +85,7 @@ function VideoPlayer() {
   // set player video ref
   useEffect(() => {
     if (currentVideo) {
-      console.log("SETTING PLAYER VIDEO CURRENT -> ", currentVideo);
+      //console.log("SETTING PLAYER VIDEO CURRENT -> ", currentVideo);
       playerVideo.current = currentVideo;
     } else {
       playerVideo.current = null;
@@ -102,32 +102,32 @@ function VideoPlayer() {
   }, [queue, playlistState, setCurrentVideo, setVideoState]);
 
   const handleEnd = useCallback(() => {
-    console.log("Video ended ------------------>");
+    //console.log("Video ended ------------------>");
     // check if teaching mode, loopback to previous marker
     if (viewMode === VIDEO_VIEW_TEACHING_MODE) {
       if (currentMarker && currentMarker?.loop) {
-        console.log("VIDEO END : TEACHING MODE: moving to ", currentMarker);
+        //console.log("VIDEO END : TEACHING MODE: moving to ", currentMarker);
         addToSeekQueue({
           t: currentMarker?.timestamp || 0,
           type: SEEK_TYPE_MOVE,
         });
         return;
       }
-      console.log("VIDEO END : TEACHING MODE: popping video, marker null");
+      //console.log("VIDEO END : TEACHING MODE: popping video, marker null");
       popFromQueue(0);
     } else {
-      console.log("VIDEO END : STUDENT MODE: popping video");
+      //console.log("VIDEO END : STUDENT MODE: popping video");
       // if student mode, pop from queue
       popFromQueue(0);
     }
   }, [popFromQueue, viewMode, addToSeekQueue, currentMarker]);
 
   const handleSetPlay = useCallback(() => {
-    console.log("SETTING VIDEO STATE TO PLAY ------------>");
+    //console.log("SETTING VIDEO STATE TO PLAY ------------>");
 
     if (videoState === STATE_VIDEO_PAUSED) {
       if (pauseReason === VIDEO_PAUSE_MARKER) {
-        console.log("VIDEO PLAY : PAUSE REASON MARKER");
+        //console.log("VIDEO PLAY : PAUSE REASON MARKER");
         // autoSetCurrentMarkerIdx()
         // set next marker
         setCurrentMarkerIdx((currentMarkerIdx + 1) % markersLength);
@@ -149,7 +149,7 @@ function VideoPlayer() {
   ]);
 
   const handleSetPause = useCallback(() => {
-    console.log("SETTING VIDEO STATE TO PAUSE ------------>");
+    //console.log("SETTING VIDEO STATE TO PAUSE ------------>");
     setVideoState(STATE_VIDEO_PAUSED);
   }, [setVideoState]);
 
@@ -164,7 +164,7 @@ function VideoPlayer() {
   );
 
   const handlePlaybackError = useCallback(() => {
-    console.log("Error playing video ------------------->");
+    //console.log("Error playing video ------------------->");
     setVideoState(STATE_VIDEO_ERROR);
   }, [setVideoState]);
 
@@ -176,7 +176,7 @@ function VideoPlayer() {
   }, [currentVideo, queue, setPlaylistState, setCurrentVideo]);
 
   const handleAlternatePlayPause = useCallback(() => {
-    console.log("ALTERNATE PLAY PAUSE ------------>");
+    //console.log("ALTERNATE PLAY PAUSE ------------>");
     if (videoState === STATE_VIDEO_PLAY) {
       handleSetPause();
     } else if (videoState === STATE_VIDEO_PAUSED) {

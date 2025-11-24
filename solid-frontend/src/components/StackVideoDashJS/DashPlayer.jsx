@@ -41,7 +41,7 @@ function DashPlayer(props) {
 	const [playInActive, setPlayInActive] = createSignal(false);
 	// let playInActiveTimer = null;
 
-	console.log("dashplayer! >>>>");
+	//console.log("dashplayer! >>>>");
 
 	const [
 		videoStore,
@@ -53,7 +53,7 @@ function DashPlayer(props) {
 			if (videoStore.videoEvents.length > 0 && !props.isActive) {
 				const event = videoStore.videoEvents[0];
 				if (event?.t === VIDEO_EVENT_PLAY_INACTIVE) {
-					console.log(
+					//console.log(
 						"[DASH PLAYER] : [INACTIVE] play event received"
 					);
 					setPlayInActive(true);
@@ -65,7 +65,7 @@ function DashPlayer(props) {
 
 	createEffect(
 		on([() => props.src], () => {
-			console.log("[DASH PLAYER] : setup", { src: props.src });
+			//console.log("[DASH PLAYER] : setup", { src: props.src });
 			let p = null;
 			if (props.src) {
 				p = dashjs.MediaPlayer().create();
@@ -77,10 +77,10 @@ function DashPlayer(props) {
 				p.preload();
 				// p.play();
 				setPlayerRefSet(true);
-				console.log("[DASH PLAYER] : player created");
+				//console.log("[DASH PLAYER] : player created");
 			}
 			onCleanup(() => {
-				console.log("[DASH PLAYER] Cleanup, player reset");
+				//console.log("[DASH PLAYER] Cleanup, player reset");
 				if (playerRef()) {
 					playerRef().destroy();
 				}
@@ -114,13 +114,13 @@ function DashPlayer(props) {
 		on([() => props.isActive, () => videoStore.videoState], () => {
 			if (props.isActive) {
 				if (videoStore.videoState === STATE_VIDEO_PLAY) {
-					console.log("[DASH PLAYER] Switch state : play", {
+					//console.log("[DASH PLAYER] Switch state : play", {
 						idx: props.video.idx,
 						ct: videoRef.current.currentTime,
 					});
 					playerRef().play();
 				} else if (videoStore.videoState === STATE_VIDEO_PAUSED) {
-					console.log("[DASH PLAYER] Switch state : pause", {
+					//console.log("[DASH PLAYER] Switch state : pause", {
 						idx: props.video.idx,
 						ct: videoRef.current.currentTime,
 					});
@@ -133,7 +133,7 @@ function DashPlayer(props) {
 	// createEffect(
 	// 	on([playerRefSet, () => props.src, drmSet], () => {
 	// 		if (playerRefSet() && drmSet() && props.src) {
-	// 			console.log("[DASH PLAYER] : preloading");
+	// 			//console.log("[DASH PLAYER] : preloading");
 	// 			playerRef().preload();
 	// 			playerRef().play().catch((error) => {
 	// 				console.error("Play failed");
@@ -145,7 +145,7 @@ function DashPlayer(props) {
 	// createEffect(
 	// 	on([playerRefSet, () => props.src, drmSet], () => {
 	// 		if (playerRefSet() && drmSet() && props.src) {
-	// 			console.log("[DASH PLAYER] : preloading");
+	// 			//console.log("[DASH PLAYER] : preloading");
 	// 			playerRef().preload();
 	// 			const playPromise = playerRef()
 	// 				.play()
@@ -177,7 +177,7 @@ function DashPlayer(props) {
 					streamInitialized() &&
 					(props.isActive || playInActive())
 				) {
-					console.log(
+					//console.log(
 						"[DASH PLAYER] : play video effect event",
 						props.src,
 						props.isActive,
@@ -192,12 +192,12 @@ function DashPlayer(props) {
 						videoRef.current
 							.play()
 							.then(() => {
-								console.log(
+								//console.log(
 									"[DASH PLAYER] : Video play event success from create hahahah"
 								);
 							})
 							.catch((err) => {
-								console.log(
+								//console.log(
 									"[DASH PLAYER] : Video play event failed",
 									err
 								);
@@ -209,7 +209,7 @@ function DashPlayer(props) {
 						const duration = playerRef().duration();
 						const remainingTime = duration - currentTime;
 						const inactiveVideoDuration = remainingTime - 0.1;
-						console.log(
+						//console.log(
 							"[DASH PLAYER IS NOT ACTIVE] starting event timer for playing inactive : currentTime = ",
 							currentTime,
 							"duration",
@@ -219,14 +219,14 @@ function DashPlayer(props) {
 							"inactiveVideoDuration",
 							inactiveVideoDuration
 						);
-						console.log(
+						//console.log(
 							"[DASH PLAYER] starting event timer for playing inactive @ ",
 							inactiveVideoDuration,
 							props.isActive,
 							props.video.idx
 						);
 						// playInActiveTimer = setTimeout(() => {
-						//   console.log("sending video event!");
+						//   //console.log("sending video event!");
 						//   addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
 						// }, inactiveVideoDuration * 1000);
 					}
@@ -246,22 +246,22 @@ function DashPlayer(props) {
 			],
 			() => {
 				if (playerRefSet && props.src && videoRef.current) {
-					console.log("[DASH PLAYER] : setting DRM Info");
+					//console.log("[DASH PLAYER] : setting DRM Info");
 					const check = isMobileTablet();
 					const isMobile = { done: true, check: check };
-					console.log("Checking for isMobile", isMobile);
+					//console.log("Checking for isMobile", isMobile);
 					// const store = useVideoStore.getState();
 					var playreadyKeyUrl;
 					playreadyKeyUrl = undefined;
 					// const setPlayreadyKeyUrl = videoStore.setPlayreadyKeyUrl;
-					//console.log("Fetching DRM Info");
+					////console.log("Fetching DRM Info");
 					// TODO : all asanas and transition videos must have drm_video flag
 					let drm_vid =
 						props.video?.video?.drm_video !== undefined
 							? props.video?.video?.drm_video
 							: false;
 
-					console.log("[DASH PLAYER] : drm req", {
+					//console.log("[DASH PLAYER] : drm req", {
 						isAsanaVideo: props.isAsanaVideo,
 						drm_video: drm_vid,
 						drm_req: drm_vid,
@@ -281,7 +281,7 @@ function DashPlayer(props) {
 							})
 								.then((res) => {
 									const data = res.data;
-									console.log(
+									//console.log(
 										"[DASH PLAYER] : widevine token"
 									);
 
@@ -296,7 +296,7 @@ function DashPlayer(props) {
 									}
 								})
 								.catch((err) => {
-									console.log(
+									//console.log(
 										"Error fetching DRM info :",
 										err
 									);
@@ -305,7 +305,7 @@ function DashPlayer(props) {
 						} else {
 							// Non Mobile
 							if (playreadyKeyUrl) {
-								console.log(
+								//console.log(
 									"[DASH PLAYER] : playready token cached"
 								);
 								playerRef().setProtectionData({
@@ -322,7 +322,7 @@ function DashPlayer(props) {
 								})
 									.then((res) => {
 										const data = res.data;
-										console.log(
+										//console.log(
 											"[DASH PLAYER] : playready token"
 										);
 										if (
@@ -338,7 +338,7 @@ function DashPlayer(props) {
 														data.token,
 												},
 											});
-											console.log(
+											//console.log(
 												"[DASH PLAYER] : playready token caching now!"
 											);
 											setPlayreadyKeyUrl(
@@ -350,7 +350,7 @@ function DashPlayer(props) {
 										}
 									})
 									.catch((err) => {
-										console.log(
+										//console.log(
 											"Error fetching DRM info :",
 											err
 										);
@@ -359,7 +359,7 @@ function DashPlayer(props) {
 							}
 						}
 					} else {
-						console.log("[DASH PLAYER] : transition video");
+						//console.log("[DASH PLAYER] : transition video");
 						setDrmSet(true);
 					}
 				}
@@ -368,8 +368,8 @@ function DashPlayer(props) {
 	);
 
 	const onMetadataLoaded = () => {
-		console.log("[DASH PLAYER] : metadata loaded event");
-		console.log(
+		//console.log("[DASH PLAYER] : metadata loaded event");
+		//console.log(
 			"[DASH PLAYER] : metadata event setting duration : ",
 			playerRef().duration(),
 			videoRef.current.duration
@@ -380,7 +380,7 @@ function DashPlayer(props) {
 
 	const onPlaybackNotAllowed = () => {
 		if (playerRef() && isActive) {
-			console.log("[DASH PLAYER] : playback not allowed");
+			//console.log("[DASH PLAYER] : playback not allowed");
 			playerRef().setMute(true);
 			playerRef().initialize(videoRef.current, props.src, true, 0.0);
 			playerRef().setMute(false);
@@ -388,13 +388,13 @@ function DashPlayer(props) {
 	};
 
 	const onStreamInitialized = () => {
-		console.log("[DASH PLAYER] : stream initialized");
+		//console.log("[DASH PLAYER] : stream initialized");
 		setStreamInitialized(true);
 	};
 
 	const onCanPlay = () => {
 		if (!props.isActive) {
-			console.log("[DASH PLAYER] : onCanPlay event");
+			//console.log("[DASH PLAYER] : onCanPlay event");
 			playerRef().pause();
 		}
 
@@ -404,7 +404,7 @@ function DashPlayer(props) {
 	};
 
 	const onPlay = () => {
-		console.log(
+		//console.log(
 			"[DASH PLAYER] handlePlay event called",
 			props.isActive,
 			props.video.idx
@@ -412,7 +412,7 @@ function DashPlayer(props) {
 
 		if (props.isActive) {
 			if (videoStore.videoState !== STATE_VIDEO_PLAY) {
-				console.log(
+				//console.log(
 					"PLAYING ----------------------------->",
 					props.video.idx
 				);
@@ -428,7 +428,7 @@ function DashPlayer(props) {
 			const remainingTime = duration - currentTime;
 			const inactiveVideoDuration = remainingTime - 0.1;
 
-			console.log(
+			//console.log(
 				"[DASH PLAYER IS ACTIVE] starting event timer for playing inactive : currentTime = ",
 				currentTime,
 				"duration",
@@ -438,14 +438,14 @@ function DashPlayer(props) {
 				"inactiveVideoDuration",
 				inactiveVideoDuration
 			);
-			console.log(
+			//console.log(
 				"[DASH PLAYER] starting event timer for playing inactive @ ",
 				inactiveVideoDuration,
 				props.isActive,
 				props.video.idx
 			);
 			// playInActiveTimer = setTimeout(() => {
-			//   console.log("sending video event!");
+			//   //console.log("sending video event!");
 			//   addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
 			// }, inactiveVideoDuration * 1000);
 		}
@@ -454,7 +454,7 @@ function DashPlayer(props) {
 	const onPause = () => {
 		if (props.isActive) {
 			if (videoStore.videoState !== STATE_VIDEO_PAUSED) {
-				console.log(
+				//console.log(
 					"PAUSING ----------------------------->",
 					props.video.idx
 				);
@@ -469,7 +469,7 @@ function DashPlayer(props) {
 	};
 
 	const onWaiting = () => {
-		console.log("[DASH PLAYER] : onWaiting event");
+		//console.log("[DASH PLAYER] : onWaiting event");
 
 		if (props.isActive) {
 			setVideoState(STATE_VIDEO_LOADING);
@@ -496,7 +496,7 @@ function DashPlayer(props) {
 			],
 			() => {
 				if (playerRefSet() && props.src && videoRef.current) {
-					console.log("[DASH PLAYER] : setting up event listeners");
+					//console.log("[DASH PLAYER] : setting up event listeners");
 					playerRef().on(
 						dashjs.MediaPlayer.events.CAN_PLAY_THROUGH,
 						props.onCanPlayThrough
@@ -559,7 +559,7 @@ function DashPlayer(props) {
 				}
 
 				return () => {
-					console.log("[DASH PLAYER] switching off event listeners");
+					//console.log("[DASH PLAYER] switching off event listeners");
 					playerRef().off(
 						dashjs.MediaPlayer.events.CAN_PLAY_THROUGH,
 						props.onCanPlayThrough
@@ -618,13 +618,13 @@ function DashPlayer(props) {
 	);
 
 	const setVideoRef = (element) => {
-		console.log("[DASH PLAYER] SETTING REF >>>>>>>>>>>>>");
+		//console.log("[DASH PLAYER] SETTING REF >>>>>>>>>>>>>");
 		videoRef.current = element;
 	};
 
 	createEffect(
 		on([playerRefSet, playerRef], () => {
-			console.log("[DASH PLAYER] : platyerRefChanged", playerRefSet());
+			//console.log("[DASH PLAYER] : platyerRefChanged", playerRefSet());
 			if (playerRefSet()) {
 				props.ref({
 					player: playerRef(),

@@ -13,7 +13,7 @@ export default function ChangePassword() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = getFormData(e);
-    // console.log(formData);
+    // //console.log(formData);
 
     Fetch({
       url: "/user/update-password",

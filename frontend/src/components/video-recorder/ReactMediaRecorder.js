@@ -60,7 +60,7 @@ export function useReactMediaRecorder({
         const stream = await window.navigator.mediaDevices.getDisplayMedia({
           video: video || true,
         });
-        // console.log("video tracks", stream.getVideoTracks());
+        // //console.log("video tracks", stream.getVideoTracks());
         stream.getVideoTracks()[0].addEventListener("ended", () => {
           stopRecording();
         });
@@ -196,15 +196,15 @@ export function useReactMediaRecorder({
       blobPropertyBag || (video ? { type: "video/mp4" } : { type: "audio/wav" })
     );
 
-    // console.log(data, blobProperty);
+    // //console.log(data, blobProperty);
 
     const blob = new Blob([data], blobProperty);
     const url = URL.createObjectURL(blob);
 
     setMediaBlobUrl(() => url);
 
-    console.log("Chunk of data received; Total size: ", data.size, "bytes");
-    // console.log("total chunks: ", mediaChunks.current.length);
+    //console.log("Chunk of data received; Total size: ", data.size, "bytes");
+    // //console.log("total chunks: ", mediaChunks.current.length);
 
     onDataAvailable(url, blob);
   };
@@ -220,9 +220,9 @@ export function useReactMediaRecorder({
   };
 
   const onRecordingStop = () => {
-    // console.log("onRecordingStop", mediaChunks.current.length);
+    // //console.log("onRecordingStop", mediaChunks.current.length);
     // // const [chunk] = mediaChunks.current;
-    // // console.log("chunk", chunk);
+    // // //console.log("chunk", chunk);
     // const blobProperty = Object.assign(
     // 	// { type: chunk.type },
     // 	blobPropertyBag ||

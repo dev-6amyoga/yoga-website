@@ -7,58 +7,55 @@ import { createStore, reconcile } from "solid-js/store";
 import { createStore as createZustandStore } from "zustand/vanilla";
 
 function useStore(api, selector, equalityFn) {
-	if (selector === void 0) {
-		selector = api.getState;
-	}
-	var initialValue = selector(api.getState());
+  if (selector === void 0) {
+    selector = api.getState;
+  }
+  var initialValue = selector(api.getState());
 
-	var [state, setState] = createStore(initialValue);
+  var [state, setState] = createStore(initialValue);
 
-	var listener = function (nextState, previousState) {
-		var prevStateSlice = selector(previousState);
-		var nextStateSlice = selector(nextState);
+  var listener = function (nextState, previousState) {
+    var prevStateSlice = selector(previousState);
+    var nextStateSlice = selector(nextState);
 
-		if (equalityFn !== undefined) {
-			const eq = equalityFn(prevStateSlice, nextStateSlice);
-			console.log({ eq, prevStateSlice, nextStateSlice });
-			if (!eq) {
-				// const r = reconcile(nextStateSlice);
-				// console.log({ nextStateSlice });
-				setState(nextStateSlice);
-			}
-		} else {
-			setState(reconcile(nextStateSlice));
-		}
-	};
+    if (equalityFn !== undefined) {
+      const eq = equalityFn(prevStateSlice, nextStateSlice);
+      if (!eq) {
+        setState(nextStateSlice);
+      }
+    } else {
+      setState(reconcile(nextStateSlice));
+    }
+  };
 
-	var unsubscribe = api.subscribe(listener);
+  var unsubscribe = api.subscribe(listener);
 
-	onCleanup(function () {
-		return unsubscribe();
-	});
+  onCleanup(function () {
+    return unsubscribe();
+  });
 
-	return state;
+  return state;
 }
 
 // export const useStore = useStore;
 
 function createImpl(createState) {
-	var api =
-		typeof createState === "function"
-			? createZustandStore(createState)
-			: createState;
+  var api =
+    typeof createState === "function"
+      ? createZustandStore(createState)
+      : createState;
 
-	var useBoundStore = function (selector, equalityFn) {
-		return useStore(api, selector, equalityFn);
-	};
+  var useBoundStore = function (selector, equalityFn) {
+    return useStore(api, selector, equalityFn);
+  };
 
-	Object.assign(useBoundStore, api);
+  Object.assign(useBoundStore, api);
 
-	return useBoundStore;
+  return useBoundStore;
 }
 
 var create = function (createState) {
-	return createState ? createImpl(createState) : createImpl;
+  return createState ? createImpl(createState) : createImpl;
 };
 
 export default create;

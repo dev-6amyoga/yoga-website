@@ -110,7 +110,7 @@ function StudentNavMUI() {
         const activePlan = userPlans.find(
           (plan) => plan.current_status === USER_PLAN_ACTIVE
         );
-        console.log(activePlan);
+        //console.log(activePlan);
         if (!activePlan) {
           setDisabled(true);
           setDisabledTailorMade(true);
@@ -126,7 +126,7 @@ function StudentNavMUI() {
         );
         setDisabled(!activePlan.plan.has_basic_playlist);
         setHasZoomClasses(!activePlan.plan.has_zoom_classes);
-        console.log(hasZoomClasses);
+        //console.log(hasZoomClasses);
       } catch (error) {
         setDisabled(true);
         setDisabledTailorMade(true);

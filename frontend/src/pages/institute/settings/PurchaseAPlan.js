@@ -270,13 +270,13 @@ function PurchaseAPlan() {
       setCurrentStatus(USER_PLAN_ACTIVE);
       var today = new Date();
       updatedValidityString = today?.toISOString();
-      console.log("New plan starts from date:", updatedValidityString);
+      //console.log("New plan starts from date:", updatedValidityString);
     } else if (userPlan.length === 1) {
       setCurrentStatus(USER_PLAN_STAGED);
       var validityDate = new Date(userPlan[0].validity_to);
       validityDate.setDate(validityDate.getDate() + 1);
       updatedValidityString = validityDate?.toISOString();
-      console.log("New plan validity from date:", updatedValidityString);
+      //console.log("New plan validity from date:", updatedValidityString);
     } else {
       var highestValidityDate = null;
       setCurrentStatus(USER_PLAN_STAGED);
@@ -293,9 +293,9 @@ function PurchaseAPlan() {
       if (highestValidityDate !== null) {
         highestValidityDate.setDate(highestValidityDate.getDate() + 1);
         updatedValidityString = highestValidityDate?.toISOString();
-        console.log("New plan validity from date:", updatedValidityString);
+        //console.log("New plan validity from date:", updatedValidityString);
       } else {
-        console.log("No valid validity_to dates found.");
+        //console.log("No valid validity_to dates found.");
       }
     }
     return updatedValidityString;
@@ -308,10 +308,10 @@ function PurchaseAPlan() {
       });
 
       setAllCurrencies(response?.data?.currencies);
-      console.log("Fetching currencies");
+      //console.log("Fetching currencies");
     } catch (error) {
       toast("Error fetching plans", { type: "error" });
-      console.log(error);
+      //console.log(error);
     }
   }, []);
 
@@ -323,7 +323,7 @@ function PurchaseAPlan() {
       const data = response.data;
       setAllPlans(data["plans"]);
     } catch (error) {
-      console.log(error);
+      //console.log(error);
     }
   }, []);
 
@@ -373,7 +373,7 @@ function PurchaseAPlan() {
       });
 
       if (res.status === 200) {
-        console.log(res.data);
+        //console.log(res.data);
         setDiscountCoupon(res.data.discount_coupon);
         setDiscountCouponApplied(true);
         return null;
@@ -381,7 +381,7 @@ function PurchaseAPlan() {
 
       return new Error("Invalid discount coupon");
     } catch (err) {
-      console.log(err);
+      //console.log(err);
       return new Error("Invalid discount coupon");
     }
   };
@@ -389,7 +389,7 @@ function PurchaseAPlan() {
   const registerUserPlan = async (t1) => {
     toBeRegistered.transaction_order_id = t1;
     toBeRegistered.institute_id = currentInstituteId;
-    console.log(toBeRegistered);
+    //console.log(toBeRegistered);
     AssignPlans(
       currentInstituteId,
       cardData.plan_id,
@@ -414,7 +414,7 @@ function PurchaseAPlan() {
     //     toast(errorData.error, { type: "error" });
     //   }
     // } catch (error) {
-    //   console.log(error);
+    //   //console.log(error);
     //   toast("Error registering plan", { type: "error" });
     // }
 
@@ -423,7 +423,7 @@ function PurchaseAPlan() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("in handle submit");
+    //console.log("in handle submit");
     if (!user) {
       toast("Please login to continue", { type: "error" });
       return;
@@ -503,7 +503,7 @@ function PurchaseAPlan() {
         toast(response.data?.message);
       }
     } catch (error) {
-      console.log(error);
+      //console.log(error);
       toast("Error setting up order, try again", { type: "error" });
     }
   };
@@ -564,7 +564,7 @@ function PurchaseAPlan() {
           },
         });
         const data = response.data;
-        console.log("DATA IS :", data);
+        //console.log("DATA IS :", data);
 
         if (data?.userplans.length !== 0) {
           setMyPlans(data?.userplans);
@@ -588,7 +588,7 @@ function PurchaseAPlan() {
           toast("You don't have a plan yet! Purchase one to continue");
         }
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     if (user && currentInstituteId && currentInstituteId !== -1) {

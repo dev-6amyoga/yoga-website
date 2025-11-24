@@ -19,7 +19,7 @@ const VideoPreview = ({ stream }) => {
   const videoRef = useRef(null);
   const fullScreen = useVideoStore((state) => state.fullScreen);
   useEffect(() => {
-    console.log("stream changed", stream);
+    //console.log("stream changed", stream);
     if (videoRef.current && stream) {
       videoRef.current.srcObject = stream;
     }
@@ -62,11 +62,11 @@ const Recorder = ({
   useEffect(() => {
     let interval = null;
     if (recordingStart && recordingPlaying) {
-      console.log("[requestData Interval] : Setting interval");
+      //console.log("[requestData Interval] : Setting interval");
       interval = setInterval(
         () => {
           if (requestData) {
-            console.log("[requestData Interval] : Requesting data");
+            //console.log("[requestData Interval] : Requesting data");
             requestData();
           }
         },
@@ -322,7 +322,7 @@ const VideoRecorder = () => {
       const blb = new Blob([videoBlob]);
 
       const url = window.URL.createObjectURL(blb);
-      console.log(blobUrl, videoBlob);
+      //console.log(blobUrl, videoBlob);
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", `video-${new Date().toISOString()}.mp4`);
@@ -345,7 +345,7 @@ const VideoRecorder = () => {
         memLevel: 9,
       }).buffer;
 
-      // console.log(compressedBuffer.byteLength);
+      // //console.log(compressedBuffer.byteLength);
 
       // compressed.getReader().read()
 
@@ -382,7 +382,7 @@ const VideoRecorder = () => {
       });
       // toast.success("Video Downloaded");
     } catch (error) {
-      console.log(error);
+      //console.log(error);
       toast.error("Failed to upload video");
     }
   };
@@ -481,7 +481,7 @@ const VideoRecorder = () => {
       });
       videoSessionCountRef.current += 1;
     } catch (error) {
-      console.log(error);
+      //console.log(error);
       toast.error("Failed to upload video");
     }
   };
@@ -490,20 +490,16 @@ const VideoRecorder = () => {
     navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
     navigator.mediaDevices.enumerateDevices().then((devices) => {
-      devices.forEach((device) => {
-        console.log(
-          device.kind + ": " + device.label + " id = " + device.deviceId
-        );
-      });
+      devices.forEach((device) => {});
     });
   }, []);
 
   const getAllAudioVideoDevices = (successCallback, failureCallback) => {
-    console.log("[] 1");
+    //console.log("[] 1");
 
     if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
       // Firefox 38+, Microsoft Edge, and Chrome 44+ seems having support of enumerateDevices
-      console.log("[] 1.1");
+      //console.log("[] 1.1");
       navigator.enumerateDevices = function (callback) {
         navigator.mediaDevices.enumerateDevices().then(callback);
       };
@@ -514,7 +510,7 @@ const VideoRecorder = () => {
       window.MediaStreamTrack &&
       window.MediaStreamTrack.getSources
     ) {
-      console.log("[] 2");
+      //console.log("[] 2");
       navigator.enumerateDevices = window.MediaStreamTrack.getSources.bind(
         window.MediaStreamTrack
       );
@@ -524,13 +520,13 @@ const VideoRecorder = () => {
       !navigator.enumerateDevices &&
       navigator.mediaDevices.enumerateDevices
     ) {
-      console.log("[] 3");
+      //console.log("[] 3");
       navigator.enumerateDevices =
         navigator.mediaDevices.enumerateDevices.bind(navigator);
     }
 
     if (!navigator.enumerateDevices) {
-      console.log("[] 4 fail");
+      //console.log("[] 4 fail");
       failureCallback(
         null,
         "Neither navigator.mediaDevices.enumerateDevices NOR MediaStreamTrack.getSources are available."
@@ -589,8 +585,8 @@ const VideoRecorder = () => {
         }
       });
 
-      console.log("[] 5");
-      // console.log({
+      //console.log("[] 5");
+      // //console.log({
       // 	videoInputDevices,
       // 	audioInputDevices,
       // });
@@ -604,13 +600,8 @@ const VideoRecorder = () => {
   useEffect(() => {
     getAllAudioVideoDevices(
       (d) => {
-        console.log(d);
+        //console.log(d);
         setDevices(d);
-        console.log(
-          d.audioInputDevices.find((d) =>
-            String(d.label).toLowerCase().includes("default")
-          )
-        );
         setChosenAudioDevice(
           d.audioInputDevices.length > 0
             ? d?.audioInputDevices?.find((div) =>
@@ -719,7 +710,7 @@ const VideoRecorder = () => {
             label="Audio Device"
             defaultValue={chosenAudioDevice}
             onChange={(e) => {
-              console.log("audio device", e.target.value);
+              //console.log("audio device", e.target.value);
               setChosenAudioDevice(e.target.value);
             }}
           >
@@ -738,7 +729,7 @@ const VideoRecorder = () => {
             label="Video Device"
             defaultValue={chosenVideoDevice}
             onChange={(e) => {
-              console.log("video device", e.target.value);
+              //console.log("video device", e.target.value);
               setChosenVideoDevice(e.target.value);
             }}
           >

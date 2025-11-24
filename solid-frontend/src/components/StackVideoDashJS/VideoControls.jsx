@@ -59,10 +59,10 @@ function VideoControls(props) {
 	] = useVideoStoreContext();
 
 	const handlePlay = () => {
-		console.log("SETTING VIDEO STATE TO PLAY ------------>");
+		//console.log("SETTING VIDEO STATE TO PLAY ------------>");
 		if (videoStore.videoState === STATE_VIDEO_PAUSED) {
 			if (videoStore.pauseReason === VIDEO_PAUSE_MARKER) {
-				console.log("VIDEO PLAY : PAUSE REASON MARKER");
+				//console.log("VIDEO PLAY : PAUSE REASON MARKER");
 				setCurrentMarkerIdx((prevIdx) =>
 					prevIdx + 1 > videoStore.markers.length - 1
 						? 0
@@ -85,7 +85,7 @@ function VideoControls(props) {
 	);
 
 	const handlePause = () => {
-		console.log("SETTING VIDEO STATE TO PAUSE ------------>");
+		//console.log("SETTING VIDEO STATE TO PAUSE ------------>");
 		setVideoState(STATE_VIDEO_PAUSED);
 	};
 
@@ -102,14 +102,14 @@ function VideoControls(props) {
 	};
 
 	const handlePrevMarker = () => {
-		console.log("Prev Marker");
+		//console.log("Prev Marker");
 		if (videoStore.markers.length > 0) {
 			const idx = (videoStore.currentMarkerIdx || 0) - 1;
-			console.log("SETTING MARKER ID :", idx);
+			//console.log("SETTING MARKER ID :", idx);
 			if (idx <= 0) {
 				setCurrentMarkerIdx(null);
 				popFromArchive(-1);
-				// console.log("end reached");
+				// //console.log("end reached");
 				return;
 			}
 			// seek to prev marker
@@ -127,17 +127,17 @@ function VideoControls(props) {
 	};
 
 	const handleNextMarker = () => {
-		console.log("Next Marker");
+		//console.log("Next Marker");
 		if (videoStore.markers.length > 0) {
 			const idx = (videoStore.currentMarkerIdx || 0) + 1;
 
 			if (idx >= videoStore.markers.length) {
 				popFromQueue(0);
-				// console.log("end reached");
+				// //console.log("end reached");
 				return;
 			}
 
-			console.log("SETTING MARKER ID :", idx);
+			//console.log("SETTING MARKER ID :", idx);
 			setCurrentMarkerIdx(idx);
 			// seek to next marker
 			addToSeekQueue({
@@ -339,7 +339,7 @@ function VideoControls(props) {
 						class="hidden w-0 accent-orange-500 opacity-0 transition-all duration-300 group-hover:w-20 xl:group-hover:w-28 group-hover:opacity-100 md:block"
 						ref={volumeSliderRef}
 						onChange={(e) => {
-							console.log(
+							//console.log(
 								"[VIDEO CONTROLS] VOLUME : ",
 								parseFloat(e.target.value)
 							);

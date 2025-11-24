@@ -115,7 +115,7 @@ router.get('/temp', async (req, res) => {
         .send(buffer)
     })
     .catch((err) => {
-      console.log(err)
+      //console.log(err)
       return res.status(500).send()
     })
 })
@@ -189,7 +189,7 @@ router.post('/student/plan', async (req, res) => {
   //       .send(buffer);
   //   })
   //   .catch((err) => {
-  //     console.log(err);
+  //     //console.log(err);
   //     return res.status(500).send();
   //   });
 })
@@ -233,13 +233,13 @@ router.post('/student/mail-', async (req, res) => {
         .json({ message: 'User plan not found' })
     }
 
-    // console.log(userPlan.custom_plan_id);
+    // //console.log(userPlan.custom_plan_id);
 
     const plan = await CustomPlan.findOne({
       _id: userPlan.custom_plan_id,
     })
 
-    // console.log(plan.prices);
+    // //console.log(plan.prices);
 
     details = {
       user: user.toJSON(),
@@ -327,7 +327,7 @@ router.post('/student/mail-', async (req, res) => {
 			);
 		})
 		.catch((err) => {
-			console.log(err);
+			//console.log(err);
 			return res.status(500).send();
 		});
 	*/
@@ -336,7 +336,7 @@ router.post('/student/mail-', async (req, res) => {
 })
 
 router.post('/student/notify-admin', async (req, res) => {
-  console.log('in notify admin!')
+  //console.log('in notify admin!')
   const { user_id, transaction_order_id, plan_type } = req.body
   if (!user_id || !transaction_order_id) {
     return res
@@ -376,7 +376,7 @@ router.post('/student/notify-admin', async (req, res) => {
       _id: userPlan.custom_plan_id,
     })
 
-    // console.log(plan.prices);
+    // //console.log(plan.prices);
     details = {
       user: user.toJSON(),
       transaction: transaction.toJSON(),

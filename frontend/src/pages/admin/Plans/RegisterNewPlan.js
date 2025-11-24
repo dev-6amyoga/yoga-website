@@ -51,7 +51,7 @@ function RegisterNewPlan() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting plan data:", planData);
+    //console.log("Submitting plan data:", planData);
     try {
       Fetch({
         url: "/plan/register",
@@ -63,7 +63,7 @@ function RegisterNewPlan() {
           navigate("/admin/plan/view-all");
         })
         .catch((err) => {
-          console.log("Something went wrong", { type: "error" });
+          //console.log("Something went wrong", { type: "error" });
         });
     } catch (error) {
       console.error(error);

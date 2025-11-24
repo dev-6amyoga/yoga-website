@@ -35,14 +35,14 @@ export default function Video() {
 			],
 			() => {
 				const handlePrevMarker = () => {
-					console.log("Prev Marker");
+					//console.log("Prev Marker");
 					if (videoStore.markers.length > 0) {
 						const idx = (videoStore.currentMarkerIdx || 0) - 1;
-						console.log("SETTING MARKER ID :", idx);
+						//console.log("SETTING MARKER ID :", idx);
 						if (idx <= 0) {
 							setCurrentMarkerIdx(null);
 							popFromArchive(-1);
-							// console.log("end reached");
+							// //console.log("end reached");
 							return;
 						}
 						// seek to prev marker
@@ -60,17 +60,17 @@ export default function Video() {
 				};
 
 				const handleNextMarker = () => {
-					console.log("Next Marker");
+					//console.log("Next Marker");
 					if (videoStore.markers.length > 0) {
 						const idx = (videoStore.currentMarkerIdx || 0) + 1;
 
 						if (idx >= videoStore.markers.length) {
 							popFromQueue(0);
-							// console.log("end reached");
+							// //console.log("end reached");
 							return;
 						}
 
-						console.log("SETTING MARKER ID :", idx);
+						//console.log("SETTING MARKER ID :", idx);
 						setCurrentMarkerIdx(idx);
 						// seek to next marker
 						addToSeekQueue({
@@ -84,7 +84,7 @@ export default function Video() {
 
 				// for hand held pointer
 				const handleKeyDown = (event) => {
-					console.log(event.key, "HI I AM KEY");
+					//console.log(event.key, "HI I AM KEY");
 
 					// TODO : fix playlist state when start is clicked
 					if (
@@ -101,14 +101,14 @@ export default function Video() {
 							if (
 								videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE
 							) {
-								console.log("Move to prev video");
+								//console.log("Move to prev video");
 								popFromArchive(-1);
 							} else if (
 								videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE
 							) {
 								//
-								console.log("Move to prev marker");
-								// console.log(
+								//console.log("Move to prev marker");
+								// //console.log(
 								// 	videoStore.markers,
 								// 	videoStore.currentMarkerIdx
 								// );
@@ -121,13 +121,13 @@ export default function Video() {
 							if (
 								videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE
 							) {
-								console.log("Move to next video");
+								//console.log("Move to next video");
 								popFromQueue(0);
 							} else if (
 								videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE
 							) {
-								console.log("Move to next marker");
-								// console.log(
+								//console.log("Move to next marker");
+								// //console.log(
 								// 	videoStore.markers,
 								// 	videoStore.currentMarkerIdx
 								// );
@@ -141,14 +141,14 @@ export default function Video() {
 							if (
 								videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE
 							) {
-								console.log("Move to prev video");
+								//console.log("Move to prev video");
 								popFromArchive(-1);
 							} else if (
 								videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE
 							) {
 								//
-								console.log("Move to prev marker");
-								// console.log(
+								//console.log("Move to prev marker");
+								// //console.log(
 								// 	videoStore.markers,
 								// 	videoStore.currentMarkerIdx
 								// );
@@ -160,13 +160,13 @@ export default function Video() {
 							if (
 								videoStore.viewMode === VIDEO_VIEW_STUDENT_MODE
 							) {
-								console.log("Move to next video");
+								//console.log("Move to next video");
 								popFromQueue(0);
 							} else if (
 								videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE
 							) {
-								console.log("Move to next marker");
-								// console.log(
+								//console.log("Move to next marker");
+								// //console.log(
 								// 	videoStore.markers,
 								// 	videoStore.currentMarkerIdx
 								// );
@@ -176,7 +176,7 @@ export default function Video() {
 						default:
 							break;
 					}
-					// console.log("keyDown", event);
+					// //console.log("keyDown", event);
 				};
 
 				document.addEventListener("keydown", handleKeyDown);
@@ -202,7 +202,7 @@ export default function Video() {
 	createEffect(() => {
 		const handleFullscreenExit = (event) => {
 			if (!document.fullscreenElement) {
-				console.log("FULL SCREEN EXIT");
+				//console.log("FULL SCREEN EXIT");
 				setFullScreen(false);
 			}
 		};
@@ -228,7 +228,7 @@ export default function Video() {
 	});
 	
 	createEffect(() => {
-		console.log("Disable watch history");
+		//console.log("Disable watch history");
 		setEnableWatchHistory(false);
 	});
 

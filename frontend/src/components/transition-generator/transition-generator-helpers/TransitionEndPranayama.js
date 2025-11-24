@@ -509,7 +509,7 @@ export const TransitionEndPranayama = async (
     const transitionIds = pending_2.map(
       (transition) => transition.transition_id
     );
-    console.log(transitionIds);
+    //console.log(transitionIds);
     if (break_status_start === "Break" && break_status_end === "Break") {
       const transition_1 = filteredTransitions_all.filter(
         (transition) =>
@@ -543,7 +543,7 @@ export const TransitionEndPranayama = async (
         result.push(t2.transition_id);
       }
       result.push(...transitionIds);
-      console.log(result);
+      //console.log(result);
       return result;
     }
     if (break_status_start === "No Break" && break_status_end === "Break") {

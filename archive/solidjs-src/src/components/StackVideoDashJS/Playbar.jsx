@@ -46,10 +46,10 @@ function draggable(el, value) {
 			dragBounds = el.parentNode.getBoundingClientRect();
 			el.parentNode.style["user-select"] = "none";
 			el.style["user-select"] = "none";
-			// console.log({ dragBounds });
+			// //console.log({ dragBounds });
 		}
 
-		// console.log(
+		// //console.log(
 		// 	e.clientX,
 		// 	e.clientY,
 		// 	targetBounds,
@@ -65,7 +65,7 @@ function draggable(el, value) {
 			e.clientY > targetBounds.top &&
 			e.clientY < targetBounds.bottom
 		) {
-			console.log("ACTIVE");
+			//console.log("ACTIVE");
 			active = true;
 			if (onDragStart) onDragStart();
 		}
@@ -73,7 +73,7 @@ function draggable(el, value) {
 
 	const handlePointerUp = (e) => {
 		active = false;
-		console.log("INACTIVE");
+		//console.log("INACTIVE");
 		el.parentNode.style["user-select"] = "auto";
 		el.style["user-select"] = "auto";
 
@@ -120,12 +120,12 @@ export default function Playbar() {
 	const [dragX, setDragX] = createSignal(0);
 
 	const handleOnDrag = (e) => {
-		// console.log(e);
+		// //console.log(e);
 		setDragX(e.offsetX);
 	};
 
 	const handleOnDragEnd = (e) => {
-		console.log(e);
+		//console.log(e);
 	};
 
 	return (

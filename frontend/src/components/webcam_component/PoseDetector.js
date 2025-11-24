@@ -22,12 +22,12 @@ export default function PoseDetector() {
     enableCam();
   }, []);
   useEffect(() => {
-    console.log("currentVideo", currentVideo?.video?._id);
+    //console.log("currentVideo", currentVideo?.video?._id);
     if (
       currentVideo &&
       currentVideo?.video?._id === "66784b0997a55a067a4c2f2e"
     ) {
-      console.log("enable score");
+      //console.log("enable score");
       enableScore.current = true;
     } else {
       enableScore.current = false;
@@ -38,7 +38,7 @@ export default function PoseDetector() {
 
   useEffect(() => {
     if (!workerRef.current) {
-      console.log("Worker setup");
+      //console.log("Worker setup");
       workerRef.current = new Worker(
         new URL("./landmarkerWorker.js", import.meta.url)
       );
@@ -61,7 +61,7 @@ export default function PoseDetector() {
             console.error("Error in worker message:", error);
           }
         } else if (type === "init-complete") {
-          console.log("[POSE DETECTOR] init complete");
+          //console.log("[POSE DETECTOR] init complete");
         }
       };
       const offscreen = canvasRef.current.transferControlToOffscreen();

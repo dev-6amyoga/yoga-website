@@ -51,7 +51,7 @@ const useVideoStore = createWithStore((set) => ({
 	autoSetCurrentMarkerIdx: (currentTime = undefined) => {
 		set((state) => {
 			let ct = currentTime ?? state.currentTime;
-			// console.log('autoSetCurrentMarkerIdx :', currentTime, '==>', ct)
+			// //console.log('autoSetCurrentMarkerIdx :', currentTime, '==>', ct)
 			// let prevIdx = state.currentMarkerIdx
 
 			// if no markers, dont bother
@@ -66,7 +66,7 @@ const useVideoStore = createWithStore((set) => ({
 
 			// find the first marker that is greater than the current time
 			const idx = state.markers.findIndex((m) => m.timestamp > ct) - 1;
-			// console.log("autoSetCurrentMarkerIdx :", idx, ct);
+			// //console.log("autoSetCurrentMarkerIdx :", idx, ct);
 
 			// if the current time is greater than the last marker, set to last marker
 			if (idx === -2) {
@@ -121,7 +121,7 @@ const useVideoStore = createWithStore((set) => ({
 	seekQueue: [],
 	addToSeekQueue: (seekEvent) =>
 		set((state) => {
-			// console.log(state.seekQueue, seekTime)
+			// //console.log(state.seekQueue, seekTime)
 			// {type: move | seek, time: number}
 			return {
 				seekQueue: [...state.seekQueue, seekEvent],
@@ -134,7 +134,7 @@ const useVideoStore = createWithStore((set) => ({
 			if (state.seekQueue.length > index) {
 				const sq = [...state.seekQueue];
 				sq.splice(index, 1);
-				// console.log(q, "in func after splice");
+				// //console.log(q, "in func after splice");
 				return {
 					seekQueue: sq,
 				};
@@ -259,7 +259,7 @@ export const VideoStoreProvider = (props) => {
 				setStore(
 					produce((state) => {
 						let ct = currentTime ?? state.currentTime;
-						// console.log('autoSetCurrentMarkerIdx :', currentTime, '==>', ct)
+						// //console.log('autoSetCurrentMarkerIdx :', currentTime, '==>', ct)
 						// let prevIdx = state.currentMarkerIdx
 
 						// if no markers, dont bother
@@ -276,7 +276,7 @@ export const VideoStoreProvider = (props) => {
 						const idx =
 							state.markers.findIndex((m) => m.timestamp > ct) -
 							1;
-						// console.log("autoSetCurrentMarkerIdx :", idx, ct);
+						// //console.log("autoSetCurrentMarkerIdx :", idx, ct);
 
 						// if the current time is greater than the last marker, set to last marker
 						if (idx === -2) {
@@ -329,7 +329,7 @@ export const VideoStoreProvider = (props) => {
 			addToSeekQueue: (seekEvent) =>
 				setStore(
 					produce((state) => {
-						// console.log(state.seekQueue, seekTime)
+						// //console.log(state.seekQueue, seekTime)
 						// {type: move | seek, time: number}
 						state.seekQueue.push(seekEvent);
 						state.pauseReason = null;
@@ -375,7 +375,7 @@ export const VideoStoreProvider = (props) => {
 		},
 	];
 
-	console.log("Hello, videoStore");
+	//console.log("Hello, videoStore");
 
 	const resolvedChildren = children(() => props.children);
 

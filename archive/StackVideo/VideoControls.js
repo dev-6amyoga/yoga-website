@@ -83,11 +83,11 @@ function VideoControls({ handleFullScreen }) {
     // }
     // setVideoState(STATE_VIDEO_PLAY)
 
-    console.log("SETTING VIDEO STATE TO PLAY ------------>");
+    //console.log("SETTING VIDEO STATE TO PLAY ------------>");
 
     if (videoState === STATE_VIDEO_PAUSED) {
       if (pauseReason === VIDEO_PAUSE_MARKER) {
-        console.log("VIDEO PLAY : PAUSE REASON MARKER");
+        //console.log("VIDEO PLAY : PAUSE REASON MARKER");
         setCurrentMarkerIdx(
           currentMarkerIdx + 1 > markers.length - 1 ? 0 : currentMarkerIdx + 1
         );
@@ -118,7 +118,7 @@ function VideoControls({ handleFullScreen }) {
     /*
         -- if playing pause it
       */
-    console.log("SETTING VIDEO STATE TO PAUSE ------------>");
+    //console.log("SETTING VIDEO STATE TO PAUSE ------------>");
     setVideoState(STATE_VIDEO_PAUSED);
   }, [setVideoState]);
 
@@ -136,7 +136,7 @@ function VideoControls({ handleFullScreen }) {
   }, [addToSeekQueue]);
 
   const handlePrevMarker = useCallback(() => {
-    console.log("Prev Marker");
+    //console.log("Prev Marker");
     if (markers.length > 0) {
       if (currentMarkerIdx === 0) {
         addToSeekQueue({ t: 0, type: SEEK_TYPE_MOVE });
@@ -151,7 +151,7 @@ function VideoControls({ handleFullScreen }) {
   }, [markers, currentMarkerIdx, setCurrentMarkerIdx, addToSeekQueue]);
 
   const handleNextMarker = useCallback(() => {
-    console.log("Next Marker");
+    //console.log("Next Marker");
     if (markers.length > 0) {
       const idx = ((currentMarkerIdx || 0) + 1) % markers.length;
       setCurrentMarkerIdx(idx);

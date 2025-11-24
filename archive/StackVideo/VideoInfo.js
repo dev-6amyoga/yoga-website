@@ -93,7 +93,6 @@ export default function VideoInfo() {
                         }`}
                         onClick={() => {
                           // TODO : fix this, bug when you go to previous marker
-                          console.log("CLICKED MARKER : ", idx);
                           setVideoEvent({
                             type: VIDEO_EVENT_MOVING_MARKER,
                             markerIdx: idx,

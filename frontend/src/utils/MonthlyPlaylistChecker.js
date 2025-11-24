@@ -26,7 +26,7 @@ export const MonthlyPlaylistChecker = async (user_id, user_type) => {
       const today = new Date();
       today.setUTCHours(0, 0, 0, 0);
       if (today >= validity_start && today <= validity_end) {
-        console.log("Today is within the validity period.");
+        //console.log("Today is within the validity period.");
         const response = await Fetch({
           url: `/user-playlists/getAllUserPlaylists/${user_id}`,
           method: "GET",
@@ -35,7 +35,7 @@ export const MonthlyPlaylistChecker = async (user_id, user_type) => {
         if (data?.length >= monthlyPlaylistLimit.playlist_config_value) {
           return -1;
         } else {
-          console.log(
+          //console.log(
             "You can make ",
             monthlyPlaylistLimit.playlist_config_value - data.length,
             " more playlists this month"
@@ -43,12 +43,12 @@ export const MonthlyPlaylistChecker = async (user_id, user_type) => {
           return monthlyPlaylistLimit.playlist_config_value - data.length;
         }
       } else {
-        console.log("Today is outside the validity period.");
+        //console.log("Today is outside the validity period.");
         // carry forward mechanism
       }
     }
     return monthlyPlaylistLimit;
   } catch (error) {
-    console.log(error);
+    //console.log(error);
   }
 };

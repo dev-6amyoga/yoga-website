@@ -58,7 +58,7 @@ function RegisterVideoForm() {
   });
 
   const hello1 = (value) => {
-    console.log(value);
+    //console.log(value);
     if (value.includes("true")) {
       setNoBreakAsana(true);
     }
@@ -134,7 +134,7 @@ function RegisterVideoForm() {
         const data = response.data;
         setTableLanguages(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -149,7 +149,7 @@ function RegisterVideoForm() {
         const data = response.data;
         setCategories(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -219,7 +219,7 @@ function RegisterVideoForm() {
       ...additionalData,
       ...asanaData,
     };
-    console.log(combinedData);
+    //console.log(combinedData);
     if (
       combinedData.asana_name === "" ||
       combinedData.asana_type === "" ||
@@ -252,7 +252,7 @@ function RegisterVideoForm() {
       if (toastShown) {
       } else {
         toast("Adding new asana, kindly wait!");
-        console.log(combinedData);
+        //console.log(combinedData);
         try {
           const response = await Fetch({
             url: "/content/video/addAsana",
@@ -263,7 +263,7 @@ function RegisterVideoForm() {
             toast("New Asana added successfully");
             navigate("/admin/video/view-all");
           } else {
-            console.log("Failed to add new Asana");
+            //console.log("Failed to add new Asana");
           }
         } catch (error) {
           toast("Error while making the request:", error);

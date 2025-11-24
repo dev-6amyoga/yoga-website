@@ -50,8 +50,8 @@ const usePlaylistStore = createWithStore((set) => ({
 					...state.queue,
 					...items.map((i, idx) => {
 						const vi_id = i?._id || i?.id;
-						// console.log('vi_id', vi_id)
-						// console.log({ video: i });
+						// //console.log('vi_id', vi_id)
+						// //console.log({ video: i });
 						return {
 							video: i,
 							idx: state.queue.length + idx + 1,
@@ -145,8 +145,8 @@ export const PlaylistStoreProvider = (props) => {
 					produce((state) => {
 						items.forEach((i, idx) => {
 							const vi_id = i?._id || i?.id;
-							// console.log('vi_id', vi_id)
-							// console.log({ video: i });
+							// //console.log('vi_id', vi_id)
+							// //console.log({ video: i });
 							state.queue.push({
 								video: i,
 								idx: state.queue.length + idx + 1,
@@ -203,7 +203,7 @@ export const PlaylistStoreProvider = (props) => {
 		},
 	];
 
-	console.log("Hello PlaylistStore!");
+	//console.log("Hello PlaylistStore!");
 
 	const resolvedChildren = children(() => props.children);
 

@@ -27,7 +27,7 @@ function WatchAnalysis() {
 
   const handleRangeChange = (ranges) => {
     setDateRange([ranges.selection]);
-    console.log("Selected Range:", ranges.selection);
+    //console.log("Selected Range:", ranges.selection);
   };
 
   const columnsDataTable1 = useMemo(
@@ -95,7 +95,7 @@ function WatchAnalysis() {
             }
           })
         );
-        console.log(enrichedData);
+        //console.log(enrichedData);
         setWatchTimeCount(enrichedData);
         setFilteredData(enrichedData);
       } catch (error) {
@@ -122,7 +122,7 @@ function WatchAnalysis() {
   };
 
   const handleSearch = (query) => {
-    console.log(query);
+    //console.log(query);
     setSearchQuery(query);
     const filtered = watchTimeCount.filter((item) =>
       item.name.toLowerCase().includes(query.toLowerCase())
@@ -131,8 +131,8 @@ function WatchAnalysis() {
   };
 
   const handleFilter = () => {
-    console.log("hi");
-    console.log("Selected Range:", ranges.selection);
+    //console.log("hi");
+    //console.log("Selected Range:", ranges.selection);
   };
 
   return (

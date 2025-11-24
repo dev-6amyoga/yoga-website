@@ -59,7 +59,7 @@ router.post('/create', async (req, res) => {
     await session.commitTransaction()
     return res.status(HTTP_OK).json({ message: 'Watch history created' })
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     await session.abortTransaction()
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)

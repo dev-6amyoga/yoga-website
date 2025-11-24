@@ -14,7 +14,7 @@ const fetchAsanaData = async (asana_id) => {
       return response.data;
     }
   } catch (err) {
-    console.log(err);
+    //console.log(err);
     throw err;
   }
 };
@@ -23,14 +23,14 @@ export const transitionGenerator = async (startId, endVideo) => {
   if (startId) {
     try {
       const prevAsana = await fetchAsanaData(startId);
-      console.log(prevAsana);
-      console.log(
+      //console.log(prevAsana);
+      //console.log(
         "Transition function called with:",
         prevAsana.asana_name,
         endVideo.asana_name
       );
     } catch (err) {
-      console.log("Error fetching previous asana:", err);
+      //console.log("Error fetching previous asana:", err);
     }
   } else {
     // first video

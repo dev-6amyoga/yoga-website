@@ -38,7 +38,7 @@ function InstituteNavbar() {
   ]);
 
   const handleInstituteSelection = (value) => {
-    console.log("Selected Institute:", value);
+    //console.log("Selected Institute:", value);
     setCurrentInstituteId(parseInt(value));
   };
 
@@ -62,7 +62,7 @@ function InstituteNavbar() {
         navigate("/auth");
       })
       .catch((err) => {
-        console.log("Logout Error:", err);
+        //console.log("Logout Error:", err);
         removeCookie(SIXAMYOGA_ACCESS_TOKEN);
         removeCookie(SIXAMYOGA_REFRESH_TOKEN);
         resetUserState();

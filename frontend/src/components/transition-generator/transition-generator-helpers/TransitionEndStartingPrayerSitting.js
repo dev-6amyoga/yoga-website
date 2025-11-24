@@ -38,14 +38,14 @@ export const TransitionEndStartingPrayerSitting = async (
       .filter(Boolean);
   };
   if (!start_category) {
-    console.log("hello");
+    //console.log("hello");
     let res = handleTransition([
       "Sitting Position Transition",
       "Pranayama Start Sitting",
     ]);
     res = res.map((transition) => transition.transition_id);
     res = res.filter((element) => element !== undefined);
-    console.log("hi");
+    //console.log("hi");
     return res;
   }
 
@@ -358,7 +358,7 @@ export const TransitionEndStartingPrayerSitting = async (
         return new_res;
       } else {
         if (start_video.nose_lock_start && start_video.chin_lock_end) {
-          console.log("pratiloma last cycle");
+          //console.log("pratiloma last cycle");
           let res = [];
           for (var i = 0; i !== filteredTransitions_all.length; i++) {
             let transition_ind = filteredTransitions_all[i];

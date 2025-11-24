@@ -26,7 +26,7 @@ router.post('/check-plan-mapping', authenticateToken, async (req, res) => {
   const { plan_id, is_custom_plan = false, coupon_name } = req.body
   const { user_id } = req.user
 
-  console.log(plan_id, is_custom_plan, coupon_name)
+  //console.log(plan_id, is_custom_plan, coupon_name)
 
   if (
     !plan_id ||
@@ -108,7 +108,7 @@ router.post('/check-plan-mapping', authenticateToken, async (req, res) => {
         ],
       })
 
-      console.log(coupon_name, discount_coupon)
+      //console.log(coupon_name, discount_coupon)
 
       if (!discount_coupon) {
         return res
@@ -153,7 +153,7 @@ router.post('/check-plan-mapping', authenticateToken, async (req, res) => {
       discount_coupon: discount_coupon,
     })
   } catch (error) {
-    console.log(error)
+    //console.log(error)
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ message: 'Internal Server Error' })
@@ -241,7 +241,7 @@ router.post('/create', async (req, res) => {
     await mt.endSession()
     return res.status(HTTP_OK).json({ message: 'Coupon created' })
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     await t.rollback()
     await mt.abortTransaction()
     await mt.endSession()
@@ -342,7 +342,7 @@ router.post('/add-plan-mapping', async (req, res) => {
       return res.status(HTTP_OK).json({ message: 'Successfully mapped' })
     }
   } catch (err) {
-    console.log(err)
+    //console.log(err)
 
     if (t && is_custom_plan) {
       await t.abortTransaction()
@@ -477,7 +477,7 @@ router.post('/get-all', async (req, res) => {
 
     return res.status(HTTP_OK).json({ discount_coupons })
   } catch (error) {
-    console.log(error)
+    //console.log(error)
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ message: 'Internal Server Error' })
@@ -525,7 +525,7 @@ router.post('/get-by-id', async (req, res) => {
         discount_coupon_applicable_plans?.map((p) => p.toJSON()) ?? [],
     }
 
-    // console.log(discount_coupon.discount_coupon_applicable_plans);
+    // //console.log(discount_coupon.discount_coupon_applicable_plans);
 
     return res.status(HTTP_OK).json({ discount_coupon: dc })
   } catch (error) {

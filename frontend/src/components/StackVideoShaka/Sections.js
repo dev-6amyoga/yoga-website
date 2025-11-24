@@ -27,7 +27,7 @@ function PlaylistSections() {
 
   const handleSeek = (s, idx) => {
     // TODO : fix this, bug when you go to previous marker
-    console.log("CLICKED SECTION : ", idx);
+    //console.log("CLICKED SECTION : ", idx);
     // setVideoEvent({
     // 	type: VIDEO_EVENT_MOVING_MARKER,
     // 	markerIdx: idx,
@@ -53,10 +53,6 @@ function PlaylistSections() {
   }, [currVideo, setCurrentMarkerIdx, setMarkers]);
 
   const currMarker = useMemo(() => {
-    console.log(
-      "[PlaylistSections] recalc currMarker => currentMarkerIdx",
-      currentMarkerIdx
-    );
     if (
       currVideo &&
       currentMarkerIdx !== null &&

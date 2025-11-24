@@ -52,10 +52,10 @@ function CounterContextProvider(props) {
 const Counter = () => {
 	const [store, actions] = useContext(CounterContext);
 
-	console.log({ store, actions });
+	//console.log({ store, actions });
 
 	createEffect(
-		on([() => store.count], (v) => console.log("Count changed : ", v))
+		on([() => store.count], (v) => //console.log("Count changed : ", v))
 	);
 
 	return (
@@ -93,18 +93,18 @@ function App() {
 	});
 
 	onMount(() => {
-		console.log("Hello!");
+		//console.log("Hello!");
 	});
 
 	createEffect(
 		on([() => store.name], (v) => {
-			console.log("Name changed : ", v);
+			//console.log("Name changed : ", v);
 		})
 	);
 
 	createEffect(
 		on([() => store.todos], (v) => {
-			console.log("Todos changed : ", v);
+			//console.log("Todos changed : ", v);
 		})
 	);
 
@@ -144,7 +144,7 @@ function App() {
 						setStore(
 							produce((state) => {
 								state.todos.push(input());
-								console.log(state.todos);
+								//console.log(state.todos);
 							})
 						);
 						setInput("");

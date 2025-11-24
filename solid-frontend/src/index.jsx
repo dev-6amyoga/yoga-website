@@ -47,8 +47,8 @@ function VideoPage() {
 							...state.queue,
 							...items.map((i, idx) => {
 								const vi_id = i?._id || i?.id;
-								// console.log('vi_id', vi_id)
-								// console.log({ video: i });
+								// //console.log('vi_id', vi_id)
+								// //console.log({ video: i });
 								// state.queue.push();
 								return {
 									video: i,
@@ -179,7 +179,7 @@ function VideoPage() {
 				setVideoStore(
 					produce((state) => {
 						let ct = currentTime ?? state.currentTime;
-						// console.log('autoSetCurrentMarkerIdx :', currentTime, '==>', ct)
+						// //console.log('autoSetCurrentMarkerIdx :', currentTime, '==>', ct)
 						// let prevIdx = state.currentMarkerIdx
 
 						// if no markers, dont bother
@@ -198,7 +198,7 @@ function VideoPage() {
 						const idx =
 							state.markers.findIndex((m) => m?.timestamp > ct) -
 							1;
-						// console.log("autoSetCurrentMarkerIdx :", idx, ct);
+						// //console.log("autoSetCurrentMarkerIdx :", idx, ct);
 
 						// if the current time is greater than the last marker, set to last marker
 						if (idx === -2) {
@@ -252,7 +252,7 @@ function VideoPage() {
 			addToSeekQueue: (seekEvent) =>
 				setVideoStore(
 					produce((state) => {
-						// console.log(state.seekQueue, seekTime)
+						// //console.log(state.seekQueue, seekTime)
 						// {type: move | seek, time: number}
 						state.seekQueue = [seekEvent];
 						state.pauseReason = null;
@@ -381,7 +381,7 @@ function VideoPage() {
 				setWatchHistoryStore(
 					produce((state) => {
 						const timedelta = wh.currentTime - state.committedTs;
-						// console.log({ timedelta });
+						// //console.log({ timedelta });
 
 						if (timedelta < 1) {
 							return;
@@ -411,7 +411,7 @@ function VideoPage() {
 			async flushWatchTimeBuffer(user_id) {
 				const watch_time_logs = state.watchTimeBuffer;
 
-				// console.log({ watch_time_logs });
+				// //console.log({ watch_time_logs });
 				if (watch_time_logs.length === 0) {
 					return;
 				}
@@ -428,11 +428,11 @@ function VideoPage() {
 				})
 					.then((res) => {
 						if (res.status === 200) {
-							console.log("watch time buffer flushed");
+							//console.log("watch time buffer flushed");
 						}
 					})
 					.catch((err) => {
-						console.log(err);
+						//console.log(err);
 						// localStorage.setItem(
 						// 	"6amyoga_watch_time_logs",
 						// 	JSON.stringify(watch_time_logs)
@@ -478,7 +478,7 @@ function VideoPage() {
 							}
 						})
 						.catch((err) => {
-							console.log(err);
+							//console.log(err);
 						});
 				}
 			},

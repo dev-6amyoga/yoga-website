@@ -50,7 +50,7 @@ function StudentNavbar() {
         navigate("/auth");
       })
       .catch((err) => {
-        console.log("Logout Error:", err);
+        //console.log("Logout Error:", err);
         removeCookie(SIXAMYOGA_ACCESS_TOKEN);
         removeCookie(SIXAMYOGA_REFRESH_TOKEN);
         resetUserState();
@@ -70,7 +70,7 @@ function StudentNavbar() {
           data: { user_id: user?.user_id },
         });
         const data = response.data;
-        console.log("NAVBAR DATA : ", data);
+        //console.log("NAVBAR DATA : ", data);
         if (data["userPlan"].length !== 0) {
           const indexOfActiveUserPlan = data["userPlan"].findIndex(
             (plan) => plan.current_status === USER_PLAN_ACTIVE
@@ -99,7 +99,7 @@ function StudentNavbar() {
       } catch (error) {
         setDisabled(true);
         setDisabledTailorMade(true);
-        console.log(error);
+        //console.log(error);
       }
     };
     if (user) {

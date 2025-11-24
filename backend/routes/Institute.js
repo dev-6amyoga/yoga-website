@@ -33,7 +33,7 @@ router.post('/register', authenticateToken, async (req, res) => {
     gstin,
   } = req.body
 
-  console.log({ body: req.body })
+  //console.log({ body: req.body })
 
   if (!name || !email || !phone || !pincode)
     return res
@@ -467,7 +467,7 @@ router.post('/get-all-by-userid', async (req, res) => {
       },
       { transaction: t }
     )
-    // console.log(ui[0]);
+    // //console.log(ui[0]);
 
     await t.commit()
     return res.status(HTTP_OK).json({ institutes: ui.map((i) => i.institute) })
@@ -549,8 +549,8 @@ router.post('/teacher/get-all-by-instituteid', async (req, res) => {
       { transaction: t }
     )
     await t.commit()
-    console.log('in func woohoo')
-    console.log('Sending  : ', teachers)
+    //console.log('in func woohoo')
+    //console.log('Sending  : ', teachers)
     return res.status(HTTP_OK).json({ teachers })
   } catch (err) {
     await t.rollback()

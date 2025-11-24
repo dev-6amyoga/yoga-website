@@ -16,7 +16,7 @@ function AllLanguages() {
   const [filteredTransitions, setFilteredTransitions] = useState([]);
   useEffect(() => {
     if (searchTerm.length > 0) {
-      console.log(searchTerm);
+      //console.log(searchTerm);
       setFilteredTransitions(
         languages.filter((transition) =>
           transition.language.toLowerCase().includes(searchTerm.toLowerCase())
@@ -40,7 +40,7 @@ function AllLanguages() {
         setLanguages(data);
         setFilteredTransitions(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -71,11 +71,11 @@ function AllLanguages() {
           prev.filter((lang) => lang.language_id !== languageId)
         );
       } else {
-        console.log("Error deleting Language:", response.status);
+        //console.log("Error deleting Language:", response.status);
       }
       setDelState(false);
     } catch (error) {
-      console.log(error);
+      //console.log(error);
     }
   };
 

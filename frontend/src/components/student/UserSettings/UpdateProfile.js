@@ -126,7 +126,7 @@ export default function UpdateProfile() {
       },
     })
       .then((res) => {
-        console.log(res);
+        //console.log(res);
         toast("Updated!", { type: "success" });
         refetchUser();
       })

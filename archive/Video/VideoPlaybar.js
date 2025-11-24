@@ -92,7 +92,7 @@ export default function VideoPlaybar({
 
   const draggedDuration = useMemo(() => {
     const d = (duration * currentBoopPosition) / barBound.width;
-    // console.log(
+    // //console.log(
     // 	duration,
     // 	currentBoopPosition,
     // 	barBound.width,

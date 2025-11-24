@@ -43,7 +43,7 @@ function StreamStackItem(props) {
 
 	const videoUrl = createMemo(
 		on([() => props.video], () => {
-			console.log("VIDEO URL", props.video);
+			//console.log("VIDEO URL", props.video);
 			return (
 				(props.video?.video?.asana_dash_url ||
 					props.video?.video?.transition_dash_url) ??
@@ -76,10 +76,10 @@ function StreamStackItem(props) {
 		usePlaylistStoreContext();
 
 	const tryToPlay = () => {
-		console.log(`Try to play called : ${props.isActive}`);
+		//console.log(`Try to play called : ${props.isActive}`);
 		if (!props.isActive) return;
 
-		console.log("Try to play called", props.video.idx, Date.now());
+		//console.log("Try to play called", props.video.idx, Date.now());
 		playerRef().current.player.play();
 
 		// if (!autoplayInitialized()) {
@@ -92,7 +92,7 @@ function StreamStackItem(props) {
 		on([() => props.isActive, () => videoStore.seekQueue], () => {
 			if (props.isActive && videoStore.seekQueue.length > 0) {
 				const seekEvent = videoStore.seekQueue[0];
-				console.log("SEEKING --->", seekEvent);
+				//console.log("SEEKING --->", seekEvent);
 				if (seekEvent && playerRef().current) {
 					switch (seekEvent.type) {
 						case SEEK_TYPE_SEEK: {
@@ -173,7 +173,7 @@ function StreamStackItem(props) {
 						if (props.isActive)
 							props.handleLoading(false, props.isActive);
 						autoSetCurrentMarkerIdx(videoStore.commitSeekTime);
-						console.log("CHECK SEEK TRUE!");
+						//console.log("CHECK SEEK TRUE!");
 						return true;
 					} else {
 						return false;
@@ -197,7 +197,7 @@ function StreamStackItem(props) {
 								?.timestamp
 						) {
 							if (currentMarker?.loop) {
-								console.log("LOOPING CUZ OF MARKER");
+								//console.log("LOOPING CUZ OF MARKER");
 								addToSeekQueue({
 									type: SEEK_TYPE_MARKER,
 									t: currentMarker?.timestamp,
@@ -207,7 +207,7 @@ function StreamStackItem(props) {
 								if (
 									videoStore.videoState !== STATE_VIDEO_PAUSED
 								) {
-									console.log("PAUSING CUZ OF MARKER");
+									//console.log("PAUSING CUZ OF MARKER");
 									setVideoState(STATE_VIDEO_PAUSED);
 									setPauseReason(VIDEO_PAUSE_MARKER);
 								}
@@ -222,7 +222,7 @@ function StreamStackItem(props) {
 					videoStore.videoState !== STATE_VIDEO_ERROR &&
 					videoStore.videoState !== STATE_VIDEO_LOADING
 				) {
-					console.log("createEffect : initializing interval timer");
+					//console.log("createEffect : initializing interval timer");
 					intervalTimer = setInterval(() => {
 						if (playerRef().current?.videoElement) {
 							if (
@@ -268,7 +268,7 @@ function StreamStackItem(props) {
 									0.1
 							) {
 								if (videoStore.videoEvents.length === 0) {
-									console.log(
+									//console.log(
 										"[StreamStackItem] Video event play inactive",
 										{
 											currentTime:
@@ -294,7 +294,7 @@ function StreamStackItem(props) {
 				}
 
 				onCleanup(() => {
-					console.log("createEffect : cleaning up interval timer");
+					//console.log("createEffect : cleaning up interval timer");
 					if (intervalTimer) clearInterval(intervalTimer);
 				});
 			}
@@ -305,7 +305,7 @@ function StreamStackItem(props) {
 	// 	(user_id) => {
 	// 		const watch_time_logs = [...watchTimeBuffer];
 
-	// 		// console.log({ watch_time_logs });
+	// 		// //console.log({ watch_time_logs });
 	// 		if (watch_time_logs.length === 0) {
 	// 			return;
 	// 		}
@@ -322,11 +322,11 @@ function StreamStackItem(props) {
 	// 		})
 	// 			.then((res) => {
 	// 				if (res.status === 200) {
-	// 					console.log("watch time buffer flushed");
+	// 					//console.log("watch time buffer flushed");
 	// 				}
 	// 			})
 	// 			.catch((err) => {
-	// 				//console.log(err);
+	// 				////console.log(err);
 	// 				// localStorage.setItem(
 	// 				// 	"6amyoga_watch_time_logs",
 	// 				// 	JSON.stringify(watch_time_logs)
@@ -351,20 +351,20 @@ function StreamStackItem(props) {
 
 	// props.video events
 	const handleVideoSeeking = (e) => {
-		console.log("Seeking...");
+		//console.log("Seeking...");
 		props.handleLoading(true, props.isActive);
 	};
 
 	const handleVideoCanPlayThrough = (e) => {
 		// setMetadataLoaded(true);
 		// const state = useVideoStore.getState();
-		console.log(
+		//console.log(
 			"Can play through...",
 			videoStore.videoState,
 			playerRef().current.videoElement,
 			playerRef().current.videoElement.currentTime
 		);
-		console.log("can play through, seek event : ", videoStore.seekQueue[0]);
+		//console.log("can play through, seek event : ", videoStore.seekQueue[0]);
 		// if (playerRef().current.videoElement.currentTime !== 0) {
 		// 	if(!videoStore.seekQueue[0]){
 		// 		playerRef().current.videoElement.currentTime = 0;
@@ -399,12 +399,12 @@ function StreamStackItem(props) {
 	// 				}, inactiveVideoDuration() * 1000);
 	// 			}
 	// 		} else {
-	// 			console.log("Duration not set yet!time is");
+	// 			//console.log("Duration not set yet!time is");
 	// 		}
 	// });
 
 	const playerInit = (ref) => {
-		console.log("player init called", ref);
+		//console.log("player init called", ref);
 		if (ref != null) {
 			setPlayerRef({ current: ref });
 			setPlayerLoaded(true);
@@ -414,7 +414,7 @@ function StreamStackItem(props) {
 	createEffect(() => {
 		const setupDash = setTimeout(() => {
 			setSetupDashPlayer(true);
-			console.log("[StreamStackItem] Delayed dash player setup");
+			//console.log("[StreamStackItem] Delayed dash player setup");
 		}, 1500);
 
 		onCleanup(() => {

@@ -28,7 +28,7 @@ import { toTimeString } from "../../utils/toTimeString";
 import DashPlayer from "./DashPlayer";
 import VideoPlaybar from "./VideoPlaybar";
 
-console.log(STATE_VIDEO_LOADING);
+//console.log(STATE_VIDEO_LOADING);
 
 function StreamStackItem(props) {
 	// const user = useUserStore((state) => state.user);
@@ -48,7 +48,7 @@ function StreamStackItem(props) {
 
 	const videoUrl = createMemo(
 		on([() => props.video], () => {
-			console.log("VIDEO URL", props.video);
+			//console.log("VIDEO URL", props.video);
 			return (
 				(props.video?.video?.asana_dash_url ||
 					props.video?.video?.transition_dash_url) ??
@@ -59,17 +59,17 @@ function StreamStackItem(props) {
 
 	// createEffect(
 	// 	on([() => props.isActive, () => props.video], () => {
-	// 		console.log(props.video, props.isActive);
+	// 		//console.log(props.video, props.isActive);
 
 	// 		if (props.isActive) {
-	// 			console.log(playerRef(), "IS REF!"); // If needed for debugging
+	// 			//console.log(playerRef(), "IS REF!"); // If needed for debugging
 	// 			if (playerRef().current.player !== null) {
 	// 				playerRef().current.player.preload();
 	// 			}
 	// 		} else {
-	// 			console.log(playerRef(), "IS REF NON ACTIVE");
+	// 			//console.log(playerRef(), "IS REF NON ACTIVE");
 	// 		}
-	// 		console.log({
+	// 		//console.log({
 	// 			propsIsActive: props.isActive,
 	// 			videoidx: props.video?.idx,
 	// 		});
@@ -100,10 +100,10 @@ function StreamStackItem(props) {
 		usePlaylistStoreContext();
 
 	const tryToPlay = () => {
-		console.log(`Try to play called : ${isActive}`);
+		//console.log(`Try to play called : ${isActive}`);
 		if (!isActive) return;
 
-		console.log("Try to play called", props.video.idx, Date.now());
+		//console.log("Try to play called", props.video.idx, Date.now());
 		playerRef().current.player.play();
 
 		// if (!autoplayInitialized()) {
@@ -115,7 +115,7 @@ function StreamStackItem(props) {
 	// 	on([() => props.isActive, () => props.video], () => {
 	// 		const pr = playerRef().current.videoElement;
 	// 		if (!props.isActive && pr && pr.currentTime > 0) {
-	// 			console.log(
+	// 			//console.log(
 	// 				"PAUSE AND RESET ----------------------------->",
 	// 				props.video.idx
 	// 			);
@@ -153,7 +153,7 @@ function StreamStackItem(props) {
 	// 				setPauseReason(null);
 
 	// 				if (videoStore.videoState === STATE_VIDEO_PAUSED) {
-	// 					console.log(
+	// 					//console.log(
 	// 						"createEffect : changing to pause",
 	// 						props.video.idx
 	// 					);
@@ -161,7 +161,7 @@ function StreamStackItem(props) {
 	// 						playerRef().current.player.pause();
 	// 					}
 	// 				} else if (videoStore.videoState === STATE_VIDEO_PLAY) {
-	// 					console.log(
+	// 					//console.log(
 	// 						"createEffect : changing to play",
 	// 						props.video.idx
 	// 					);
@@ -179,7 +179,7 @@ function StreamStackItem(props) {
 		on([() => props.isActive, () => videoStore.seekQueue], () => {
 			if (props.isActive && videoStore.seekQueue.length > 0) {
 				const seekEvent = videoStore.seekQueue[0];
-				console.log("SEEKING --->", seekEvent);
+				//console.log("SEEKING --->", seekEvent);
 				if (seekEvent && playerRef().current) {
 					switch (seekEvent.type) {
 						case SEEK_TYPE_SEEK: {
@@ -287,7 +287,7 @@ function StreamStackItem(props) {
 								?.timestamp
 						) {
 							if (currentMarker.loop) {
-								console.log("LOOPING CUZ OF MARKER");
+								//console.log("LOOPING CUZ OF MARKER");
 								addToSeekQueue({
 									type: SEEK_TYPE_MARKER,
 									t: currentMarker?.timestamp,
@@ -297,7 +297,7 @@ function StreamStackItem(props) {
 								if (
 									videoStore.videoState !== STATE_VIDEO_PAUSED
 								) {
-									console.log("PAUSING CUZ OF MARKER");
+									//console.log("PAUSING CUZ OF MARKER");
 									setVideoState(STATE_VIDEO_PAUSED);
 									setPauseReason(VIDEO_PAUSE_MARKER);
 								}
@@ -312,7 +312,7 @@ function StreamStackItem(props) {
 					videoStore.videoState !== STATE_VIDEO_ERROR &&
 					videoStore.videoState !== STATE_VIDEO_LOADING
 				) {
-					console.log("createEffect : initializing interval timer");
+					//console.log("createEffect : initializing interval timer");
 					intervalTimer = setInterval(() => {
 						if (playerRef().current?.videoElement) {
 							if (
@@ -363,7 +363,7 @@ function StreamStackItem(props) {
 									-0.05
 							) {
 								if (videoStore.videoEvents.length === 0) {
-									console.log(
+									//console.log(
 										"[StreamStackItem] Video event play inactive",
 										{
 											currentTime:
@@ -389,7 +389,7 @@ function StreamStackItem(props) {
 				}
 
 				onCleanup(() => {
-					console.log("createEffect : cleaning up interval timer");
+					//console.log("createEffect : cleaning up interval timer");
 					if (intervalTimer) clearInterval(intervalTimer);
 				});
 			}
@@ -400,7 +400,7 @@ function StreamStackItem(props) {
 	// 	(user_id) => {
 	// 		const watch_time_logs = [...watchTimeBuffer];
 
-	// 		// console.log({ watch_time_logs });
+	// 		// //console.log({ watch_time_logs });
 	// 		if (watch_time_logs.length === 0) {
 	// 			return;
 	// 		}
@@ -417,11 +417,11 @@ function StreamStackItem(props) {
 	// 		})
 	// 			.then((res) => {
 	// 				if (res.status === 200) {
-	// 					console.log("watch time buffer flushed");
+	// 					//console.log("watch time buffer flushed");
 	// 				}
 	// 			})
 	// 			.catch((err) => {
-	// 				//console.log(err);
+	// 				////console.log(err);
 	// 				// localStorage.setItem(
 	// 				// 	"6amyoga_watch_time_logs",
 	// 				// 	JSON.stringify(watch_time_logs)
@@ -446,19 +446,19 @@ function StreamStackItem(props) {
 
 	// props.video events
 	const handleVideoSeeking = (e) => {
-		console.log("Seeking...");
+		//console.log("Seeking...");
 		props.handleLoading(true, props.isActive);
 	};
 
 	const handleVideoSeeked = (e) => {
-		console.log("Seeked...");
+		//console.log("Seeked...");
 		setVideoState(STATE_VIDEO_PLAY);
 	};
 
 	const handleVideoCanPlayThrough = (e) => {
 		// setMetadataLoaded(true);
 		// const state = useVideoStore.getState();
-		console.log(
+		//console.log(
 			"Can play through...",
 			videoStore.videoState,
 			playerRef().current.videoElement.currentTime
@@ -492,12 +492,12 @@ function StreamStackItem(props) {
 	// 				}, inactiveVideoDuration() * 1000);
 	// 			}
 	// 		} else {
-	// 			console.log("Duration not set yet!time is");
+	// 			//console.log("Duration not set yet!time is");
 	// 		}
 	// });
 
 	const playerInit = (ref) => {
-		console.log("player init called", ref);
+		//console.log("player init called", ref);
 		if (ref != null) {
 			setPlayerRef({ current: ref });
 			setPlayerLoaded(true);

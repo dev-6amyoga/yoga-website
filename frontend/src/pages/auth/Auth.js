@@ -12,7 +12,7 @@ export default function Auth() {
 
   useEffect(() => {
     if (location.state) {
-      // console.log(location.state);
+      // //console.log(location.state);
       setLoginOpen(
         location?.state?.login !== undefined ? location?.state?.login : false
       );

@@ -13,6 +13,7 @@ const {
 } = require('../utils/http_status_codes')
 const { Institute } = require('../models/sql/Institute')
 const { Role } = require('../models/sql/Role')
+const { UserPlan } = require('../models/sql/UserPlan')
 const { Op } = require('sequelize')
 const { sequelize } = require('../init.sequelize')
 const { validate_email } = require('../utils/validate_email')
@@ -40,7 +41,7 @@ router.post('/verify-google', async (req, res) => {
     let startTime = new Date()
     const userInfo = await auth.verify(client_id, jwtToken)
 
-    console.log('elapsed time to verify google token: ', new Date() - startTime)
+    //console.log('elapsed time to verify google token: ', new Date() - startTime)
 
     if (
       userInfo === null ||
@@ -54,15 +55,15 @@ router.post('/verify-google', async (req, res) => {
 
     startTime = new Date()
     const user = await GetUserInfo({ email: userInfo.email })[0]
-    console.log('elapsed time to get user info: ', new Date() - startTime)
+    //console.log('elapsed time to get user info: ', new Date() - startTime)
 
     if (!user) {
-      console.log(userInfo)
+      //console.log(userInfo)
       return res
         .status(HTTP_OK)
         .json({ message: 'Token verified', ...userInfo })
     } else {
-      console.log('there')
+      //console.log('there')
       return res.status(HTTP_OK).json({
         message: 'User already exists; Please sign in',
         ...userInfo,
@@ -111,37 +112,59 @@ router.post('/verify-tokens', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   const clientIp = req.clientIp
+  console.log('[LOGIN] Starting login process for IP:', clientIp)
 
   const { username, password } = req.body
-  if (!username || !password)
+  if (!username || !password) {
+    console.log('[LOGIN] Missing username or password')
     return res
       .status(HTTP_BAD_REQUEST)
       .json({ message: 'Missing required fields' })
+  }
+
+  console.log('[LOGIN] Attempting login for username:', username)
 
   const t = await sequelize.transaction()
 
   try {
     let startTime = new Date()
     // check if user exists
+    console.log('[LOGIN] Fetching user info for username:', username)
     let [user, errorUser] = await GetUserInfo({ username }, [
       'user_id',
       'password',
     ])
-    console.log('elapsed time to get user info: ', new Date() - startTime)
+    console.log(
+      '[LOGIN] GetUserInfo elapsed time:',
+      new Date() - startTime,
+      'ms'
+    )
 
-    console.log(errorUser)
+    if (errorUser) {
+      console.log('[LOGIN] GetUserInfo error:', errorUser)
+    }
 
     if (!user || errorUser) {
+      console.log('[LOGIN] User not found or error occurred')
       await t.rollback()
       return res.status(HTTP_BAD_REQUEST).json({ error: 'User does not exist' })
     }
 
+    console.log('[LOGIN] User found. User ID:', user.user_id)
+
     // check password
     startTime = new Date()
+    console.log('[LOGIN] Comparing passwords')
     const validPassword = await brypt.compare(password, user.password)
-    console.log('elapsed time to compare password: ', new Date() - startTime)
+    console.log(
+      '[LOGIN] Password comparison elapsed time:',
+      new Date() - startTime,
+      'ms'
+    )
+    console.log('[LOGIN] Password valid:', validPassword)
 
     if (!validPassword) {
+      console.log('[LOGIN] Invalid password for user:', username)
       await t.rollback()
       return res.status(HTTP_BAD_REQUEST).json({ error: 'Invalid password' })
     }
@@ -149,6 +172,10 @@ router.post('/login', async (req, res) => {
     delete user.password
 
     // update user plans
+    console.log(
+      '[LOGIN] Fetching UserInstitutePlanRole for user_id:',
+      user.user_id
+    )
     const uipr = await UserInstitutePlanRole.findAll({
       where: {
         user_id: user.user_id,
@@ -156,22 +183,57 @@ router.post('/login', async (req, res) => {
       transaction: t,
     })
 
+    console.log('[LOGIN] Found', uipr.length, 'UserInstitutePlanRole records')
+
     if (uipr.length === 0) {
+      console.log('[LOGIN] No UserInstitutePlanRole records found')
       await t.rollback()
       return res.status(HTTP_BAD_REQUEST).json({ error: 'User not registered' })
     }
 
     startTime = new Date()
+    console.log('[LOGIN] Fetching active UserPlan for user_id:', user.user_id)
+    const activeUserPlan = await UserPlan.findOne({
+      where: {
+        user_id: user.user_id,
+        current_status: 'ACTIVE',
+      },
+      transaction: t,
+    })
+    console.log(
+      '[LOGIN] Active UserPlan fetch elapsed time:',
+      new Date() - startTime,
+      'ms'
+    )
+    console.log('[LOGIN] Active UserPlan found:', activeUserPlan ? 'Yes' : 'No')
+    if (activeUserPlan) {
+      console.log(
+        '[LOGIN] Active plan details - Plan ID:',
+        activeUserPlan.plan_id,
+        'User Plan ID:',
+        activeUserPlan.user_plan_id
+      )
+    }
 
+    console.log(
+      '[LOGIN] Updating UserPlanStatus for',
+      uipr.length,
+      'institutes'
+    )
     await Promise.all(
       uipr.map((u) => {
-        UpdateUserPlanStatus(user.user_id, u.get('institute_id'), t)
+        console.log(
+          '[LOGIN] Updating plan status for institute_id:',
+          u.get('institute_id')
+        )
+        return UpdateUserPlanStatus(user.user_id, u.get('institute_id'), t)
       })
     )
 
-    console.log('elapsed time to update plan status: ', new Date() - startTime)
+    console.log('[LOGIN] UserPlanStatus update completed')
 
     startTime = new Date()
+    console.log('[LOGIN] Fetching updated user info')
     ;[user, errorUser] = await GetUserInfo({ username }, [
       'user_id',
       'username',
@@ -181,18 +243,22 @@ router.post('/login', async (req, res) => {
       'is_google_login',
       'last_login',
     ])
-
-    console.log('elapsed time to  plan status: ', new Date() - startTime)
+    console.log(
+      '[LOGIN] Updated user info fetch elapsed time:',
+      new Date() - startTime,
+      'ms'
+    )
 
     if (errorUser) {
+      console.log('[LOGIN] Error fetching updated user info:', errorUser)
       await t.rollback()
       return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: errorUser })
     }
 
-    // TODO: check if login history shows different IP
+    console.log('[LOGIN] Updated user info retrieved')
 
     startTime = new Date()
-
+    console.log('[LOGIN] Destroying previous LoginTokens for IP:', clientIp)
     await LoginToken.destroy({
       where: {
         user_id: user.user_id,
@@ -201,8 +267,14 @@ router.post('/login', async (req, res) => {
       transaction: t,
       force: true,
     })
+    console.log(
+      '[LOGIN] LoginToken destroy elapsed time:',
+      new Date() - startTime,
+      'ms'
+    )
 
     // check if user has active login token
+    console.log('[LOGIN] Checking for active login tokens')
     const login_token_history = await LoginToken.findOne({
       where: {
         user_id: user?.user_id,
@@ -213,36 +285,25 @@ router.post('/login', async (req, res) => {
       transaction: t,
     })
 
-    // if (login_token_history) {
-    //   await t.rollback()
-    //   console.log('one device one login')
-    //   return res.status(HTTP_BAD_REQUEST).json({
-    //     error: 'Varying IP Address; One device login only',
-    //   })
-    // }
-
     console.log(
-      'elapsed time to get login token history: ',
-      new Date() - startTime
+      '[LOGIN] Active login token found:',
+      login_token_history ? 'Yes' : 'No'
     )
 
-    // check if plans should be updated
-
     startTime = new Date()
+    console.log('[LOGIN] Generating access and refresh tokens')
     const [accessToken, access_token_creation_at, access_token_expiry_at] =
       generateAccessToken(user)
     const [refreshToken, refresh_token_creation_at, refresh_token_expiry_at] =
       generateRefreshToken(user)
-
-    console.log('elapsed time to generate tokens: ', new Date() - startTime)
-
-    // console.log(user);
-    // const [_, userPlanUpdateError] = await UpdateUserPlanStatus(user.user_id);
-    // TODO: delete all previous tokens of user from same ip?
+    console.log(
+      '[LOGIN] Token generation elapsed time:',
+      new Date() - startTime,
+      'ms'
+    )
 
     startTime = new Date()
-    // add current token to login token table
-    // add to login history
+    console.log('[LOGIN] Creating LoginToken and LoginHistory records')
     await Promise.all([
       LoginToken.create(
         {
@@ -269,24 +330,35 @@ router.post('/login', async (req, res) => {
         { transaction: t }
       ),
     ])
-
-    console.log('elapsed time to create login token: ', new Date() - startTime)
+    console.log(
+      '[LOGIN] LoginToken and LoginHistory creation elapsed time:',
+      new Date() - startTime,
+      'ms'
+    )
 
     startTime = new Date()
+    console.log('[LOGIN] Committing transaction')
     await t.commit()
+    console.log(
+      '[LOGIN] Transaction commit elapsed time:',
+      new Date() - startTime,
+      'ms'
+    )
 
-    console.log('elapsed time to commit transaction: ', new Date() - startTime)
+    console.log('[LOGIN] Login successful for user_id:', user.user_id)
 
     return res.status(HTTP_OK).json({
       user,
+      userPlan: activeUserPlan,
       accessToken,
       refreshToken,
       accessTokenExpiryAt: access_token_expiry_at,
       refreshTokenExpiryAt: refresh_token_expiry_at,
     })
   } catch (err) {
+    console.error('[LOGIN] Error during login:', err)
     await t.rollback()
-    console.log(err)
+    console.log('[LOGIN] Transaction rolled back')
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
       message: 'internal server error',
     })
@@ -301,7 +373,7 @@ router.post('/login-google', async (req, res) => {
     let startTime = new Date()
     const userInfo = await auth.verify(client_id, jwtToken)
 
-    console.log('elapsed time to verify google token: ', new Date() - startTime)
+    //console.log('elapsed time to verify google token: ', new Date() - startTime)
 
     if (
       userInfo === null ||
@@ -331,7 +403,7 @@ router.post('/login-google', async (req, res) => {
         'password',
       ])
 
-      console.log('elapsed time to get user info: ', new Date() - startTime)
+      //console.log('elapsed time to get user info: ', new Date() - startTime)
 
       if (!user || errorUser) {
         await t.rollback()
@@ -350,7 +422,7 @@ router.post('/login-google', async (req, res) => {
         transaction: t,
       })
 
-      console.log('elapsed time to get user plans: ', new Date() - startTime)
+      //console.log('elapsed time to get user plans: ', new Date() - startTime)
 
       if (uipr.length === 0) {
         await t.rollback()
@@ -366,7 +438,7 @@ router.post('/login-google', async (req, res) => {
         })
       )
 
-      console.log('elapsed time to update user plans: ', new Date() - startTime)
+      //console.log('elapsed time to update user plans: ', new Date() - startTime)
       ;[user, errorUser] = await GetUserInfo({ email }, [
         'user_id',
         'username',
@@ -412,10 +484,10 @@ router.post('/login-google', async (req, res) => {
       //   })
       // }
 
-      console.log(
-        'elapsed time to get login token history: ',
-        new Date() - startTime
-      )
+      //console.log(
+      //   'elapsed time to get login token history: ',
+      //   new Date() - startTime
+      // )
 
       startTime = new Date()
 
@@ -425,7 +497,7 @@ router.post('/login-google', async (req, res) => {
       const [refreshToken, refresh_token_creation_at, refresh_token_expiry_at] =
         generateRefreshToken(user)
 
-      console.log('elapsed time to generate tokens: ', new Date() - startTime)
+      //console.log('elapsed time to generate tokens: ', new Date() - startTime)
 
       // TODO: delete all previous tokens of user from same ip?
 
@@ -462,10 +534,10 @@ router.post('/login-google', async (req, res) => {
 
       await t.commit()
 
-      console.log(
-        'elapsed time to create login token: ',
-        new Date() - startTime
-      )
+      //console.log(
+      //   'elapsed time to create login token: ',
+      //   new Date() - startTime
+      // )
 
       return res.status(HTTP_OK).json({
         user,
@@ -615,7 +687,7 @@ router.post('/register', async (req, res) => {
       .status(HTTP_BAD_REQUEST)
       .json({ error: 'Missing required fields' })
 
-  console.log('ROLE IS : ', role_name)
+  //console.log('ROLE IS : ', role_name)
   if (!validate_email(email_id)) {
     return res.status(HTTP_BAD_REQUEST).json({ error: 'Invalid email' })
   }
@@ -749,7 +821,7 @@ router.post('/register', async (req, res) => {
             message: 'Internal server error; try again',
           })
         } else {
-          // console.log("Registration mail sent to admin!");
+          // //console.log("Registration mail sent to admin!");
           mailTransporter.sendMail(
             {
               from: 'dev.6amyoga@gmail.com',
@@ -928,7 +1000,7 @@ router.post('/register-google', async (req, res) => {
             message: 'Internal server error; try again',
           })
         } else {
-          // console.log("Registration mail sent to admin!");
+          // //console.log("Registration mail sent to admin!");
           mailTransporter.sendMail(
             {
               from: 'dev.6amyoga@gmail.com',
@@ -1003,7 +1075,7 @@ router.get('/countries', async (req, res) => {
     // Return the formatted response
     res.json(formattedCountries)
   } catch (error) {
-    console.log(error)
+    //console.log(error)
     res.status(500).json({ error: 'Failed to fetch country data' })
   }
 })

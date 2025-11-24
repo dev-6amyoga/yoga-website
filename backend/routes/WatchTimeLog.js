@@ -28,11 +28,11 @@ const {
 } = require('../services/WatchTimeLog.service')
 
 router.post('/update', authenticateToken, async (req, res) => {
-  console.log('WatchTime /update')
+  //console.log('WatchTime /update')
   const { user_id, institute_id, watch_time_logs, updated_at, playlist_id } =
     req.body
   if (!user_id || !watch_time_logs || institute_id === undefined) {
-    console.log('Missing required fields')
+    //console.log('Missing required fields')
     return res
       .status(HTTP_BAD_REQUEST)
       .json({ message: 'Missing required fields' })
@@ -48,14 +48,14 @@ router.post('/update', authenticateToken, async (req, res) => {
       session
     )
     if (!user_plan || error) {
-      console.log('User currenly has no active plan')
+      //console.log('User currenly has no active plan')
       await session.abortTransaction()
       await session.endSession()
       return res
         .status(HTTP_BAD_REQUEST)
         .json({ message: error || 'User currenly has no active plan' })
     }
-    console.log('User plan found', user_plan)
+    //console.log('User plan found', user_plan)
     let reduced_watch_time = []
     let total_watch_time = 0
     watch_time_logs.forEach((wtl) => {
@@ -194,7 +194,7 @@ router.post('/update', authenticateToken, async (req, res) => {
               data: { committed: true },
             })
           } catch (err) {
-            console.log(err)
+            //console.log(err)
             await t.rollback()
             await session.endSession()
             return res.status(HTTP_BAD_REQUEST).json({
@@ -203,7 +203,7 @@ router.post('/update', authenticateToken, async (req, res) => {
             })
           }
         } catch (err) {
-          console.log(err)
+          //console.log(err)
           return res
             .status(HTTP_INTERNAL_SERVER_ERROR)
             .json({ message: 'Something went wrong' })
@@ -217,7 +217,7 @@ router.post('/update', authenticateToken, async (req, res) => {
   } catch (error) {
     await session.abortTransaction()
     await session.endSession()
-    console.log(error)
+    //console.log(error)
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ message: error })
   }
 })
@@ -250,7 +250,7 @@ router.post('/get-logs', async (req, res) => {
     }
     return res.status(HTTP_OK).json({ watchTimeLog })
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ message: 'Something went wrong' })
@@ -303,7 +303,7 @@ router.post('/get-stats', async (req, res) => {
       watchTimePerMonth,
     })
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ message: 'Something went wrong' })
@@ -365,7 +365,7 @@ router.post('/get-quota', async (req, res) => {
     // map of user plan ids and their quotas
 
     quota.forEach((q) => {
-      // console.log(q.user_plan_id);
+      // //console.log(q.user_plan_id);
       if (mongoose.isValidObjectId(q.user_plan_id)) {
         let idx = custom_user_plans.findIndex(
           (x) => x._id.toString() === q.user_plan_id
@@ -373,7 +373,7 @@ router.post('/get-quota', async (req, res) => {
         if (idx !== -1) {
           custom_user_plans[idx].quota = q.quota
         }
-        // console.log(idx, custom_user_plans);
+        // //console.log(idx, custom_user_plans);
       } else {
         if (user_plan) {
           user_plan.quota = q.quota
@@ -383,7 +383,7 @@ router.post('/get-quota', async (req, res) => {
 
     return res.status(HTTP_OK).json({ user_plan, custom_user_plans })
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ message: 'Something went wrong' })
@@ -417,7 +417,7 @@ router.post('/get-plan', async (req, res) => {
 
     return res.status(HTTP_OK).json({ plan })
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ message: 'Something went wrong' })
@@ -442,7 +442,7 @@ router.post('/update-userplan', async (req, res) => {
 
     return res.status(HTTP_OK).json({ user_plan })
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ message: 'Something went wrong' })
@@ -479,7 +479,7 @@ router.get('/time-statistics', async (req, res) => {
         },
       },
     ])
-    console.log(aggregatedData)
+    //console.log(aggregatedData)
     res.json(aggregatedData)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -489,7 +489,7 @@ router.get('/time-statistics', async (req, res) => {
 // router.get('/time-statistics', async (req, res) => {
 //   try {
 //     const allWatchTime = await WatchTimeLog.find()
-//     console.log(allWatchTime)
+//     //console.log(allWatchTime)
 //     const aggregatedData = allWatchTime.reduce((acc, curr) => {
 //       const { asana_id, duration } = curr
 //       if (acc[asana_id]) {

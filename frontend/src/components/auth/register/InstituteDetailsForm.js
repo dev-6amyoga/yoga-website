@@ -200,7 +200,7 @@ export default function InstituteDetailsForm({
       setInfoSaved(true);
 
       toast("Progress saved!", { type: "success" });
-      // console.log(inst);
+      // //console.log(inst);
     },
     [
       setInstituteInfo,

@@ -31,7 +31,7 @@ export default function PickRegistationMode({
             containerProps={{}}
             onSuccess={async (credentialResponse) => {
               setLoading(true);
-              // console.log(credentialResponse);
+              // //console.log(credentialResponse);
               const jwt_token = credentialResponse.credential
                 ? credentialResponse.credential
                 : null;
@@ -77,7 +77,7 @@ export default function PickRegistationMode({
               if (email_verified) {
                 const email = payload.data.email;
                 const name = payload.data.name;
-                // console.log(email, name);
+                // //console.log(email, name);
                 setGoogleInfo({
                   jwt_token,
                   verified: true,

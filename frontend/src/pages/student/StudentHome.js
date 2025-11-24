@@ -136,7 +136,7 @@ function StudentHome() {
           setHasUserPlan(true);
         }
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     fetchPlanData();
@@ -291,7 +291,7 @@ function StudentHome() {
 //           setHasUserPlan(true);
 //         }
 //       } catch (err) {
-//         console.log(err);
+//         //console.log(err);
 //       }
 //     };
 //     fetchPlanData();

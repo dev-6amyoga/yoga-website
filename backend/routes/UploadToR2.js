@@ -59,15 +59,15 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
     let buffer = req.file
 
-    // console.log('[/upload] : python', python, typeof python)
-    console.log('[/upload] : file_name', file_name)
-    console.log('[/upload] : original size:', req.file.buffer.byteLength)
+    // //console.log('[/upload] : python', python, typeof python)
+    //console.log('[/upload] : file_name', file_name)
+    //console.log('[/upload] : original size:', req.file.buffer.byteLength)
 
     if (compressed) {
       buffer = zlib.gunzipSync(req.file.buffer)
       // buffer = await decompressedBlob.arrayBuffer()
 
-      console.log('[/upload] : decompressed size:  ', buffer.byteLength)
+      //console.log('[/upload] : decompressed size:  ', buffer.byteLength)
     }
 
     // let python = false
@@ -81,18 +81,18 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       let timeoutCount = 0
 
       while (uploadProcess.exitCode === null && timeoutCount < 300) {
-        console.log(
-          'Waiting for upload to complete',
-          timeoutCount,
-          uploadProcess.stdout.readable,
-          uploadProcess.stderr.readable,
-          uploadProcess.pid
-        )
+        //console.log(
+        //   'Waiting for upload to complete',
+        //   timeoutCount,
+        //   uploadProcess.stdout.readable,
+        //   uploadProcess.stderr.readable,
+        //   uploadProcess.pid
+        // )
 
         if (uploadProcess.stdout.readable) {
           const data = uploadProcess.stdout.read()
           if (data) {
-            console.log(`[/upload] : stdout: ${data}`)
+            //console.log(`[/upload] : stdout: ${data}`)
           }
         }
 
@@ -111,7 +111,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       if (uploadProcess.stdout.readable) {
         const data = uploadProcess.stdout.read()
         if (data) {
-          console.log(`[/upload] : stdout: ${data}`)
+          //console.log(`[/upload] : stdout: ${data}`)
         }
       }
 
@@ -124,12 +124,12 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       }
 
       if (timeoutCount >= 300) {
-        console.log('[/upload] : Timeout')
+        //console.log('[/upload] : Timeout')
         return res.status(500).json({ message: 'Failed to upload video' })
       }
 
       if (uploadProcess.exitCode === 0) {
-        console.log('[/upload] : Success, exit code:', uploadProcess.exitCode)
+        //console.log('[/upload] : Success, exit code:', uploadProcess.exitCode)
         return res.status(200).json({ message: 'File uploaded successfully' })
       }
 
@@ -172,7 +172,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
     const endTs = performance.now()
 
-    console.log('[/upload] : Time taken (js) :', endTs - startTs)
+    //console.log('[/upload] : Time taken (js) :', endTs - startTs)
 
     return res.status(HTTP_OK).json({
       message: 'File uploaded successfully',
@@ -232,8 +232,8 @@ router.post('/videos/process/', async (req, res) => {
   let folder_name = null
 
   try {
-    // console.log('foldername:', foldername)
-    // console.log('videos:', videos)
+    // //console.log('foldername:', foldername)
+    // //console.log('videos:', videos)
     videoRecording = await VideoRecordings.findById(video_recording_id)
 
     if (!videoRecording) {
@@ -251,7 +251,7 @@ router.post('/videos/process/', async (req, res) => {
       folder_name
     )
 
-    console.log(videosRes)
+    //console.log(videosRes)
 
     if (!videosRes.Contents || videosRes.Contents.length === 0) {
       return res.status(HTTP_BAD_REQUEST).json({
@@ -270,15 +270,15 @@ router.post('/videos/process/', async (req, res) => {
         : -1
     )
 
-    console.log(
-      'videos:',
-      videos.map((v) => v.Key)
-    )
+    //console.log(
+    //   'videos:',
+    //   videos.map((v) => v.Key)
+    // )
 
-    console.log(
-      'TOTAL BUFFER LENGTH : ',
-      videos.reduce((acc, v) => acc + v.Size, 0)
-    )
+    //console.log(
+    //   'TOTAL BUFFER LENGTH : ',
+    //   videos.reduce((acc, v) => acc + v.Size, 0)
+    // )
 
     // if (videos) {
     //   return res.status(HTTP_BAD_REQUEST).json({
@@ -296,7 +296,7 @@ router.post('/videos/process/', async (req, res) => {
 
     uploadId = multipartUpload.UploadId
 
-    console.log('uploadId:', uploadId)
+    //console.log('uploadId:', uploadId)
 
     const chunkSize = 10 * 1024 * 1024
 
@@ -328,16 +328,16 @@ router.post('/videos/process/', async (req, res) => {
       totalLen = buf.byteLength + leftoverBufferLen
       currentBufferPointer = 0
 
-      console.log('video:', videos[v].Key, buf.byteLength, totalLen)
+      //console.log('video:', videos[v].Key, buf.byteLength, totalLen)
 
       while (totalLen >= chunkSize) {
-        console.log({
-          leftoverBufferLen,
-          sizeOfleftoverBuffer: leftoverBuffer.byteLength,
-          totalLen,
-          partNumber,
-          subpartNumber,
-        })
+        //console.log({
+        //   leftoverBufferLen,
+        //   sizeOfleftoverBuffer: leftoverBuffer.byteLength,
+        //   totalLen,
+        //   partNumber,
+        //   subpartNumber,
+        // })
 
         if (leftoverBufferLen > 0) {
           const partBuf = Buffer.concat([
@@ -345,7 +345,7 @@ router.post('/videos/process/', async (req, res) => {
             buf.subarray(0, chunkSize - leftoverBufferLen),
           ])
 
-          console.log('partBuf size : ', partBuf.byteLength)
+          //console.log('partBuf size : ', partBuf.byteLength)
 
           const uploadRes = await cloudflareUploadPart(
             'yoga-video-recordings',
@@ -368,12 +368,12 @@ router.post('/videos/process/', async (req, res) => {
             currentBufferPointer + chunkSize
           )
 
-          console.log('partBuf : ', {
-            start: currentBufferPointer,
-            end: currentBufferPointer + chunkSize,
-            buf_size: buf.byteLength,
-            partBuf_size: partBuf.byteLength,
-          })
+          //console.log('partBuf : ', {
+          //   start: currentBufferPointer,
+          //   end: currentBufferPointer + chunkSize,
+          //   buf_size: buf.byteLength,
+          //   partBuf_size: partBuf.byteLength,
+          // })
 
           const uploadRes = await cloudflareUploadPart(
             'yoga-video-recordings',
@@ -397,9 +397,9 @@ router.post('/videos/process/', async (req, res) => {
       }
 
       if (totalLen > 0) {
-        console.log('totalLen > 0; calc leftoverBuffer', { totalLen })
+        //console.log('totalLen > 0; calc leftoverBuffer', { totalLen })
         if (subpartNumber === 0) {
-          console.log('totalLen > 0, subpartNumber === 0', subpartNumber)
+          //console.log('totalLen > 0, subpartNumber === 0', subpartNumber)
           if (leftoverBuffer.byteLength > 0) {
             leftoverBuffer = Buffer.concat([
               leftoverBuffer,
@@ -409,13 +409,13 @@ router.post('/videos/process/', async (req, res) => {
             leftoverBuffer = buf.subarray(0, totalLen)
           }
         } else {
-          console.log(
-            'totalLen > 0, subpartNumber !== 0',
-            subpartNumber,
-            buf.byteLength,
-            subpartNumber * chunkSize,
-            buf.byteLength - subpartNumber * chunkSize
-          )
+          //console.log(
+          //   'totalLen > 0, subpartNumber !== 0',
+          //   subpartNumber,
+          //   buf.byteLength,
+          //   subpartNumber * chunkSize,
+          //   buf.byteLength - subpartNumber * chunkSize
+          // )
           leftoverBuffer = buf.subarray(
             buf.byteLength - totalLen,
             buf.byteLength
@@ -425,8 +425,8 @@ router.post('/videos/process/', async (req, res) => {
       }
     }
 
-    console.log('out of loop')
-    console.log({ leftoverBufferLen, totalLen, partNumber, subpartNumber })
+    //console.log('out of loop')
+    //console.log({ leftoverBufferLen, totalLen, partNumber, subpartNumber })
 
     // if (totalLen > 0 && totalLen < chunkSize && buf.byteLength > 0) {
     //   leftoverBuffer = buf
@@ -435,7 +435,7 @@ router.post('/videos/process/', async (req, res) => {
 
     // upload the last part
     if (leftoverBufferLen > 0) {
-      console.log('uploading leftover buffer:', leftoverBufferLen)
+      //console.log('uploading leftover buffer:', leftoverBufferLen)
       const uploadRes = await cloudflareUploadPart(
         'yoga-video-recordings',
         `${folder_name}/${folder_name}_final.mp4`,
@@ -474,16 +474,16 @@ router.post('/videos/process/', async (req, res) => {
 
     // const buffers = videoData.map((v) => v.buffer)
 
-    // console.log('buffers processed:', buffers.length)
+    // //console.log('buffers processed:', buffers.length)
 
     // for (let v = 0; v < videoData.length; v += 1) {
-    //   console.log('video:', videoData[v].Key, videoData[v].buffer.byteLength)
+    //   //console.log('video:', videoData[v].Key, videoData[v].buffer.byteLength)
     // }
 
     // // merge all videos into one buffer in order
     // const combinedBuffer = Buffer.concat(buffers)
 
-    // console.log('combined buffer size:', combinedBuffer.byteLength)
+    // //console.log('combined buffer size:', combinedBuffer.byteLength)
 
     /*
     const readableBuffer = Readable.from(combinedBuffer)
@@ -514,7 +514,7 @@ router.post('/videos/process/', async (req, res) => {
     })
 
     while (status === 0) {
-      console.log('waiting for ffmpeg to complete')
+      //console.log('waiting for ffmpeg to complete')
       await sleep(1000)
     }
 
@@ -528,7 +528,7 @@ router.post('/videos/process/', async (req, res) => {
     // get buffer from file
     const processedBuffer = fs.readFileSync(`video.mp4`)
 
-    console.log('processed buffer size:', processedBuffer.byteLength)
+    //console.log('processed buffer size:', processedBuffer.byteLength)
 
     await cloudflareAddFileToBucket(
       'yoga-video-recordings',
@@ -580,7 +580,7 @@ router.post('/videos/process/', async (req, res) => {
 })
 
 router.post('/videos/process-ffmpeg', async (req, res) => {
-  console.log('ffmpeg processing request')
+  //console.log('ffmpeg processing request')
   const { video_recording_id } = req.body
 
   console.info('video_recording_id', video_recording_id)
@@ -596,8 +596,8 @@ router.post('/videos/process-ffmpeg', async (req, res) => {
   let folder_name = null
 
   try {
-    // console.log('foldername:', foldername)
-    // console.log('videos:', videos)
+    // //console.log('foldername:', foldername)
+    // //console.log('videos:', videos)
     videoRecording = await VideoRecordings.findById(video_recording_id)
 
     if (!videoRecording) {
@@ -655,7 +655,7 @@ router.post('/videos/process-ffmpeg', async (req, res) => {
     let maxWaitTime = 17 * 60
 
     command.on('progress', (progress) => {
-      console.log(`Processing: ${JSON.stringify(progress)}`)
+      //console.log(`Processing: ${JSON.stringify(progress)}`)
     })
 
     command.on('end', () => {
@@ -670,7 +670,7 @@ router.post('/videos/process-ffmpeg', async (req, res) => {
     })
 
     while (status === -1 && maxWaitTime > 0) {
-      console.log('waiting for ffmpeg to complete')
+      //console.log('waiting for ffmpeg to complete')
       maxWaitTime -= 1
       await sleep(1000)
     }
@@ -694,7 +694,7 @@ router.post('/videos/process-ffmpeg', async (req, res) => {
     // get buffer from file
     const processedBuffer = fs.readFileSync(`video.mp4`)
 
-    console.log('processed buffer size:', processedBuffer.byteLength)
+    //console.log('processed buffer size:', processedBuffer.byteLength)
 
     await cloudflareAddFileToBucket(
       'yoga-video-recordings',

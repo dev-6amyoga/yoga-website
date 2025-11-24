@@ -9,7 +9,7 @@ const ClassHistory = require('../models/mongo/ClassHistory')
 
 const handleTeacherConnection = (ws) => {
   ws.on('message', async (msg) => {
-    console.log('[WS] /teacher : ping', msg)
+    //console.log('[WS] /teacher : ping', msg)
     // parse message
 
     const event = JSON.parse(msg)
@@ -31,7 +31,7 @@ const handleTeacherConnection = (ws) => {
       )
     }
 
-    console.log('here1', type, data, event_time, class_history_id)
+    //console.log('here1', type, data, event_time, class_history_id)
 
     const mt = await mongoose.startSession()
 
@@ -39,7 +39,7 @@ const handleTeacherConnection = (ws) => {
 
     try {
       // find class history object
-      console.log('here2')
+      //console.log('here2')
 
       const { sub_type, data: sub_type_data } = data
 
@@ -60,7 +60,7 @@ const handleTeacherConnection = (ws) => {
           )
 
           if (!classHistory) {
-            console.log('here4')
+            //console.log('here4')
             await mt.abortTransaction()
             await mt.endSession()
             ws.send(
@@ -70,16 +70,16 @@ const handleTeacherConnection = (ws) => {
               })
             )
 
-            console.log('here5')
+            //console.log('here5')
 
             return null
           }
         } else if (sub_type === EVENT_QUEUE_POP) {
-          console.log('--pop')
+          //console.log('--pop')
         } else if (type === EVENT_QUEUE_CLEAR) {
-          console.log('--clear')
+          //console.log('--clear')
         } else {
-          console.log('here6')
+          //console.log('here6')
           await mt.abortTransaction()
           await mt.endSession()
           ws.send(
@@ -112,17 +112,17 @@ const handleTeacherConnection = (ws) => {
   })
 
   ws.on('open', () => {
-    console.log('[WS] /teacher : open')
+    //console.log('[WS] /teacher : open')
   })
 }
 
 const handleStudentConnection = (ws) => {
   ws.on('message', (msg) => {
-    console.log('[WS] /student : ping', msg)
+    //console.log('[WS] /student : ping', msg)
   })
 
   ws.on('open', () => {
-    console.log('[WS] /student : open')
+    //console.log('[WS] /student : open')
   })
 }
 

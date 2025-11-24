@@ -86,14 +86,14 @@ export default function Register({ switchForm }) {
             toast.success("Email verified successfully!");
             setCheckEmailVerification(false);
           } else {
-            console.log("Error verifying email; Retrying...");
+            //console.log("Error verifying email; Retrying...");
           }
         } else {
-          console.log("Error verifying email; Retrying...");
+          //console.log("Error verifying email; Retrying...");
         }
         return null;
       } catch (err) {
-        console.log("Error verifying email; Retrying...");
+        //console.log("Error verifying email; Retrying...");
         return null;
       }
     },
@@ -126,7 +126,7 @@ export default function Register({ switchForm }) {
           is_google_login: !!googleInfo?.verified,
         };
 
-        console.log(newUser);
+        //console.log(newUser);
         let url = "/auth/register";
         if (googleInfo?.verified) {
           url += "-google";
@@ -156,7 +156,7 @@ export default function Register({ switchForm }) {
           role_name: "TEACHER",
           is_google_login: !!googleInfo?.verified,
         };
-        console.log(newUser);
+        //console.log(newUser);
         let url = "/auth/register";
         if (googleInfo?.verified) {
           url += "-google";
@@ -189,7 +189,13 @@ export default function Register({ switchForm }) {
 
   useEffect(() => {
     if (user?.user_id && role === "STUDENT") {
-      navigate("/student/free-videos");
+      // Route based on active plan
+      const userPlanData = useUserStore.getState().userPlan;
+      if (userPlanData?.plan_id) {
+        navigate("/student/join-class");
+      } else {
+        navigate("/student/purchase-a-plan");
+      }
     }
   }, [user, role]);
 

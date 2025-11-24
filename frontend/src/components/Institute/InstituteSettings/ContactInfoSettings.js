@@ -34,7 +34,7 @@ export default function ContactInfoSettings() {
       formData.phone = currentInstitute?.phone;
     }
 
-    // console.log({
+    // //console.log({
     //     ...currentInstitute,
     //     ...formData,
     // });
@@ -60,7 +60,7 @@ export default function ContactInfoSettings() {
               toast("Institute updated successfully", {
                 type: "success",
               });
-              // console.log({ res: res.data });
+              // //console.log({ res: res.data });
               updateInstitute(res.data);
             } else {
               toast("Error updating institute; retry", {
@@ -73,7 +73,7 @@ export default function ContactInfoSettings() {
         }
       })
       .catch((err) => {
-        console.log(err);
+        //console.log(err);
         toast("Error updating institute", { type: "error" });
       });
   };

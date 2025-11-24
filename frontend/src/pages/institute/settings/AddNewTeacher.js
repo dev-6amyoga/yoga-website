@@ -28,7 +28,7 @@ function AddNewTeacher() {
     ])
   );
   useEffect(() => {
-    console.log(user.user_id);
+    //console.log(user.user_id);
     Fetch({
       url: "/user-plan/get-user-institute-plan-by-id",
       method: "POST",

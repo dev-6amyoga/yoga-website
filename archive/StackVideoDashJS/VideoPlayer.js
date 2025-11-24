@@ -79,7 +79,7 @@ function VideoPlayer() {
   // set player video ref
   useEffect(() => {
     if (currentVideo) {
-      console.log("SETTING PLAYER VIDEO CURRENT -> ", currentVideo);
+      //console.log("SETTING PLAYER VIDEO CURRENT -> ", currentVideo);
       playerVideo.current = currentVideo;
     } else {
       playerVideo.current = null;
@@ -105,7 +105,7 @@ function VideoPlayer() {
   }, [setCurrentMarkerIdx, setDuration, setPauseReason, setCurrentTime]);
 
   const handleEnd = useCallback(() => {
-    // console.log("Video ended ------------------>");
+    // //console.log("Video ended ------------------>");
     const state = useVideoStore.getState();
 
     let currentMarker = null;
@@ -123,19 +123,19 @@ function VideoPlayer() {
     // check if teaching mode, loopback to previous marker
     if (state.viewMode === VIDEO_VIEW_TEACHING_MODE) {
       if (currentMarker && currentMarker?.loop) {
-        console.log("VIDEO END : TEACHING MODE: moving to ", currentMarker);
+        //console.log("VIDEO END : TEACHING MODE: moving to ", currentMarker);
         addToSeekQueue({
           t: currentMarker?.timestamp || 0,
           type: SEEK_TYPE_MOVE,
         });
         return;
       }
-      console.log("VIDEO END : TEACHING MODE: popping video, marker null");
+      //console.log("VIDEO END : TEACHING MODE: popping video, marker null");
 
       handleReset();
       popFromQueue(0);
     } else {
-      console.log("VIDEO END : STUDENT MODE: popping video");
+      //console.log("VIDEO END : STUDENT MODE: popping video");
       // if student mode, pop from queue
       handleReset();
       popFromQueue(0);
@@ -144,7 +144,7 @@ function VideoPlayer() {
 
   const handleSetPlay = useCallback(
     (isActive) => {
-      console.log("SETTING VIDEO STATE TO PLAY ------------>");
+      //console.log("SETTING VIDEO STATE TO PLAY ------------>");
 
       if (isActive) {
         let state = useVideoStore.getState();
@@ -155,7 +155,7 @@ function VideoPlayer() {
 
         if (videoState === STATE_VIDEO_PAUSED) {
           if (pauseReason === VIDEO_PAUSE_MARKER) {
-            console.log("VIDEO PLAY : PAUSE REASON MARKER");
+            //console.log("VIDEO PLAY : PAUSE REASON MARKER");
             // autoSetCurrentMarkerIdx()
             // set next marker
             setCurrentMarkerIdx((currentMarkerIdx + 1) % markersLength);
@@ -173,7 +173,7 @@ function VideoPlayer() {
 
   const handleSetPause = useCallback(
     (isActive) => {
-      console.log("SETTING VIDEO STATE TO PAUSE ------------>");
+      //console.log("SETTING VIDEO STATE TO PAUSE ------------>");
       if (isActive) {
         setVideoState(STATE_VIDEO_PAUSED);
       }
@@ -194,7 +194,7 @@ function VideoPlayer() {
   );
 
   const handlePlaybackError = useCallback(() => {
-    console.log("Error playing video ------------------->");
+    //console.log("Error playing video ------------------->");
     if (useVideoStore.getState().isActive) {
       setVideoState(STATE_VIDEO_ERROR);
     }
@@ -232,7 +232,7 @@ function VideoPlayer() {
       clearTimeout(timeout);
     }
     if (queue.length > 0) {
-      console.log("VIDEOPLAYER.js : Setting first video");
+      //console.log("VIDEOPLAYER.js : Setting first video");
       setVideos((prevVideos) => {
         if (queue.length > 0) {
           const firstVideo = queue[0];
@@ -243,7 +243,7 @@ function VideoPlayer() {
         }
       });
       timeout = setTimeout(() => {
-        console.log("VIDEOPLAYER.js : Setting second video");
+        //console.log("VIDEOPLAYER.js : Setting second video");
         setVideos((prevVideos) => {
           if (queue.length > 1) {
             const secondVideo = queue[1];
@@ -266,12 +266,14 @@ function VideoPlayer() {
 
   useEffect(() => {
     if (currentVideo) {
-      console.log(currentVideo.queue_id);
+      //console.log(currentVideo.queue_id);
     }
   }, [currentVideo, queue]);
   return (
     <div
-      className={`hover:cursor-pointer bg-black w-full ${fullScreen ? "h-screen" : "rounded-xl overflow-hidden"}`}
+      className={`hover:cursor-pointer bg-black w-full ${
+        fullScreen ? "h-screen" : "rounded-xl overflow-hidden"
+      }`}
     >
       <div className={`mx-auto aspect-video ${fullScreen ? "h-full" : ""}`}>
         {currentVideo ? (

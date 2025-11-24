@@ -50,13 +50,13 @@ export const withAuth = (Component, ...roles) => {
     }, []);
 
     useEffect(() => {
-      // console.log("withAuth : userChanged");
+      // //console.log("withAuth : userChanged");
       // if user is there, check if role is valid
       if (finishedLoading) {
         if (user) {
-          // console.log(user, "IN WITH AUTH");
-          // console.log(roles, " IN WITH AUTH");
-          // console.log(currentRole, "IN WITH AUTH");
+          // //console.log(user, "IN WITH AUTH");
+          // //console.log(roles, " IN WITH AUTH");
+          // //console.log(currentRole, "IN WITH AUTH");
           // if role is null, show the component [authenticated+public]
           if (roles.includes(null)) {
             setShow(true);
@@ -72,7 +72,7 @@ export const withAuth = (Component, ...roles) => {
         } else {
           if (queryClient.isFetching({ queryKey: ["user"] })) {
             // alert("fetching");
-            console.log("fetching");
+            //console.log("fetching");
             setFinishLoading(false);
             return;
           }
@@ -89,7 +89,7 @@ export const withAuth = (Component, ...roles) => {
     }, [user, currentRole, location, navigate, finishedLoading]);
 
     // useEffect(() => {
-    // 	console.log("withAuth : userChanged");
+    // 	//console.log("withAuth : userChanged");
     // }, [user]);
 
     return (

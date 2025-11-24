@@ -42,5 +42,5 @@ const getInfo = async () => {
 
 getInfo()
   .then((res) => fs.writeFile("new_files.json", res))
-  .then((res) => console.log("written to file"))
+  .then((res) => //console.log("written to file"))
   .catch((err) => console.error(err));

@@ -35,7 +35,7 @@ function TeacherTransactions() {
         );
         setTransactions(data.all_transaction_for_user);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     if (user) {

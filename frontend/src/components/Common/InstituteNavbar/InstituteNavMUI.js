@@ -56,7 +56,7 @@
 //   ]);
 
 //   const handleInstituteSelection = (value) => {
-//     console.log("Selected Institute:", value);
+//     //console.log("Selected Institute:", value);
 //     setCurrentInstituteId(parseInt(value));
 //   };
 
@@ -76,7 +76,7 @@
 //     },
 //     retry: 5,
 //     onError: (error) => {
-//       console.log("Logout Error:", error);
+//       //console.log("Logout Error:", error);
 //       toast.error("Logout Error; Please try again");
 //     },
 //   });

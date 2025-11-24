@@ -52,19 +52,19 @@ export default function Pricing({
           method: "GET",
         });
         const data = response.data;
-        console.log(data.currencies);
+        //console.log(data.currencies);
         const inrCurrency = data.currencies.find(
           (currency) => currency.short_tag === selectedCurrency
         );
         if (inrCurrency) {
           setCurrentCurrencyId(inrCurrency.currency_id);
         } else {
-          console.log("currency not found");
+          //console.log("currency not found");
         }
 
         setAllCurrencies(data.currencies);
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     fetchData();
@@ -115,7 +115,7 @@ export default function Pricing({
       <div className="my-10 grid w-full grid-cols-1 place-content-center place-items-center gap-4 md:grid-cols-3 lg:gap-8">
         {allPlans?.map((plan) => {
           let selectedPricing;
-          console.log(plan);
+          //console.log("plan is:", plan);
           if (plan.pricing) {
             selectedPricing = plan.pricing.find(
               (x) => x.currency.short_tag === selectedCurrency
@@ -123,6 +123,7 @@ export default function Pricing({
           } else {
             selectedPricing = Number(plan.prices[0][currentCurrencyId]);
           }
+          //console.log(selectedPricing, "selectedPricing");
           return (
             <>
               {plan.name && (
@@ -480,7 +481,7 @@ export default function Pricing({
                             otherNeed: otherNeed,
                             plan: plan,
                           };
-                          console.log(data);
+                          //console.log(data);
                           subscribePlan(data);
                         }}
                       >

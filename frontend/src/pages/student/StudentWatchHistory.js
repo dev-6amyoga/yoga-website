@@ -49,11 +49,11 @@ function StudentWatchHistory() {
       .then((res) => {
         if (res.status === 200) {
           setWatchHistory(res.data.watchHistory);
-          console.log(res.data.watchHistory);
+          //console.log(res.data.watchHistory);
         }
       })
       .catch((err) => {
-        console.log(err);
+        //console.log(err);
         toast("Error fetching watch history", {
           type: "error",
         });
@@ -71,14 +71,14 @@ function StudentWatchHistory() {
     })
       .then((res) => {
         if (res.status === 200) {
-          console.log(res.data?.watchTimePerMonth);
+          //console.log(res.data?.watchTimePerMonth);
           setWatchTimeAll(res.data?.watchTimeAll ?? 0);
           setWatchTimeToday(res.data?.watchTimeToday ?? 0);
           setWatchTimePerMonth(res.data?.watchTimePerMonth ?? []);
         }
       })
       .catch((err) => {
-        console.log(err);
+        //console.log(err);
         toast("Error fetching watch time", {
           type: "error",
         });
@@ -96,7 +96,7 @@ function StudentWatchHistory() {
     })
       .then((res) => {
         if (res.status === 200) {
-          console.log(res.data);
+          //console.log(res.data);
           setWatchTimeLimit(res.data?.user_plan?.plan?.watch_time_limit);
           setActivePlan(res.data?.user_plan?.plan?.name);
           setWatchTimeQuota(res.data?.user_plan?.quota);
@@ -106,7 +106,7 @@ function StudentWatchHistory() {
         }
       })
       .catch((err) => {
-        console.log(err);
+        //console.log(err);
         // toast('Error fetching watch time', {
         //     type: 'error',
         // })
@@ -138,7 +138,7 @@ function StudentWatchHistory() {
   }, [watchTimeToday]);
 
   function convertSecondsToHMS(totalSeconds) {
-    console.log({ totalSeconds });
+    //console.log({ totalSeconds });
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = (totalSeconds % 60).toFixed();
@@ -146,10 +146,10 @@ function StudentWatchHistory() {
   }
 
   const formatHMS = useMemo(() => {
-    // console.log({ activePlan });
+    // //console.log({ activePlan });
     const done = convertSecondsToHMS(userPlan?.quota);
     const { hours, minutes, seconds } = done;
-    // console.log(done, watchTimeQuota, watchTimeAll);
+    // //console.log(done, watchTimeQuota, watchTimeAll);
 
     const hh = String(hours).padStart(2, "0");
     const mm = String(minutes).padStart(2, "0");
@@ -178,7 +178,7 @@ function StudentWatchHistory() {
 
     if (customUserPlans.length > 0) {
       customUserPlans.forEach((plan) => {
-        // console.log(plan.quota);
+        // //console.log(plan.quota);
         const { hours, minutes, seconds } = convertSecondsToHMS(plan.quota);
 
         const hh = String(hours).padStart(2, "0");

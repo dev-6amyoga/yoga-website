@@ -51,7 +51,7 @@ function VideoPlayer() {
 	};
 
 	const handleEnd = () => {
-		console.log("Video ended ------------------>");
+		//console.log("Video ended ------------------>");
 		let currentMarker = null;
 
 		if (
@@ -66,9 +66,9 @@ function VideoPlayer() {
 
 		// check if teaching mode, loopback to previous marker
 		if (videoStore.viewMode === VIDEO_VIEW_TEACHING_MODE) {
-			console.log("VIDEO ENDED : TEACHING MODE: ", currentMarker);
+			//console.log("VIDEO ENDED : TEACHING MODE: ", currentMarker);
 			if (currentMarker && currentMarker?.loop) {
-				console.log(
+				//console.log(
 					"VIDEO END : TEACHING MODE: moving to ",
 					currentMarker
 				);
@@ -78,14 +78,14 @@ function VideoPlayer() {
 				});
 				return;
 			}
-			console.log(
+			//console.log(
 				"VIDEO END : TEACHING MODE: popping video, marker null"
 			);
 
 			handleReset();
 			popFromQueue(0);
 		} else {
-			console.log("VIDEO ENDED : STUDENT MODE: popping video");
+			//console.log("VIDEO ENDED : STUDENT MODE: popping video");
 			// if student mode, pop from queue
 			handleReset();
 			popFromQueue(0);
@@ -93,7 +93,7 @@ function VideoPlayer() {
 	};
 
 	const handleSetPlay = (isActive) => {
-		console.log("SETTING VIDEO STATE TO PLAY ------------>");
+		//console.log("SETTING VIDEO STATE TO PLAY ------------>");
 
 		if (isActive) {
 			let videoState = videoStore.videoState;
@@ -103,7 +103,7 @@ function VideoPlayer() {
 
 			if (videoState === STATE_VIDEO_PAUSED) {
 				if (pauseReason === VIDEO_PAUSE_MARKER) {
-					console.log("VIDEO PLAY : PAUSE REASON MARKER");
+					//console.log("VIDEO PLAY : PAUSE REASON MARKER");
 					// autoSetCurrentMarkerIdx()
 					// set next marker
 					setCurrentMarkerIdx((currentMarkerIdx + 1) % markersLength);
@@ -118,7 +118,7 @@ function VideoPlayer() {
 	};
 
 	const handleSetPause = (isActive) => {
-		console.log("SETTING VIDEO STATE TO PAUSE ------------>");
+		//console.log("SETTING VIDEO STATE TO PAUSE ------------>");
 		if (isActive) {
 			setVideoState(STATE_VIDEO_PAUSED);
 		}
@@ -133,19 +133,19 @@ function VideoPlayer() {
 	};
 
 	const handlePlaybackError = (isActive) => {
-		console.log("Error playing video ------------------->");
+		//console.log("Error playing video ------------------->");
 		if (isActive) {
 			setVideoState(STATE_VIDEO_ERROR);
 		}
 	};
 
 	const handleStartPlaylist = () => {
-		console.log(videoStore.currentVideo, playlistStore.queue.length);
+		//console.log(videoStore.currentVideo, playlistStore.queue.length);
 		if (
 			videoStore.currentVideo === null &&
 			playlistStore.queue.length > 0
 		) {
-			console.log("Playlist start --------------------->");
+			//console.log("Playlist start --------------------->");
 			setPlaylistState(false);
 			setTimeout(() => {
 				setPlaylistState(true);
@@ -178,7 +178,7 @@ function VideoPlayer() {
 			// dependencies
 			[() => playlistStore.queue, () => videoStore.playlistState],
 			() => {
-				console.log(
+				//console.log(
 					"Queue or playlistState changed : ",
 					videoStore.playlistState
 				);
@@ -201,7 +201,7 @@ function VideoPlayer() {
 		on(
 			() => playlistStore.queue,
 			(q) => {
-				console.log("Queue changed : called", q);
+				//console.log("Queue changed : called", q);
 				let timeout = null;
 
 				if (timeout) {
@@ -209,7 +209,7 @@ function VideoPlayer() {
 				}
 
 				if (q.length > 0) {
-					console.log("VIDEOPLAYER.js : Setting first video");
+					//console.log("VIDEOPLAYER.js : Setting first video");
 					setVideos((prevVideos) => {
 						if (q.length > 0) {
 							const firstVideo = q[0];
@@ -220,7 +220,7 @@ function VideoPlayer() {
 						}
 					});
 					timeout = setTimeout(() => {
-						console.log("VIDEOPLAYER.js : Setting second video");
+						//console.log("VIDEOPLAYER.js : Setting second video");
 						setVideos((prevVideos) => {
 							if (q.length > 1) {
 								const secondVideo = q[1];
@@ -248,7 +248,7 @@ function VideoPlayer() {
 			const currentVideo = v[0];
 
 			if (currentVideo && currentVideo) {
-				console.log(currentVideo.queue_id);
+				//console.log(currentVideo.queue_id);
 			}
 		})
 	);

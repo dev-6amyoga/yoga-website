@@ -100,7 +100,7 @@ router.post('/create', async (req, res) => {
       }
     )
 
-    // console.log('classObj:', classObj)
+    // //console.log('classObj:', classObj)
 
     if (class_type === CLASS_TYPE_ONETIME) {
       await ClassHistory.create(
@@ -249,11 +249,11 @@ router.post('/student/get-all', async (req, res) => {
       if (classObj.allowed_students.includes(String(user_id))) {
         finalList.push(classes[i])
       } else {
-        console.log(classObj.allowed_students)
+        //console.log(classObj.allowed_students)
       }
     }
-    console.log(user_id)
-    console.log(finalList)
+    //console.log(user_id)
+    //console.log(finalList)
     return res.status(HTTP_OK).json(finalList)
   } catch (error) {
     console.error(error)
@@ -371,7 +371,7 @@ router.post('/start', async (req, res) => {
 router.post('/get-history', async (req, res) => {
   const { class_id } = req.body
 
-  console.log(class_id)
+  //console.log(class_id)
 
   if (!class_id) {
     return res.status(HTTP_BAD_REQUEST).json({
@@ -386,7 +386,7 @@ router.post('/get-history', async (req, res) => {
 
     return res.status(HTTP_OK).json({ class_history: class_history_records })
   } catch (error) {
-    console.log(error)
+    //console.log(error)
 
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
       error: 'Failed to fetch class history',
@@ -410,7 +410,7 @@ router.post('/get-latest-history', async (req, res) => {
 
     return res.status(HTTP_OK).json({ class_history: class_history_record })
   } catch (error) {
-    console.log(error)
+    //console.log(error)
 
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
       error: 'Failed to fetch class history',

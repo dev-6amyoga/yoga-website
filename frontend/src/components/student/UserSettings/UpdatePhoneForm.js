@@ -78,7 +78,7 @@ export default function UpdatePhoneForm() {
     queryFn: async () => {
       const [res, error] = await UserAPI.postGetUserByID(user?.user_id);
 
-      console.log(res.user);
+      //console.log(res.user);
 
       if (error) {
         toast(error.message, { type: "error" });
@@ -111,7 +111,7 @@ export default function UpdatePhoneForm() {
   const handleUpdatePhone = async (e) => {
     e.preventDefault();
 
-    console.log("Update phone called");
+    //console.log("Update phone called");
 
     if (phone === "" || phone === undefined) {
       toast("Phone is required", { type: "error" });
@@ -137,7 +137,7 @@ export default function UpdatePhoneForm() {
       },
     })
       .then((res) => {
-        console.log(res);
+        //console.log(res);
         toast("Updated!", { type: "success" });
         handleReset();
         refetchUser();
@@ -154,7 +154,7 @@ export default function UpdatePhoneForm() {
     if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
 
     inputErrorDebounce.current = setTimeout(async () => {
-      console.log("Checking phone number");
+      //console.log("Checking phone number");
 
       if (phone) {
         const [is_phone_valid, phone_error] = await validatePhone(phone);
@@ -270,7 +270,7 @@ export default function UpdatePhoneForm() {
         <PhoneInputWithCountrySelect
           value={phone}
           onChange={(val) => {
-            console.log(val);
+            //console.log(val);
             setPhone(val);
           }}
           disabled={!isEditing || verified || resendCounter > 0}

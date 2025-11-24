@@ -24,7 +24,7 @@ import { VIDEO_PAUSE_MARKER } from "../../../enums/video_pause_reasons";
 import { VIDEO_VIEW_STUDENT_MODE } from "../../../enums/video_view_modes";
 import DPSingle from "./DPSingle";
 
-// console.log(STATE_VIDEO_LOADING);
+// //console.log(STATE_VIDEO_LOADING);
 
 function StreamItem(props) {
 	// const user = useUserStore((state) => state.user);
@@ -56,17 +56,17 @@ function StreamItem(props) {
 
 	// createEffect(
 	// 	on([() => props.isActive, () => props.video], () => {
-	// 		console.log(props.video, props.isActive);
+	// 		//console.log(props.video, props.isActive);
 
 	// 		if (props.isActive) {
-	// 			console.log(playerRef(), "IS REF!"); // If needed for debugging
+	// 			//console.log(playerRef(), "IS REF!"); // If needed for debugging
 	// 			if (playerRef().current.player !== null) {
 	// 				playerRef().current.player.preload();
 	// 			}
 	// 		} else {
-	// 			console.log(playerRef(), "IS REF NON ACTIVE");
+	// 			//console.log(playerRef(), "IS REF NON ACTIVE");
 	// 		}
-	// 		console.log({
+	// 		//console.log({
 	// 			propsIsActive: props.isActive,
 	// 			videoidx: props.video?.idx,
 	// 		});
@@ -98,7 +98,7 @@ function StreamItem(props) {
 		on([() => props.isActive, () => videoStore.seekQueue], () => {
 			if (props.isActive && videoStore.seekQueue.length > 0) {
 				const seekEvent = videoStore.seekQueue[0];
-				console.log("SEEKING --->", seekEvent);
+				//console.log("SEEKING --->", seekEvent);
 				if (seekEvent && playerRef().current) {
 					switch (seekEvent.type) {
 						case SEEK_TYPE_SEEK: {
@@ -206,7 +206,7 @@ function StreamItem(props) {
 								?.timestamp
 						) {
 							if (currentMarker?.loop) {
-								console.log("LOOPING CUZ OF MARKER");
+								//console.log("LOOPING CUZ OF MARKER");
 								addToSeekQueue({
 									type: SEEK_TYPE_MARKER,
 									t: currentMarker?.timestamp,
@@ -216,7 +216,7 @@ function StreamItem(props) {
 								if (
 									videoStore.videoState !== STATE_VIDEO_PAUSED
 								) {
-									console.log("PAUSING CUZ OF MARKER");
+									//console.log("PAUSING CUZ OF MARKER");
 									setVideoState(STATE_VIDEO_PAUSED);
 									setPauseReason(VIDEO_PAUSE_MARKER);
 								}
@@ -231,7 +231,7 @@ function StreamItem(props) {
 					videoStore.videoState !== STATE_VIDEO_ERROR &&
 					videoStore.videoState !== STATE_VIDEO_LOADING
 				) {
-					console.log("createEffect : initializing interval timer");
+					//console.log("createEffect : initializing interval timer");
 					intervalTimer = setInterval(() => {
 						if (playerRef().current?.videoElement) {
 							if (
@@ -282,7 +282,7 @@ function StreamItem(props) {
 									-0.05
 							) {
 								if (videoStore.videoEvents.length === 0) {
-									console.log(
+									//console.log(
 										"[StreamStackItem] Video event play inactive",
 										{
 											currentTime:
@@ -308,7 +308,7 @@ function StreamItem(props) {
 				}
 
 				onCleanup(() => {
-					console.log("createEffect : cleaning up interval timer");
+					//console.log("createEffect : cleaning up interval timer");
 					if (intervalTimer) clearInterval(intervalTimer);
 				});
 			}
@@ -319,7 +319,7 @@ function StreamItem(props) {
 	// 	(user_id) => {
 	// 		const watch_time_logs = [...watchTimeBuffer];
 
-	// 		// console.log({ watch_time_logs });
+	// 		// //console.log({ watch_time_logs });
 	// 		if (watch_time_logs.length === 0) {
 	// 			return;
 	// 		}
@@ -336,11 +336,11 @@ function StreamItem(props) {
 	// 		})
 	// 			.then((res) => {
 	// 				if (res.status === 200) {
-	// 					console.log("watch time buffer flushed");
+	// 					//console.log("watch time buffer flushed");
 	// 				}
 	// 			})
 	// 			.catch((err) => {
-	// 				//console.log(err);
+	// 				////console.log(err);
 	// 				// localStorage.setItem(
 	// 				// 	"6amyoga_watch_time_logs",
 	// 				// 	JSON.stringify(watch_time_logs)
@@ -365,19 +365,19 @@ function StreamItem(props) {
 
 	// props.video events
 	const handleVideoSeeking = (e) => {
-		console.log("Seeking...");
+		//console.log("Seeking...");
 		props.handleLoading(true, props.isActive);
 	};
 
 	const handleVideoSeeked = (e) => {
-		console.log("Seeked...");
+		//console.log("Seeked...");
 		setVideoState(STATE_VIDEO_PLAY);
 	};
 
 	const handleVideoCanPlayThrough = (e) => {
 		// setMetadataLoaded(true);
 		// const state = useVideoStore.getState();
-		console.log(
+		//console.log(
 			"Can play through...",
 			videoStore.videoState,
 			playerRef().current.videoElement.currentTime
@@ -402,7 +402,7 @@ function StreamItem(props) {
 	};
 
 	const playerInit = (ref) => {
-		console.log("player init called", ref);
+		//console.log("player init called", ref);
 		if (ref != null) {
 			setPlayerRef({ current: ref });
 			setPlayerLoaded(true);

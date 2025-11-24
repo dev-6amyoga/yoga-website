@@ -57,19 +57,19 @@ function verifyToken(token) {
   try {
     decoded = jwt.verify(token, JWT_TOKEN_SECRET)
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     error = err
   }
   return [decoded, error]
 }
 
 async function authenticateToken(req, res, next) {
-  // console.log(req.headers);
+  // //console.log(req.headers);
   const authHeader = req.headers['authorization']
   // const refreshToken = req.cookies["refreshToken"];
   const token = authHeader?.split(' ')[1]
-  console.log({ access_token: token !== undefined || token !== null })
-  // console.log({ authHeader });
+  //console.log({ access_token: token !== undefined || token !== null })
+  // //console.log({ authHeader });
 
   if (token === null || token === undefined) return res.sendStatus(401)
 
@@ -102,7 +102,7 @@ async function authenticateToken(req, res, next) {
     })
 
     if (!login_token) {
-      console.log('Token unavailable')
+      //console.log('Token unavailable')
       return res.status(HTTP_FORBIDDEN).json({ message: 'Token unavailable' })
     }
 

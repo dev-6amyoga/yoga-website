@@ -33,7 +33,7 @@ function AllTransitions() {
   const [filteredTransitions, setFilteredTransitions] = useState([]);
   useEffect(() => {
     if (searchTerm.length > 0) {
-      console.log(searchTerm);
+      //console.log(searchTerm);
       setFilteredTransitions(
         transitions.filter((transition) =>
           transition.transition_video_name
@@ -63,7 +63,7 @@ function AllTransitions() {
         setTransitions(data);
         setFilteredTransitions(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -86,7 +86,7 @@ function AllTransitions() {
       }
       setDelState(false);
     } catch (error) {
-      console.log(error);
+      //console.log(error);
     }
   };
 
@@ -102,7 +102,7 @@ function AllTransitions() {
     };
 
     const handleUpdate = async () => {
-      console.log("update!!");
+      //console.log("update!!");
       setModalState(true);
       setModalData(rowData);
     };
@@ -141,7 +141,7 @@ function AllTransitions() {
   };
 
   const updateData = async () => {
-    console.log(modalData);
+    //console.log(modalData);
     setModalState(false);
     if (modalData.teacher_mode == "false") {
       modalData.teacher_mode = false;

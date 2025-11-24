@@ -50,7 +50,7 @@ export default function UpdateScreen() {
           if (res && res.status === 200) {
             setUserId(res.data.user.user_id);
             setUserData(res.data.user);
-            console.log(res.data.user);
+            //console.log(res.data.user);
             setDisplay(true);
             toast("User fetched successfully", {
               type: "success",

@@ -54,7 +54,7 @@ function ViewAllPlans() {
         });
         setPlans(sortedUsers);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -97,7 +97,7 @@ function ViewAllPlans() {
     };
 
     const handleUpdate = async () => {
-      console.log("IN UPDATE!");
+      //console.log("IN UPDATE!");
       setModalData(rowData);
       setModalState(true);
     };
@@ -149,22 +149,22 @@ function ViewAllPlans() {
       });
 
       if (response?.status === 200) {
-        console.log("Response from server:", response);
+        //console.log("Response from server:", response);
         setPlans((prev) => prev.filter((plan) => plan.plan_id !== plan_id));
-        console.log("Plan deleted successfully");
+        //console.log("Plan deleted successfully");
       } else {
-        console.log("Error deleting plan:", response.status);
+        //console.log("Error deleting plan:", response.status);
       }
 
       setDelState(false);
     } catch (error) {
-      console.log(error);
+      //console.log(error);
     }
   };
   const updateData = async () => {
     try {
       const plan_id = Number(modalData.plan_id);
-      console.log(modalData);
+      //console.log(modalData);
       const response = await Fetch({
         url: `/plan/update-plan/${plan_id}`,
         method: "PUT",
@@ -175,7 +175,7 @@ function ViewAllPlans() {
         setupdated(true);
         setModalState(false);
       } else {
-        console.log("Error updating asana:", response.status);
+        //console.log("Error updating asana:", response.status);
       }
     } catch (error) {
       console.error(error);

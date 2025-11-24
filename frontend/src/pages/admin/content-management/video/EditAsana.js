@@ -171,7 +171,7 @@ function EditAsana() {
         });
         setTableLanguages(response.data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -185,7 +185,7 @@ function EditAsana() {
         });
         setCategories(response.data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();

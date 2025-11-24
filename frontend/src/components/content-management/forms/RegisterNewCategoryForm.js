@@ -13,83 +13,80 @@ import AdminPageWrapper from "../../Common/AdminPageWrapper";
 import "./RegisterVideoForm.css";
 
 function RegisterNewCategoryForm() {
-	const navigate = useNavigate();
-	const [categories, setCategories] = useState([]);
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const response = await Fetch({
-					url: "/content/asana/getAllAsanaCategories",
-				});
-				const data = response.data;
-				setCategories(data);
-			} catch (error) {
-				console.log(error);
-			}
-		};
-		fetchData();
-	}, []);
+  const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await Fetch({
+          url: "/content/asana/getAllAsanaCategories",
+        });
+        const data = response.data;
+        setCategories(data);
+      } catch (error) {
+        //console.log(error);
+      }
+    };
+    fetchData();
+  }, []);
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		const formData = getFormData(e);
-		console.log(formData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = getFormData(e);
+    //console.log(formData);
 
-		if (formData.asana_category === "") {
-			toast("Missing required fields!");
-		} else {
-			const categoryExists = categories.some(
-				(category) =>
-					formData.asana_category === category.asana_category
-			);
-			if (categoryExists) {
-				toast("Entered category already exists!");
-			} else {
-				try {
-					const response = await Fetch({
-						url: "/content/asana/addAsanaCategory",
-						method: "POST",
-						data: formData,
-					});
+    if (formData.asana_category === "") {
+      toast("Missing required fields!");
+    } else {
+      const categoryExists = categories.some(
+        (category) => formData.asana_category === category.asana_category
+      );
+      if (categoryExists) {
+        toast("Entered category already exists!");
+      } else {
+        try {
+          const response = await Fetch({
+            url: "/content/asana/addAsanaCategory",
+            method: "POST",
+            data: formData,
+          });
 
-					if (response?.status === 200) {
-						toast("New Category added successfully");
-						navigate("/admin/asana-category/all");
-					} else {
-						toast("Failed to add new category");
-					}
-				} catch (error) {
-					console.error("Error while making the request:", error);
-				}
-			}
-		}
-	};
+          if (response?.status === 200) {
+            toast("New Category added successfully");
+            navigate("/admin/asana-category/all");
+          } else {
+            toast("Failed to add new category");
+          }
+        } catch (error) {
+          console.error("Error while making the request:", error);
+        }
+      }
+    }
+  };
 
-	return (
-		<AdminPageWrapper heading="Content Management - Register New Asana Category">
-			<Card>
-				<form className="flex flex-col gap-1" onSubmit={handleSubmit}>
-					<br />
-					<Card>
-						<Text span style={{ color: "#949392" }}>
-							Existing Asana Categories :
-						</Text>
-						{categories &&
-							categories.map((x) => (
-								<Text style={{ color: "#949392" }}>
-									{x.asana_category}
-								</Text>
-							))}
-					</Card>
-					<br />
-					<Text h5>New Asana Category:</Text>
-					<Input width="100%" name="asana_category"></Input>
-					<br />
-					<Button htmlType="submit">Submit</Button>
-				</form>
-			</Card>
-		</AdminPageWrapper>
-	);
+  return (
+    <AdminPageWrapper heading="Content Management - Register New Asana Category">
+      <Card>
+        <form className="flex flex-col gap-1" onSubmit={handleSubmit}>
+          <br />
+          <Card>
+            <Text span style={{ color: "#949392" }}>
+              Existing Asana Categories :
+            </Text>
+            {categories &&
+              categories.map((x) => (
+                <Text style={{ color: "#949392" }}>{x.asana_category}</Text>
+              ))}
+          </Card>
+          <br />
+          <Text h5>New Asana Category:</Text>
+          <Input width="100%" name="asana_category"></Input>
+          <br />
+          <Button htmlType="submit">Submit</Button>
+        </form>
+      </Card>
+    </AdminPageWrapper>
+  );
 }
 
 export default withAuth(RegisterNewCategoryForm, ROLE_ROOT);

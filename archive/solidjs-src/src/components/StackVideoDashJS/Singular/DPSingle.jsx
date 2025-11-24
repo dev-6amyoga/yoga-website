@@ -44,7 +44,7 @@ function DPSingle(props) {
 	const [metrics, setMetrics] = createSignal({});
 	// let playInActiveTimer = null;
 
-	console.log("dashplayer! >>>>");
+	//console.log("dashplayer! >>>>");
 
 	const [
 		videoStore,
@@ -56,7 +56,7 @@ function DPSingle(props) {
 	// 		if (videoStore.videoEvents.length > 0 && !props.isActive) {
 	// 			const event = videoStore.videoEvents[0];
 	// 			if (event?.t === VIDEO_EVENT_PLAY_INACTIVE) {
-	// 				console.log(
+	// 				//console.log(
 	// 					"[DASH PLAYER] : [INACTIVE] play event received"
 	// 				);
 	// 				setPlayInActive(true);
@@ -78,7 +78,7 @@ function DPSingle(props) {
 
 	onMount(() => {
 		onCleanup(() => {
-			console.log("[DASH PLAYER] Cleanup, DASH PLAYER RESET");
+			//console.log("[DASH PLAYER] Cleanup, DASH PLAYER RESET");
 			if (playerRef()) {
 				playerRef().destroy();
 			}
@@ -93,7 +93,7 @@ function DPSingle(props) {
 	// 	on([() => props.src, () => props.video, () => props.nextVideo], () => {
 	// 		if (!props.src) return;
 
-	// 		console.log("[DASH PLAYER] : setup", {
+	// 		//console.log("[DASH PLAYER] : setup", {
 	// 			src: props.src,
 	// 			video: props.video,
 	// 			nextVideo: props.nextVideo,
@@ -101,7 +101,7 @@ function DPSingle(props) {
 
 	// 		if (props.nextVideo == null) {
 	// 			// current video is last video
-	// 			console.log(
+	// 			//console.log(
 	// 				"[DASH PLAYER] : last video ------------------------------>"
 	// 			);
 	// 			setNextPlayerRef(null);
@@ -113,7 +113,7 @@ function DPSingle(props) {
 	// 		const nextSource = getSource(props.nextVideo);
 
 	// 		if (props.video?.queue_id === prevNV?.queue_id) {
-	// 			console.log(
+	// 			//console.log(
 	// 				"[DASH PLAYER] : middle video ------------------------------>"
 	// 			);
 	// 			// not first video
@@ -121,7 +121,7 @@ function DPSingle(props) {
 	// 			let p = playerRef();
 
 	// 			if (p) {
-	// 				console.log("[DASH PLAYER] : reset prev player");
+	// 				//console.log("[DASH PLAYER] : reset prev player");
 	// 				// p.reset();
 	// 				p.destroy();
 	// 			}
@@ -129,7 +129,7 @@ function DPSingle(props) {
 	// 			let np = nextPlayerRef();
 
 	// 			if (np) {
-	// 				console.log(
+	// 				//console.log(
 	// 					"[DASH PLAYER] : attaching prev next player",
 	// 					videoRef.current
 	// 					// np.duration()
@@ -144,7 +144,7 @@ function DPSingle(props) {
 
 	// 			// set up video player for next video
 	// 			if (nextSource) {
-	// 				console.log("[DASH PLAYER] : setting up next MediaPlayer");
+	// 				//console.log("[DASH PLAYER] : setting up next MediaPlayer");
 	// 				np = dashjs.MediaPlayer().create();
 	// 				np.updateSettings(dashSettings);
 	// 				np.initialize(null, nextSource, false, 0.0);
@@ -157,7 +157,7 @@ function DPSingle(props) {
 	// 			setDrmSet(false);
 	// 		} else {
 	// 			// first video
-	// 			console.log(
+	// 			//console.log(
 	// 				"[DASH PLAYER] : first video ------------------------------>"
 	// 			);
 
@@ -167,7 +167,7 @@ function DPSingle(props) {
 	// 			p.preload();
 	// 			p.play();
 	// 			setPlayerRef(p);
-	// 			console.log("[DASH PLAYER] : player created");
+	// 			//console.log("[DASH PLAYER] : player created");
 
 	// 			if (nextSource) {
 	// 				// set up video player for next video
@@ -177,7 +177,7 @@ function DPSingle(props) {
 	// 				np.preload();
 	// 				setNextPlayerRef(np);
 	// 				setPrevNextVideo(props.nextVideo);
-	// 				console.log("[DASH PLAYER] : next player created");
+	// 				//console.log("[DASH PLAYER] : next player created");
 	// 			}
 
 	// 			setPlayerRefSet(true);
@@ -185,7 +185,7 @@ function DPSingle(props) {
 	// 		}
 
 	// 		onCleanup(() => {
-	// 			// console.log("[DASH PLAYER] Cleanup, player reset");
+	// 			// //console.log("[DASH PLAYER] Cleanup, player reset");
 	// 			// if (playerRef()) {
 	// 			// 	playerRef().destroy();
 	// 			// }
@@ -200,7 +200,7 @@ function DPSingle(props) {
 		on([() => props.src], () => {
 			if (!props.src) return;
 
-			console.log("[DASH PLAYER] : setup", {
+			//console.log("[DASH PLAYER] : setup", {
 				src: props.src,
 				video: props.video,
 			});
@@ -228,7 +228,7 @@ function DPSingle(props) {
 			}
 
 			onCleanup(() => {
-				console.log("[DASH PLAYER] Cleanup, player reset");
+				//console.log("[DASH PLAYER] Cleanup, player reset");
 				if (playerRef()) {
 					playerRef().destroy();
 				}
@@ -262,7 +262,7 @@ function DPSingle(props) {
 
 	createEffect(
 		on([playerRef], () => {
-			console.log("[DASH PLAYER] : setting up metrics thingy");
+			//console.log("[DASH PLAYER] : setting up metrics thingy");
 			var eventPoller = setInterval(function () {
 				let p = playerRef();
 				var streamInfo = p.getActiveStream().getStreamInfo();
@@ -293,14 +293,14 @@ function DPSingle(props) {
 						bufferLevel: bufferLevel,
 					};
 
-					console.log("[DASH PLAYER] : metrics", m);
+					//console.log("[DASH PLAYER] : metrics", m);
 
 					setMetrics(m);
 				}
 			}, 1000);
 
 			onCleanup(() => {
-				console.log("[DASH PLAYER] : clearing metrics interval");
+				//console.log("[DASH PLAYER] : clearing metrics interval");
 				clearInterval(eventPoller);
 			});
 		})
@@ -316,7 +316,7 @@ function DPSingle(props) {
 			],
 			() => {
 				if (playerRef() && props.isActive && metadataLoaded()) {
-					console.log("[DASH PLAYER] : updating volume");
+					//console.log("[DASH PLAYER] : updating volume");
 					playerRef().setVolume(videoStore.volume);
 				} else if (playerRef() && !props.isActive && metadataLoaded()) {
 					playerRef().pause();
@@ -333,13 +333,13 @@ function DPSingle(props) {
 		on([() => props.isActive, () => videoStore.videoState], () => {
 			if (props.isActive) {
 				if (videoStore.videoState === STATE_VIDEO_PLAY) {
-					console.log("[DASH PLAYER] Switch state : play", {
+					//console.log("[DASH PLAYER] Switch state : play", {
 						idx: props.video.idx,
 						ct: videoRef.current.currentTime,
 					});
 					playerRef().play();
 				} else if (videoStore.videoState === STATE_VIDEO_PAUSED) {
-					console.log("[DASH PLAYER] Switch state : pause", {
+					//console.log("[DASH PLAYER] Switch state : pause", {
 						idx: props.video.idx,
 						ct: videoRef.current.currentTime,
 					});
@@ -352,7 +352,7 @@ function DPSingle(props) {
 	// createEffect(
 	// 	on([playerRefSet, () => props.src, drmSet], () => {
 	// 		if (playerRefSet() && drmSet() && props.src) {
-	// 			console.log("[DASH PLAYER] : preloading");
+	// 			//console.log("[DASH PLAYER] : preloading");
 	// 			playerRef().preload();
 	// 			playerRef().play().catch((error) => {
 	// 				console.error("Play failed");
@@ -364,7 +364,7 @@ function DPSingle(props) {
 	// createEffect(
 	// 	on([playerRefSet, () => props.src, drmSet], () => {
 	// 		if (playerRefSet() && drmSet() && props.src) {
-	// 			console.log("[DASH PLAYER] : preloading");
+	// 			//console.log("[DASH PLAYER] : preloading");
 	// 			playerRef().preload();
 	// 			const playPromise = playerRef()
 	// 				.play()
@@ -397,7 +397,7 @@ function DPSingle(props) {
 					streamInitialized() &&
 					(props.isActive || playInActive())
 				) {
-					console.log(
+					//console.log(
 						"[DASH PLAYER] : play video effect event",
 						props.src,
 						props.isActive,
@@ -412,12 +412,12 @@ function DPSingle(props) {
 						videoRef.current
 							.play()
 							.then(() => {
-								console.log(
+								//console.log(
 									"[DASH PLAYER] : Video play event success from create hahahah"
 								);
 							})
 							.catch((err) => {
-								console.log(
+								//console.log(
 									"[DASH PLAYER] : Video play event failed",
 									err
 								);
@@ -429,7 +429,7 @@ function DPSingle(props) {
 						const duration = playerRef().duration();
 						const remainingTime = duration - currentTime;
 						const inactiveVideoDuration = remainingTime - 0.1;
-						console.log(
+						//console.log(
 							"[DASH PLAYER IS NOT ACTIVE] starting event timer for playing inactive : currentTime = ",
 							currentTime,
 							"duration",
@@ -439,14 +439,14 @@ function DPSingle(props) {
 							"inactiveVideoDuration",
 							inactiveVideoDuration
 						);
-						console.log(
+						//console.log(
 							"[DASH PLAYER] starting event timer for playing inactive @ ",
 							inactiveVideoDuration,
 							props.isActive,
 							props.video.idx
 						);
 						// playInActiveTimer = setTimeout(() => {
-						//   console.log("sending video event!");
+						//   //console.log("sending video event!");
 						//   addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
 						// }, inactiveVideoDuration * 1000);
 					}
@@ -466,16 +466,16 @@ function DPSingle(props) {
 			],
 			() => {
 				if (playerRefSet && props.src && videoRef.current) {
-					console.log("[DASH PLAYER] : setting DRM Info");
+					//console.log("[DASH PLAYER] : setting DRM Info");
 					const check = isMobileTablet();
 					const isMobile = { done: true, check: check };
-					console.log("Checking for isMobile", isMobile);
+					//console.log("Checking for isMobile", isMobile);
 					// const store = useVideoStore.getState();
 					var playreadyKeyUrl;
 					playreadyKeyUrl = videoStore.playreadyKeyUrl ?? undefined;
 					// const setPlayreadyKeyUrl = videoStore.setPlayreadyKeyUrl;
-					//console.log("Fetching DRM Info");
-					console.log(
+					////console.log("Fetching DRM Info");
+					//console.log(
 						"[DASH PLAYER] : isAsanaVideo",
 						props.isAsanaVideo
 					);
@@ -491,7 +491,7 @@ function DPSingle(props) {
 							})
 								.then((res) => {
 									const data = res.data;
-									console.log(
+									//console.log(
 										"[DASH PLAYER] : widevine token"
 									);
 
@@ -509,7 +509,7 @@ function DPSingle(props) {
 									}
 								})
 								.catch((err) => {
-									console.log(
+									//console.log(
 										"Error fetching DRM info :",
 										err
 									);
@@ -518,7 +518,7 @@ function DPSingle(props) {
 						} else {
 							// Non Mobile
 							if (playreadyKeyUrl) {
-								console.log(
+								//console.log(
 									"[DASH PLAYER] : playready token cached"
 								);
 								player.setProtectionData({
@@ -538,7 +538,7 @@ function DPSingle(props) {
 								})
 									.then((res) => {
 										const data = res.data;
-										console.log(
+										//console.log(
 											"[DASH PLAYER] : playready token"
 										);
 										if (
@@ -554,7 +554,7 @@ function DPSingle(props) {
 														data.token,
 												},
 											});
-											console.log(
+											//console.log(
 												"[DASH PLAYER] : playready token caching now!"
 											);
 											// player
@@ -569,7 +569,7 @@ function DPSingle(props) {
 										}
 									})
 									.catch((err) => {
-										console.log(
+										//console.log(
 											"Error fetching DRM info :",
 											err
 										);
@@ -578,7 +578,7 @@ function DPSingle(props) {
 							}
 						}
 					} else {
-						console.log("[DASH PLAYER] : transition video");
+						//console.log("[DASH PLAYER] : transition video");
 						setDrmSet(true);
 					}
 				}
@@ -587,8 +587,8 @@ function DPSingle(props) {
 	);
 
 	const onMetadataLoaded = () => {
-		console.log("[DASH PLAYER] : metadata loaded event");
-		console.log(
+		//console.log("[DASH PLAYER] : metadata loaded event");
+		//console.log(
 			"[DASH PLAYER] : metadata event setting duration : ",
 			playerRef().duration(),
 			videoRef.current.duration
@@ -599,7 +599,7 @@ function DPSingle(props) {
 
 	const onPlaybackNotAllowed = () => {
 		if (playerRef() && props.isActive) {
-			console.log("[DASH PLAYER] : playback not allowed");
+			//console.log("[DASH PLAYER] : playback not allowed");
 			playerRef().setMute(true);
 			playerRef().initialize(videoRef.current, props.src, true, 0.0);
 			playerRef().setMute(false);
@@ -607,13 +607,13 @@ function DPSingle(props) {
 	};
 
 	const onStreamInitialized = () => {
-		console.log("[DASH PLAYER] : stream initialized");
+		//console.log("[DASH PLAYER] : stream initialized");
 		setStreamInitialized(true);
 	};
 
 	const onCanPlay = () => {
 		if (!props.isActive) {
-			console.log("[DASH PLAYER] : onCanPlay event");
+			//console.log("[DASH PLAYER] : onCanPlay event");
 			playerRef().pause();
 		}
 
@@ -623,7 +623,7 @@ function DPSingle(props) {
 	};
 
 	const onPlay = () => {
-		console.log(
+		//console.log(
 			"[DASH PLAYER] handlePlay event called",
 			props.isActive,
 			props.video.idx
@@ -631,7 +631,7 @@ function DPSingle(props) {
 
 		if (props.isActive) {
 			if (videoStore.videoState !== STATE_VIDEO_PLAY) {
-				console.log(
+				//console.log(
 					"PLAYING ----------------------------->",
 					props.video.idx
 				);
@@ -647,7 +647,7 @@ function DPSingle(props) {
 			const remainingTime = duration - currentTime;
 			const inactiveVideoDuration = remainingTime - 0.1;
 
-			console.log(
+			//console.log(
 				"[DASH PLAYER IS ACTIVE] starting event timer for playing inactive : currentTime = ",
 				currentTime,
 				"duration",
@@ -657,14 +657,14 @@ function DPSingle(props) {
 				"inactiveVideoDuration",
 				inactiveVideoDuration
 			);
-			console.log(
+			//console.log(
 				"[DASH PLAYER] starting event timer for playing inactive @ ",
 				inactiveVideoDuration,
 				props.isActive,
 				props.video.idx
 			);
 			// playInActiveTimer = setTimeout(() => {
-			//   console.log("sending video event!");
+			//   //console.log("sending video event!");
 			//   addVideoEvent({ t: VIDEO_EVENT_PLAY_INACTIVE });
 			// }, inactiveVideoDuration * 1000);
 		}
@@ -673,7 +673,7 @@ function DPSingle(props) {
 	const onPause = () => {
 		if (props.isActive) {
 			if (videoStore.videoState !== STATE_VIDEO_PAUSED) {
-				console.log(
+				//console.log(
 					"PAUSING ----------------------------->",
 					props.video.idx
 				);
@@ -688,7 +688,7 @@ function DPSingle(props) {
 	};
 
 	const onWaiting = () => {
-		console.log("[DASH PLAYER] : onWaiting event");
+		//console.log("[DASH PLAYER] : onWaiting event");
 
 		if (props.isActive) {
 			setVideoState(STATE_VIDEO_LOADING);
@@ -715,7 +715,7 @@ function DPSingle(props) {
 			],
 			() => {
 				if (playerRef() && playerRefSet() && videoRef.current) {
-					console.log("[DASH PLAYER] : setting up event listeners");
+					//console.log("[DASH PLAYER] : setting up event listeners");
 					playerRef().on(
 						dashjs.MediaPlayer.events.CAN_PLAY_THROUGH,
 						props.onCanPlayThrough
@@ -778,7 +778,7 @@ function DPSingle(props) {
 				}
 
 				return () => {
-					console.log("[DASH PLAYER] switching off event listeners");
+					//console.log("[DASH PLAYER] switching off event listeners");
 					playerRef().off(
 						dashjs.MediaPlayer.events.CAN_PLAY_THROUGH,
 						props.onCanPlayThrough
@@ -837,13 +837,13 @@ function DPSingle(props) {
 	);
 
 	const setVideoRef = (element) => {
-		console.log("[DASH PLAYER] SETTING REF >>>>>>>>>>>>>");
+		//console.log("[DASH PLAYER] SETTING REF >>>>>>>>>>>>>");
 		videoRef.current = element;
 	};
 
 	createEffect(
 		on([playerRefSet, playerRef], () => {
-			console.log("[DASH PLAYER] : platyerRefChanged", playerRefSet());
+			//console.log("[DASH PLAYER] : platyerRefChanged", playerRefSet());
 			if (playerRefSet()) {
 				props.ref({
 					player: playerRef(),

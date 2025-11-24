@@ -58,9 +58,14 @@ export default function LoginGoogle() {
 
   useEffect(() => {
     if (loginStatus === "Login successful" && type === "student") {
-      navigate("/student/free-videos");
+      const userPlanData = useUserStore.getState().userPlan;
+      if (userPlanData?.plan_id) {
+        navigate("/student/join-class");
+      } else {
+        navigate("/student/purchase-a-plan");
+      }
     } else if (loginStatus === "Login successful" && type === "root") {
-      console.log("here!");
+      //console.log("here!");
       navigate("/admin");
     } else if (loginStatus === "Login successful" && type === "teacher") {
       navigate("/teacher/free-videos");
@@ -91,7 +96,7 @@ export default function LoginGoogle() {
               },
             });
             if (response && response?.status === 200) {
-              // console.log("response is : ", response);
+              // //console.log("response is : ", response);
               if (response.data?.message === "User does not exist") {
                 const googleName = response.data?.user.name;
                 const googleEmail = response.data?.user.email;
@@ -108,7 +113,7 @@ export default function LoginGoogle() {
                 const currRole = Object.keys(userData?.user?.roles)[0];
                 const currPlan = userData?.user?.roles[currRole][0]?.plan;
                 setUserPlan(currPlan);
-                console.log(userData?.user?.roles[currRole]);
+                //console.log(userData?.user?.roles[currRole]);
                 const ins = userData?.user?.roles[currRole].map(
                   (r) => r?.institute
                 );
@@ -136,7 +141,7 @@ export default function LoginGoogle() {
             }
           }}
           onError={() => {
-            console.log("Login Failed");
+            //console.log("Login Failed");
           }}
           size="large"
         />

@@ -248,7 +248,7 @@ function StudentPlan() {
       const activePlan = data.userPlan.find(
         (plan) => plan.current_status === "ACTIVE"
       );
-      console.log("ACTIVE : ", activePlan);
+      //console.log("ACTIVE : ", activePlan);
       if (activePlan) setPlanId(activePlan.plan_id);
     } catch (error) {
       console.error("Error fetching user plans:", error);
@@ -268,7 +268,7 @@ function StudentPlan() {
           }
         }
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     if (user) {
@@ -292,7 +292,7 @@ function StudentPlan() {
         }
       }
     } catch (err) {
-      console.log(err);
+      //console.log(err);
     }
   };
   useEffect(() => {
@@ -395,7 +395,7 @@ function StudentPlan() {
         n: 10,
         retryDelayMs: 2000,
         onRetry: (err) => {
-          console.log(err);
+          //console.log(err);
         },
       })
         .then((res) => {

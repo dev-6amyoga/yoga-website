@@ -13,10 +13,6 @@ export default function EmailVerification() {
   useEffect(() => {
     setToken(() => {
       if (location.search.includes("?token=")) {
-        console.log(
-          "IN EMAIL VERIFICATION WITH : ",
-          location.search.split("?token=")[1]
-        );
         return location.search.split("?token=")[1];
       } else {
         return null;

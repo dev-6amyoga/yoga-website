@@ -23,7 +23,7 @@ function Playlist() {
 				url: "/content/video/getAllTransitions",
 			});
 			const data = response.data;
-			// console.log(data);
+			// //console.log(data);
 			return data;
 		} catch (error) {
 			console.error(error);
@@ -39,7 +39,7 @@ function Playlist() {
 				url: "/content/playlists/getAllPlaylists",
 			});
 			const data = response.data;
-			console.log({ playlists: data });
+			//console.log({ playlists: data });
 			return data ?? [];
 		} catch (error) {
 			// setLoading(false);
@@ -53,7 +53,7 @@ function Playlist() {
 			return [];
 		}
 		const allAsanasData = asana_ids.map((asana_id) => {
-			// console.log("FETCHING FOR : ", asana_id, "\n");
+			// //console.log("FETCHING FOR : ", asana_id, "\n");
 			if (Number(asana_id)) {
 				const asanaObject = allAsanas().find(
 					(asana) => asana.id === asana_id
@@ -63,7 +63,7 @@ function Playlist() {
 				const transitionObject = allTransitions().find(
 					(transition) => transition.transition_id === asana_id
 				);
-				// console.log(transitionObject);
+				// //console.log(transitionObject);
 				return transitionObject || null;
 			}
 		});
@@ -75,14 +75,14 @@ function Playlist() {
 	const handleAddToQueue = (asana_ids) => {
 		getAllAsanas(asana_ids)
 			.then((asanas) => {
-				console.log(asanas);
+				//console.log(asanas);
 				addToQueue(asanas.filter((v) => v !== null));
 			})
-			.catch((err) => console.log(err));
+			.catch((err) => //console.log(err));
 	};
 
 	const showDetails = (x) => {
-		console.log("in show details");
+		//console.log("in show details");
 	};
 
 	return (

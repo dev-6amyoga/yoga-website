@@ -65,7 +65,7 @@ export default function YogaClassCard({
           deviceId: navigator.userAgent,
         },
       });
-      console.log(response);
+      //console.log(response);
 
       if (response.data.allowed) {
         window.open(classDetails.zoom_url, "_blank");

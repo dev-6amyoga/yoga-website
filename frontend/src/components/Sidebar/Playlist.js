@@ -189,7 +189,7 @@ function Playlist({ page }) {
           }
         }
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
 
@@ -235,7 +235,7 @@ function Playlist({ page }) {
           }
         }
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     if (user) {
@@ -317,7 +317,7 @@ function Playlist({ page }) {
         const data = response.data;
         setAllTransitions(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -355,7 +355,7 @@ function Playlist({ page }) {
               asanasDetails.push(data);
             }
           } catch (err) {
-            console.log(err);
+            //console.log(err);
           }
         }
       } catch (err) {
@@ -374,7 +374,7 @@ function Playlist({ page }) {
                 }
 
                 const currentID = current?.id || current?.transition_id;
-                // console.log(acc, currentID, current);
+                // //console.log(acc, currentID, current);
                 const isTransition =
                   current?.transition_id !== undefined ? true : false;
 
@@ -416,7 +416,7 @@ function Playlist({ page }) {
         } else {
         }
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     if (isInstitute && currentInstituteId) {
@@ -459,13 +459,13 @@ function Playlist({ page }) {
               setMadeForTeacher((prev) => [...prev, ...filteredMadeForTeacher]);
             }
           } catch (err) {
-            console.log(err);
+            //console.log(err);
           }
         } else {
-          console.log("No playlists made!");
+          //console.log("No playlists made!");
         }
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     if (isTeacher && currentInstituteId && user) {
@@ -495,7 +495,7 @@ function Playlist({ page }) {
           }
         }
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     if (currentInstituteId && user) {
@@ -525,7 +525,7 @@ function Playlist({ page }) {
         setLoading(false);
       } catch (error) {
         setLoading(false);
-        console.log(error);
+        //console.log(error);
       }
     };
     if (userPlan || page === "testing") {
@@ -601,11 +601,11 @@ function Playlist({ page }) {
           if (res.data) {
             setIsPersonal(true);
           }
-          console.log("created playlists :", res.data.playlists);
+          //console.log("created playlists :", res.data.playlists);
           setUserPlaylists(res.data.playlists);
         }
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     if (user) {

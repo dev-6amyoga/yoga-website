@@ -253,7 +253,7 @@ class MPDCombiner {
       const res = await fetch(this.files[0].url, { method: 'GET' })
       let data = await res.text()
 
-      console.log(this.files[0].url)
+      //console.log(this.files[0].url)
 
       if (this.files.length < 2) {
         // Only one file, no need to combine
@@ -298,7 +298,7 @@ class MPDCombiner {
       }
 
       const end = new Date()
-      console.log('Time taken to combine mpd:', end - start, 'ms')
+      //console.log('Time taken to combine mpd:', end - start, 'ms')
 
       return [finalManifest, this.totalDuration, this.sections]
     } catch (err) {
@@ -310,7 +310,7 @@ class MPDCombiner {
   parseInitialManifest(file, mpdFileString) {
     // This is the first manifest file in sequence
     // Parse and store the parent manifest
-    console.log('[MPDCombiner] Parsing initial manifest')
+    //console.log('[MPDCombiner] Parsing initial manifest')
     const parser = this.getParser()
 
     const doc = parser.parseFromString(mpdFileString, 'text/xml')
@@ -337,7 +337,7 @@ class MPDCombiner {
     // this.modifySegmentTemplate(this.parent, file);
     this.modifySegmentBaseURL(this.parent, file)
 
-    console.log('[MPDCombiner] Initial manifest parsed successfully')
+    //console.log('[MPDCombiner] Initial manifest parsed successfully')
   }
 
   appendManifestToParent(file, mpdFileString) {

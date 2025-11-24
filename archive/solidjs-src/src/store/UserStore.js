@@ -4,7 +4,6 @@ const useUserStore = createWithStore((set) => ({
   user: null,
   setUser: (user) =>
     set(() => {
-      // console.log('updating user : ', user);
       return { user: user };
     }),
 
@@ -21,7 +20,6 @@ const useUserStore = createWithStore((set) => ({
   currentInstituteId: null,
   setCurrentInstituteId: (id) =>
     set(() => {
-      console.log("Setting current institute id to ", id);
       return { currentInstituteId: id };
     }),
 

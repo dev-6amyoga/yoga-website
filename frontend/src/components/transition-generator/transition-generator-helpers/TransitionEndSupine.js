@@ -30,11 +30,11 @@ export const TransitionEndSupine = async (
   const handleTransition = (transitions) => {
     return transitions
       .map((transition) => {
-        console.log(transition);
+        //console.log(transition);
         const filtered = filteredTransitions_all.filter(
           (transitions) => transitions.transition_video_name === transition
         );
-        console.log(filtered);
+        //console.log(filtered);
         return getUniqueTransition(filtered);
       })
       .filter(Boolean);
@@ -455,7 +455,7 @@ export const TransitionEndSupine = async (
       return res;
     }
     if (break_status_start === "No Break" && break_status_end === "No Break") {
-      console.log(start_video.prone_breath);
+      //console.log(start_video.prone_breath);
       if (start_video.prone_breath === false) {
         let res = handleTransition([
           "Fold Hands Feet Apart Prone Transition",
@@ -654,7 +654,7 @@ export const TransitionEndSupine = async (
         return new_res;
       } else {
         if (start_video.nose_lock_start && start_video.chin_lock_end) {
-          console.log("pratiloma last cycle");
+          //console.log("pratiloma last cycle");
           let res = [];
           for (var i = 0; i !== filteredTransitions_all.length; i++) {
             let transition_ind = filteredTransitions_all[i];

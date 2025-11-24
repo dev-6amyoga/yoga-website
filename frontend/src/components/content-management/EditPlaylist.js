@@ -148,7 +148,7 @@ function EditPlaylist() {
         });
         setAsanas(response.data);
       } catch (error) {
-        console.log("error");
+        //console.log("error");
       }
     };
     fetchData();
@@ -162,7 +162,7 @@ function EditPlaylist() {
         });
         setTransitions(response.data);
       } catch (error) {
-        console.log("error");
+        //console.log("error");
       }
     };
     fetchData();
@@ -180,7 +180,7 @@ function EditPlaylist() {
         const asanasOnlyPlaylist = filterAsanas(response.data.asana_ids);
         setPlaylistCurrent(asanasOnlyPlaylist);
       } catch (error) {
-        console.log("error");
+        //console.log("error");
       }
     };
 
@@ -782,7 +782,7 @@ function EditPlaylist() {
       }
     }
     setPlaylistCurrent(recalculatedPlaylist);
-    console.log(recalculatedPlaylist);
+    //console.log(recalculatedPlaylist);
     formValues.asana_ids = recalculatedPlaylist;
     const response = await Fetch({
       url: `/content/playlists/updatePlaylist/${playlist_id}`,

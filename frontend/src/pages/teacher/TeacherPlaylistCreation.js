@@ -43,10 +43,10 @@ export default function TeacherPlaylistCreation() {
   const [incremented, setIncremented] = useState(false);
   const [modalState, setModalState] = useState(false);
   useEffect(() => {
-    console.log(user);
-    console.log(user.roles);
-    console.log(currentInstituteId);
-    console.log(currentInstitute);
+    //console.log(user);
+    //console.log(user.roles);
+    //console.log(currentInstituteId);
+    //console.log(currentInstitute);
   }, [user]);
   const incrementPlaylistField = (field) => {
     setUserPlaylist((prevPlaylist) => ({
@@ -83,10 +83,10 @@ export default function TeacherPlaylistCreation() {
           url: "/content/video/getAllAsanas",
         });
         const data = response.data;
-        console.log(data);
+        //console.log(data);
         setAsanas(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();

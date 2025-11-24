@@ -136,7 +136,7 @@ const UpdateUserPlanStatus = async (
 
   try {
     // USER PLAN ------------------>
-    console.log('Updating user plan status')
+    //console.log('Updating user plan status')
 
     // get active plan
     const activePlan = await UserPlan.findOne({
@@ -225,7 +225,7 @@ const UpdateUserPlanStatus = async (
       })
 
       if (stagedPlan) {
-        console.log('Promoting staged plan to active plan')
+        //console.log('Promoting staged plan to active plan')
 
         // set active
         stagedPlan.set('current_status', USER_PLAN_ACTIVE)
@@ -309,7 +309,7 @@ const UpdateUserPlanStatus = async (
 
     // TODO : might need to take into consideration the different custom plan ids
 
-    console.log('Updating custom user plan status')
+    //console.log('Updating custom user plan status')
     let activeCustomUserPlans = await CustomUserPlan.aggregate(
       [
         {
@@ -349,7 +349,7 @@ const UpdateUserPlanStatus = async (
 
         processedCustomPlanIds.push(customUserPlan.custom_plan_id)
 
-        console.log(customUserPlan.validity_to)
+        //console.log(customUserPlan.validity_to)
 
         // check if plan is to be expired by date;
         if (new Date(customUserPlan.validity_to) < now) {
@@ -457,7 +457,7 @@ const UpdateUserPlanStatus = async (
           ]
 
           if (customUserPlan) {
-            console.log(customUserPlan)
+            //console.log(customUserPlan)
             filter[0]['$match']['purchase_date'] = {
               $gt: customUserPlan.purchase_date,
             }
@@ -538,7 +538,7 @@ const UpdateUserPlanStatus = async (
 
     return ['success', null]
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     if (transaction === null) {
       await t.rollback()
     }
@@ -572,7 +572,7 @@ const GetPlanForWatchQuotaDeduction = async (
   try {
     // CUSTOM USER PLANS : get active custom plans sorted by time where playlist id is allowed
     if (playlist_id) {
-      console.log('looking for custom plans')
+      //console.log('looking for custom plans')
       const activeCustomPlans = await CustomUserPlan.aggregate([
         {
           $match: {
@@ -606,7 +606,7 @@ const GetPlanForWatchQuotaDeduction = async (
         },
       ])
 
-      console.log(activeCustomPlans.length)
+      //console.log(activeCustomPlans.length)
 
       // if active plans found, return the first one
 
@@ -639,7 +639,7 @@ const GetPlanForWatchQuotaDeduction = async (
         ],
       })
 
-      console.log(activePlans.length)
+      //console.log(activePlans.length)
 
       if (activePlans.length > 0) {
         if (sequelize_transaction === null) {

@@ -67,7 +67,7 @@ export function UpdateEmailForm() {
     if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
 
     inputErrorDebounce.current = setTimeout(async () => {
-      console.log("Checking email");
+      //console.log("Checking email");
 
       if (formData?.email_profile && formData?.email_profile !== currentEmail) {
         const [is_email_valid, email_error] = validateEmail(
@@ -106,7 +106,7 @@ export function UpdateEmailForm() {
   const handleUpdateEmail = async (e) => {
     e.preventDefault();
     const formData = getFormData(e);
-    console.log(formData.email_profile);
+    //console.log(formData.email_profile);
     if (formData.email_profile === currentEmail) {
       toast("No changes to save!");
       setShowMessage(false);
@@ -114,7 +114,7 @@ export function UpdateEmailForm() {
       return;
     }
     setIsEditing(false);
-    console.log(userData);
+    //console.log(userData);
     Fetch({
       url: "/update-request/register",
       method: "POST",
@@ -130,7 +130,7 @@ export function UpdateEmailForm() {
       },
     })
       .then((res) => {
-        console.log(res);
+        //console.log(res);
         toast("Update sent successfully", { type: "success" });
         setShowMessage(true);
         setIsEmailUpdate(false);

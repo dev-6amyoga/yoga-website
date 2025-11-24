@@ -6,7 +6,7 @@ const { exec } = require('child_process')
 const path = require('path')
 
 router.post('/run-bat', (req, res) => {
-  console.log('in run bat')
+  //console.log('in run bat')
   const batFilePath = path.join(__dirname, 'script.bat')
   exec(batFilePath, (error, stdout, stderr) => {
     if (error) {
@@ -17,7 +17,7 @@ router.post('/run-bat', (req, res) => {
       console.error(`stderr: ${stderr}`)
       return res.status(500).send(`Error: ${stderr}`)
     }
-    console.log(`stdout: ${stdout}`)
+    //console.log(`stdout: ${stdout}`)
     res.send(`Success: ${stdout}`)
   })
 })

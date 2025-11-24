@@ -27,7 +27,7 @@ function AllPlaylistConfigs() {
   };
 
   const updateData = async () => {
-    console.log(modalData);
+    //console.log(modalData);
     const response = await Fetch({
       url: `/playlist-configs/updateConfig/${modalData.playlist_config_id}`,
       method: "PUT",
@@ -66,7 +66,7 @@ function AllPlaylistConfigs() {
         setPlaylistConfigs(data);
         setFilteredConfigs(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -103,11 +103,11 @@ function AllPlaylistConfigs() {
           prev.filter((x) => x.playlist_config_id !== playlistConfigId)
         );
       } else {
-        console.log("Error deleting Playlist Config:", response.status);
+        //console.log("Error deleting Playlist Config:", response.status);
       }
       setDelState(false);
     } catch (error) {
-      console.log(error);
+      //console.log(error);
     }
   };
 
@@ -157,7 +157,7 @@ function AllPlaylistConfigs() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = getFormData(e);
-    console.log(formData);
+    //console.log(formData);
     if (
       formData.playlist_config_name === "" ||
       formData.playlist_config_value === ""

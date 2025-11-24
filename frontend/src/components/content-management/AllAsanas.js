@@ -57,7 +57,7 @@ function AllAsanas() {
 
   useEffect(() => {
     if (searchTerm.length > 0) {
-      console.log(searchTerm);
+      //console.log(searchTerm);
       setFilteredTransitions(
         asanas.filter((transition) =>
           transition.asana_name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -92,7 +92,7 @@ function AllAsanas() {
         const data = response.data;
         setAllPlaylists(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -225,7 +225,7 @@ function AllAsanas() {
         const data = response.data;
         setTableLanguages(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -240,7 +240,7 @@ function AllAsanas() {
         const data = response.data;
         setCategories(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -273,7 +273,7 @@ function AllAsanas() {
         toast("Error updating asana:", response.status);
       }
     } catch (error) {
-      console.log(error);
+      //console.log(error);
     }
   };
 
@@ -285,7 +285,7 @@ function AllAsanas() {
     const asanaId = delAsanaId;
     for (var i = 0; i < allPlaylists.length; i++) {
       if (allPlaylists[i].asana_ids.includes(asanaId)) {
-        console.log("Update this playlist!");
+        //console.log("Update this playlist!");
         allPlaylists[i].asana_ids = allPlaylists[i].asana_ids.filter(
           (id) => id !== asanaId
         );
@@ -296,9 +296,9 @@ function AllAsanas() {
             data: allPlaylists[i],
           });
           if (response?.status === 200) {
-            console.log(response);
+            //console.log(response);
           } else {
-            console.log("Error updating asana:", response.status);
+            //console.log("Error updating asana:", response.status);
           }
         } catch (error) {
           console.error(error);
@@ -317,7 +317,7 @@ function AllAsanas() {
           prevAsanas.filter((asana) => asana.id !== asanaId)
         );
       } else {
-        console.log("Error deleting asana:", response.status);
+        //console.log("Error deleting asana:", response.status);
       }
     } catch (error) {
       console.error(error);

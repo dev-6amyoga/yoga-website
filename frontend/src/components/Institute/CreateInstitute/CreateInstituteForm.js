@@ -187,7 +187,7 @@ export default function CreateInstituteForm({
       }
 
       const formData = getFormData(e);
-      // console.log(formData)
+      // //console.log(formData)
 
       const [is_email_valid, email_error] = validateEmail(
         formData?.contact_email
@@ -209,7 +209,7 @@ export default function CreateInstituteForm({
       handleSubmit(inst);
 
       // toast('Progress saved!', { type: 'success' })
-      // console.log(inst)
+      // //console.log(inst)
     },
     [
       cities,

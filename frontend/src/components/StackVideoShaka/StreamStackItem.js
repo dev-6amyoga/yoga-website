@@ -226,9 +226,9 @@ function StreamStackItem({
 
   useEffect(() => {
     if (watchHistoryExhausted) {
-      console.log("Watch time exhausted!");
+      //console.log("Watch time exhausted!");
     } else {
-      console.log("Watch time not exhausted!");
+      //console.log("Watch time not exhausted!");
     }
   }, [watchHistoryExhausted]);
 
@@ -236,18 +236,18 @@ function StreamStackItem({
     // toast(`Try to play called : ${isActiveRef.current}`, { type: "info" });
     if (!isActiveRef.current) return;
 
-    console.log("Try to play called", video.idx, Date.now());
+    //console.log("Try to play called", video.idx, Date.now());
     playerRef.current.videoElement
       .play()
       .then((res) => {
-        console.log("Autoplay initialized", video.idx);
+        //console.log("Autoplay initialized", video.idx);
         if (volume === 0 && !autoplayInitialized) {
-          console.log("Setting volume to 0.5");
+          //console.log("Setting volume to 0.5");
           playerRef.current.videoElement.muted = false;
           playerRef.current.videoElement.volume = 1;
           setAutoplayInitialized(true);
         } else {
-          console.log("Setting volume to ", volume);
+          //console.log("Setting volume to ", volume);
           playerRef.current.videoElement.muted = false;
           // playerRef.current.videoElement.volume = volume;
         }
@@ -259,20 +259,20 @@ function StreamStackItem({
           playerRef.current.videoElement !== null &&
           playerRef.current.videoElement !== undefined
         ) {
-          console.log("Trying to play using mute", video.idx);
+          //console.log("Trying to play using mute", video.idx);
           playerRef.current.videoElement.muted = true;
           playerRef.current.videoElement
             .play()
             .then((res) => {
-              console.log("Autoplay initialized after muting", video.idx);
+              //console.log("Autoplay initialized after muting", video.idx);
               playerRef.current.videoElement.muted = false;
               if (volume === 0 && !autoplayInitialized) {
-                console.log("Setting volume to 1");
+                //console.log("Setting volume to 1");
                 playerRef.current.videoElement.muted = false;
                 playerRef.current.videoElement.volume = 1;
                 setAutoplayInitialized(true);
               } else {
-                console.log("Setting volume to ", volume);
+                //console.log("Setting volume to ", volume);
                 playerRef.current.videoElement.muted = false;
                 // playerRef.current.videoElement.volume = volume;
               }
@@ -286,24 +286,12 @@ function StreamStackItem({
 
   useEffect(() => {
     isActiveRef.current = isActive;
-    if (isActive) {
-      console.log(
-        "IS ACTIVE",
-        video?.idx,
-        playerRef.current.videoElement.currentTime
-      );
-    }
-    console.log({
-      isActive,
-      videoidx: video?.idx,
-      isActiveRef: isActiveRef.current,
-    });
   }, [isActive, video]);
 
   useEffect(() => {
     return () => {
       if (playerRef.current.player) {
-        console.log("Unloading video");
+        //console.log("Unloading video");
         playerRef.current.player.unload();
       }
     };
@@ -313,7 +301,7 @@ function StreamStackItem({
   useEffect(() => {
     const pr = playerRef.current.videoElement;
     if (!isActive && pr && pr.currentTime > 0) {
-      //console.log("PAUSE AND RESET ----------------------------->", video.idx);
+      ////console.log("PAUSE AND RESET ----------------------------->", video.idx);
       pr.muted = true;
       setVolume(0);
       // pr.currentTime = 0.04;
@@ -332,12 +320,6 @@ function StreamStackItem({
   // if its active, set the duration
   useEffect(() => {
     if (isActive && metadataLoaded && playerLoaded) {
-      console.log(
-        "PLAYING ----------------------------->",
-        video,
-        video.video.id,
-        playerRef?.current.videoElement
-      );
       if (playerRef.current.videoElement.currentTime > 0.0) {
         playerRef.current.videoElement.currentTime = 0.0;
         setCommitSeekTime(0.0);
@@ -354,13 +336,6 @@ function StreamStackItem({
 
   // change play/pause based on video state
   useEffect(() => {
-    console.log("VIDEO_STATE_CHANGE", {
-      videoState,
-      isActive,
-      metadataLoaded,
-      autoplayInitialized,
-      idx: video.idx,
-    });
     // console.trace();
     if (
       isActive &&
@@ -370,10 +345,10 @@ function StreamStackItem({
     ) {
       setPauseReason(null);
       if (videoState === STATE_VIDEO_PAUSED) {
-        console.log("useEffect : changing to pause", video.idx);
+        //console.log("useEffect : changing to pause", video.idx);
         playerRef.current.videoElement.pause();
       } else if (videoState === STATE_VIDEO_PLAY) {
-        console.log("useEffect : changing to play", video.idx);
+        //console.log("useEffect : changing to play", video.idx);
         tryToPlay();
       }
     }
@@ -393,7 +368,7 @@ function StreamStackItem({
   useEffect(() => {
     if (isActive && seekQueue.length > 0) {
       const seekEvent = seekQueue[0];
-      console.log("SEEKING --->", seekEvent);
+      //console.log("SEEKING --->", seekEvent);
       // setVideoState(STATE_VIDEO_PLAY)
       // setPauseReason(null)
       if (seekEvent && playerRef.current) {
@@ -408,7 +383,7 @@ function StreamStackItem({
             if (ct < 0) ct = 0;
 
             playerRef.current.videoElement.currentTime = ct;
-            // console.log(
+            // //console.log(
             //   "SEEKING ----------------------------->",
             //   playerRef.current.videoElement.currentTime
             // );
@@ -425,7 +400,7 @@ function StreamStackItem({
             }
 
             playerRef.current.videoElement.currentTime = st;
-            // console.log(
+            // //console.log(
             //   "SEEKING ----------------------------->",
             //   playerRef.current.videoElement.currentTime
             // );
@@ -470,7 +445,7 @@ function StreamStackItem({
     const checkSeek = (ct) => {
       // check if seekQueue length is greater than 0,
       // check if the current time is === to the marker time
-      // console.log("Checking seek", ct, commitSeekTime, seekQueue.length);
+      // //console.log("Checking seek", ct, commitSeekTime, seekQueue.length);
       if (seekQueue.length > 0 && commitSeekTime.toFixed(0) === ct.toFixed(0)) {
         if (isActive) handleLoading(false, isActive);
         autoSetCurrentMarkerIdx(commitSeekTime);
@@ -481,12 +456,12 @@ function StreamStackItem({
     };
 
     const checkPauseOrLoop = (ct) => {
-      // console.log("checkPauseOrLoop : ", ct, viewMode);
+      // //console.log("checkPauseOrLoop : ", ct, viewMode);
       if (viewMode === VIDEO_VIEW_STUDENT_MODE) {
-        // console.log("STUDENT --------->");
+        // //console.log("STUDENT --------->");
         return false;
       } else {
-        // console.log("TEACHER --------->");
+        // //console.log("TEACHER --------->");
         // either pause or loop
         let currentMarker = markers[currentMarkerIdx];
 
@@ -494,14 +469,14 @@ function StreamStackItem({
           return false;
         } else if (ct > markers[currentMarkerIdx + 1]?.timestamp) {
           if (currentMarker.loop) {
-            console.log("LOOPING CUZ OF MARKER");
+            //console.log("LOOPING CUZ OF MARKER");
             addToSeekQueue({
               type: SEEK_TYPE_MARKER,
               t: currentMarker.timestamp,
             });
             return true;
           } else {
-            console.log("PAUSING CUZ OF MARKER");
+            //console.log("PAUSING CUZ OF MARKER");
             setVideoState(STATE_VIDEO_PAUSED);
             setPauseReason(VIDEO_PAUSE_MARKER);
             return true;
@@ -536,7 +511,7 @@ function StreamStackItem({
 
         // before 0.05 seconds of video end, add a video event
         // to play the inactive video
-        // console.log(
+        // //console.log(
         // 	"VIDEO_EVENT_PLAY_INACTIVE : ",
         // 	playerRef.current?.videoElement?.currentTime -
         // 		playerRef.current?.videoElement?.duration
@@ -547,12 +522,8 @@ function StreamStackItem({
             playerRef.current?.videoElement?.currentTime <
             0.1
         ) {
-          console.log("VIDEO_EVENT_PLAY_INACTIVE");
+          //console.log("VIDEO_EVENT_PLAY_INACTIVE");
           if (videoEvent.length === 0) {
-            console.log("[StreamStackItem] Video event play inactive", {
-              currentTime: playerRef.current?.videoElement?.currentTime,
-              duration: playerRef.current?.videoElement?.duration,
-            });
             setVideoEvent({
               t: VIDEO_EVENT_PLAY_INACTIVE,
             });
@@ -565,7 +536,7 @@ function StreamStackItem({
     }, 50);
 
     return () => {
-      // console.log('CLEANING INTERVAL --------------------------------------->')
+      // //console.log('CLEANING INTERVAL --------------------------------------->')
       clearInterval(int);
     };
   }, [
@@ -594,7 +565,7 @@ function StreamStackItem({
     (user_id) => {
       const watch_time_logs = [...watchTimeBuffer];
 
-      // console.log({ watch_time_logs });
+      // //console.log({ watch_time_logs });
       if (watch_time_logs.length === 0) {
         return;
       }
@@ -611,12 +582,12 @@ function StreamStackItem({
       })
         .then((res) => {
           if (res.status === 200) {
-            console.log("watch time buffer flushed");
+            //console.log("watch time buffer flushed");
           }
         })
         .catch((err) => {
-          console.log("errored");
-          console.log(err);
+          //console.log("errored");
+          //console.log(err);
           localStorage.setItem(
             "6amyoga_watch_time_logs",
             JSON.stringify(watch_time_logs)
@@ -630,10 +601,10 @@ function StreamStackItem({
   );
 
   useEffect(() => {
-    console.log("Watch time useEffect : ", enableWatchHistory);
+    //console.log("Watch time useEffect : ", enableWatchHistory);
     if (isActive && enableWatchHistory && user && video) {
-      console.log("setting up stuff");
-      // console.log('CURRENT VIDEO', video)
+      //console.log("setting up stuff");
+      // //console.log('CURRENT VIDEO', video)
       // flushing
       flushWatchTimeBuffer(user?.user_id);
 
@@ -662,12 +633,12 @@ function StreamStackItem({
       // 	},
       // })
       // 	.then((res) => {
-      // 		console.log("watch history created", res.data);
+      // 		//console.log("watch history created", res.data);
       // 	})
       // 	.catch((err) => {
-      // 		console.log(err);
+      // 		//console.log(err);
       // 	});
-      console.log("Starting watch time intervals!");
+      //console.log("Starting watch time intervals!");
       // starting interval timer to flush watch duration buffer
       flushTimeInterval.current = setInterval(() => {
         flushWatchTimeBuffer(user?.user_id, video?.video?.playlist_id);
@@ -683,10 +654,6 @@ function StreamStackItem({
           playlist_id: video?.video?.playlist_id,
           currentTime: playerRef?.current?.videoElement?.currentTime,
         });
-        console.log(
-          "WATCH HISTORY ct : ",
-          playerRef?.current?.videoElement?.currentTime
-        );
         addToCommittedTs(playerRef?.current?.videoElement?.currentTime ?? 0);
       }, 3500);
     } else {
@@ -700,7 +667,7 @@ function StreamStackItem({
     }
 
     return () => {
-      console.log("Clearing watch time intervals!");
+      //console.log("Clearing watch time intervals!");
       if (flushTimeInterval.current) {
         clearInterval(flushTimeInterval.current);
       }
@@ -725,7 +692,7 @@ function StreamStackItem({
     if (videoEvent.length > 0 && !isActive) {
       const event = videoEvent[0];
       if (event?.t === VIDEO_EVENT_PLAY_INACTIVE) {
-        console.log("[DASH PLAYER] : [INACTIVE] play event received");
+        //console.log("[DASH PLAYER] : [INACTIVE] play event received");
         // play the video
         playerRef?.current?.videoElement.play();
       }
@@ -749,11 +716,6 @@ function StreamStackItem({
 
   const handlePlayerStateChange = useCallback(
     (e) => {
-      console.log(
-        "State Change",
-        e.newstate,
-        isActiveRef.current === null ? "null" : isActiveRef.current
-      );
       if (isActiveRef.current) {
         switch (e.newstate) {
           case "buffering":
@@ -782,7 +744,7 @@ function StreamStackItem({
   // video events
   const handleVideoSeeking = useCallback(
     (e) => {
-      console.log("Seeking...", e.target.currentTime); // Log current time and seek reason
+      //console.log("Seeking...", e.target.currentTime); // Log current time and seek reason
       handleLoading(true, isActiveRef.current);
     },
     [handleLoading]
@@ -790,7 +752,7 @@ function StreamStackItem({
 
   const handleVideoSeeked = useCallback(
     (e) => {
-      console.log("Seeked...");
+      //console.log("Seeked...");
       setVideoState(STATE_VIDEO_PLAY);
     },
     [setVideoState]
@@ -798,7 +760,7 @@ function StreamStackItem({
 
   const handleVideoCanPlayThrough = useCallback((e) => {
     const state = useVideoStore.getState();
-    console.log("Can play through...", state.videoState);
+    //console.log("Can play through...", state.videoState);
     // tryToPlay();
 
     if (!state.videoStarted) state.setVideoStarted(true);
@@ -829,7 +791,7 @@ function StreamStackItem({
 
   const playerOnError = useCallback(
     (e) => {
-      console.log("[StreamStackItem:error] Error playing video", e);
+      //console.log("[StreamStackItem:error] Error playing video", e);
       setVideoState(STATE_VIDEO_ERROR);
       // alert(JSON.stringify({ err: e }));
     },
@@ -905,7 +867,7 @@ function StreamStackItem({
     if (contentToRemove) {
       try {
         await storage.remove(contentToRemove.offlineUri);
-        console.log("Successfully removed:", manifestUri);
+        //console.log("Successfully removed:", manifestUri);
       } catch (error) {
         console.error("Failed to remove video:", error);
       }
@@ -917,9 +879,6 @@ function StreamStackItem({
   const loadVideo = useCallback(
     async (offlineSupported, isDrm, lastUpdated) => {
       if (!offlineSupported) {
-        console.log(
-          "[StreamStackItem:loadVideo] Offline not supported. Fallback to online URL"
-        );
         await handleOnlineVideoLoad(videoUrl);
         return;
       }
@@ -929,7 +888,7 @@ function StreamStackItem({
         let offlineUri = offlineRecord?.offlineUri;
         const savedTimestamp = await showAllRecords(videoUrl);
 
-        // console.log(isDrm, lastUpdated, savedTimestamp);
+        // //console.log(isDrm, lastUpdated, savedTimestamp);
 
         const unixDate = new Date(savedTimestamp);
 
@@ -941,9 +900,6 @@ function StreamStackItem({
           lastUpdated &&
           isoDate.getTime() > unixDate.getTime()
         ) {
-          console.log(
-            "[StreamStackItem:loadVideo] Video is outdated. Redownloading..."
-          );
           await shakaOfflineStore.remove(videoUrl);
           offlineUri = null;
         }
@@ -956,14 +912,8 @@ function StreamStackItem({
         if (!offlineUri) {
           setOpen(true);
           if (isDrm) {
-            console.log(
-              "[StreamStackItem:loadVideo] DRM video detected. Processing..."
-            );
             offlineUri = await handleDrmDownload(videoUrl, videoTitle);
           } else {
-            console.log(
-              "[StreamStackItem:loadVideo] Non-DRM video detected. Downloading..."
-            );
             offlineUri = await handleNonDrmDownload(videoUrl, videoTitle);
           }
 
@@ -973,7 +923,7 @@ function StreamStackItem({
         }
 
         if (offlineUri) {
-          console.log("[StreamStackItem:loadVideo] Loading offline URI");
+          //console.log("[StreamStackItem:loadVideo] Loading offline URI");
           await handleOfflineVideoLoad(offlineUri);
         } else {
           console.warn(
@@ -983,7 +933,6 @@ function StreamStackItem({
         }
 
         setMetadataLoaded(true);
-        console.log("[StreamStackItem:loadVideo] Video loaded successfully.");
       } catch (error) {
         console.error(
           "[StreamStackItem:loadVideo] Error loading video:",
@@ -1002,7 +951,7 @@ function StreamStackItem({
         let error = null;
 
         const detectedBrowser = detectBrowser();
-        console.log("Detected Browser", detectedBrowser);
+        //console.log("Detected Browser", detectedBrowser);
 
         switch (detectedBrowser) {
           case browser.edge:
@@ -1123,7 +1072,7 @@ function StreamStackItem({
       throw error;
     }
 
-    console.log("[StreamStackItem:playerInit] Fetching Widevine Token");
+    //console.log("[StreamStackItem:playerInit] Fetching Widevine Token");
 
     setDrmConfig(drmConfig);
 
@@ -1220,7 +1169,7 @@ function StreamStackItem({
 
   const playerInit = useCallback(
     async (ref) => {
-      console.log("player init called", ref);
+      //console.log("player init called", ref);
       if (ref != null) {
         playerRef.current = ref;
 
@@ -1230,22 +1179,22 @@ function StreamStackItem({
         const offlineSupported =
           useShakaOfflineStore.getState()?.offlineSupported || false;
 
-        console.log("Checking for isMobile", isMobile);
+        //console.log("Checking for isMobile", isMobile);
 
         if (playerRef.current.ui) {
-          console.log("Setting up UI");
+          //console.log("Setting up UI");
           setupUI();
 
           playerRef.current.ui.configure(shakaUIConfig);
         }
 
         if (playerRef.current.videoElement) {
-          console.log("Setting up videoElement events");
+          //console.log("Setting up videoElement events");
           setupVideoElement();
         }
 
         if (playerRef.current.player) {
-          console.log("Setting up player events");
+          //console.log("Setting up player events");
           setupEventListeners();
 
           // playerRef.current.player.configure(
@@ -1256,7 +1205,7 @@ function StreamStackItem({
           // stream settings
           playerRef.current.player.configure(shakaStreamConfig);
 
-          //console.log("Fetching DRM Info");
+          ////console.log("Fetching DRM Info");
           //fetch only if it is not a transition video
           if (
             (!isNaN(video?.video?.id) &&
@@ -1272,14 +1221,11 @@ function StreamStackItem({
             if (!isMobile.check) {
               await loadVideo(offlineSupported, true, updatedAt);
             } else {
-              console.log(
-                "[StreamStackItem:playerInit] Mobile detected. Unsupported."
-              );
               setPlayerSupported(false);
               return;
             }
           } else {
-            console.log("no drm");
+            //console.log("no drm");
             await loadVideo(offlineSupported, false, updatedAt);
           }
         }

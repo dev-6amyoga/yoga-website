@@ -46,17 +46,17 @@ function PackagingVideos() {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log("executing bat file!");
+      //console.log("executing bat file!");
       Fetch({
         url: "/video-packaging/run-bat",
         method: "POST",
       })
         .then((res) => {
-          console.log("success");
-          console.log(res.data);
+          //console.log("success");
+          //console.log(res.data);
         })
         .catch((err) => {
-          console.log("Error:", err);
+          //console.log("Error:", err);
         });
     };
     if (files.length > 0) {
@@ -69,7 +69,7 @@ function PackagingVideos() {
       const mp4Files = selectedFiles.filter(
         (file) => file.type === "video/mp4"
       );
-      console.log(mp4Files, selectedFiles);
+      //console.log(mp4Files, selectedFiles);
       if (mp4Files.length === selectedFiles.length) {
         setFiles(mp4Files);
         setError("");

@@ -89,7 +89,7 @@ function TeacherPlan() {
     const formData = getFormData(e);
 
     const discount_coupon = formData?.discount_coupon;
-    console.log(discount_coupon);
+    //console.log(discount_coupon);
     const error = await validateDiscountCoupon(discount_coupon);
 
     if (error) {
@@ -109,13 +109,13 @@ function TeacherPlan() {
       setCurrentStatus(USER_PLAN_ACTIVE);
       var today = new Date();
       updatedValidityString = today?.toISOString();
-      console.log("1New plan starts from date:", updatedValidityString);
+      //console.log("1New plan starts from date:", updatedValidityString);
     } else if (userPlan.length === 1) {
       setCurrentStatus(USER_PLAN_STAGED);
       var validityDate = new Date(userPlan[0].validity_to);
       validityDate.setDate(validityDate.getDate() + 1);
       updatedValidityString = validityDate?.toISOString();
-      console.log("2New plan validity from date:", updatedValidityString);
+      //console.log("2New plan validity from date:", updatedValidityString);
     } else {
       var highestValidityDate = null;
       setCurrentStatus(USER_PLAN_STAGED);
@@ -133,11 +133,6 @@ function TeacherPlan() {
       if (highestValidityDate !== null) {
         highestValidityDate.setDate(highestValidityDate.getDate() + 1);
         updatedValidityString = highestValidityDate?.toISOString();
-        console.log(
-          "3New plan validity from date:",
-          updatedValidityString,
-          highestValidityDate
-        );
       } else {
       }
     }
@@ -152,7 +147,7 @@ function TeacherPlan() {
       const filteredPlans = response.data?.plans?.filter(
         (plan) => plan.plan_user_type === "TEACHER"
       );
-      console.log("filtered plans : ", filteredPlans);
+      //console.log("filtered plans : ", filteredPlans);
       setAllPlans(filteredPlans);
     } catch (error) {
       toast("Error fetching plans", { type: "error" });
@@ -172,11 +167,11 @@ function TeacherPlan() {
 
   const validateDiscountCoupon = async (discount_coupon) => {
     if (!discount_coupon) {
-      console.log("invalid ya!");
+      //console.log("invalid ya!");
       return new Error("Invalid discount coupon");
     }
     try {
-      console.log("fetching now");
+      //console.log("fetching now");
       const res = await Fetch({
         url: "/discount-coupon/check-plan-mapping",
         method: "POST",
@@ -195,7 +190,7 @@ function TeacherPlan() {
       }
       return new Error(res?.data?.message);
     } catch (err) {
-      console.log(err);
+      //console.log(err);
       if (err?.response?.data?.error) {
         return new Error(err?.response?.data?.error);
       } else {
@@ -227,7 +222,7 @@ function TeacherPlan() {
         n: 10,
         retryDelayMs: 2000,
         onRetry: (err) => {
-          console.log(err);
+          //console.log(err);
         },
       })
         .then((res) => {
@@ -249,7 +244,7 @@ function TeacherPlan() {
       }
     }
 
-    console.log(toBeRegistered);
+    //console.log(toBeRegistered);
   }, [toBeRegistered]);
 
   const handleSubmit = async (e) => {
@@ -385,7 +380,7 @@ function TeacherPlan() {
     delete finalUserPlan.user_id;
     finalUserPlan.transaction_order_id = order_id;
     finalUserPlan.user_type = "TEACHER";
-    console.log({ finalUserPlan });
+    //console.log({ finalUserPlan });
     FetchRetry({
       url: "/teacher-plan/purchase",
       method: "POST",
@@ -464,7 +459,7 @@ function TeacherPlan() {
         method: "GET",
       });
 
-      console.log("teacher plans : ", response.data);
+      //console.log("teacher plans : ", response.data);
       setPlanId(response.data.planId);
     };
     if (user) {
@@ -533,7 +528,7 @@ function TeacherPlan() {
               "Sri Lanka",
             ];
             if (southAsia.includes(data.country_name)) {
-              console.log("currency is : INR");
+              //console.log("currency is : INR");
               setSelectedCurrency("INR");
             } else {
               setSelectedCurrency("USD");
@@ -554,8 +549,8 @@ function TeacherPlan() {
     if (data.plan_name) {
       try {
         let finalCustomCardData = { ...data };
-        console.log(finalCustomCardData);
-        console.log(currentCustomUserPlans);
+        //console.log(finalCustomCardData);
+        //console.log(currentCustomUserPlans);
         const relevantPlans = currentCustomUserPlans.filter(
           (plan) =>
             plan.custom_plan_id === finalCustomCardData?._id &&

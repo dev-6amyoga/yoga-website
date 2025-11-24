@@ -70,7 +70,7 @@ export default function ChangePassword() {
   const inputErrorDebounce = useRef(null);
 
   useEffect(() => {
-    console.log(passwordError);
+    //console.log(passwordError);
   }, [passwordError]);
   // Check password
 

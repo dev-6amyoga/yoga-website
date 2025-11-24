@@ -26,7 +26,7 @@ export default function AddCouponForm({ visible, setVisible }) {
         setVisible(false);
       })
       .catch((err) => {
-        console.log(err);
+        //console.log(err);
         toast(err.response?.data?.message, {
           type: "error",
         });

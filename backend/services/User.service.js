@@ -71,7 +71,7 @@ const GetUserInfo = async (filter, attributes = null) => {
     ;[user, errorUser] = await GetUser(filter, attributes)
     if (!user || errorUser) {
       error = 'User does not exist'
-      console.log(error)
+      //console.log(error)
       return [null, error]
     }
 

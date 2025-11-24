@@ -74,7 +74,7 @@ router.put('/playlists/updatePlaylist/:playlistId', async (req, res) => {
 // router.put('/playlists/updatePlaylist/:playlistId', async (req, res) => {
 //   const playlistId = req.params.playlistId
 //   const updatedData = req.body
-//   console.log(playlistId, updatedData)
+//   //console.log(playlistId, updatedData)
 //   try {
 //     const existingPlaylist = await Playlist.findOne({
 //       playlist_id: playlistId,
@@ -109,7 +109,7 @@ router.put('/playlists/updatePlaylist/:playlistId', async (req, res) => {
 
 router.get('/playlists/getPlaylistById/:playlistId', async (req, res) => {
   const playlistId = req.params.playlistId
-  console.log(playlistId)
+  //console.log(playlistId)
   try {
     const existingPlaylist = await Playlist.findOne({
       playlist_id: playlistId,
@@ -159,7 +159,7 @@ router.post('/playlists/createManifest/:playlistId', async (req, res) => {
 
       const asanaIds = playlist.asana_ids.filter((id) => typeof id === 'number')
 
-      // console.log(asanaIds);
+      // //console.log(asanaIds);
 
       let asanas = []
 
@@ -238,8 +238,8 @@ router.post('/playlists/createManifest/:playlistId', async (req, res) => {
       let [combinedManifest, totalDuration, sections] =
         await mpdCombiner.getCombinedManifest()
 
-      console.log(combinedManifest, totalDuration, sections)
-      // console.log(combinedManifest, totalDuration, sections);
+      //console.log(combinedManifest, totalDuration, sections)
+      // //console.log(combinedManifest, totalDuration, sections);
       // save the file to cloudflare
       await R2.cloudflareAddFile(
         `${playlist._id.toString()}.mpd`,
@@ -254,7 +254,7 @@ router.post('/playlists/createManifest/:playlistId', async (req, res) => {
         process.env.CLOUDFLARE_R2_PUBLIC_URL
       }/${playlist._id.toString()}.mpd`
 
-      console.log(totalDuration)
+      //console.log(totalDuration)
       if (totalDuration) {
         playlist.duration = totalDuration
       }
@@ -332,7 +332,7 @@ router.post('/playlists/calculateDuration', async (req, res) => {
         .status(404)
         .json({ message: 'No valid asanas or transitions found' })
     }
-    console.log('Files being sent to MPDCombiner:', files)
+    //console.log('Files being sent to MPDCombiner:', files)
     let mpdCombiner = new MPDCombiner(files, null)
     let [_, totalDuration] = await mpdCombiner.getCombinedManifest()
     return res.status(200).json({ totalDuration })

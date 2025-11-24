@@ -38,7 +38,7 @@ const useWatchHistoryStore = createWithSignal((set, get) => ({
 	},
 	updateWatchTimeBuffer: (wh) => {
 		const timedelta = wh.currentTime - get().committedTs;
-		// console.log({ timedelta });
+		// //console.log({ timedelta });
 
 		if (timedelta < 1) {
 			return;
@@ -71,7 +71,7 @@ const useWatchHistoryStore = createWithSignal((set, get) => ({
 	flushWatchTimeBuffer: async (user_id) => {
 		const watch_time_logs = get().watchTimeBuffer;
 
-		// console.log({ watch_time_logs });
+		// //console.log({ watch_time_logs });
 		if (watch_time_logs.length === 0) {
 			return;
 		}
@@ -88,11 +88,11 @@ const useWatchHistoryStore = createWithSignal((set, get) => ({
 		})
 			.then((res) => {
 				if (res.status === 200) {
-					console.log("watch time buffer flushed");
+					//console.log("watch time buffer flushed");
 				}
 			})
 			.catch((err) => {
-				console.log(err);
+				//console.log(err);
 				// localStorage.setItem(
 				// 	"6amyoga_watch_time_logs",
 				// 	JSON.stringify(watch_time_logs)
@@ -132,7 +132,7 @@ const useWatchHistoryStore = createWithSignal((set, get) => ({
 					}
 				})
 				.catch((err) => {
-					console.log(err);
+					//console.log(err);
 				});
 		}
 	},
@@ -208,7 +208,7 @@ export const WatchHistoryProvider = (props) => {
 				setStore(
 					produce((state) => {
 						const timedelta = wh.currentTime - state.committedTs;
-						// console.log({ timedelta });
+						// //console.log({ timedelta });
 
 						if (timedelta < 1) {
 							return;
@@ -238,7 +238,7 @@ export const WatchHistoryProvider = (props) => {
 			async flushWatchTimeBuffer(user_id) {
 				const watch_time_logs = state.watchTimeBuffer;
 
-				// console.log({ watch_time_logs });
+				// //console.log({ watch_time_logs });
 				if (watch_time_logs.length === 0) {
 					return;
 				}
@@ -255,11 +255,11 @@ export const WatchHistoryProvider = (props) => {
 				})
 					.then((res) => {
 						if (res.status === 200) {
-							console.log("watch time buffer flushed");
+							//console.log("watch time buffer flushed");
 						}
 					})
 					.catch((err) => {
-						console.log(err);
+						//console.log(err);
 						// localStorage.setItem(
 						// 	"6amyoga_watch_time_logs",
 						// 	JSON.stringify(watch_time_logs)
@@ -305,14 +305,14 @@ export const WatchHistoryProvider = (props) => {
 							}
 						})
 						.catch((err) => {
-							console.log(err);
+							//console.log(err);
 						});
 				}
 			},
 		},
 	];
 
-	console.log("Hello WatchHistoryStore!");
+	//console.log("Hello WatchHistoryStore!");
 
 	const resolvedChildren = children(() => props.children);
 

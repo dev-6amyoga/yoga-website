@@ -61,10 +61,10 @@ function draggable(el, value) {
 			dragBounds = el.parentNode.getBoundingClientRect();
 			el.parentNode.style["user-select"] = "none";
 			el.style["user-select"] = "none";
-			// console.log({ dragBounds });
+			// //console.log({ dragBounds });
 		}
 
-		// console.log(
+		// //console.log(
 		// 	e.clientX,
 		// 	e.clientY,
 		// 	targetBounds,
@@ -80,7 +80,7 @@ function draggable(el, value) {
 			e.clientY > targetBounds.top &&
 			e.clientY < targetBounds.bottom
 		) {
-			console.log("ACTIVE");
+			//console.log("ACTIVE");
 			active = true;
 			if (onDragStart) onDragStart();
 		}
@@ -89,7 +89,7 @@ function draggable(el, value) {
 	const handlePointerUp = (e) => {
 		if (active) {
 			active = false;
-			console.log("INACTIVE");
+			//console.log("INACTIVE");
 			el.parentNode.style["user-select"] = "auto";
 			el.style["user-select"] = "auto";
 
@@ -188,7 +188,7 @@ export default function VideoPlaybar(props) {
 	// 	on(
 	// 		[() => videoStore.currentMarkerIdx, () => videoStore.markers],
 	// 		() => {
-	// 			console.log(
+	// 			//console.log(
 	// 				"CURRENT IDX CHANGED, SETTING PREV NEXT MARKERS",
 	// 				videoStore.currentMarkerIdx
 	// 			);
@@ -229,12 +229,12 @@ export default function VideoPlaybar(props) {
 			currentTime >= 7.5
 		) {
 			popTimeout = setTimeout(() => {
-				console.log("Popping from queue");
+				//console.log("Popping from queue");
 				popFromQueue(0);
 			}, 60);
 		}
 
-		// console.log(viewMode.value, currentTime, prevNextMarkers);
+		// //console.log(viewMode.value, currentTime, prevNextMarkers);
 		// 0 : cur marker, 1 : next marker
 		onCleanup(() => {
 			if (popTimeout) {
@@ -246,7 +246,7 @@ export default function VideoPlaybar(props) {
 
 	// useEffect(
 	//	() => {
-	// console.log(
+	// //console.log(
 	//     videoEvent,
 	//     currentTime,
 	//     prevNextMarkers[0],
@@ -257,9 +257,9 @@ export default function VideoPlaybar(props) {
 	//     videoEvent?.type === VIDEO_EVENT_MOVING_MARKER &&
 	//     Math.abs(currentTime - markers[videoEvent?.markerIdx].timestamp) < 1
 	// ) {
-	//     console.log('SETTING CURRENT IDX --->', videoEvent?.markerIdx || 0)
+	//     //console.log('SETTING CURRENT IDX --->', videoEvent?.markerIdx || 0)
 	//     setCurrentMarkerIdx(videoEvent?.markerIdx || 0)
-	//     console.log('VIDEO EVENT --->', null)
+	//     //console.log('VIDEO EVENT --->', null)
 	//     setVideoEvent(null)
 	//     return
 	// }
@@ -285,7 +285,7 @@ export default function VideoPlaybar(props) {
 	//                 prevNextMarkers[0] &&
 	//                 !prevNextMarkers[0]?.loop
 	//             ) {
-	//                 console.log(
+	//                 //console.log(
 	//                     "SETTING PAUSE REASON TO 'VIDEO_PAUSE_MARKER'"
 	//                 )
 	//                 setVideoState(STATE_VIDEO_PAUSED)
@@ -313,7 +313,7 @@ export default function VideoPlaybar(props) {
 	const handleSetBarBounds = () => {
 		if (barRef) {
 			const bounds = barRef.getBoundingClientRect();
-			console.log("[VIDEO PLAYBAR] BOUNDS : ", bounds);
+			//console.log("[VIDEO PLAYBAR] BOUNDS : ", bounds);
 			setBarBound({
 				top: bounds.top,
 				bottom: bounds.bottom,
@@ -339,7 +339,7 @@ export default function VideoPlaybar(props) {
 	);
 
 	const moveToTimestamp = (t) => {
-		// console.log("MOVING BY ", t - currentTime);
+		// //console.log("MOVING BY ", t - currentTime);
 		addToSeekQueue({ t, type: SEEK_TYPE_MOVE });
 	};
 
@@ -348,7 +348,7 @@ export default function VideoPlaybar(props) {
 		on([() => videoStore.currentTime, barBound, props.duration], () => {
 			const pos =
 				barBound().width * (videoStore.currentTime / props.duration());
-			// console.log("[EVENT] setting boop pos: ", pos);
+			// //console.log("[EVENT] setting boop pos: ", pos);
 			setCurrentBoopPosition(pos);
 		})
 	);
@@ -363,7 +363,7 @@ export default function VideoPlaybar(props) {
 			const bounds = barBound();
 			const t =
 				(props.duration() * (e.clientX - bounds.left)) / bounds.width;
-			console.log("[EVENT] Calling move to timestamp from seekOnClick", {
+			//console.log("[EVENT] Calling move to timestamp from seekOnClick", {
 				duration: props.duration(),
 				location,
 				offsetX: e.clientX,
@@ -374,7 +374,7 @@ export default function VideoPlaybar(props) {
 		} else {
 			const bounds = barBound();
 			const t = (props.duration() * e.offsetX) / bounds.width;
-			console.log("[EVENT] Calling move to timestamp from seekOnClick", {
+			//console.log("[EVENT] Calling move to timestamp from seekOnClick", {
 				duration: props.duration(),
 				location,
 				offsetX: e.offsetX,
@@ -386,13 +386,13 @@ export default function VideoPlaybar(props) {
 	};
 
 	const handleDragOnStart = (e) => {
-		console.log("[EVENT] DRAG STARTED", e, props.isActive, barBound());
+		//console.log("[EVENT] DRAG STARTED", e, props.isActive, barBound());
 		setMouseDown(true);
 		props.handleSetPause(props.isActive);
 	};
 
 	const handleDragOnStop = (e) => {
-		console.log("[EVENT] DRAG STOPPED", e, e.offsetX);
+		//console.log("[EVENT] DRAG STOPPED", e, e.offsetX);
 		seekOnClick(e, "boopdrag");
 		setMouseDown(false);
 	};
@@ -400,7 +400,7 @@ export default function VideoPlaybar(props) {
 	const handleOnDrag = (e) => {
 		const cbp = e.offsetX;
 		// const calcpos = cbp < 0 ? 0 : cbp > bounds.width ? bounds.width : cbp;
-		// console.log("[EVENT] Dragging : ", {
+		// //console.log("[EVENT] Dragging : ", {
 		// 	cbp,
 		// 	calcpos,
 		// 	e,
@@ -413,7 +413,7 @@ export default function VideoPlaybar(props) {
 		on([barBound, currentBoopPosition, props.duration], () => {
 			const d =
 				(props.duration() * currentBoopPosition()) / barBound().width;
-			// console.log(
+			// //console.log(
 			// 	props.duration,
 			// 	currentBoopPosition,
 			// 	barBound.width,
@@ -434,7 +434,7 @@ export default function VideoPlaybar(props) {
 	// 			onDragEnd: handleDragOnStop,
 	// 			onDrag: handleOnDrag,
 	// 		};
-	// 		console.log("[EVENT] drag options change ", ops);
+	// 		//console.log("[EVENT] drag options change ", ops);
 	// 		setOptions(ops);
 	// 	})
 	// );
@@ -452,7 +452,7 @@ export default function VideoPlaybar(props) {
 	// 		],
 	// 		() => {
 	// 			if (props.isActive) {
-	// 				console.log(
+	// 				//console.log(
 	// 					videoStore.currentTime,
 	// 					props.duration(),
 	// 					videoStore.currentTime / props.duration()
@@ -471,7 +471,7 @@ export default function VideoPlaybar(props) {
 					seekOnClick(e, "barclick");
 				}}
 				ref={(el) => {
-					console.log(el.getBoundingClientRect());
+					//console.log(el.getBoundingClientRect());
 					barRef = el;
 				}}>
 				<div

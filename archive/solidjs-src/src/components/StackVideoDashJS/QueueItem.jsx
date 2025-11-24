@@ -40,7 +40,7 @@ function QueueItem(props) {
 					<button
 						class="h-5 w-5 xl:h-6 xl:w-6 border rounded-full p-2 flex items-center justify-center"
 						onClick={() => {
-							console.log("QueueItem: pop", props.idx());
+							//console.log("QueueItem: pop", props.idx());
 							props.pop(props.idx());
 						}}>
 						-

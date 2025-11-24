@@ -53,10 +53,10 @@ function LogPayment() {
   const [showUserSelection, setShowUserSelection] = useState(false);
 
   const calculateEndDate = (startDate, validityDays) => {
-    console.log(startDate, validityDays);
+    //console.log(startDate, validityDays);
     const endDate = new Date(startDate);
     endDate.setUTCDate(endDate.getUTCDate() + validityDays);
-    console.log(endDate.toISOString().split("T")[0]);
+    //console.log(endDate.toISOString().split("T")[0]);
     // setValidityToDate(endDate.toISOString().split("T")[0]);
     return endDate.toISOString().split("T")[0];
   };
@@ -100,7 +100,7 @@ function LogPayment() {
           }
         })
         .catch((err) => {
-          console.log(err);
+          //console.log(err);
         });
     };
     if (selectedPlan !== null && selectedPlan !== undefined) {
@@ -118,12 +118,12 @@ function LogPayment() {
         });
         const data = response.data;
         if (data["userPlan"]) {
-          console.log(data["userPlan"]);
+          //console.log(data["userPlan"]);
           setUserPlans(data["userPlan"]);
         } else {
         }
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     if (user_id !== 0) {
@@ -141,9 +141,9 @@ function LogPayment() {
         const data = response.data;
 
         setStudentData(data.users);
-        console.log({ users: data.users });
+        //console.log({ users: data.users });
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     fetchStudents();
@@ -160,7 +160,7 @@ function LogPayment() {
 
         setInstituteData(data.users);
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     fetchInstitutes();
@@ -168,18 +168,18 @@ function LogPayment() {
 
   useEffect(() => {
     const fetchStudentPlans = async () => {
-      console.log("in fetch plans for student");
+      //console.log("in fetch plans for student");
       try {
         const response = await Fetch({
           url: "/plan/get-all-student-plans",
         });
         if (response?.status === 200) {
-          console.log("STUDENT plans : ", response?.data?.plans);
+          //console.log("STUDENT plans : ", response?.data?.plans);
           setStudentPlans(response?.data?.plans);
         }
       } catch (error) {
         toast("Error fetching plans", { type: "error" });
-        console.log(error);
+        //console.log(error);
       }
     };
 
@@ -193,11 +193,11 @@ function LogPayment() {
           url: "/plan/get-all-institute-plans",
         });
         if (response?.status === 200) {
-          console.log("INSTITUTE plans : ", response?.data?.plans);
+          //console.log("INSTITUTE plans : ", response?.data?.plans);
           setInstitutePlans(response?.data?.plans);
         }
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchInstitutePlans();
@@ -207,7 +207,7 @@ function LogPayment() {
     const handleLog = async () => {
       try {
         setUserId(rowData.user_id);
-        console.log(rowData.institute_id);
+        //console.log(rowData.institute_id);
         setInstituteId(rowData.institute_id);
         setPlanAddition(true);
         setModalData(rowData);
@@ -248,13 +248,13 @@ function LogPayment() {
       setCurrentStatus(USER_PLAN_ACTIVE);
       var today = new Date();
       updatedValidityString = today.toISOString();
-      console.log("New plan starts from date:", updatedValidityString);
+      //console.log("New plan starts from date:", updatedValidityString);
     } else if (userPlan.length === 1) {
       setCurrentStatus(USER_PLAN_STAGED);
       var validityDate = new Date(userPlan[0].validity_to);
       validityDate.setDate(validityDate.getDate() + 1);
       updatedValidityString = validityDate.toISOString();
-      console.log("New plan validity from date:", updatedValidityString);
+      //console.log("New plan validity from date:", updatedValidityString);
     } else {
       var highestValidityDate = null;
       setCurrentStatus(USER_PLAN_STAGED);
@@ -270,9 +270,9 @@ function LogPayment() {
       if (highestValidityDate !== null) {
         highestValidityDate.setDate(highestValidityDate.getDate() + 1);
         updatedValidityString = highestValidityDate.toISOString();
-        console.log("New plan validity from date:", updatedValidityString);
+        //console.log("New plan validity from date:", updatedValidityString);
       } else {
-        console.log("No valid validity_to dates found.");
+        //console.log("No valid validity_to dates found.");
       }
     }
     return updatedValidityString;
@@ -369,8 +369,8 @@ function LogPayment() {
     );
     transactionData.payment_date = purchaseDate.toISOString().split("T")[0];
 
-    // console.log(transactionData);
-    console.log(userPlanData);
+    // //console.log(transactionData);
+    //console.log(userPlanData);
 
     try {
       const response = await Fetch({
@@ -398,7 +398,7 @@ function LogPayment() {
             toast(response?.data?.error);
           }
         } catch (error) {
-          console.log(error);
+          //console.log(error);
           toast("Error subscribing plan", { type: "error" });
         }
       } else {

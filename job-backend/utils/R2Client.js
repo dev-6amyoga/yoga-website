@@ -99,7 +99,7 @@ module.exports = {
 		partNumber,
 		body
 	) => {
-		console.log(
+		//console.log(
 			"[cloudflareUploadPart] uploading size:",
 			body.byteLength,
 			" part number:",

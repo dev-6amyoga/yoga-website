@@ -36,7 +36,7 @@ function StudentWatchHistory() {
         }
       })
       .catch((err) => {
-        console.log(err);
+        //console.log(err);
         toast("Error fetching watch history", {
           type: "error",
         });
@@ -58,7 +58,7 @@ function StudentWatchHistory() {
         }
       })
       .catch((err) => {
-        console.log(err);
+        //console.log(err);
         toast("Error fetching watch time", {
           type: "error",
         });
@@ -76,14 +76,14 @@ function StudentWatchHistory() {
     })
       .then((res) => {
         if (res.status === 200) {
-          console.log(res.data);
+          //console.log(res.data);
           setWatchTimeLimit(res.data?.user_plan?.plan?.watch_time_limit);
           setActivePlan(res.data?.user_plan?.plan?.name);
           setWatchTimeQuota(res.data?.quota?.quota);
         }
       })
       .catch((err) => {
-        console.log(err);
+        //console.log(err);
         toast("Error fetching watch time", {
           type: "error",
         });

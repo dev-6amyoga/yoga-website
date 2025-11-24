@@ -61,7 +61,7 @@ function Institutes() {
           url: "/user/get-all-institutes",
           method: "GET",
         });
-        console.log(response.data.userInstituteData);
+        //console.log(response.data.userInstituteData);
         const sortedUsers = response.data.userInstituteData.sort((a, b) => {
           return new Date(b.created) - new Date(a.created);
         });

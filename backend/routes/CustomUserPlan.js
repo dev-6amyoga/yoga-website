@@ -38,7 +38,7 @@ router.post('/register', authenticateToken, async (req, res) => {
 
     const { user_id } = req.user
 
-    console.log(req.body)
+    //console.log(req.body)
 
     // check request body
 
@@ -52,7 +52,7 @@ router.post('/register', authenticateToken, async (req, res) => {
       !transaction_order_id ||
       !user_type
     ) {
-      console.log('Missing required fields1')
+      //console.log('Missing required fields1')
       return res
         .status(HTTP_BAD_REQUEST)
         .json({ message: 'Missing required fields' })
@@ -60,7 +60,7 @@ router.post('/register', authenticateToken, async (req, res) => {
 
     // mongodb object id is string
     if (typeof plan_id !== 'string') {
-      console.log('Missing required fields2')
+      //console.log('Missing required fields2')
       return res.status(HTTP_BAD_REQUEST).json({
         message: 'Invalid plan_id',
       })
@@ -73,14 +73,14 @@ router.post('/register', authenticateToken, async (req, res) => {
         validity_to === null ||
         validity_to === undefined)
     ) {
-      console.log('Missing required fields3')
+      //console.log('Missing required fields3')
       // if status is active and either valid from or valid to are null;
       return res
         .status(HTTP_BAD_REQUEST)
         .json({ error: 'Missing required fields' })
     } else if (current_status === USER_PLAN_STAGED) {
     } else {
-      console.log('INVALID STATUS', current_status)
+      //console.log('INVALID STATUS', current_status)
       if (
         current_status !== USER_PLAN_ACTIVE &&
         current_status !== USER_PLAN_STAGED

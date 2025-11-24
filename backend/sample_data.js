@@ -515,7 +515,7 @@ const bulkCreateSampleData = async () => {
   // // INSTITUTE
   // try {
   //   const ri = await Institute.bulkCreate(institutes, { transaction: t })
-  //   console.log(
+  //   //console.log(
   //     `Institutes sample data inserted : ${institutes.length}/${ri.length}`
   //   )
   // } catch (err) {
@@ -526,7 +526,7 @@ const bulkCreateSampleData = async () => {
   // // ROLE
   // try {
   //   const rr = await Role.bulkCreate(roles, { transaction: t })
-  //   console.log(`Roles sample data inserted : ${roles.length}/${rr.length}`)
+  //   //console.log(`Roles sample data inserted : ${roles.length}/${rr.length}`)
   // } catch (err) {
   //   await t.rollback()
   //   throw err
@@ -535,7 +535,7 @@ const bulkCreateSampleData = async () => {
   // // USER
   // try {
   //   const ru = await User.bulkCreate(users, { transaction: t })
-  //   console.log(`Users sample data inserted : ${users.length}/${ru.length}`)
+  //   //console.log(`Users sample data inserted : ${users.length}/${ru.length}`)
   // } catch (err) {
   //   await t.rollback()
   //   throw err
@@ -546,7 +546,7 @@ const bulkCreateSampleData = async () => {
   //   const rui = await UserInstitute.bulkCreate(user_institute, {
   //     transaction: t,
   //   })
-  //   console.log(
+  //   //console.log(
   //     `UserInstitute sample data inserted : ${user_institute.length}/${rui.length}`
   //   )
   // } catch (err) {
@@ -562,7 +562,7 @@ const bulkCreateSampleData = async () => {
   //       transaction: t,
   //     }
   //   )
-  //   console.log(
+  //   //console.log(
   //     `UserInstitutePlanRole sample data inserted : ${user_institute_plan_role.length}/${rur.length}`
   //   )
   // } catch (err) {
@@ -573,7 +573,7 @@ const bulkCreateSampleData = async () => {
   // PERMISSION
   // try {
   //   const rp = await Permission.bulkCreate(permissions, { transaction: t })
-  //   console.log(
+  //   //console.log(
   //     `Permissions sample data inserted : ${permissions.length}/${rp.length}`
   //   )
   // } catch (err) {
@@ -586,7 +586,7 @@ const bulkCreateSampleData = async () => {
   //   const rrp = await RolePermission.bulkCreate(roles_perms, {
   //     transaction: t,
   //   })
-  //   console.log(
+  //   //console.log(
   //     `RolePermission sample data inserted : ${permissions.length}/${rrp.length}`
   //   )
   // } catch (err) {
@@ -597,7 +597,7 @@ const bulkCreateSampleData = async () => {
   // PLAN
   // try {
   //   const rpl = await Plan.bulkCreate(plans, { transaction: t })
-  //   console.log(`Plans sample data inserted : ${plans.length}/${rpl.length}`)
+  //   //console.log(`Plans sample data inserted : ${plans.length}/${rpl.length}`)
   // } catch (err) {
   //   await t.rollback()
   //   throw err
@@ -606,7 +606,7 @@ const bulkCreateSampleData = async () => {
   // // CURRENCY
   // try {
   //   const rc = await Currency.bulkCreate(currency, { transaction: t })
-  //   console.log(
+  //   //console.log(
   //     `Currency sample data inserted : ${currency.length}/${rc.length}`
   //   )
   // } catch (err) {
@@ -619,7 +619,7 @@ const bulkCreateSampleData = async () => {
   //   const rpp = await PlanPricing.bulkCreate(plan_pricing, {
   //     transaction: t,
   //   })
-  //   console.log(
+  //   //console.log(
   //     `Plan pricing sample data inserted : ${plan_pricing.length}/${rpp.length}`
   //   )
   // } catch (err) {
@@ -631,7 +631,7 @@ const bulkCreateSampleData = async () => {
   //   const rpp = await ZoomClassModel.bulkCreate(zoom_classes, {
   //     transaction: t,
   //   })
-  //   console.log(
+  //   //console.log(
   //     `Zoom class sample data inserted : ${zoom_classes.length}/${rpp.length}`
   //   )
   // } catch (err) {
@@ -642,7 +642,7 @@ const bulkCreateSampleData = async () => {
   //   const rupa = await UserPlanAttendance.bulkCreate(user_plan_attendance, {
   //     transaction: t,
   //   })
-  //   console.log(
+  //   //console.log(
   //     `UserPlanAttendance sample data inserted : ${user_plan_attendance.length}/${rupa.length}`
   //   )
   // } catch (err) {
@@ -655,7 +655,7 @@ const bulkCreateSampleData = async () => {
   //   const rca = await ClassAttendance.bulkCreate(class_attendance, {
   //     transaction: t,
   //   })
-  //   console.log(
+  //   //console.log(
   //     `ClassAttendance sample data inserted : ${class_attendance.length}/${rca.length}`
   //   )
   // } catch (err) {

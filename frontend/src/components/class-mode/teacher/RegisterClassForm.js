@@ -52,11 +52,11 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 		setDays(val);
 	};
 	const handleEndTimeChange = (e) => {
-		console.log(e.target.value);
+		//console.log(e.target.value);
 		setEndTime(e.target.value);
 	};
 	const handleStartTimeChange = (e) => {
-		console.log(e.target.value);
+		//console.log(e.target.value);
 		setStartTime(e.target.value);
 	};
 
@@ -79,12 +79,12 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 			// Calculate the difference in minutes
 			let difference = 2400 - (timeInMinutes1 - timeInMinutes2);
 
-			console.log("before: ", difference);
+			//console.log("before: ", difference);
 			// Handle negative difference (time2 after time1 next day)
 			if (difference > 2400) {
 				difference -= 2400;
 			}
-			console.log("after : ", difference);
+			//console.log("after : ", difference);
 
 			// Convert difference back to hours and minutes
 			const hours = Math.floor(difference / 100);
@@ -123,18 +123,18 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 		queryKey: ["students"],
 		queryFn: async () => {
 			try {
-				console.log("Getting students");
+				//console.log("Getting students");
 				const res = await Fetch({
 					url: "/user/get-all-students",
 					//   token: true,
 					method: "GET",
 				});
 
-				console.log(res.data);
+				//console.log(res.data);
 
 				return res?.data?.users;
 			} catch (error) {
-				console.log(error);
+				//console.log(error);
 				throw error;
 			}
 		},
@@ -211,29 +211,7 @@ export default function RegisterNewClass({ visible = false, setVisible }) {
 
 		// formData["days"] = days;
 
-		// console.log(formData, new Date(formData.start_time).toISOString());
-
-		if (classType === CLASS_TYPE_ONETIME) {
-			console.log({
-				...formData,
-				start_time: new Date(formData.start_time).toISOString(),
-				end_time: new Date(formData.end_time).toISOString(),
-				class_type: classType,
-				allowed_students: allowedStudents.map((s) => s.email),
-			});
-		}
-
-		if (classType === CLASS_TYPE_RECURRING) {
-			console.log({
-				...formData,
-				start_time: formData.start_time,
-				end_time: formData.end_time,
-				class_type: classType,
-				recurrance_type: recurranceType,
-				recurrance_days: weeklyRecurranceDays,
-				allowed_students: allowedStudents.map((s) => s.email),
-			});
-		}
+		// //console.log(formData, new Date(formData.start_time).toISOString());
 
 		const onetime_class_start_time =
 			classType === CLASS_TYPE_ONETIME

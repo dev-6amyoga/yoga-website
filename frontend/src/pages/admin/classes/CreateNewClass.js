@@ -59,11 +59,11 @@ export default function CreateNewClass() {
       method: "GET",
     })
       .then((res) => {
-        console.log(res.data);
+        //console.log(res.data);
         setPlans(res.data.plans);
       })
       .catch((err) => {
-        console.log("Something went wrong", { type: "error" });
+        //console.log("Something went wrong", { type: "error" });
       });
   };
   const fetchInstitutes = () => {
@@ -72,11 +72,11 @@ export default function CreateNewClass() {
       method: "GET",
     })
       .then((res) => {
-        console.log(res.data);
+        //console.log(res.data);
         setInstitutes(res.data);
       })
       .catch((err) => {
-        console.log("Something went wrong", { type: "error" });
+        //console.log("Something went wrong", { type: "error" });
       });
   };
 
@@ -92,11 +92,11 @@ export default function CreateNewClass() {
       data: { institute_id },
     })
       .then((res) => {
-        console.log(res.data);
+        //console.log(res.data);
         setTeachers(res.data.users);
       })
       .catch((err) => {
-        console.log("Something went wrong", { type: "error" });
+        //console.log("Something went wrong", { type: "error" });
       });
   };
 
@@ -157,7 +157,7 @@ export default function CreateNewClass() {
               recurring_end_time: formData.recurring_end_time.format("HH:mm"),
             };
 
-      console.log("Payload to submit:", payload);
+      //console.log("Payload to submit:", payload);
 
       Fetch({
         url: "/zoom/api/classes",
@@ -166,7 +166,7 @@ export default function CreateNewClass() {
       })
         .then((res) => {
           if (res.status === 200) {
-            console.log("Class created successfully");
+            //console.log("Class created successfully");
             setFormData({
               zoom_class_name: "",
               plan_id: [],
@@ -183,7 +183,7 @@ export default function CreateNewClass() {
           }
         })
         .catch((err) => {
-          console.log(err);
+          //console.log(err);
         });
     } catch (err) {
       console.error(err);

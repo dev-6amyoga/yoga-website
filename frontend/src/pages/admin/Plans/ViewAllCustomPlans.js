@@ -54,7 +54,7 @@ function ViewAllCustomPlans() {
         const data = response.data;
         setCurrencies(data.currencies);
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     fetchData();
@@ -68,7 +68,7 @@ function ViewAllCustomPlans() {
         ]);
         setAllPlaylists(playlistsResponse.data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
 
@@ -83,13 +83,13 @@ function ViewAllCustomPlans() {
           method: "GET",
         });
         const data = response.data;
-        console.log(data);
+        //console.log(data);
         const sortedUsers = data.custom_plans.sort((a, b) => {
           return b.custom_plan_id - a.custom_plan_id;
         });
         setCustomPlans(sortedUsers);
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     fetchData();
@@ -131,7 +131,7 @@ function ViewAllCustomPlans() {
       });
       handleClose();
     } catch (err) {
-      console.log(err);
+      //console.log(err);
     }
   };
 

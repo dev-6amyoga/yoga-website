@@ -17,7 +17,7 @@ const popFromQueue = globalPlaylistStore.popFromQueue;
 
 export const handleToggleMode = () => {
 	const videoStore = useVideoStore.getState();
-	console.log(
+	//console.log(
 		"Switching modes ==> Current mode: ",
 		videoStore.viewMode.value
 	);
@@ -30,19 +30,19 @@ export const handleToggleMode = () => {
 };
 
 export const handlePrevMarker = () => {
-	// console.log("Prev Marker Clicked");
+	// //console.log("Prev Marker Clicked");
 	const videoStore = useVideoStore.getState();
 	const markers = videoStore.markers;
 	const currentMarkerIdx = videoStore.currentMarkerIdx.value;
 
-	console.log("Prev Marker", markers.length);
+	//console.log("Prev Marker", markers.length);
 	if (markers.length > 0) {
 		const idx = (currentMarkerIdx || 0) - 1;
-		console.log("SETTING MARKER ID :", idx);
+		//console.log("SETTING MARKER ID :", idx);
 		if (idx <= 0) {
 			setCurrentMarkerIdx(null);
 			popFromArchive(-1);
-			// console.log("end reached");
+			// //console.log("end reached");
 			return;
 		}
 		// seek to prev marker
@@ -58,22 +58,22 @@ export const handlePrevMarker = () => {
 };
 
 export const handleNextMarker = () => {
-	console.log("Next Marker Clicked");
+	//console.log("Next Marker Clicked");
 	const videoStore = useVideoStore.getState();
 	const markers = videoStore.markers;
 	const currentMarkerIdx = videoStore.currentMarkerIdx.value;
 
-	console.log("Next Marker", markers.length);
+	//console.log("Next Marker", markers.length);
 	if (markers.length > 0) {
 		const idx = (currentMarkerIdx.value || 0) + 1;
 
 		if (idx >= markers.length) {
 			popFromQueue(0);
-			// console.log("end reached");
+			// //console.log("end reached");
 			return;
 		}
 
-		console.log("SETTING MARKER ID :", idx);
+		//console.log("SETTING MARKER ID :", idx);
 		setCurrentMarkerIdx(idx);
 		// seek to next marker
 		addToSeekQueue({

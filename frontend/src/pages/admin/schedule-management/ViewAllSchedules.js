@@ -73,7 +73,7 @@ function ViewAllSchedules() {
     }, {});
   }, [allAsanas]);
   useEffect(() => {
-    console.log("map : ", asanaNameMap);
+    //console.log("map : ", asanaNameMap);
   }, [asanaNameMap]);
 
   useEffect(() => {
@@ -83,10 +83,10 @@ function ViewAllSchedules() {
           url: "/content/video/getAllAsanas",
         });
         const data = response?.data;
-        console.log("all asanas : ", data);
+        //console.log("all asanas : ", data);
         setAllAsanas(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -98,10 +98,10 @@ function ViewAllSchedules() {
           url: "/schedule/getAllSchedules",
         });
         const data = response.data;
-        console.log("all schedules : ", data);
+        //console.log("all schedules : ", data);
         setAllSchedules(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();

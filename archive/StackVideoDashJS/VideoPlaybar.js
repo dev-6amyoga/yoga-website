@@ -54,7 +54,7 @@ export default function VideoPlaybar({
 	}, [currentVideo, setCurrentTime]);
 
 	const prevNextMarkers = useMemo(() => {
-		console.log(
+		//console.log(
 			"CURRENT IDX CHANGED, SETTING PREV NEXT MARKERS",
 			currentMarkerIdx
 		);
@@ -80,12 +80,12 @@ export default function VideoPlaybar({
 			currentTime >= 7.5
 		) {
 			popTimeout.current = setTimeout(() => {
-				console.log("Popping from queue");
+				//console.log("Popping from queue");
 				popFromQueue(0);
 			}, 60);
 		}
 
-		// console.log(viewMode, currentTime, prevNextMarkers);
+		// //console.log(viewMode, currentTime, prevNextMarkers);
 		// 0 : cur marker, 1 : next marker
 		return () => {
 			if (popTimeout.current) {
@@ -96,7 +96,7 @@ export default function VideoPlaybar({
 
 	useEffect(
 		() => {
-			// console.log(
+			// //console.log(
 			//     videoEvent,
 			//     currentTime,
 			//     prevNextMarkers[0],
@@ -107,9 +107,9 @@ export default function VideoPlaybar({
 			//     videoEvent?.type === VIDEO_EVENT_MOVING_MARKER &&
 			//     Math.abs(currentTime - markers[videoEvent?.markerIdx].timestamp) < 1
 			// ) {
-			//     console.log('SETTING CURRENT IDX --->', videoEvent?.markerIdx || 0)
+			//     //console.log('SETTING CURRENT IDX --->', videoEvent?.markerIdx || 0)
 			//     setCurrentMarkerIdx(videoEvent?.markerIdx || 0)
-			//     console.log('VIDEO EVENT --->', null)
+			//     //console.log('VIDEO EVENT --->', null)
 			//     setVideoEvent(null)
 			//     return
 			// }
@@ -135,7 +135,7 @@ export default function VideoPlaybar({
 			//                 prevNextMarkers[0] &&
 			//                 !prevNextMarkers[0]?.loop
 			//             ) {
-			//                 console.log(
+			//                 //console.log(
 			//                     "SETTING PAUSE REASON TO 'VIDEO_PAUSE_MARKER'"
 			//                 )
 			//                 setVideoState(STATE_VIDEO_PAUSED)
@@ -189,7 +189,7 @@ export default function VideoPlaybar({
 
 	const moveToTimestamp = useCallback(
 		(t) => {
-			// console.log("MOVING BY ", t - currentTime);
+			// //console.log("MOVING BY ", t - currentTime);
 			addToSeekQueue({ t, type: SEEK_TYPE_MOVE });
 		},
 		[addToSeekQueue]
@@ -213,7 +213,7 @@ export default function VideoPlaybar({
 	const seekOnClick = useCallback(
 		(e, location) => {
 			e.preventDefault();
-			//   console.log(
+			//   //console.log(
 			//     "Calling move to	timestamp from seekOnClick",
 			//     e.type,
 			//     location
@@ -253,7 +253,7 @@ export default function VideoPlaybar({
 
 	const draggedDuration = useMemo(() => {
 		const d = (duration * currentBoopPosition) / barBound.width;
-		// console.log(
+		// //console.log(
 		// 	duration,
 		// 	currentBoopPosition,
 		// 	barBound.width,

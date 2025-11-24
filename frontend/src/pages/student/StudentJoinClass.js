@@ -79,7 +79,7 @@ export default function StudentJoinClass() {
   };
 
   useEffect(() => {
-    console.log(userPlan);
+    //console.log(userPlan);
     if (user && userPlan) {
       setLoading(true);
       if (userPlan.plan_id) {

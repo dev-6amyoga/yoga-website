@@ -9,7 +9,7 @@ const { UserInstitutePlanRole } = require('../models/sql/UserInstitutePlanRole')
 
 const { User } = require('../models/sql/User')
 router.post('/get-teachers-in-institute', async (req, res) => {
-  console.log(req.body)
+  //console.log(req.body)
   const { institute_id } = req.body
   if (!institute_id) {
     return res

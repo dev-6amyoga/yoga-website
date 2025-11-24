@@ -95,10 +95,10 @@ function RegisterPlaylistForm() {
           url: "/content/language/getAllLanguages",
         });
         const data = response.data;
-        console.log(data, "IS LANGUAGE");
+        //console.log(data, "IS LANGUAGE");
         setAllLanguages(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -112,7 +112,7 @@ function RegisterPlaylistForm() {
         });
         setAsanas(response.data); // Always set all asanas
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -126,7 +126,7 @@ function RegisterPlaylistForm() {
         });
         setTransitions(response.data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -134,7 +134,7 @@ function RegisterPlaylistForm() {
 
   const [currentTotalDuration, setCurrentTotalDuration] = useState(0);
   useEffect(() => {
-    console.log("New Duration:", currentTotalDuration);
+    //console.log("New Duration:", currentTotalDuration);
   }, [currentTotalDuration]); // Re-run when newDuration changes
 
   useEffect(() => {
@@ -149,7 +149,7 @@ function RegisterPlaylistForm() {
         });
 
         if (response.status === 200) {
-          console.log(response.data);
+          //console.log(response.data);
           setCurrentTotalDuration(response.data.totalDuration / 60);
         }
       } catch (err) {
@@ -385,7 +385,7 @@ function RegisterPlaylistForm() {
           rowData.drm_video,
           transitions
         );
-        console.log(t1);
+        //console.log(t1);
         t1 = t1.filter((element) => element !== undefined);
         setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
       }
@@ -393,7 +393,7 @@ function RegisterPlaylistForm() {
       const lastId = playlistCurrent[playlistCurrent.length - 1];
       if (Number.isInteger(lastId)) {
         let prevAsana = await fetchAsanaById(lastId);
-        console.log(prevAsana);
+        //console.log(prevAsana);
         if (prevAsana) {
           if (rowData.asana_category === "Sitting") {
             let t1 = await TransitionEndSitting(
@@ -408,7 +408,7 @@ function RegisterPlaylistForm() {
               rowData.drm_video,
               transitions
             );
-            console.log(t1);
+            //console.log(t1);
             t1 = t1.filter((element) => element !== undefined);
             setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
           }
@@ -505,7 +505,7 @@ function RegisterPlaylistForm() {
               rowData.drm_video,
               transitions
             );
-            console.log(t1);
+            //console.log(t1);
             t1 = t1.filter((element) => element !== undefined);
             setPlaylistCurrent([...playlistCurrent, ...t1, rowData.id]);
           }
@@ -667,9 +667,9 @@ function RegisterPlaylistForm() {
       const currentId = asanasOnlyPlaylist[i];
       if (typeof currentId === "number") {
         if (i === 0) {
-          console.log(currentId);
+          //console.log(currentId);
           const curAsana = await fetchAsanaById(currentId);
-          console.log(curAsana);
+          //console.log(curAsana);
           let transitionData = {
             start_category: null,
             break_status_start: null,
@@ -679,7 +679,7 @@ function RegisterPlaylistForm() {
             drm_status: curAsana.drm_video,
             transitions: transitions,
           };
-          console.log(transitionData);
+          //console.log(transitionData);
           if (curAsana.asana_category === "Sitting") {
             let t1 = await TransitionEndSitting(
               transitionData.start_category,
@@ -1187,7 +1187,7 @@ function RegisterPlaylistForm() {
     toast(index);
     if (index > 0 && typeof playlistCurrent[index] === "number") {
       const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
-      console.log(asanasOnlyPlaylist);
+      //console.log(asanasOnlyPlaylist);
       const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
       if (asanaIndex - 1 >= 0) {
         [asanasOnlyPlaylist[asanaIndex - 1], asanasOnlyPlaylist[asanaIndex]] = [
@@ -1195,7 +1195,7 @@ function RegisterPlaylistForm() {
           asanasOnlyPlaylist[asanaIndex - 1],
         ];
       }
-      console.log(asanasOnlyPlaylist);
+      //console.log(asanasOnlyPlaylist);
       await recalculateTransitions(asanasOnlyPlaylist);
     }
   };
@@ -1205,7 +1205,7 @@ function RegisterPlaylistForm() {
     toast(index);
     if (index > 0 && typeof playlistCurrent[index] === "number") {
       const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
-      console.log(asanasOnlyPlaylist);
+      //console.log(asanasOnlyPlaylist);
       const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
       if (asanaIndex + 1 < asanasOnlyPlaylist.length) {
         [asanasOnlyPlaylist[asanaIndex + 1], asanasOnlyPlaylist[asanaIndex]] = [
@@ -1213,7 +1213,7 @@ function RegisterPlaylistForm() {
           asanasOnlyPlaylist[asanaIndex + 1],
         ];
       }
-      console.log(asanasOnlyPlaylist);
+      //console.log(asanasOnlyPlaylist);
       await recalculateTransitions(asanasOnlyPlaylist);
     }
   };
@@ -1224,7 +1224,7 @@ function RegisterPlaylistForm() {
       const asanasOnlyPlaylist = filterAsanas(playlistCurrent);
       const asanaIndex = asanasOnlyPlaylist.indexOf(playlistCurrent[index]);
       asanasOnlyPlaylist.splice(asanaIndex, 1);
-      console.log(asanasOnlyPlaylist);
+      //console.log(asanasOnlyPlaylist);
       await recalculateTransitions(asanasOnlyPlaylist);
     }
   };
@@ -1259,7 +1259,7 @@ function RegisterPlaylistForm() {
       if (response?.status === 200) {
         toast("Playlist added successfully");
         let new_playlist_id = response.data.playlist_id;
-        console.log(response.data);
+        //console.log(response.data);
         try {
           const response = await Fetch({
             url: `/content/playlists/createManifest/${new_playlist_id}`,
@@ -1270,7 +1270,7 @@ function RegisterPlaylistForm() {
             navigate("/admin/playlist/view-all");
           }
         } catch (error) {
-          console.log(error);
+          //console.log(error);
         }
       } else {
         console.error("Failed to add playlist");

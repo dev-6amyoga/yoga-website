@@ -19,99 +19,91 @@ import "./ClassInfoStudent.css";
 // };
 
 export default function ClassInfoStudent({
-	class_id,
-	handleClassStart,
-	handleClassEnd,
+  class_id,
+  handleClassStart,
+  handleClassEnd,
 }) {
-	const { data: classInfo } = useQuery({
-		queryKey: ["classInfo", class_id],
-		queryFn: async () => {
-			const [res, err] = await ClassAPI.postGetClassById(class_id);
-			console.log(res);
-			if (err) {
-				console.error(err);
-				toast.error("Failed to fetch class info");
-			}
+  const { data: classInfo } = useQuery({
+    queryKey: ["classInfo", class_id],
+    queryFn: async () => {
+      const [res, err] = await ClassAPI.postGetClassById(class_id);
+      //console.log(res);
+      if (err) {
+        console.error(err);
+        toast.error("Failed to fetch class info");
+      }
 
-			return res.class;
-		},
-	});
+      return res.class;
+    },
+  });
 
-	const { data: classHistoryInfo } = useQuery({
-		queryKey: ["classHistoryInfo", class_id],
-		queryFn: async () => {
-			const [res, err] =
-				await ClassAPI.postGetLatestClassHistoryById(class_id);
+  const { data: classHistoryInfo } = useQuery({
+    queryKey: ["classHistoryInfo", class_id],
+    queryFn: async () => {
+      const [res, err] = await ClassAPI.postGetLatestClassHistoryById(class_id);
 
-			if (err) {
-				console.error(err);
-				toast.error("Failed to fetch class history info");
-			}
+      if (err) {
+        console.error(err);
+        toast.error("Failed to fetch class history info");
+      }
 
-			console.log(res);
+      //console.log(res);
 
-			return res.class_history;
-		},
-	});
+      return res.class_history;
+    },
+  });
 
-	return (
-		<Card
-			sx={{
-				border: "1px solid",
-				borderColor: "primary.main",
-				background: "linear-gradient(#033363, #021F3B)",
-				borderRadius: "1rem",
-				margin: "2rem 0",
-			}}>
-			<CardContent>
-				<div className="class-info-student">
-					{/* info */}
-					<div className="class-info-student-title">
-						<h3 className="text-white">{classInfo?.class_name}</h3>
-						<p className="class-info-student-desc text-y-white text-sm">
-							{classInfo?.class_desc}
-						</p>
-					</div>
+  return (
+    <Card
+      sx={{
+        border: "1px solid",
+        borderColor: "primary.main",
+        background: "linear-gradient(#033363, #021F3B)",
+        borderRadius: "1rem",
+        margin: "2rem 0",
+      }}
+    >
+      <CardContent>
+        <div className="class-info-student">
+          {/* info */}
+          <div className="class-info-student-title">
+            <h3 className="text-white">{classInfo?.class_name}</h3>
+            <p className="class-info-student-desc text-y-white text-sm">
+              {classInfo?.class_desc}
+            </p>
+          </div>
 
-					<div className="class-info-student-teacher text-white flex flex-col gap-2 py-1">
-						<div className="flex flex-row gap-2 items-center">
-							<Avatar>{classInfo?.teacher?.name[0]}</Avatar>
-							{classInfo?.teacher.name}
-						</div>
-					</div>
+          <div className="class-info-student-teacher text-white flex flex-col gap-2 py-1">
+            <div className="flex flex-row gap-2 items-center">
+              <Avatar>{classInfo?.teacher?.name[0]}</Avatar>
+              {classInfo?.teacher.name}
+            </div>
+          </div>
 
-					<div className="class-info-student-info flex flex-col gap-8 text-sm text-white">
-						<div className="flex flex-row gap-8">
-							<div>
-								<p className="font-medium">Start Time</p>
-								<p>
-									{new Date(
-										classHistoryInfo?.start_time
-									).toLocaleString()}
-								</p>
-							</div>
-							<div>
-								<p className="font-medium">End Time</p>
-								<p>
-									{new Date(
-										classHistoryInfo?.end_time
-									).toLocaleString()}
-								</p>
-							</div>
-						</div>
-						<Timer
-							className="text-white text-xl"
-							prefix="Starts in"
-							endTime={classHistoryInfo?.start_time}
-							onEnded={handleClassStart}
-							onEndTitle=""
-						/>
-						{/* <div>
+          <div className="class-info-student-info flex flex-col gap-8 text-sm text-white">
+            <div className="flex flex-row gap-8">
+              <div>
+                <p className="font-medium">Start Time</p>
+                <p>{new Date(classHistoryInfo?.start_time).toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="font-medium">End Time</p>
+                <p>{new Date(classHistoryInfo?.end_time).toLocaleString()}</p>
+              </div>
+            </div>
+            <Timer
+              className="text-white text-xl"
+              prefix="Starts in"
+              endTime={classHistoryInfo?.start_time}
+              onEnded={handleClassStart}
+              onEndTitle=""
+            />
+            {/* <div>
 							<p className="font-medium">Duration</p>
 							<p>{classInfo?.duration / 1000 / 60} minutes</p>
 						</div> */}
 
-						{/* <div>
+            {/* <div>
 							<p className="font-medium">Attendees</p>
 							<p className="flex flex-row gap-1 items-center">
 								<span
@@ -119,30 +111,32 @@ export default function ClassInfoStudent({
 								{classInfo.attendees}
 							</p>
 						</div> */}
-					</div>
+          </div>
 
-					{/* actions */}
-					<div className="class-info-student-actions flex flex-col gap-4 justify-center">
-						<Button
-							variant="contained"
-							startIcon={<ExitToApp />}
-							sx={{
-								minWidth: "fit-content",
-							}}>
-							Leave Class
-						</Button>
-						<Button
-							sx={{
-								minWidth: "fit-content",
-							}}
-							variant="contained"
-							color="inherit"
-							startIcon={<Share />}>
-							Share
-						</Button>
-					</div>
-				</div>
-			</CardContent>
-		</Card>
-	);
+          {/* actions */}
+          <div className="class-info-student-actions flex flex-col gap-4 justify-center">
+            <Button
+              variant="contained"
+              startIcon={<ExitToApp />}
+              sx={{
+                minWidth: "fit-content",
+              }}
+            >
+              Leave Class
+            </Button>
+            <Button
+              sx={{
+                minWidth: "fit-content",
+              }}
+              variant="contained"
+              color="inherit"
+              startIcon={<Share />}
+            >
+              Share
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }

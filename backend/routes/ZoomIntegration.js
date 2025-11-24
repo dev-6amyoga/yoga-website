@@ -70,7 +70,7 @@ const createZoomMeeting = async (topic, startTime, isRecurring = false) => {
         },
       }
     )
-    console.log(res)
+    //console.log(res)
     return {
       joinUrl: res.data.join_url, // already contains ?pwd=...
       meetingId: res.data.id,
@@ -232,7 +232,7 @@ router.post('/api/classes', async (req, res) => {
       for (const tId of teacher_id) {
         // Create a unique Zoom meeting for this teacher's recurring slot
         const meeting = await createZoomMeeting(zoom_class_name, null) // No specific start_time for recurring
-        console.log(meeting)
+        //console.log(meeting)
         for (const pId of plan_id) {
           const iId = institute_id
           // Check if recurring class already exists for this teacher/plan/institute/days/time
@@ -306,7 +306,7 @@ router.get('/api/classes', async (req, res) => {
 router.get('/api/classes/today', async (req, res) => {
   try {
     const { teacher_id, plan_id } = req.query
-    console.log('GOT : ', teacher_id, plan_id)
+    //console.log('GOT : ', teacher_id, plan_id)
 
     // Use Asia/Kolkata timezone
     const now = moment.tz('Asia/Kolkata')
@@ -337,8 +337,8 @@ router.get('/api/classes/today', async (req, res) => {
       recurring_days: { [Op.contains]: [todayDayNum] },
     }
 
-    console.log('oneTimeClause:', oneTimeClause)
-    console.log('recurringClause:', recurringClause)
+    //console.log('oneTimeClause:', oneTimeClause)
+    //console.log('recurringClause:', recurringClause)
 
     const classes = await ZoomClassModel.findAll({
       where: {

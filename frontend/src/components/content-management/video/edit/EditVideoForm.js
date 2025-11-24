@@ -16,25 +16,25 @@ function EditVideoForm({
 
   // Debugging checkpoint: log initial state
   useEffect(() => {
-    console.log("Initial modalData:", modalData);
-    console.log("Initial formState:", formState);
+    //console.log("Initial modalData:", modalData);
+    //console.log("Initial formState:", formState);
   }, [modalData]);
 
   // Update formState dynamically
   const handleChange = (key, value) => {
-    console.log("Updating state:", key, value); // Debugging checkpoint
+    //console.log("Updating state:", key, value); // Debugging checkpoint
     setFormState((prev) => ({ ...prev, [key]: value }));
   };
 
   // Toggle for checkboxes
   const handleCheckboxChange = (key) => {
-    console.log("Toggling checkbox:", key); // Debugging checkpoint
+    //console.log("Toggling checkbox:", key); // Debugging checkpoint
     setFormState((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted with state:", formState); // Debugging checkpoint
+    //console.log("Form submitted with state:", formState); // Debugging checkpoint
     updateData(formState); // Call parent handler
   };
 

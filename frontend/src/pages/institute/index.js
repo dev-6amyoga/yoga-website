@@ -16,9 +16,9 @@ function InstituteHome() {
   const [currentInstitute, setCurrentInstitute] = useState(null);
 
   useEffect(() => {
-    // console.log(user);
+    // //console.log(user);
     const fetchData = async (id) => {
-      console.log("CALLING", id);
+      //console.log("CALLING", id);
       if (id) {
         Fetch({
           url: "/institute/get-by-instituteid",
@@ -28,7 +28,7 @@ function InstituteHome() {
           },
         }).then((res) => {
           if (res && res.status === 200) {
-            console.log(res.data);
+            //console.log(res.data);
             setInstituteData(res.data);
             // updateInstitute(res.data);
           } else {
@@ -45,7 +45,7 @@ function InstituteHome() {
   }, [currentInstitute]);
 
   useEffect(() => {
-    console.log({ currentInstituteId, institutes });
+    //console.log({ currentInstituteId, institutes });
     if (
       currentInstituteId !== null &&
       currentInstituteId !== undefined &&
@@ -55,7 +55,7 @@ function InstituteHome() {
         const ins = institutes?.find(
           (institute) => institute?.institute_id === currentInstituteId
         );
-        console.log("Setting institute in ins home: ", ins);
+        //console.log("Setting institute in ins home: ", ins);
         return ins;
       });
     }

@@ -90,7 +90,7 @@ router.post('/video/addTransition', async (req, res) => {
     requestData.transition_id = newId
     const newAsana = new TransitionVideo(requestData)
     const hlsDuration = getVideoDuration(newAsana.transition_hls_url)
-    console.log(hlsDuration)
+    //console.log(hlsDuration)
     newAsana.duration = hlsDuration
     const savedAsana = await newAsana.save()
     res.status(200).json(savedAsana)
@@ -476,10 +476,10 @@ router.get('/video/deleteField', async (req, res) => {
       let asana = asanas[i]
       if (asana.asana_hls_url) {
         delete asana.asana_hls_url
-        console.log(asana)
+        //console.log(asana)
         await asana.save()
       } else {
-        console.log('ahoy')
+        //console.log('ahoy')
       }
     }
     res.json(asanas)

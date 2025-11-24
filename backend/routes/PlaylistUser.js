@@ -21,7 +21,7 @@ router.post('/create', async (req, res) => {
     playlist_language,
     playlist_mode,
   } = req.body
-  console.log(req.body)
+  //console.log(req.body)
 
   const currentMonth = new Date().toISOString().slice(0, 7) // "YYYY-MM"
 
@@ -92,14 +92,14 @@ router.post('/create', async (req, res) => {
       }
     })
 
-    console.log(files)
+    //console.log(files)
 
     // Generate combined MPD file
     let mpdCombiner = new MPDCombiner(files, null)
     let [combinedManifest, totalDuration, sections] =
       await mpdCombiner.getCombinedManifest()
 
-    console.log(combinedManifest, totalDuration, sections)
+    //console.log(combinedManifest, totalDuration, sections)
 
     const newPlaylist = new Playlist({
       playlist_id: Date.now(),
@@ -188,7 +188,7 @@ router.put('/edit/:playlistId', async (req, res) => {
         old_playlist_dash_url: oldPlaylistDashUrl,
       })
 
-      console.log(newPlaylist)
+      //console.log(newPlaylist)
 
       await newPlaylist.save()
       userPlaylistToBeEdited.edits_left -= 1
@@ -325,7 +325,7 @@ router.get('/user/:userId', async (req, res) => {
       0
     )
 
-    console.log('User Playlists:', userPlaylists) // Debugging output
+    //console.log('User Playlists:', userPlaylists) // Debugging output
 
     res.json({
       userPlaylists: userPlaylistsOg,

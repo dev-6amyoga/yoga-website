@@ -33,7 +33,7 @@ export default function ClassInfoStudent() {
     queryKey: ["classInfo", class_id],
     queryFn: async () => {
       const [res, err] = await ClassAPI.postGetClassById(class_id);
-      console.log(res);
+      //console.log(res);
       if (err) {
         console.error(err);
         toast.error("Failed to fetch class info");
@@ -69,7 +69,7 @@ export default function ClassInfoStudent() {
           data: { class_id: classDetails.class_id, user_id: user?.user_id },
         });
         if (res.status === 200) {
-          console.log(res.data);
+          //console.log(res.data);
           if (res.data.length > 0) {
             setValidUser(true);
           } else {

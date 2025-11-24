@@ -47,7 +47,7 @@ function RegisterTransitionVideoForm() {
         const data = response.data;
         setTableLanguages(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -62,7 +62,7 @@ function RegisterTransitionVideoForm() {
         const data = response.data;
         setCategories(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -92,10 +92,10 @@ function RegisterTransitionVideoForm() {
         toast("New Transition added successfully");
         navigate("/admin/video/transition/all");
       } else {
-        console.log("Failed to add new transition");
+        //console.log("Failed to add new transition");
       }
     } catch (error) {
-      console.log("Error while making the request:", error);
+      //console.log("Error while making the request:", error);
     }
   };
 

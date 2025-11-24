@@ -16,7 +16,7 @@ const router = express.Router()
 // app.use(bodyParser.json({ limit: "50mb" }));
 
 router.post('/pose-detection', async (req, res) => {
-  console.log('in pose detect')
+  //console.log('in pose detect')
   const { image } = req.body
   try {
     const vision = await FilesetResolver.forVisionTasks(

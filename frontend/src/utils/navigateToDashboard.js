@@ -1,6 +1,6 @@
 export const navigateToDashboard = (currentRole, userPlan, navigate) => {
   const type = currentRole;
-  console.log("Navigating to dashboard", type);
+  //console.log("Navigating to dashboard", type);
   // return;
   switch (type) {
     case "ROOT":
@@ -16,12 +16,13 @@ export const navigateToDashboard = (currentRole, userPlan, navigate) => {
       navigate("/institute");
       break;
     case "STUDENT":
-      // if (userPlan === null) {
-      //   navigate("/student/free-videos");
-      // } else {
-      //   navigate("/student/free-videos");
-      // }
-      navigate("/student/free-videos");
+      console.log("User Plan in Navigation:", userPlan);
+
+      if (userPlan?.plan_id) {
+        navigate("/student/join-class");
+      } else {
+        navigate("/student/purchase-a-plan");
+      }
       break;
     default:
       navigate("/");

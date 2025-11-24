@@ -50,10 +50,10 @@ export default function FreeVideos() {
         if (data["userPlan"]) {
           setPlanId(data["userPlan"]["plan_id"]);
         } else {
-          console.log(data["error"]);
+          //console.log(data["error"]);
         }
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     if (user) {

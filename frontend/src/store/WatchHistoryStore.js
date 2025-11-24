@@ -87,11 +87,11 @@ const useWatchHistoryStore = create((set, get) => ({
     })
       .then((res) => {
         if (res.status === 200) {
-          console.log("watch time buffer flushed");
+          //console.log("watch time buffer flushed");
         }
       })
       .catch((err) => {
-        console.log(err, err?.response?.data?.message);
+        //console.log(err, err?.response?.data?.message);
         if (err?.response?.data?.message === "Watch time quota exceeded") {
           //plan expired
           set({ watchHistoryExhausted: true });
@@ -133,7 +133,7 @@ const useWatchHistoryStore = create((set, get) => ({
           }
         })
         .catch((err) => {
-          console.log(err);
+          //console.log(err);
         });
     }
   },

@@ -120,13 +120,15 @@ export default function Login({ switchForm }) {
       });
       if (response && response?.status === 200) {
         const userData = response.data;
+        console.log("userData:", userData);
         setUser(userData.user);
-        console.log(user);
+        //console.log(user);
         setAccessToken(userData?.accessToken);
         setRefreshToken(userData?.refreshToken);
         setRoles(userData?.user?.roles);
         const currRole = Object.keys(userData?.user?.roles)[0];
-        const currPlan = userData?.user?.roles[currRole][0]?.plan;
+        const currPlan = userData?.userPlan;
+        console.log("userPlan:", currPlan);
         setUserPlan(currPlan);
         const ins = userData?.user?.roles[currRole].map((r) => r?.institute);
         setInstitutes(ins);
@@ -156,7 +158,7 @@ export default function Login({ switchForm }) {
       removeCookie(SIXAMYOGA_REFRESH_TOKEN);
       // alert(import.meta.env.VITE_BACKEND_DOMAIN);
       // alert(error?.message);
-      console.log(error);
+      //console.log(error);
       toast(
         error?.response?.data?.error
           ? `${error?.response?.data?.error}`
@@ -169,6 +171,7 @@ export default function Login({ switchForm }) {
   useEffect(() => {
     if (user && currentRole) {
       console.log("ohohoo", user);
+      console.log("ohohoo", userPlan);
       navigateToDashboard(currentRole, userPlan, navigate);
     }
   }, [user, currentRole, navigate, userPlan]);
@@ -204,8 +207,8 @@ export default function Login({ switchForm }) {
 
   //   useEffect(() => {
   //     if (user?.user_id) {
-  //       console.log("navigating based on id");
-  //       console.log(currentRole);
+  //       //console.log("navigating based on id");
+  //       //console.log(currentRole);
   //       if (currentRole === "STUDENT") {
   //         navigate("/student/free-videos");
   //       } else if (currentRole === "ROOT") {

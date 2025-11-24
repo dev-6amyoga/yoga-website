@@ -89,7 +89,7 @@ function VideoPlayer() {
 					- start interval timer to commit time [5s]
 	*/
 	useEffect(() => {
-		console.log("CURRENT VIDEO", currentVideo);
+		//console.log("CURRENT VIDEO", currentVideo);
 		// flushing
 		flushWatchTimeBuffer(user?.user_id);
 
@@ -122,7 +122,7 @@ function VideoPlayer() {
 				.catch((err) => {});
 
 			// starting interval timer to flush watch duration buffer
-			console.log("Starting new flushTimeInterval");
+			//console.log("Starting new flushTimeInterval");
 			setFlushTimeInterval(
 				setInterval(() => {
 					flushWatchTimeBuffer(user?.user_id);
@@ -130,10 +130,10 @@ function VideoPlayer() {
 			);
 
 			// starting interval timer to commit time
-			console.log("Starting new commitTimeInterval");
+			//console.log("Starting new commitTimeInterval");
 			setCommitTimeInterval(
 				setInterval(() => {
-					console.log("COMMITTING TIME", player.current.currentTime);
+					//console.log("COMMITTING TIME", player.current.currentTime);
 					// TODO : fix this
 					updateWatchTimeBuffer({
 						user_id: user?.user_id,
@@ -148,7 +148,7 @@ function VideoPlayer() {
 	}, [currentVideo]);
 
 	useEffect(() => {
-		console.log({
+		//console.log({
 			user,
 			queue,
 			committedTs,
@@ -168,13 +168,13 @@ function VideoPlayer() {
 		return () => {
 			// clearing previous interval to flush
 			if (flushTimeInterval) {
-				console.log("Clearing previous flushTimeInterval");
+				//console.log("Clearing previous flushTimeInterval");
 				clearInterval(flushTimeInterval);
 			}
 
 			// clearing previous commitTimeInterval
 			if (commitTimeInterval) {
-				console.log("Clearing previous commitTimeInterval");
+				//console.log("Clearing previous commitTimeInterval");
 				clearInterval(commitTimeInterval);
 			}
 		};
@@ -182,7 +182,7 @@ function VideoPlayer() {
 
 	useEffect(() => {
 		if (watchTimeArchive && watchTimeArchive.length > 0) {
-			console.log(
+			//console.log(
 				"DURATIONS : ",
 				watchTimeArchive?.reduce((acc, curr) => {
 					if (!acc[curr.asana_id]) {
@@ -204,7 +204,7 @@ function VideoPlayer() {
 				videoState === STATE_VIDEO_PAUSED) &&
 			player?.current?.currentTime > 1
 		) {
-			// console.log(newVideoState, videoState);
+			// //console.log(newVideoState, videoState);
 			setVideoStateVisible(true);
 
 			t = setTimeout(() => {
@@ -271,7 +271,7 @@ function VideoPlayer() {
 	}, [videoState]);
 
 	const handleEnd = () => {
-		console.log("Video ended ------------------>");
+		//console.log("Video ended ------------------>");
 		// setNewVideoState(true);
 		popFromQueue(0);
 	};
@@ -284,17 +284,17 @@ function VideoPlayer() {
 	};
 
 	const handleSetPlay = () => {
-		console.log("SETTING VIDEO STATE TO PLAY ------------>", currentTime);
+		//console.log("SETTING VIDEO STATE TO PLAY ------------>", currentTime);
 		setVideoState(STATE_VIDEO_PLAY);
 	};
 
 	const handleSetPause = () => {
-		console.log("SETTING VIDEO STATE TO PAUSE ------------>", currentTime);
+		//console.log("SETTING VIDEO STATE TO PAUSE ------------>", currentTime);
 		setVideoState(STATE_VIDEO_PAUSED);
 	};
 
 	const handlePlaybackError = () => {
-		console.log("Error playing video ------------------->");
+		//console.log("Error playing video ------------------->");
 		setVideoState(STATE_VIDEO_ERROR);
 	};
 
@@ -363,24 +363,24 @@ function VideoPlayer() {
 										preload="auto"
 										onEnded={handleEnd}
 										onLoadStart={() => {
-											console.log(
+											//console.log(
 												"Loading start ----------------------------->"
 											);
 											handleLoading(true);
 										}}
 										onLoadedData={() => {
-											console.log(
+											//console.log(
 												"First frame ready ---------------------->"
 											);
 										}}
 										onStalled={() => {
-											console.log(
+											//console.log(
 												"Stalled ----------------------------->"
 											);
 											handleLoading(true);
 										}}
 										onCanPlay={() => {
-											console.log(
+											//console.log(
 												"Can play ----------------------------->"
 											);
 											handleLoading(false);
@@ -389,10 +389,10 @@ function VideoPlayer() {
 										onSeeked={() => handleLoading(false)}
 										onError={handlePlaybackError}
 										onLoadedMetaData={(e) => {
-											console.log(
+											//console.log(
 												"Loading metadata --------------------------------->"
 											);
-											console.log({
+											//console.log({
 												duration:
 													player.current.duration,
 											});

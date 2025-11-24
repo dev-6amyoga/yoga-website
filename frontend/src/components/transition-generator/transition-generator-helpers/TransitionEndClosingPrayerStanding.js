@@ -355,7 +355,7 @@ export const TransitionEndClosingPrayerStanding = async (
         return new_res;
       } else {
         if (start_video.nose_lock_start && start_video.chin_lock_end) {
-          console.log("pratiloma last cycle");
+          //console.log("pratiloma last cycle");
           let res = [];
           for (var i = 0; i !== filteredTransitions_all.length; i++) {
             let transition_ind = filteredTransitions_all[i];
@@ -439,9 +439,9 @@ export const TransitionEndClosingPrayerStanding = async (
               new_res = new_res.map((transition) => transition.transition_id);
               return new_res;
             } else {
-              console.log(pending_2);
+              //console.log(pending_2);
               let new_res = [...pending_2];
-              console.log(new_res);
+              //console.log(new_res);
               new_res = new_res.filter((element) => element !== undefined);
               new_res = new_res.map((transition) => transition.transition_id);
               return new_res;

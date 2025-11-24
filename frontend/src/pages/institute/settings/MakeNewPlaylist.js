@@ -58,7 +58,7 @@ function MakeNewPlaylist() {
 
   useState(() => {
     if (currentInstituteId) {
-      console.log(currentInstitute);
+      //console.log(currentInstitute);
       setCurrentInstitute(
         institutes?.find(
           (institute) => institute.institute_id === currentInstituteId
@@ -153,7 +153,7 @@ function MakeNewPlaylist() {
         const data = response.data;
         setAsanas(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();

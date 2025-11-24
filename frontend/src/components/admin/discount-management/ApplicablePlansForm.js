@@ -49,7 +49,7 @@ export default function ApplicablePlansForm({
   }, []);
 
   // useEffect(() => {
-  // 	console.log(plans);
+  // 	//console.log(plans);
   // }, [plans]);
 
   // useEffect(() => {
@@ -69,7 +69,7 @@ export default function ApplicablePlansForm({
   // 						toast(res?.data?.message, { type: "success" });
   // 					})
   // 					.catch((err) => {
-  // 						console.log(err);
+  // 						//console.log(err);
   // 						toast(err?.response?.data?.message, {
   // 							type: "error",
   // 						});
@@ -153,7 +153,7 @@ export default function ApplicablePlansForm({
         getUpdatedCoupon(coupon?.discount_coupon_id);
       })
       .catch((err) => {
-        console.log(err);
+        //console.log(err);
         toast.error("Failed to add plan mapping");
       });
   };

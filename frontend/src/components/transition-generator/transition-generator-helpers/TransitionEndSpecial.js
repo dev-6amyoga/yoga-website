@@ -341,7 +341,7 @@ export const TransitionEndSpecial = async (
         return new_res;
       } else {
         if (start_video.nose_lock_start && start_video.chin_lock_end) {
-          console.log("pratiloma last cycle");
+          //console.log("pratiloma last cycle");
           let res = [];
           for (var i = 0; i !== filteredTransitions_all.length; i++) {
             let transition_ind = filteredTransitions_all[i];

@@ -98,7 +98,7 @@ const classWsRouter = require('./websocket-routes/Class')
 // const graceful = new Graceful({ brees: [bree] })
 
 // cron.schedule('*/10 * * * * *', () => {
-//   console.log(
+//   //console.log(
 //     'Running a task every 10 seconds: ',
 //     new Date().toLocaleTimeString()
 //   )
@@ -253,7 +253,7 @@ const port = parseInt(process.env.PORT, 10)
 let start = performance.now()
 initializeSequelize()
   .then(() => {
-    console.log('Sequelize initialized, took', performance.now() - start, 'ms')
+    //console.log('Sequelize initialized, took', performance.now() - start, 'ms')
 
     start = performance.now()
 
@@ -268,10 +268,10 @@ initializeSequelize()
         start = performance.now()
         // bulkCreateSampleData()
         //   .then(() => {
-        //     console.log('Sample data created!')
+        //     //console.log('Sample data created!')
         //   })
         //   .catch((err) => {
-        //     console.log(err)
+        //     //console.log(err)
         //   })
 
         app.listen(port || 4000, () => {

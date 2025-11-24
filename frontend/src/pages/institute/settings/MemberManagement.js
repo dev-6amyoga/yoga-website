@@ -36,9 +36,9 @@ function MemberManagement() {
           data: { user_id: user?.user_id },
         });
         const data = response.data;
-        console.log(data?.userPlan?.plan?.number_of_teachers);
+        //console.log(data?.userPlan?.plan?.number_of_teachers);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     if (user) {
@@ -115,15 +115,15 @@ function MemberManagement() {
             }
           })
           .catch((err) => {
-            console.log(err);
+            //console.log(err);
           });
         setDelState(false);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
       setDelState(false);
     } catch (error) {
-      console.log(error);
+      //console.log(error);
     }
   };
 

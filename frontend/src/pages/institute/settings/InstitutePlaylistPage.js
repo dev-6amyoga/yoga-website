@@ -28,7 +28,7 @@ function InstitutePlaylistPage() {
         setUserPlan(data["userPlan"]);
         setPlanId(data["userPlan"]["plan_id"]);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     // fetchData();

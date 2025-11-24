@@ -78,7 +78,7 @@ const detectVrikshasana = (landmarks) => {
 
 router.post('/get-by-id', async (req, res) => {
   const { user_id } = req.body
-  console.log(user_id, 'IS STUDENT ID!')
+  //console.log(user_id, 'IS STUDENT ID!')
   if (!user_id) {
     return res
       .status(HTTP_BAD_REQUEST)
@@ -154,11 +154,6 @@ router.post('/get-by-token', async (req, res) => {
 
     for (let i = 0; i < uipr.length; i++) {
       const u = uipr[i]
-      console.log(
-        'Updating user plan status',
-        decoded?.user?.user_id,
-        u.get('institute_id')
-      )
       await UpdateUserPlanStatus(
         decoded?.user?.user_id,
         u.get('institute_id'),
@@ -703,7 +698,7 @@ router.post('/forgot-password-token', async (req, res) => {
 router.post('/forgot-password-update', async (req, res) => {
   const { user_id, new_password, confirm_new_password } = req.body
 
-  // console.log(user_id, new_password, confirm_new_password);
+  // //console.log(user_id, new_password, confirm_new_password);
 
   if (
     user_id === null ||
@@ -725,7 +720,7 @@ router.post('/forgot-password-update', async (req, res) => {
   try {
     const user = await User.findByPk(user_id)
 
-    // console.log(user);
+    // //console.log(user);
     if (!user) {
       return res.status(HTTP_BAD_REQUEST).json({ error: 'User does not exist' })
     }
@@ -885,19 +880,19 @@ router.get('/get-all-students', async (req, res) => {
 
 router.post('/get-class-users', async (req, res) => {
   try {
-    console.log('=== /get-class-users START ===')
+    //console.log('=== /get-class-users START ===')
     const { class_ids } = req.body
-    console.log('class_ids:', class_ids)
+    //console.log('class_ids:', class_ids)
 
     if (!class_ids || !Array.isArray(class_ids) || class_ids.length === 0) {
-      console.log('❌ Validation failed - class_ids:', class_ids)
+      //console.log('❌ Validation failed - class_ids:', class_ids)
       return res.status(400).json({ error: 'class_ids is required' })
     }
 
-    console.log(`✓ Validation passed - Found ${class_ids.length} class_ids`)
+    //console.log(`✓ Validation passed - Found ${class_ids.length} class_ids`)
 
     // Find all classes
-    console.log('Finding classes with class_ids:', class_ids)
+    //console.log('Finding classes with class_ids:', class_ids)
     const classes = await ZoomClassModel.findAll({
       where: {
         zoom_class_id: class_ids,
@@ -906,20 +901,20 @@ router.post('/get-class-users', async (req, res) => {
       raw: true,
     })
 
-    console.log(`Found ${classes.length} classes`)
-    console.log('Classes data:', JSON.stringify(classes, null, 2))
+    //console.log(`Found ${classes.length} classes`)
+    //console.log('Classes data:', JSON.stringify(classes, null, 2))
 
     if (classes.length === 0) {
-      console.log('⚠️ No classes found - returning empty users array')
+      //console.log('⚠️ No classes found - returning empty users array')
       return res.status(200).json({ users: [] })
     }
 
     // Extract unique plan IDs
     const planIds = [...new Set(classes.map((cls) => cls.plan_id))]
-    console.log(`Extracted ${planIds.length} unique plan IDs:`, planIds)
+    //console.log(`Extracted ${planIds.length} unique plan IDs:`, planIds)
 
     // Find all user plans with user details
-    console.log('Finding user plans for plan_ids:', planIds)
+    //console.log('Finding user plans for plan_ids:', planIds)
     const userPlans = await UserPlan.findAll({
       where: {
         plan_id: planIds,
@@ -934,27 +929,24 @@ router.post('/get-class-users', async (req, res) => {
       raw: false,
     })
 
-    console.log(`Found ${userPlans.length} user plan records`)
-    console.log(
-      'User plans sample:',
-      JSON.stringify(userPlans.slice(0, 2), null, 2)
-    )
+    //console.log(`Found ${userPlans.length} user plan records`)
+    //console.log(
+    //   'User plans sample:',
+    //   JSON.stringify(userPlans.slice(0, 2), null, 2)
+    // )
 
     // Deduplicate users and include plan_id and user_plan_id
     const uniqueUsers = {}
     userPlans.forEach((up, idx) => {
-      console.log(`Processing user plan ${idx}:`, {
-        user_plan_id: up.user_plan_id,
-        plan_id: up.plan_id,
-        user_id: up.user?.user_id,
-        user_name: up.user?.name,
-      })
+      //console.log(`Processing user plan ${idx}:`, {
+      //   user_plan_id: up.user_plan_id,
+      //   plan_id: up.plan_id,
+      //   user_id: up.user?.user_id,
+      //   user_name: up.user?.name,
+      // })
 
       if (up.user && up.user.user_id) {
         if (!uniqueUsers[up.user.user_id]) {
-          console.log(
-            `  ✓ Adding new user: ${up.user.user_id} - ${up.user.name}`
-          )
           uniqueUsers[up.user.user_id] = {
             user_id: up.user.user_id,
             name: up.user.name,
@@ -965,17 +957,17 @@ router.post('/get-class-users', async (req, res) => {
             user_plan_id: up.user_plan_id,
           }
         } else {
-          console.log(`  ⊘ Duplicate user skipped: ${up.user.user_id}`)
+          //console.log(`  ⊘ Duplicate user skipped: ${up.user.user_id}`)
         }
       } else {
-        console.log(`  ❌ Invalid user data:`, up.user)
+        //console.log(`  ❌ Invalid user data:`, up.user)
       }
     })
 
     const users = Object.values(uniqueUsers)
-    console.log(`Final unique users count: ${users.length}`)
-    console.log('Final users:', JSON.stringify(users, null, 2))
-    console.log('=== /get-class-users END (SUCCESS) ===\n')
+    //console.log(`Final unique users count: ${users.length}`)
+    //console.log('Final users:', JSON.stringify(users, null, 2))
+    //console.log('=== /get-class-users END (SUCCESS) ===\n')
 
     return res.status(200).json({ users })
   } catch (err) {

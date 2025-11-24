@@ -62,7 +62,7 @@ export default function AttendancePage() {
       attendanceData.find((r) => r.userPlanAttendance) ||
       attendanceData[0]?.userPlanAttendance ||
       null;
-    console.log(userPlanAttendance);
+    //console.log(userPlanAttendance);
 
     const totalAllowed = userPlanAttendance
       ? Number(userPlanAttendance.userPlanAttendance.classes_allowed || 0)

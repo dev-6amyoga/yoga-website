@@ -117,7 +117,7 @@ export default function Highlights() {
     if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
 
     inputErrorDebounce.current = setTimeout(async () => {
-      console.log("Checking phone number");
+      //console.log("Checking phone number");
 
       if (phone) {
         const [is_phone_valid, phone_error] = await validatePhone(phone);
@@ -188,7 +188,7 @@ export default function Highlights() {
         );
       }
     } catch (err) {
-      console.log(err);
+      //console.log(err);
     }
   };
   return (

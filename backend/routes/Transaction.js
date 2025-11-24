@@ -23,7 +23,7 @@ module.exports = router
 
 router.post('/get-transaction-by-user-id', async (req, res) => {
   const { user_id } = req.body
-  console.log(user_id)
+  //console.log(user_id)
   if (!user_id) {
     return res
       .status(HTTP_BAD_REQUEST)
@@ -56,7 +56,7 @@ router.post('/add-transaction', async (req, res) => {
     transaction_signature,
     user_id,
   } = req.body
-  console.log(req.body)
+  //console.log(req.body)
   if (
     !payment_for ||
     !payment_method ||
@@ -73,7 +73,7 @@ router.post('/add-transaction', async (req, res) => {
       .status(HTTP_BAD_REQUEST)
       .json({ error: 'Missing required fields' })
   }
-  console.log('Adding new transaction:', req.body)
+  //console.log('Adding new transaction:', req.body)
   try {
     const newTransaction = await Transaction.create({
       payment_for,
@@ -110,7 +110,7 @@ router.get('/get-all', async (req, res) => {
     })
     return res.status(HTTP_OK).json({ transactions })
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ error: 'Failed to fetch transactions!' })
@@ -164,7 +164,7 @@ router.get('/admin-stats/revenue-per-month', async (req, res) => {
 
     return res.status(HTTP_OK).json({ revenuePerMonth: reduced })
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ error: 'Failed to fetch transactions!' })
@@ -200,7 +200,7 @@ router.get('/admin-stats/current-month-revenue', async (req, res) => {
       .status(HTTP_OK)
       .json({ currentMonthRevenue: currentMonthRevenue })
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ error: 'Failed to fetch transactions!' })
@@ -226,7 +226,7 @@ router.get('/get-all-discounted', async (req, res) => {
     })
     return res.status(HTTP_OK).json({ transactions })
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ error: 'Failed to fetch transactions!' })

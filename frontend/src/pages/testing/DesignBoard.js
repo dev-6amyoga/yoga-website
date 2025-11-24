@@ -57,12 +57,12 @@ export default function DesignBoard() {
 
   const onSubmit = (data) => {
     setFormData(data);
-    console.log("SUBMITTED : ", data);
+    //console.log("SUBMITTED : ", data);
   };
 
   const onOtpSubmit = (data) => {
     setOtpFormData(data);
-    console.log("OTP SUBMITTED : ", data);
+    //console.log("OTP SUBMITTED : ", data);
   };
 
   const onReset = (e) => {
@@ -70,7 +70,7 @@ export default function DesignBoard() {
     try {
       form.reset();
     } catch (err) {
-      console.log(err);
+      //console.log(err);
     }
   };
 

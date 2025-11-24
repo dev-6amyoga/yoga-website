@@ -64,7 +64,7 @@ function ViewAllPlaylists() {
         setAllAsanas(asanasResponse.data);
         setAllTransitions(transitionsResponse.data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
 
@@ -154,7 +154,7 @@ function ViewAllPlaylists() {
         setDelOpen(false);
       }
     } catch (error) {
-      console.log(error);
+      //console.log(error);
     }
   };
 

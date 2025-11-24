@@ -101,10 +101,10 @@ function RegisterNewPlaylistStudent() {
           url: "/content/language/getAllLanguages",
         });
         const data = response.data;
-        console.log(data);
+        //console.log(data);
         setAllLanguages(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -118,7 +118,7 @@ function RegisterNewPlaylistStudent() {
         });
         setAsanas(response.data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -132,7 +132,7 @@ function RegisterNewPlaylistStudent() {
         });
         setTransitions(response.data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -766,7 +766,7 @@ function RegisterNewPlaylistStudent() {
         // recalculatedPlaylist.push(currentId);
       }
     }
-    console.log(recalculatedPlaylist);
+    //console.log(recalculatedPlaylist);
     setPlaylistCurrent(recalculatedPlaylist);
     let saveObject = {
       user_id: user.user_id,

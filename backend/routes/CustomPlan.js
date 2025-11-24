@@ -87,7 +87,7 @@ router.get('/getCustomPlansByUser/:user_id', async (req, res) => {
 router.put('/editCustomPlan/:id', async (req, res) => {
   try {
     const planId = req.params.id
-    console.log(planId)
+    //console.log(planId)
     const updateData = req.body
 
     // Fetch the existing plan

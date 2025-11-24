@@ -73,7 +73,7 @@ function RegisterNewSchedule() {
         }));
         setAllStudents(flattenedStudents);
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     fetchData();
@@ -95,7 +95,7 @@ function RegisterNewSchedule() {
         }));
         setAllTeachers(flattenedStudents);
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     fetchData();
@@ -116,7 +116,7 @@ function RegisterNewSchedule() {
         }));
         setAllInstitutes(flattenedStudents);
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     fetchData();
@@ -131,7 +131,7 @@ function RegisterNewSchedule() {
         const data = response.data;
         setAsanas(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();
@@ -171,7 +171,7 @@ function RegisterNewSchedule() {
         const data = response.data;
         setTransitions(data);
       } catch (error) {
-        console.log(error);
+        //console.log(error);
       }
     };
     fetchData();

@@ -133,8 +133,8 @@ app.use("/video-processing", require("./routes/VideoProcessing"));
 const mongoURI = process.env.MONGO_SRV_URL;
 mongoose
 	.connect(mongoURI)
-	.then(() => console.log("Connected to MongoDB Atlas"))
-	.catch((err) => console.log(err));
+	.then(() => //console.log("Connected to MongoDB Atlas"))
+	.catch((err) => //console.log(err));
 
 app.get("/info", async (req, res) =>
 	res.status(200).json({
@@ -145,5 +145,5 @@ app.get("/info", async (req, res) =>
 const port = parseInt(process.env.PORT, 10);
 
 app.listen(port || 4000).then(() => {
-	console.log(`Server is running on port ${port}`);
+	//console.log(`Server is running on port ${port}`);
 });

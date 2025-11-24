@@ -278,7 +278,7 @@ const detectVrikshasanaRight = (landmarks) => {
 self.onmessage = async (event) => {
   const { type, data } = event;
   if (data.type === "init") {
-    console.log("[LANDMARKER] received init");
+    //console.log("[LANDMARKER] received init");
     const [m1] = await Promise.all([
       import("https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0"),
     ]);
@@ -310,7 +310,7 @@ self.onmessage = async (event) => {
 
     POSE_CONNECTIONS = module.PoseLandmarker.POSE_CONNECTIONS;
 
-    console.log("[LANDMARKER] finished init");
+    //console.log("[LANDMARKER] finished init");
     self.postMessage({ type: "init-complete" });
   }
 
@@ -367,5 +367,5 @@ self.onmessage = async (event) => {
 };
 
 self.onerror = function (err) {
-  console.log(err);
+  //console.log(err);
 };

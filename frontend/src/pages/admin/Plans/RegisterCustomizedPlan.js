@@ -123,7 +123,7 @@ function RegisterNewCustomizedPlan() {
         const data = response.data;
         setCurrencies(data.currencies);
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     fetchData();
@@ -139,7 +139,7 @@ function RegisterNewCustomizedPlan() {
         const data = response.data;
         setAllPlaylists(data);
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     fetchData();
@@ -156,7 +156,7 @@ function RegisterNewCustomizedPlan() {
         setAllStudents(data.users);
         setAllInstitutes([]);
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     const fetchData1 = async () => {
@@ -169,7 +169,7 @@ function RegisterNewCustomizedPlan() {
         setAllInstitutes(data.userInstituteData);
         setAllStudents([]);
       } catch (err) {
-        console.log(err);
+        //console.log(err);
       }
     };
     if (userType === "student") {
@@ -212,7 +212,7 @@ function RegisterNewCustomizedPlan() {
         navigate("/admin/custom-plan/view");
       }
     } catch (err) {
-      console.log(err);
+      //console.log(err);
     }
   };
 

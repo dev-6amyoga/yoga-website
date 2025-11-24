@@ -20,7 +20,7 @@ function RegisterForm({ vidName, dashUrl, onSubmit }) {
       if (response?.status === 200) {
         toast("New Asana added successfully");
       } else {
-        console.log("Failed to add new Asana");
+        //console.log("Failed to add new Asana");
       }
     } catch (error) {
       toast("Error while making the request:", error);
@@ -41,7 +41,7 @@ function RegisterForm({ vidName, dashUrl, onSubmit }) {
   //     if (response?.status === 200) {
   //       toast("New Transition added successfully");
   //     } else {
-  //       console.log("Failed to add new Transition");
+  //       //console.log("Failed to add new Transition");
   //     }
   //   } catch (error) {
   //     toast("Error while making the request:", error);
@@ -305,7 +305,7 @@ function AutomaticRegister() {
   }, [asanas, transitions]);
 
   const handleRegister = (vidName) => {
-    console.log("Registering:", vidName);
+    //console.log("Registering:", vidName);
     // Add your registration logic here
   };
 

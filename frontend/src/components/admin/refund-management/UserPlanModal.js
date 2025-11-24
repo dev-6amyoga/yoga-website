@@ -2,7 +2,7 @@ import { Modal, Tag } from "@geist-ui/core";
 import JsonTable from "../../../components/Common/JsonTable/JsonTable";
 
 function UserPlanModal({ data, open, handleClose }) {
-  console.log("Transaction modal", { data, open });
+  //console.log("Transaction modal", { data, open });
   return (
     <Modal visible={open} onClose={handleClose}>
       <Modal.Title>
