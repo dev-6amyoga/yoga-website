@@ -1,4 +1,3 @@
-"use client";
 import React, { useEffect, useState } from "react";
 import YogaClassCard from "../admin/classes/YogaClassCard";
 import { Fetch } from "../../utils/Fetch";
@@ -14,7 +13,70 @@ export default function StudentJoinClass() {
     state.userPlan,
   ]);
 
-  //dummy commit
+  const getClassEndTime = (classObj) => {
+    if (classObj.class_type === "one_time") {
+      return new Date(classObj.end_time);
+    } else if (classObj.class_type === "recurring") {
+      const now = new Date();
+      const [endHour, endMinute] = classObj.recurring_end_time
+        .split(":")
+        .map(Number);
+      return new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        endHour,
+        endMinute,
+        0
+      );
+    }
+  };
+
+  const getClassStartTime = (classObj) => {
+    if (classObj.class_type === "one_time") {
+      return new Date(classObj.start_time);
+    } else if (classObj.class_type === "recurring") {
+      const now = new Date();
+      const [startHour, startMinute] = classObj.recurring_start_time
+        .split(":")
+        .map(Number);
+      return new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        startHour,
+        startMinute,
+        0
+      );
+    }
+  };
+
+  const classifyClasses = (classesData) => {
+    const now = new Date();
+    const liveClasses = [];
+    const upcomingClasses = [];
+    const finishedClasses = [];
+
+    classesData.forEach((classObj) => {
+      const startTime = getClassStartTime(classObj);
+      const endTime = getClassEndTime(classObj);
+      const fifteenMinsBeforeStart = new Date(startTime.getTime() - 15 * 60000);
+      if (now >= fifteenMinsBeforeStart && now < endTime) {
+        liveClasses.push(classObj);
+      } else if (now < fifteenMinsBeforeStart) {
+        upcomingClasses.push(classObj);
+      } else {
+        finishedClasses.push(classObj);
+      }
+    });
+
+    const sortByStartTime = (a, b) =>
+      getClassStartTime(a) - getClassStartTime(b);
+    liveClasses.sort(sortByStartTime);
+    upcomingClasses.sort(sortByStartTime);
+    finishedClasses.sort(sortByStartTime);
+    return { liveClasses, upcomingClasses, finishedClasses };
+  };
 
   useEffect(() => {
     console.log(userPlan);
@@ -32,6 +94,9 @@ export default function StudentJoinClass() {
     }
   }, [user, userPlan]);
 
+  const { liveClasses, upcomingClasses, finishedClasses } =
+    classifyClasses(classes);
+
   return (
     <StudentPageWrapper heading={"Join Class"}>
       {loading ? (
@@ -47,20 +112,113 @@ export default function StudentJoinClass() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 2,
+            gap: 3,
             justifyContent: "center",
             alignItems: "center",
             mt: 2,
           }}
         >
-          {classes.map((classObj) => (
-            <YogaClassCard
-              key={classObj.zoom_class_id}
-              classDetails={classObj}
-              isStudentView={true}
-              isAdminView={false}
-            />
-          ))}
+          {/* Live Classes Section */}
+          {liveClasses.length > 0 && (
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                alignItems: "center",
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: "bold",
+                  color: "#1976d2",
+                  alignSelf: "center",
+                  mb: 1,
+                }}
+              >
+                🔴 LIVE NOW
+              </Typography>
+              {liveClasses.map((classObj) => (
+                <YogaClassCard
+                  key={classObj.zoom_class_id}
+                  classDetails={classObj}
+                  isStudentView={true}
+                  isAdminView={false}
+                  isLive={true}
+                />
+              ))}
+            </Box>
+          )}
+
+          {/* Upcoming Classes Section */}
+          {upcomingClasses.length > 0 && (
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                alignItems: "center",
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: "bold",
+                  color: "#1976d2",
+                  alignSelf: "center",
+                  mb: 1,
+                }}
+              >
+                Upcoming Classes
+              </Typography>
+              {upcomingClasses.map((classObj) => (
+                <YogaClassCard
+                  key={classObj.zoom_class_id}
+                  classDetails={classObj}
+                  isStudentView={true}
+                  isAdminView={false}
+                  isLive={false}
+                />
+              ))}
+            </Box>
+          )}
+
+          {/* Finished Classes Section */}
+          {finishedClasses.length > 0 && (
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                alignItems: "center",
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: "bold",
+                  color: "#999",
+                  alignSelf: "center",
+                  mb: 1,
+                }}
+              >
+                Finished Classes
+              </Typography>
+              {finishedClasses.map((classObj) => (
+                <YogaClassCard
+                  key={classObj.zoom_class_id}
+                  classDetails={classObj}
+                  isStudentView={true}
+                  isAdminView={false}
+                  isLive={false}
+                />
+              ))}
+            </Box>
+          )}
         </Box>
       )}
     </StudentPageWrapper>

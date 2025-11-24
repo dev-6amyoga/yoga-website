@@ -527,19 +527,27 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
         }
 
         // Create UserPlanAttendance record
-        const userPlanAttendance = await UserPlanAttendance.create(
-          {
+        const [newUPA, created] = await UserPlanAttendance.findOrCreate({
+          where: { user_plan_id: user_plan_id },
+          defaults: {
             user_id: user_id,
             plan_id: userPlanRecord.plan_id,
-            user_plan_id: userPlanRecord.user_plan_id,
             start_date: userPlanRecord.validity_from,
             expiry_date: userPlanRecord.validity_to,
             classes_allowed: plan.number_of_zoom_classes || 0,
             classes_attended: 0,
             status: 'ACTIVE',
           },
-          { transaction: t }
-        )
+          transaction: t,
+        })
+
+        if (created) {
+          console.log(`✓ New UserPlanAttendance created (id=${newUPA.id})`)
+        } else {
+          console.log(`⊘ UserPlanAttendance already existed (id=${newUPA.id})`)
+        }
+
+        upa = newUPA
       }
 
       // 4. Check if attendance already exists for that user/class on that date
@@ -844,6 +852,347 @@ router.post('/admin/log-attendance', async (req, res) => {
     await t.rollback()
     console.error('admin/log-attendance error:', err)
     return res.status(500).json({ error: 'Server error' })
+  }
+})
+
+router.get('/admin/get-class-attendance/:class_id', async (req, res) => {
+  try {
+    console.log('=== /admin/get-class-attendance START ===')
+    const { class_id } = req.params
+
+    console.log('class_id:', class_id)
+
+    if (!class_id) {
+      console.log('❌ Validation failed - class_id is required')
+      return res.status(400).json({ error: 'class_id is required' })
+    }
+
+    console.log('✓ Validation passed')
+
+    // Fetch all attendance records for this class
+    console.log(`Finding attendance records for class_id: ${class_id}`)
+    const attendanceRecords = await ClassAttendance.findAll({
+      where: {
+        class_id: class_id,
+      },
+      include: [
+        {
+          model: require('../models/sql/User').User,
+          attributes: ['user_id', 'name', 'email', 'phone', 'username'],
+          required: false,
+        },
+      ],
+      order: [
+        ['date', 'DESC'],
+        ['join_time', 'ASC'],
+      ],
+      raw: false,
+    })
+
+    console.log(`Found ${attendanceRecords.length} attendance records`)
+    console.log(
+      'Sample attendance:',
+      JSON.stringify(attendanceRecords.slice(0, 2), null, 2)
+    )
+
+    // Group by date
+    const groupedByDate = {}
+    attendanceRecords.forEach((record) => {
+      const dateKey = new Date(record.date).toISOString().split('T')[0]
+      if (!groupedByDate[dateKey]) {
+        groupedByDate[dateKey] = []
+      }
+      groupedByDate[dateKey].push({
+        user_id: record.user_id,
+        user_name: record.User?.name || 'Unknown',
+        user_email: record.User?.email || '',
+        user_phone: record.User?.phone || '',
+        attendance_status: record.attendance_status,
+        join_time: record.join_time,
+        leave_time: record.leave_time,
+        duration_minutes: record.duration_minutes,
+        marked_by: record.marked_by,
+        device_id: record.device_id,
+        created_at: record.created,
+        updated_at: record.updated,
+      })
+    })
+
+    console.log(`Grouped into ${Object.keys(groupedByDate).length} date groups`)
+    console.log('=== /admin/get-class-attendance END (SUCCESS) ===\n')
+
+    return res.status(200).json({
+      class_id,
+      total_records: attendanceRecords.length,
+      attendance_by_date: groupedByDate,
+      attendance_list: attendanceRecords.map((record) => ({
+        user_id: record.user_id,
+        user_name: record.User?.name || 'Unknown',
+        user_email: record.User?.email || '',
+        user_phone: record.User?.phone || '',
+        attendance_status: record.attendance_status,
+        date: record.date,
+        join_time: record.join_time,
+        leave_time: record.leave_time,
+        duration_minutes: record.duration_minutes,
+        marked_by: record.marked_by,
+        device_id: record.device_id,
+        created_at: record.created,
+        updated_at: record.updated,
+      })),
+    })
+  } catch (err) {
+    console.error('=== /admin/get-class-attendance ERROR ===')
+    console.error('Error message:', err.message)
+    console.error('Error stack:', err.stack)
+    console.error('Full error:', err)
+    console.error('=== /admin/get-class-attendance END (FAILED) ===\n')
+    return res.status(500).json({ error: 'Failed to fetch class attendance' })
+  }
+})
+
+// Endpoint to view attendance by user
+router.get('/admin/get-user-attendance/:user_id', async (req, res) => {
+  try {
+    console.log('=== /admin/get-user-attendance START ===')
+    const { user_id } = req.params
+
+    console.log('user_id:', user_id)
+
+    if (!user_id) {
+      console.log('❌ Validation failed - user_id is required')
+      return res.status(400).json({ error: 'user_id is required' })
+    }
+
+    console.log('✓ Validation passed')
+
+    // Fetch all attendance records for this user
+    console.log(`Finding attendance records for user_id: ${user_id}`)
+    const attendanceRecords = await ClassAttendance.findAll({
+      where: {
+        user_id: user_id,
+      },
+      include: [
+        {
+          model: ZoomClassModel,
+          attributes: [
+            'zoom_class_id',
+            'zoom_class_name',
+            'class_type',
+            'recurring_start_time',
+            'recurring_end_time',
+          ],
+          required: false,
+        },
+        {
+          model: Plan,
+          attributes: ['plan_id', 'plan_name', 'number_of_zoom_classes'],
+          required: false,
+        },
+      ],
+      order: [['date', 'DESC']],
+      raw: false,
+    })
+
+    console.log(`Found ${attendanceRecords.length} attendance records for user`)
+    console.log(
+      'Sample attendance:',
+      JSON.stringify(attendanceRecords.slice(0, 2), null, 2)
+    )
+
+    // Group by month
+    const groupedByMonth = {}
+    attendanceRecords.forEach((record) => {
+      const date = new Date(record.date)
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+
+      if (!groupedByMonth[monthKey]) {
+        groupedByMonth[monthKey] = []
+      }
+
+      groupedByMonth[monthKey].push({
+        attendance_id: record.id,
+        class_id: record.class_id,
+        class_name: record.ZoomClass?.zoom_class_name || 'Unknown',
+        class_type: record.ZoomClass?.class_type || '',
+        class_time: record.ZoomClass?.recurring_start_time || '',
+        plan_name: record.Plan?.plan_name || 'Unknown',
+        date: record.date,
+        attendance_status: record.attendance_status,
+        join_time: record.join_time,
+        leave_time: record.leave_time,
+        duration_minutes: record.duration_minutes,
+        marked_by: record.marked_by,
+        device_id: record.device_id,
+        remarks: record.remarks,
+        created_at: record.created,
+        updated_at: record.updated,
+      })
+    })
+
+    console.log(
+      `Grouped into ${Object.keys(groupedByMonth).length} month groups`
+    )
+    console.log('=== /admin/get-user-attendance END (SUCCESS) ===\n')
+
+    return res.status(200).json({
+      user_id,
+      total_records: attendanceRecords.length,
+      attendance_by_month: groupedByMonth,
+      attendance_list: attendanceRecords.map((record) => ({
+        attendance_id: record.id,
+        class_id: record.class_id,
+        class_name: record.ZoomClass?.zoom_class_name || 'Unknown',
+        class_type: record.ZoomClass?.class_type || '',
+        class_time: record.ZoomClass?.recurring_start_time || '',
+        plan_name: record.Plan?.plan_name || 'Unknown',
+        date: record.date,
+        attendance_status: record.attendance_status,
+        join_time: record.join_time,
+        leave_time: record.leave_time,
+        duration_minutes: record.duration_minutes,
+        marked_by: record.marked_by,
+        device_id: record.device_id,
+        remarks: record.remarks,
+        created_at: record.created,
+        updated_at: record.updated,
+      })),
+    })
+  } catch (err) {
+    console.error('=== /admin/get-user-attendance ERROR ===')
+    console.error('Error message:', err.message)
+    console.error('Error stack:', err.stack)
+    console.error('Full error:', err)
+    console.error('=== /admin/get-user-attendance END (FAILED) ===\n')
+    return res.status(500).json({ error: 'Failed to fetch user attendance' })
+  }
+})
+
+// Endpoint to view attendance by class for each day
+router.get('/admin/get-class-attendance-by-day/:class_id', async (req, res) => {
+  try {
+    console.log('=== /admin/get-class-attendance-by-day START ===')
+    const { class_id } = req.params
+
+    console.log('class_id:', class_id)
+
+    if (!class_id) {
+      console.log('❌ Validation failed - class_id is required')
+      return res.status(400).json({ error: 'class_id is required' })
+    }
+
+    console.log('✓ Validation passed')
+
+    // Fetch class details
+    console.log(`Finding class: ${class_id}`)
+    const yogaClass = await ZoomClassModel.findByPk(class_id)
+
+    if (!yogaClass) {
+      console.log('❌ Class not found')
+      return res.status(404).json({ error: 'Class not found' })
+    }
+
+    console.log('✓ Class found:', {
+      zoom_class_id: yogaClass.zoom_class_id,
+      zoom_class_name: yogaClass.zoom_class_name,
+      class_type: yogaClass.class_type,
+    })
+
+    // Fetch all attendance records for this class
+    console.log(`Finding attendance records for class_id: ${class_id}`)
+    const attendanceRecords = await ClassAttendance.findAll({
+      where: {
+        class_id: class_id,
+      },
+      include: [
+        {
+          model: require('../models/sql/User').User,
+          attributes: ['user_id', 'name', 'email', 'phone', 'username'],
+          required: false,
+        },
+      ],
+      order: [
+        ['date', 'DESC'],
+        ['join_time', 'ASC'],
+      ],
+      raw: false,
+    })
+
+    console.log(`Found ${attendanceRecords.length} total attendance records`)
+
+    // Group by date
+    const groupedByDate = {}
+    let totalAttended = 0
+    let totalAbsent = 0
+
+    attendanceRecords.forEach((record) => {
+      const dateKey = new Date(record.date).toISOString().split('T')[0]
+
+      if (!groupedByDate[dateKey]) {
+        groupedByDate[dateKey] = {
+          date: dateKey,
+          attended: [],
+          absent: [],
+          total_attended: 0,
+          total_absent: 0,
+        }
+      }
+
+      const attendanceData = {
+        attendance_id: record.id,
+        user_id: record.user_id,
+        user_name: record.User?.name || 'Unknown',
+        user_email: record.User?.email || '',
+        user_phone: record.User?.phone || '',
+        user_username: record.User?.username || '',
+        attendance_status: record.attendance_status,
+        join_time: record.join_time,
+        leave_time: record.leave_time,
+        duration_minutes: record.duration_minutes,
+        marked_by: record.marked_by,
+        device_id: record.device_id,
+        remarks: record.remarks,
+        created_at: record.created,
+        updated_at: record.updated,
+      }
+
+      if (record.attendance_status === 'ATTENDED') {
+        groupedByDate[dateKey].attended.push(attendanceData)
+        groupedByDate[dateKey].total_attended += 1
+        totalAttended += 1
+      } else {
+        groupedByDate[dateKey].absent.push(attendanceData)
+        groupedByDate[dateKey].total_absent += 1
+        totalAbsent += 1
+      }
+    })
+
+    // Convert to array and sort by date descending
+    const attendanceByDay = Object.values(groupedByDate).sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    )
+
+    console.log(`Grouped into ${attendanceByDay.length} date groups`)
+    console.log('=== /admin/get-class-attendance-by-day END (SUCCESS) ===\n')
+
+    return res.status(200).json({
+      class_id,
+      class_name: yogaClass.zoom_class_name,
+      class_type: yogaClass.class_type,
+      total_records: attendanceRecords.length,
+      total_attended: totalAttended,
+      total_absent: totalAbsent,
+      attendance_by_day: attendanceByDay,
+    })
+  } catch (err) {
+    console.error('=== /admin/get-class-attendance-by-day ERROR ===')
+    console.error('Error message:', err.message)
+    console.error('Error stack:', err.stack)
+    console.error('Full error:', err)
+    console.error('=== /admin/get-class-attendance-by-day END (FAILED) ===\n')
+    return res
+      .status(500)
+      .json({ error: 'Failed to fetch class attendance by day' })
   }
 })
 

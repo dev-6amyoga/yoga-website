@@ -11,16 +11,29 @@ import {
   DialogActions,
   IconButton,
   Tooltip,
+  Chip,
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import { toast } from "react-toastify";
 
+const liveBlinkingKeyframes = `
+  @keyframes liveBlink {
+    0%, 49% {
+      box-shadow: 0 0 20px 5px rgba(76, 175, 80, 0.8), 0 0 40px 10px rgba(76, 175, 80, 0.4);
+    }
+    50%, 100% {
+      box-shadow: 0 0 10px 2px rgba(76, 175, 80, 0.4), 0 0 20px 5px rgba(76, 175, 80, 0.2);
+    }
+  }
+`;
+
 export default function YogaClassCard({
   classDetails,
   isStudentView = true,
   isAdminView = false,
+  isLive = false,
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [joining, setJoining] = useState(false);
@@ -34,8 +47,10 @@ export default function YogaClassCard({
   let joinDisabled = false;
   let joinTooltip = "";
 
+  // ...existing code...
+
   const handleJoin = async (e) => {
-    e.preventDefault(); // Prevent default anchor behavior
+    e.preventDefault();
     setJoining(true);
 
     try {
@@ -47,13 +62,12 @@ export default function YogaClassCard({
           classId: classDetails.zoom_class_id,
           planId: userPlan.plan_id,
           userPlanId: userPlan.user_plan_id,
-          deviceId: navigator.userAgent, // Using user agent as device ID
+          deviceId: navigator.userAgent,
         },
       });
       console.log(response);
 
       if (response.data.allowed) {
-        // If attendance recorded successfully, open Zoom link
         window.open(classDetails.zoom_url, "_blank");
         toast.success(response.data.message);
       } else {
@@ -205,125 +219,127 @@ End Time: ${classDetails.recurring_end_time}`
 `;
 
   return (
-    <Card
-      sx={{
-        width: "80%",
-        borderRadius: 4,
-        boxShadow: 3,
-        textAlign: "center",
-        p: 2,
-        mb: 2,
-      }}
-    >
-      <CardContent>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            mb: 2,
-          }}
-        >
-          <Typography
-            variant="h6"
-            sx={{ fontFamily: "Roboto, sans-serif", fontWeight: 500, mr: 1 }}
+    <>
+      <style>{liveBlinkingKeyframes}</style>
+      <Card
+        sx={{
+          width: "80%",
+          borderRadius: 4,
+          boxShadow: 3,
+          textAlign: "center",
+          p: 2,
+          mb: 2,
+          backgroundColor: isLive ? "rgba(76, 175, 80, 0.1)" : "inherit",
+          border: isLive ? "2px solid #4CAF50" : "none",
+          animation: isLive ? "liveBlink 1.5s infinite" : "none",
+          transition: "all 0.3s ease",
+        }}
+      >
+        <CardContent>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mb: 2,
+              gap: 1,
+            }}
           >
-            {classDetails.zoom_class_name}
-          </Typography>
-          <IconButton size="small" onClick={() => setInfoOpen(true)}>
-            <InfoOutlinedIcon />
-          </IconButton>
-        </Box>
-        <Box
-          sx={{
-            border: "1px solid #ccc",
-            borderRadius: 2,
-            display: "inline-block",
-            px: 2,
-            py: 0.5,
-            mb: 3,
-          }}
-        >
-          <Typography variant="subtitle1" sx={{ fontStyle: "italic" }}>
-            {timingStr}
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 2 }}>
-          {isAdminView ? (
-            <Tooltip title="Join class without attendance tracking">
-              <span>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="medium"
-                  sx={{ borderRadius: 2, px: 5, minWidth: 120 }}
-                  onClick={handleAdminJoin}
-                  disabled={joining}
-                >
-                  {joining ? "JOINING..." : "ADMIN JOIN"}
-                </Button>
-              </span>
-            </Tooltip>
-          ) : (
-            <Tooltip
-              title={joinDisabled ? joinTooltip : ""}
-              arrow
-              disableHoverListener={!joinDisabled}
+            <Typography
+              variant="h6"
+              sx={{ fontFamily: "Roboto, sans-serif", fontWeight: 500 }}
             >
-              <span>
-                <Button
-                  variant="contained"
-                  color="success"
-                  size="medium"
-                  sx={{ borderRadius: 2, px: 5, minWidth: 120 }}
-                  onClick={handleJoin}
-                  disabled={joinDisabled || joining}
-                >
-                  {joining ? "JOINING..." : "JOIN"}
-                </Button>
-              </span>
-            </Tooltip>
-          )}
-          {/* {!isStudentView && (
-            <>
-              <Button
-                variant="outlined"
-                size="medium"
-                sx={{ borderRadius: 2, px: 5, minWidth: 120 }}
+              {classDetails.zoom_class_name}
+            </Typography>
+            {isLive && (
+              <Chip
+                label="LIVE"
+                size="small"
+                sx={{
+                  backgroundColor: "#4CAF50",
+                  color: "white",
+                  fontWeight: "bold",
+                  animation: "liveBlink 1.5s infinite",
+                }}
+              />
+            )}
+            <IconButton size="small" onClick={() => setInfoOpen(true)}>
+              <InfoOutlinedIcon />
+            </IconButton>
+          </Box>
+          <Box
+            sx={{
+              border: "1px solid #ccc",
+              borderRadius: 2,
+              display: "inline-block",
+              px: 2,
+              py: 0.5,
+              mb: 3,
+            }}
+          >
+            <Typography variant="subtitle1" sx={{ fontStyle: "italic" }}>
+              {timingStr}
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 2 }}
+          >
+            {isAdminView ? (
+              <Tooltip title="Join class without attendance tracking">
+                <span>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="medium"
+                    sx={{ borderRadius: 2, px: 5, minWidth: 120 }}
+                    onClick={handleAdminJoin}
+                    disabled={joining}
+                  >
+                    {joining ? "JOINING..." : "ADMIN JOIN"}
+                  </Button>
+                </span>
+              </Tooltip>
+            ) : (
+              <Tooltip
+                title={joinDisabled ? joinTooltip : ""}
+                arrow
+                disableHoverListener={!joinDisabled}
               >
-                ATTENDANCE
-              </Button>
-              <Button
-                variant="outlined"
-                size="medium"
-                sx={{ borderRadius: 2, px: 5, minWidth: 120 }}
-              >
-                ATTENDEE LIST
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
-                size="medium"
-                sx={{ borderRadius: 2, px: 5, minWidth: 120 }}
-              >
-                DELETE
-              </Button>
-            </>
-          )} */}
-        </Box>
-      </CardContent>
-      <Dialog open={infoOpen} onClose={() => setInfoOpen(false)}>
-        <DialogTitle>Class Info</DialogTitle>
-        <DialogContent>
-          <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-            {infoData}
-          </pre>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setInfoOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-    </Card>
+                <span>
+                  <Button
+                    variant="contained"
+                    color={isLive ? "success" : "primary"}
+                    size="medium"
+                    sx={{
+                      borderRadius: 2,
+                      px: 5,
+                      minWidth: 120,
+                      backgroundColor: isLive ? "#4CAF50" : "primary",
+                      fontWeight: isLive ? "bold" : "normal",
+                    }}
+                    onClick={handleJoin}
+                    disabled={joinDisabled || joining}
+                  >
+                    {joining ? "JOINING..." : "JOIN"}
+                  </Button>
+                </span>
+              </Tooltip>
+            )}
+          </Box>
+        </CardContent>
+        <Dialog open={infoOpen} onClose={() => setInfoOpen(false)}>
+          <DialogTitle>Class Info</DialogTitle>
+          <DialogContent>
+            <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+              {infoData}
+            </pre>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setInfoOpen(false)}>Close</Button>
+          </DialogActions>
+        </Dialog>
+      </Card>
+    </>
   );
 }
