@@ -4,7 +4,6 @@ import { Fetch } from "../../utils/Fetch";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import useUserStore from "../../store/UserStore";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
-import { getLocalDateForRecurringClass } from "../../utils/TimezoneConverter";
 
 export default function StudentJoinClass() {
   const [classes, setClasses] = useState([]);
@@ -14,26 +13,43 @@ export default function StudentJoinClass() {
     state.userPlan,
   ]);
 
-  // const getClassEndTime = (classObj) => {
-  //   if (classObj.class_type === "one_time") {
-  //     return new Date(classObj.end_time);
-  //   } else if (classObj.class_type === "recurring") {
-  //     // Convert IST time to local timezone
-  //     return getLocalDateForRecurringClass(classObj.recurring_end_time);
-  //   }
-  // };
+  const getClassEndTime = (classObj) => {
+    if (classObj.class_type === "one_time") {
+      return new Date(classObj.end_time);
+    } else if (classObj.class_type === "recurring") {
+      const now = new Date();
+      const [endHour, endMinute] = classObj.recurring_end_time
+        .split(":")
+        .map(Number);
+      return new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        endHour,
+        endMinute,
+        0
+      );
+    }
+  };
 
-  // const getClassStartTime = (classObj) => {
-  //   if (classObj.class_type === "one_time") {
-  //     return new Date(classObj.start_time);
-  //   } else if (classObj.class_type === "recurring") {
-  //     // Convert IST time to local timezone
-  //     return getLocalDateForRecurringClass(classObj.recurring_start_time);
-  //   }
-  // };
-
-  const getClassStartTime = (classObj) => new Date(classObj.local_start_time);
-  const getClassEndTime = (classObj) => new Date(classObj.local_end_time);
+  const getClassStartTime = (classObj) => {
+    if (classObj.class_type === "one_time") {
+      return new Date(classObj.start_time);
+    } else if (classObj.class_type === "recurring") {
+      const now = new Date();
+      const [startHour, startMinute] = classObj.recurring_start_time
+        .split(":")
+        .map(Number);
+      return new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        startHour,
+        startMinute,
+        0
+      );
+    }
+  };
 
   const classifyClasses = (classesData) => {
     const now = new Date();
@@ -63,11 +79,12 @@ export default function StudentJoinClass() {
   };
 
   useEffect(() => {
+    //console.log(userPlan);
     if (user && userPlan) {
       setLoading(true);
       if (userPlan.plan_id) {
         Fetch({
-          url: `/zoom/api/classes/today?plan_id=${userPlan.plan_id}&timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}`,
+          url: `/zoom/api/classes/today?plan_id=${userPlan.plan_id}`,
           method: "GET",
         })
           .then((res) => setClasses(res.data))
