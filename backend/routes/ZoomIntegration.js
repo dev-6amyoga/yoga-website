@@ -447,7 +447,42 @@ router.get('/admin/classes/today', async (req, res) => {
       return aTime.diff(bTime)
     })
 
-    res.status(200).json(distinctClasses)
+    // Get user timezone from query or default to IST
+    const userTZ = req.query.timezone || 'Asia/Kolkata'
+
+    // Add local_start_time, local_end_time, and timezone_abbr
+    const result = distinctClasses.map((cls) => {
+      let startTime, endTime, tzAbbr
+
+      if (cls.class_type === 'one_time') {
+        const localStart = moment.tz(cls.start_time, 'Asia/Kolkata').tz(userTZ)
+        startTime = localStart.format()
+        const localEnd = moment.tz(cls.end_time, 'Asia/Kolkata').tz(userTZ)
+        endTime = localEnd.format()
+        tzAbbr = localStart.format('z')
+      } else if (cls.class_type === 'recurring') {
+        // recurring => stored as HH:mm in IST
+        const localStart = moment
+          .tz(cls.recurring_start_time, 'HH:mm', 'Asia/Kolkata')
+          .tz(userTZ)
+        startTime = localStart.format()
+        const localEnd = moment
+          .tz(cls.recurring_end_time, 'HH:mm', 'Asia/Kolkata')
+          .tz(userTZ)
+        endTime = localEnd.format()
+        tzAbbr = localStart.format('z')
+      }
+
+      return {
+        ...cls,
+        local_start_time: startTime,
+        local_end_time: endTime,
+        timezone_abbr: tzAbbr,
+        user_timezone: userTZ,
+      }
+    })
+
+    res.status(200).json(result)
   } catch (err) {
     console.error('Error fetching today classes:', err)
     res.status(500).json({ error: err.message || 'Failed to fetch classes' })
