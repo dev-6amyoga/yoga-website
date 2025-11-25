@@ -218,6 +218,25 @@ End Time: ${formatTimeWithTimezone(classDetails.recurring_end_time, true)}`
 }
 `;
 
+  function formatClassTime(date) {
+    const d = new Date(date);
+
+    const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    const isIndia = userTZ === "Asia/Kolkata" || userTZ === "Asia/Calcutta"; // just in case old mapping
+
+    return d
+      .toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZoneName: isIndia ? "short" : "short", // same option, but name differs automatically
+      })
+      .replace("GMT+5:30", "IST"); // force IST label
+  }
+  const start = formatClassTime(classDetails.local_start_time);
+  const end = formatClassTime(classDetails.local_end_time);
+
   return (
     <>
       <style>{liveBlinkingKeyframes}</style>
@@ -278,7 +297,7 @@ End Time: ${formatTimeWithTimezone(classDetails.recurring_end_time, true)}`
             }}
           >
             <Typography variant="subtitle1" sx={{ fontStyle: "italic" }}>
-              {timingStr}
+              {`${start} - ${end}`}
             </Typography>
           </Box>
 

@@ -594,8 +594,6 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
   }
 })
 
-module.exports = router
-
 router.post('/admin/log-attendance', async (req, res) => {
   const t = await sequelize.transaction()
   try {

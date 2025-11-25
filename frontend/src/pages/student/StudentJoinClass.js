@@ -14,23 +14,26 @@ export default function StudentJoinClass() {
     state.userPlan,
   ]);
 
-  const getClassEndTime = (classObj) => {
-    if (classObj.class_type === "one_time") {
-      return new Date(classObj.end_time);
-    } else if (classObj.class_type === "recurring") {
-      // Convert IST time to local timezone
-      return getLocalDateForRecurringClass(classObj.recurring_end_time);
-    }
-  };
+  // const getClassEndTime = (classObj) => {
+  //   if (classObj.class_type === "one_time") {
+  //     return new Date(classObj.end_time);
+  //   } else if (classObj.class_type === "recurring") {
+  //     // Convert IST time to local timezone
+  //     return getLocalDateForRecurringClass(classObj.recurring_end_time);
+  //   }
+  // };
 
-  const getClassStartTime = (classObj) => {
-    if (classObj.class_type === "one_time") {
-      return new Date(classObj.start_time);
-    } else if (classObj.class_type === "recurring") {
-      // Convert IST time to local timezone
-      return getLocalDateForRecurringClass(classObj.recurring_start_time);
-    }
-  };
+  // const getClassStartTime = (classObj) => {
+  //   if (classObj.class_type === "one_time") {
+  //     return new Date(classObj.start_time);
+  //   } else if (classObj.class_type === "recurring") {
+  //     // Convert IST time to local timezone
+  //     return getLocalDateForRecurringClass(classObj.recurring_start_time);
+  //   }
+  // };
+
+  const getClassStartTime = (classObj) => new Date(classObj.local_start_time);
+  const getClassEndTime = (classObj) => new Date(classObj.local_end_time);
 
   const classifyClasses = (classesData) => {
     const now = new Date();
@@ -65,7 +68,7 @@ export default function StudentJoinClass() {
       setLoading(true);
       if (userPlan.plan_id) {
         Fetch({
-          url: `/zoom/api/classes/today?plan_id=${userPlan.plan_id}`,
+          url: `/zoom/api/classes/today?plan_id=${userPlan.plan_id}&timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}`,
           method: "GET",
         })
           .then((res) => setClasses(res.data))

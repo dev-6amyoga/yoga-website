@@ -305,29 +305,24 @@ router.get('/api/classes', async (req, res) => {
 
 router.get('/api/classes/today', async (req, res) => {
   try {
-    const { teacher_id, plan_id } = req.query
-    //console.log('GOT : ', teacher_id, plan_id)
+    const { teacher_id, plan_id, timezone } = req.query
+    const userTZ = timezone || 'Asia/Kolkata'
 
-    // Use Asia/Kolkata timezone
-    const now = moment.tz('Asia/Kolkata')
-    const startOfDay = now.clone().startOf('day')
-    const endOfDay = now.clone().endOf('day')
-    const todayDayNum = now.day() // 0 (Sun) - 6 (Sat)
+    const nowIST = moment.tz('Asia/Kolkata')
+    const startOfDayIST = nowIST.clone().startOf('day')
+    const endOfDayIST = nowIST.clone().endOf('day')
+    const todayDayNum = nowIST.day()
 
     let whereClause = {}
-
-    if (teacher_id) {
-      whereClause.teacher_id = teacher_id
-    } else if (plan_id) {
-      whereClause.plan_id = plan_id
-    }
+    if (teacher_id) whereClause.teacher_id = teacher_id
+    if (plan_id) whereClause.plan_id = plan_id
 
     const oneTimeClause = {
       ...whereClause,
       class_type: 'one_time',
       start_time: {
-        [Op.gte]: startOfDay.toDate(),
-        [Op.lte]: endOfDay.toDate(),
+        [Op.gte]: startOfDayIST.toDate(),
+        [Op.lte]: endOfDayIST.toDate(),
       },
     }
 
@@ -337,21 +332,43 @@ router.get('/api/classes/today', async (req, res) => {
       recurring_days: { [Op.contains]: [todayDayNum] },
     }
 
-    //console.log('oneTimeClause:', oneTimeClause)
-    //console.log('recurringClause:', recurringClause)
-
     const classes = await ZoomClassModel.findAll({
-      where: {
-        [Op.or]: [oneTimeClause, recurringClause],
-      },
+      where: { [Op.or]: [oneTimeClause, recurringClause] },
     })
 
-    res.status(HTTP_OK).json(classes)
+    // Convert times to user timezone before returning
+    const result = classes.map((cls) => {
+      let startTime, endTime
+
+      if (cls.class_type === 'one_time') {
+        startTime = moment(cls.start_time)
+          .tz('Asia/Kolkata')
+          .tz(userTZ)
+          .format()
+        endTime = moment(cls.end_time).tz('Asia/Kolkata').tz(userTZ).format()
+      } else {
+        // recurring => stored as HH:mm in IST
+        startTime = moment
+          .tz(cls.recurring_start_time, 'HH:mm', 'Asia/Kolkata')
+          .tz(userTZ)
+          .format()
+        endTime = moment
+          .tz(cls.recurring_end_time, 'HH:mm', 'Asia/Kolkata')
+          .tz(userTZ)
+          .format()
+      }
+
+      return {
+        ...cls.toJSON(),
+        local_start_time: startTime,
+        local_end_time: endTime,
+      }
+    })
+
+    res.status(200).json(result)
   } catch (err) {
     console.error(err)
-    res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ error: "Failed to fetch today's classes" })
+    res.status(500).json({ error: "Failed to fetch today's classes" })
   }
 })
 
