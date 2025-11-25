@@ -17,28 +17,11 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import { toast } from "react-toastify";
-import {
-  getLocalDateForRecurringClass,
-  formatTimeWithTimezone,
-  getUserTimezoneAbbr,
-} from "../../../utils/TimezoneConverter";
-
-const liveBlinkingKeyframes = `
-  @keyframes liveBlink {
-    0%, 49% {
-      box-shadow: 0 0 20px 5px rgba(76, 175, 80, 0.8), 0 0 40px 10px rgba(76, 175, 80, 0.4);
-    }
-    50%, 100% {
-      box-shadow: 0 0 10px 2px rgba(76, 175, 80, 0.4), 0 0 20px 5px rgba(76, 175, 80, 0.2);
-    }
-  }
-`;
 
 export default function YogaClassCard({
   classDetails,
   isStudentView = true,
   isAdminView = false,
-  isLive = false,
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [joining, setJoining] = useState(false);
@@ -47,13 +30,55 @@ export default function YogaClassCard({
     state.userPlan,
   ]);
 
-  let timingStr = "";
-  let startTime, endTime;
+  /** ----------------------------------------------------------------------
+   *  SINGLE SOURCE OF TRUTH — Already converted server times
+   * ---------------------------------------------------------------------- */
+  const start = new Date(classDetails.local_start_time);
+  const end = new Date(classDetails.local_end_time);
+  const now = new Date();
+
+  /** ----------------------------------------------------------------------
+   *  Format for display (local timezone)
+   * ---------------------------------------------------------------------- */
+  function formatDisplayTime(date) {
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZoneName: "short",
+    });
+  }
+
+  const displayStart = formatDisplayTime(start);
+  const displayEnd = formatDisplayTime(end);
+
+  /** ----------------------------------------------------------------------
+   *  LIVE & JOIN LOGIC — same in all countries
+   *
+   *  JOIN enable window:
+   *    15 min before start  →  end of class
+   *
+   *  LIVE indicator:
+   *    now >= start && now <= end
+   * ---------------------------------------------------------------------- */
+  const fifteenBefore = new Date(start.getTime() - 15 * 60000);
+
+  const isLive = now >= start && now <= end;
+
   let joinDisabled = false;
   let joinTooltip = "";
 
-  // ...existing code...
+  if (now < fifteenBefore) {
+    joinDisabled = true;
+    joinTooltip = "JOIN will be enabled 15 minutes before class start time.";
+  } else if (now > end) {
+    joinDisabled = true;
+    joinTooltip = "Class has ended.";
+  }
 
+  /** ----------------------------------------------------------------------
+   * HANDLERS
+   * ---------------------------------------------------------------------- */
   const handleJoin = async (e) => {
     e.preventDefault();
     setJoining(true);
@@ -70,7 +95,6 @@ export default function YogaClassCard({
           deviceId: navigator.userAgent,
         },
       });
-      //console.log(response);
 
       if (response.data.allowed) {
         window.open(classDetails.zoom_url, "_blank");
@@ -79,15 +103,13 @@ export default function YogaClassCard({
         toast.error(response.data.message);
       }
     } catch (error) {
-      console.error("Join error:", error);
       toast.error(error.response?.data?.message || "Failed to join class");
     } finally {
       setJoining(false);
     }
   };
 
-  const handleAdminJoin = async (e) => {
-    e.preventDefault();
+  const handleAdminJoin = async () => {
     setJoining(true);
 
     try {
@@ -95,9 +117,7 @@ export default function YogaClassCard({
         url: "/class-attendance/admin/join-class",
         method: "POST",
         token: true,
-        data: {
-          classId: classDetails.zoom_class_id,
-        },
+        data: { classId: classDetails.zoom_class_id },
       });
 
       if (response.data.allowed) {
@@ -107,139 +127,24 @@ export default function YogaClassCard({
         toast.error(response.data.message);
       }
     } catch (error) {
-      console.error("Admin join error:", error);
       toast.error(error.response?.data?.message || "Failed to join class");
     } finally {
       setJoining(false);
     }
   };
 
-  if (classDetails.class_type === "one_time") {
-    startTime = new Date(classDetails.start_time);
-    endTime = new Date(classDetails.end_time);
-    timingStr =
-      classDetails.start_time && classDetails.end_time
-        ? `${startTime.toLocaleDateString("en-GB", {
-            weekday: "short",
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          })}, ${startTime.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })} - ${endTime.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}`
-        : "";
-  } else if (classDetails.class_type === "recurring") {
-    const days =
-      Array.isArray(classDetails.recurring_days) &&
-      classDetails.recurring_days.length
-        ? classDetails.recurring_days
-            .map((d) => ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d])
-            .join(", ")
-        : "";
-    // Convert IST times to local timezone for display
-    const startTimeLocal = formatTimeWithTimezone(
-      classDetails.recurring_start_time,
-      true
-    );
-    const endTimeLocal = formatTimeWithTimezone(
-      classDetails.recurring_end_time,
-      true
-    );
-    timingStr = `${days} | ${startTimeLocal} - ${endTimeLocal}`;
-  }
-
-  if (
-    isStudentView &&
-    classDetails.class_type === "one_time" &&
-    startTime &&
-    endTime
-  ) {
-    const now = new Date();
-    const thirtyMinsBeforeStart = new Date(startTime.getTime() - 15 * 60000);
-    if (now > endTime) {
-      joinDisabled = true;
-      joinTooltip = "Class has ended.";
-    } else if (now < thirtyMinsBeforeStart) {
-      joinDisabled = true;
-      joinTooltip =
-        "JOIN button will be enabled only 15 mins before class start time.";
-    }
-  }
-
-  if (
-    isStudentView &&
-    classDetails.class_type === "recurring" &&
-    Array.isArray(classDetails.recurring_days) &&
-    classDetails.recurring_days.length > 0
-  ) {
-    const now = new Date();
-    const todayDayNum = now.getDay();
-
-    if (!classDetails.recurring_days.includes(todayDayNum)) {
-      joinDisabled = true;
-      joinTooltip = "No class scheduled for today.";
-    } else {
-      // Convert IST times to local timezone
-      const todayStart = getLocalDateForRecurringClass(
-        classDetails.recurring_start_time
-      );
-      const todayEnd = getLocalDateForRecurringClass(
-        classDetails.recurring_end_time
-      );
-      const fifteenMinsBeforeStart = new Date(
-        todayStart.getTime() - 15 * 60000
-      );
-
-      if (now > todayEnd) {
-        joinDisabled = true;
-        joinTooltip = "Class has ended.";
-      } else if (now < fifteenMinsBeforeStart) {
-        joinDisabled = true;
-        joinTooltip =
-          "JOIN button will be enabled only 15 mins before class start time.";
-      }
-    }
-  }
-
+  /** ----------------------------------------------------------------------
+   * INFO MODAL CONTENT
+   * ---------------------------------------------------------------------- */
   const infoData = `
 Class Name: ${classDetails.zoom_class_name}
-Type: ${classDetails.class_type}
-${
-  classDetails.class_type === "one_time"
-    ? `Start: ${classDetails.start_time ? new Date(classDetails.start_time).toLocaleString() : ""}
-End: ${classDetails.end_time ? new Date(classDetails.end_time).toLocaleString() : ""}`
-    : `Days: ${Array.isArray(classDetails.recurring_days) ? classDetails.recurring_days.join(", ") : ""}
-Start Time: ${formatTimeWithTimezone(classDetails.recurring_start_time, true)}
-End Time: ${formatTimeWithTimezone(classDetails.recurring_end_time, true)}`
-}
+Start: ${start.toLocaleString()}
+End:   ${end.toLocaleString()}
+Type:  ${classDetails.class_type}
 `;
-
-  function formatClassTime(date) {
-    const d = new Date(date);
-
-    const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    const isIndia = userTZ === "Asia/Kolkata" || userTZ === "Asia/Calcutta"; // just in case old mapping
-
-    return d
-      .toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-        timeZoneName: isIndia ? "short" : "short", // same option, but name differs automatically
-      })
-      .replace("GMT+5:30", "IST"); // force IST label
-  }
-  const start = formatClassTime(classDetails.local_start_time);
-  const end = formatClassTime(classDetails.local_end_time);
 
   return (
     <>
-      <style>{liveBlinkingKeyframes}</style>
       <Card
         sx={{
           width: "80%",
@@ -251,25 +156,20 @@ End Time: ${formatTimeWithTimezone(classDetails.recurring_end_time, true)}`
           backgroundColor: isLive ? "rgba(76, 175, 80, 0.1)" : "inherit",
           border: isLive ? "2px solid #4CAF50" : "none",
           animation: isLive ? "liveBlink 1.5s infinite" : "none",
-          transition: "all 0.3s ease",
         }}
       >
         <CardContent>
+          {/* Header */}
           <Box
             sx={{
               display: "flex",
-              alignItems: "center",
               justifyContent: "center",
-              mb: 2,
               gap: 1,
+              mb: 2,
             }}
           >
-            <Typography
-              variant="h6"
-              sx={{ fontFamily: "Roboto, sans-serif", fontWeight: 500 }}
-            >
-              {classDetails.zoom_class_name}
-            </Typography>
+            <Typography variant="h6">{classDetails.zoom_class_name}</Typography>
+
             {isLive && (
               <Chip
                 label="LIVE"
@@ -278,14 +178,16 @@ End Time: ${formatTimeWithTimezone(classDetails.recurring_end_time, true)}`
                   backgroundColor: "#4CAF50",
                   color: "white",
                   fontWeight: "bold",
-                  animation: "liveBlink 1.5s infinite",
                 }}
               />
             )}
+
             <IconButton size="small" onClick={() => setInfoOpen(true)}>
               <InfoOutlinedIcon />
             </IconButton>
           </Box>
+
+          {/* Time display */}
           <Box
             sx={{
               border: "1px solid #ccc",
@@ -297,47 +199,31 @@ End Time: ${formatTimeWithTimezone(classDetails.recurring_end_time, true)}`
             }}
           >
             <Typography variant="subtitle1" sx={{ fontStyle: "italic" }}>
-              {`${start} - ${end}`}
+              {`${displayStart} - ${displayEnd}`}
             </Typography>
           </Box>
 
-          <Box
-            sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 2 }}
-          >
+          {/* Buttons */}
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
             {isAdminView ? (
-              <Tooltip title="Join class without attendance tracking">
-                <span>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="medium"
-                    sx={{ borderRadius: 2, px: 5, minWidth: 120 }}
-                    onClick={handleAdminJoin}
-                    disabled={joining}
-                  >
-                    {joining ? "JOINING..." : "ADMIN JOIN"}
-                  </Button>
-                </span>
-              </Tooltip>
-            ) : (
-              <Tooltip
-                title={joinDisabled ? joinTooltip : ""}
-                arrow
-                disableHoverListener={!joinDisabled}
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleAdminJoin}
+                disabled={joining}
+                sx={{ borderRadius: 2, px: 5 }}
               >
+                {joining ? "JOINING..." : "ADMIN JOIN"}
+              </Button>
+            ) : (
+              <Tooltip title={joinDisabled ? joinTooltip : ""} arrow>
                 <span>
                   <Button
                     variant="contained"
                     color={isLive ? "success" : "primary"}
-                    size="medium"
-                    sx={{
-                      borderRadius: 2,
-                      px: 5,
-                      minWidth: 120,
-                      backgroundColor: isLive ? "#4CAF50" : "primary",
-                      fontWeight: isLive ? "bold" : "normal",
-                    }}
                     onClick={handleJoin}
+                    disabled={joinDisabled || joining}
+                    sx={{ borderRadius: 2, px: 5 }}
                   >
                     {joining ? "JOINING..." : "JOIN"}
                   </Button>
@@ -346,18 +232,17 @@ End Time: ${formatTimeWithTimezone(classDetails.recurring_end_time, true)}`
             )}
           </Box>
         </CardContent>
-        <Dialog open={infoOpen} onClose={() => setInfoOpen(false)}>
-          <DialogTitle>Class Info</DialogTitle>
-          <DialogContent>
-            <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-              {infoData}
-            </pre>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setInfoOpen(false)}>Close</Button>
-          </DialogActions>
-        </Dialog>
       </Card>
+
+      <Dialog open={infoOpen} onClose={() => setInfoOpen(false)}>
+        <DialogTitle>Class Info</DialogTitle>
+        <DialogContent>
+          <pre>{infoData}</pre>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setInfoOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
