@@ -338,7 +338,6 @@ End Time: ${formatTimeWithTimezone(classDetails.recurring_end_time, true)}`
                       fontWeight: isLive ? "bold" : "normal",
                     }}
                     onClick={handleJoin}
-                    disabled={joinDisabled || joining}
                   >
                     {joining ? "JOINING..." : "JOIN"}
                   </Button>
