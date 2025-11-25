@@ -49,9 +49,6 @@ export default function YogaClassCard({
     });
   }
 
-  const displayStart = formatDisplayTime(start);
-  const displayEnd = formatDisplayTime(end);
-
   /** ----------------------------------------------------------------------
    *  LIVE & JOIN LOGIC — same in all countries
    *
@@ -133,9 +130,32 @@ export default function YogaClassCard({
     }
   };
 
-  /** ----------------------------------------------------------------------
-   * INFO MODAL CONTENT
-   * ---------------------------------------------------------------------- */
+  function formatIST(date) {
+    console.log(date, "IST");
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Kolkata",
+    });
+  }
+
+  function formatEST(date) {
+    console.log(date, "EST");
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "America/New_York",
+    });
+  }
+  const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  console.log("User Time Zone:", userTimeZone);
+  const isIndia = userTimeZone === "Asia/Calcutta";
+  console.log("Is India Time Zone:", isIndia);
+  const displayStart = isIndia ? formatIST(start) : formatEST(start);
+  const displayEnd = isIndia ? formatIST(end) : formatEST(end);
+
   const infoData = `
 Class Name: ${classDetails.zoom_class_name}
 Start: ${start.toLocaleString()}
