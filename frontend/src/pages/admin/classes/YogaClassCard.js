@@ -104,7 +104,6 @@ export default function YogaClassCard({
       if (popup) {
         popup.location.href = universalZoomUrl;
       } else {
-        // 4️⃣ Fallback (WebView/iPad block popup)
         window.location.href = universalZoomUrl;
       }
 
