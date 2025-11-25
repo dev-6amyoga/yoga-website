@@ -73,12 +73,12 @@ export default function YogaClassCard({
     joinTooltip = "Class has ended.";
   }
 
-  /** ----------------------------------------------------------------------
-   * HANDLERS
-   * ---------------------------------------------------------------------- */
   const handleJoin = async (e) => {
     e.preventDefault();
     setJoining(true);
+
+    // 1️⃣ Open popup immediately during the user click event
+    const popup = window.open("", "_blank");
 
     try {
       const response = await Fetch({
@@ -93,18 +93,66 @@ export default function YogaClassCard({
         },
       });
 
-      if (response.data.allowed) {
-        window.open(classDetails.zoom_url, "_blank");
-        toast.success(response.data.message);
-      } else {
+      if (!response.data.allowed) {
+        popup?.close();
         toast.error(response.data.message);
+        return;
       }
+
+      const universalZoomUrl = classDetails.zoom_url;
+
+      if (popup) {
+        popup.location.href = universalZoomUrl;
+      } else {
+        // 4️⃣ Fallback (WebView/iPad block popup)
+        window.location.href = universalZoomUrl;
+      }
+
+      toast.success(response.data.message);
     } catch (error) {
+      popup?.close();
       toast.error(error.response?.data?.message || "Failed to join class");
     } finally {
       setJoining(false);
     }
   };
+
+  // const handleJoin = async (e) => {
+  //   e.preventDefault();
+  //   setJoining(true);
+
+  //   try {
+  //     const response = await Fetch({
+  //       url: "/class-attendance/join",
+  //       method: "POST",
+  //       data: {
+  //         userId: user.user_id,
+  //         classId: classDetails.zoom_class_id,
+  //         planId: userPlan.plan_id,
+  //         userPlanId: userPlan.user_plan_id,
+  //         deviceId: navigator.userAgent,
+  //       },
+  //     });
+
+  //     if (response.data.allowed) {
+  //       try {
+  //         const newTab = window.open(classDetails.zoom_url, "_blank");
+  //         if (!newTab) {
+  //           window.location.href = classDetails.zoom_url;
+  //         }
+  //       } catch {
+  //         window.location.href = classDetails.zoom_url;
+  //       }
+  //       toast.success(response.data.message);
+  //     } else {
+  //       toast.error(response.data.message);
+  //     }
+  //   } catch (error) {
+  //     toast.error(error.response?.data?.message || "Failed to join class");
+  //   } finally {
+  //     setJoining(false);
+  //   }
+  // };
 
   const handleAdminJoin = async () => {
     setJoining(true);
