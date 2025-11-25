@@ -59,24 +59,16 @@ function StudentNavMUI() {
 
   // Logout handler
   const handleLogout = async () => {
-    try {
-      const res = await FetchRetry({
-        url: "/auth/logout",
-        method: "POST",
-        token: true,
-        n: 5,
-      });
-      if (res.status === 200) {
-        removeCookie(SIXAMYOGA_ACCESS_TOKEN);
-        removeCookie(SIXAMYOGA_REFRESH_TOKEN);
-        resetUserState();
-        navigate("/auth");
-      } else {
-        throw new Error();
-      }
-    } catch {
-      toast.error("Logout Error; Please try again");
-    }
+    const res = await FetchRetry({
+      url: "/auth/logout",
+      method: "POST",
+      token: true,
+      n: 5,
+    });
+    removeCookie(SIXAMYOGA_ACCESS_TOKEN);
+    removeCookie(SIXAMYOGA_REFRESH_TOKEN);
+    resetUserState();
+    navigate("/auth");
   };
 
   // Profile menu handlers
