@@ -210,7 +210,7 @@ router.post('/join', async (req, res) => {
       )
 
       await t.commit()
-      return res.json({ allowed: true, message: 'Joined successfully' })
+      return res.json({ allowed: true, message: 'Opening Zoom' })
     }
 
     // 7. attendance exists → check device
@@ -224,7 +224,7 @@ router.post('/join', async (req, res) => {
     await t.commit()
     return res.json({
       allowed: true,
-      message: 'Rejoined from same device',
+      message: 'Opening Zoom',
       rejoin: true,
     })
   } catch (err) {
