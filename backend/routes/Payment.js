@@ -76,7 +76,18 @@ router.post('/commit', authenticateToken, async (req, res) => {
     discount_coupon_id,
   } = req.body
 
+  console.log('[Payment.commit] Extracted fields:', {
+    user_id,
+    status,
+    payment_for,
+    payment_method,
+    amount,
+    currency_id,
+    discount_coupon_id,
+  })
+
   if (user_id === null || user_id === undefined || !status) {
+    console.log('[Payment.commit] Missing user_id or status')
     return res.status(HTTP_BAD_REQUEST).json({
       message: 'Missing required fields',
     })
@@ -85,6 +96,7 @@ router.post('/commit', authenticateToken, async (req, res) => {
   switch (status) {
     case TRANSACTION_FAILED:
       if (!order_id) {
+        console.log('[Payment.commit] FAILED: Missing order_id')
         return res.status(HTTP_BAD_REQUEST).json({
           message: 'Missing required fields',
         })
@@ -92,6 +104,7 @@ router.post('/commit', authenticateToken, async (req, res) => {
       break
     case TRANSACTION_CANCELLED:
       if (!order_id) {
+        console.log('[Payment.commit] CANCELLED: Missing order_id')
         return res.status(HTTP_BAD_REQUEST).json({
           message: 'Missing required fields',
         })
@@ -99,6 +112,7 @@ router.post('/commit', authenticateToken, async (req, res) => {
       break
     case TRANSACTION_TIMEOUT:
       if (!order_id) {
+        console.log('[Payment.commit] TIMEOUT: Missing order_id')
         return res.status(HTTP_BAD_REQUEST).json({
           message: 'Missing required fields',
         })
@@ -119,12 +133,22 @@ router.post('/commit', authenticateToken, async (req, res) => {
         currency_id === null ||
         currency_id === undefined
       ) {
+        console.log('[Payment.commit] SUCCESS: Missing required fields', {
+          payment_for,
+          amount,
+          status,
+          signature,
+          order_id,
+          payment_id,
+          currency_id,
+        })
         return res.status(HTTP_BAD_REQUEST).json({
           message: 'Missing required fields',
         })
       }
       break
     default:
+      console.log('[Payment.commit] Invalid status:', status)
       return res.status(HTTP_BAD_REQUEST).json({
         message: 'Invalid status',
       })
@@ -134,11 +158,27 @@ router.post('/commit', authenticateToken, async (req, res) => {
   const data = crypto.createHmac('sha256', SECRET_KEY, {})
   data.update(`${order_id}|${payment_id}`)
   const digest = data.digest('hex')
-  // //console.log(digest, signature);
+  console.log('[Payment.commit] Hash verification:', {
+    digest,
+    signature,
+    match: digest === signature,
+  })
 
   const t = await sequelize.transaction()
 
   try {
+    console.log('[Payment.commit] Creating transaction record with data:', {
+      payment_for,
+      payment_method,
+      amount,
+      status,
+      order_id,
+      payment_id,
+      user_id,
+      currency_id,
+      discount_coupon_id,
+    })
+
     // create a transaction in the database
     const transaction = await Transaction.create(
       {
@@ -157,15 +197,28 @@ router.post('/commit', authenticateToken, async (req, res) => {
       { transaction: t }
     )
 
+    console.log('[Payment.commit] Transaction created successfully:', {
+      transaction_id: transaction.transaction_id,
+    })
+
     await t.commit()
-    return res
-      .status(HTTP_OK)
-      .json({ status: 'successfully saved transaction' })
+    return res.status(HTTP_OK).json({
+      status: 'successfully saved transaction',
+      transaction_id: transaction.transaction_id,
+    })
   } catch (err) {
-    //console.log(err);
+    console.error('[Payment.commit] Error creating transaction:', {
+      message: err.message,
+      code: err.code,
+      detail: err.detail,
+      constraint: err.constraint,
+      original: err.original?.message,
+      stack: err.stack,
+    })
     await t.rollback()
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
       message: 'Something went wrong, try again!',
+      error: err.message,
     })
   }
 })

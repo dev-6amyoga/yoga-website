@@ -194,7 +194,7 @@ router.post('/student/plan', async (req, res) => {
   //   });
 })
 
-router.post('/student/mail-', async (req, res) => {
+router.post('/student/mail-invoice', async (req, res) => {
   const { user_id, transaction_order_id, plan_type } = req.body
 
   if (!user_id || !transaction_order_id) {
