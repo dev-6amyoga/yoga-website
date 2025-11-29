@@ -37,6 +37,7 @@ import CreateNewClass from "../pages/admin/classes/CreateNewClass";
 import ViewAllClasses from "../pages/admin/classes/ViewAllClasses";
 import JoinClass from "../pages/admin/classes/JoinClass";
 import AdminLogAttendance from "../pages/admin/classes/AdminLogAttendance";
+import ViewClassAttendees from "../pages/admin/classes/ViewClassAttendees";
 export const AdminRoutes = [
   {
     path: "/admin",
@@ -108,6 +109,10 @@ export const AdminRoutes = [
   {
     path: "/admin/log-attendance",
     element: <AdminLogAttendance />,
+  },
+  {
+    path: "/admin/view-class-attendees",
+    element: <ViewClassAttendees />,
   },
   // schedule
   {

@@ -29,6 +29,8 @@ const paths = [
       { path: "/admin/join-class", title: "Join Class" },
 
       { path: "/admin/log-attendance", title: "Log Attendance" },
+
+      { path: "/admin/view-class-attendees", title: "View Class Attendees" },
     ],
   },
   {
