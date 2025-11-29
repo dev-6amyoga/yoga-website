@@ -79,16 +79,28 @@ export default function StudentJoinClass() {
   };
 
   useEffect(() => {
-    //console.log(userPlan);
-    if (user && userPlan) {
+    if (user) {
       setLoading(true);
-      if (userPlan.plan_id) {
+      if (userPlan && userPlan.plan_id) {
         Fetch({
           url: `/zoom/api/classes/today?plan_id=${userPlan.plan_id}`,
           method: "GET",
         })
           .then((res) => setClasses(res.data))
           .catch((err) => console.error("Error fetching today's classes:", err))
+          .finally(() => setLoading(false));
+      } else {
+        Fetch({
+          url: "/zoom/api/classes/today",
+          method: "GET",
+        })
+          .then((res) => {
+            const masterClasses = res.data.filter(
+              (classObj) => classObj.zoom_class_name === "Master Class"
+            );
+            setClasses(masterClasses[0] ? [masterClasses[0]] : []);
+          })
+          .catch((err) => console.error("Error fetching Master Class:", err))
           .finally(() => setLoading(false));
       }
     }

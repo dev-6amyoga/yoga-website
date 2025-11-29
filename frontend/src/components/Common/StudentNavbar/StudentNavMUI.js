@@ -92,10 +92,14 @@ function StudentNavMUI() {
           data: { user_id: user?.user_id },
         });
         const userPlans = response.data?.userPlan || [];
+
+        // Check for Master Class availability
+        const hasMasterClass = await checkForMasterClass();
+
         if (userPlans.length === 0) {
           setDisabled(true);
           setDisabledTailorMade(true);
-          setHasZoomClasses(true);
+          setHasZoomClasses(!hasMasterClass);
           return;
         }
         // Check for active plans
@@ -106,7 +110,7 @@ function StudentNavMUI() {
         if (!activePlan) {
           setDisabled(true);
           setDisabledTailorMade(true);
-          setHasZoomClasses(true);
+          setHasZoomClasses(!hasMasterClass);
           return;
         }
         setUserPlan(activePlan);
@@ -117,8 +121,7 @@ function StudentNavMUI() {
             : !activePlan.plan.has_playlist_creation
         );
         setDisabled(!activePlan.plan.has_basic_playlist);
-        setHasZoomClasses(!activePlan.plan.has_zoom_classes);
-        //console.log(hasZoomClasses);
+        setHasZoomClasses(!activePlan.plan.has_zoom_classes && !hasMasterClass);
       } catch (error) {
         setDisabled(true);
         setDisabledTailorMade(true);
@@ -127,6 +130,22 @@ function StudentNavMUI() {
     };
     if (user) fetchPlanData();
   }, [user, setUserPlan]);
+
+  // Check if Master Class is available
+  const checkForMasterClass = async () => {
+    try {
+      const response = await Fetch({
+        url: "/zoom/api/classes/today",
+        method: "GET",
+      });
+      const classes = response.data || [];
+      return classes.some(
+        (classObj) => classObj.zoom_class_name === "Master Class"
+      );
+    } catch (error) {
+      return false;
+    }
+  };
 
   // Navigation paths
   const paths = useMemo(

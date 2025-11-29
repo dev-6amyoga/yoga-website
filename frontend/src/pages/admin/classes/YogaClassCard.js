@@ -81,6 +81,18 @@ export default function YogaClassCard({
     const popup = window.open("", "_blank");
 
     try {
+      // Skip attendance tracking for Master Class
+      if (classDetails.zoom_class_name === "Master Class") {
+        const universalZoomUrl = classDetails.zoom_url;
+        if (popup) {
+          popup.location.href = universalZoomUrl;
+        } else {
+          window.location.href = universalZoomUrl;
+        }
+        toast.success("Joining class...");
+        return;
+      }
+
       const response = await Fetch({
         url: "/class-attendance/join",
         method: "POST",
