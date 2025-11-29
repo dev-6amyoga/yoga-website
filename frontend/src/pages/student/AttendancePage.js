@@ -68,11 +68,12 @@ export default function AttendancePage() {
       ? Number(userPlanAttendance.userPlanAttendance.classes_allowed || 0)
       : null;
 
-    const classesAttended = attendanceData.length;
-    const classesRemaining =
-      totalAllowed !== null
-        ? Math.max(0, totalAllowed - classesAttended)
-        : null;
+    const classesAttended = userPlanAttendance
+      ? Number(userPlanAttendance.userPlanAttendance.classes_attended || 0)
+      : null;
+
+    const classesRemaining = totalAllowed - classesAttended;
+
     const percentUsed =
       totalAllowed && totalAllowed > 0
         ? Math.round((classesAttended / totalAllowed) * 100)
