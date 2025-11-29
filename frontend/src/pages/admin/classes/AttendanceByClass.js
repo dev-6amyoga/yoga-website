@@ -78,7 +78,53 @@ export default function AttendanceByClass() {
         data: { class_ids: classIds },
       });
 
-      setClassUsers(res.data.users || []);
+      // Fetch user plans and attendance data
+      const usersWithPlans = await Promise.all(
+        (res.data.users || []).map(async (user) => {
+          try {
+            const planRes = await Fetch({
+              url: "/user-plan/get-user-plan-by-id",
+              method: "POST",
+              data: { user_id: user.user_id },
+            });
+            const plans = planRes.data.userPlan || [];
+            const hasActivePlan = plans.some(
+              (p) => p.current_status === "ACTIVE"
+            );
+
+            // Fetch attendance data to get class balance
+            let classesRemaining = 0;
+            try {
+              const attendanceRes = await Fetch({
+                url: `/class-attendance/api/attendance/${user.user_id}`,
+                method: "GET",
+              });
+
+              if (attendanceRes.data && attendanceRes.data.length > 0) {
+                const userPlanAttendance =
+                  attendanceRes.data[0].userPlanAttendance;
+                if (userPlanAttendance) {
+                  classesRemaining =
+                    userPlanAttendance.classes_allowed -
+                    userPlanAttendance.classes_attended;
+                }
+              }
+            } catch (e) {
+              console.error("Failed to fetch attendance data", e);
+            }
+
+            return {
+              ...user,
+              hasActivePlan,
+              classesRemaining,
+            };
+          } catch (e) {
+            return { ...user, hasActivePlan: false, classesRemaining: 0 };
+          }
+        })
+      );
+
+      setClassUsers(usersWithPlans);
     } catch (e) {
       console.error("Failed to load class users", e);
     }
@@ -337,6 +383,14 @@ export default function AttendanceByClass() {
                         onChange={() => toggleUser(u)}
                       />
                     }
+                    sx={{
+                      border: !u.hasActivePlan ? "2px solid red" : "none",
+                      borderRadius: 1,
+                      mb: !u.hasActivePlan ? 1 : 0,
+                      backgroundColor: !u.hasActivePlan
+                        ? "rgba(255, 0, 0, 0.05)"
+                        : "transparent",
+                    }}
                   >
                     <ListItemIcon>
                       <Checkbox
@@ -349,11 +403,13 @@ export default function AttendanceByClass() {
                       />
                     </ListItemIcon>
                     <ListItemText
-                      primary={`${u.name} (ID: ${u.user_id})`}
+                      primary={`${u.name} (ID: ${u.user_id})${!u.hasActivePlan ? " ⚠️ No Active Plan" : ""}`}
                       primaryTypographyProps={{
                         fontSize: isMobile ? 13 : 14,
+                        fontWeight: !u.hasActivePlan ? 600 : 400,
+                        color: !u.hasActivePlan ? "error" : "inherit",
                       }}
-                      secondary={`Plan: ${u.plan_id} | UserPlan: ${u.user_plan_id}`}
+                      secondary={`Plan: ${u.plan_id} | UserPlan: ${u.user_plan_id} | Classes Remaining: ${u.classesRemaining || 0}`}
                       secondaryTypographyProps={{
                         fontSize: isMobile ? 11 : 12,
                       }}
