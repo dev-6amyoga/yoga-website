@@ -1,13 +1,34 @@
 import {
+  Box,
   Button,
-  Grid,
-  Input,
-  Modal,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
   Select,
-  Spacer,
   Table,
-  Text,
-} from "@geist-ui/core";
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Paper,
+  Tabs,
+  Tab,
+  Chip,
+  Stack,
+  Alert,
+} from "@mui/material";
+import {
+  Download as DownloadIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ContentCopy as CopyIcon,
+} from "@mui/icons-material";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -15,16 +36,21 @@ import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { ROLE_ROOT } from "../../../enums/roles";
 import { Fetch } from "../../../utils/Fetch";
 import { withAuth } from "../../../utils/withAuth";
+import { getFrontendDomain } from "../../../utils/getFrontendDomain";
+
+const FRONTEND_DOMAIN = getFrontendDomain();
 
 function ViewAllPlans() {
   const notify = (x) => toast(x);
   const [plans, setPlans] = useState([]);
+  const [institutePlans, setInstitutePlans] = useState([]);
   const [delState, setDelState] = useState(false);
   const [delPlanId, setDelPlanId] = useState(0);
   const [modalState, setModalState] = useState(false);
   const [updated, setupdated] = useState(false);
   const [sortedPlans, setSortedPlans] = useState([]);
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortedInstitutePlans, setSortedInstitutePlans] = useState([]);
+  const [tabValue, setTabValue] = useState(0);
   const [modalData, setModalData] = useState({
     plan_id: 0,
     name: "",
@@ -37,7 +63,7 @@ function ViewAllPlans() {
     plan_user_type: "",
   });
 
-  const closeDelHandler = (event) => {
+  const closeDelHandler = () => {
     setDelState(false);
   };
 
@@ -48,28 +74,47 @@ function ViewAllPlans() {
           url: "/plan/get-all",
         });
         const data = response.data;
-
         const sortedUsers = data.plans.sort((a, b) => {
           return new Date(b.created) - new Date(a.created);
         });
         setPlans(sortedUsers);
       } catch (error) {
-        //console.log(error);
+        notify("Error fetching plans");
       }
     };
     fetchData();
   }, [updated]);
 
   useEffect(() => {
-    const sortedData = [...plans].sort((a, b) => {
-      if (sortOrder === "asc") {
-        return a.plan_id - b.plan_id;
-      } else {
-        return b.plan_id - a.plan_id;
+    const fetchInstitutePlans = async () => {
+      try {
+        const response = await Fetch({
+          url: "/plan/get-all-institute-plans",
+        });
+        const data = response.data;
+        const sortedInstitute = data.plans.sort((a, b) => {
+          return new Date(b.created) - new Date(a.created);
+        });
+        setInstitutePlans(sortedInstitute);
+      } catch (error) {
+        notify("Error fetching institute plans");
       }
-    });
+    };
+    fetchInstitutePlans();
+  }, [updated]);
+
+  useEffect(() => {
+    const sortedData = [...plans].sort((a, b) => a.plan_id - b.plan_id);
     setSortedPlans(sortedData);
-  }, [plans, sortOrder, updated]);
+  }, [plans, updated]);
+
+  useEffect(() => {
+    const sortedData = [...institutePlans].sort(
+      (a, b) => a.plan_id - b.plan_id
+    );
+    console.log(sortedData);
+    setSortedInstitutePlans(sortedData);
+  }, [institutePlans, updated]);
 
   const handleDownload = (data1) => {
     const csv = Papa.unparse(data1);
@@ -78,61 +123,30 @@ function ViewAllPlans() {
     if (link.download !== undefined) {
       const url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
-      link.setAttribute("download", "data.csv");
+      link.setAttribute("download", "plans.csv");
       link.style.visibility = "hidden";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     }
   };
-  const renderAction = (value, rowData, index) => {
-    const handleDelete = async () => {
-      try {
-        const plan_id = Number(rowData.plan_id);
-        setDelPlanId(plan_id);
-        setDelState(true);
-      } catch (error) {
-        console.error(error);
-      }
-    };
 
-    const handleUpdate = async () => {
-      //console.log("IN UPDATE!");
-      setModalData(rowData);
-      setModalState(true);
-    };
-
-    return (
-      <Grid.Container gap={0.1}>
-        <Grid>
-          <Button
-            type="error"
-            auto
-            scale={1 / 3}
-            font="12px"
-            onClick={handleDelete}
-          >
-            Remove
-          </Button>
-        </Grid>
-        <Grid>
-          <Button
-            type="warning"
-            auto
-            scale={1 / 3}
-            font="12px"
-            onClick={() => handleUpdate(Number(rowData.plan_id))}
-          >
-            Update
-          </Button>
-        </Grid>
-      </Grid.Container>
-    );
+  const handleDelete = (planId) => {
+    setDelPlanId(planId);
+    setDelState(true);
   };
+
+  const handleUpdate = (rowData) => {
+    setModalData(rowData);
+    setModalState(true);
+  };
+
   const handleInputChange = (value, field) => {
     if (field === "has_basic_playlist") {
       setModalData({ ...modalData, [field]: value === "Yes" });
     } else if (field === "has_playlist_creation") {
+      setModalData({ ...modalData, [field]: value === "Yes" });
+    } else if (field === "has_self_audio_upload") {
       setModalData({ ...modalData, [field]: value === "Yes" });
     } else {
       setModalData({ ...modalData, [field]: value });
@@ -141,30 +155,25 @@ function ViewAllPlans() {
 
   const deletePlan = async () => {
     try {
-      const plan_id = delPlanId; // Assuming you have the plan ID to delete
-
       const response = await Fetch({
-        url: `/plan/deletePlan/${plan_id}`, // Adjust the endpoint
+        url: `/plan/deletePlan/${delPlanId}`,
         method: "DELETE",
       });
 
       if (response?.status === 200) {
-        //console.log("Response from server:", response);
-        setPlans((prev) => prev.filter((plan) => plan.plan_id !== plan_id));
-        //console.log("Plan deleted successfully");
-      } else {
-        //console.log("Error deleting plan:", response.status);
+        setPlans((prev) => prev.filter((plan) => plan.plan_id !== delPlanId));
+        notify("Plan deleted successfully");
       }
 
       setDelState(false);
     } catch (error) {
-      //console.log(error);
+      notify("Error deleting plan");
     }
   };
+
   const updateData = async () => {
     try {
       const plan_id = Number(modalData.plan_id);
-      //console.log(modalData);
       const response = await Fetch({
         url: `/plan/update-plan/${plan_id}`,
         method: "PUT",
@@ -172,168 +181,338 @@ function ViewAllPlans() {
       });
       if (response?.status === 200) {
         notify("Plan updated successfully");
-        setupdated(true);
+        setupdated(!updated);
         setModalState(false);
-      } else {
-        //console.log("Error updating asana:", response.status);
       }
     } catch (error) {
-      console.error(error);
+      notify("Error updating plan");
     }
   };
+
+  const getPurchaseLink = (planId) => {
+    return `${FRONTEND_DOMAIN}/student/purchase-a-plan/${planId}`;
+  };
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    notify("Link copied to clipboard!");
+  };
+
+  const PricingDisplay = ({ pricing }) => {
+    if (!pricing || pricing.length === 0) return <span>-</span>;
+    return (
+      <Stack spacing={0.5}>
+        {pricing.map((price) => (
+          <span key={price.plan_pricing_id}>
+            {price.denomination} {price.currency.short_tag}
+          </span>
+        ))}
+      </Stack>
+    );
+  };
+  const StudentPlansTable = () => (
+    <TableContainer component={Paper} sx={{ mt: 3 }}>
+      <Table>
+        <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
+          <TableRow>
+            <TableCell sx={{ fontWeight: 600 }}>Plan ID</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Plan Name</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Basic Playlist</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Playlist Creation</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Creation Limit</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Self Audio Upload</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Teachers</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Validity (Days)</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {sortedPlans.map((plan) => (
+            <TableRow key={plan.plan_id} hover>
+              <TableCell>{plan.plan_id}</TableCell>
+              <TableCell sx={{ fontWeight: 500 }}>{plan.name}</TableCell>
+              <TableCell>
+                <Chip
+                  label={plan.has_basic_playlist ? "Yes" : "No"}
+                  color={plan.has_basic_playlist ? "success" : "default"}
+                  size="small"
+                />
+              </TableCell>
+              <TableCell>
+                <Chip
+                  label={plan.has_playlist_creation ? "Yes" : "No"}
+                  color={plan.has_playlist_creation ? "success" : "default"}
+                  size="small"
+                />
+              </TableCell>
+              <TableCell>{plan.playlist_creation_limit}</TableCell>
+              <TableCell>
+                <Chip
+                  label={plan.has_self_audio_upload ? "Yes" : "No"}
+                  color={plan.has_self_audio_upload ? "success" : "default"}
+                  size="small"
+                />
+              </TableCell>
+              <TableCell>{plan.number_of_teachers}</TableCell>
+              <TableCell>{plan.plan_validity}</TableCell>
+              <TableCell>
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<EditIcon />}
+                    size="small"
+                    onClick={() => handleUpdate(plan)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<DeleteIcon />}
+                    size="small"
+                    onClick={() => handleDelete(plan.plan_id)}
+                  >
+                    Delete
+                  </Button>
+                </Stack>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
+  const InstitutePlansTable = () => (
+    <TableContainer component={Paper} sx={{ mt: 3 }}>
+      <Table size="small">
+        <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
+          <TableRow>
+            <TableCell sx={{ fontWeight: 600 }}>Plan ID</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Plan Name</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Pricing</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Classes/Limit</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Validity (Days)</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Purchase Link</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {sortedInstitutePlans.map((plan) => (
+            <TableRow key={plan.plan_id} hover>
+              <TableCell>{plan.plan_id}</TableCell>
+              <TableCell sx={{ fontWeight: 500 }}>{plan.name}</TableCell>
+              <TableCell>
+                <PricingDisplay pricing={plan.pricing} />
+              </TableCell>
+              <TableCell>
+                {plan.number_of_zoom_classes || plan.watch_time_limit || "-"}
+              </TableCell>
+              <TableCell>{plan.plan_validity_days}</TableCell>
+              <TableCell>
+                <Stack direction="row" spacing={0.5}>
+                  <Button
+                    variant="text"
+                    size="small"
+                    href={getPurchaseLink(plan.plan_id)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View
+                  </Button>
+                  <Button
+                    variant="text"
+                    size="small"
+                    startIcon={<CopyIcon />}
+                    onClick={() =>
+                      copyToClipboard(getPurchaseLink(plan.plan_id))
+                    }
+                  />
+                </Stack>
+              </TableCell>
+              <TableCell>
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<EditIcon />}
+                    size="small"
+                    onClick={() => handleUpdate(plan)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<DeleteIcon />}
+                    size="small"
+                    onClick={() => handleDelete(plan.plan_id)}
+                  >
+                    Delete
+                  </Button>
+                </Stack>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+
   return (
-    <AdminPageWrapper heading="Plan Management - View All Plans">
-      <div className="elements">
-        <Button
-          onClick={() => {
-            handleDownload(sortedPlans);
-          }}
+    <AdminPageWrapper heading="Plan Management">
+      <Box sx={{ p: 2 }}>
+        <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+          <Button
+            variant="contained"
+            startIcon={<DownloadIcon />}
+            onClick={() =>
+              handleDownload(
+                tabValue === 0 ? sortedPlans : sortedInstitutePlans
+              )
+            }
+          >
+            Download CSV
+          </Button>
+        </Stack>
+
+        <Paper>
+          <Tabs
+            value={tabValue}
+            onChange={(e, newValue) => setTabValue(newValue)}
+          >
+            <Tab label="Institute Plans" />
+            <Tab label="Student Plans" />
+          </Tabs>
+        </Paper>
+
+        {tabValue === 1 && <></>}
+        {tabValue === 0 && <InstitutePlansTable />}
+      </Box>
+
+      {/* Update Modal */}
+      <Dialog
+        open={modalState}
+        onClose={() => setModalState(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Update Plan</DialogTitle>
+        <DialogContent
+          sx={{ pt: 3, display: "flex", flexDirection: "column", gap: 2 }}
         >
-          Download CSV
-        </Button>
-
-        <Spacer h={2} />
-        <Table data={sortedPlans}>
-          <Table.Column prop="plan_id" label="Plan ID" />
-          <Table.Column prop="name" label="Plan Name" />
-          <Table.Column
-            prop="has_basic_playlist"
-            label="Can use 6AM Playlist"
+          <TextField
+            fullWidth
+            label="Plan Name"
+            value={modalData.name}
+            onChange={(e) => handleInputChange(e.target.value, "name")}
           />
-          <Table.Column
-            prop="has_playlist_creation"
-            label="Can make own playlist"
+
+          <FormControl fullWidth>
+            <InputLabel>Has Basic Playlist</InputLabel>
+            <Select
+              value={modalData.has_basic_playlist ? "Yes" : "No"}
+              onChange={(e) =>
+                handleInputChange(e.target.value, "has_basic_playlist")
+              }
+              label="Has Basic Playlist"
+            >
+              <MenuItem value="Yes">Yes</MenuItem>
+              <MenuItem value="No">No</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth>
+            <InputLabel>Has Playlist Creation</InputLabel>
+            <Select
+              value={modalData.has_playlist_creation ? "Yes" : "No"}
+              onChange={(e) =>
+                handleInputChange(e.target.value, "has_playlist_creation")
+              }
+              label="Has Playlist Creation"
+            >
+              <MenuItem value="Yes">Yes</MenuItem>
+              <MenuItem value="No">No</MenuItem>
+            </Select>
+          </FormControl>
+
+          <TextField
+            fullWidth
+            type="number"
+            label="Playlist Creation Limit"
+            value={modalData.playlist_creation_limit}
+            onChange={(e) =>
+              handleInputChange(e.target.value, "playlist_creation_limit")
+            }
           />
-          <Table.Column
-            prop="playlist_creation_limit"
-            label="Playlist creation Limit"
+
+          <FormControl fullWidth>
+            <InputLabel>Has Self Audio Upload</InputLabel>
+            <Select
+              value={modalData.has_self_audio_upload ? "Yes" : "No"}
+              onChange={(e) =>
+                handleInputChange(e.target.value, "has_self_audio_upload")
+              }
+              label="Has Self Audio Upload"
+            >
+              <MenuItem value="Yes">Yes</MenuItem>
+              <MenuItem value="No">No</MenuItem>
+            </Select>
+          </FormControl>
+
+          <TextField
+            fullWidth
+            type="number"
+            label="Number of Teachers"
+            value={modalData.number_of_teachers}
+            onChange={(e) =>
+              handleInputChange(e.target.value, "number_of_teachers")
+            }
           />
-          <Table.Column prop="has_self_audio_upload" label="Self Audio" />
-          <Table.Column prop="number_of_teachers" label="Number of teachers" />
-          <Table.Column prop="plan_validity" label="Plan Validity" />
-          <Table.Column prop="plan_user_type" label="Plan user type" />
-          <Table.Column
-            prop="operation"
-            label="ACTIONS"
-            width={150}
-            render={renderAction}
+
+          <TextField
+            fullWidth
+            type="number"
+            label="Plan Validity (Days)"
+            value={modalData.plan_validity}
+            onChange={(e) => handleInputChange(e.target.value, "plan_validity")}
           />
-        </Table>
-      </div>
-      <div>
-        {/* update modal */}
-        <Modal visible={modalState} onClose={() => setModalState(false)}>
-          <Modal.Title>Update Plan</Modal.Title>
-          <Modal.Subtitle>{modalData.name}</Modal.Subtitle>
-          <Modal.Content>
-            <form>
-              <Input
-                width="100%"
-                id="name"
-                placeholder={modalData.name}
-                onChange={(e) => handleInputChange(e.target.value, "name")}
-              >
-                Plan Name
-              </Input>
 
-              <Text>Has Basic Playlist </Text>
-              <Select
-                placeholder={modalData.has_basic_playlist ? "Yes" : "No"}
-                onChange={(value) =>
-                  handleInputChange(value, "has_basic_playlist")
-                }
-                id="has_basic_playlist"
-              >
-                <Select.Option value="Yes"> Yes </Select.Option>
-                <Select.Option value="No"> No </Select.Option>
-              </Select>
+          <FormControl fullWidth>
+            <InputLabel>Plan User Type</InputLabel>
+            <Select
+              value={modalData.plan_user_type || "Student"}
+              onChange={(e) =>
+                handleInputChange(e.target.value, "plan_user_type")
+              }
+              label="Plan User Type"
+            >
+              <MenuItem value="Institute">Institute</MenuItem>
+              <MenuItem value="Student">Student</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setModalState(false)}>Cancel</Button>
+          <Button onClick={updateData} variant="contained">
+            Update
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-              <Text>Has Basic Playlist </Text>
-              <Select
-                placeholder={modalData.has_playlist_creation ? "Yes" : "No"}
-                onChange={(value) =>
-                  handleInputChange(value, "has_playlist_creation")
-                }
-                id="has_playlist_creation"
-              >
-                <Select.Option value="Yes"> Yes </Select.Option>
-                <Select.Option value="No"> No </Select.Option>
-              </Select>
-
-              <Input
-                width="100%"
-                id="name"
-                placeholder={modalData.playlist_creation_limit}
-                onChange={(e) =>
-                  handleInputChange(e.target.value, "playlist_creation_limit")
-                }
-              >
-                Playlist Creation Limit
-              </Input>
-
-              <Text>Has Self Audio Upload </Text>
-              <Select
-                placeholder={modalData.has_self_audio_upload ? "Yes" : "No"}
-                onChange={(value) =>
-                  handleInputChange(value, "has_self_audio_upload")
-                }
-                id="has_self_audio_upload"
-              >
-                <Select.Option value="Yes"> Yes </Select.Option>
-                <Select.Option value="No"> No </Select.Option>
-              </Select>
-
-              <Input
-                width="100%"
-                id="number_of_teachers"
-                placeholder={modalData.number_of_teachers}
-                onChange={(e) =>
-                  handleInputChange(e.target.value, "number_of_teachers")
-                }
-              >
-                Number of Teachers
-              </Input>
-
-              <Input
-                width="100%"
-                id="plan_validity"
-                placeholder={modalData.plan_validity}
-                onChange={(e) =>
-                  handleInputChange(e.target.value, "plan_validity")
-                }
-              >
-                Plan Validity
-              </Input>
-
-              <Text> Plan User Type </Text>
-              <Select
-                placeholder={modalData.plan_user_type ? "Institute" : "Student"}
-                onChange={(value) => handleInputChange(value, "plan_user_type")}
-                id="plan_user_type"
-              >
-                <Select.Option value="Institute"> Institute </Select.Option>
-                <Select.Option value="Student"> Student </Select.Option>
-              </Select>
-            </form>
-          </Modal.Content>
-
-          <Modal.Action passive onClick={() => setModalState(false)}>
-            Cancel
-          </Modal.Action>
-          <Modal.Action onClick={updateData}>Update</Modal.Action>
-        </Modal>
-        {/* delete modal */}
-        <Modal visible={delState} onClose={closeDelHandler}>
-          <Modal.Title>Delete plan</Modal.Title>
-          <Modal.Content>
-            <p>Do you really wish to delete this Plan?</p>
-          </Modal.Content>
-          <Modal.Action passive onClick={() => setDelState(false)}>
-            No
-          </Modal.Action>
-          <Modal.Action onClick={deletePlan}>Yes</Modal.Action>
-        </Modal>
-      </div>
+      {/* Delete Modal */}
+      <Dialog open={delState} onClose={closeDelHandler}>
+        <DialogTitle>Delete Plan</DialogTitle>
+        <DialogContent>
+          <Alert severity="warning">
+            Do you really wish to delete this Plan?
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDelState(false)}>No</Button>
+          <Button onClick={deletePlan} variant="contained" color="error">
+            Yes, Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </AdminPageWrapper>
   );
 }
