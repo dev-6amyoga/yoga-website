@@ -43,6 +43,10 @@ export const StudentRoutes = [
     element: <StudentPlan />,
   },
   {
+    path: "/student/purchase-a-plan/:planId",
+    element: <StudentPlan />,
+  },
+  {
     path: "/student/join-class",
     element: <StudentJoinClass />,
   },

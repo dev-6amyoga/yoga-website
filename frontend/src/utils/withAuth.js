@@ -39,6 +39,14 @@ export const withAuth = (Component, ...roles) => {
     const [show, setShow] = useState(false);
     const [finishedLoading, setFinishLoading] = useState(false);
 
+    const isPlanPage = () => {
+      const pathname = location.pathname;
+      return (
+        pathname.includes("/purchase-a-plan") ||
+        pathname.match(/\/purchase-a-plan\/\d+/)
+      );
+    };
+
     useEffect(() => {
       const t = setInterval(() => {
         setFinishLoading(true);
@@ -53,6 +61,10 @@ export const withAuth = (Component, ...roles) => {
       // //console.log("withAuth : userChanged");
       // if user is there, check if role is valid
       if (finishedLoading) {
+        if (isPlanPage()) {
+          setShow(true);
+          return;
+        }
         if (user) {
           // //console.log(user, "IN WITH AUTH");
           // //console.log(roles, " IN WITH AUTH");

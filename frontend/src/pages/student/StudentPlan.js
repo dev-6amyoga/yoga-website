@@ -3,6 +3,7 @@ import { Alert } from "@mui/material";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import { useCallback, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
   USER_PLAN_ACTIVE,
@@ -47,6 +48,7 @@ function DiscountCouponForm({ handleDiscountCouponFormSubmit }) {
 }
 function StudentPlan() {
   let user = useUserStore((state) => state.user);
+  const { planId: urlPlanId } = useParams();
   const [allPlans, setAllPlans] = useState([]);
   const [allInstitutePlans, setAllInstitutePlans] = useState([]);
   const [showCard, setShowCard] = useState(false);
@@ -166,6 +168,17 @@ function StudentPlan() {
   };
 
   useEffect(() => {
+    if (urlPlanId && user && allPlans.length > 0) {
+      const selectedPlan = allPlans.find(
+        (plan) => plan.plan_id === parseInt(urlPlanId)
+      );
+      if (selectedPlan) {
+        subscribePlan(selectedPlan);
+      }
+    }
+  }, [urlPlanId, user, allPlans]);
+
+  useEffect(() => {
     if (showCard) {
       setLoading(false);
     }
@@ -275,6 +288,7 @@ function StudentPlan() {
       fetchData();
     }
   }, [user]);
+
   const fetchCustomUserPlans = async () => {
     try {
       const res = await Fetch({
@@ -419,6 +433,11 @@ function StudentPlan() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!user) {
+      sessionStorage.setItem("redirectAfterLogin", location.pathname);
+      navigate("/login");
+      return;
+    }
     let t = false;
     if (t) {
       return;

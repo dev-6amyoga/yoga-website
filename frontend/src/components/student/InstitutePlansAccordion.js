@@ -14,6 +14,9 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTheme } from "@mui/material/styles";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import useUserStore from "../../store/UserStore";
 
 function InstitutePlansAccordion({
   allInstitutePlans,
@@ -23,6 +26,24 @@ function InstitutePlansAccordion({
   const [expandedPlanId, setExpandedPlanId] = React.useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const { planId: urlPlanId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const user = useUserStore((state) => state.user);
+
+  useEffect(() => {
+    // Check URL planId first
+    if (urlPlanId) {
+      setExpandedPlanId(parseInt(urlPlanId));
+      return;
+    }
+
+    // Check sessionStorage for selected plan (after login redirect)
+    const selectedPlanId = sessionStorage.getItem("selectedPlanId");
+    if (selectedPlanId) {
+      setExpandedPlanId(parseInt(selectedPlanId));
+    }
+  }, [urlPlanId]);
 
   const handleChange = (planId) => (_, expanded) => {
     setExpandedPlanId(expanded ? planId : null);
@@ -33,6 +54,19 @@ function InstitutePlansAccordion({
     EUR: "€",
     GBP: "£",
   };
+
+  const handleSubscribePlan = (plan) => {
+    if (!user) {
+      // Store the current plan and redirect to login
+      sessionStorage.setItem("redirectAfterLogin", location.pathname);
+      sessionStorage.setItem("selectedPlanId", plan.plan_id);
+      navigate("/auth?login=true");
+      return;
+    }
+    // User is logged in, proceed with subscription
+    subscribePlan(plan);
+  };
+
   const preferredCurrencyTag = useMemo(() => {
     if (selectedCurrency?.short_tag) return selectedCurrency.short_tag;
     // prefer India if user's timezone or locale suggests India
@@ -82,6 +116,12 @@ function InstitutePlansAccordion({
       return Number.isFinite(n) ? n : 0;
     };
     return [...allInstitutePlans].sort((a, b) => {
+      const aIsUrlPlan = urlPlanId && a.plan_id === parseInt(urlPlanId);
+      const bIsUrlPlan = urlPlanId && b.plan_id === parseInt(urlPlanId);
+
+      if (aIsUrlPlan && !bIsUrlPlan) return -1;
+      if (!aIsUrlPlan && bIsUrlPlan) return 1;
+
       const aValidity = parseNum(a.plan_validity_days);
       const bValidity = parseNum(b.plan_validity_days);
       if (aValidity !== bValidity) return bValidity - aValidity;
@@ -90,7 +130,7 @@ function InstitutePlansAccordion({
       const bClasses = parseNum(b.number_of_zoom_classes);
       return bClasses - aClasses;
     });
-  }, [allInstitutePlans]);
+  }, [allInstitutePlans, urlPlanId]);
 
   return (
     <Box
@@ -102,7 +142,7 @@ function InstitutePlansAccordion({
         </Typography>
       )}
 
-      {sortedPlans?.map((plan) => {
+      {sortedPlans?.map((plan, index) => {
         const pricingItem = getPricingForPlan(plan);
         const currencyTag =
           pricingItem?.currency?.short_tag ||
@@ -111,21 +151,48 @@ function InstitutePlansAccordion({
         const symbol = CURRENCY_SYMBOLS[currencyTag] || currencyTag;
         const priceAmount =
           pricingItem?.denomination ?? pricingItem?.price ?? 0;
+        const isTopPlan = urlPlanId && plan.plan_id === parseInt(urlPlanId);
 
         return (
           <Accordion
             key={plan.plan_id}
             expanded={expandedPlanId === plan.plan_id}
             onChange={handleChange(plan.plan_id)}
-            sx={{ mb: 1 }}
+            sx={{
+              mb: 1,
+              border: isTopPlan ? "2px solid #4caf50" : "1px solid #e0e0e0",
+              backgroundColor: isTopPlan ? "#f1f8f4" : "transparent",
+              boxShadow: isTopPlan
+                ? "0 4px 12px rgba(76, 175, 80, 0.15)"
+                : "none",
+              transition: "all 0.3s ease",
+            }}
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Grid container alignItems="center" spacing={1}>
+                {isTopPlan && (
+                  <Grid item xs={12}>
+                    <Chip
+                      label="Selected Plan"
+                      sx={{
+                        backgroundColor: "#4caf50",
+                        color: "white",
+                        fontWeight: 600,
+                        mb: 1,
+                      }}
+                    />
+                  </Grid>
+                )}
                 <Grid item xs={8} sm={6}>
                   <Typography
                     variant={isMobile ? "subtitle2" : "h6"}
                     noWrap
-                    sx={{ textOverflow: "ellipsis", maxWidth: "100%" }}
+                    sx={{
+                      textOverflow: "ellipsis",
+                      maxWidth: "100%",
+                      color: isTopPlan ? "#2e7d32" : "inherit",
+                      fontWeight: isTopPlan ? 700 : 500,
+                    }}
                   >
                     {plan.name}
                   </Typography>
@@ -144,7 +211,10 @@ function InstitutePlansAccordion({
                 >
                   <Typography
                     variant={isMobile ? "subtitle1" : "h5"}
-                    sx={{ fontWeight: 700 }}
+                    sx={{
+                      fontWeight: 700,
+                      color: isTopPlan ? "#4caf50" : "inherit",
+                    }}
                   >
                     {symbol + " " + priceAmount}
                   </Typography>
@@ -164,14 +234,17 @@ function InstitutePlansAccordion({
                   sx={{ display: "flex", justifyContent: "flex-end" }}
                 >
                   <Button
-                    variant="outlined"
-                    color="primary"
+                    variant={isTopPlan ? "contained" : "outlined"}
+                    color={isTopPlan ? "success" : "primary"}
                     size={isMobile ? "small" : "medium"}
                     onClick={(e) => {
-                      e.stopPropagation(); // don't toggle accordion when user taps buy
-                      subscribePlan(plan);
+                      e.stopPropagation();
+                      handleSubscribePlan(plan);
                     }}
                     fullWidth={isMobile}
+                    sx={{
+                      fontWeight: isTopPlan ? 700 : 500,
+                    }}
                   >
                     {isMobile ? "Buy" : "Buy / Subscribe"}
                   </Button>
@@ -179,7 +252,7 @@ function InstitutePlansAccordion({
               </Grid>
             </AccordionSummary>
 
-            <AccordionDetails>
+            {/* <AccordionDetails>
               <Stack direction="column" spacing={2}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={8}>
@@ -209,9 +282,6 @@ function InstitutePlansAccordion({
                       <Typography variant="body2">
                         Classes: {plan.number_of_zoom_classes ?? "Unlimited"}
                       </Typography>
-                      {/* <Typography variant="body2">
-                        Teachers: {plan.number_of_teachers ?? 1}
-                      </Typography> */}
                       <Typography variant="caption" color="text.secondary">
                         Validity: {plan.plan_validity_days} days
                       </Typography>
@@ -221,7 +291,7 @@ function InstitutePlansAccordion({
                           variant="contained"
                           color="primary"
                           fullWidth
-                          onClick={() => subscribePlan(plan)}
+                          onClick={() => handleSubscribePlan(plan)}
                         >
                           Purchase
                         </Button>
@@ -244,14 +314,14 @@ function InstitutePlansAccordion({
                       variant="contained"
                       color="secondary"
                       fullWidth
-                      onClick={() => subscribePlan(plan)}
+                      onClick={() => handleSubscribePlan(plan)}
                     >
                       Quick purchase
                     </Button>
                   </Box>
                 )}
               </Stack>
-            </AccordionDetails>
+            </AccordionDetails> */}
           </Accordion>
         );
       })}

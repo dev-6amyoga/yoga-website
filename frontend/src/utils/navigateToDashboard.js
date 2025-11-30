@@ -4,6 +4,12 @@ export const navigateToDashboard = async (currentRole, userPlan, navigate) => {
   const type = currentRole;
   //console.log("Navigating to dashboard", type);
   // return;
+  // Check if there's a redirect path stored (from plan page)
+  const redirectAfterLogin = sessionStorage.getItem("redirectAfterLogin");
+  // Clear the stored values
+  sessionStorage.removeItem("redirectAfterLogin");
+  sessionStorage.removeItem("selectedPlanId");
+
   switch (type) {
     case "ROOT":
       navigate("/admin");
@@ -18,6 +24,10 @@ export const navigateToDashboard = async (currentRole, userPlan, navigate) => {
       navigate("/institute");
       break;
     case "STUDENT":
+      if (redirectAfterLogin) {
+        navigate(redirectAfterLogin);
+        return;
+      }
       console.log("User Plan in Navigation:", userPlan);
 
       if (userPlan?.plan_id) {
