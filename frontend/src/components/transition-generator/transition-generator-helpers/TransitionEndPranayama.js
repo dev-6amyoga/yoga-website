@@ -713,10 +713,16 @@ export const TransitionEndPranayama = async (
   }
 
   if (start_category === "Vajrasana") {
+    let pranayamaType = "";
+    if (end_video.namasakara_start) {
+      pranayamaType = "Pranayama Start Sitting";
+    } else {
+      pranayamaType = "Pranayama Legs Lock";
+    }
     if (break_status_start === "Break") {
       let res = handleTransition([
         "Vajra To Sitting Transition",
-        "Pranayama Start Sitting",
+        pranayamaType,
       ]);
       res = res.map((transition) => transition.transition_id);
       res = res.filter((element) => element !== undefined);
@@ -729,10 +735,7 @@ export const TransitionEndPranayama = async (
       } else {
         transitions.push("Vajrasana Dyanmudra To Relax Position Front");
       }
-      transitions.push(
-        "Vajra To Sitting Transition",
-        "Pranayama Start Sitting"
-      );
+      transitions.push("Vajra To Sitting Transition", pranayamaType);
       let res = handleTransition(transitions);
       res = res
         .map((transition) => transition.transition_id)
