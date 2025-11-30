@@ -175,6 +175,7 @@ export default function Register({ switchForm }) {
         if (response?.status === 200) {
           handleLogin(newUser.username, newUser.password);
           toast.success("New User added successfully!");
+
           navigate("/auth");
         } else {
           toast.error(response.data?.message);
@@ -187,9 +188,15 @@ export default function Register({ switchForm }) {
     }
   }, [disclaimerAcceptedVar, generalInfo, role, googleInfo, clientID]);
 
+  const redirectAfterLogin = sessionStorage.getItem("redirectAfterLogin");
+
   useEffect(() => {
     if (user?.user_id && role === "STUDENT") {
       // Route based on active plan
+      if (redirectAfterLogin) {
+        navigate(redirectAfterLogin);
+        return;
+      }
       const userPlanData = useUserStore.getState().userPlan;
       if (userPlanData?.plan_id) {
         navigate("/student/join-class");

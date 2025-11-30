@@ -6,9 +6,6 @@ export const navigateToDashboard = async (currentRole, userPlan, navigate) => {
   // return;
   // Check if there's a redirect path stored (from plan page)
   const redirectAfterLogin = sessionStorage.getItem("redirectAfterLogin");
-  // Clear the stored values
-  sessionStorage.removeItem("redirectAfterLogin");
-  sessionStorage.removeItem("selectedPlanId");
 
   switch (type) {
     case "ROOT":
