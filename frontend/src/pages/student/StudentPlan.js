@@ -80,6 +80,8 @@ function StudentPlan() {
   const [customPlansForUser, setCustomPlansForUser] = useState([]);
   const [currentCustomUserPlans, setCurrentCustomUserPlans] = useState([]);
   const [trialPlanAvailed, setTrialPlanAvailed] = useState(false);
+  const [hasRecentInstituteSubscription, setHasRecentInstituteSubscription] =
+    useState(false);
 
   const randomUUID = () => {
     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
@@ -88,6 +90,35 @@ function StudentPlan() {
       return v.toString(16);
     });
   };
+
+  const checkRecentInstituteSubscription = useCallback(() => {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    console.log("Current date:", new Date());
+    console.log("Six months ago:", sixMonthsAgo);
+    console.log("My plans:", myPlans);
+
+    // Check if user had ANY plan within the last 6 months
+    const hasRecentInstitute = myPlans.some((plan) => {
+      const planDate = new Date(plan.validity_from);
+      const isRecent = planDate >= sixMonthsAgo;
+
+      console.log(`Plan: ${plan.plan?.name}`, {
+        planDate: planDate.toDateString(),
+        isRecent,
+      });
+
+      return isRecent;
+    });
+
+    console.log("Has recent subscription:", hasRecentInstitute);
+    setHasRecentInstituteSubscription(hasRecentInstitute);
+  }, [myPlans]);
+
+  useEffect(() => {
+    checkRecentInstituteSubscription();
+  }, [myPlans, checkRecentInstituteSubscription]);
 
   const handleTryTrial = async (plan) => {
     if (trialPlanAvailed) {
@@ -331,14 +362,24 @@ function StudentPlan() {
       const response = await Fetch({
         url: "/plan/get-all-institute-plans",
       });
-      const filteredPlans = response.data?.plans?.filter(
+      console.log("Fetched institute plans:", response.data?.plans);
+      let filteredPlans = response.data?.plans?.filter(
         (plan) => plan.plan_user_type === "INSTITUTE"
       );
+
+      // Filter out 30-day plans if user doesn't have any plan within last 6 months
+      if (!hasRecentInstituteSubscription) {
+        filteredPlans = filteredPlans.filter(
+          (plan) => plan.plan_validity_days !== 30
+        );
+      }
+
+      console.log("Filtered institute plans:", filteredPlans);
       setAllInstitutePlans(filteredPlans);
     } catch (error) {
       toast("Error fetching plans", { type: "error" });
     }
-  }, []);
+  }, [hasRecentInstituteSubscription]);
 
   const fetchCurrencies = useCallback(async () => {
     try {
