@@ -274,33 +274,90 @@ router.post('/admin/join-class', async (req, res) => {
 router.get('/api/attendance/:userId', async (req, res) => {
   try {
     const { userId } = req.params
-    const attendanceRecords = await ClassAttendance.findAll({
+
+    // 1. Check UserPlanAttendance first
+    let userPlanAttendanceRecords = await UserPlanAttendance.findAll({
+      where: { user_id: userId },
+    })
+
+    // 2. If no UserPlanAttendance rows exist, check for ACTIVE UserPlan entries
+    if (userPlanAttendanceRecords.length === 0) {
+      const activeUserPlans = await UserPlan.findAll({
+        where: {
+          user_id: userId,
+          current_status: 'ACTIVE',
+        },
+      })
+
+      // 3. For each ACTIVE UserPlan, create UserPlanAttendance if it doesn't exist
+      for (const userPlan of activeUserPlans) {
+        const plan = await Plan.findByPk(userPlan.plan_id)
+
+        if (plan) {
+          await UserPlanAttendance.create({
+            user_id: userId,
+            plan_id: userPlan.plan_id,
+            user_plan_id: userPlan.user_plan_id,
+            start_date: userPlan.validity_from,
+            expiry_date: userPlan.validity_to,
+            classes_allowed: plan.number_of_zoom_classes || 0,
+            classes_attended: 0,
+            status: 'ACTIVE',
+          })
+        }
+      }
+
+      // Fetch newly created records
+      userPlanAttendanceRecords = await UserPlanAttendance.findAll({
+        where: { user_id: userId },
+      })
+    }
+
+    // 4. Check for ClassAttendance records
+    const classAttendanceRecords = await ClassAttendance.findAll({
       where: { user_id: userId },
       order: [['date', 'DESC']],
     })
 
-    // attach class, plan and userPlanAttendance objects for each record
-    const enriched = await Promise.all(
-      attendanceRecords.map(async (rec) => {
-        const recJson = rec.toJSON ? rec.toJSON() : rec
-        const [cls, plan, upa] = await Promise.all([
-          ZoomClassModel.findByPk(recJson.class_id),
-          Plan.findByPk(recJson.plan_id),
-          recJson.user_plan_id
-            ? UserPlanAttendance.findOne({
-                where: { user_plan_id: recJson.user_plan_id },
-              })
-            : Promise.resolve(null),
-        ])
+    // 5. If ClassAttendance records exist, enrich them with plan and userPlanAttendance
+    if (classAttendanceRecords.length > 0) {
+      const enriched = await Promise.all(
+        classAttendanceRecords.map(async (rec) => {
+          const recJson = rec.toJSON ? rec.toJSON() : rec
+          const [cls, plan, upa] = await Promise.all([
+            ZoomClassModel.findByPk(recJson.class_id),
+            Plan.findByPk(recJson.plan_id),
+            recJson.user_plan_id
+              ? UserPlanAttendance.findOne({
+                  where: { user_plan_id: recJson.user_plan_id },
+                })
+              : Promise.resolve(null),
+          ])
+          return {
+            ...recJson,
+            class: cls ? (cls.toJSON ? cls.toJSON() : cls) : null,
+            plan: plan ? (plan.toJSON ? plan.toJSON() : plan) : null,
+            userPlanAttendance: upa ? (upa.toJSON ? upa.toJSON() : upa) : null,
+          }
+        })
+      )
+
+      return res.status(200).json(enriched)
+    }
+
+    // 6. If no ClassAttendance records, return UserPlanAttendance and Plan data
+    const userPlanDataWithPlans = await Promise.all(
+      userPlanAttendanceRecords.map(async (upa) => {
+        const plan = await Plan.findByPk(upa.plan_id)
+
         return {
-          ...recJson,
-          class: cls ? (cls.toJSON ? cls.toJSON() : cls) : null,
-          plan: plan ? (plan.toJSON ? plan.toJSON() : plan) : null,
           userPlanAttendance: upa ? (upa.toJSON ? upa.toJSON() : upa) : null,
+          plan: plan ? (plan.toJSON ? plan.toJSON() : plan) : null,
         }
       })
     )
-    res.status(200).json(enriched)
+
+    res.status(200).json(userPlanDataWithPlans)
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Failed to fetch attendance records' })
