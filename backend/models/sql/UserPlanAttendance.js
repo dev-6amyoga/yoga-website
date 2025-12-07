@@ -39,7 +39,7 @@ const UserPlanAttendance = sequelize.define(
       defaultValue: 0,
     },
     status: {
-      type: DataTypes.ENUM('ACTIVE', 'EXPIRED'),
+      type: DataTypes.ENUM('ACTIVE', 'EXPIRED', 'STAGED'),
       defaultValue: 'ACTIVE',
     },
   },

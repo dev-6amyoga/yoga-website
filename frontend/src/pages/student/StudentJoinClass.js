@@ -82,6 +82,7 @@ export default function StudentJoinClass() {
     if (user) {
       setLoading(true);
       if (userPlan && userPlan.plan_id) {
+        console.log("Fetching today's classes for plan:", userPlan);
         Fetch({
           url: `/zoom/api/classes/today?plan_id=${userPlan.plan_id}`,
           method: "GET",

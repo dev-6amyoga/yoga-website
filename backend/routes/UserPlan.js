@@ -377,7 +377,7 @@ router.post('/register', authenticateToken, async (req, res) => {
         expiry_date: computed_validity_to,
         classes_allowed: plan.number_of_zoom_classes,
         classes_attended: 0,
-        status: 'ACTIVE',
+        status: current_status === USER_PLAN_ACTIVE ? 'ACTIVE' : current_status,
       },
       { transaction: t }
     )
