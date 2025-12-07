@@ -409,7 +409,7 @@ export default function AttendanceByClass() {
                         fontWeight: !u.hasActivePlan ? 600 : 400,
                         color: !u.hasActivePlan ? "error" : "inherit",
                       }}
-                      secondary={`Plan: ${u.plan_id} | UserPlan: ${u.user_plan_id} | Classes Remaining: ${u.classesRemaining || 0}`}
+                      secondary={`Phone: ${u.phone || "N/A"} | Classes Remaining: ${u.classesRemaining || 0}`}
                       secondaryTypographyProps={{
                         fontSize: isMobile ? 11 : 12,
                       }}
@@ -440,7 +440,7 @@ export default function AttendanceByClass() {
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>User ID</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Plan ID</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Phone</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>User Plan ID</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 600 }}>
                       Action
@@ -453,7 +453,7 @@ export default function AttendanceByClass() {
                     <TableRow key={u.user_id}>
                       <TableCell>{u.name}</TableCell>
                       <TableCell>{u.user_id}</TableCell>
-                      <TableCell>{u.plan_id}</TableCell>
+                      <TableCell>{u.phone || "N/A"}</TableCell>
                       <TableCell>{u.user_plan_id}</TableCell>
                       <TableCell align="center">
                         <Button

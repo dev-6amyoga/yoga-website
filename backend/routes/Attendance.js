@@ -344,7 +344,10 @@ router.get('/api/attendance/:userId', async (req, res) => {
             Plan.findByPk(recJson.plan_id),
             recJson.user_plan_id
               ? UserPlanAttendance.findOne({
-                  where: { user_plan_id: recJson.user_plan_id },
+                  where: {
+                    user_plan_id: recJson.user_plan_id,
+                    status: 'ACTIVE',
+                  },
                 })
               : Promise.resolve(null),
           ])
