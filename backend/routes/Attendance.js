@@ -274,6 +274,7 @@ router.post('/admin/join-class', async (req, res) => {
 router.get('/api/attendance/:userId', async (req, res) => {
   try {
     const { userId } = req.params
+    const today = moment().tz('Asia/Kolkata').startOf('day')
 
     // 1. Check UserPlanAttendance first
     let userPlanAttendanceRecords = await UserPlanAttendance.findAll({
@@ -311,6 +312,20 @@ router.get('/api/attendance/:userId', async (req, res) => {
       userPlanAttendanceRecords = await UserPlanAttendance.findAll({
         where: { user_id: userId },
       })
+    }
+
+    // Update status to EXPIRED if expiry_date is past
+    for (const record of userPlanAttendanceRecords) {
+      const expiryDate = moment(record.expiry_date)
+        .tz('Asia/Kolkata')
+        .startOf('day')
+      if (expiryDate.isBefore(today) && record.status !== 'EXPIRED') {
+        await UserPlanAttendance.update(
+          { status: 'EXPIRED' },
+          { where: { user_plan_id: record.user_plan_id } }
+        )
+        record.status = 'EXPIRED'
+      }
     }
 
     // 4. Check for ClassAttendance records
