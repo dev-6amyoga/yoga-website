@@ -98,7 +98,7 @@ const classWsRouter = require('./websocket-routes/Class')
 // })
 // const graceful = new Graceful({ brees: [bree] })
 
-cron.schedule('*/10 * * * * *', async () => {
+cron.schedule('0 0 * * *', async () => {
   console.log(
     'Running a task every 10 seconds: ',
     new Date().toLocaleTimeString()
