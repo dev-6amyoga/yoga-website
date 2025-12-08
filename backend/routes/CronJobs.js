@@ -7,7 +7,7 @@ const {
 const { UserPlan } = require('../models/sql/UserPlan')
 const { ClassAttendance } = require('../models/sql/ClassAttendance')
 const { User } = require('../models/sql/User')
-const { sequelize } = require('../init.sequelize')
+const { sequelize, Op } = require('../init.sequelize')
 const { mailTransporter } = require('../init.nodemailer')
 const moment = require('moment-timezone')
 const getFrontendDomain = require('../utils/getFrontendDomain')
@@ -148,7 +148,7 @@ router.post('/update-plan-statuses', async (req, res) => {
           user_id: userId,
           current_status: USER_PLAN_ACTIVE,
           transaction_order_id: {
-            [sequelize.Op.ne]: 'PRACTICENOWPLAN',
+            [Op.ne]: 'PRACTICENOWPLAN',
           },
         },
         transaction: t,
@@ -215,7 +215,7 @@ router.post('/update-plan-statuses', async (req, res) => {
                   USER_PLAN_EXPIRED_BY_USAGE,
                 ],
                 transaction_order_id: {
-                  [sequelize.Op.ne]: 'PRACTICENOWPLAN',
+                  [Op.ne]: 'PRACTICENOWPLAN',
                 },
               },
               order: [['validity_to', 'DESC']],
@@ -357,7 +357,7 @@ router.post('/update-plan-statuses', async (req, res) => {
           where: {
             user_id: userId,
             transaction_order_id: {
-              [sequelize.Op.ne]: 'PRACTICENOWPLAN',
+              [Op.ne]: 'PRACTICENOWPLAN',
             },
           },
           transaction: t,
@@ -375,7 +375,7 @@ router.post('/update-plan-statuses', async (req, res) => {
           where: {
             user_id: userId,
             transaction_order_id: {
-              [sequelize.Op.ne]: 'PRACTICENOWPLAN',
+              [Op.ne]: 'PRACTICENOWPLAN',
             },
           },
           order: [['purchase_date', 'DESC']],
@@ -406,7 +406,7 @@ router.post('/update-plan-statuses', async (req, res) => {
                 USER_PLAN_EXPIRED_BY_USAGE,
               ],
               transaction_order_id: {
-                [sequelize.Op.ne]: 'PRACTICENOWPLAN',
+                [Op.ne]: 'PRACTICENOWPLAN',
               },
             },
             order: [['validity_to', 'DESC']],
