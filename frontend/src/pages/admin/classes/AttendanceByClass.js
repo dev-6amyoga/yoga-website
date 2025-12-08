@@ -23,6 +23,7 @@ import {
   TableCell,
   TableBody,
   useMediaQuery,
+  Alert,
 } from "@mui/material";
 import { Fetch } from "../../../utils/Fetch";
 
@@ -46,6 +47,10 @@ export default function AttendanceByClass() {
 
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
+
+  const [cronTime, setCronTime] = useState("00:00");
+  const [cronLoading, setCronLoading] = useState(false);
+  const [cronMessage, setCronMessage] = useState("");
 
   useEffect(() => {
     loadClasses();
@@ -241,6 +246,28 @@ export default function AttendanceByClass() {
     }
   };
 
+  const handleTriggerCron = async () => {
+    setCronLoading(true);
+    setCronMessage("");
+    try {
+      const res = await Fetch({
+        url: "/cron/update-plan-statuses",
+        method: "POST",
+      });
+      setCronMessage({
+        type: "success",
+        text: `Cron job executed successfully. ${res.data.userPlansUpdated} plans updated, ${res.data.attendanceRecordsUpdated} attendance records updated, ${res.data.emailsSent} emails sent.`,
+      });
+    } catch (e) {
+      console.error("Failed to trigger cron job", e);
+      setCronMessage({
+        type: "error",
+        text: "Failed to trigger cron job. Please try again.",
+      });
+    }
+    setCronLoading(false);
+  };
+
   return (
     <Card
       variant="outlined"
@@ -253,6 +280,68 @@ export default function AttendanceByClass() {
         <Typography variant={isMobile ? "subtitle1" : "h6"} mb={2}>
           Enter Attendance by Class
         </Typography>
+
+        {/* CRON JOB CONTROLS */}
+        <Card
+          variant="outlined"
+          sx={{
+            p: isMobile ? 1.5 : 2,
+            mb: 3,
+            backgroundColor: "#f9f9f9",
+            border: "1px solid #e0e0e0",
+          }}
+        >
+          <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
+            Update Plan Statuses and Send Email Notifications
+          </Typography>
+
+          <Grid container spacing={isMobile ? 1.5 : 2} alignItems="flex-end">
+            {/* <Grid item xs={12} sm={4}> 
+               <TextField
+                fullWidth
+                label="Daily Run Time (IST)"
+                type="time"
+                value={cronTime}
+                onChange={(e) => setCronTime(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                size={isMobile ? "small" : "medium"}
+                helperText="Default: 12:00 AM"
+              />
+            </Grid> */}
+
+            <Grid item xs={12} sm={8}>
+              <Stack direction="row" spacing={1}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleTriggerCron}
+                  disabled={cronLoading}
+                  size={isMobile ? "small" : "medium"}
+                  fullWidth={isMobile}
+                >
+                  {cronLoading ? (
+                    <>
+                      <CircularProgress size={20} sx={{ mr: 1 }} />
+                      Running...
+                    </>
+                  ) : (
+                    "Trigger Now"
+                  )}
+                </Button>
+              </Stack>
+            </Grid>
+          </Grid>
+
+          {cronMessage && (
+            <Alert
+              severity={cronMessage.type}
+              sx={{ mt: 2 }}
+              onClose={() => setCronMessage("")}
+            >
+              {cronMessage.text}
+            </Alert>
+          )}
+        </Card>
 
         {/* CLASS SELECTION */}
         <Grid container spacing={isMobile ? 1.5 : 2}>

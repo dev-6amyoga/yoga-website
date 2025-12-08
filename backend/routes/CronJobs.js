@@ -22,7 +22,7 @@ const sendUnpaidClassEmail = async (user, classDate) => {
   try {
     if (!user || !user.email) {
       console.warn('User or email not found for unpaid class notification')
-      return
+      return false
     }
 
     await mailTransporter.sendMail({
@@ -43,8 +43,10 @@ const sendUnpaidClassEmail = async (user, classDate) => {
     console.log(
       `Unpaid class email sent to ${user.email} for class on ${classDate}`
     )
+    return true
   } catch (err) {
     console.error(`Failed to send unpaid class email to ${user?.email}:`, err)
+    return false
   }
 }
 
@@ -60,6 +62,7 @@ router.post('/update-plan-statuses', async (req, res) => {
 
     let updatedCount = 0
     let updatedAttendanceCount = 0
+    let emailsSent = 0
 
     for (const userPlan of allUserPlans) {
       const validityFrom = moment(userPlan.validity_from)
@@ -319,10 +322,11 @@ router.post('/update-plan-statuses', async (req, res) => {
         if (userPlanRows.length === 0) {
           // No user plans at all - all classes are unpaid
           for (const attendance of classAttendances) {
-            await sendUnpaidClassEmail(
+            const emailSent = await sendUnpaidClassEmail(
               userEmail,
               moment(attendance.date).format('YYYY-MM-DD')
             )
+            if (emailSent) emailsSent++
           }
         } else {
           // Check attendance after most recent expired plan
@@ -349,10 +353,11 @@ router.post('/update-plan-statuses', async (req, res) => {
                 .startOf('day')
 
               if (attendanceDate.isAfter(expiredValidityTo)) {
-                await sendUnpaidClassEmail(
+                const emailSent = await sendUnpaidClassEmail(
                   userEmail,
                   moment(attendance.date).format('YYYY-MM-DD')
                 )
+                if (emailSent) emailsSent++
               }
             }
           }
@@ -365,6 +370,7 @@ router.post('/update-plan-statuses', async (req, res) => {
       message: 'Plan statuses updated successfully',
       userPlansUpdated: updatedCount,
       attendanceRecordsUpdated: updatedAttendanceCount,
+      emailsSent: emailsSent,
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
