@@ -1,6 +1,9 @@
 const express = require('express')
 const router = express.Router()
 const { UserPlanAttendance } = require('../models/sql/UserPlanAttendance')
+const {
+  PracticeNowPlanAttendance,
+} = require('../models/sql/PracticeNowPlanAttendance')
 const { UserPlan } = require('../models/sql/UserPlan')
 const { ClassAttendance } = require('../models/sql/ClassAttendance')
 const { User } = require('../models/sql/User')
@@ -38,6 +41,7 @@ const sendUnpaidClassEmail = async (
     await mailTransporter.sendMail({
       from: 'dev.6amyoga@gmail.com',
       to: user.email,
+      cc: '992351@gmail.com',
       subject: '6AM Yoga | Unpaid Class Attendance',
       text: `Hello ${user.name},\n\nWe noticed that you attended a class on ${classDate} without an active plan.\n\nPlease purchase a plan to continue attending classes.\n\nRepeat your last subscription: ${purchaseLink}\n\nBest regards,\n6AM Yoga Team`,
       html: `
@@ -130,7 +134,6 @@ router.post('/update-plan-statuses', async (req, res) => {
       }
     }
 
-    // Step 2: Get all unique users
     const allUsers = await User.findAll({
       attributes: ['user_id'],
       transaction: t,
@@ -139,21 +142,27 @@ router.post('/update-plan-statuses', async (req, res) => {
     for (const user of allUsers) {
       const userId = user.user_id
 
-      // Check for active user plans
+      // Check for active user plans (excluding PRACTICENOWPLAN)
       const activeUserPlans = await UserPlan.findAll({
         where: {
           user_id: userId,
           current_status: USER_PLAN_ACTIVE,
+          transaction_order_id: {
+            [sequelize.Op.ne]: 'PRACTICENOWPLAN',
+          },
         },
         transaction: t,
       })
 
-      // Rule 1: User cannot have more than 1 active plan
-      if (activeUserPlans.length > 1) {
-        console.warn(
-          `User ${userId} has ${activeUserPlans.length} active plans. This should not happen.`
-        )
-      }
+      // Check for active PRACTICENOWPLAN
+      const activePracticeNowPlan = await UserPlan.findOne({
+        where: {
+          user_id: userId,
+          current_status: USER_PLAN_ACTIVE,
+          transaction_order_id: 'PRACTICENOWPLAN',
+        },
+        transaction: t,
+      })
 
       if (activeUserPlans.length > 0) {
         const activePlan = activeUserPlans[0]
@@ -205,6 +214,9 @@ router.post('/update-plan-statuses', async (req, res) => {
                   USER_PLAN_EXPIRED_BY_DATE,
                   USER_PLAN_EXPIRED_BY_USAGE,
                 ],
+                transaction_order_id: {
+                  [sequelize.Op.ne]: 'PRACTICENOWPLAN',
+                },
               },
               order: [['validity_to', 'DESC']],
               transaction: t,
@@ -229,6 +241,27 @@ router.post('/update-plan-statuses', async (req, res) => {
           }
         }
 
+        // Get classes attended from PracticeNowPlanAttendance if PRACTICENOWPLAN exists
+        let practiceNowClassesAttended = 0
+        if (activePracticeNowPlan) {
+          const practiceNowAttendance = await PracticeNowPlanAttendance.findOne(
+            {
+              where: {
+                user_id: userId,
+                user_plan_id: activePracticeNowPlan.user_plan_id,
+              },
+              transaction: t,
+            }
+          )
+          if (practiceNowAttendance) {
+            practiceNowClassesAttended = practiceNowAttendance.classes_attended
+          }
+        }
+
+        // Total classes attended = classes from PracticeNowPlanAttendance + classes from ClassAttendance
+        const totalClassesAttended =
+          practiceNowClassesAttended + classesAttended
+
         // Rule 2 & 3: Create or update UserPlanAttendance
         if (!userPlanAttendance) {
           await UserPlanAttendance.create(
@@ -239,17 +272,17 @@ router.post('/update-plan-statuses', async (req, res) => {
               start_date: activePlan.validity_from,
               expiry_date: activePlan.validity_to,
               classes_allowed: plan.classes_allowed || 0,
-              classes_attended: classesAttended,
+              classes_attended: totalClassesAttended,
               status: USER_PLAN_ACTIVE,
             },
             { transaction: t }
           )
           updatedAttendanceCount++
 
-          // ✅ NEW: Check if classes_allowed = classes_attended
+          // ✅ Check if classes_allowed = classes_attended
           if (
             plan.classes_allowed > 0 &&
-            plan.classes_allowed === classesAttended
+            plan.classes_allowed === totalClassesAttended
           ) {
             console.log(
               `UserPlan ID ${activePlan.user_plan_id} - Classes limit reached. Setting to EXPIRED_BY_USAGE`
@@ -273,7 +306,7 @@ router.post('/update-plan-statuses', async (req, res) => {
         } else {
           await UserPlanAttendance.update(
             {
-              classes_attended: classesAttended,
+              classes_attended: totalClassesAttended,
             },
             {
               where: { id: userPlanAttendance.id },
@@ -282,10 +315,10 @@ router.post('/update-plan-statuses', async (req, res) => {
           )
           updatedAttendanceCount++
 
-          // ✅ NEW: Check if classes_allowed = classes_attended
+          // ✅ Check if classes_allowed = classes_attended
           if (
             plan.classes_allowed > 0 &&
-            plan.classes_allowed === classesAttended &&
+            plan.classes_allowed === totalClassesAttended &&
             activePlan.current_status !== USER_PLAN_EXPIRED_BY_USAGE
           ) {
             console.log(
@@ -309,7 +342,7 @@ router.post('/update-plan-statuses', async (req, res) => {
           }
         }
       } else {
-        // Rule 4: User has NO active plan
+        // Rule 4: User has NO active regular plan
         // Set all UserPlanAttendance rows to EXPIRED status
         await UserPlanAttendance.update(
           { status: 'EXPIRED' },
@@ -321,7 +354,12 @@ router.post('/update-plan-statuses', async (req, res) => {
 
         // Rule 5: Check for unpaid class attendance
         const userPlanRows = await UserPlan.findAll({
-          where: { user_id: userId },
+          where: {
+            user_id: userId,
+            transaction_order_id: {
+              [sequelize.Op.ne]: 'PRACTICENOWPLAN',
+            },
+          },
           transaction: t,
         })
 
@@ -332,9 +370,14 @@ router.post('/update-plan-statuses', async (req, res) => {
 
         const userEmail = await User.findByPk(userId, { transaction: t })
 
-        // Get the last plan the user purchased (most recent by purchase_date)
+        // Get the last plan the user purchased (most recent by purchase_date, excluding PRACTICENOWPLAN)
         const lastUserPlan = await UserPlan.findOne({
-          where: { user_id: userId },
+          where: {
+            user_id: userId,
+            transaction_order_id: {
+              [sequelize.Op.ne]: 'PRACTICENOWPLAN',
+            },
+          },
           order: [['purchase_date', 'DESC']],
           transaction: t,
         })
@@ -362,6 +405,9 @@ router.post('/update-plan-statuses', async (req, res) => {
                 USER_PLAN_EXPIRED_BY_DATE,
                 USER_PLAN_EXPIRED_BY_USAGE,
               ],
+              transaction_order_id: {
+                [sequelize.Op.ne]: 'PRACTICENOWPLAN',
+              },
             },
             order: [['validity_to', 'DESC']],
             transaction: t,

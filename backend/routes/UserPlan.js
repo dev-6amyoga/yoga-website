@@ -48,6 +48,9 @@ router.post('/get-user-plan-by-id', async (req, res) => {
     const userPlan = await UserPlan.findAll({
       where: {
         user_id: user_id,
+        transaction_order_id: {
+          [Op.ne]: 'PRACTICENOWPLAN',
+        },
       },
       include: [
         { model: User, attributes: ['name'] },
@@ -75,6 +78,49 @@ router.post('/get-user-plan-by-id', async (req, res) => {
     return res
       .status(HTTP_INTERNAL_SERVER_ERROR)
       .json({ error: 'Failed to fetch user' })
+  }
+})
+
+router.post('/get-practice-now-plan', async (req, res) => {
+  const { user_id } = req.body
+  if (!user_id) {
+    return res
+      .status(HTTP_BAD_REQUEST)
+      .json({ error: 'Missing required fields' })
+  }
+  try {
+    const userPlan = await UserPlan.findAll({
+      where: {
+        user_id: user_id,
+        transaction_order_id: 'PRACTICENOWPLAN',
+      },
+      include: [
+        { model: User, attributes: ['name'] },
+        {
+          model: Plan,
+          attributes: [
+            'plan_id',
+            'name',
+            'has_basic_playlist',
+            'has_playlist_creation',
+            'playlist_creation_limit',
+            'has_self_audio_upload',
+            'number_of_teachers',
+            'has_zoom_classes',
+            'number_of_zoom_classes',
+            'plan_validity_days',
+            'watch_time_limit',
+          ],
+        },
+      ],
+      order: [['validity_to', 'DESC']],
+    })
+    return res.status(HTTP_OK).json({ userPlan: userPlan ? userPlan : null })
+  } catch (error) {
+    console.error(error)
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ error: 'Failed to fetch practice now plan' })
   }
 })
 
