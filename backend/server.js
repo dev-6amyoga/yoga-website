@@ -14,7 +14,7 @@ const helmet = require('helmet')
 const glob = require('glob')
 const { bulkCreateSampleData } = require('./sample_data')
 const getFrontendDomain = require('./utils/getFrontendDomain')
-
+const getBackendDomain = require('./utils/getBackendDomain')
 // LOGGING
 // const logger = require('pino-http')
 const morgan = require('morgan')
@@ -47,6 +47,7 @@ const reminderRouter = require('./routes/ReminderScript')
 const videoRecordingRouter = require('./routes/VideoRecordings')
 const videoPackagingRouter = require('./routes/VideoPackaging')
 const authRouter = require('./routes/Auth')
+const cronRouter = require('./routes/CronJobs')
 const instituteRouter = require('./routes/Institute')
 const userRouter = require('./routes/User')
 const playlistRouter = require('./routes/Playlist')
@@ -97,12 +98,25 @@ const classWsRouter = require('./websocket-routes/Class')
 // })
 // const graceful = new Graceful({ brees: [bree] })
 
-// cron.schedule('*/10 * * * * *', () => {
-//   //console.log(
-//     'Running a task every 10 seconds: ',
-//     new Date().toLocaleTimeString()
-//   )
-// })
+cron.schedule('*/10 * * * * *', async () => {
+  console.log(
+    'Running a task every 10 seconds: ',
+    new Date().toLocaleTimeString()
+  )
+  try {
+    console.log('Running cron job: Update plan statuses')
+    const response = await fetch(
+      `${getBackendDomain()}/cron/update-plan-statuses`,
+      {
+        method: 'POST',
+      }
+    )
+    const data = await response.json()
+    console.log('Cron job completed:', data)
+  } catch (err) {
+    console.error('Cron job failed:', err)
+  }
+})
 
 const corsOptions = {
   origin: [
@@ -212,6 +226,7 @@ app.use('/video-packaging', videoPackagingRouter)
 app.use('/content', playlistRouter)
 app.use('/schedule', scheduleRouter)
 app.use('/user', userRouter)
+app.use('/cron', cronRouter)
 app.use('/auth', authRouter)
 app.use('/plan', planRouter)
 app.use('/user-plan', userPlanRouter)
