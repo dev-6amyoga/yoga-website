@@ -7,6 +7,7 @@ const { User } = require('../models/sql/User')
 const { sequelize } = require('../init.sequelize')
 const { mailTransporter } = require('../init.nodemailer')
 const moment = require('moment-timezone')
+const getFrontendDomain = require('../utils/getFrontendDomain')
 const {
   USER_PLAN_EXPIRED_BY_DATE,
   USER_PLAN_ACTIVE,
@@ -18,23 +19,35 @@ const {
   HTTP_INTERNAL_SERVER_ERROR,
 } = require('../utils/http_status_codes')
 
-const sendUnpaidClassEmail = async (user, classDate) => {
+const sendUnpaidClassEmail = async (
+  user,
+  classDate,
+  lastPlanId = null,
+  frontendDomain
+) => {
   try {
     if (!user || !user.email) {
       console.warn('User or email not found for unpaid class notification')
       return false
     }
 
+    const purchaseLink = lastPlanId
+      ? `${frontendDomain}/student/purchase-a-plan/${lastPlanId}`
+      : `${frontendDomain}/student/purchase-a-plan`
+
     await mailTransporter.sendMail({
       from: 'dev.6amyoga@gmail.com',
       to: user.email,
       subject: '6AM Yoga | Unpaid Class Attendance',
-      text: `Hello ${user.name},\n\nWe noticed that you attended a class on ${classDate} without an active plan.\n\nPlease purchase a plan to continue attending classes.\n\nBest regards,\n6AM Yoga Team`,
+      text: `Hello ${user.name},\n\nWe noticed that you attended a class on ${classDate} without an active plan.\n\nPlease purchase a plan to continue attending classes.\n\nRepeat your last subscription: ${purchaseLink}\n\nBest regards,\n6AM Yoga Team`,
       html: `
         <h2>Unpaid Class Attendance</h2>
         <p>Hello <strong>${user.name}</strong>,</p>
         <p>We noticed that you attended a class on <strong>${classDate}</strong> without an active plan.</p>
         <p>Please purchase a plan to continue attending classes.</p>
+        <br/>
+        <p><strong>Repeat your last subscription:</strong></p>
+        <p><a href="${purchaseLink}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Purchase Plan</a></p>
         <br/>
         <p>Best regards,<br/>6AM Yoga Team</p>
       `,
@@ -319,12 +332,24 @@ router.post('/update-plan-statuses', async (req, res) => {
 
         const userEmail = await User.findByPk(userId, { transaction: t })
 
+        // Get the last plan the user purchased (most recent by purchase_date)
+        const lastUserPlan = await UserPlan.findOne({
+          where: { user_id: userId },
+          order: [['purchase_date', 'DESC']],
+          transaction: t,
+        })
+
+        const lastPlanId = lastUserPlan ? lastUserPlan.plan_id : null
+        const frontendDomain = getFrontendDomain()
+
         if (userPlanRows.length === 0) {
           // No user plans at all - all classes are unpaid
           for (const attendance of classAttendances) {
             const emailSent = await sendUnpaidClassEmail(
               userEmail,
-              moment(attendance.date).format('YYYY-MM-DD')
+              moment(attendance.date).format('YYYY-MM-DD'),
+              lastPlanId,
+              frontendDomain
             )
             if (emailSent) emailsSent++
           }
@@ -355,7 +380,9 @@ router.post('/update-plan-statuses', async (req, res) => {
               if (attendanceDate.isAfter(expiredValidityTo)) {
                 const emailSent = await sendUnpaidClassEmail(
                   userEmail,
-                  moment(attendance.date).format('YYYY-MM-DD')
+                  moment(attendance.date).format('YYYY-MM-DD'),
+                  lastPlanId,
+                  frontendDomain
                 )
                 if (emailSent) emailsSent++
               }
