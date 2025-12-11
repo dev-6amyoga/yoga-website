@@ -33,7 +33,11 @@ router.post('/join', async (req, res) => {
     if (!userPlan) {
       // Fetch the UserPlan to get validity dates
       const userPlanRecord = await UserPlan.findOne({
-        where: { user_plan_id: userPlanId },
+        where: {
+          user_plan_id: userPlanId,
+          current_status: 'ACTIVE',
+          transaction_order_id: { [Op.ne]: 'PRACTICENOWPLAN' },
+        },
         transaction: t,
       })
 
@@ -287,6 +291,7 @@ router.get('/api/attendance/:userId', async (req, res) => {
         where: {
           user_id: userId,
           current_status: 'ACTIVE',
+          transaction_order_id: { [Op.ne]: 'PRACTICENOWPLAN' },
         },
       })
 
