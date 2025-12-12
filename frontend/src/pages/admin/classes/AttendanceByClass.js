@@ -93,8 +93,10 @@ export default function AttendanceByClass() {
               data: { user_id: user.user_id },
             });
             const plans = planRes.data.userPlan || [];
-            const hasActivePlan = plans.some(
-              (p) => p.current_status === "ACTIVE"
+            let hasActivePlan = plans.some(
+              (p) =>
+                p.current_status === "ACTIVE" &&
+                p.transaction_order_id !== "PRACTICENOWPLAN"
             );
 
             // Fetch attendance data to get class balance
@@ -116,6 +118,11 @@ export default function AttendanceByClass() {
               }
             } catch (e) {
               console.error("Failed to fetch attendance data", e);
+            }
+
+            // If classes remaining is 0, treat as no active plan
+            if (classesRemaining === 0) {
+              hasActivePlan = false;
             }
 
             return {
