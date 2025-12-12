@@ -99,6 +99,8 @@ export default function AttendanceByClass() {
                 p.transaction_order_id !== "PRACTICENOWPLAN"
             );
             let hasActivePlan = !!activePlan;
+            console.log("user", user.user_id, "activePlan", activePlan);
+            console.log("hasActivePlan", hasActivePlan);
 
             // Fetch attendance data to get class balance
             let classesRemaining = 0;
@@ -107,19 +109,26 @@ export default function AttendanceByClass() {
                 url: `/class-attendance/api/attendance/${user.user_id}`,
                 method: "GET",
               });
-
+              console.log("attendanceRes", attendanceRes);
               if (attendanceRes.data && attendanceRes.data.length > 0) {
                 // Find userPlanAttendance that matches the active plan's user_plan_id
                 let userPlanAttendance = null;
 
                 if (activePlan) {
                   // Search through all attendance records to find one matching the active plan
-                  userPlanAttendance = attendanceRes.data.find(
-                    (record) =>
+                  for (const record of attendanceRes.data) {
+                    if (
                       record.userPlanAttendance &&
-                      record.userPlanAttendance.user_plan_id ===
-                        activePlan.user_plan_id
-                  )?.userPlanAttendance;
+                      record.userPlanAttendance.status === "ACTIVE"
+                    ) {
+                      userPlanAttendance = record.userPlanAttendance;
+                      console.log(
+                        "Using first ACTIVE userPlanAttendance:",
+                        userPlanAttendance
+                      );
+                      break;
+                    }
+                  }
                 }
 
                 if (userPlanAttendance) {
