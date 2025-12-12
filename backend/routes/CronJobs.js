@@ -207,6 +207,104 @@ router.post('/update-plan-statuses', async (req, res) => {
       }
     }
 
+    // ✅ NEW: Update UserPlanAttendance with correct user_plan_id based on validity dates
+    console.log(
+      'Step: Updating UserPlanAttendance with correct user_plan_id...'
+    )
+    const allUserPlanAttendances = await UserPlanAttendance.findAll({
+      transaction: t,
+    })
+
+    let userPlanAttendanceUpdatedCount = 0
+
+    for (const userPlanAttendance of allUserPlanAttendances) {
+      const attendanceStartDate = moment(userPlanAttendance.start_date)
+        .tz('Asia/Kolkata')
+        .startOf('day')
+      const attendanceExpiryDate = moment(userPlanAttendance.expiry_date)
+        .tz('Asia/Kolkata')
+        .startOf('day')
+      const userId = userPlanAttendance.user_id
+
+      // Find all user plans for this user (excluding PRACTICENOWPLAN)
+      const userPlans = await UserPlan.findAll({
+        where: {
+          user_id: userId,
+          transaction_order_id: {
+            [Op.ne]: 'PRACTICENOWPLAN',
+          },
+        },
+        transaction: t,
+      })
+
+      console.log(
+        `UserPlanAttendance ID ${userPlanAttendance.id}: Checking ${userPlans.length} user plans... (start: ${attendanceStartDate.format('YYYY-MM-DD')}, expiry: ${attendanceExpiryDate.format('YYYY-MM-DD')})`
+      )
+
+      // Find the plan that has matching validity dates
+      let correctUserPlanId = null
+      for (const userPlan of userPlans) {
+        const planValidityFrom = moment(userPlan.validity_from)
+          .tz('Asia/Kolkata')
+          .startOf('day')
+        const planValidityTo = moment(userPlan.validity_to)
+          .tz('Asia/Kolkata')
+          .startOf('day')
+
+        // Check if start_date and expiry_date match the plan's validity dates
+        if (
+          attendanceStartDate.isSameOrAfter(planValidityFrom) &&
+          attendanceExpiryDate.isSameOrBefore(planValidityTo)
+        ) {
+          correctUserPlanId = userPlan.user_plan_id
+          console.log(
+            `  ✓ Found matching plan: user_plan_id ${correctUserPlanId} (${planValidityFrom.format('YYYY-MM-DD')} to ${planValidityTo.format('YYYY-MM-DD')})`
+          )
+          break
+        }
+      }
+
+      // Update if the correct user_plan_id is different from current
+      if (
+        correctUserPlanId &&
+        userPlanAttendance.user_plan_id !== correctUserPlanId
+      ) {
+        // Find the correct UserPlan to get its current_status
+        const correctUserPlan = userPlans.find(
+          (p) => p.user_plan_id === correctUserPlanId
+        )
+        let correctStatus = 'ACTIVE'
+
+        if (correctUserPlan) {
+          if (
+            correctUserPlan.current_status === USER_PLAN_EXPIRED_BY_DATE ||
+            correctUserPlan.current_status === USER_PLAN_EXPIRED_BY_USAGE
+          ) {
+            correctStatus = 'EXPIRED'
+          } else {
+            correctStatus = correctUserPlan.current_status
+          }
+        }
+
+        console.log(
+          `  Updating UserPlanAttendance ID ${userPlanAttendance.id}: ${userPlanAttendance.user_plan_id} -> ${correctUserPlanId} (status: ${correctStatus})`
+        )
+
+        await UserPlanAttendance.update(
+          { user_plan_id: correctUserPlanId, status: correctStatus },
+          {
+            where: { id: userPlanAttendance.id },
+            transaction: t,
+          }
+        )
+        userPlanAttendanceUpdatedCount++
+      } else if (correctUserPlanId === null) {
+        console.log(
+          `  ⚠️ No matching plan found for start_date ${attendanceStartDate.format('YYYY-MM-DD')} and expiry_date ${attendanceExpiryDate.format('YYYY-MM-DD')}`
+        )
+      }
+    }
+
     const allUsers = await User.findAll({
       attributes: ['user_id'],
       transaction: t,
