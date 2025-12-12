@@ -135,6 +135,78 @@ router.post('/update-plan-statuses', async (req, res) => {
       }
     }
 
+    // ✅ NEW: Update ClassAttendance with correct user_plan_id based on validity dates
+    console.log('Step: Updating ClassAttendance with correct user_plan_id...')
+    const allClassAttendances = await ClassAttendance.findAll({
+      transaction: t,
+    })
+
+    for (const classAttendance of allClassAttendances) {
+      const attendanceDate = moment(classAttendance.date)
+        .tz('Asia/Kolkata')
+        .startOf('day')
+      const userId = classAttendance.user_id
+
+      // Find all active user plans for this user
+      const userPlans = await UserPlan.findAll({
+        where: {
+          user_id: userId,
+          current_status: USER_PLAN_ACTIVE,
+          transaction_order_id: {
+            [Op.ne]: 'PRACTICENOWPLAN',
+          },
+        },
+        transaction: t,
+      })
+
+      console.log(
+        `ClassAttendance ID ${classAttendance.id}: Checking ${userPlans.length} user plans...`
+      )
+
+      // Find the plan that covers this attendance date
+      let correctUserPlanId = null
+      for (const userPlan of userPlans) {
+        const planValidityFrom = moment(userPlan.validity_from)
+          .tz('Asia/Kolkata')
+          .startOf('day')
+        const planValidityTo = moment(userPlan.validity_to)
+          .tz('Asia/Kolkata')
+          .startOf('day')
+
+        if (
+          attendanceDate.isSameOrAfter(planValidityFrom) &&
+          attendanceDate.isSameOrBefore(planValidityTo)
+        ) {
+          correctUserPlanId = userPlan.user_plan_id
+          console.log(
+            `  ✓ Found matching plan: user_plan_id ${correctUserPlanId} (${planValidityFrom.format('YYYY-MM-DD')} to ${planValidityTo.format('YYYY-MM-DD')})`
+          )
+          break
+        }
+      }
+
+      // Update if the correct user_plan_id is different from current
+      if (
+        correctUserPlanId &&
+        classAttendance.user_plan_id !== correctUserPlanId
+      ) {
+        console.log(
+          `  Updating ClassAttendance ID ${classAttendance.id}: ${classAttendance.user_plan_id} -> ${correctUserPlanId}`
+        )
+        await ClassAttendance.update(
+          { user_plan_id: correctUserPlanId },
+          {
+            where: { id: classAttendance.id },
+            transaction: t,
+          }
+        )
+      } else if (correctUserPlanId === null) {
+        console.log(
+          `  ⚠️ No matching plan found for attendance date ${attendanceDate.format('YYYY-MM-DD')}`
+        )
+      }
+    }
+
     const allUsers = await User.findAll({
       attributes: ['user_id'],
       transaction: t,
