@@ -93,11 +93,12 @@ export default function AttendanceByClass() {
               data: { user_id: user.user_id },
             });
             const plans = planRes.data.userPlan || [];
-            let hasActivePlan = plans.some(
+            const activePlan = plans.find(
               (p) =>
                 p.current_status === "ACTIVE" &&
                 p.transaction_order_id !== "PRACTICENOWPLAN"
             );
+            let hasActivePlan = !!activePlan;
 
             // Fetch attendance data to get class balance
             let classesRemaining = 0;
@@ -108,8 +109,19 @@ export default function AttendanceByClass() {
               });
 
               if (attendanceRes.data && attendanceRes.data.length > 0) {
-                const userPlanAttendance =
-                  attendanceRes.data[0].userPlanAttendance;
+                // Find userPlanAttendance that matches the active plan's user_plan_id
+                let userPlanAttendance = null;
+
+                if (activePlan) {
+                  // Search through all attendance records to find one matching the active plan
+                  userPlanAttendance = attendanceRes.data.find(
+                    (record) =>
+                      record.userPlanAttendance &&
+                      record.userPlanAttendance.user_plan_id ===
+                        activePlan.user_plan_id
+                  )?.userPlanAttendance;
+                }
+
                 if (userPlanAttendance) {
                   classesRemaining =
                     userPlanAttendance.classes_allowed -
@@ -131,6 +143,7 @@ export default function AttendanceByClass() {
               classesRemaining,
             };
           } catch (e) {
+            console.error("Failed to fetch plan for user", e);
             return { ...user, hasActivePlan: false, classesRemaining: 0 };
           }
         })
