@@ -22,57 +22,19 @@ router.post('/join', async (req, res) => {
         .json({ allowed: false, message: 'Missing required fields' })
     }
 
-    // 1. load user plan attendance (single record) with row lock
     let userPlan = await UserPlanAttendance.findOne({
-      where: { user_plan_id: userPlanId },
+      where: { user_plan_id: userPlanId, status: 'ACTIVE' },
       transaction: t,
       lock: t.LOCK.UPDATE,
     })
 
-    // Create UserPlanAttendance if it doesn't exist
     if (!userPlan) {
-      // Fetch the UserPlan to get validity dates
-      const userPlanRecord = await UserPlan.findOne({
-        where: {
-          user_plan_id: userPlanId,
-          current_status: 'ACTIVE',
-        },
-        transaction: t,
-      })
-
-      if (!userPlanRecord) {
-        await t.rollback()
-        return res
-          .status(404)
-          .json({ allowed: false, message: 'User plan not found' })
-      }
-
-      // Fetch plan to get classes_allowed
-      const plan = await Plan.findByPk(planId, { transaction: t })
-      if (!plan) {
-        await t.rollback()
-        return res
-          .status(404)
-          .json({ allowed: false, message: 'Plan not found' })
-      }
-
-      // Create UserPlanAttendance record
-      userPlan = await UserPlanAttendance.create(
-        {
-          user_id: userId,
-          plan_id: planId,
-          user_plan_id: userPlanId,
-          start_date: userPlanRecord.validity_from,
-          expiry_date: userPlanRecord.validity_to,
-          classes_allowed: plan.number_of_zoom_classes || 0,
-          classes_attended: 0,
-          status: 'ACTIVE',
-        },
-        { transaction: t }
-      )
+      await t.rollback()
+      return res
+        .status(404)
+        .json({ allowed: false, message: 'User attendance not found' })
     }
 
-    // validate plan period and status
     const startDate = moment(userPlan.start_date).tz('Asia/Kolkata')
     const endDate = moment(userPlan.expiry_date).tz('Asia/Kolkata')
 
@@ -90,8 +52,9 @@ router.post('/join', async (req, res) => {
         .json({ allowed: false, message: 'Plan already expired' })
     }
 
-    // 2. fetch class
-    const yogaClass = await ZoomClassModel.findByPk(classId, { transaction: t })
+    const yogaClass = await ZoomClassModel.findByPk(classId, {
+      transaction: t,
+    })
     if (!yogaClass) {
       await t.rollback()
       return res
@@ -99,7 +62,6 @@ router.post('/join', async (req, res) => {
         .json({ allowed: false, message: 'Class not found' })
     }
 
-    // 3. determine today's class start/end (handles recurring)
     let classStart, classEnd
 
     if (String(yogaClass.class_type).toLowerCase() === 'recurring') {
@@ -150,14 +112,8 @@ router.post('/join', async (req, res) => {
       classEnd = moment(yogaClass.end_time).tz('Asia/Kolkata')
     }
 
-    const tenMinsBeforeStart = classStart.clone().subtract(10, 'minutes')
+    const tenMinsBeforeStart = classStart.clone().subtract(20, 'minutes')
 
-    //console.log('NOW:', now.format())
-    //console.log('CLASS START:', classStart.format())
-    //console.log('CLASS END:', classEnd.format())
-    //console.log('Ten mins before:', tenMinsBeforeStart.format())
-
-    // 4. check class window
     if (now.isBefore(tenMinsBeforeStart)) {
       await t.rollback()
       return res
@@ -171,10 +127,8 @@ router.post('/join', async (req, res) => {
         .json({ allowed: false, message: 'Class already ended' })
     }
 
-    // 5. check today's attendance window
     const startOfDay = now.clone().startOf('day')
     const endOfDay = now.clone().endOf('day')
-
     const existingAttendance = await ClassAttendance.findOne({
       where: {
         user_id: userId,
@@ -220,9 +174,10 @@ router.post('/join', async (req, res) => {
     // 7. attendance exists → check device
     if (existingAttendance.device_id !== deviceId) {
       await t.rollback()
-      return res
-        .status(403)
-        .json({ allowed: false, message: 'Already joined from another device' })
+      return res.status(403).json({
+        allowed: false,
+        message: 'Already joined from another device',
+      })
     }
 
     await t.commit()
