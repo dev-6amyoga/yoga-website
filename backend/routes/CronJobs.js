@@ -1,27 +1,13 @@
 const express = require('express')
 const router = express.Router()
-const { UserPlanAttendance } = require('../models/sql/UserPlanAttendance')
-const {
-  PracticeNowPlanAttendance,
-} = require('../models/sql/PracticeNowPlanAttendance')
-const { UserPlan } = require('../models/sql/UserPlan')
-const { ClassAttendance } = require('../models/sql/ClassAttendance')
 const { User } = require('../models/sql/User')
-const { sequelize } = require('../init.sequelize')
-const { Op } = require('sequelize')
-const { mailTransporter } = require('../init.nodemailer')
-const moment = require('moment-timezone')
-const getFrontendDomain = require('../utils/getFrontendDomain')
-const {
-  USER_PLAN_EXPIRED_BY_DATE,
-  USER_PLAN_ACTIVE,
-  USER_PLAN_STAGED,
-  USER_PLAN_EXPIRED_BY_USAGE,
-} = require('../enums/user_plan_status')
 const {
   HTTP_OK,
   HTTP_INTERNAL_SERVER_ERROR,
 } = require('../utils/http_status_codes')
+
+const { sequelize } = require('../init.sequelize')
+const { mailTransporter } = require('../init.nodemailer')
 
 const sendUnpaidClassEmail = async (
   user,
@@ -30,10 +16,7 @@ const sendUnpaidClassEmail = async (
   frontendDomain
 ) => {
   try {
-    if (!user || !user.email) {
-      console.warn('User or email not found for unpaid class notification')
-      return false
-    }
+    if (!user || !user.email) return false
 
     const purchaseLink = lastPlanId
       ? `${frontendDomain}/student/purchase-a-plan/${lastPlanId}`
@@ -42,591 +25,282 @@ const sendUnpaidClassEmail = async (
     await mailTransporter.sendMail({
       from: 'dev.6amyoga@gmail.com',
       to: user.email,
-      cc: '992351@gmail.com',
       subject: '6AM Yoga | Unpaid Class Attendance',
-      text: `Hello ${user.name},\n\nWe noticed that you attended a class on ${classDate} without an active plan.\n\nPlease purchase a plan to continue attending classes.\n\nRepeat your last subscription: ${purchaseLink}\n\nBest regards,\n6AM Yoga Team`,
       html: `
-        <h2>Unpaid Class Attendance</h2>
         <p>Hello <strong>${user.name}</strong>,</p>
-        <p>We noticed that you attended a class on <strong>${classDate}</strong> without an active plan.</p>
+        <p>You attended a class on <strong>${classDate}</strong> without an active plan.</p>
         <p>Please purchase a plan to continue attending classes.</p>
-        <br/>
-        <p><strong>Repeat your last subscription:</strong></p>
-        <p><a href="${purchaseLink}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Purchase Plan</a></p>
-        <br/>
-        <p>Best regards,<br/>6AM Yoga Team</p>
+        <p>
+          <a href="${purchaseLink}"
+             style="background:#4CAF50;color:#fff;padding:10px 16px;
+                    border-radius:4px;text-decoration:none;">
+            Purchase Plan
+          </a>
+        </p>
+        <p>– 6AM Yoga Team</p>
       `,
     })
 
-    console.log(
-      `Unpaid class email sent to ${user.email} for class on ${classDate}`
-    )
     return true
   } catch (err) {
-    console.error(`Failed to send unpaid class email to ${user?.email}:`, err)
+    console.error('Unpaid email failed:', err)
     return false
   }
 }
 
+const CLASS_ATTENDANCE_INIT = `INSERT INTO user_plan_attendance (
+  user_id,
+  plan_id,
+  user_plan_id,
+  start_date,
+  expiry_date,
+  classes_allowed,
+  classes_attended,
+  status,
+  created,
+  updated
+)
+SELECT
+  up.user_id,
+  up.plan_id,
+  up.user_plan_id,
+  up.validity_from,
+  up.validity_to,
+  p.number_of_zoom_classes,
+  0,
+  CASE
+    WHEN up.current_status = 'ACTIVE' THEN 'ACTIVE'
+    WHEN up.current_status = 'STAGED' THEN 'STAGED'
+    ELSE 'EXPIRED'
+  END::enum_user_plan_attendance_status,
+  NOW(),
+  NOW()
+FROM user_plan up
+JOIN plan p
+  ON p.plan_id = up.plan_id
+LEFT JOIN user_plan_attendance upa
+  ON upa.user_plan_id = up.user_plan_id
+WHERE upa.user_plan_id IS NULL
+  AND up.deleted_at IS NULL
+  AND up.plan_id > 16;
+`
+
+const SQL_EXPIRE_BY_DATE = `
+UPDATE user_plan
+SET current_status = 'EXPIRED_BY_DATE',
+    updated = NOW()
+WHERE deleted_at IS NULL
+  AND current_status IN ('ACTIVE','STAGED')
+  AND validity_to < CURRENT_DATE;
+`
+
+const SQL_ACTIVATE_STAGED = `
+UPDATE user_plan up
+SET current_status = 'ACTIVE',
+    updated = NOW()
+WHERE up.current_status = 'STAGED'
+  AND up.validity_from <= CURRENT_DATE
+  AND NOT EXISTS (
+    SELECT 1 FROM user_plan up2
+    WHERE up2.user_id = up.user_id
+      AND up2.current_status = 'ACTIVE'
+      AND up2.deleted_at IS NULL
+  );
+`
+
+const SQL_SYNC_ATTENDANCE_STATUS = `
+UPDATE user_plan_attendance upa
+SET status = CASE
+  WHEN up.current_status = 'ACTIVE'
+    THEN 'ACTIVE'::enum_user_plan_attendance_status
+  WHEN up.current_status = 'STAGED'
+    THEN 'STAGED'::enum_user_plan_attendance_status
+  ELSE 'EXPIRED'::enum_user_plan_attendance_status
+END,
+updated = NOW()
+FROM user_plan up
+WHERE up.user_plan_id = upa.user_plan_id
+  AND upa.deleted_at IS NULL;
+
+`
+
+const SQL_ADJUST_UNPAID_CLASSES = `
+WITH last_expired_plan AS (
+  SELECT
+    user_id,
+    MAX(validity_to) AS last_expired_date
+  FROM user_plan
+  WHERE current_status IN ('EXPIRED_BY_DATE','EXPIRED_BY_USAGE')
+    AND deleted_at IS NULL
+  GROUP BY user_id
+)
+
+UPDATE class_attendance ca
+SET
+  user_plan_id = up.user_plan_id,
+  adjusted_to_plan_id = up.user_plan_id,
+  updated = NOW()
+FROM user_plan up,
+     last_expired_plan lep
+WHERE up.current_status = 'ACTIVE'
+  AND up.deleted_at IS NULL
+
+  -- link update target
+  AND ca.user_id = up.user_id
+  AND lep.user_id = ca.user_id
+
+  AND ca.attendance_status = 'ATTENDED'
+  AND ca.deleted_at IS NULL
+  AND ca.adjusted_to_plan_id IS NULL
+
+  -- within active plan validity (inclusive)
+  AND CAST(ca.date AS DATE)
+      BETWEEN up.validity_from AND up.validity_to
+
+  -- not covered by another active plan
+  AND NOT EXISTS (
+    SELECT 1
+    FROM user_plan up2
+    WHERE up2.user_id = ca.user_id
+      AND up2.current_status = 'ACTIVE'
+      AND CAST(ca.date AS DATE)
+          BETWEEN up2.validity_from AND up2.validity_to
+      AND up2.user_plan_id <> up.user_plan_id
+  )
+
+  -- after last expired plan (inclusive)
+  AND (
+    lep.last_expired_date IS NULL
+    OR CAST(ca.date AS DATE) >= lep.last_expired_date
+  );
+`
+
+const SQL_GET_UNPAID_CLASSES = `
+WITH last_expired_plan AS (
+  SELECT user_id, MAX(validity_to) AS last_expired_date
+  FROM user_plan
+  WHERE current_status IN ('EXPIRED_BY_DATE','EXPIRED_BY_USAGE')
+    AND deleted_at IS NULL
+  GROUP BY user_id
+)
+SELECT ca.id, ca.user_id, ca.date
+FROM class_attendance ca
+LEFT JOIN last_expired_plan lep ON lep.user_id = ca.user_id
+WHERE ca.attendance_status = 'ATTENDED'
+  AND ca.deleted_at IS NULL
+  AND ca.adjusted_to_plan_id IS NULL
+  AND ca.unpaid_email_sent = FALSE
+  AND NOT EXISTS (
+    SELECT 1 FROM user_plan up
+    WHERE up.user_id = ca.user_id
+      AND up.current_status = 'ACTIVE'
+      AND CAST(ca.date AS DATE)
+          BETWEEN up.validity_from AND up.validity_to
+  )
+  AND (
+    lep.last_expired_date IS NULL
+    OR CAST(ca.date AS DATE) >= lep.last_expired_date
+  );
+`
+
+const SQL_RESET_ATTENDANCE = `
+UPDATE user_plan_attendance
+SET classes_attended = 0
+WHERE deleted_at IS NULL;
+`
+
+const SQL_RECOUNT_ATTENDANCE = `
+UPDATE user_plan_attendance upa
+SET classes_attended = sub.cnt
+FROM (
+  SELECT user_plan_id, COUNT(*) cnt
+  FROM class_attendance
+  WHERE attendance_status = 'ATTENDED'
+    AND deleted_at IS NULL
+  GROUP BY user_plan_id
+) sub
+WHERE upa.user_plan_id = sub.user_plan_id;
+`
+
+const SQL_PRACTICE_NOW_ATTENDANCE = `UPDATE user_plan_attendance upa
+SET classes_attended = classes_attended + pn.total_attended
+FROM (
+  SELECT
+    upa.user_plan_id,
+    SUM(pna.classes_attended) AS total_attended
+  FROM practice_now_plan_attendance pna
+  JOIN user_plan_attendance upa
+    ON upa.user_id = pna.user_id
+   AND pna.start_date >= upa.start_date
+   AND pna.expiry_date <= upa.expiry_date
+  WHERE pna.deleted_at IS NULL
+    AND pna.status = 'ACTIVE'
+  GROUP BY upa.user_plan_id
+) pn
+WHERE upa.user_plan_id = pn.user_plan_id;
+`
+
+const SQL_EXPIRE_BY_USAGE = `
+UPDATE user_plan up
+SET current_status = 'EXPIRED_BY_USAGE',
+    updated = NOW()
+FROM user_plan_attendance upa
+WHERE up.user_plan_id = upa.user_plan_id
+  AND up.current_status = 'ACTIVE'
+  AND upa.classes_attended >= upa.classes_allowed;
+`
+
 router.post('/update-plan-statuses', async (req, res) => {
   console.log('Received request to update plan statuses')
-  const t = await sequelize.transaction()
+  console.log('🕑 User plan cron started')
+  const tx = await sequelize.transaction()
+
   try {
-    const today = moment().tz('Asia/Kolkata').startOf('day')
+    await sequelize.query(SQL_EXPIRE_BY_DATE, { transaction: tx })
+    await sequelize.query(SQL_ACTIVATE_STAGED, { transaction: tx })
+    await sequelize.query(CLASS_ATTENDANCE_INIT, { transaction: tx })
+    await sequelize.query(SQL_SYNC_ATTENDANCE_STATUS, { transaction: tx })
 
-    const allUserPlans = await UserPlan.findAll({
-      transaction: t,
+    await sequelize.query(SQL_ADJUST_UNPAID_CLASSES, { transaction: tx })
+
+    const unpaid = await sequelize.query(SQL_GET_UNPAID_CLASSES, {
+      type: sequelize.QueryTypes.SELECT,
+      transaction: tx,
     })
 
-    let updatedCount = 0
-    let updatedAttendanceCount = 0
-    let emailsSent = 0
+    for (const row of unpaid) {
+      const user = await User.findByPk(row.user_id, { transaction: tx })
+      if (!user) continue
 
-    for (const userPlan of allUserPlans) {
-      const validityFrom = moment(userPlan.validity_from)
-        .tz('Asia/Kolkata')
-        .startOf('day')
-      const validityTo = moment(userPlan.validity_to)
-        .tz('Asia/Kolkata')
-        .startOf('day')
-
-      let newStatus = userPlan.current_status
-
-      if (
-        today.isSameOrAfter(validityFrom) &&
-        today.isSameOrBefore(validityTo)
-      ) {
-        newStatus = USER_PLAN_ACTIVE
-      } else if (today.isAfter(validityTo)) {
-        newStatus = USER_PLAN_EXPIRED_BY_DATE
-      } else if (today.isBefore(validityFrom)) {
-        newStatus = USER_PLAN_STAGED
-      }
-
-      if (newStatus !== userPlan.current_status) {
-        console.log(
-          `Updating UserPlan ID ${userPlan.user_plan_id} status from ${userPlan.current_status} to ${newStatus}`
-        )
-        await UserPlan.update(
-          { current_status: newStatus },
-          {
-            where: { user_plan_id: userPlan.user_plan_id },
-            transaction: t,
-          }
-        )
-        updatedCount++
-
-        let attendanceStatus = newStatus
-        if (
-          newStatus === USER_PLAN_EXPIRED_BY_DATE ||
-          newStatus === USER_PLAN_EXPIRED_BY_USAGE
-        ) {
-          attendanceStatus = 'EXPIRED'
-        }
-
-        await UserPlanAttendance.update(
-          { status: attendanceStatus },
-          {
-            where: { user_plan_id: userPlan.user_plan_id },
-            transaction: t,
-          }
-        )
-        updatedAttendanceCount++
-      }
-    }
-
-    // ✅ NEW: Update ClassAttendance with correct user_plan_id based on validity dates
-    console.log('Step: Updating ClassAttendance with correct user_plan_id...')
-    const allClassAttendances = await ClassAttendance.findAll({
-      transaction: t,
-    })
-
-    for (const classAttendance of allClassAttendances) {
-      const attendanceDate = moment(classAttendance.date)
-        .tz('Asia/Kolkata')
-        .startOf('day')
-      const userId = classAttendance.user_id
-
-      // Find all active user plans for this user
-      const userPlans = await UserPlan.findAll({
-        where: {
-          user_id: userId,
-          current_status: USER_PLAN_ACTIVE,
-          transaction_order_id: {
-            [Op.ne]: 'PRACTICENOWPLAN',
-          },
-        },
-        transaction: t,
-      })
-
-      console.log(
-        `ClassAttendance ID ${classAttendance.id}: Checking ${userPlans.length} user plans...`
+      const sent = await sendUnpaidClassEmail(
+        user,
+        row.date.toISOString().split('T')[0],
+        null,
+        process.env.FRONTEND_DOMAIN
       )
 
-      // Find the plan that covers this attendance date
-      let correctUserPlanId = null
-      for (const userPlan of userPlans) {
-        const planValidityFrom = moment(userPlan.validity_from)
-          .tz('Asia/Kolkata')
-          .startOf('day')
-        const planValidityTo = moment(userPlan.validity_to)
-          .tz('Asia/Kolkata')
-          .startOf('day')
-
-        if (
-          attendanceDate.isSameOrAfter(planValidityFrom) &&
-          attendanceDate.isSameOrBefore(planValidityTo)
-        ) {
-          correctUserPlanId = userPlan.user_plan_id
-          console.log(
-            `  ✓ Found matching plan: user_plan_id ${correctUserPlanId} (${planValidityFrom.format('YYYY-MM-DD')} to ${planValidityTo.format('YYYY-MM-DD')})`
-          )
-          break
-        }
-      }
-
-      // Update if the correct user_plan_id is different from current
-      if (
-        correctUserPlanId &&
-        classAttendance.user_plan_id !== correctUserPlanId
-      ) {
-        console.log(
-          `  Updating ClassAttendance ID ${classAttendance.id}: ${classAttendance.user_plan_id} -> ${correctUserPlanId}`
-        )
-        await ClassAttendance.update(
-          { user_plan_id: correctUserPlanId },
-          {
-            where: { id: classAttendance.id },
-            transaction: t,
-          }
-        )
-      } else if (correctUserPlanId === null) {
-        console.log(
-          `  ⚠️ No matching plan found for attendance date ${attendanceDate.format('YYYY-MM-DD')}`
+      if (sent) {
+        await sequelize.query(
+          `UPDATE class_attendance
+             SET unpaid_email_sent = TRUE
+             WHERE id = :id`,
+          { replacements: { id: row.id }, transaction: tx }
         )
       }
     }
 
-    // ✅ NEW: Update UserPlanAttendance with correct user_plan_id based on validity dates
-    console.log(
-      'Step: Updating UserPlanAttendance with correct user_plan_id...'
-    )
-    const allUserPlanAttendances = await UserPlanAttendance.findAll({
-      transaction: t,
-    })
+    await sequelize.query(SQL_RESET_ATTENDANCE, { transaction: tx })
+    await sequelize.query(SQL_RECOUNT_ATTENDANCE, { transaction: tx })
+    await sequelize.query(SQL_PRACTICE_NOW_ATTENDANCE, { transaction: tx })
+    await sequelize.query(SQL_EXPIRE_BY_USAGE, { transaction: tx })
 
-    let userPlanAttendanceUpdatedCount = 0
-
-    for (const userPlanAttendance of allUserPlanAttendances) {
-      const attendanceStartDate = moment(userPlanAttendance.start_date)
-        .tz('Asia/Kolkata')
-        .startOf('day')
-      const attendanceExpiryDate = moment(userPlanAttendance.expiry_date)
-        .tz('Asia/Kolkata')
-        .startOf('day')
-      const userId = userPlanAttendance.user_id
-
-      // Find all user plans for this user (excluding PRACTICENOWPLAN)
-      const userPlans = await UserPlan.findAll({
-        where: {
-          user_id: userId,
-          transaction_order_id: {
-            [Op.ne]: 'PRACTICENOWPLAN',
-          },
-        },
-        transaction: t,
-      })
-
-      console.log(
-        `UserPlanAttendance ID ${userPlanAttendance.id}: Checking ${userPlans.length} user plans... (start: ${attendanceStartDate.format('YYYY-MM-DD')}, expiry: ${attendanceExpiryDate.format('YYYY-MM-DD')})`
-      )
-
-      // Find the plan that has matching validity dates
-      let correctUserPlanId = null
-      for (const userPlan of userPlans) {
-        const planValidityFrom = moment(userPlan.validity_from)
-          .tz('Asia/Kolkata')
-          .startOf('day')
-        const planValidityTo = moment(userPlan.validity_to)
-          .tz('Asia/Kolkata')
-          .startOf('day')
-
-        // Check if start_date and expiry_date match the plan's validity dates
-        if (
-          attendanceStartDate.isSameOrAfter(planValidityFrom) &&
-          attendanceExpiryDate.isSameOrBefore(planValidityTo)
-        ) {
-          correctUserPlanId = userPlan.user_plan_id
-          console.log(
-            `  ✓ Found matching plan: user_plan_id ${correctUserPlanId} (${planValidityFrom.format('YYYY-MM-DD')} to ${planValidityTo.format('YYYY-MM-DD')})`
-          )
-          break
-        }
-      }
-
-      // Update if the correct user_plan_id is different from current
-      if (
-        correctUserPlanId &&
-        userPlanAttendance.user_plan_id !== correctUserPlanId
-      ) {
-        // Find the correct UserPlan to get its current_status
-        const correctUserPlan = userPlans.find(
-          (p) => p.user_plan_id === correctUserPlanId
-        )
-        let correctStatus = 'ACTIVE'
-
-        if (correctUserPlan) {
-          if (
-            correctUserPlan.current_status === USER_PLAN_EXPIRED_BY_DATE ||
-            correctUserPlan.current_status === USER_PLAN_EXPIRED_BY_USAGE
-          ) {
-            correctStatus = 'EXPIRED'
-          } else {
-            correctStatus = correctUserPlan.current_status
-          }
-        }
-
-        console.log(
-          `  Updating UserPlanAttendance ID ${userPlanAttendance.id}: ${userPlanAttendance.user_plan_id} -> ${correctUserPlanId} (status: ${correctStatus})`
-        )
-
-        await UserPlanAttendance.update(
-          { user_plan_id: correctUserPlanId, status: correctStatus },
-          {
-            where: { id: userPlanAttendance.id },
-            transaction: t,
-          }
-        )
-        userPlanAttendanceUpdatedCount++
-      } else if (correctUserPlanId === null) {
-        console.log(
-          `  ⚠️ No matching plan found for start_date ${attendanceStartDate.format('YYYY-MM-DD')} and expiry_date ${attendanceExpiryDate.format('YYYY-MM-DD')}`
-        )
-      }
-    }
-
-    const allUsers = await User.findAll({
-      attributes: ['user_id'],
-      transaction: t,
-    })
-
-    for (const user of allUsers) {
-      const userId = user.user_id
-
-      // Check for active user plans (excluding PRACTICENOWPLAN)
-      const activeUserPlans = await UserPlan.findAll({
-        where: {
-          user_id: userId,
-          current_status: USER_PLAN_ACTIVE,
-          transaction_order_id: {
-            [Op.ne]: 'PRACTICENOWPLAN',
-          },
-        },
-        transaction: t,
-      })
-
-      // Check for active PRACTICENOWPLAN
-      const activePracticeNowPlan = await UserPlan.findOne({
-        where: {
-          user_id: userId,
-          current_status: USER_PLAN_ACTIVE,
-          transaction_order_id: 'PRACTICENOWPLAN',
-        },
-        transaction: t,
-      })
-
-      if (activeUserPlans.length > 0) {
-        const activePlan = activeUserPlans[0]
-
-        // Rule 2 & 3: Check/create UserPlanAttendance and calculate attended classes
-        let userPlanAttendance = await UserPlanAttendance.findOne({
-          where: {
-            user_id: userId,
-            user_plan_id: activePlan.user_plan_id,
-          },
-          transaction: t,
-        })
-
-        const validityFrom = moment(activePlan.validity_from)
-          .tz('Asia/Kolkata')
-          .startOf('day')
-        const validityTo = moment(activePlan.validity_to)
-          .tz('Asia/Kolkata')
-          .startOf('day')
-
-        // Get class attendance for this user
-        const classAttendances = await ClassAttendance.findAll({
-          where: { user_id: userId },
-          transaction: t,
-        })
-
-        // Get the plan details to know classes_allowed
-        const plan = await activePlan.getPlan({ transaction: t })
-
-        let classesAttended = 0
-
-        for (const attendance of classAttendances) {
-          const attendanceDate = moment(attendance.date)
-            .tz('Asia/Kolkata')
-            .startOf('day')
-
-          // Attended between validity_from and validity_to
-          if (
-            attendanceDate.isSameOrAfter(validityFrom) &&
-            attendanceDate.isSameOrBefore(validityTo)
-          ) {
-            classesAttended++
-          } else if (attendanceDate.isBefore(validityFrom)) {
-            // Check if attendance is after most recent expired plan
-            const expiredPlans = await UserPlan.findAll({
-              where: {
-                user_id: userId,
-                current_status: [
-                  USER_PLAN_EXPIRED_BY_DATE,
-                  USER_PLAN_EXPIRED_BY_USAGE,
-                ],
-                transaction_order_id: {
-                  [Op.ne]: 'PRACTICENOWPLAN',
-                },
-              },
-              order: [['validity_to', 'DESC']],
-              transaction: t,
-            })
-
-            if (expiredPlans.length > 0) {
-              const mostRecentExpired = expiredPlans[0]
-              const expiredValidityTo = moment(mostRecentExpired.validity_to)
-                .tz('Asia/Kolkata')
-                .startOf('day')
-
-              if (
-                attendanceDate.isAfter(expiredValidityTo) &&
-                attendanceDate.isBefore(validityFrom)
-              ) {
-                classesAttended++
-              }
-            } else {
-              // No expired plans, count attendance before current active plan
-              classesAttended++
-            }
-          }
-        }
-
-        // Get classes attended from PracticeNowPlanAttendance if PRACTICENOWPLAN exists
-        let practiceNowClassesAttended = 0
-        if (activePracticeNowPlan) {
-          const practiceNowAttendance = await PracticeNowPlanAttendance.findOne(
-            {
-              where: {
-                user_id: userId,
-                user_plan_id: activePracticeNowPlan.user_plan_id,
-              },
-              transaction: t,
-            }
-          )
-          if (practiceNowAttendance) {
-            practiceNowClassesAttended = practiceNowAttendance.classes_attended
-          }
-        }
-
-        // Total classes attended = classes from PracticeNowPlanAttendance + classes from ClassAttendance
-        const totalClassesAttended =
-          practiceNowClassesAttended + classesAttended
-
-        // Rule 2 & 3: Create or update UserPlanAttendance
-        if (!userPlanAttendance) {
-          await UserPlanAttendance.create(
-            {
-              user_id: userId,
-              plan_id: activePlan.plan_id,
-              user_plan_id: activePlan.user_plan_id,
-              start_date: activePlan.validity_from,
-              expiry_date: activePlan.validity_to,
-              classes_allowed: plan.classes_allowed || 0,
-              classes_attended: totalClassesAttended,
-              status: USER_PLAN_ACTIVE,
-            },
-            { transaction: t }
-          )
-          updatedAttendanceCount++
-
-          // ✅ Check if classes_allowed = classes_attended
-          if (
-            plan.classes_allowed > 0 &&
-            plan.classes_allowed === totalClassesAttended
-          ) {
-            console.log(
-              `UserPlan ID ${activePlan.user_plan_id} - Classes limit reached. Setting to EXPIRED_BY_USAGE`
-            )
-            await UserPlan.update(
-              { current_status: USER_PLAN_EXPIRED_BY_USAGE },
-              {
-                where: { user_plan_id: activePlan.user_plan_id },
-                transaction: t,
-              }
-            )
-            await UserPlanAttendance.update(
-              { status: 'EXPIRED' },
-              {
-                where: { user_plan_id: activePlan.user_plan_id },
-                transaction: t,
-              }
-            )
-            updatedCount++
-          }
-        } else {
-          await UserPlanAttendance.update(
-            {
-              classes_attended: totalClassesAttended,
-            },
-            {
-              where: { id: userPlanAttendance.id },
-              transaction: t,
-            }
-          )
-          updatedAttendanceCount++
-
-          // ✅ Check if classes_allowed = classes_attended
-          if (
-            plan.classes_allowed > 0 &&
-            plan.classes_allowed === totalClassesAttended &&
-            activePlan.current_status !== USER_PLAN_EXPIRED_BY_USAGE
-          ) {
-            console.log(
-              `UserPlan ID ${activePlan.user_plan_id} - Classes limit reached. Setting to EXPIRED_BY_USAGE`
-            )
-            await UserPlan.update(
-              { current_status: USER_PLAN_EXPIRED_BY_USAGE },
-              {
-                where: { user_plan_id: activePlan.user_plan_id },
-                transaction: t,
-              }
-            )
-            await UserPlanAttendance.update(
-              { status: 'EXPIRED' },
-              {
-                where: { user_plan_id: activePlan.user_plan_id },
-                transaction: t,
-              }
-            )
-            updatedCount++
-          }
-        }
-      } else {
-        // Rule 4: User has NO active regular plan
-        // Set all UserPlanAttendance rows to EXPIRED status
-        await UserPlanAttendance.update(
-          { status: 'EXPIRED' },
-          {
-            where: { user_id: userId },
-            transaction: t,
-          }
-        )
-
-        // Rule 5: Check for unpaid class attendance
-        const userPlanRows = await UserPlan.findAll({
-          where: {
-            user_id: userId,
-            transaction_order_id: {
-              [Op.ne]: 'PRACTICENOWPLAN',
-            },
-          },
-          transaction: t,
-        })
-
-        const classAttendances = await ClassAttendance.findAll({
-          where: { user_id: userId },
-          transaction: t,
-        })
-
-        const userEmail = await User.findByPk(userId, { transaction: t })
-
-        // Get the last plan the user purchased (most recent by purchase_date, excluding PRACTICENOWPLAN)
-        const lastUserPlan = await UserPlan.findOne({
-          where: {
-            user_id: userId,
-            transaction_order_id: {
-              [Op.ne]: 'PRACTICENOWPLAN',
-            },
-          },
-          order: [['purchase_date', 'DESC']],
-          transaction: t,
-        })
-
-        const lastPlanId = lastUserPlan ? lastUserPlan.plan_id : null
-        const frontendDomain = getFrontendDomain()
-
-        if (userPlanRows.length === 0) {
-          // No user plans at all - all classes are unpaid
-          for (const attendance of classAttendances) {
-            const emailSent = await sendUnpaidClassEmail(
-              userEmail,
-              moment(attendance.date).format('YYYY-MM-DD'),
-              lastPlanId,
-              frontendDomain
-            )
-            if (emailSent) emailsSent++
-          }
-        } else {
-          // Check attendance after most recent expired plan
-          const mostRecentExpired = await UserPlan.findOne({
-            where: {
-              user_id: userId,
-              current_status: [
-                USER_PLAN_EXPIRED_BY_DATE,
-                USER_PLAN_EXPIRED_BY_USAGE,
-              ],
-              transaction_order_id: {
-                [Op.ne]: 'PRACTICENOWPLAN',
-              },
-            },
-            order: [['validity_to', 'DESC']],
-            transaction: t,
-          })
-
-          if (mostRecentExpired) {
-            const expiredValidityTo = moment(mostRecentExpired.validity_to)
-              .tz('Asia/Kolkata')
-              .startOf('day')
-
-            for (const attendance of classAttendances) {
-              const attendanceDate = moment(attendance.date)
-                .tz('Asia/Kolkata')
-                .startOf('day')
-
-              if (attendanceDate.isAfter(expiredValidityTo)) {
-                const emailSent = await sendUnpaidClassEmail(
-                  userEmail,
-                  moment(attendance.date).format('YYYY-MM-DD'),
-                  lastPlanId,
-                  frontendDomain
-                )
-                if (emailSent) emailsSent++
-              }
-            }
-          }
-        }
-      }
-    }
-
-    await t.commit()
-    return res.status(HTTP_OK).json({
-      message: 'Plan statuses updated successfully',
-      userPlansUpdated: updatedCount,
-      attendanceRecordsUpdated: updatedAttendanceCount,
-      emailsSent: emailsSent,
-      timestamp: new Date().toISOString(),
-    })
-  } catch (error) {
-    if (!t.finished) {
-      await t.rollback()
-    }
-    console.error('Cron update plan statuses error:', error)
-    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-      error: 'Failed to update plan statuses',
-      details: error.message,
-    })
+    await tx.commit()
+    console.log('✅ User plan cron completed')
+  } catch (err) {
+    await tx.rollback()
+    console.error('❌ User plan cron failed', err)
   }
+  res.status(HTTP_OK).json({ message: 'Cron job executed successfully' })
 })
 
 module.exports = router

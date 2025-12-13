@@ -93,11 +93,7 @@ export default function AttendanceByClass() {
               data: { user_id: user.user_id },
             });
             const plans = planRes.data.userPlan || [];
-            const activePlan = plans.find(
-              (p) =>
-                p.current_status === "ACTIVE" &&
-                p.transaction_order_id !== "PRACTICENOWPLAN"
-            );
+            const activePlan = plans.find((p) => p.current_status === "ACTIVE");
             let hasActivePlan = !!activePlan;
             console.log("user", user.user_id, "activePlan", activePlan);
             console.log("hasActivePlan", hasActivePlan);

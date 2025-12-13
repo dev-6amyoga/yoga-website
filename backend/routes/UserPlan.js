@@ -48,9 +48,6 @@ router.post('/get-user-plan-by-id', async (req, res) => {
     const userPlan = await UserPlan.findAll({
       where: {
         user_id: user_id,
-        transaction_order_id: {
-          [Op.ne]: 'PRACTICENOWPLAN',
-        },
       },
       include: [
         { model: User, attributes: ['name'] },
