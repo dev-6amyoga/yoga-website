@@ -98,25 +98,31 @@ const classWsRouter = require('./websocket-routes/Class')
 // })
 // const graceful = new Graceful({ brees: [bree] })
 
-cron.schedule('*/10 * * * * *', async () => {
-  console.log(
-    'Running a task every 10 seconds: ',
-    new Date().toLocaleTimeString()
-  )
-  try {
-    console.log('Running cron job: Update plan statuses')
-    const response = await fetch(
-      `${getBackendDomain()}/cron/update-plan-statuses`,
-      {
-        method: 'POST',
-      }
+cron.schedule(
+  '0 0 * * *',
+  async () => {
+    console.log(
+      'Running a task every day at midnight: ',
+      new Date().toLocaleTimeString()
     )
-    const data = await response.json()
-    console.log('Cron job completed:', data)
-  } catch (err) {
-    console.error('Cron job failed:', err)
+    try {
+      console.log('Running cron job: Update plan statuses')
+      const response = await fetch(
+        `${getBackendDomain()}/cron/update-plan-statuses`,
+        {
+          method: 'POST',
+        }
+      )
+      const data = await response.json()
+      console.log('Cron job completed:', data)
+    } catch (err) {
+      console.error('Cron job failed:', err)
+    }
+  },
+  {
+    timezone: 'Asia/Kolkata',
   }
-})
+)
 
 const corsOptions = {
   origin: [
