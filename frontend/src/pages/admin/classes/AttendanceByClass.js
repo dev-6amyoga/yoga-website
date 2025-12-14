@@ -95,8 +95,16 @@ export default function AttendanceByClass() {
             const plans = planRes.data.userPlan || [];
             const activePlan = plans.find((p) => p.current_status === "ACTIVE");
             let hasActivePlan = !!activePlan;
-            console.log("user", user.user_id, "activePlan", activePlan);
-            console.log("hasActivePlan", hasActivePlan);
+            let activePlanDetails = {};
+
+            // Extract plan details if active plan exists
+            if (activePlan && activePlan.plan) {
+              activePlanDetails = {
+                name: activePlan.plan.name,
+                validity_from: activePlan.validity_from,
+                validity_to: activePlan.validity_to,
+              };
+            }
 
             // Fetch attendance data to get class balance
             let classesRemaining = 0;
@@ -105,7 +113,7 @@ export default function AttendanceByClass() {
                 url: `/class-attendance/api/attendance/${user.user_id}`,
                 method: "GET",
               });
-              console.log("attendanceRes", attendanceRes);
+
               if (attendanceRes.data && attendanceRes.data.length > 0) {
                 // Find userPlanAttendance that matches the active plan's user_plan_id
                 let userPlanAttendance = null;
@@ -118,10 +126,6 @@ export default function AttendanceByClass() {
                       record.userPlanAttendance.status === "ACTIVE"
                     ) {
                       userPlanAttendance = record.userPlanAttendance;
-                      console.log(
-                        "Using first ACTIVE userPlanAttendance:",
-                        userPlanAttendance
-                      );
                       break;
                     }
                   }
@@ -146,10 +150,16 @@ export default function AttendanceByClass() {
               ...user,
               hasActivePlan,
               classesRemaining,
+              activePlanDetails,
             };
           } catch (e) {
             console.error("Failed to fetch plan for user", e);
-            return { ...user, hasActivePlan: false, classesRemaining: 0 };
+            return {
+              ...user,
+              hasActivePlan: false,
+              classesRemaining: 0,
+              activePlanDetails: {},
+            };
           }
         })
       );
@@ -553,9 +563,16 @@ export default function AttendanceByClass() {
                 <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>User ID</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Phone</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>User Plan ID</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Plan Name</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      Validity From
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Validity To</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      Classes Remaining
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}> Phone</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}> Email ID</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 600 }}>
                       Action
                     </TableCell>
@@ -563,27 +580,46 @@ export default function AttendanceByClass() {
                 </TableHead>
 
                 <TableBody>
-                  {selectedUsers.map((u) => (
-                    <TableRow key={u.user_id}>
-                      <TableCell>{u.name}</TableCell>
-                      <TableCell>{u.user_id}</TableCell>
-                      <TableCell>{u.phone || "N/A"}</TableCell>
-                      <TableCell>{u.user_plan_id}</TableCell>
-                      <TableCell align="center">
-                        <Button
-                          color="error"
-                          size={isMobile ? "small" : "medium"}
-                          onClick={() =>
-                            setSelectedUsers((prev) =>
-                              prev.filter((x) => x.user_id !== u.user_id)
-                            )
-                          }
-                        >
-                          Remove
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {selectedUsers.map((u) => {
+                    // Find the active plan details
+                    const activePlanDetails = u.activePlanDetails || {};
+                    const planName = activePlanDetails.name || "N/A";
+                    const validityFrom = activePlanDetails.validity_from
+                      ? new Date(
+                          activePlanDetails.validity_from
+                        ).toLocaleDateString()
+                      : "N/A";
+                    const validityTo = activePlanDetails.validity_to
+                      ? new Date(
+                          activePlanDetails.validity_to
+                        ).toLocaleDateString()
+                      : "N/A";
+
+                    return (
+                      <TableRow key={u.user_id}>
+                        <TableCell>{u.name}</TableCell>
+                        <TableCell>{planName}</TableCell>
+                        <TableCell>{validityFrom}</TableCell>
+                        <TableCell>{validityTo}</TableCell>
+                        <TableCell>{u.classesRemaining || 0}</TableCell>
+                        <TableCell>{u.phone || "N/A"}</TableCell>
+                        <TableCell>{u.email || "N/A"}</TableCell>
+                        <TableCell align="center">
+                          <Button
+                            color="error"
+                            size={isMobile ? "small" : "medium"}
+                            onClick={() =>
+                              setSelectedUsers((prev) =>
+                                prev.filter((x) => x.user_id !== u.user_id)
+                              )
+                            }
+                          >
+                            Remove
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
