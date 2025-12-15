@@ -245,9 +245,12 @@ UPDATE user_plan up
 SET current_status = 'EXPIRED_BY_USAGE',
     updated = NOW()
 FROM user_plan_attendance upa
+JOIN plan p ON p.plan_id = up.plan_id
 WHERE up.user_plan_id = upa.user_plan_id
   AND up.current_status = 'ACTIVE'
-  AND upa.classes_attended >= upa.classes_allowed;
+  AND upa.classes_attended >= upa.classes_allowed
+  AND upa.classes_allowed > 0
+  AND p.plan_user_type = 'INSTITUTE';
 `
 
 router.post('/update-plan-statuses', async (req, res) => {
