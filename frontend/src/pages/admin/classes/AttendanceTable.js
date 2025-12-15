@@ -1,80 +1,104 @@
+import { useState } from "react";
 import {
   Table,
+  TableBody,
+  TableCell,
+  TableContainer,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
   Paper,
-  TableContainer,
-  Chip,
-  Typography,
+  useMediaQuery,
 } from "@mui/material";
-import dayjs from "dayjs";
+import moment from "moment-timezone";
 
 export default function AttendanceTable({ data }) {
-  if (!data || data.length === 0) {
-    return <Typography>No attendance found.</Typography>;
-  }
+  const isMobile = useMediaQuery("(max-width:600px)");
+
+  // Format time to IST HH:mm
+  const formatTimeIST = (isoString, markedBy) => {
+    if (!isoString) return "N/A";
+
+    // Check if marked_by is 'SYSTEM' - these are stored in UTC and need conversion
+    if (markedBy === "SYSTEM") {
+      // Convert UTC to IST and format as HH:mm
+      const istTime = moment(isoString).tz("Asia/Kolkata");
+      return istTime.format("HH:mm");
+    }
+
+    // For ADMIN_MANUAL and INSTRUCTOR, extract HH:mm directly from ISO string
+    const timeMatch = isoString.match(/T(\d{2}):(\d{2}):/);
+    if (timeMatch) {
+      return `${timeMatch[1]}:${timeMatch[2]}`;
+    }
+
+    return "N/A";
+  };
+
+  // Format date to YYYY-MM-DD
+  const formatDateIST = (isoString) => {
+    if (!isoString) return "N/A";
+    return moment(isoString).tz("Asia/Kolkata").format("YYYY-MM-DD");
+  };
 
   return (
     <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
+      <Table size={isMobile ? "small" : "medium"}>
+        <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
           <TableRow>
-            <TableCell>
-              <strong>User ID</strong>
-            </TableCell>
-            <TableCell>
-              <strong>Name</strong>
-            </TableCell>
-            <TableCell>
-              <strong>Email</strong>
-            </TableCell>
-            <TableCell>
-              <strong>Phone</strong>
-            </TableCell>
-            <TableCell>
-              <strong>Date</strong>
-            </TableCell>
-            <TableCell>
-              <strong>Status</strong>
-            </TableCell>
-            <TableCell>
-              <strong>Join Time</strong>
-            </TableCell>
-            <TableCell>
-              <strong>Duration (min)</strong>
-            </TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>User Name</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Email</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Phone</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Join Time (IST)</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Leave Time (IST)</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Duration (mins)</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Marked By</TableCell>
           </TableRow>
         </TableHead>
-
         <TableBody>
-          {data.map((a) => (
-            <TableRow key={a.id}>
-              <TableCell>{a.user?.user_id}</TableCell>
-              <TableCell>{a.user?.name}</TableCell>
-              <TableCell>{a.user?.email}</TableCell>
-              <TableCell>{a.user?.phone}</TableCell>
+          {data && data.length > 0 ? (
+            data.map((row, idx) => (
+              <TableRow key={idx}>
+                <TableCell>{row.user?.name || "N/A"}</TableCell>
+                <TableCell>{row.user?.email || "N/A"}</TableCell>
+                <TableCell>{row.user?.phone || "N/A"}</TableCell>
+                <TableCell>{formatDateIST(row.date)}</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#1976d2" }}>
+                  {formatTimeIST(row.join_time, row.marked_by)}
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: "#d32f2f" }}>
+                  {formatTimeIST(row.leave_time, row.marked_by)}
+                </TableCell>
 
-              <TableCell>{dayjs(a.date).format("YYYY-MM-DD")}</TableCell>
-
-              <TableCell>
-                <Chip
-                  label={a.attendance_status}
-                  color={
-                    a.attendance_status === "ATTENDED" ? "success" : "error"
-                  }
-                  size="small"
-                />
+                <TableCell>{row.duration_minutes || 0}</TableCell>
+                <TableCell>
+                  <span
+                    style={{
+                      backgroundColor:
+                        row.attendance_status === "ATTENDED"
+                          ? "#4caf50"
+                          : "#f44336",
+                      color: "white",
+                      padding: "4px 8px",
+                      borderRadius: "4px",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {row.attendance_status}
+                  </span>
+                </TableCell>
+                <TableCell>{row.marked_by || "N/A"}</TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={9} align="center">
+                No attendance data
               </TableCell>
-
-              <TableCell>
-                {a.join_time ? dayjs(a.join_time).format("HH:mm") : "--"}
-              </TableCell>
-
-              <TableCell>{a.duration_minutes ?? "--"}</TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </TableContainer>
