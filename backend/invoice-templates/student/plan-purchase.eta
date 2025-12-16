@@ -108,7 +108,6 @@ h2 {
           <p>INR 0</p>
         </td>
         <td>
-          <p><% const multipliedValue = (it.plan_pricing.denomination * 0.18).toFixed(2);%>INR <%=multipliedValue%></p><br/>
           <small>
             2.5% SGST (INR <%=it.plan_pricing?.denomination %>  * 0.025) = INR <% const sgst = (it.plan_pricing.denomination * 0.025).toFixed(2) %><%=sgst%>
           </small><br/>
@@ -117,8 +116,8 @@ h2 {
           </small>
         </td>
         <td>
-          <p>INR <% const res = (it.plan_pricing?.denomination * 0.05).toFixed(2);%><%=res%></p>
-        </td>
+          <p>INR <% const total = (parseFloat(it.plan_pricing?.denomination) + parseFloat(sgst) + parseFloat(cgst)).toFixed(2);%><%=total%></p>
+        </td>        
       </tr>
     </tbody>
   </table>
