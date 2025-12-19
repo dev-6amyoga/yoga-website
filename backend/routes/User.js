@@ -964,6 +964,37 @@ router.post('/get-class-users', async (req, res) => {
       }
     })
 
+    const instituteUsers = await UserInstitutePlanRole.findAll({
+      where: {
+        institute_id: 3,
+        role_id: 5, // role_id 5 = student
+      },
+      include: [
+        {
+          model: User,
+          attributes: ['user_id', 'name', 'email', 'phone', 'username'],
+        },
+      ],
+      attributes: ['user_id', 'institute_id'],
+      raw: false,
+    })
+
+    instituteUsers.forEach((uipr) => {
+      if (uipr.user && uipr.user.user_id) {
+        if (!uniqueUsers[uipr.user.user_id]) {
+          uniqueUsers[uipr.user.user_id] = {
+            user_id: uipr.user.user_id,
+            name: uipr.user.name,
+            email: uipr.user.email,
+            phone: uipr.user.phone,
+            username: uipr.user.username,
+            plan_id: null,
+            user_plan_id: null,
+          }
+        }
+      }
+    })
+
     const users = Object.values(uniqueUsers)
     //console.log(`Final unique users count: ${users.length}`)
     //console.log('Final users:', JSON.stringify(users, null, 2))
