@@ -164,7 +164,13 @@ export default function AttendanceByClass() {
         })
       );
 
-      setClassUsers(usersWithPlans);
+      const sortedUsers = usersWithPlans.sort((a, b) => {
+        if (a.hasActivePlan !== b.hasActivePlan) {
+          return a.hasActivePlan ? -1 : 1;
+        }
+        return a.name.localeCompare(b.name);
+      });
+      setClassUsers(sortedUsers);
     } catch (e) {
       console.error("Failed to load class users", e);
     }
