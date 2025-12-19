@@ -379,6 +379,32 @@ router.get('/api/attendance/:userId', async (req, res) => {
       console.log(
         `Returning ${enriched.length} enriched ClassAttendance records`
       )
+
+      console.log(
+        'Step 6b: Including UserPlanAttendance records without ClassAttendance...'
+      )
+      const usedUserPlanIds = new Set(enriched.map((e) => e.user_plan_id))
+      const unusedUPARecords = userPlanAttendanceRecords.filter(
+        (upa) => !usedUserPlanIds.has(upa.user_plan_id)
+      )
+
+      console.log(
+        `Found ${unusedUPARecords.length} UserPlanAttendance records without ClassAttendance`
+      )
+
+      const upaWithPlans = await Promise.all(
+        unusedUPARecords.map(async (upa) => {
+          console.log(`  Fetching plan for user_plan_id: ${upa.user_plan_id}`)
+          const plan = await Plan.findByPk(upa.plan_id)
+          return {
+            userPlanAttendance: upa ? (upa.toJSON ? upa.toJSON() : upa) : null,
+            plan: plan ? (plan.toJSON ? plan.toJSON() : plan) : null,
+          }
+        })
+      )
+
+      const allResults = [...enriched, ...upaWithPlans]
+
       console.log('=== /api/attendance END (ClassAttendance path) ===\n')
       return res.status(200).json(enriched)
     }
