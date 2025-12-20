@@ -267,6 +267,63 @@ function StudentPlan() {
     return updatedValidityString;
   };
 
+  const getStartDateAndStatus = (userPlans) => {
+    const today = new Date();
+
+    if (!userPlans || userPlans.length === 0) {
+      return {
+        status: USER_PLAN_ACTIVE,
+        startDate: today.toISOString(),
+      };
+    }
+
+    const validActivePlans = userPlans.filter(
+      (p) => p.status === USER_PLAN_ACTIVE && new Date(p.validity_to) >= today
+    );
+
+    const stagedPlans = userPlans.filter((p) => p.status === USER_PLAN_STAGED);
+
+    // 1️⃣ STAGED takes highest priority
+    if (stagedPlans.length > 0) {
+      const lastStaged = stagedPlans.reduce((latest, plan) =>
+        new Date(plan.validity_to) > new Date(latest.validity_to)
+          ? plan
+          : latest
+      );
+
+      const startDate = new Date(lastStaged.validity_to);
+      startDate.setDate(startDate.getDate() + 1);
+
+      return {
+        status: USER_PLAN_STAGED,
+        startDate: startDate.toISOString(),
+      };
+    }
+
+    // 2️⃣ ACTIVE exists, no STAGED
+    if (validActivePlans.length > 0) {
+      const latestActive = validActivePlans.reduce((latest, plan) =>
+        new Date(plan.validity_to) > new Date(latest.validity_to)
+          ? plan
+          : latest
+      );
+
+      const startDate = new Date(latestActive.validity_to);
+      startDate.setDate(startDate.getDate() + 1);
+
+      return {
+        status: USER_PLAN_STAGED,
+        startDate: startDate.toISOString(),
+      };
+    }
+
+    // 3️⃣ Only EXPIRED plans
+    return {
+      status: USER_PLAN_ACTIVE,
+      startDate: today.toISOString(),
+    };
+  };
+
   const fetchUserPlans = useCallback(async () => {
     try {
       const response = await Fetch({
@@ -818,7 +875,7 @@ function StudentPlan() {
   }, [user, fetchUserPlans]);
 
   useEffect(() => {
-    setValidityFromDate(getEndDate(myPlans));
+    setValidityFromDate(getStartDateAndStatus(myPlans).startDate);
   }, [myPlans]);
 
   useEffect(() => {
