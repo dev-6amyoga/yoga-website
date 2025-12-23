@@ -878,129 +878,71 @@ router.get('/get-all-students', async (req, res) => {
   }
 })
 
-router.post('/get-class-users', async (req, res) => {
+router.get('/get-class-users', async (req, res) => {
   try {
-    //console.log('=== /get-class-users START ===')
-    const { class_ids } = req.body
-    //console.log('class_ids:', class_ids)
+    const users = await sequelize.query(
+      `
+  SELECT
+      uipr.user_id,
+      uipr.institute_id,
 
-    if (!class_ids || !Array.isArray(class_ids) || class_ids.length === 0) {
-      //console.log('❌ Validation failed - class_ids:', class_ids)
-      return res.status(400).json({ error: 'class_ids is required' })
-    }
+      u.name,
+      u.phone,
+      u.email,
 
-    //console.log(`✓ Validation passed - Found ${class_ids.length} class_ids`)
+      CASE
+        WHEN up.user_plan_id IS NULL THEN 'No plan purchased'
+        WHEN up.current_status = 'ACTIVE' THEN p.name
+        ELSE p.name || ' (expired)'
+      END AS plan_name,
 
-    // Find all classes
-    //console.log('Finding classes with class_ids:', class_ids)
-    const classes = await ZoomClassModel.findAll({
-      where: {
-        zoom_class_id: class_ids,
-      },
-      attributes: ['plan_id', 'zoom_class_id'],
-      raw: true,
-    })
+      up.validity_from,
+      up.validity_to,
+      upa.classes_allowed AS classes_allowed,
+      upa.classes_attended AS classes_attended,
+      COALESCE(
+        upa.classes_allowed - upa.classes_attended,
+        0
+      ) AS classes_remaining
 
-    //console.log(`Found ${classes.length} classes`)
-    //console.log('Classes data:', JSON.stringify(classes, null, 2))
+  FROM user_institute_plan_role uipr
 
-    if (classes.length === 0) {
-      //console.log('⚠️ No classes found - returning empty users array')
-      return res.status(200).json({ users: [] })
-    }
+  JOIN "user" u
+      ON u.user_id = uipr.user_id
 
-    // Extract unique plan IDs
-    const planIds = [...new Set(classes.map((cls) => cls.plan_id))]
-    //console.log(`Extracted ${planIds.length} unique plan IDs:`, planIds)
+  LEFT JOIN LATERAL (
+      SELECT *
+      FROM user_plan
+      WHERE user_id = uipr.user_id
+        AND institute_id = uipr.institute_id
+        AND current_status IN ('ACTIVE', 'EXPIRED_BY_DATE', 'EXPIRED_BY_USAGE')
+      ORDER BY
+      CASE
+        WHEN current_status = 'ACTIVE' THEN 1
+        WHEN current_status IN ('EXPIRED_BY_DATE', 'EXPIRED_BY_USAGE') THEN 2
+        END,
+        validity_to DESC
+      LIMIT 1
+  ) up ON true
 
-    // Find all user plans with user details
-    //console.log('Finding user plans for plan_ids:', planIds)
-    const userPlans = await UserPlan.findAll({
-      where: {
-        plan_id: planIds,
-      },
-      include: [
-        {
-          model: User,
-          attributes: ['user_id', 'name', 'email', 'phone', 'username'],
-        },
-      ],
-      attributes: ['user_plan_id', 'plan_id', 'user_id'],
-      raw: false,
-    })
+  LEFT JOIN plan p
+      ON p.plan_id = up.plan_id
 
-    //console.log(`Found ${userPlans.length} user plan records`)
-    //console.log(
-    //   'User plans sample:',
-    //   JSON.stringify(userPlans.slice(0, 2), null, 2)
-    // )
+  LEFT JOIN user_plan_attendance upa
+      ON upa.user_plan_id = up.user_plan_id
+     AND upa.status = 'ACTIVE'
 
-    // Deduplicate users and include plan_id and user_plan_id
-    const uniqueUsers = {}
-    userPlans.forEach((up, idx) => {
-      //console.log(`Processing user plan ${idx}:`, {
-      //   user_plan_id: up.user_plan_id,
-      //   plan_id: up.plan_id,
-      //   user_id: up.user?.user_id,
-      //   user_name: up.user?.name,
-      // })
-
-      if (up.user && up.user.user_id) {
-        if (!uniqueUsers[up.user.user_id]) {
-          uniqueUsers[up.user.user_id] = {
-            user_id: up.user.user_id,
-            name: up.user.name,
-            email: up.user.email,
-            phone: up.user.phone,
-            username: up.user.username,
-            plan_id: up.plan_id,
-            user_plan_id: up.user_plan_id,
-          }
-        } else {
-          //console.log(`  ⊘ Duplicate user skipped: ${up.user.user_id}`)
-        }
-      } else {
-        //console.log(`  ❌ Invalid user data:`, up.user)
+  WHERE
+      uipr.institute_id = :instituteId
+      AND uipr.role_id = :roleId
+  `,
+      {
+        replacements: { instituteId: 3, roleId: 5 },
+        type: sequelize.QueryTypes.SELECT,
       }
-    })
+    )
 
-    const instituteUsers = await UserInstitutePlanRole.findAll({
-      where: {
-        institute_id: 3,
-        role_id: 5, // role_id 5 = student
-      },
-      include: [
-        {
-          model: User,
-          attributes: ['user_id', 'name', 'email', 'phone', 'username'],
-        },
-      ],
-      attributes: ['user_id', 'institute_id'],
-      raw: false,
-    })
-
-    instituteUsers.forEach((uipr) => {
-      if (uipr.user && uipr.user.user_id) {
-        if (!uniqueUsers[uipr.user.user_id]) {
-          uniqueUsers[uipr.user.user_id] = {
-            user_id: uipr.user.user_id,
-            name: uipr.user.name,
-            email: uipr.user.email,
-            phone: uipr.user.phone,
-            username: uipr.user.username,
-            plan_id: null,
-            user_plan_id: null,
-          }
-        }
-      }
-    })
-
-    const users = Object.values(uniqueUsers)
-    //console.log(`Final unique users count: ${users.length}`)
-    //console.log('Final users:', JSON.stringify(users, null, 2))
-    //console.log('=== /get-class-users END (SUCCESS) ===\n')
-
-    return res.status(200).json({ users })
+    res.json({ users })
   } catch (err) {
     console.error('=== /get-class-users ERROR ===')
     console.error('Error message:', err.message)

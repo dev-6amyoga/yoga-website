@@ -79,102 +79,13 @@ export default function AttendanceByClass() {
     try {
       const res = await Fetch({
         url: "/user/get-class-users",
-        method: "POST",
-        data: { class_ids: classIds },
+        method: "GET",
       });
-
-      // Fetch user plans and attendance data
-      const usersWithPlans = await Promise.all(
-        (res.data.users || []).map(async (user) => {
-          try {
-            const planRes = await Fetch({
-              url: "/user-plan/get-user-plan-by-id",
-              method: "POST",
-              data: { user_id: user.user_id },
-            });
-            const plans = planRes.data.userPlan || [];
-            const activePlan = plans.find((p) => p.current_status === "ACTIVE");
-            let hasActivePlan = !!activePlan;
-            let activePlanDetails = {};
-
-            // Extract plan details if active plan exists
-            if (activePlan && activePlan.plan) {
-              activePlanDetails = {
-                name: activePlan.plan.name,
-                validity_from: activePlan.validity_from,
-                validity_to: activePlan.validity_to,
-              };
-            }
-
-            // Fetch attendance data to get class balance
-            let classesRemaining = 0;
-            try {
-              const attendanceRes = await Fetch({
-                url: `/class-attendance/api/attendance/${user.user_id}`,
-                method: "GET",
-              });
-
-              if (attendanceRes.data && attendanceRes.data.length > 0) {
-                // Find userPlanAttendance that matches the active plan's user_plan_id
-                let userPlanAttendance = null;
-
-                if (activePlan) {
-                  // Search through all attendance records to find one matching the active plan
-                  for (const record of attendanceRes.data) {
-                    if (
-                      record.userPlanAttendance &&
-                      record.userPlanAttendance.status === "ACTIVE"
-                    ) {
-                      userPlanAttendance = record.userPlanAttendance;
-                      break;
-                    }
-                  }
-                }
-
-                if (userPlanAttendance) {
-                  classesRemaining =
-                    userPlanAttendance.classes_allowed -
-                    userPlanAttendance.classes_attended;
-                }
-              }
-            } catch (e) {
-              console.error("Failed to fetch attendance data", e);
-            }
-
-            // If classes remaining is 0, treat as no active plan
-            if (classesRemaining === 0) {
-              hasActivePlan = false;
-            }
-
-            return {
-              ...user,
-              hasActivePlan,
-              classesRemaining,
-              activePlanDetails,
-            };
-          } catch (e) {
-            console.error("Failed to fetch plan for user", e);
-            return {
-              ...user,
-              hasActivePlan: false,
-              classesRemaining: 0,
-              activePlanDetails: {},
-            };
-          }
-        })
-      );
-
-      const sortedUsers = usersWithPlans.sort((a, b) => {
-        if (a.hasActivePlan !== b.hasActivePlan) {
-          return a.hasActivePlan ? -1 : 1;
-        }
-        return a.name.localeCompare(b.name);
-      });
-      setClassUsers(sortedUsers);
+      console.log(res.data.users);
+      setClassUsers(res.data.users);
     } catch (e) {
       console.error("Failed to load class users", e);
     }
-
     setLoadingUsers(false);
   };
 
@@ -243,7 +154,7 @@ export default function AttendanceByClass() {
     }
   };
 
-  const filteredUsers = classUsers.filter((u) =>
+  const filteredUsers = classUsers?.filter((u) =>
     u.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -337,19 +248,6 @@ export default function AttendanceByClass() {
           </Typography>
 
           <Grid container spacing={isMobile ? 1.5 : 2} alignItems="flex-end">
-            {/* <Grid item xs={12} sm={4}> 
-               <TextField
-                fullWidth
-                label="Daily Run Time (IST)"
-                type="time"
-                value={cronTime}
-                onChange={(e) => setCronTime(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                size={isMobile ? "small" : "medium"}
-                helperText="Default: 12:00 AM"
-              />
-            </Grid> */}
-
             <Grid item xs={12} sm={8}>
               <Stack direction="row" spacing={1}>
                 <Button
@@ -514,12 +412,19 @@ export default function AttendanceByClass() {
                       />
                     }
                     sx={{
-                      border: !u.hasActivePlan ? "2px solid red" : "none",
+                      border:
+                        u.classes_allowed === 0 || u.classes_allowed === null
+                          ? "2px solid red"
+                          : "none",
                       borderRadius: 1,
-                      mb: !u.hasActivePlan ? 1 : 0,
-                      backgroundColor: !u.hasActivePlan
-                        ? "rgba(255, 0, 0, 0.05)"
-                        : "transparent",
+                      mb:
+                        u.classes_allowed === 0 || u.classes_allowed === null
+                          ? 1
+                          : 0,
+                      backgroundColor:
+                        u.classes_allowed === 0 || u.classes_allowed === null
+                          ? "rgba(255, 0, 0, 0.05)"
+                          : "transparent",
                     }}
                   >
                     <ListItemIcon>
@@ -533,13 +438,19 @@ export default function AttendanceByClass() {
                       />
                     </ListItemIcon>
                     <ListItemText
-                      primary={`${u.name} (ID: ${u.user_id})${!u.hasActivePlan ? " ⚠️ No Active Plan" : ""}`}
+                      primary={`${u.name} (ID: ${u.user_id})${u.classes_allowed === 0 || u.classes_allowed === null ? " ⚠️ No Active Plan" : ""}`}
                       primaryTypographyProps={{
                         fontSize: isMobile ? 13 : 14,
-                        fontWeight: !u.hasActivePlan ? 600 : 400,
-                        color: !u.hasActivePlan ? "error" : "inherit",
+                        fontWeight:
+                          u.classes_allowed === 0 || u.classes_allowed === null
+                            ? 600
+                            : 400,
+                        color:
+                          u.classes_allowed === 0 || u.classes_allowed === null
+                            ? "error"
+                            : "inherit",
                       }}
-                      secondary={`Phone: ${u.phone || "N/A"} | Classes Remaining: ${u.classesRemaining || 0}`}
+                      secondary={`Phone: ${u.phone || "N/A"} | Classes Remaining: ${u.classes_remaining || 0}`}
                       secondaryTypographyProps={{
                         fontSize: isMobile ? 11 : 12,
                       }}
@@ -588,17 +499,12 @@ export default function AttendanceByClass() {
                 <TableBody>
                   {selectedUsers.map((u) => {
                     // Find the active plan details
-                    const activePlanDetails = u.activePlanDetails || {};
-                    const planName = activePlanDetails.name || "N/A";
-                    const validityFrom = activePlanDetails.validity_from
-                      ? new Date(
-                          activePlanDetails.validity_from
-                        ).toLocaleDateString()
+                    const planName = u.plan_name || "N/A";
+                    const validityFrom = u.validity_from
+                      ? new Date(u.validity_from).toLocaleDateString()
                       : "N/A";
-                    const validityTo = activePlanDetails.validity_to
-                      ? new Date(
-                          activePlanDetails.validity_to
-                        ).toLocaleDateString()
+                    const validityTo = u.validity_to
+                      ? new Date(u.validity_to).toLocaleDateString()
                       : "N/A";
 
                     return (

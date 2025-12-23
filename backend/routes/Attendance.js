@@ -243,6 +243,9 @@ router.get('/api/attendance/:userId', async (req, res) => {
     let userPlanAttendanceRecords = await UserPlanAttendance.findAll({
       where: { user_id: userId },
     })
+    let activeUserPlanAttendanceRecords = await UserPlanAttendance.findAll({
+      where: { user_id: userId, status: 'ACTIVE' },
+    })
     console.log(
       `Found ${userPlanAttendanceRecords.length} UserPlanAttendance records`
     )
@@ -368,10 +371,17 @@ router.get('/api/attendance/:userId', async (req, res) => {
             `    class found: ${cls ? 'yes' : 'no'}, plan found: ${plan ? 'yes' : 'no'}, upa found: ${upa ? 'yes' : 'no'}`
           )
           return {
-            ...recJson,
-            class: cls ? (cls.toJSON ? cls.toJSON() : cls) : null,
-            plan: plan ? (plan.toJSON ? plan.toJSON() : plan) : null,
-            userPlanAttendance: upa ? (upa.toJSON ? upa.toJSON() : upa) : null,
+            activeUserPlan: activeUserPlanAttendanceRecords,
+            metaData: {
+              ...recJson,
+              class: cls ? (cls.toJSON ? cls.toJSON() : cls) : null,
+              plan: plan ? (plan.toJSON ? plan.toJSON() : plan) : null,
+              userPlanAttendance: upa
+                ? upa.toJSON
+                  ? upa.toJSON()
+                  : upa
+                : null,
+            },
           }
         })
       )
@@ -406,7 +416,7 @@ router.get('/api/attendance/:userId', async (req, res) => {
       const allResults = [...enriched, ...upaWithPlans]
 
       console.log('=== /api/attendance END (ClassAttendance path) ===\n')
-      return res.status(200).json(enriched)
+      return res.status(200).json(allResults)
     }
 
     // 6. If no ClassAttendance records, return UserPlanAttendance and Plan data
