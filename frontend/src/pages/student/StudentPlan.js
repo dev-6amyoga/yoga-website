@@ -236,37 +236,6 @@ function StudentPlan() {
     }
   };
 
-  const getEndDate = (userPlan) => {
-    var updatedValidityString = "";
-    if (userPlan.length === 0) {
-      setCurrentStatus(USER_PLAN_ACTIVE);
-      var today = new Date();
-      updatedValidityString = today?.toISOString();
-    } else if (userPlan.length === 1) {
-      setCurrentStatus(USER_PLAN_STAGED);
-      var validityDate = new Date(userPlan[0].validity_to);
-      validityDate.setDate(validityDate.getDate() + 1);
-      updatedValidityString = validityDate?.toISOString();
-    } else {
-      var highestValidityDate = null;
-      setCurrentStatus(USER_PLAN_STAGED);
-      for (var i = 0; i !== userPlan.length; i++) {
-        var validityDate = new Date(userPlan[i].validity_to);
-        if (
-          highestValidityDate === null ||
-          validityDate > highestValidityDate
-        ) {
-          highestValidityDate = validityDate;
-        }
-      }
-      if (highestValidityDate !== null) {
-        highestValidityDate.setDate(highestValidityDate.getDate() + 1);
-        updatedValidityString = highestValidityDate?.toISOString();
-      }
-    }
-    return updatedValidityString;
-  };
-
   const getStartDateAndStatus = (userPlans) => {
     const today = new Date();
 
