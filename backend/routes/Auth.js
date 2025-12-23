@@ -112,256 +112,148 @@ router.post('/verify-tokens', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   const clientIp = req.clientIp
-  console.log('[LOGIN] Starting login process for IP:', clientIp)
-
   const { username, password } = req.body
+
   if (!username || !password) {
-    console.log('[LOGIN] Missing username or password')
     return res
       .status(HTTP_BAD_REQUEST)
       .json({ message: 'Missing required fields' })
   }
 
-  console.log('[LOGIN] Attempting login for username:', username)
-
-  const t = await sequelize.transaction()
-
   try {
-    let startTime = new Date()
-    // check if user exists
-    console.log('[LOGIN] Fetching user info for username:', username)
+    // ─────────────────────────────
+    // 1️⃣ READ USER (NO TRANSACTION)
+    // ─────────────────────────────
     let [user, errorUser] = await GetUserInfo({ username }, [
       'user_id',
       'password',
     ])
-    console.log(
-      '[LOGIN] GetUserInfo elapsed time:',
-      new Date() - startTime,
-      'ms'
-    )
-
-    if (errorUser) {
-      console.log('[LOGIN] GetUserInfo error:', errorUser)
-    }
 
     if (!user || errorUser) {
-      console.log('[LOGIN] User not found or error occurred')
-      await t.rollback()
       return res.status(HTTP_BAD_REQUEST).json({ error: 'User does not exist' })
     }
 
-    console.log('[LOGIN] User found. User ID:', user.user_id)
-
-    // check password
-    startTime = new Date()
-    console.log('[LOGIN] Comparing passwords')
+    // ─────────────────────────────
+    // 2️⃣ PASSWORD CHECK (NO DB)
+    // ─────────────────────────────
     const validPassword = await brypt.compare(password, user.password)
-    console.log(
-      '[LOGIN] Password comparison elapsed time:',
-      new Date() - startTime,
-      'ms'
-    )
-    console.log('[LOGIN] Password valid:', validPassword)
 
     if (!validPassword) {
-      console.log('[LOGIN] Invalid password for user:', username)
-      await t.rollback()
       return res.status(HTTP_BAD_REQUEST).json({ error: 'Invalid password' })
     }
 
     delete user.password
 
-    // update user plans
-    console.log(
-      '[LOGIN] Fetching UserInstitutePlanRole for user_id:',
-      user.user_id
-    )
-    const uipr = await UserInstitutePlanRole.findAll({
-      where: {
-        user_id: user.user_id,
-      },
-      transaction: t,
-    })
+    // ─────────────────────────────
+    // 3️⃣ WRITE OPERATIONS (SHORT TX)
+    // ─────────────────────────────
+    const t = await sequelize.transaction()
 
-    console.log('[LOGIN] Found', uipr.length, 'UserInstitutePlanRole records')
-
-    if (uipr.length === 0) {
-      console.log('[LOGIN] No UserInstitutePlanRole records found')
-      await t.rollback()
-      return res.status(HTTP_BAD_REQUEST).json({ error: 'User not registered' })
-    }
-
-    startTime = new Date()
-    console.log('[LOGIN] Fetching active UserPlan for user_id:', user.user_id)
-    const activeUserPlan = await UserPlan.findOne({
-      where: {
-        user_id: user.user_id,
-        current_status: 'ACTIVE',
-      },
-      transaction: t,
-    })
-    console.log(
-      '[LOGIN] Active UserPlan fetch elapsed time:',
-      new Date() - startTime,
-      'ms'
-    )
-    console.log('[LOGIN] Active UserPlan found:', activeUserPlan ? 'Yes' : 'No')
-    if (activeUserPlan) {
-      console.log(
-        '[LOGIN] Active plan details - Plan ID:',
-        activeUserPlan.plan_id,
-        'User Plan ID:',
-        activeUserPlan.user_plan_id
-      )
-    }
-
-    console.log(
-      '[LOGIN] Updating UserPlanStatus for',
-      uipr.length,
-      'institutes'
-    )
-    await Promise.all(
-      uipr.map((u) => {
-        console.log(
-          '[LOGIN] Updating plan status for institute_id:',
-          u.get('institute_id')
-        )
-        return UpdateUserPlanStatus(user.user_id, u.get('institute_id'), t)
+    try {
+      const uipr = await UserInstitutePlanRole.findAll({
+        where: { user_id: user.user_id },
+        transaction: t,
       })
-    )
 
-    console.log('[LOGIN] UserPlanStatus update completed')
+      if (uipr.length === 0) {
+        await t.rollback()
+        return res
+          .status(HTTP_BAD_REQUEST)
+          .json({ error: 'User not registered' })
+      }
 
-    startTime = new Date()
-    console.log('[LOGIN] Fetching updated user info')
-    ;[user, errorUser] = await GetUserInfo({ username }, [
-      'user_id',
-      'username',
-      'name',
-      'email',
-      'phone',
-      'is_google_login',
-      'last_login',
-    ])
-    console.log(
-      '[LOGIN] Updated user info fetch elapsed time:',
-      new Date() - startTime,
-      'ms'
-    )
-
-    if (errorUser) {
-      console.log('[LOGIN] Error fetching updated user info:', errorUser)
-      await t.rollback()
-      return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: errorUser })
-    }
-
-    console.log('[LOGIN] Updated user info retrieved')
-
-    startTime = new Date()
-    console.log('[LOGIN] Destroying previous LoginTokens for IP:', clientIp)
-    await LoginToken.destroy({
-      where: {
-        user_id: user.user_id,
-        ip: clientIp,
-      },
-      transaction: t,
-      force: true,
-    })
-    console.log(
-      '[LOGIN] LoginToken destroy elapsed time:',
-      new Date() - startTime,
-      'ms'
-    )
-
-    // check if user has active login token
-    console.log('[LOGIN] Checking for active login tokens')
-    const login_token_history = await LoginToken.findOne({
-      where: {
-        user_id: user?.user_id,
-        refresh_token_expiry_at: {
-          [Op.gt]: new Date(),
+      const activeUserPlan = await UserPlan.findOne({
+        where: {
+          user_id: user.user_id,
+          current_status: 'ACTIVE',
         },
-      },
-      transaction: t,
-    })
+        transaction: t,
+      })
 
-    console.log(
-      '[LOGIN] Active login token found:',
-      login_token_history ? 'Yes' : 'No'
-    )
+      // Update plan statuses (parallel but safe)
+      await Promise.all(
+        uipr.map((u) =>
+          UpdateUserPlanStatus(user.user_id, u.get('institute_id'), t)
+        )
+      )
 
-    startTime = new Date()
-    console.log('[LOGIN] Generating access and refresh tokens')
-    const [accessToken, access_token_creation_at, access_token_expiry_at] =
-      generateAccessToken(user)
-    const [refreshToken, refresh_token_creation_at, refresh_token_expiry_at] =
-      generateRefreshToken(user)
-    console.log(
-      '[LOGIN] Token generation elapsed time:',
-      new Date() - startTime,
-      'ms'
-    )
+      // Re-fetch user info ONLY if required
+      ;[user, errorUser] = await GetUserInfo({ username }, [
+        'user_id',
+        'username',
+        'name',
+        'email',
+        'phone',
+        'is_google_login',
+        'last_login',
+      ])
 
-    startTime = new Date()
-    console.log('[LOGIN] Creating LoginToken and LoginHistory records')
-    await Promise.all([
-      LoginToken.create(
-        {
-          access_token: accessToken,
-          refresh_token: refreshToken,
-          access_token_creation_at,
-          access_token_expiry_at,
-          refresh_token_creation_at,
-          refresh_token_expiry_at,
+      if (errorUser) {
+        await t.rollback()
+        return res.status(HTTP_INTERNAL_SERVER_ERROR).json({ error: errorUser })
+      }
+
+      await LoginToken.destroy({
+        where: {
+          user_id: user.user_id,
           ip: clientIp,
-          user_id: user?.user_id,
         },
-        { transaction: t }
-      ),
-      LoginHistory.create(
-        {
-          user_id: user?.user_id,
-          ip: clientIp || null,
-          user_agent: req.get('User-Agent') || req?.useragent?.source || null,
-          platform: req?.useragent?.platform,
-          os: req?.useragent?.os,
-          browser: req?.useragent?.browser,
-        },
-        { transaction: t }
-      ),
-    ])
-    console.log(
-      '[LOGIN] LoginToken and LoginHistory creation elapsed time:',
-      new Date() - startTime,
-      'ms'
-    )
+        transaction: t,
+        force: true,
+      })
 
-    startTime = new Date()
-    console.log('[LOGIN] Committing transaction')
-    await t.commit()
-    console.log(
-      '[LOGIN] Transaction commit elapsed time:',
-      new Date() - startTime,
-      'ms'
-    )
+      const [accessToken, access_token_creation_at, access_token_expiry_at] =
+        generateAccessToken(user)
 
-    console.log('[LOGIN] Login successful for user_id:', user.user_id)
+      const [refreshToken, refresh_token_creation_at, refresh_token_expiry_at] =
+        generateRefreshToken(user)
 
-    return res.status(HTTP_OK).json({
-      user,
-      userPlan: activeUserPlan,
-      accessToken,
-      refreshToken,
-      accessTokenExpiryAt: access_token_expiry_at,
-      refreshTokenExpiryAt: refresh_token_expiry_at,
-    })
+      await Promise.all([
+        LoginToken.create(
+          {
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            access_token_creation_at,
+            access_token_expiry_at,
+            refresh_token_creation_at,
+            refresh_token_expiry_at,
+            ip: clientIp,
+            user_id: user.user_id,
+          },
+          { transaction: t }
+        ),
+        LoginHistory.create(
+          {
+            user_id: user.user_id,
+            ip: clientIp,
+            user_agent: req.get('User-Agent') || req?.useragent?.source || null,
+            platform: req?.useragent?.platform,
+            os: req?.useragent?.os,
+            browser: req?.useragent?.browser,
+          },
+          { transaction: t }
+        ),
+      ])
+
+      await t.commit()
+
+      return res.status(HTTP_OK).json({
+        user,
+        userPlan: activeUserPlan,
+        accessToken,
+        refreshToken,
+        accessTokenExpiryAt: access_token_expiry_at,
+        refreshTokenExpiryAt: refresh_token_expiry_at,
+      })
+    } catch (err) {
+      await t.rollback()
+      throw err
+    }
   } catch (err) {
-    console.error('[LOGIN] Error during login:', err)
-    await t.rollback()
-    console.log('[LOGIN] Transaction rolled back')
-    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-      message: 'internal server error',
-    })
+    console.error('[LOGIN] Error:', err)
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: 'internal server error' })
   }
 })
 
