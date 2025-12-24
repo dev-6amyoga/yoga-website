@@ -131,6 +131,10 @@ const paths = [
     type: "group",
     subPaths: [
       {
+        path: "/admin/transactions/my-income",
+        title: "Transaction Statements",
+      },
+      {
         path: "/admin/transactions/log-payment",
         title: "Log a Payment",
       },

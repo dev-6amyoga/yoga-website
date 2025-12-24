@@ -38,6 +38,7 @@ import ViewAllClasses from "../pages/admin/classes/ViewAllClasses";
 import JoinClass from "../pages/admin/classes/JoinClass";
 import AdminLogAttendance from "../pages/admin/classes/AdminLogAttendance";
 import ViewClassAttendees from "../pages/admin/classes/ViewClassAttendees";
+import MyIncome from "../pages/admin/transactions/MyIncome";
 export const AdminRoutes = [
   {
     path: "/admin",
@@ -188,6 +189,10 @@ export const AdminRoutes = [
   {
     path: "/admin/transactions/refund",
     element: <RefundManagement />,
+  },
+  {
+    path: "/admin/transactions/my-income",
+    element: <MyIncome />,
   },
   // plans
   {
