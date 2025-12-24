@@ -885,17 +885,16 @@ router.get('/get-class-users', async (req, res) => {
   SELECT
       uipr.user_id,
       uipr.institute_id,
-
       u.name,
       u.phone,
       u.email,
-
+      up.plan_id,
+      up.user_plan_id,
       CASE
         WHEN up.user_plan_id IS NULL THEN 'No plan purchased'
         WHEN up.current_status = 'ACTIVE' THEN p.name
         ELSE p.name || ' (expired)'
       END AS plan_name,
-
       up.validity_from,
       up.validity_to,
       upa.classes_allowed AS classes_allowed,

@@ -456,11 +456,11 @@ router.get('/api/attendance/:userId', async (req, res) => {
 router.post('/admin/log-attendance-by-class', async (req, res) => {
   const t = await sequelize.transaction()
   try {
-    //console.log('=== /admin/log-attendance-by-class START ===')
+    console.log('=== /admin/log-attendance-by-class START ===')
     const { entries } = req.body
 
-    //console.log('Request body:', JSON.stringify(req.body, null, 2))
-    //console.log('Entries:', entries)
+    console.log('Request body:', JSON.stringify(req.body, null, 2))
+    console.log('Entries:', entries)
 
     if (
       !entries ||
@@ -470,12 +470,12 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
       !entries.users ||
       !Array.isArray(entries.users)
     ) {
-      //console.log('❌ Validation failed')
-      //console.log('  class_name:', entries?.class_name)
-      //console.log('  class_type:', entries?.class_type)
-      //console.log('  join_time:', entries?.join_time)
-      //console.log('  users:', entries?.users)
-      //console.log('  users is array:', Array.isArray(entries?.users))
+      console.log('❌ Validation failed')
+      console.log('  class_name:', entries?.class_name)
+      console.log('  class_type:', entries?.class_type)
+      console.log('  join_time:', entries?.join_time)
+      console.log('  users:', entries?.users)
+      console.log('  users is array:', Array.isArray(entries?.users))
 
       await t.rollback()
       return res.status(400).json({
@@ -484,8 +484,8 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
       })
     }
 
-    //console.log(`✓ Validation passed`)
-    //console.log(`Processing ${entries.users.length} users`)
+    console.log(`✓ Validation passed`)
+    console.log(`Processing ${entries.users.length} users`)
 
     const created = []
     const updatedUserPlans = []
@@ -504,14 +504,14 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
       } = entries
 
       if (!user_id || !plan_id || !user_plan_id || !date) {
-        //console.log('❌ Missing required user fields')
+        console.log('❌ Missing required user fields')
         await t.rollback()
         return res.status(400).json({
           error: `Missing required fields for user ${user_id}`,
         })
       }
 
-      //console.log('✓ User fields validated')
+      console.log('✓ User fields validated')
 
       // 1. Find the applicable class for this user
 
@@ -526,7 +526,7 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
       })
 
       if (!userApplicableClass) {
-        //console.log(`❌ Class not found for user_plan_id ${user_plan_id}`)
+        console.log(`❌ Class not found for user_plan_id ${user_plan_id}`)
         await t.rollback()
         return res.status(400).json({
           error: `Class ${class_name} not applicable for user_plan_id ${user_plan_id}`,
@@ -536,7 +536,7 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
       // 2. Parse date and times
       const when = new Date(date)
       if (isNaN(when.getTime())) {
-        //console.log('❌ Invalid date format')
+        console.log('❌ Invalid date format')
         await t.rollback()
         return res
           .status(400)
