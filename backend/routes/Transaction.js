@@ -252,7 +252,7 @@ router.get('/gst-summary', async (req, res) => {
       FROM public."transaction"
       WHERE ${where.join(' AND ')}
       GROUP BY TO_CHAR(payment_date, 'YYYY-MM')
-      ORDER BY month;
+      ORDER BY month DESC;
     `
     const data = await sequelize.query(query, {
       replacements: { from, to },
