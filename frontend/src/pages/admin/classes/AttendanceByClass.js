@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Grid,
   Card,
@@ -10,10 +10,8 @@ import {
   MenuItem,
   CircularProgress,
   Checkbox,
-  List,
   ListItem,
   ListItemText,
-  ListItemIcon,
   Typography,
   Button,
   Stack,
@@ -26,6 +24,7 @@ import {
   Alert,
 } from "@mui/material";
 import { Fetch } from "../../../utils/Fetch";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 export default function AttendanceByClass() {
   const isMobile = useMediaQuery("(max-width:600px)");
@@ -46,60 +45,59 @@ export default function AttendanceByClass() {
   const [loadingUsers, setLoadingUsers] = useState(false);
 
   const [search, setSearch] = useState("");
-  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const [cronTime, setCronTime] = useState("00:00");
+  const [selectedUserIds, setSelectedUserIds] = useState(new Set());
+
   const [cronLoading, setCronLoading] = useState(false);
   const [cronMessage, setCronMessage] = useState("");
+
+  /* -------------------- EFFECTS -------------------- */
 
   useEffect(() => {
     loadClasses();
   }, []);
 
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  /* -------------------- API -------------------- */
+
   const loadClasses = async () => {
     setLoadingClasses(true);
     try {
-      const res = await Fetch({
-        url: "/zoom/api/classes",
-        method: "GET",
-      });
-
-      const grouped = groupClasses(res.data || []);
-      setClasses(grouped);
+      const res = await Fetch({ url: "/zoom/api/classes", method: "GET" });
+      setClasses(groupClasses(res.data || []));
     } catch (e) {
-      console.error("Failed to fetch classes", e);
+      console.error(e);
     }
     setLoadingClasses(false);
   };
 
-  const loadClassUsers = async (classIds) => {
-    if (!classIds || classIds.length === 0) return;
+  const loadClassUsers = async () => {
     setLoadingUsers(true);
-
     try {
-      const res = await Fetch({
-        url: "/user/get-class-users",
-        method: "GET",
-      });
-      console.log(res.data.users);
-      setClassUsers(res.data.users);
+      const res = await Fetch({ url: "/user/get-class-users", method: "GET" });
+      setClassUsers(res.data.users || []);
     } catch (e) {
-      console.error("Failed to load class users", e);
+      console.error(e);
     }
     setLoadingUsers(false);
   };
 
+  /* -------------------- HELPERS -------------------- */
+
   const groupClasses = (classes) => {
     const map = {};
-
     classes.forEach((c) => {
       const times = Array.isArray(c.recurring_start_time)
         ? c.recurring_start_time
         : [c.recurring_start_time];
 
       times.forEach((time) => {
-        const key = `${c.zoom_class_name}__${time}`;
-
+        const key = `${c.zoom_class_name}_${time}`;
         if (!map[key]) {
           map[key] = {
             label: `${c.zoom_class_name} (${time})`,
@@ -108,11 +106,9 @@ export default function AttendanceByClass() {
             class_ids: [],
           };
         }
-
         map[key].class_ids.push(c.zoom_class_id);
       });
     });
-
     return Object.values(map);
   };
 
@@ -120,176 +116,100 @@ export default function AttendanceByClass() {
     const group = classes[index];
     setSelectedClassIndex(index);
     setSelectedClassName(group.class_name);
-
     setSelectedStartTime(group.start_time);
     handleStartTimeChange(group.start_time);
-    setSelectedUsers([]);
-
-    loadClassUsers(group.class_ids);
+    setSelectedUserIds(new Set());
+    loadClassUsers();
   };
 
   const handleStartTimeChange = (time) => {
-    setSelectedStartTime(time);
-
     if (!time) return;
-
     const [h, m] = time.split(":").map(Number);
-    const minutes = h * 60 + m;
-    const end = minutes + 60;
-    const endH = String(Math.floor(end / 60)).padStart(2, "0");
-    const endM = String(end % 60).padStart(2, "0");
-
-    setEndTime(`${endH}:${endM}`);
+    const end = h * 60 + m + 60;
+    setEndTime(
+      `${String(Math.floor(end / 60)).padStart(2, "0")}:${String(
+        end % 60
+      ).padStart(2, "0")}`
+    );
     setDuration(60);
   };
 
-  const toggleUser = (user) => {
-    const exists = selectedUsers.find((u) => u.user_id === user.user_id);
-    if (exists) {
-      setSelectedUsers((prev) =>
-        prev.filter((u) => u.user_id !== user.user_id)
-      );
-    } else {
-      setSelectedUsers((prev) => [...prev, user]);
-    }
-  };
+  const toggleUser = useCallback((userId) => {
+    setSelectedUserIds((prev) => {
+      const copy = new Set(prev);
+      copy.has(userId) ? copy.delete(userId) : copy.add(userId);
+      return copy;
+    });
+  }, []);
 
-  const filteredUsers = classUsers?.filter((u) =>
-    u.name.toLowerCase().includes(search.toLowerCase())
-  );
+  /* -------------------- MEMOIZED DATA -------------------- */
+
+  const filteredUsers = useMemo(() => {
+    if (!debouncedSearch) return classUsers;
+    const s = debouncedSearch.toLowerCase();
+    return classUsers.filter((u) => u.name.toLowerCase().includes(s));
+  }, [classUsers, debouncedSearch]);
+
+  const selectedUsers = useMemo(() => {
+    return classUsers.filter((u) => selectedUserIds.has(u.user_id));
+  }, [classUsers, selectedUserIds]);
+
+  /* -------------------- VIRTUAL ROW -------------------- */
+
+  const parentRef = React.useRef(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: filteredUsers.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => (isMobile ? 88 : 64),
+    overscan: 10,
+  });
+
+  /* -------------------- SUBMIT -------------------- */
 
   const handleSubmit = async () => {
-    if (
-      !selectedClassName ||
-      !selectedStartTime ||
-      selectedUsers.length === 0 ||
-      !selectedDate
-    )
-      return alert("Missing fields");
+    if (!selectedUsers.length) return alert("No users selected");
 
-    const payload = {
-      entries: {
-        class_name: selectedClassName,
-        class_type: "recurring",
-        join_time: selectedStartTime,
-        leave_time: endTime,
-        duration_minutes: duration,
-        date: selectedDate,
-        users: selectedUsers.map((u) => ({
-          user_id: u.user_id,
-          plan_id: u.plan_id,
-          user_plan_id: u.user_plan_id,
-        })),
-        institute_id: 3,
+    await Fetch({
+      url: "/class-attendance/admin/log-attendance-by-class",
+      method: "POST",
+      data: {
+        entries: {
+          class_name: selectedClassName,
+          class_type: "recurring",
+          join_time: selectedStartTime,
+          leave_time: endTime,
+          duration_minutes: duration,
+          date: selectedDate,
+          institute_id: 3,
+          users: selectedUsers.map((u) => ({
+            user_id: u.user_id,
+            plan_id: u.plan_id,
+            user_plan_id: u.user_plan_id,
+          })),
+        },
       },
-    };
+    });
 
-    try {
-      await Fetch({
-        url: "/class-attendance/admin/log-attendance-by-class",
-        method: "POST",
-        data: payload,
-      });
-      alert("Attendance saved!");
-      setSelectedUsers([]);
-    } catch (e) {
-      console.error(e);
-      alert("Error submitting attendance");
-    }
+    alert("Attendance saved!");
+    setSelectedUserIds(new Set());
   };
 
-  const handleTriggerCron = async () => {
-    setCronLoading(true);
-    setCronMessage("");
-    try {
-      const res = await Fetch({
-        url: "/cron/update-plan-statuses",
-        method: "POST",
-      });
-      setCronMessage({
-        type: "success",
-        text: `Cron job executed successfully. ${res.data.userPlansUpdated} plans updated, ${res.data.attendanceRecordsUpdated} attendance records updated, ${res.data.emailsSent} emails sent.`,
-      });
-    } catch (e) {
-      console.error("Failed to trigger cron job", e);
-      setCronMessage({
-        type: "error",
-        text: "Failed to trigger cron job. Please try again.",
-      });
-    }
-    setCronLoading(false);
-  };
+  /* -------------------- UI -------------------- */
 
   return (
-    <Card
-      variant="outlined"
-      sx={{
-        p: isMobile ? 1 : 2,
-        borderRadius: 2,
-      }}
-    >
-      <CardContent sx={{ p: isMobile ? 1 : 2 }}>
-        <Typography variant={isMobile ? "subtitle1" : "h6"} mb={2}>
-          Enter Attendance by Class
-        </Typography>
+    <Card variant="outlined">
+      <CardContent>
+        <Typography variant="h6">Enter Attendance by Class</Typography>
 
-        {/* CRON JOB CONTROLS */}
-        <Card
-          variant="outlined"
-          sx={{
-            p: isMobile ? 1.5 : 2,
-            mb: 3,
-            backgroundColor: "#f9f9f9",
-            border: "1px solid #e0e0e0",
-          }}
-        >
-          <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
-            Update Plan Statuses and Send Email Notifications
-          </Typography>
-
-          <Grid container spacing={isMobile ? 1.5 : 2} alignItems="flex-end">
-            <Grid item xs={12} sm={8}>
-              <Stack direction="row" spacing={1}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleTriggerCron}
-                  disabled={cronLoading}
-                  size={isMobile ? "small" : "medium"}
-                  fullWidth={isMobile}
-                >
-                  {cronLoading ? (
-                    <>
-                      <CircularProgress size={20} sx={{ mr: 1 }} />
-                      Running...
-                    </>
-                  ) : (
-                    "Trigger Now"
-                  )}
-                </Button>
-              </Stack>
-            </Grid>
-          </Grid>
-
-          {cronMessage && (
-            <Alert
-              severity={cronMessage.type}
-              sx={{ mt: 2 }}
-              onClose={() => setCronMessage("")}
-            >
-              {cronMessage.text}
-            </Alert>
-          )}
-        </Card>
-
-        {/* CLASS SELECTION */}
-        <Grid container spacing={isMobile ? 1.5 : 2}>
+        {/* CLASS SELECT */}
+        <Grid container spacing={2} mt={1}>
           <Grid item xs={12} sm={3}>
-            <FormControl fullWidth size={isMobile ? "small" : "medium"}>
+            <FormControl fullWidth>
               <InputLabel>Class</InputLabel>
               <Select
-                label="Class"
                 value={selectedClassIndex}
+                label="Class"
                 onChange={(e) => handleClassChange(e.target.value)}
               >
                 {loadingClasses ? (
@@ -310,246 +230,146 @@ export default function AttendanceByClass() {
           <Grid item xs={12} sm={3}>
             <TextField
               fullWidth
-              label="Class Name"
-              value={selectedClassName}
-              size={isMobile ? "small" : "medium"}
-              disabled
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={3}>
-            <TextField
-              fullWidth
               label="Date"
               type="date"
               value={selectedDate}
-              size={isMobile ? "small" : "medium"}
               onChange={(e) => setSelectedDate(e.target.value)}
               InputLabelProps={{ shrink: true }}
             />
           </Grid>
-
-          <Grid item xs={12} sm={3}>
-            <TextField
-              fullWidth
-              label="Start Time"
-              value={selectedStartTime}
-              size={isMobile ? "small" : "medium"}
-              disabled
-            />
-          </Grid>
-
-          <Grid item xs={6} sm={2}>
-            <TextField
-              fullWidth
-              label="End Time"
-              value={endTime}
-              size={isMobile ? "small" : "medium"}
-              disabled
-            />
-          </Grid>
-
-          <Grid item xs={6} sm={2}>
-            <TextField
-              fullWidth
-              label="Duration"
-              value={duration}
-              size={isMobile ? "small" : "medium"}
-              disabled
-            />
-          </Grid>
         </Grid>
 
-        {/* USER SEARCH */}
+        {/* USERS */}
         {selectedClassIndex !== "" && (
           <>
-            <Typography
-              mt={3}
-              mb={1}
-              fontWeight={600}
-              variant={isMobile ? "body2" : "body1"}
-            >
-              Students in this class
-            </Typography>
-
             <TextField
               fullWidth
               placeholder="Search student..."
               value={search}
-              size={isMobile ? "small" : "medium"}
               onChange={(e) => setSearch(e.target.value)}
-              sx={{ mb: 2 }}
+              sx={{ mt: 2, mb: 1 }}
             />
 
             {loadingUsers ? (
               <CircularProgress />
             ) : (
-              <List
-                dense={isMobile}
-                sx={{
-                  maxHeight: isMobile ? 250 : 300,
-                  overflowY: "auto",
+              <div
+                ref={parentRef}
+                style={{
+                  height: isMobile ? 250 : 350,
+                  overflow: "auto",
                   border: "1px solid #eee",
-                  borderRadius: 1,
+                  borderRadius: 4,
                 }}
               >
-                {filteredUsers.length === 0 && (
-                  <Typography p={1}>No students found</Typography>
-                )}
+                <div
+                  style={{
+                    height: `${rowVirtualizer.getTotalSize()}px`,
+                    width: "100%",
+                    position: "relative",
+                  }}
+                >
+                  {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                    const u = filteredUsers[virtualRow.index];
+                    const noPlan =
+                      u.classes_allowed === 0 || u.classes_allowed === null;
+                    const checked = selectedUserIds.has(u.user_id);
 
-                {filteredUsers.map((u) => (
-                  <ListItem
-                    key={u.user_id}
-                    disablePadding={isMobile}
-                    secondaryAction={
-                      <Checkbox
-                        checked={
-                          !!selectedUsers.find(
-                            (sel) => sel.user_id === u.user_id
-                          )
-                        }
-                        onChange={() => toggleUser(u)}
-                      />
-                    }
-                    sx={{
-                      border:
-                        u.classes_allowed === 0 || u.classes_allowed === null
-                          ? "2px solid red"
-                          : "none",
-                      borderRadius: 1,
-                      mb:
-                        u.classes_allowed === 0 || u.classes_allowed === null
-                          ? 1
-                          : 0,
-                      backgroundColor:
-                        u.classes_allowed === 0 || u.classes_allowed === null
-                          ? "rgba(255, 0, 0, 0.05)"
-                          : "transparent",
-                    }}
-                  >
-                    <ListItemIcon>
-                      <Checkbox
-                        checked={
-                          !!selectedUsers.find(
-                            (sel) => sel.user_id === u.user_id
-                          )
-                        }
-                        onChange={() => toggleUser(u)}
-                      />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={`${u.name} (ID: ${u.user_id})${u.classes_allowed === 0 || u.classes_allowed === null ? " ⚠️ No Active Plan" : ""}`}
-                      primaryTypographyProps={{
-                        fontSize: isMobile ? 13 : 14,
-                        fontWeight:
-                          u.classes_allowed === 0 || u.classes_allowed === null
-                            ? 600
-                            : 400,
-                        color:
-                          u.classes_allowed === 0 || u.classes_allowed === null
-                            ? "error"
-                            : "inherit",
-                      }}
-                      secondary={`Phone: ${u.phone || "N/A"} | Classes Remaining: ${u.classes_remaining || 0}`}
-                      secondaryTypographyProps={{
-                        fontSize: isMobile ? 11 : 12,
-                      }}
-                    />
-                  </ListItem>
-                ))}
-              </List>
+                    return (
+                      <div
+                        key={u.user_id}
+                        ref={rowVirtualizer.measureElement}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          transform: `translateY(${virtualRow.start}px)`,
+                        }}
+                      >
+                        <ListItem
+                          secondaryAction={
+                            <Checkbox
+                              checked={checked}
+                              onChange={() => toggleUser(u.user_id)}
+                            />
+                          }
+                          sx={{
+                            border: noPlan ? "2px solid red" : "none",
+                            backgroundColor: noPlan
+                              ? "rgba(255,0,0,0.05)"
+                              : "transparent",
+                          }}
+                        >
+                          <ListItemText
+                            primary={`${u.name} (ID: ${u.user_id})${
+                              noPlan ? " ⚠️ No Active Plan" : ""
+                            }`}
+                            secondary={`Phone: ${u.phone || "N/A"} | Remaining: ${
+                              u.classes_remaining || 0
+                            }`}
+                          />
+                        </ListItem>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             )}
           </>
         )}
 
-        {/* SELECTED USERS */}
+        {/* SELECTED TABLE */}
         {selectedUsers.length > 0 && (
           <>
-            <Typography mt={3} mb={1} fontWeight={600}>
+            <Typography mt={3} fontWeight={600}>
               Selected Students ({selectedUsers.length})
             </Typography>
 
-            <div style={{ overflowX: "auto" }}>
-              <Table
-                size="small"
-                sx={{
-                  minWidth: isMobile ? 600 : "100%",
-                  border: "1px solid #eee",
-                }}
-              >
-                <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Plan Name</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
-                      Validity From
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Plan</TableCell>
+                  <TableCell>Validity</TableCell>
+                  <TableCell>Remaining</TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {selectedUsers.map((u) => (
+                  <TableRow key={u.user_id}>
+                    <TableCell>{u.name}</TableCell>
+                    <TableCell>{u.plan_name}</TableCell>
+                    <TableCell>
+                      {u.validity_from
+                        ? new Date(u.validity_from).toLocaleDateString()
+                        : "N/A"}{" "}
+                      –{" "}
+                      {u.validity_to
+                        ? new Date(u.validity_to).toLocaleDateString()
+                        : "N/A"}
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Validity To</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
-                      Classes Remaining
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}> Phone</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}> Email ID</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600 }}>
-                      Action
+                    <TableCell>{u.classes_remaining || 0}</TableCell>
+                    <TableCell>
+                      <Button
+                        color="error"
+                        onClick={() => toggleUser(u.user_id)}
+                      >
+                        Remove
+                      </Button>
                     </TableCell>
                   </TableRow>
-                </TableHead>
-
-                <TableBody>
-                  {selectedUsers.map((u) => {
-                    // Find the active plan details
-                    const planName = u.plan_name || "N/A";
-                    const validityFrom = u.validity_from
-                      ? new Date(u.validity_from).toLocaleDateString()
-                      : "N/A";
-                    const validityTo = u.validity_to
-                      ? new Date(u.validity_to).toLocaleDateString()
-                      : "N/A";
-
-                    return (
-                      <TableRow key={u.user_id}>
-                        <TableCell>{u.name}</TableCell>
-                        <TableCell>{planName}</TableCell>
-                        <TableCell>{validityFrom}</TableCell>
-                        <TableCell>{validityTo}</TableCell>
-                        <TableCell>{u.classesRemaining || 0}</TableCell>
-                        <TableCell>{u.phone || "N/A"}</TableCell>
-                        <TableCell>{u.email || "N/A"}</TableCell>
-                        <TableCell align="center">
-                          <Button
-                            color="error"
-                            size={isMobile ? "small" : "medium"}
-                            onClick={() =>
-                              setSelectedUsers((prev) =>
-                                prev.filter((x) => x.user_id !== u.user_id)
-                              )
-                            }
-                          >
-                            Remove
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
+                ))}
+              </TableBody>
+            </Table>
           </>
         )}
 
-        {/* SUBMIT */}
-        <Stack mt={3} direction="row" justifyContent="flex-end">
+        <Stack mt={3} alignItems="flex-end">
           <Button
             variant="contained"
-            size={isMobile ? "small" : "medium"}
-            fullWidth={isMobile}
-            disabled={
-              selectedClassIndex === "" ||
-              !selectedStartTime ||
-              !selectedDate ||
-              selectedUsers.length === 0
-            }
+            disabled={!selectedUsers.length}
             onClick={handleSubmit}
           >
             Submit Attendance
