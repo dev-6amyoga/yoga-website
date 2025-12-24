@@ -913,7 +913,6 @@ router.get('/get-class-users', async (req, res) => {
       SELECT *
       FROM user_plan
       WHERE user_id = uipr.user_id
-        AND institute_id = uipr.institute_id
         AND current_status IN ('ACTIVE', 'EXPIRED_BY_DATE', 'EXPIRED_BY_USAGE')
       ORDER BY
       CASE
