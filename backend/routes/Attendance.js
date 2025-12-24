@@ -234,213 +234,56 @@ router.get('/api/attendance/:userId', async (req, res) => {
     const { userId } = req.params
     console.log('=== /api/attendance START ===')
     console.log('userId:', userId)
-
-    const today = moment().tz('Asia/Kolkata').startOf('day')
-    console.log('today:', today.format())
-
-    // 1. Check UserPlanAttendance first
-    console.log('Step 1: Fetching UserPlanAttendance records...')
-    let userPlanAttendanceRecords = await UserPlanAttendance.findAll({
-      where: { user_id: userId },
-    })
-    let activeUserPlanAttendanceRecords = await UserPlanAttendance.findAll({
-      where: { user_id: userId, status: 'ACTIVE' },
-    })
-    console.log(
-      `Found ${userPlanAttendanceRecords.length} UserPlanAttendance records`
-    )
-    userPlanAttendanceRecords.forEach((r, i) => {
-      console.log(
-        `  [${i}] user_plan_id: ${r.user_plan_id}, status: ${r.status}, classes_attended: ${r.classes_attended}, classes_allowed: ${r.classes_allowed}`
-      )
-    })
-
-    // 2. If no UserPlanAttendance rows exist, check for ACTIVE UserPlan entries
-    if (userPlanAttendanceRecords.length === 0) {
-      console.log(
-        'Step 2: No UserPlanAttendance records found, checking for ACTIVE UserPlans...'
-      )
-      const activeUserPlans = await UserPlan.findAll({
-        where: {
-          user_id: userId,
-          current_status: 'ACTIVE',
-        },
-      })
-      console.log(`Found ${activeUserPlans.length} ACTIVE UserPlans`)
-      activeUserPlans.forEach((p, i) => {
-        console.log(
-          `  [${i}] user_plan_id: ${p.user_plan_id}, plan_id: ${p.plan_id}, validity: ${moment(p.validity_from).format('YYYY-MM-DD')} to ${moment(p.validity_to).format('YYYY-MM-DD')}`
-        )
-      })
-
-      // 3. For each ACTIVE UserPlan, create UserPlanAttendance if it doesn't exist
-      console.log(
-        'Step 3: Creating UserPlanAttendance records for ACTIVE UserPlans...'
-      )
-      for (const userPlan of activeUserPlans) {
-        console.log(`  Processing user_plan_id: ${userPlan.user_plan_id}`)
-        const plan = await Plan.findByPk(userPlan.plan_id)
-        console.log(`    Plan found: ${plan ? 'yes' : 'no'}`)
-
-        if (plan) {
-          console.log(
-            `    Creating UserPlanAttendance: classes_allowed=${plan.number_of_zoom_classes || 0}`
-          )
-          await UserPlanAttendance.create({
-            user_id: userId,
-            plan_id: userPlan.plan_id,
-            user_plan_id: userPlan.user_plan_id,
-            start_date: userPlan.validity_from,
-            expiry_date: userPlan.validity_to,
-            classes_allowed: plan.number_of_zoom_classes || 0,
-            classes_attended: 0,
-            status: 'ACTIVE',
-          })
-          console.log(`    ✓ UserPlanAttendance created`)
-        }
+    const classAttendanceData = await sequelize.query(
+      `
+        SELECT
+          ca.*,
+          COUNT(*) FILTER (WHERE EXTRACT(DOW FROM ca."date") = 1)
+            OVER (PARTITION BY ca.user_id) AS monday,
+          COUNT(*) FILTER (WHERE EXTRACT(DOW FROM ca."date") = 2)
+            OVER (PARTITION BY ca.user_id) AS tuesday,
+          COUNT(*) FILTER (WHERE EXTRACT(DOW FROM ca."date") = 3)
+            OVER (PARTITION BY ca.user_id) AS wednesday,
+          COUNT(*) FILTER (WHERE EXTRACT(DOW FROM ca."date") = 4)
+            OVER (PARTITION BY ca.user_id) AS thursday,
+          COUNT(*) FILTER (WHERE EXTRACT(DOW FROM ca."date") = 5)
+            OVER (PARTITION BY ca.user_id) AS friday,
+          COUNT(*) FILTER (WHERE EXTRACT(DOW FROM ca."date") = 6)
+            OVER (PARTITION BY ca.user_id) AS saturday,
+          COUNT(*) FILTER (WHERE EXTRACT(DOW FROM ca."date") = 0)
+            OVER (PARTITION BY ca.user_id) AS sunday
+        FROM class_attendance ca
+        WHERE ca.user_id = :userId
+        ORDER BY ca."date" DESC;
+      `,
+      {
+        replacements: { userId: userId },
+        type: sequelize.QueryTypes.SELECT,
       }
-
-      // Fetch newly created records
-      console.log(
-        'Step 3b: Fetching newly created UserPlanAttendance records...'
-      )
-      userPlanAttendanceRecords = await UserPlanAttendance.findAll({
-        where: { user_id: userId },
-      })
-      console.log(
-        `Found ${userPlanAttendanceRecords.length} records after creation`
-      )
-    }
-
-    // Update status to EXPIRED if expiry_date is past
-    console.log('Step 4: Updating expired status records...')
-    let expiredCount = 0
-    for (const record of userPlanAttendanceRecords) {
-      const expiryDate = moment(record.expiry_date)
-        .tz('Asia/Kolkata')
-        .startOf('day')
-      console.log(
-        `  Checking record user_plan_id: ${record.user_plan_id}, expiry: ${expiryDate.format()}, today: ${today.format()}, isBefore: ${expiryDate.isBefore(today)}, current status: ${record.status}`
-      )
-      if (expiryDate.isBefore(today) && record.status !== 'EXPIRED') {
-        console.log(`    Updating to EXPIRED`)
-        await UserPlanAttendance.update(
-          { status: 'EXPIRED' },
-          { where: { user_plan_id: record.user_plan_id } }
-        )
-        record.status = 'EXPIRED'
-        expiredCount++
+    )
+    const userPlanAttendanceData = await sequelize.query(
+      `
+        SELECT
+          upa.*,
+          up.*,
+          p.*
+        FROM user_plan_attendance upa
+        JOIN user_plan up
+          ON upa.user_plan_id = up.user_plan_id
+        JOIN plan p
+          ON p.plan_id = up.plan_id
+        WHERE up.current_status = 'ACTIVE'
+          AND up.user_id = :userId;
+      `,
+      {
+        replacements: { userId: userId },
+        type: sequelize.QueryTypes.SELECT,
       }
+    )
+    const userPlanDataWithPlans = {
+      userPlanAttendanceData: userPlanAttendanceData,
+      classAttendanceData: classAttendanceData,
     }
-    console.log(`Updated ${expiredCount} records to EXPIRED status`)
-
-    // 4. Check for ClassAttendance records
-    console.log('Step 5: Fetching ClassAttendance records...')
-    const classAttendanceRecords = await ClassAttendance.findAll({
-      where: { user_id: userId },
-      order: [['date', 'DESC']],
-    })
-    console.log(
-      `Found ${classAttendanceRecords.length} ClassAttendance records`
-    )
-    classAttendanceRecords.slice(0, 5).forEach((r, i) => {
-      console.log(
-        `  [${i}] class_id: ${r.class_id}, date: ${moment(r.date).format('YYYY-MM-DD')}, user_plan_id: ${r.user_plan_id}`
-      )
-    })
-
-    // 5. If ClassAttendance records exist, enrich them with plan and userPlanAttendance
-    if (classAttendanceRecords.length > 0) {
-      console.log('Step 6: Enriching ClassAttendance records...')
-      const enriched = await Promise.all(
-        classAttendanceRecords.map(async (rec, idx) => {
-          const recJson = rec.toJSON ? rec.toJSON() : rec
-          console.log(`  [${idx}] Enriching class_id: ${recJson.class_id}`)
-          const [cls, plan, upa] = await Promise.all([
-            ZoomClassModel.findByPk(recJson.class_id),
-            Plan.findByPk(recJson.plan_id),
-            recJson.user_plan_id
-              ? UserPlanAttendance.findOne({
-                  where: {
-                    user_plan_id: recJson.user_plan_id,
-                  },
-                })
-              : Promise.resolve(null),
-          ])
-          console.log(
-            `    class found: ${cls ? 'yes' : 'no'}, plan found: ${plan ? 'yes' : 'no'}, upa found: ${upa ? 'yes' : 'no'}`
-          )
-          return {
-            activeUserPlan: activeUserPlanAttendanceRecords,
-            metaData: {
-              ...recJson,
-              class: cls ? (cls.toJSON ? cls.toJSON() : cls) : null,
-              plan: plan ? (plan.toJSON ? plan.toJSON() : plan) : null,
-              userPlanAttendance: upa
-                ? upa.toJSON
-                  ? upa.toJSON()
-                  : upa
-                : null,
-            },
-          }
-        })
-      )
-
-      console.log(
-        `Returning ${enriched.length} enriched ClassAttendance records`
-      )
-
-      console.log(
-        'Step 6b: Including UserPlanAttendance records without ClassAttendance...'
-      )
-      const usedUserPlanIds = new Set(enriched.map((e) => e.user_plan_id))
-      const unusedUPARecords = userPlanAttendanceRecords.filter(
-        (upa) => !usedUserPlanIds.has(upa.user_plan_id)
-      )
-
-      console.log(
-        `Found ${unusedUPARecords.length} UserPlanAttendance records without ClassAttendance`
-      )
-
-      const upaWithPlans = await Promise.all(
-        unusedUPARecords.map(async (upa) => {
-          console.log(`  Fetching plan for user_plan_id: ${upa.user_plan_id}`)
-          const plan = await Plan.findByPk(upa.plan_id)
-          return {
-            userPlanAttendance: upa ? (upa.toJSON ? upa.toJSON() : upa) : null,
-            plan: plan ? (plan.toJSON ? plan.toJSON() : plan) : null,
-          }
-        })
-      )
-
-      const allResults = [...enriched, ...upaWithPlans]
-
-      console.log('=== /api/attendance END (ClassAttendance path) ===\n')
-      return res.status(200).json(allResults)
-    }
-
-    // 6. If no ClassAttendance records, return UserPlanAttendance and Plan data
-    console.log(
-      'Step 6 (alternate): No ClassAttendance found, returning UserPlanAttendance with Plans...'
-    )
-    const userPlanDataWithPlans = await Promise.all(
-      userPlanAttendanceRecords.map(async (upa, idx) => {
-        console.log(
-          `  [${idx}] Fetching plan for user_plan_id: ${upa.user_plan_id}, plan_id: ${upa.plan_id}`
-        )
-        const plan = await Plan.findByPk(upa.plan_id)
-        console.log(`    plan found: ${plan ? 'yes' : 'no'}`)
-        return {
-          userPlanAttendance: upa ? (upa.toJSON ? upa.toJSON() : upa) : null,
-          plan: plan ? (plan.toJSON ? plan.toJSON() : plan) : null,
-        }
-      })
-    )
-
-    console.log(
-      `Returning ${userPlanDataWithPlans.length} UserPlanAttendance records with Plans`
-    )
-    console.log('=== /api/attendance END (UserPlanAttendance path) ===\n')
     res.status(200).json(userPlanDataWithPlans)
   } catch (err) {
     console.error('=== /api/attendance ERROR ===')

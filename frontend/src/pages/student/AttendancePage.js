@@ -24,7 +24,8 @@ import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function AttendancePage() {
-  const [attendanceData, setAttendanceData] = useState([]);
+  const [classAttendance, setClassAttendance] = useState([]);
+  const [userPlanAttendance, setUserPlanAttendance] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const user = useUserStore((s) => s.user);
@@ -41,11 +42,10 @@ export default function AttendancePage() {
           url: `/class-attendance/api/attendance/${user.user_id}`,
           method: "GET",
         });
-        // ensure sorted newest first
-        const data = (response.data || []).sort(
-          (a, b) => new Date(b.date) - new Date(a.date)
+        setClassAttendance(response.data.classAttendanceData || []);
+        setUserPlanAttendance(
+          response.data.userPlanAttendanceData?.[0] || null
         );
-        setAttendanceData(data);
       } catch (err) {
         setError("Failed to fetch attendance data");
       } finally {
@@ -57,52 +57,56 @@ export default function AttendancePage() {
   }, [user]);
 
   const stats = useMemo(() => {
-    if (!attendanceData || attendanceData.length === 0) return null;
-    const userPlanAttendance =
-      attendanceData.find((r) => r.userPlanAttendance) ||
-      attendanceData[0]?.userPlanAttendance ||
-      null;
-    //console.log(userPlanAttendance);
+    if (!classAttendance.length) return null;
 
-    const totalAllowed = userPlanAttendance
-      ? Number(userPlanAttendance.userPlanAttendance.classes_allowed || 0)
-      : null;
+    const totalAllowed =
+      userPlanAttendance?.classes_allowed != null
+        ? Number(userPlanAttendance.classes_allowed)
+        : null;
 
-    const classesAttended = userPlanAttendance
-      ? Number(userPlanAttendance.userPlanAttendance.classes_attended || 0)
-      : null;
+    const classesAttended =
+      userPlanAttendance?.classes_attended != null
+        ? Number(userPlanAttendance.classes_attended)
+        : 0;
 
-    const classesRemaining = totalAllowed - classesAttended;
+    const classesRemaining =
+      totalAllowed != null ? totalAllowed - classesAttended : null;
 
     const percentUsed =
       totalAllowed && totalAllowed > 0
         ? Math.round((classesAttended / totalAllowed) * 100)
         : null;
 
-    const lastAttended = attendanceData[0]
-      ? new Date(attendanceData[0].date)
+    const lastAttended = classAttendance[0]
+      ? new Date(classAttendance[0].date)
       : null;
 
-    const weekdayCounts = new Array(7).fill(0);
-    attendanceData.forEach((r) => {
-      const d = new Date(r.date);
-      weekdayCounts[d.getDay()] += 1;
-    });
+    // 👇 DIRECTLY FROM SQL (no recompute)
+    const weekdayCounts = [
+      classAttendance[0].sunday ?? 0,
+      classAttendance[0].monday ?? 0,
+      classAttendance[0].tuesday ?? 0,
+      classAttendance[0].wednesday ?? 0,
+      classAttendance[0].thursday ?? 0,
+      classAttendance[0].friday ?? 0,
+      classAttendance[0].saturday ?? 0,
+    ];
+
+    // streak logic (unchanged)
+    const datesSet = new Set(
+      classAttendance.map((r) => new Date(r.date).toISOString().slice(0, 10))
+    );
 
     let streak = 0;
-    const datesSet = new Set(
-      attendanceData.map((r) => new Date(r.date).toISOString().slice(0, 10))
-    );
-    let dayCursor = new Date().toISOString().slice(0, 10);
-    while (datesSet.has(dayCursor)) {
+    let cursor = new Date().toISOString().slice(0, 10);
+    while (datesSet.has(cursor)) {
       streak++;
-      const dt = new Date(dayCursor + "T00:00:00");
-      dt.setDate(dt.getDate() - 1);
-      dayCursor = dt.toISOString().slice(0, 10);
+      const d = new Date(cursor + "T00:00:00");
+      d.setDate(d.getDate() - 1);
+      cursor = d.toISOString().slice(0, 10);
     }
 
     return {
-      userPlanAttendance,
       totalAllowed,
       classesAttended,
       classesRemaining,
@@ -111,7 +115,7 @@ export default function AttendancePage() {
       weekdayCounts,
       streak,
     };
-  }, [attendanceData]);
+  }, [classAttendance, userPlanAttendance]);
 
   if (loading)
     return (
@@ -145,18 +149,12 @@ export default function AttendancePage() {
                   </Typography>
                 ) : (
                   <Stack spacing={2} sx={{ mt: 2 }}>
-                    {/* PLAN NAME */}
                     <Typography variant="body2" color="text.secondary">
                       Plan:{" "}
-                      {stats.userPlanAttendance?.plan_id
-                        ? `Plan #${stats.userPlanAttendance.plan_id}`
-                        : "—"}{" "}
-                      {attendanceData[0]?.plan?.name
-                        ? `— ${attendanceData[0].plan.name}`
-                        : ""}
+                      {userPlanAttendance
+                        ? `${userPlanAttendance.name} (Plan #${userPlanAttendance.plan_id})`
+                        : "—"}
                     </Typography>
-
-                    {/* CLASSES ATTENDED */}
                     <Box>
                       <Typography variant="caption">
                         Classes attended
@@ -283,7 +281,7 @@ export default function AttendancePage() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {attendanceData.map((record) => (
+                      {classAttendance.map((record) => (
                         <TableRow
                           key={record.id || `${record.user_id}-${record.date}`}
                         >
@@ -291,11 +289,11 @@ export default function AttendancePage() {
                             {new Date(record.date).toLocaleDateString()}
                           </TableCell>
                           <TableCell>
-                            {record.class?.zoom_class_name ??
-                              `#${record.class_id}`}
+                            {record.zoom_class_name ?? `#${record.class_id}`}
                           </TableCell>
+
                           <TableCell>
-                            {record.plan?.name ?? record.plan_id ?? "—"}
+                            {userPlanAttendance?.name ?? record.plan_id ?? "—"}
                           </TableCell>
                           <TableCell>{record.attendance_status}</TableCell>
                           <TableCell>
