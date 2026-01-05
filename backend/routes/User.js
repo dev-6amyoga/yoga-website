@@ -939,7 +939,6 @@ router.get('/get-class-users', async (req, res) => {
         type: sequelize.QueryTypes.SELECT,
       }
     )
-
     res.json({ users })
   } catch (err) {
     console.error('=== /get-class-users ERROR ===')
@@ -947,6 +946,68 @@ router.get('/get-class-users', async (req, res) => {
     console.error('Error stack:', err.stack)
     console.error('Full error:', err)
     console.error('=== /get-class-users END (FAILED) ===\n')
+    return res.status(500).json({ error: 'Failed to load class users' })
+  }
+})
+
+router.get('/get-attendance-stats-all-users', async (req, res) => {
+  try {
+    const results = await sequelize.query(`
+SELECT
+  u.user_id,
+  u.name,
+  u.email,
+  u.phone,
+
+  up.user_plan_id,
+  up.plan_id,
+  p.name AS plan_name,      
+  up.current_status,
+  up.validity_from,
+  up.validity_to,
+
+  upa.classes_allowed,
+  upa.classes_attended,
+  COALESCE(
+    upa.classes_allowed - upa.classes_attended,
+    0
+  ) AS classes_remaining,
+
+  CASE
+    WHEN up.user_plan_id IS NULL THEN false
+    WHEN up.current_status = 'ACTIVE' THEN true
+    ELSE false
+  END AS has_active_plan
+
+FROM "user" u
+
+LEFT JOIN LATERAL (
+  SELECT *
+  FROM user_plan up
+  WHERE up.user_id = u.user_id
+    AND up.current_status = 'ACTIVE'
+  ORDER BY up.validity_to DESC
+  LIMIT 1
+) up ON true
+
+LEFT JOIN plan p
+  ON p.plan_id = up.plan_id    
+
+LEFT JOIN user_plan_attendance upa
+  ON upa.user_plan_id = up.user_plan_id
+  AND upa.status = 'ACTIVE'
+
+ORDER BY
+  has_active_plan DESC,
+  u.name ASC;
+    `)
+    res.json({ results })
+  } catch (err) {
+    console.error('=== /et-attendance-stats-all-userss ERROR ===')
+    console.error('Error message:', err.message)
+    console.error('Error stack:', err.stack)
+    console.error('Full error:', err)
+    console.error('=== /get-attendance-stats-all-users END (FAILED) ===\n')
     return res.status(500).json({ error: 'Failed to load class users' })
   }
 })

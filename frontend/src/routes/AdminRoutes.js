@@ -39,6 +39,7 @@ import JoinClass from "../pages/admin/classes/JoinClass";
 import AdminLogAttendance from "../pages/admin/classes/AdminLogAttendance";
 import ViewClassAttendees from "../pages/admin/classes/ViewClassAttendees";
 import MyIncome from "../pages/admin/transactions/MyIncome";
+import StudentsPlanTable from "../pages/admin/member-management/StudentsPlanTable";
 export const AdminRoutes = [
   {
     path: "/admin",
@@ -163,6 +164,10 @@ export const AdminRoutes = [
   {
     path: "/admin/members/institutes",
     element: <Institutes />,
+  },
+  {
+    path: "/admin/members/students-plans",
+    element: <StudentsPlanTable />,
   },
   {
     path: "/admin/members/teachers",

@@ -31,6 +31,8 @@ const paths = [
       { path: "/admin/log-attendance", title: "Log Attendance" },
 
       { path: "/admin/view-class-attendees", title: "View Class Attendees" },
+
+      { path: "/admin/members/students-plans", title: "Member Details" },
     ],
   },
   {

@@ -280,110 +280,112 @@ router.post(
 )
 
 router.post('/register', authenticateToken, async (req, res) => {
+  console.log('➡️ /user-plan/register called')
+  console.log('🧾 Request body:', JSON.stringify(req.body))
+
   const {
     user_id,
     plan_id,
     institute_id,
-
     purchase_date,
     validity_from = null,
     validity_to = null,
-
     cancellation_date,
     auto_renewal_enabled,
-
     discount_coupon_id,
     referral_code_id,
-
     current_status,
     transaction_order_id,
     is_trial,
     user_type,
   } = req.body
-  //console.log('registering!!')
-  //console.log(req.body)
+
+  // -------- Required fields check ----------
   if (
     !user_id ||
     !plan_id ||
     !purchase_date ||
     !transaction_order_id ||
     !user_type
-  )
+  ) {
+    console.warn('❌ Missing required fields', {
+      user_id,
+      plan_id,
+      purchase_date,
+      transaction_order_id,
+      user_type,
+    })
+
     return res
       .status(HTTP_BAD_REQUEST)
       .json({ error: 'Missing required fields' })
+  }
+
+  // -------- Status / validity logic ----------
+  console.log('📌 Status + validity check', {
+    current_status,
+    validity_from,
+    validity_to,
+  })
 
   if (
     current_status === USER_PLAN_ACTIVE &&
-    (validity_from === null ||
-      validity_from === undefined ||
-      validity_to === null ||
-      validity_to === undefined)
+    (validity_from == null || validity_to == null)
   ) {
-    // if status is active and either valid from or valid to are null;
+    console.warn('❌ ACTIVE plan missing validity dates')
     return res
       .status(HTTP_BAD_REQUEST)
       .json({ error: 'Missing required fields' })
-  } else if (current_status === USER_PLAN_STAGED) {
-  } else {
-    if (
-      current_status !== USER_PLAN_ACTIVE &&
-      current_status !== USER_PLAN_STAGED
-    ) {
-      return res.status(HTTP_BAD_REQUEST).json({ error: 'Invalid status' })
-    }
   }
 
+  if (
+    current_status !== USER_PLAN_ACTIVE &&
+    current_status !== USER_PLAN_STAGED
+  ) {
+    console.warn('❌ Invalid status:', current_status)
+    return res.status(HTTP_BAD_REQUEST).json({ error: 'Invalid status' })
+  }
+
+  // -------- Check existing user plan ----------
   const user_plan = await UserPlan.findOne({
-    where: {
-      user_id: user_id,
-      current_status: current_status,
-    },
+    where: { user_id, current_status },
     attributes: ['user_plan_id', 'user_id', 'validity_from', 'validity_to'],
   })
-  //console.log(user_plan, 'user_plan')
 
-  if (
-    user_plan &&
-    user_plan.current_status === current_status &&
-    current_status === USER_PLAN_ACTIVE
-  )
+  console.log('📎 Existing plan lookup result:', user_plan?.dataValues || null)
+
+  if (user_plan && current_status === USER_PLAN_ACTIVE) {
+    console.warn('❌ User already has active plan')
     return res.status(HTTP_BAD_REQUEST).json({
-      error: `User already has a plan that is ${current_status}; Any payment made will be refunded to your account in 4 to 5 business days.`,
+      error: `User already has a plan that is ${current_status}; Any payment made will be refunded...`,
     })
+  }
+
   const t = await sequelize.transaction()
+
   try {
-    // find plan by id
+    console.log('🔍 Fetching plan + user + role')
+
     let plan = null
     if (plan_id) {
-      plan = await Plan.findOne(
-        {
-          where: { plan_id: plan_id },
-        },
-        { transaction: t }
-      )
+      plan = await Plan.findOne({ where: { plan_id } }, { transaction: t })
       if (!plan) throw new Error("Plan doesn't exist")
-      //console.log(plan, 'plan found')
-    } else {
-      throw new Error("Plan doesn't exist")
     }
 
-    // find user by id
     const user = await User.findOne(
-      {
-        where: { user_id: user_id },
-        attributes: ['user_id'],
-      },
+      { where: { user_id }, attributes: ['user_id'] },
       { transaction: t }
     )
     if (!user) throw new Error("User doesn't exist")
-    //console.log(user, 'user found')
+
     const role = await Role.findOne({
       where: { name: user_type },
       attributes: ['role_id'],
     })
     if (!role) throw new Error("Role doesn't exist")
-    //console.log(role, 'role found')
+
+    console.log('📆 Computing validity_to')
+
     let computed_validity_to = validity_to
     if (validity_from) {
       const fromDate = new Date(validity_from)
@@ -391,27 +393,40 @@ router.post('/register', authenticateToken, async (req, res) => {
       toDate.setDate(fromDate.getDate() + plan.plan_validity_days)
       computed_validity_to = toDate
     }
-    // create userPlan
+
+    console.log('🛠 Creating UserPlan with:', {
+      purchase_date,
+      validity_from,
+      computed_validity_to,
+      current_status,
+      user_id,
+      plan_id,
+      transaction_order_id,
+    })
+
     const newUserPlan = await UserPlan.create(
       {
-        purchase_date: purchase_date,
-        validity_from: validity_from,
+        purchase_date,
+        validity_from,
         validity_to: computed_validity_to,
-        cancellation_date: cancellation_date,
-        auto_renewal_enabled: auto_renewal_enabled,
-        discount_coupon_id: discount_coupon_id,
-        referral_code_id: referral_code_id,
-        user_id: user_id,
-        plan_id: plan_id,
-        is_trial: is_trial,
-        institute_id: institute_id,
-        current_status: current_status,
-        transaction_order_id: transaction_order_id,
-        user_type: user_type,
+        cancellation_date,
+        auto_renewal_enabled,
+        discount_coupon_id,
+        referral_code_id,
+        user_id,
+        plan_id,
+        is_trial,
+        institute_id,
+        current_status,
+        transaction_order_id,
+        user_type,
       },
       { transaction: t }
     )
-    const userPlanAttendance = await UserPlanAttendance.create(
+
+    console.log('📚 Creating attendance + quota')
+
+    await UserPlanAttendance.create(
       {
         user_id,
         plan_id,
@@ -424,45 +439,36 @@ router.post('/register', authenticateToken, async (req, res) => {
       },
       { transaction: t }
     )
-    // add quota
+
     if (current_status === USER_PLAN_ACTIVE) {
       await WatchTimeQuota.create({
         user_plan_id: String(newUserPlan.user_plan_id),
         quota: plan.watch_time_limit,
       })
-
-      // const x = await UserInstitutePlanRole.update(
-      //   {
-      //     user_plan_id: newUserPlan.user_plan_id,
-      //   },
-      //   {
-      //     transaction: t,
-      //     where: {
-      //       user_id: user_id,
-      //       role_id: role.role_id,
-      //       institute_id: institute_id,
-      //     },
-      //   }
-      // )
-
-      // if (x[0] === 0) {
-      //   throw new Error('Failed to update user')
-      // }
     }
+
     await t.commit()
+
+    console.log('✅ User plan registered successfully')
+
     res.status(HTTP_OK).json({
       message: 'User plan registered successfully',
       newUserPlan,
-      userPlanAttendance,
     })
   } catch (error) {
-    console.error(error)
+    console.error('🔥 ERROR in /user-plan/register:', error)
+
     await t.rollback()
+
     switch (error.message) {
       case "Plan doesn't exist":
       case "User doesn't exist":
+      case "Role doesn't exist":
         return res.status(HTTP_BAD_REQUEST).json({ error: 'Invalid request' })
     }
+
+    // fallback just in case
+    return res.status(500).json({ error: 'Server error' })
   }
 })
 
