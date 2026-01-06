@@ -325,53 +325,6 @@ function StudentPlan() {
     }
   }, [user, formattedDate]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await Fetch({
-          url: `/customPlan/getCustomPlansByUser/${user.user_id}`,
-          method: "GET",
-        });
-        if (res.status === 200) {
-          if (res.data.plans?.length > 0) {
-            setCustomPlansForUser(res.data.plans);
-          }
-        }
-      } catch (err) {
-        //console.log(err);
-      }
-    };
-    if (user) {
-      fetchData();
-    }
-  }, [user]);
-
-  const fetchCustomUserPlans = async () => {
-    try {
-      const res = await Fetch({
-        url: `/customUserPlan/getCustomUserPlansByUser/${user.user_id}`,
-        token: true,
-        method: "GET",
-      });
-      if (res.status === 200) {
-        if (res.data.plans) {
-          setCurrentCustomUserPlans(
-            res.data.plans.sort(
-              (a, b) => new Date(b.created_at) - new Date(a.created_at)
-            )
-          );
-        }
-      }
-    } catch (err) {
-      //console.log(err);
-    }
-  };
-  useEffect(() => {
-    if (user) {
-      fetchCustomUserPlans();
-    }
-  }, [user]);
-
   const fetchPlans = useCallback(async () => {
     try {
       const response = await Fetch({
