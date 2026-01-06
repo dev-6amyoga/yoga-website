@@ -492,8 +492,8 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
         const newAttendance = await ClassAttendance.create(
           {
             user_id,
-            plan_id: hasPlan ? plan_id : null,
-            user_plan_id: hasPlan ? user_plan_id : null,
+            plan_id: hasPlan ? plan_id : 999,
+            user_plan_id: hasPlan ? user_plan_id : 999,
             class_id,
             device_id: 'ADMIN_MANUAL',
             date: when,
