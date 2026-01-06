@@ -327,63 +327,37 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
       })
     }
 
-    console.log(`✓ Validation passed`)
-    console.log(`Processing ${entries.users.length} users`)
+    const {
+      class_name,
+      class_type,
+      join_time,
+      leave_time,
+      duration_minutes,
+      date,
+    } = entries
 
     const created = []
     const updatedUserPlans = []
 
-    for (const [userIdx, user] of entries.users.entries()) {
+    for (const user of entries.users) {
       const { user_id, plan_id, user_plan_id } = user
 
-      // Extract from entries, NOT from entries.users[userIdx]
-      const {
-        class_name,
-        date,
-        join_time,
-        leave_time,
-        duration_minutes,
-        class_type,
-      } = entries
-
-      if (!user_id || !plan_id || !user_plan_id || !date) {
-        console.log('❌ Missing required user fields')
+      if (!user_id || !date) {
         await t.rollback()
         return res.status(400).json({
           error: `Missing required fields for user ${user_id}`,
         })
       }
 
-      console.log('✓ User fields validated')
+      const hasPlan = !!(plan_id && user_plan_id)
 
-      // 1. Find the applicable class for this user
-
-      const userApplicableClass = await ZoomClassModel.findOne({
-        where: {
-          plan_id: plan_id,
-          zoom_class_name: class_name,
-          class_type: class_type,
-          recurring_start_time: join_time,
-        },
-        transaction: t,
-      })
-
-      if (!userApplicableClass) {
-        console.log(`❌ Class not found for user_plan_id ${user_plan_id}`)
-        await t.rollback()
-        return res.status(400).json({
-          error: `Class ${class_name} not applicable for user_plan_id ${user_plan_id}`,
-        })
-      }
-
-      // 2. Parse date and times
+      // Parse date + class times
       const when = new Date(date)
       if (isNaN(when.getTime())) {
-        console.log('❌ Invalid date format')
         await t.rollback()
-        return res
-          .status(400)
-          .json({ error: `Invalid date format for user ${user_id}` })
+        return res.status(400).json({
+          error: `Invalid date format for user ${user_id}`,
+        })
       }
 
       const startOfDay = new Date(
@@ -398,136 +372,132 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
       const nextDay = new Date(startOfDay)
       nextDay.setDate(startOfDay.getDate() + 1)
 
-      // Parse join_time (HH:mm format)
-      //console.log(`Parsing join_time: "${join_time}"`)
       let parsedJoinTime = null
-      if (join_time && typeof join_time === 'string') {
-        const [hours, minutes] = join_time.split(':').map(Number)
-        //console.log(`  Hours: ${hours}, Minutes: ${minutes}`)
-        if (!isNaN(hours) && !isNaN(minutes)) {
-          parsedJoinTime = new Date(when)
-          parsedJoinTime.setHours(hours, minutes, 0, 0)
-          //console.log(`  ✓ Parsed: ${parsedJoinTime.toISOString()}`)
-        }
+      if (join_time) {
+        const [h, m] = join_time.split(':').map(Number)
+        parsedJoinTime = new Date(when)
+        parsedJoinTime.setHours(h, m, 0, 0)
       }
 
-      // Parse leave_time (HH:mm format)
-      //console.log(`Parsing leave_time: "${leave_time}"`)
       let parsedLeaveTime = null
-      if (leave_time && typeof leave_time === 'string') {
-        const [hours, minutes] = leave_time.split(':').map(Number)
-        //console.log(`  Hours: ${hours}, Minutes: ${minutes}`)
-        if (!isNaN(hours) && !isNaN(minutes)) {
-          parsedLeaveTime = new Date(when)
-          parsedLeaveTime.setHours(hours, minutes, 0, 0)
-          //console.log(`  ✓ Parsed: ${parsedLeaveTime.toISOString()}`)
-        }
+      if (leave_time) {
+        const [h, m] = leave_time.split(':').map(Number)
+        parsedLeaveTime = new Date(when)
+        parsedLeaveTime.setHours(h, m, 0, 0)
       }
 
-      // 3. Lock and fetch UserPlanAttendance
-      let upa = await UserPlanAttendance.findOne({
-        where: { user_plan_id },
+      // ===== 1️⃣ Resolve Zoom Class =====
+      const classWhere = {
+        zoom_class_name: class_name,
+        class_type,
+        recurring_start_time: join_time,
+      }
+
+      if (hasPlan) classWhere.plan_id = plan_id
+
+      const userApplicableClass = await ZoomClassModel.findOne({
+        where: classWhere,
         transaction: t,
-        lock: t.LOCK.UPDATE,
       })
 
-      if (!upa) {
-        const userPlanRecord = await UserPlan.findOne({
-          where: { user_id: user_id, current_status: 'ACTIVE' },
-          transaction: t,
+      if (!userApplicableClass) {
+        await t.rollback()
+        return res.status(400).json({
+          error: hasPlan
+            ? `Class ${class_name} not applicable for user_plan_id ${user_plan_id}`
+            : `Class ${class_name} not found`,
         })
-
-        if (!userPlanRecord) {
-          await t.rollback()
-          return res
-            .status(404)
-            .json({ allowed: false, message: 'User plan not found' })
-        }
-
-        // Fetch plan to get classes_allowed
-        const plan = await Plan.findByPk(userPlanRecord.plan_id, {
-          transaction: t,
-        })
-        if (!plan) {
-          await t.rollback()
-          return res
-            .status(404)
-            .json({ allowed: false, message: 'Plan not found' })
-        }
-
-        // Create UserPlanAttendance record
-        const [newUPA, created] = await UserPlanAttendance.findOrCreate({
-          where: { user_plan_id: user_plan_id },
-          defaults: {
-            user_id: user_id,
-            plan_id: userPlanRecord.plan_id,
-            start_date: userPlanRecord.validity_from,
-            expiry_date: userPlanRecord.validity_to,
-            classes_allowed: plan.number_of_zoom_classes || 0,
-            classes_attended: 0,
-            status: 'ACTIVE',
-          },
-          transaction: t,
-        })
-
-        if (created) {
-          //console.log(`✓ New UserPlanAttendance created (id=${newUPA.id})`)
-        } else {
-          //console.log(`⊘ UserPlanAttendance already existed (id=${newUPA.id})`)
-        }
-
-        upa = newUPA
       }
 
-      // 4. Check if attendance already exists for that user/class on that date
+      const class_id = userApplicableClass.zoom_class_id
+
+      // ===== 2️⃣ Prevent duplicate attendance =====
       const existing = await ClassAttendance.findOne({
         where: {
           user_id,
-          class_id: userApplicableClass.zoom_class_id,
+          class_id,
           date: { [Op.gte]: startOfDay, [Op.lt]: nextDay },
         },
-        transaction: t,
         lock: t.LOCK.UPDATE,
+        transaction: t,
       })
 
-      //console.log('Existing attendance:', existing ? '✓ Found' : '✗ Not found')
+      // ===== 3️⃣ If plan exists — ensure + update UPA =====
+      let upa = null
 
+      if (hasPlan) {
+        upa = await UserPlanAttendance.findOne({
+          where: { user_plan_id },
+          transaction: t,
+          lock: t.LOCK.UPDATE,
+        })
+
+        if (!upa) {
+          const userPlanRecord = await UserPlan.findOne({
+            where: { user_id, current_status: 'ACTIVE' },
+            transaction: t,
+          })
+
+          if (!userPlanRecord) {
+            await t.rollback()
+            return res.status(404).json({
+              allowed: false,
+              message: 'User plan not found',
+            })
+          }
+
+          const plan = await Plan.findByPk(userPlanRecord.plan_id, {
+            transaction: t,
+          })
+
+          const [newUPA] = await UserPlanAttendance.findOrCreate({
+            where: { user_plan_id },
+            defaults: {
+              user_id,
+              plan_id: userPlanRecord.plan_id,
+              start_date: userPlanRecord.validity_from,
+              expiry_date: userPlanRecord.validity_to,
+              classes_allowed: plan.number_of_zoom_classes || 0,
+              classes_attended: 0,
+              status: 'ACTIVE',
+            },
+            transaction: t,
+          })
+
+          upa = newUPA
+        }
+      }
+
+      // ===== 4️⃣ Insert / Update Attendance =====
       if (existing) {
-        //console.log(`Updating existing attendance record (id=${existing.id})`)
-        // Update existing attendance record
-        await ClassAttendance.update(
+        await existing.update(
           {
-            attendance_status: 'ATTENDED',
+            attendance_status: hasPlan ? 'ATTENDED' : 'UNPAID',
             join_time: parsedJoinTime,
             leave_time: parsedLeaveTime,
             duration_minutes: duration_minutes || null,
             marked_by: 'INSTRUCTOR',
             device_id: 'ADMIN_MANUAL',
-            updated: sequelize.literal('NOW()'),
           },
-          { where: { id: existing.id }, transaction: t }
+          { transaction: t }
         )
-
-        //console.log('✓ Attendance record updated')
 
         created.push({
           attendanceId: existing.id,
           action: 'updated',
           user_id,
-          class_id: userApplicableClass.zoom_class_id,
+          class_id,
         })
       } else {
-        //console.log('Creating new attendance record')
-        // 5. Create new attendance record
         const newAttendance = await ClassAttendance.create(
           {
             user_id,
-            plan_id,
-            user_plan_id,
-            class_id: userApplicableClass.zoom_class_id,
+            plan_id: hasPlan ? plan_id : null,
+            user_plan_id: hasPlan ? user_plan_id : null,
+            class_id,
             device_id: 'ADMIN_MANUAL',
             date: when,
-            attendance_status: 'ATTENDED',
+            attendance_status: hasPlan ? 'ATTENDED' : 'UNPAID',
             join_time: parsedJoinTime,
             leave_time: parsedLeaveTime,
             duration_minutes: duration_minutes || null,
@@ -537,35 +507,26 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
           { transaction: t }
         )
 
-        //console.log(`✓ New attendance record created (id=${newAttendance.id})`)
+        created.push(newAttendance)
+      }
 
-        // 6. Increment classes_attended in UserPlanAttendance
-
+      // ===== 5️⃣ Increment class count ONLY if paid =====
+      if (hasPlan && upa) {
         await UserPlanAttendance.update(
           { classes_attended: (upa.classes_attended || 0) + 1 },
           { where: { user_plan_id }, transaction: t }
         )
 
-        //console.log('✓ classes_attended incremented')
+        const fresh = await UserPlanAttendance.findOne({
+          where: { user_plan_id },
+          transaction: t,
+        })
 
-        created.push(
-          newAttendance.toJSON ? newAttendance.toJSON() : newAttendance
-        )
+        updatedUserPlans.push(fresh)
       }
-
-      // 7. Fetch fresh UPA row for response
-      //console.log('Fetching updated UPA row')
-      upa = await UserPlanAttendance.findOne({
-        where: { user_plan_id },
-        transaction: t,
-      })
-      updatedUserPlans.push(upa.toJSON ? upa.toJSON() : upa)
     }
 
-    //console.log('\nCommitting transaction...')
     await t.commit()
-    //console.log('✓ Transaction committed')
-    //console.log('=== /admin/log-attendance-by-class END (SUCCESS) ===\n')
 
     return res.status(200).json({
       message: 'Attendance logged successfully',
@@ -573,12 +534,7 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
       updatedUserPlans,
     })
   } catch (err) {
-    console.error('=== /admin/log-attendance-by-class ERROR ===')
-    console.error('Error message:', err.message)
-    console.error('Error stack:', err.stack)
-    console.error('Full error:', err)
-    console.error('=== /admin/log-attendance-by-class END (FAILED) ===\n')
-
+    console.error(err)
     await t.rollback()
     return res.status(500).json({ error: 'Server error' })
   }
