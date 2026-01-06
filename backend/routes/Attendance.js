@@ -497,7 +497,7 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
             class_id,
             device_id: 'ADMIN_MANUAL',
             date: when,
-            attendance_status: hasPlan ? 'ATTENDED' : 'UNPAID',
+            attendance_status: 'ATTENDED',
             join_time: parsedJoinTime,
             leave_time: parsedLeaveTime,
             duration_minutes: duration_minutes || null,
