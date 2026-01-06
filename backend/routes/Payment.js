@@ -56,170 +56,79 @@ router.post('/order', authenticateToken, async (req, res) => {
   }
 })
 
-router.post('/commit', authenticateToken, async (req, res) => {
-  /*
-    user_id: user making the payment
-    status: success || failed || cancelled || timedout
-  */
-  //console.log({ body: req.body });
-
-  const {
-    user_id,
-    status,
-    payment_for,
-    payment_method,
-    amount,
-    signature,
-    order_id,
-    payment_id,
-    currency_id,
-    discount_coupon_id,
-  } = req.body
-
-  console.log('[Payment.commit] Extracted fields:', {
-    user_id,
-    status,
-    payment_for,
-    payment_method,
-    amount,
-    currency_id,
-    discount_coupon_id,
-  })
-
-  if (user_id === null || user_id === undefined || !status) {
-    console.log('[Payment.commit] Missing user_id or status')
-    return res.status(HTTP_BAD_REQUEST).json({
-      message: 'Missing required fields',
-    })
-  }
-
-  switch (status) {
-    case TRANSACTION_FAILED:
-      if (!order_id) {
-        console.log('[Payment.commit] FAILED: Missing order_id')
-        return res.status(HTTP_BAD_REQUEST).json({
-          message: 'Missing required fields',
-        })
-      }
-      break
-    case TRANSACTION_CANCELLED:
-      if (!order_id) {
-        console.log('[Payment.commit] CANCELLED: Missing order_id')
-        return res.status(HTTP_BAD_REQUEST).json({
-          message: 'Missing required fields',
-        })
-      }
-      break
-    case TRANSACTION_TIMEOUT:
-      if (!order_id) {
-        console.log('[Payment.commit] TIMEOUT: Missing order_id')
-        return res.status(HTTP_BAD_REQUEST).json({
-          message: 'Missing required fields',
-        })
-      }
-      break
-    case TRANSACTION_SUCCESS:
-      // should it be or or and? confus what
-      //
-      if (
-        !payment_for ||
-        amount === null ||
-        amount === undefined ||
-        amount < 0 ||
-        !status ||
-        !signature ||
-        !order_id ||
-        !payment_id ||
-        currency_id === null ||
-        currency_id === undefined
-      ) {
-        console.log('[Payment.commit] SUCCESS: Missing required fields', {
-          payment_for,
-          amount,
-          status,
-          signature,
-          order_id,
-          payment_id,
-          currency_id,
-        })
-        return res.status(HTTP_BAD_REQUEST).json({
-          message: 'Missing required fields',
-        })
-      }
-      break
-    default:
-      console.log('[Payment.commit] Invalid status:', status)
-      return res.status(HTTP_BAD_REQUEST).json({
-        message: 'Invalid status',
-      })
-  }
-
-  // TODO: fix this; not same as frontend hash for some reason
-  const data = crypto.createHmac('sha256', SECRET_KEY, {})
-  data.update(`${order_id}|${payment_id}`)
-  const digest = data.digest('hex')
-  console.log('[Payment.commit] Hash verification:', {
-    digest,
-    signature,
-    match: digest === signature,
-  })
-
-  const t = await sequelize.transaction()
-
+router.post('/commit', async (req, res) => {
   try {
-    console.log('[Payment.commit] Creating transaction record with data:', {
+    const {
+      user_id,
+      status,
       payment_for,
       payment_method,
       amount,
-      status,
+      signature,
       order_id,
       payment_id,
-      user_id,
       currency_id,
       discount_coupon_id,
-    })
+    } = req.body
 
-    // create a transaction in the database
-    const transaction = await Transaction.create(
-      {
-        payment_for: payment_for,
-        payment_method: payment_method,
-        amount: amount,
-        payment_status: status,
-        payment_date: new Date(),
-        transaction_order_id: order_id,
-        transaction_payment_id: payment_id,
-        transaction_signature: signature,
-        user_id: user_id,
-        currency_id: currency_id,
-        discount_coupon_id: discount_coupon_id ?? null,
-      },
-      { transaction: t }
-    )
+    if (!user_id || !status || !order_id) {
+      return res
+        .status(HTTP_BAD_REQUEST)
+        .json({ message: 'Missing required fields' })
+    }
 
-    console.log('[Payment.commit] Transaction created successfully:', {
-      transaction_id: transaction.transaction_id,
-    })
+    // 🔒 VERIFY SIGNATURE ONLY IF SUCCESS
+    if (status === 'success') {
+      const digest = crypto
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+        .update(`${order_id}|${payment_id}`)
+        .digest('hex')
 
-    await t.commit()
-    return res.status(HTTP_OK).json({
-      status: 'successfully saved transaction',
-      transaction_id: transaction.transaction_id,
-    })
+      if (digest !== signature) {
+        console.log('❌ Signature mismatch')
+        return res
+          .status(HTTP_BAD_REQUEST)
+          .json({ message: 'Invalid signature' })
+      }
+    }
+
+    const t = await sequelize.transaction()
+
+    try {
+      // 🧠 IDEMPOTENT — if transaction already exists, do nothing
+      const [txn, created] = await Transaction.findOrCreate({
+        where: { transaction_payment_id: payment_id || order_id },
+        defaults: {
+          user_id,
+          amount,
+          payment_for,
+          payment_method,
+          payment_status: status,
+          transaction_order_id: order_id,
+          transaction_payment_id: payment_id,
+          transaction_signature: signature,
+          currency_id,
+          discount_coupon_id: discount_coupon_id ?? null,
+          payment_date: new Date(),
+        },
+        transaction: t,
+      })
+
+      if (!created) {
+        console.log('ℹ️ Duplicate commit — returning OK')
+      }
+
+      await t.commit()
+      return res.status(HTTP_OK).json({ ok: true })
+    } catch (err) {
+      await t.rollback()
+      throw err
+    }
   } catch (err) {
-    console.error('[Payment.commit] Error creating transaction:', {
-      message: err.message,
-      code: err.code,
-      detail: err.detail,
-      constraint: err.constraint,
-      original: err.original?.message,
-      stack: err.stack,
-    })
-    await t.rollback()
-    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-      message: 'Something went wrong, try again!',
-      error: err.message,
-    })
+    console.error('Commit error', err)
+    return res
+      .status(HTTP_INTERNAL_SERVER_ERROR)
+      .json({ message: 'Server error' })
   }
 })
 

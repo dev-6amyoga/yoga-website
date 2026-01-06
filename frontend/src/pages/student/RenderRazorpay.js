@@ -1,291 +1,132 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useCallback } from "react";
 import { toast } from "react-toastify";
 import { FetchRetry } from "../../utils/Fetch";
-import { paymentMethodConfig } from "../../utils/razorpayUtils";
-// import PropTypes from "prop-types";
-// import Axios from "axios";
-// import crypto from "crypto";
-import HmacSHA256 from "crypto-js/hmac-sha256";
 import {
-  TRANSACTION_CANCELLED,
-  TRANSACTION_FAILED,
   TRANSACTION_SUCCESS,
+  TRANSACTION_FAILED,
+  TRANSACTION_CANCELLED,
   TRANSACTION_TIMEOUT,
 } from "../../enums/transaction_status";
 
-import { memo } from "react";
-
-const loadScript = (src) => {
-  return new Promise((resolve) => {
+const loadScript = (src) =>
+  new Promise((resolve) => {
     const script = document.createElement("script");
     script.src = src;
-    script.onload = () => {
-      // //console.log("razorpay loaded successfully");
-      resolve(true);
-    };
-    script.onerror = () => {
-      // //console.log("error in loading razorpay");
-      resolve(false);
-    };
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
     document.body.appendChild(script);
   });
-};
 
-const RenderRazorpay = ({
-  userId,
-  keyId,
-  keySecret,
+export default function RazorpayCheckout({
   orderId,
-  currency,
-  currencyId,
-  discount_coupon_id,
+  keyId,
   amount,
+  currency,
+  userId,
   payment_for,
-  redirectUrl,
-  onErrorCallback = () => {},
-  onSuccessCallback = () => {},
+  currency_id,
+  discount_coupon_id,
   displayRazorpay,
   setDisplayRazorpay,
-}) => {
-  const paymentId = useRef(null);
-  const paymentMethod = useRef(null);
-  const gateway = useRef(null);
-  const razorpayRendered = useRef(false);
-  const navigate = useNavigate();
+  onSuccessCallback = () => {},
+  onErrorCallback = () => {},
+}) {
+  const gateway = useRef();
+  const paymentId = useRef();
 
-  const showRazorpay = useCallback(
-    async (options) => {
-      if (razorpayRendered.current === false) {
-        try {
-          const res = await loadScript(
-            "https://checkout.razorpay.com/v1/checkout.js"
-          );
-          if (!res) {
-            toast("Razorpay SDK failed to load. Are you online?");
-            return;
-          }
-          const rzp = new window.Razorpay(options);
-
-          gateway.current = rzp;
-
-          // //console.log(gateway.current);
-
-          rzp.on("payment.submit", (response) => {
-            //console.log("payment.submit response", response);
-            paymentMethod.current = response.method;
-          });
-
-          rzp.on("payment.failed", (response) => {
-            //console.log("payment.failed response", response);
-            paymentId.current = response.error.metadata.payment_id;
-          });
-
-          gateway.current.open();
-          razorpayRendered.current = true;
-        } catch (err) {
-          setDisplayRazorpay(false);
-        }
-      }
-    },
-    [setDisplayRazorpay]
-  );
-
-  const handlePaymentBackendCallback = useCallback(
-    async (status, orderDetails = {}) => {
-      // user_id, status, payment_for, payment_method, amount, signature, order_id, payment_id,
-      switch (status) {
-        case TRANSACTION_SUCCESS:
-          if (!currencyId) {
-            toast("Pick a currency!", { type: "error" });
-            return;
-          }
-          break;
-        case TRANSACTION_CANCELLED:
-        case TRANSACTION_TIMEOUT:
-        case TRANSACTION_FAILED:
-          break;
-        default:
-          break;
-      }
-      FetchRetry({
-        url: "/payment/commit",
-        method: "POST",
-        token: true,
-        data: {
-          user_id: userId,
-          status,
-          payment_for: payment_for,
-          payment_method: paymentMethod.current,
-          amount,
-          signature: orderDetails?.signature,
-          order_id: orderDetails?.orderId,
-          payment_id: orderDetails?.paymentId,
-          currency_id: currencyId,
-          discount_coupon_id: discount_coupon_id ?? null,
-        },
-        n: 10,
-        retryDelayMs: 2000,
-        onRetry: (err) => {
-          //console.log(err);
-        },
-      })
-        .then((res) => {
-          if (res.status === 200) {
-            setDisplayRazorpay(false);
-
-            let type = status === TRANSACTION_SUCCESS ? "success" : "error";
-
-            // toast(status, { type });
-
-            if (status === TRANSACTION_SUCCESS) {
-              // //console.log("IT WAS A SUCCESS YAYAYAY");
-              onSuccessCallback(orderDetails.orderId);
-            } else {
-              // //console.log("IT WAS A FAILURE OOPS");
-              toast(
-                "Payment Failed. Any money debited will be refunded in 5-7 business days.",
-                {
-                  type: "error",
-                }
-              );
-              onErrorCallback();
-            }
-          } else {
-            setDisplayRazorpay(false);
-            onErrorCallback();
-            // //console.log("OOPS ERROR 1");
-
-            toast(
-              "Something went wrong, try again. Any money debited will be refunded in 5-7 business days.",
-              {
-                type: "error",
-              }
-            );
-          }
-        })
-        .catch((err) => {
-          setDisplayRazorpay(false);
-          onErrorCallback();
-          // //console.log("OOPS ERROR 20", err);
-          toast(
-            "Something went wrong, try again. Any money debited will be refunded in 5-7 business days.",
-            { type: "error" }
-          );
+  const commitPayment = useCallback(
+    async (status, payload = {}) => {
+      try {
+        const res = await FetchRetry({
+          url: "/payment/commit",
+          method: "POST",
+          token: false, // IMPORTANT — no auth
+          data: {
+            user_id: userId,
+            status,
+            payment_for,
+            amount,
+            currency_id,
+            discount_coupon_id: discount_coupon_id ?? null,
+            order_id: payload.razorpay_order_id,
+            payment_id: payload.razorpay_payment_id,
+            signature: payload.razorpay_signature,
+            payment_method: payload.payment_method ?? null,
+          },
+          n: 5,
+          retryDelayMs: 2000,
         });
+
+        if (status === TRANSACTION_SUCCESS) {
+          onSuccessCallback(payload.razorpay_order_id);
+        } else {
+          onErrorCallback();
+        }
+      } catch (e) {
+        toast("Payment recorded but system failed — support notified.", {
+          type: "error",
+        });
+        onErrorCallback();
+      } finally {
+        setDisplayRazorpay(false);
+      }
     },
     [
-      setDisplayRazorpay,
       userId,
-      amount,
       payment_for,
-      currencyId,
-      onErrorCallback,
+      amount,
+      currency_id,
+      discount_coupon_id,
       onSuccessCallback,
+      onErrorCallback,
+      setDisplayRazorpay,
     ]
   );
 
-  const handlePayment = useCallback(
-    (response) => {
-      // //console.log(response);
-      paymentId.current = response.razorpay_payment_id;
-      const succeeded =
-        HmacSHA256(`${orderId}|${paymentId.current}`, keySecret).toString() ===
-        response.razorpay_signature;
-      if (succeeded) {
-        handlePaymentBackendCallback(TRANSACTION_SUCCESS, {
-          orderId,
-          paymentId: paymentId.current,
-          signature: response.razorpay_signature,
-        });
-      } else {
-        handlePaymentBackendCallback(TRANSACTION_FAILED, {
-          orderId,
-          paymentId: paymentId.current,
-        });
-      }
-    },
-    [keySecret, orderId, handlePaymentBackendCallback]
-  );
+  const startPayment = useCallback(async () => {
+    const ok = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+    if (!ok) return toast("Failed to load Razorpay");
 
-  const handleModalOnDismiss = useCallback(
-    async (reason) => {
-      // //console.log({ reason, paymentId: paymentId.current, orderId });
-      const {
-        reason: paymentReason,
-        field,
-        step,
-        code,
-      } = reason && reason.error ? reason.error : {};
-
-      if (reason === undefined) {
-        //console.log(TRANSACTION_CANCELLED);
-        handlePaymentBackendCallback(TRANSACTION_CANCELLED, {
-          orderId,
-          paymentId: paymentId.current,
-        });
-      } else if (reason === TRANSACTION_TIMEOUT) {
-        //console.log(TRANSACTION_TIMEOUT);
-        handlePaymentBackendCallback(TRANSACTION_TIMEOUT, {
-          orderId,
-          paymentId: paymentId.current,
-        });
-      } else {
-        //console.log(TRANSACTION_FAILED);
-        handlePaymentBackendCallback(TRANSACTION_FAILED, {
-          paymentReason,
-          field,
-          step,
-          code,
-          orderId,
-          paymentId: paymentId.current,
-        });
-      }
-    },
-    [handlePaymentBackendCallback, orderId]
-  );
-
-  const options = useMemo(() => {
-    return {
+    const rzp = new window.Razorpay({
       key: keyId,
       amount,
       currency,
-      name: "6AM Yoga",
       order_id: orderId,
-      config: paymentMethodConfig,
-      handler: handlePayment,
+      name: "6AM Yoga",
+
+      handler: async (response) => {
+        await commitPayment(TRANSACTION_SUCCESS, response);
+      },
+
       modal: {
-        confirm_close: true,
-        ondismiss: handleModalOnDismiss,
+        ondismiss: async () => {
+          await commitPayment(TRANSACTION_CANCELLED, {
+            razorpay_order_id: orderId,
+            razorpay_payment_id: paymentId.current,
+          });
+        },
       },
-      retry: {
-        enabled: false,
-      },
+
+      retry: { enabled: false },
       timeout: 300,
-      theme: {
-        color: "",
-      },
-    };
-  }, [amount, currency, keyId, orderId, handlePayment, handleModalOnDismiss]);
+    });
+
+    gateway.current = rzp;
+
+    rzp.on("payment.submit", (data) => {
+      paymentId.current = data.payment_id;
+    });
+
+    rzp.on("payment.failed", async (data) => {
+      await commitPayment(TRANSACTION_FAILED, data.error.metadata);
+    });
+
+    rzp.open();
+  }, [amount, currency, keyId, orderId, commitPayment]);
 
   useEffect(() => {
-    if (displayRazorpay) {
-      // //console.log("in razorpay");
-      showRazorpay(options);
-    } else {
-      razorpayRendered.current = false;
-      // reset razorpay
-      if (gateway.current) {
-        window.Razorpay = null;
-        gateway.current.close();
-        gateway.current = null;
-      }
-    }
-  }, [showRazorpay, options, displayRazorpay]);
+    if (displayRazorpay) startPayment();
+  }, [displayRazorpay, startPayment]);
 
-  useEffect(() => {}, [displayRazorpay]);
-
-  return <></>;
-};
-
-export default memo(RenderRazorpay);
+  return null;
+}
