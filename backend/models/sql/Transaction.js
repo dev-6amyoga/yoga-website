@@ -1,15 +1,15 @@
-const { sequelize } = require("../../init.sequelize");
-const { DataTypes } = require("sequelize");
-const { options } = require("./defaultOptions");
-const { User } = require("./User");
-const { DiscountCoupon } = require("./DiscountCoupon");
-const { ReferralCode } = require("./ReferralCode");
-const { Currency } = require("./Currency");
-const { UserPlan } = require("./UserPlan");
-const { Refund } = require("./Refund");
+const { sequelize } = require('../../init.sequelize')
+const { DataTypes } = require('sequelize')
+const { options } = require('./defaultOptions')
+const { User } = require('./User')
+const { DiscountCoupon } = require('./DiscountCoupon')
+const { ReferralCode } = require('./ReferralCode')
+const { Currency } = require('./Currency')
+const { UserPlan } = require('./UserPlan')
+const { Refund } = require('./Refund')
 
 const Transaction = sequelize.define(
-  "transaction",
+  'transaction',
   {
     transaction_id: {
       type: DataTypes.INTEGER,
@@ -25,7 +25,7 @@ const Transaction = sequelize.define(
       allowNull: true,
     },
     amount: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DECIMAL,
       allowNull: false,
     },
     payment_status: {
@@ -51,6 +51,6 @@ const Transaction = sequelize.define(
     },
   },
   { ...options }
-);
+)
 
-module.exports = { Transaction };
+module.exports = { Transaction }
