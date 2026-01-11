@@ -263,9 +263,7 @@ router.post('/update-plan-statuses', async (req, res) => {
     await sequelize.query(SQL_ACTIVATE_STAGED, { transaction: tx })
     await sequelize.query(CLASS_ATTENDANCE_INIT, { transaction: tx })
     await sequelize.query(SQL_SYNC_ATTENDANCE_STATUS, { transaction: tx })
-
     await sequelize.query(SQL_ADJUST_UNPAID_CLASSES, { transaction: tx })
-
     const unpaid = await sequelize.query(SQL_GET_UNPAID_CLASSES, {
       type: sequelize.QueryTypes.SELECT,
       transaction: tx,

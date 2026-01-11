@@ -31,35 +31,147 @@ const {
 } = require('../enums/refund_status')
 const { Op } = require('sequelize')
 const { authenticateToken } = require('../utils/jwt')
+const axios = require('axios')
+const { commitUnified } = require('../services/commitUnified')
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+})
 
-router.post('/order', authenticateToken, async (req, res) => {
-  const razorpay = new Razorpay({
-    key_id: RAZORPAY_KEY_ID,
-    key_secret: RAZORPAY_KEY_SECRET,
-    // key_id: RAZORPAY_LIVE_KEY_ID,
-    // key_secret: RAZORPAY_LIVE_KEY_SECRET,
-  })
-
-  //console.log(req.body.amount);
-  const options = {
-    amount: req.body.amount,
-    currency: req.body.currency,
-    receipt: 'any unique id for every order',
-    payment_capture: 1,
-  }
+router.post('/order', async (req, res) => {
   try {
-    const response = await razorpay.orders.create(options)
-    res.status(HTTP_OK).json({ order: response })
+    const {
+      amount,
+      currency,
+      user_id,
+      plan_id,
+      discount_coupon_id,
+      user_plan_payload,
+    } = req.body
+    console.log(req.body)
+    if (!amount || !currency || !user_id || !plan_id) {
+      return res.status(400).json({ message: 'Missing required fields' })
+    }
+
+    const order = await razorpay.orders.create({
+      amount: Math.round(amount),
+      currency,
+      receipt: `rcpt_${Date.now()}`,
+      payment_capture: 1,
+      notes: {
+        user_id: String(user_id),
+        plan_id: String(plan_id),
+        discount_coupon_id: discount_coupon_id
+          ? String(discount_coupon_id)
+          : '',
+        user_plan_payload: JSON.stringify(user_plan_payload),
+      },
+    })
+
+    return res.status(200).json({ order })
   } catch (err) {
-    console.error('Razorpay Error:', err.error)
-    res.status(HTTP_BAD_REQUEST).json({ error: err.error })
+    console.error('Order creation failed:', err)
+    return res.status(500).json({ message: 'Order creation failed' })
   }
 })
 
 router.post('/commit', async (req, res) => {
   try {
+    await commitUnified(req.body)
+    return res.status(200).json({ ok: true })
+  } catch (err) {
+    console.error('Commit failed:', err)
+    return res.status(500).json({ message: 'Commit failed' })
+  }
+})
+
+router.post(
+  '/webhook/razorpay',
+  express.raw({ type: '*/*' }),
+  async (req, res) => {
+    try {
+      const secret = process.env.RAZORPAY_WEBHOOK_SECRET
+      const signature = req.headers['x-razorpay-signature']
+
+      if (!signature) {
+        console.error('❌ No Razorpay signature header')
+        return res.status(400).send('No signature')
+      }
+
+      const expectedSignature = crypto
+        .createHmac('sha256', secret)
+        .update(req.body)
+        .digest('hex')
+
+      if (signature !== expectedSignature) {
+        console.error('❌ Invalid Razorpay webhook signature')
+        return res.status(401).send('Invalid signature')
+      }
+
+      const event = JSON.parse(req.body.toString())
+      const payment = event?.payload?.payment?.entity
+
+      if (!payment) {
+        return res.status(200).json({ ok: true })
+      }
+
+      const status =
+        payment.status === 'captured' ? TRANSACTION_SUCCESS : TRANSACTION_FAILED
+
+      const notes = payment.notes || {}
+
+      const user_plan_payload = notes.user_plan_payload
+        ? JSON.parse(notes.user_plan_payload)
+        : null
+
+      await commitUnified({
+        user_id: notes.user_id,
+        plan_id: notes.plan_id,
+        status,
+        payment_for: 'USER_PLAN',
+        payment_method: 'razorpay',
+        amount: payment.amount / 100,
+        order_id: payment.order_id,
+        payment_id: payment.id,
+        signature,
+        currency_id: 1,
+        discount_coupon_id: notes.discount_coupon_id || null,
+        user_plan_payload,
+      })
+
+      return res.status(200).json({ ok: true })
+    } catch (err) {
+      console.error('❌ Webhook error:', err)
+      return res.status(500).send('Webhook error')
+    }
+  }
+)
+
+module.exports = router
+
+const triggerInvoiceAndAdmin = async (user_id, order_id, transaction) => {
+  try {
+    // Send invoice
+    await FetchInternal('/invoice/student/mail-invoice', {
+      user_id,
+      transaction_order_id: order_id,
+    })
+
+    // Notify admin
+    await FetchInternal('/invoice/student/notify-admin', {
+      user_id,
+      transaction_order_id: order_id,
+    })
+  } catch (err) {
+    console.error('Post-payment side effects failed:', err)
+  }
+}
+
+router.post('/commit', async (req, res) => {
+  try {
     const {
       user_id,
+      plan_id,
       status,
       payment_for,
       payment_method,
@@ -77,53 +189,34 @@ router.post('/commit', async (req, res) => {
         .json({ message: 'Missing required fields' })
     }
 
-    // 🔒 VERIFY SIGNATURE ONLY IF SUCCESS
-    if (status === 'success') {
+    if (status === TRANSACTION_SUCCESS && payment_method === 'razorpay') {
       const digest = crypto
         .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
         .update(`${order_id}|${payment_id}`)
         .digest('hex')
 
       if (digest !== signature) {
-        console.log('❌ Signature mismatch')
         return res
           .status(HTTP_BAD_REQUEST)
           .json({ message: 'Invalid signature' })
       }
     }
 
-    const t = await sequelize.transaction()
+    await commitUnified({
+      user_id,
+      plan_id,
+      status,
+      payment_for,
+      payment_method,
+      amount,
+      order_id,
+      payment_id,
+      signature,
+      currency_id,
+      discount_coupon_id,
+    })
 
-    try {
-      // 🧠 IDEMPOTENT — if transaction already exists, do nothing
-      const [txn, created] = await Transaction.findOrCreate({
-        where: { transaction_payment_id: payment_id || order_id },
-        defaults: {
-          user_id,
-          amount,
-          payment_for,
-          payment_method,
-          payment_status: status,
-          transaction_order_id: order_id,
-          transaction_payment_id: payment_id,
-          transaction_signature: signature,
-          currency_id,
-          discount_coupon_id: discount_coupon_id ?? null,
-          payment_date: new Date(),
-        },
-        transaction: t,
-      })
-
-      if (!created) {
-        console.log('ℹ️ Duplicate commit — returning OK')
-      }
-
-      await t.commit()
-      return res.status(HTTP_OK).json({ ok: true })
-    } catch (err) {
-      await t.rollback()
-      throw err
-    }
+    return res.status(HTTP_OK).json({ ok: true })
   } catch (err) {
     console.error('Commit error', err)
     return res

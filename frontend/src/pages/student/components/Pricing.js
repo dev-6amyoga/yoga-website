@@ -27,7 +27,6 @@ export default function Pricing({
   allPlans,
   subscribePlan,
   selectedCurrency,
-  handleTryTrial,
   trialPlanAvailed,
 }) {
   const [allCurrencies, setAllCurrencies] = useState([]);
@@ -619,7 +618,6 @@ export default function Pricing({
           <Button
             onClick={() => {
               setTrialDialogOpen(false);
-              if (trialPlanToTry) handleTryTrial(trialPlanToTry);
             }}
             color="primary"
             variant="contained"

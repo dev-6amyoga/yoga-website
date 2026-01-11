@@ -44,6 +44,7 @@ router.post('/get-user-plan-by-id', async (req, res) => {
       .status(HTTP_BAD_REQUEST)
       .json({ error: 'Missing required fields' })
   }
+
   try {
     const userPlan = await UserPlan.findAll({
       where: {
@@ -69,7 +70,31 @@ router.post('/get-user-plan-by-id', async (req, res) => {
       ],
       order: [['validity_to', 'DESC']],
     })
-    return res.status(HTTP_OK).json({ userPlan: userPlan ? userPlan : null })
+
+    let newPlanStartDate = new Date()
+    let newPlanStatus = 'ACTIVE'
+
+    if (userPlan && userPlan.length > 0) {
+      const now = new Date()
+
+      const activePlan = userPlan.find(
+        (plan) =>
+          plan.current_status === 'ACTIVE' && new Date(plan.validity_to) >= now
+      )
+
+      if (activePlan) {
+        newPlanStartDate = new Date(activePlan.validity_to)
+        newPlanStatus = 'STAGED'
+      }
+    }
+
+    return res.status(HTTP_OK).json({
+      userPlan: userPlan ? userPlan : null,
+      newPlanPrediction: {
+        start_date: newPlanStartDate,
+        status: newPlanStatus,
+      },
+    })
   } catch (error) {
     console.error(error)
     return res
@@ -89,7 +114,6 @@ router.post('/get-practice-now-plan', async (req, res) => {
     const userPlan = await UserPlan.findAll({
       where: {
         user_id: user_id,
-        transaction_order_id: 'PRACTICENOWPLAN',
       },
       include: [
         { model: User, attributes: ['name'] },

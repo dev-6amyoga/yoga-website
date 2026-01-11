@@ -1,35 +1,31 @@
-import { Input, Modal, Spacer } from "@geist-ui/core";
-import { Alert } from "@mui/material";
-import Button from "@mui/material/Button";
-import Divider from "@mui/material/Divider";
-import { useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState, useCallback } from "react";
 import { toast } from "react-toastify";
-import {
-  USER_PLAN_ACTIVE,
-  USER_PLAN_STAGED,
-} from "../../enums/user_plan_status";
+import { useNavigate, useParams } from "react-router-dom";
 import useUserStore from "../../store/UserStore";
-import { Fetch, FetchRetry } from "../../utils/Fetch";
+import { Fetch } from "../../utils/Fetch";
 import calculateTotalPrice from "../../utils/calculateTotalPrice";
-import getFormData from "../../utils/getFormData";
-import RenderRazorpay from "./RenderRazorpay";
+import RazorpayCheckout from "./RenderRazorpay";
 import Pricing from "./components/Pricing";
-import Paper from "@mui/material/Paper";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import html2pdf from "html2pdf.js";
-import { useNavigate } from "react-router-dom";
 import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
+import Hero from "./components/Hero";
 import { ROLE_STUDENT } from "../../enums/roles";
 import { withAuth } from "../../utils/withAuth";
-import Hero from "./components/Hero";
+import {
+  Alert,
+  Box,
+  Button,
+  Divider,
+  Input,
+  Modal,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import InstitutePlansAccordion from "../../components/student/InstitutePlansAccordion";
-//add trial plan
 
 function DiscountCouponForm({ handleDiscountCouponFormSubmit }) {
   return (
@@ -46,16 +42,16 @@ function DiscountCouponForm({ handleDiscountCouponFormSubmit }) {
     </form>
   );
 }
+
 function StudentPlan() {
-  let user = useUserStore((state) => state.user);
-  const { planId: urlPlanId } = useParams();
-  const [allPlans, setAllPlans] = useState([]);
-  const [allInstitutePlans, setAllInstitutePlans] = useState([]);
-  const [showCard, setShowCard] = useState(false);
+  const user = useUserStore((state) => state.user);
   const navigate = useNavigate();
-  const [showCustomCard, setShowCustomCard] = useState(false);
+  const { planId: urlPlanId } = useParams();
+  const [allInstitutePlans, setAllInstitutePlans] = useState([]);
+  const [allPlans, setAllPlans] = useState([]);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [showCard, setShowCard] = useState(false);
   const [cardData, setCardData] = useState(null);
-  const [customCardData, setCustomCardData] = useState(null);
   const [price, setPrice] = useState(0);
   const [discountCouponApplied, setDiscountCouponApplied] = useState(false);
   const [discountCoupon, setDiscountCoupon] = useState(null);
@@ -65,8 +61,11 @@ function StudentPlan() {
     currency: null,
     amount: null,
   });
+  const [activating, setActivating] = useState(false);
+  const [activated, setActivated] = useState(false);
+
+  const [loading, setLoading] = useState(false);
   const [myPlans, setMyPlans] = useState([]);
-  const [currentStatus, setCurrentStatus] = useState("");
   const [validityFromDate, setValidityFromDate] = useState("");
   const [currencies, setAllCurrencies] = useState([]);
   const [selectedCurrency, setSelectedCurrency] = useState("INR");
@@ -74,22 +73,9 @@ function StudentPlan() {
   const [planId, setPlanId] = useState(-1);
   const [toBeRegistered, setToBeRegistered] = useState({});
   const [invalidCountry, setInvalidCountry] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [formattedDate, setFormattedDate] = useState(new Date().toISOString());
-  const [customPlanSent, setCustomPlanSent] = useState(false);
-  const [customPlansForUser, setCustomPlansForUser] = useState([]);
-  const [currentCustomUserPlans, setCurrentCustomUserPlans] = useState([]);
-  const [trialPlanAvailed, setTrialPlanAvailed] = useState(false);
   const [hasRecentInstituteSubscription, setHasRecentInstituteSubscription] =
     useState(false);
-
-  const randomUUID = () => {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-      const r = (Math.random() * 16) | 0;
-      const v = c === "x" ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
-  };
 
   const checkRecentInstituteSubscription = useCallback(() => {
     const sixMonthsAgo = new Date();
@@ -116,111 +102,6 @@ function StudentPlan() {
     setHasRecentInstituteSubscription(hasRecentInstitute);
   }, [myPlans]);
 
-  useEffect(() => {
-    checkRecentInstituteSubscription();
-  }, [myPlans, checkRecentInstituteSubscription]);
-
-  const handleTryTrial = async (plan) => {
-    if (trialPlanAvailed) {
-      toast("You have already availed a trial plan.", { type: "info" });
-      return;
-    }
-    const validity_from = new Date().toISOString();
-    const validity_to = new Date(
-      Date.now() + 30 * 24 * 60 * 60 * 1000
-    ).toISOString();
-    const transaction_order_id = "trial_" + randomUUID();
-    const trialPlanData = {
-      cancellation_date: null,
-      auto_renewal_enabled: false,
-      user_id: user?.user_id,
-      plan_id: plan.plan_id,
-      discount_coupon_id: null,
-      referral_code_id: null,
-      amount: 0,
-      currency: selectedCurrency,
-      user_type: "STUDENT",
-      purchase_date: new Date().toISOString(),
-      validity_from: validity_from,
-      validity_to: validity_to,
-      transaction_order_id,
-      current_status: USER_PLAN_ACTIVE,
-      is_trial: true,
-    };
-    setLoading(true);
-    try {
-      // 1. Add transaction first
-      const transactionRes = await Fetch({
-        url: "/transaction/add-transaction",
-        method: "POST",
-        data: {
-          payment_for: "USER_PLAN",
-          payment_method: "TRIAL",
-          amount: 0,
-          payment_status: "TRIAL",
-          payment_date: new Date().toISOString(),
-          transaction_order_id,
-          transaction_payment_id: "TRIAL",
-          transaction_signature: "TRIAL",
-          user_id: user?.user_id,
-        },
-      });
-      if (transactionRes.status === 200) {
-        // 2. Register user plan only if transaction is successful
-        const res = await Fetch({
-          url: "/user-plan/register",
-          method: "POST",
-          token: true,
-          data: trialPlanData,
-        });
-        if (res.status === 200) {
-          toast("Trial activated! Enjoy 30 days of free access.", {
-            type: "success",
-          });
-          setTrialPlanAvailed(true);
-          fetchUserPlans();
-        } else {
-          toast(res?.data?.message || "Could not activate trial.", {
-            type: "error",
-          });
-        }
-      } else {
-        toast(
-          transactionRes?.data?.error || "Could not create trial transaction.",
-          {
-            type: "error",
-          }
-        );
-      }
-    } catch (err) {
-      toast("Error activating trial.", { type: "error" });
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    if (urlPlanId && user && allPlans.length > 0) {
-      const selectedPlan = allPlans.find(
-        (plan) => plan.plan_id === parseInt(urlPlanId)
-      );
-      if (selectedPlan) {
-        subscribePlan(selectedPlan);
-      }
-    }
-  }, [urlPlanId, user, allPlans]);
-
-  useEffect(() => {
-    if (showCard) {
-      setLoading(false);
-    }
-  }, [showCard]);
-
-  const calculateEndDate = (validityDays) => {
-    const endDate = new Date(validityFromDate);
-    endDate.setUTCDate(endDate.getUTCDate() + validityDays);
-    return endDate.toISOString();
-  };
-
   const handleDiscountCouponFormSubmit = async (e) => {
     e.preventDefault();
     const formData = getFormData(e);
@@ -235,95 +116,6 @@ function StudentPlan() {
       return;
     }
   };
-
-  const getStartDateAndStatus = (userPlans) => {
-    const today = new Date();
-
-    if (!userPlans || userPlans.length === 0) {
-      return {
-        status: USER_PLAN_ACTIVE,
-        startDate: today.toISOString(),
-      };
-    }
-
-    const validActivePlans = userPlans.filter(
-      (p) => p.status === USER_PLAN_ACTIVE && new Date(p.validity_to) >= today
-    );
-
-    const stagedPlans = userPlans.filter((p) => p.status === USER_PLAN_STAGED);
-
-    // 1️⃣ STAGED takes highest priority
-    if (stagedPlans.length > 0) {
-      const lastStaged = stagedPlans.reduce((latest, plan) =>
-        new Date(plan.validity_to) > new Date(latest.validity_to)
-          ? plan
-          : latest
-      );
-
-      const startDate = new Date(lastStaged.validity_to);
-      startDate.setDate(startDate.getDate() + 1);
-
-      return {
-        status: USER_PLAN_STAGED,
-        startDate: startDate.toISOString(),
-      };
-    }
-
-    // 2️⃣ ACTIVE exists, no STAGED
-    if (validActivePlans.length > 0) {
-      const latestActive = validActivePlans.reduce((latest, plan) =>
-        new Date(plan.validity_to) > new Date(latest.validity_to)
-          ? plan
-          : latest
-      );
-
-      const startDate = new Date(latestActive.validity_to);
-      startDate.setDate(startDate.getDate() + 1);
-
-      return {
-        status: USER_PLAN_STAGED,
-        startDate: startDate.toISOString(),
-      };
-    }
-
-    // 3️⃣ Only EXPIRED plans
-    return {
-      status: USER_PLAN_ACTIVE,
-      startDate: today.toISOString(),
-    };
-  };
-
-  const fetchUserPlans = useCallback(async () => {
-    try {
-      const response = await Fetch({
-        url: "/user-plan/get-user-plan-by-id",
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        data: { user_id: user?.user_id },
-      });
-      const data = response.data;
-      if (!data?.userPlan?.length) return;
-      data.userPlan.sort(
-        (a, b) => new Date(a.validity_to) - new Date(b.validity_to)
-      );
-      setTrialPlanAvailed(
-        data.userPlan.some(
-          (plan) =>
-            (plan.plan.name === "Warmup Plan" ||
-              plan.plan.name === "15 Minute Daily Yoga") &&
-            plan.is_trial === true
-        )
-      );
-      setMyPlans(data.userPlan);
-      const activePlan = data.userPlan.find(
-        (plan) => plan.current_status === "ACTIVE"
-      );
-      console.log("ACTIVE : ", activePlan);
-      if (activePlan) setPlanId(activePlan.plan_id);
-    } catch (error) {
-      console.error("Error fetching user plans:", error);
-    }
-  }, [user, formattedDate]);
 
   const fetchPlans = useCallback(async () => {
     try {
@@ -360,6 +152,51 @@ function StudentPlan() {
     }
   }, [hasRecentInstituteSubscription]);
 
+  useEffect(() => {
+    fetchPlans();
+  }, [fetchPlans]);
+
+  const fetchUserPlans = useCallback(async () => {
+    try {
+      const response = await Fetch({
+        url: "/user-plan/get-user-plan-by-id",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        data: { user_id: user?.user_id },
+      });
+      const data = response.data;
+      console.log(data);
+      setValidityFromDate(data.newPlanPrediction.start_date);
+      if (!data?.userPlan?.length) return;
+      data.userPlan.sort(
+        (a, b) => new Date(a.validity_to) - new Date(b.validity_to)
+      );
+      setMyPlans(data.userPlan);
+      const activePlan = data.userPlan.find(
+        (plan) => plan.current_status === "ACTIVE"
+      );
+      console.log("ACTIVE : ", activePlan);
+      if (activePlan) setPlanId(activePlan.plan_id);
+    } catch (error) {
+      console.error("Error fetching user plans:", error);
+    }
+  }, [user, formattedDate]);
+
+  useEffect(() => {
+    if (urlPlanId && allPlans.length > 0) {
+      const plan = allPlans.find((p) => p.plan_id === Number(urlPlanId));
+      if (plan) onSelectPlan(plan);
+    }
+  }, [urlPlanId, allPlans]);
+
+  const onSelectPlan = (plan) => {
+    setSelectedPlan(plan);
+    const pricing = plan.pricing.find(
+      (p) => p.currency.short_tag === selectedCurrency
+    );
+    setPrice(pricing?.denomination || 0);
+  };
+
   const fetchCurrencies = useCallback(async () => {
     try {
       const response = await Fetch({
@@ -377,11 +214,6 @@ function StudentPlan() {
     }
     try {
       let isCustom = false;
-      if (showCustomCard) {
-        isCustom = true;
-      } else if (showCard) {
-        isCustom = false;
-      }
       const res = await Fetch({
         url: "/discount-coupon/check-plan-mapping",
         method: "POST",
@@ -389,7 +221,7 @@ function StudentPlan() {
         data: {
           coupon_name: discount_coupon,
           is_custom_plan: isCustom,
-          plan_id: isCustom ? customCardData._id : cardData.plan_id,
+          plan_id: cardData.plan_id,
         },
       });
       if (res.status === 200) {
@@ -407,387 +239,125 @@ function StudentPlan() {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const order_id = `ord_${toBeRegistered.user_id}_${toBeRegistered.validity_from}`;
-      FetchRetry({
-        url: "/payment/commit",
-        method: "POST",
-        token: true,
-        data: {
-          user_id: toBeRegistered.user_id,
-          status: "successful",
-          payment_for: "user_plan",
-          payment_method: "manual",
-          amount: toBeRegistered.amount,
-          signature: "n/a",
-          order_id: order_id, //may be unique, check again
-          payment_id: "n/a",
-          currency_id: 1,
-          discount_coupon_id: toBeRegistered.discount_coupon_id,
-        },
-        n: 10,
-        retryDelayMs: 2000,
-        onRetry: (err) => {
-          //console.log(err);
-        },
-      })
-        .then((res) => {
-          if (res.status === 200) {
-            registerUserPlan(order_id);
-          }
-        })
-        .catch((err) => {
-          toast(
-            "Something went wrong, try again. Any money debited will be refunded in 5-7 business days.",
-            { type: "error" }
-          );
-        });
-    };
-    if (Object.keys(toBeRegistered).length !== 0) {
-      if (toBeRegistered.amount === 0) {
-        fetchData();
-      }
-    }
-  }, [toBeRegistered]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!user) {
-      sessionStorage.setItem("redirectAfterLogin", location.pathname);
       navigate("/login");
       return;
     }
-    let t = false;
-    if (t) {
+
+    if (!selectedPlan) {
+      toast("Please select a plan", { type: "error" });
       return;
     }
-    if (!user) {
-      toast("Please login to continue", { type: "error" });
-      return;
-    }
-    if (!cardData) {
-      if (!customCardData) {
-        toast("Please select a plan to continue", { type: "error" });
+
+    const amount = calculateTotalPrice(price, selectedCurrency, true, 5);
+
+    const payload = {
+      user_id: user.user_id,
+      plan_id: selectedPlan.plan_id,
+      amount,
+      currency: selectedCurrency,
+    };
+
+    setLoading(true);
+
+    try {
+      // FREE PLAN
+      if (amount === 0) {
+        await Fetch({
+          url: "/payment/commit",
+          method: "POST",
+          token: true,
+          data: {
+            ...payload,
+            status: "SUCCESS",
+            payment_method: "FREE",
+            order_id: `free_${Date.now()}`,
+          },
+        });
+
+        toast("Plan activated!");
+        window.location.reload();
         return;
       }
-    }
-    if (!selectedCurrency || !selectedCurrencyId) {
-      toast("Please select a currency to continue", { type: "error" });
-      return;
-    }
-    // if (customCardData) {
-    //   let userPlanData = {
-    //     cancellation_date: null,
-    //     auto_renewal_enabled: false,
-    //     user_id: user?.user_id,
-    //     plan_id: customCardData?._id,
-    //     purchase_date: formattedDate,
-    //     discount_coupon_id:
-    //       discountCoupon && discountCouponApplied
-    //         ? discountCoupon.discount_coupon_id
-    //         : null,
-    //     referral_code_id: null,
-    //     amount: calculateTotalPrice(
-    //       price,
-    //       selectedCurrency,
-    //       true,
-    //       5,
-    //       discountCoupon
-    //     ),
-    //     currency: selectedCurrency,
-    //     user_type: "STUDENT",
-    //     validity_from: customCardData.validity_from,
-    //     validity_to: customCardData.validity_to,
-    //     custom_plan: true,
-    //     current_status: customCardData.current_status,
-    //   };
-    //   setToBeRegistered(userPlanData);
-    //   if (userPlanData.amount === 0) {
-    //     setToBeRegistered(userPlanData);
-    //   } else {
-    //     try {
-    //       const response = await Fetch({
-    //         url: "/payment/order",
-    //         method: "POST",
-    //         data: userPlanData,
-    //         token: true,
-    //       });
-    //       if (response?.status === 200) {
-    //         const razorpayOrder = response.data?.order;
-    //         if (razorpayOrder && razorpayOrder?.id) {
-    //           setOrderDetails({
-    //             orderId: razorpayOrder?.id,
-    //             currency: razorpayOrder?.currency,
-    //             amount: razorpayOrder?.amount,
-    //           });
-    //           setDisplayRazorpay(true);
-    //           setLoading(true);
-    //         }
-    //       } else {
-    //         toast(response.data?.message);
-    //       }
-    //     } catch (error) {
-    //       toast("Error setting up order, try again", {
-    //         type: "error",
-    //       });
-    //     }
-    //   }
-    // } else if (cardData) {
-    let userPlanData = {
-      cancellation_date: null,
-      auto_renewal_enabled: false,
-      user_id: user?.user_id,
-      plan_id: cardData?.plan_id,
-      discount_coupon_id:
-        discountCoupon && discountCouponApplied
-          ? discountCoupon.discount_coupon_id
-          : null,
-      referral_code_id: null,
-      amount: calculateTotalPrice(
-        price,
-        selectedCurrency,
-        true,
-        5,
-        discountCoupon
-      ),
-      currency: selectedCurrency,
-      user_type: "STUDENT",
-    };
-    if (planId !== -1) {
-      if (currentStatus !== USER_PLAN_ACTIVE) {
-        toast(
-          "You have an active plan! If you purchase a new plan, it will be staged."
-        );
-      }
-      const validityToDate = calculateEndDate(cardData.plan_validity_days);
-      userPlanData.purchase_date = formattedDate;
-      userPlanData.validity_from = validityFromDate;
-      userPlanData.validity_to = validityToDate;
-      userPlanData.current_status = currentStatus;
-      setShowCard(false);
-      setToBeRegistered(userPlanData);
-    } else {
-      userPlanData.purchase_date = formattedDate;
-      userPlanData.validity_from = formattedDate;
-      userPlanData.validity_to = calculateEndDate(cardData.plan_validity_days);
-      userPlanData.current_status = USER_PLAN_ACTIVE;
-      setToBeRegistered(userPlanData);
-    }
-    if (userPlanData.amount === 0) {
-      setToBeRegistered(userPlanData);
-    } else {
-      try {
-        const response = await Fetch({
-          url: "/payment/order",
-          method: "POST",
-          data: userPlanData,
-          token: true,
+
+      // PAID PLAN
+      const res = await Fetch({
+        url: "/payment/order",
+        method: "POST",
+        data: payload,
+        token: true,
+      });
+
+      if (res.status === 200) {
+        const order = res.data.order;
+        setOrderDetails({
+          orderId: order.id,
+          currency: order.currency,
+          amount: order.amount,
         });
-        if (response?.status === 200) {
-          const razorpayOrder = response.data?.order;
-          if (razorpayOrder && razorpayOrder?.id) {
-            setOrderDetails({
-              orderId: razorpayOrder?.id,
-              currency: razorpayOrder?.currency,
-              amount: razorpayOrder?.amount,
-            });
-            setDisplayRazorpay(true);
-            setLoading(true);
-          }
-        } else {
-          toast(response.data?.message);
-        }
-      } catch (error) {
-        toast("Error setting up order, try again", {
-          type: "error",
-        });
+        setDisplayRazorpay(true);
       }
+    } catch (err) {
+      toast("Error initiating payment", { type: "error" });
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const onPaymentSuccess = () => {
+    setShowCard(false);
+    setDisplayRazorpay(false);
+    toast("Payment successful! Activating your plan...");
+    setActivating(true);
+    pollForActivation();
   };
 
   const subscribePlan = async (data) => {
-    if (data.plan) {
-      toast("Sending enquiry!");
-      let finalData = {};
-      const selectedNeeds = data.selectedNeeds;
-      const otherNeed = data.otherNeed;
-      finalData["user"] = user;
-      finalData["selectedNeeds"] = selectedNeeds;
-      finalData["otherNeed"] = otherNeed;
-      const res = await Fetch({
-        url: "/plan/custom-plan-enquiry",
-        method: "POST",
-        data: finalData,
-      });
-      if (res.status === 200) {
-        toast(res.data.message);
-        setCustomPlanSent(true);
-      }
-      return;
-    }
-    if (data.plan_name) {
+    setShowCard(true);
+    setCardData(data);
+    setSelectedPlan(data);
+    setDiscountCouponApplied(false);
+    setDiscountCoupon(null);
+    const pricing = data.pricing.find(
+      (p) => p.currency.short_tag === selectedCurrency
+    );
+    setPrice(pricing.denomination);
+  };
+
+  const pollForActivation = async () => {
+    let attempts = 0;
+
+    const interval = setInterval(async () => {
+      attempts++;
+
       try {
-        let finalCustomCardData = { ...data };
-        const relevantPlans = currentCustomUserPlans.filter(
-          (plan) =>
-            plan.custom_plan_id === finalCustomCardData?._id &&
-            (plan.current_status === USER_PLAN_ACTIVE ||
-              plan.current_status === USER_PLAN_STAGED)
-        );
-        if (relevantPlans.length > 0) {
-          const existingPlan = relevantPlans.reduce(
-            (latestPlan, currentPlan) => {
-              const latestValidityTo = new Date(latestPlan.validity_to);
-              const currentValidityTo = new Date(currentPlan.validity_to);
-              return currentValidityTo > latestValidityTo
-                ? currentPlan
-                : latestPlan;
-            }
-          );
-          const existingValidityFrom = new Date(existingPlan.validity_to);
-          finalCustomCardData.validity_from =
-            existingValidityFrom.toISOString();
-          const newValidityTo = new Date(existingValidityFrom);
-          newValidityTo.setDate(
-            newValidityTo.getDate() + (data.planValidity || 0)
-          );
-          finalCustomCardData.validity_to = newValidityTo.toISOString();
-          finalCustomCardData.current_status = USER_PLAN_STAGED;
-        } else {
-          finalCustomCardData.validity_from = new Date().toISOString();
-          const validityToDate = new Date(finalCustomCardData.validity_from);
-          validityToDate.setDate(
-            validityToDate.getDate() + (data.planValidity || 0)
-          );
-          finalCustomCardData.validity_to = validityToDate.toISOString();
-          finalCustomCardData.current_status = USER_PLAN_ACTIVE;
+        const res = await Fetch({
+          url: "/user-plan/get-user-plan-by-id",
+          method: "POST",
+          data: { user_id: user?.user_id },
+        });
+
+        if (res?.data?.userPlan?.length > myPlans.length) {
+          clearInterval(interval);
+          setActivated(true);
+          setActivating(false);
+          toast("Plan activated 🎉");
+
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
         }
-        setCustomCardData(finalCustomCardData);
-        setShowCustomCard(true);
-        setDiscountCouponApplied(false);
-        setDiscountCoupon(null);
-        const selectedPricing = Number(data.prices[0][selectedCurrencyId]);
-        setPrice(selectedPricing);
-      } catch (error) {
-        console.error("Error processing plan data:", error);
+
+        if (attempts > 15) {
+          clearInterval(interval);
+          toast("Activation is taking longer than usual", { type: "info" });
+          setActivating(false);
+        }
+      } catch (err) {
+        console.error("Polling failed", err);
       }
-    } else {
-      setShowCard(true);
-      setCardData(data);
-      setDiscountCouponApplied(false);
-      setDiscountCoupon(null);
-      const pricing = data.pricing.find(
-        (p) => p.currency.short_tag === selectedCurrency
-      );
-      setPrice(pricing.denomination);
-    }
-  };
-
-  const downloadInvoice = async (response) => {
-    try {
-      const dataBuffer = new Blob([response.data], {
-        type: "text/html;charset=utf-8;",
-      });
-      const htmlString = await dataBuffer.text();
-      var opt = {
-        margin: 0.25,
-        image: { type: "png", quality: 1 },
-        html2canvas: { scale: 0.85 },
-        jsPDF: {
-          unit: "in",
-          format: "A4",
-          orientation: "portrait",
-        },
-      };
-      const doc = html2pdf()
-        .set(opt)
-        .from(htmlString)
-        .toPdf()
-        .save("6AMYOGA_plan_purchase.pdf");
-    } catch (err) {
-      toast(err);
-      console.error(err);
-    }
-  };
-
-  const registerUserPlan = async (order_id) => {
-    let finalUserPlan = { ...toBeRegistered };
-    finalUserPlan.transaction_order_id = order_id;
-    finalUserPlan.user_type = "STUDENT";
-    finalUserPlan.institute_id = null;
-    finalUserPlan.is_trial = false;
-    FetchRetry({
-      url: "/user-plan/register",
-      method: "POST",
-      token: true,
-      data: finalUserPlan,
-      n: 5,
-      retryDelayMs: 2000,
-    })
-      .then((response) => {
-        if (response?.status === 200) {
-          toast("Plan subscribed successfully", { type: "success" });
-          FetchRetry({
-            url: "/invoice/student/mail-invoice",
-            method: "POST",
-            data: JSON.stringify({
-              user_id: finalUserPlan.user_id,
-              transaction_order_id: order_id,
-            }),
-            n: 2,
-            retryDelayMs: 2000,
-          })
-            .then((responseInvoice) => {
-              if (responseInvoice.status === 200) {
-                toast("Invoice mailed successfully", {
-                  type: "success",
-                });
-              }
-              navigate("/student/purchase-a-plan");
-              return downloadInvoice(responseInvoice);
-            })
-            .then(async (res) => {
-              const res1 = await Fetch({
-                url: "/invoice/student/notify-admin",
-                method: "POST",
-                token: true,
-                data: {
-                  user_id: finalUserPlan.user_id,
-                  transaction_order_id: order_id,
-                },
-              });
-              setShowCard(false);
-              setCardData(null);
-              setLoading(false);
-              window.location.reload();
-            })
-            .catch((error) => {
-              setShowCard(false);
-              setCardData(null);
-              toast(
-                "Error mailing invoice; Download invoice in Transaction History",
-                { type: "error" }
-              );
-              setLoading(false);
-            });
-          fetchUserPlans();
-        } else {
-          toast(response?.data?.message);
-          setLoading(false);
-        }
-      })
-      .catch((error) => {
-        toast(
-          "Error subscribing plan; Incase money has been debited from your account, it will be refunded within 4 to 5 business days! Please try again!",
-          { type: "error" }
-        );
-      });
-  };
-
-  const registerErrorCallback = () => {
-    setShowCard(false);
-    setCardData(null);
+    }, 2000);
   };
 
   useEffect(() => {
@@ -797,74 +367,9 @@ function StudentPlan() {
   }, [user, fetchUserPlans]);
 
   useEffect(() => {
-    setValidityFromDate(getStartDateAndStatus(myPlans).startDate);
-  }, [myPlans]);
-
-  useEffect(() => {
     fetchPlans();
     fetchCurrencies();
   }, [fetchPlans, fetchCurrencies]);
-
-  const continentNames = {
-    AF: "Africa",
-    AN: "Antarctica",
-    AS: "Asia",
-    EU: "Europe",
-    NA: "North America",
-    OC: "Oceania",
-    SA: "South America",
-  };
-
-  const continentCurrencyMap = {
-    Asia: "INR",
-    Africa: "USD",
-    Antarctica: "USD",
-    Europe: "EUR",
-    Oceania: "USD",
-    "South America": "USD",
-    "North America": "USD",
-  };
-
-  useEffect(() => {
-    fetch("https://ipapi.co/json/")
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        if (!continentNames[data.continent_code]) {
-          toast("Currency not available for your country", {
-            type: "error",
-          });
-          setSelectedCurrency("USD");
-        } else {
-          if (continentNames[data.continent_code] === "Asia") {
-            const southAsia = [
-              "Afghanistan",
-              "Bangladesh",
-              "Bhutan",
-              "India",
-              "Maldives",
-              "Nepal",
-              "Pakistan",
-              "Vietnam",
-              "Sri Lanka",
-            ];
-            if (southAsia.includes(data.country_name)) {
-              setSelectedCurrency("INR");
-            } else {
-              setSelectedCurrency("USD");
-            }
-          } else {
-            setSelectedCurrency(
-              continentCurrencyMap[continentNames[data.continent_code]]
-            );
-          }
-        }
-      })
-      .catch((err) => {
-        setSelectedCurrency("USD");
-      });
-  }, []);
 
   const [filteredPlans, setFilteredPlans] = useState([]);
 
@@ -872,12 +377,36 @@ function StudentPlan() {
     setFilteredPlans(allPlans);
   }, [allPlans]);
 
+  const calculateEndDate = (validityDays) => {
+    if (!validityFromDate) return "";
+
+    const start = new Date(validityFromDate);
+
+    if (isNaN(start.getTime())) return "";
+
+    const endDate = new Date(start);
+    endDate.setDate(endDate.getDate() + validityDays);
+
+    return endDate.toISOString();
+  };
+
+  const infoCardStyle = {
+    border: "1px solid #eee",
+    borderRadius: 2,
+    p: 1.5,
+    fontSize: 13,
+    display: "flex",
+    flexDirection: "column",
+    gap: 0.5,
+    background: "#fafafa",
+  };
+
   return (
     <div className="max-w-7xl mx-auto">
       <StudentNavMUI />
       <Hero heading="Plans" />
+
       <div className="mx-auto max-w-7xl">
-        {/* {planId === -1 && currentCustomUserPlans.length === 0 ? ( */}
         {planId === -1 ? (
           <Alert variant="outlined" severity="info">
             Please purchase a subscription to unlock all features!
@@ -888,7 +417,6 @@ function StudentPlan() {
           </Alert>
         )}
       </div>
-      <Spacer h={2} />
       {myPlans && myPlans.length > 0 && (
         <div className="mx-auto max-w-7xl">
           <h4>Plan History</h4>
@@ -936,6 +464,17 @@ function StudentPlan() {
           </TableContainer>
         </div>
       )}
+      {activating && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          Activating your plan… please wait ⏳
+        </Alert>
+      )}
+
+      {activated && (
+        <Alert severity="success" sx={{ mt: 2 }}>
+          Plan activated! Refreshing… 🎉
+        </Alert>
+      )}
 
       <div className="flex flex-col items-center justify-center pt-4">
         {invalidCountry ? (
@@ -959,166 +498,180 @@ function StudentPlan() {
               allPlans={filteredPlans}
               subscribePlan={subscribePlan}
               selectedCurrency={selectedCurrency}
-              handleTryTrial={handleTryTrial}
-              trialPlanAvailed={trialPlanAvailed}
+              trialPlanAvailed={false}
             />
           </>
         )}
-        <Modal visible={showCard} onClose={() => setShowCard(false)}>
-          <Modal.Content>
-            {cardData ? (
-              <>
-                <h3>{cardData.name}</h3>
-
-                <Divider />
-                <Spacer />
-                <p>
-                  <strong>Price</strong>
-                  <br />
-                  {cardData ? (
-                    <>
-                      <span>{selectedCurrency}</span> <span>{price}</span>{" "}
-                      {discountCouponApplied ? (
-                        <span className="text-green-600">
-                          - {(price * discountCoupon.discount_percentage) / 100}
-                        </span>
-                      ) : (
-                        <></>
-                      )}{" "}
-                      {selectedCurrency === "INR" ? (
-                        <span>+ 5% GST (2.5% SGST + 2.5% CGST)</span>
-                      ) : (
-                        <></>
-                      )}{" "}
-                      {selectedCurrency === "INR" || discountCouponApplied ? (
-                        <>
-                          <span> = </span>{" "}
-                          <span>
-                            {calculateTotalPrice(
-                              price,
-                              selectedCurrency,
-                              true,
-                              5,
-                              discountCoupon,
-                              1
-                            )}
-                          </span>
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                      <br />
-                      {discountCouponApplied ? (
-                        <span className="rounded-full bg-green-600 px-2 py-1 text-sm text-white">
-                          Coupon Applied : {discountCoupon.coupon_name} |{" "}
-                          {discountCoupon?.discount_percentage}
-                          {"%"}
-                          OFF
-                          <button
-                            className="mx-2 rounded-full border-0 bg-red-500 px-1"
-                            onClick={() => {
-                              setDiscountCouponApplied(false);
-                              setDiscountCoupon(null);
-                            }}
-                          >
-                            Remove
-                          </button>
-                        </span>
-                      ) : (
-                        <></>
-                      )}
-                    </>
-                  ) : (
-                    ""
-                  )}
-                </p>
-                <Spacer />
-                <DiscountCouponForm
-                  handleDiscountCouponFormSubmit={
-                    handleDiscountCouponFormSubmit
-                  }
-                />
-                <Spacer />
-                <Divider />
-                <Spacer />
-                <h5>Validity</h5>
-                <Spacer />
-                <div className="flex flex-col gap-2">
-                  <div className="flex flex-row gap-2">
-                    <p className="flex flex-1 flex-col items-center rounded-lg border p-2 text-sm">
-                      <span className="font-medium">Plan Start Date</span>
-                      <span className="text-center">
-                        {new Date(validityFromDate).toLocaleString()}
-                      </span>
-                    </p>
-
-                    <p className="flex flex-1 flex-col items-center rounded-lg border p-2 text-sm">
-                      <span className="font-medium">Plan End Date</span>
-                      <span className="text-center">
-                        {new Date(
-                          calculateEndDate(cardData.plan_validity_days)
-                        ).toLocaleString()}
-                      </span>
-                    </p>
-                  </div>
-
-                  <p className="flex flex-1 flex-col items-center rounded-lg border p-2 text-sm">
-                    <span className="font-medium">Watch Hours Limit</span>
-                    <span className="text-center">
-                      {cardData?.watch_time_limit < 3600 ? (
-                        <>{cardData?.watch_time_limit / 60} Minutes</>
-                      ) : (
-                        <>{cardData?.watch_time_limit / 3600} Hours</>
-                      )}
-                    </span>
-                  </p>
-                </div>
-                <Spacer />
-                <Divider />
-                <Spacer />
-                <Button
-                  onClick={handleSubmit}
-                  fullWidth
-                  variant="contained"
-                  disabled={loading}
-                >
-                  {loading ? "..." : "Purchase"}
-                </Button>
-              </>
-            ) : (
-              <></>
-            )}
-          </Modal.Content>
-          <Modal.Action
-            onClick={() => {
-              setShowCard(false);
-              setCardData(null);
-              setDisplayRazorpay(false);
+        <Modal open={showCard} onClose={() => setShowCard(false)}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              bgcolor: "background.paper",
+              borderRadius: 3,
+              width: { xs: "90%", sm: 420 },
+              maxHeight: "85vh",
+              display: "flex",
+              flexDirection: "column",
+              boxShadow: 24,
+              overflow: "hidden",
             }}
           >
-            Close
-          </Modal.Action>
-        </Modal>
-      </div>
+            {/* Header */}
+            <Box sx={{ px: 3, py: 2, borderBottom: "1px solid #eee" }}>
+              <h3 style={{ margin: 0 }}>{cardData?.name}</h3>
+            </Box>
 
-      <RenderRazorpay
-        userId={user?.user_id}
-        keyId={import.meta.env.VITE_RAZORPAY_KEY_ID}
-        keySecret={import.meta.env.VITE_RAZORPAY_KEY_SECRET}
-        orderId={orderDetails.orderId}
-        currency={orderDetails.currency}
-        currencyId={selectedCurrencyId}
-        amount={orderDetails.amount}
-        payment_for={"user_plan"}
-        redirectUrl={"/student"}
-        onSuccessCallback={registerUserPlan}
-        onErrorCallback={registerErrorCallback}
-        displayRazorpay={displayRazorpay}
-        setDisplayRazorpay={setDisplayRazorpay}
-        discount_coupon_id={
-          discountCouponApplied ? discountCoupon?.discount_coupon_id : null
-        }
-      />
+            {/* Scrollable Content */}
+            <Box sx={{ px: 3, py: 2, overflowY: "auto", flex: 1 }}>
+              {/* Price */}
+              <Box sx={{ mb: 2 }}>
+                <strong>Price</strong>
+                <Box sx={{ mt: 1 }}>
+                  <span>{selectedCurrency}</span>{" "}
+                  <span style={{ fontWeight: 600 }}>{price}</span>{" "}
+                  {discountCouponApplied && (
+                    <span style={{ color: "green", marginLeft: 6 }}>
+                      - {(price * discountCoupon.discount_percentage) / 100}
+                    </span>
+                  )}
+                </Box>
+
+                <Box sx={{ mt: 1, fontSize: 13, color: "#555" }}>
+                  {selectedCurrency === "INR" && "Includes 5% GST"}
+                </Box>
+
+                {discountCouponApplied && (
+                  <Box
+                    sx={{
+                      mt: 1,
+                      p: 1,
+                      borderRadius: 1,
+                      background: "#E8F5E9",
+                      fontSize: 13,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span>
+                      Coupon: {discountCoupon.coupon_name} (
+                      {discountCoupon.discount_percentage}% OFF)
+                    </span>
+                    <Button
+                      size="small"
+                      color="error"
+                      onClick={() => {
+                        setDiscountCouponApplied(false);
+                        setDiscountCoupon(null);
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </Box>
+                )}
+              </Box>
+
+              <Divider sx={{ my: 2 }} />
+
+              {/* Coupon */}
+              <DiscountCouponForm
+                handleDiscountCouponFormSubmit={handleDiscountCouponFormSubmit}
+              />
+
+              <Divider sx={{ my: 2 }} />
+
+              {/* Validity */}
+              <Box>
+                <strong>Validity</strong>
+
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 1.5,
+                    mt: 1.5,
+                  }}
+                >
+                  <Box sx={infoCardStyle}>
+                    <span>Start</span>
+                    <strong>
+                      {new Date(validityFromDate).toLocaleDateString()}
+                    </strong>
+                  </Box>
+
+                  <Box sx={infoCardStyle}>
+                    <span>End</span>
+                    <strong>
+                      {new Date(validityFromDate).toLocaleDateString()}
+
+                      {/* {calculateEndDate(cardData?.plan_validity_days)
+                        ? new Date(
+                            calculateEndDate(cardData?.plan_validity_days)
+                          ).toLocaleDateString()
+                        : "--"} */}
+                    </strong>
+                  </Box>
+                </Box>
+
+                <Box sx={{ ...infoCardStyle, mt: 1.5 }}>
+                  <span>Watch Limit</span>
+                  <strong>
+                    {cardData?.watch_time_limit < 3600
+                      ? `${cardData?.watch_time_limit / 60} Minutes`
+                      : `${cardData?.watch_time_limit / 3600} Hours`}
+                  </strong>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Footer */}
+            <Box
+              sx={{
+                p: 2,
+                borderTop: "1px solid #eee",
+                display: "flex",
+                flexDirection: "column",
+                gap: 1,
+              }}
+            >
+              <Button
+                onClick={handleSubmit}
+                fullWidth
+                variant="contained"
+                disabled={loading}
+              >
+                {loading ? "Processing..." : "Purchase"}
+              </Button>
+
+              <Button
+                fullWidth
+                color="inherit"
+                onClick={() => {
+                  setShowCard(false);
+                  setCardData(null);
+                  setDisplayRazorpay(false);
+                }}
+              >
+                Cancel
+              </Button>
+            </Box>
+          </Box>
+        </Modal>
+
+        <RazorpayCheckout
+          keyId={import.meta.env.VITE_RAZORPAY_KEY_ID}
+          orderId={orderDetails.orderId}
+          currency={orderDetails.currency}
+          amount={orderDetails.amount}
+          displayRazorpay={displayRazorpay}
+          setDisplayRazorpay={setDisplayRazorpay}
+          onSuccess={onPaymentSuccess}
+          onFailure={() => toast("Payment cancelled")}
+        />
+      </div>
     </div>
   );
 }
