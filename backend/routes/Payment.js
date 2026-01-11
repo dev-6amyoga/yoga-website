@@ -85,67 +85,63 @@ router.post('/commit', async (req, res) => {
   }
 })
 
-router.post(
-  '/webhook/razorpay',
-  express.raw({ type: '*/*' }),
-  async (req, res) => {
-    try {
-      const secret = process.env.RAZORPAY_WEBHOOK_SECRET
-      const signature = req.headers['x-razorpay-signature']
+router.post('/webhook/razorpay', async (req, res) => {
+  try {
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET
+    const signature = req.headers['x-razorpay-signature']
 
-      if (!signature) {
-        console.error('❌ No Razorpay signature header')
-        return res.status(400).send('No signature')
-      }
-
-      const expectedSignature = crypto
-        .createHmac('sha256', secret)
-        .update(req.body)
-        .digest('hex')
-
-      if (signature !== expectedSignature) {
-        console.error('❌ Invalid Razorpay webhook signature')
-        return res.status(401).send('Invalid signature')
-      }
-
-      const event = JSON.parse(req.body.toString())
-      const payment = event?.payload?.payment?.entity
-
-      if (!payment) {
-        return res.status(200).json({ ok: true })
-      }
-
-      const status =
-        payment.status === 'captured' ? TRANSACTION_SUCCESS : TRANSACTION_FAILED
-
-      const notes = payment.notes || {}
-
-      const user_plan_payload = notes.user_plan_payload
-        ? JSON.parse(notes.user_plan_payload)
-        : null
-
-      await commitUnified({
-        user_id: notes.user_id,
-        plan_id: notes.plan_id,
-        status,
-        payment_for: 'USER_PLAN',
-        payment_method: 'razorpay',
-        amount: payment.amount / 100,
-        order_id: payment.order_id,
-        payment_id: payment.id,
-        signature,
-        currency_id: 1,
-        discount_coupon_id: notes.discount_coupon_id || null,
-        user_plan_payload,
-      })
-
-      return res.status(200).json({ ok: true })
-    } catch (err) {
-      console.error('❌ Webhook error:', err)
-      return res.status(500).send('Webhook error')
+    if (!signature) {
+      console.error('❌ No Razorpay signature header')
+      return res.status(400).send('No signature')
     }
+
+    const expectedSignature = crypto
+      .createHmac('sha256', secret)
+      .update(req.body)
+      .digest('hex')
+
+    if (signature !== expectedSignature) {
+      console.error('❌ Invalid Razorpay webhook signature')
+      return res.status(401).send('Invalid signature')
+    }
+
+    const event = JSON.parse(req.body.toString())
+    const payment = event?.payload?.payment?.entity
+
+    if (!payment) {
+      return res.status(200).json({ ok: true })
+    }
+
+    const status =
+      payment.status === 'captured' ? TRANSACTION_SUCCESS : TRANSACTION_FAILED
+
+    const notes = payment.notes || {}
+
+    const user_plan_payload = notes.user_plan_payload
+      ? JSON.parse(notes.user_plan_payload)
+      : null
+
+    await commitUnified({
+      user_id: notes.user_id,
+      plan_id: notes.plan_id,
+      status,
+      payment_for: 'USER_PLAN',
+      payment_method: 'razorpay',
+      amount: payment.amount / 100,
+      order_id: payment.order_id,
+      payment_id: payment.id,
+      signature,
+      currency_id: 1,
+      discount_coupon_id: notes.discount_coupon_id || null,
+      user_plan_payload,
+    })
+
+    return res.status(200).json({ ok: true })
+  } catch (err) {
+    console.error('❌ Webhook error:', err)
+    return res.status(500).send('Webhook error')
   }
-)
+})
 
 module.exports = router
 

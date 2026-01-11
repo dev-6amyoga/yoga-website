@@ -160,7 +160,7 @@ expressWs(app)
 
 // CORS
 app.use(cors(corsOptions))
-
+app.use('/payment/webhook/razorpay', express.raw({ type: 'application/json' }))
 // parse json body
 app.use(express.json())
 
