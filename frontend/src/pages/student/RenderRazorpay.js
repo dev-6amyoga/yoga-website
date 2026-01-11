@@ -40,7 +40,7 @@ export default function RazorpayCheckout({
         const res = await FetchRetry({
           url: "/payment/commit",
           method: "POST",
-          token: false, // IMPORTANT — no auth
+          token: false,
           data: {
             user_id: userId,
             status,
