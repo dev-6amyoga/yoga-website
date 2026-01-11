@@ -252,11 +252,25 @@ function StudentPlan() {
 
     const amount = calculateTotalPrice(price, selectedCurrency, true, 5);
 
+    const userPlanPayload = {
+      purchase_date: new Date().toISOString(),
+      validity_from: validityFromDate || new Date().toISOString(),
+      validity_to: null,
+      cancellation_date: null,
+      auto_renewal_enabled: false,
+      referral_code_id: null,
+      current_status: "ACTIVE",
+      is_trial: false,
+      user_type: "STUDENT",
+      institute_id: selectedPlan?.institute_id || null,
+    };
+
     const payload = {
       user_id: user.user_id,
       plan_id: selectedPlan.plan_id,
       amount,
       currency: selectedCurrency,
+      user_plan_payload: userPlanPayload,
     };
 
     setLoading(true);
