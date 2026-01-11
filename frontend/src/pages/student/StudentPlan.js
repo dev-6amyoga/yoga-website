@@ -378,16 +378,18 @@ function StudentPlan() {
   }, [allPlans]);
 
   const calculateEndDate = (validityDays) => {
-    if (!validityFromDate) return "";
+    if (!validityFromDate) return null;
+    if (!validityDays || isNaN(validityDays)) return null;
 
     const start = new Date(validityFromDate);
-
-    if (isNaN(start.getTime())) return "";
+    if (isNaN(start.getTime())) return null;
 
     const endDate = new Date(start);
-    endDate.setDate(endDate.getDate() + validityDays);
+    endDate.setDate(endDate.getDate() + Number(validityDays));
 
-    return endDate.toISOString();
+    if (isNaN(endDate.getTime())) return null;
+
+    return endDate;
   };
 
   const infoCardStyle = {
@@ -598,20 +600,21 @@ function StudentPlan() {
                   <Box sx={infoCardStyle}>
                     <span>Start</span>
                     <strong>
-                      {new Date(validityFromDate).toLocaleDateString()}
+                      {validityFromDate &&
+                      !isNaN(new Date(validityFromDate).getTime())
+                        ? new Date(validityFromDate).toLocaleDateString()
+                        : "--"}
                     </strong>
                   </Box>
 
                   <Box sx={infoCardStyle}>
                     <span>End</span>
                     <strong>
-                      {new Date(validityFromDate).toLocaleDateString()}
-
-                      {/* {calculateEndDate(cardData?.plan_validity_days)
-                        ? new Date(
-                            calculateEndDate(cardData?.plan_validity_days)
+                      {calculateEndDate(cardData?.plan_validity_days)
+                        ? calculateEndDate(
+                            cardData?.plan_validity_days
                           ).toLocaleDateString()
-                        : "--"} */}
+                        : "--"}
                     </strong>
                   </Box>
                 </Box>
