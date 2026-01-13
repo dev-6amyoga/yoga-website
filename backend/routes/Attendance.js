@@ -756,7 +756,7 @@ router.get('/same-class/:classId', async (req, res) => {
 
     const classIds = matchingClasses.map((c) => c.zoom_class_id)
 
-    // 3️⃣ Fetch attendance (NO includes)
+    // 3️⃣ Fetch attendance
     const attendance = await ClassAttendance.findAll({
       where: { class_id: classIds },
       order: [['date', 'DESC']],
@@ -765,16 +765,64 @@ router.get('/same-class/:classId', async (req, res) => {
     // 4️⃣ Collect user IDs
     const userIds = [...new Set(attendance.map((a) => a.user_id))]
 
-    // 5️⃣ Fetch user data manually (still using model)
+    // 5️⃣ Fetch user data
     const users = await User.findAll({
       where: { user_id: userIds },
       attributes: ['user_id', 'name', 'email', 'phone'],
     })
 
-    // 6️⃣ Map user info to attendance
-    const userMap = {}
-    users.forEach((u) => (userMap[u.user_id] = u))
+    // 6️⃣ Fetch ACTIVE user plans
+    const activePlans = await UserPlan.findAll({
+      where: {
+        user_id: userIds,
+        status: USER_PLAN_ACTIVE, // or 'ACTIVE'
+      },
+      attributes: ['user_plan_id', 'user_id', 'end_date'],
+    })
 
+    // 7️⃣ Fetch plan attendance info
+    const userPlanIds = activePlans.map((p) => p.user_plan_id)
+
+    const planAttendance = await UserPlanAttendance.findAll({
+      where: {
+        user_plan_id: userPlanIds,
+      },
+      attributes: ['user_plan_id', 'classes_allowed', 'classes_attended'],
+    })
+
+    // 8️⃣ Create lookup maps
+    const activePlanMap = {}
+    activePlans.forEach((p) => {
+      activePlanMap[p.user_id] = p
+    })
+
+    const planAttendanceMap = {}
+    planAttendance.forEach((pa) => {
+      planAttendanceMap[pa.user_plan_id] = pa
+    })
+
+    const userMap = {}
+    users.forEach((u) => {
+      const plan = activePlanMap[u.user_id]
+      let remainingClasses = 0
+      let planLastDay = 'No active plan'
+
+      if (plan) {
+        const pa = planAttendanceMap[plan.user_plan_id]
+        if (pa) {
+          remainingClasses = pa.classes_allowed - pa.classes_attended
+        }
+        planLastDay = plan.end_date
+      }
+
+      userMap[u.user_id] = {
+        ...u.toJSON(),
+        remaining_classes: remainingClasses,
+        plan_last_day: planLastDay,
+      }
+    })
+
+    // 🔟 Attach user info to attendance
     const enrichedAttendance = attendance.map((att) => ({
       ...att.toJSON(),
       user: userMap[att.user_id] || null,

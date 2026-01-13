@@ -50,8 +50,8 @@ export default function AttendanceTable({ data }) {
             <TableCell sx={{ fontWeight: 600 }}>Phone</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>Join Time (IST)</TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Leave Time (IST)</TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Duration (mins)</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Plan Validity</TableCell>
+            <TableCell sx={{ fontWeight: 600 }}>Remaining Classes</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
             <TableCell sx={{ fontWeight: 600 }}>Marked By</TableCell>
           </TableRow>
@@ -68,10 +68,10 @@ export default function AttendanceTable({ data }) {
                   {formatTimeIST(row.join_time, row.marked_by)}
                 </TableCell>
                 <TableCell sx={{ fontWeight: 600, color: "#d32f2f" }}>
-                  {formatTimeIST(row.leave_time, row.marked_by)}
+                  {formatTimeIST(row.plan_last_day, row.marked_by)}
                 </TableCell>
 
-                <TableCell>{row.duration_minutes || 0}</TableCell>
+                <TableCell>{row.remaining_classes || 0}</TableCell>
                 <TableCell>
                   <span
                     style={{

@@ -79,13 +79,11 @@ export default function ViewClassAttendees() {
       let data = res.data.attendees;
       console.log("Fetched attendees:", data);
 
-      // 2️⃣ FILTER BY SELECTED DATE (if chosen)
       if (selectedDate) {
         const dateStr = selectedDate.format("YYYY-MM-DD");
         data = data.filter((a) => a.date.startsWith(dateStr));
       }
 
-      // 3️⃣ FILTER BY TIME (optional)
       if (selectedTime) {
         const timeStr = selectedTime.format("HH:mm");
         data = data.filter((a) => a.time === timeStr);
