@@ -9,6 +9,7 @@ const { UserPlan } = require('../models/sql/UserPlan')
 const { User } = require('../models/sql/User')
 const { sequelize } = require('../init.sequelize')
 const moment = require('moment-timezone')
+const { USER_PLAN_ACTIVE } = require('../enums/user_plan_status')
 
 router.post('/join', async (req, res) => {
   const t = await sequelize.transaction()
@@ -775,7 +776,7 @@ router.get('/same-class/:classId', async (req, res) => {
     const activePlans = await UserPlan.findAll({
       where: {
         user_id: userIds,
-        status: USER_PLAN_ACTIVE, // or 'ACTIVE'
+        current_status: USER_PLAN_ACTIVE, // or 'ACTIVE'
       },
       attributes: ['user_plan_id', 'user_id', 'end_date'],
     })
