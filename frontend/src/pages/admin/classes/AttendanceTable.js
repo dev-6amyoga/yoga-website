@@ -65,10 +65,10 @@ export default function AttendanceTable({ data }) {
                 <TableCell>{row.user?.phone || "N/A"}</TableCell>
                 <TableCell>{formatDateIST(row.date)}</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: "#1976d2" }}>
-                  {formatTimeIST(row.join_time, row.marked_by)}
+                  {formatTimeIST(row.user?.join_time, row.marked_by)}
                 </TableCell>
                 <TableCell sx={{ fontWeight: 600, color: "#d32f2f" }}>
-                  {formatTimeIST(row.plan_last_day, row.marked_by)}
+                  {formatTimeIST(row.user?.plan_last_day, row.marked_by)}
                 </TableCell>
 
                 <TableCell>{row.remaining_classes || 0}</TableCell>
