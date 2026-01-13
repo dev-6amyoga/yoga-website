@@ -307,6 +307,13 @@ export default function AttendanceByClass() {
                             }`}
                             secondary={`Phone: ${u.phone || "N/A"} | Remaining: ${
                               u.classes_remaining || 0
+                            } | Last Day: ${
+                              u.validity_to &&
+                              u.validity_to !== "No active plan"
+                                ? new Date(u.validity_to).toLocaleDateString(
+                                    "en-GB"
+                                  )
+                                : "No active plan"
                             }`}
                           />
                         </ListItem>
