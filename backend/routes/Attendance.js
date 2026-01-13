@@ -778,7 +778,7 @@ router.get('/same-class/:classId', async (req, res) => {
         user_id: userIds,
         current_status: USER_PLAN_ACTIVE, // or 'ACTIVE'
       },
-      attributes: ['user_plan_id', 'user_id', 'end_date'],
+      attributes: ['user_plan_id', 'user_id', 'validity_to'],
     })
 
     // 7️⃣ Fetch plan attendance info
