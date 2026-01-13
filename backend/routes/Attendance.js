@@ -813,7 +813,7 @@ router.get('/same-class/:classId', async (req, res) => {
         if (pa) {
           remainingClasses = pa.classes_allowed - pa.classes_attended
         }
-        planLastDay = plan.end_date
+        planLastDay = plan.validity_to
       }
 
       userMap[u.user_id] = {
