@@ -68,10 +68,14 @@ export default function AttendanceTable({ data }) {
                   {formatTimeIST(row.user?.join_time, row.marked_by)}
                 </TableCell>
                 <TableCell sx={{ fontWeight: 600, color: "#d32f2f" }}>
-                  {formatTimeIST(row.user?.plan_last_day, row.marked_by)}
+                  {row.user?.plan_last_day === "No active plan"
+                    ? "No active plan"
+                    : new Date(row.user?.plan_last_day).toLocaleDateString(
+                        "en-GB"
+                      )}
                 </TableCell>
 
-                <TableCell>{row.remaining_classes || 0}</TableCell>
+                <TableCell>{row.user?.remaining_classes || 0}</TableCell>
                 <TableCell>
                   <span
                     style={{
