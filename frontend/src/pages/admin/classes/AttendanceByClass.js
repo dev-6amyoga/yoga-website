@@ -22,6 +22,8 @@ import {
   TableBody,
   useMediaQuery,
   Alert,
+  Paper,
+  TableContainer,
 } from "@mui/material";
 import { Fetch } from "../../../utils/Fetch";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -348,43 +350,61 @@ export default function AttendanceByClass() {
               Selected Students ({selectedUsers.length})
             </Typography>
 
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Plan</TableCell>
-                  <TableCell>Validity</TableCell>
-                  <TableCell>Remaining</TableCell>
-                  <TableCell />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {selectedUsers.map((u) => (
-                  <TableRow key={u.user_id}>
-                    <TableCell>{u.name}</TableCell>
-                    <TableCell>{u.plan_name}</TableCell>
-                    <TableCell>
-                      {u.validity_from
-                        ? new Date(u.validity_from).toLocaleDateString()
-                        : "N/A"}{" "}
-                      –{" "}
-                      {u.validity_to
-                        ? new Date(u.validity_to).toLocaleDateString()
-                        : "N/A"}
-                    </TableCell>
-                    <TableCell>{u.classes_remaining || 0}</TableCell>
-                    <TableCell>
-                      <Button
-                        color="error"
-                        onClick={() => toggleUser(u.user_id)}
-                      >
-                        Remove
-                      </Button>
-                    </TableCell>
+            <TableContainer
+              component={Paper}
+              sx={{
+                mt: 1,
+                maxHeight: 300,
+                overflowX: "auto",
+                overflowY: "auto",
+                WebkitOverflowScrolling: "touch",
+              }}
+            >
+              <Table
+                size="small"
+                stickyHeader
+                sx={{
+                  minWidth: 650,
+                }}
+              >
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Plan</TableCell>
+                    <TableCell>Validity</TableCell>
+                    <TableCell>Remaining</TableCell>
+                    <TableCell />
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+
+                <TableBody>
+                  {selectedUsers.map((u) => (
+                    <TableRow key={u.user_id}>
+                      <TableCell>{u.name}</TableCell>
+                      <TableCell>{u.plan_name}</TableCell>
+                      <TableCell>
+                        {u.validity_from
+                          ? new Date(u.validity_from).toLocaleDateString()
+                          : "N/A"}{" "}
+                        –{" "}
+                        {u.validity_to
+                          ? new Date(u.validity_to).toLocaleDateString()
+                          : "N/A"}
+                      </TableCell>
+                      <TableCell>{u.classes_remaining || 0}</TableCell>
+                      <TableCell>
+                        <Button
+                          color="error"
+                          onClick={() => toggleUser(u.user_id)}
+                        >
+                          Remove
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </>
         )}
 
