@@ -161,7 +161,7 @@ export default function AttendanceByClass() {
   const rowVirtualizer = useVirtualizer({
     count: filteredUsers.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => (isMobile ? 88 : 64),
+    estimateSize: () => (isMobile ? 96 : 72),
     overscan: 10,
   });
 
@@ -288,6 +288,8 @@ export default function AttendanceByClass() {
                         }}
                       >
                         <ListItem
+                          dense={isMobile}
+                          disableGutters
                           secondaryAction={
                             <Checkbox
                               checked={checked}
@@ -295,6 +297,9 @@ export default function AttendanceByClass() {
                             />
                           }
                           sx={{
+                            minHeight: isMobile ? 88 : 64,
+                            pr: 6,
+                            boxSizing: "border-box",
                             border: noPlan ? "2px solid red" : "none",
                             backgroundColor: noPlan
                               ? "rgba(255,0,0,0.05)"
@@ -315,6 +320,16 @@ export default function AttendanceByClass() {
                                   )
                                 : "No active plan"
                             }`}
+                            primaryTypographyProps={{
+                              fontSize: isMobile ? "0.9rem" : "1rem",
+                              fontWeight: 500,
+                            }}
+                            secondaryTypographyProps={{
+                              fontSize: isMobile ? "0.7rem" : "0.85rem",
+                              lineHeight: 1.3,
+                              whiteSpace: "normal", // allow wrapping
+                              wordBreak: "break-word",
+                            }}
                           />
                         </ListItem>
                       </div>
