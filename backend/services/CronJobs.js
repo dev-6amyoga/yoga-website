@@ -1,19 +1,16 @@
-const express = require('express')
-const router = express.Router()
-const { User } = require('../models/sql/User')
-const {
-  HTTP_OK,
-  HTTP_INTERNAL_SERVER_ERROR,
-} = require('../utils/http_status_codes')
+const { Op } = require('sequelize')
 
 const { sequelize } = require('../init.sequelize')
 const { mailTransporter } = require('../init.nodemailer')
 
+const { User } = require('../models/sql/User')
+const { UserPlan } = require('../models/sql/UserPlan')
+
 const sendUnpaidClassEmail = async (
   user,
   classDate,
-  lastPlanId = null,
-  frontendDomain
+  frontendDomain,
+  lastPlanId = null
 ) => {
   try {
     if (!user || !user.email) return false
@@ -32,7 +29,7 @@ const sendUnpaidClassEmail = async (
         <p>Please purchase a plan to continue attending classes.</p>
         <p>
           <a href="${purchaseLink}"
-             style="background:#4CAF50;color:#fff;padding:10px 16px;
+            style="background:#4CAF50;color:#fff;padding:10px 16px;
                     border-radius:4px;text-decoration:none;">
             Purchase Plan
           </a>
@@ -141,7 +138,7 @@ SET
   adjusted_to_plan_id = up.user_plan_id,
   updated = NOW()
 FROM user_plan up,
-     last_expired_plan lep
+    last_expired_plan lep
 WHERE up.current_status = 'ACTIVE'
   AND up.deleted_at IS NULL
 
@@ -253,55 +250,163 @@ WHERE up.user_plan_id = upa.user_plan_id
   AND p.plan_user_type = 'INSTITUTE';
 `
 
-router.post('/update-plan-statuses', async (req, res) => {
-  console.log('Received request to update plan statuses')
-  console.log('🕑 User plan cron started')
-  const tx = await sequelize.transaction()
+module.exports = {
+  UpdatePlanStatuses: async function UpdatePlanStatuses() {
+    console.log('[UpdatePlanStatuses] Received request to update plan statuses')
+    console.log('[UpdatePlanStatuses] User plan cron started')
 
-  try {
-    await sequelize.query(SQL_EXPIRE_BY_DATE, { transaction: tx })
-    await sequelize.query(SQL_ACTIVATE_STAGED, { transaction: tx })
-    await sequelize.query(CLASS_ATTENDANCE_INIT, { transaction: tx })
-    await sequelize.query(SQL_SYNC_ATTENDANCE_STATUS, { transaction: tx })
-    await sequelize.query(SQL_ADJUST_UNPAID_CLASSES, { transaction: tx })
-    const unpaid = await sequelize.query(SQL_GET_UNPAID_CLASSES, {
-      type: sequelize.QueryTypes.SELECT,
-      transaction: tx,
-    })
+    const tx = await sequelize.transaction()
 
-    for (const row of unpaid) {
-      const user = await User.findByPk(row.user_id, { transaction: tx })
-      if (!user) continue
+    try {
+      await sequelize.query(SQL_EXPIRE_BY_DATE, { transaction: tx })
+      await sequelize.query(SQL_ACTIVATE_STAGED, { transaction: tx })
+      await sequelize.query(CLASS_ATTENDANCE_INIT, { transaction: tx })
+      await sequelize.query(SQL_SYNC_ATTENDANCE_STATUS, { transaction: tx })
 
-      const sent = await sendUnpaidClassEmail(
-        user,
-        row.date.toISOString().split('T')[0],
-        null,
-        process.env.FRONTEND_DOMAIN
+      await sequelize.query(SQL_ADJUST_UNPAID_CLASSES, { transaction: tx })
+
+      const unpaid = await sequelize.query(SQL_GET_UNPAID_CLASSES, {
+        type: sequelize.QueryTypes.SELECT,
+        transaction: tx,
+      })
+
+      const unsuccessful = []
+
+      const emailResults = await Promise.all(
+        unpaid.map(async (row) => {
+          const sent = await sendUnpaidClassEmail(
+            row,
+            row.date.toISOString().split('T')[0],
+            process.env.FRONTEND_DOMAIN,
+            null
+          )
+
+          if (!sent) {
+            unsuccessful.push(row.id)
+          }
+
+          return sent ? row.id : null
+        })
       )
 
-      if (sent) {
+      const successfullySentIds = emailResults.filter((id) => id !== null)
+
+      if (successfullySentIds.length > 0) {
         await sequelize.query(
-          `UPDATE class_attendance
-             SET unpaid_email_sent = TRUE
-             WHERE id = :id`,
-          { replacements: { id: row.id }, transaction: tx }
+          `UPDATE class_attendance SET unpaid_email_sent = TRUE WHERE id IN (:ids)`,
+          { replacements: { ids: successfullySentIds }, transaction: tx }
         )
       }
+
+      console.log('[UpdatePlanStatuses] failed to send to  : ', unsuccessful)
+
+      await sequelize.query(SQL_RESET_ATTENDANCE, { transaction: tx })
+      await sequelize.query(SQL_RECOUNT_ATTENDANCE, { transaction: tx })
+      await sequelize.query(SQL_PRACTICE_NOW_ATTENDANCE, { transaction: tx })
+      await sequelize.query(SQL_EXPIRE_BY_USAGE, { transaction: tx })
+
+      await tx.commit()
+      console.log('[UpdatePlanStatuses] User plan cron completed')
+    } catch (err) {
+      await tx.rollback()
+      console.error('[UpdatePlanStatuses] User plan cron failed', err)
     }
+  },
 
-    await sequelize.query(SQL_RESET_ATTENDANCE, { transaction: tx })
-    await sequelize.query(SQL_RECOUNT_ATTENDANCE, { transaction: tx })
-    await sequelize.query(SQL_PRACTICE_NOW_ATTENDANCE, { transaction: tx })
-    await sequelize.query(SQL_EXPIRE_BY_USAGE, { transaction: tx })
+  SendPlanExpiryReminders: async () => {
+    try {
+      console.log(
+        '[SendPlanExpiryReminders] Received request to send plan expiry reminders'
+      )
 
-    await tx.commit()
-    console.log('✅ User plan cron completed')
-  } catch (err) {
-    await tx.rollback()
-    console.error('❌ User plan cron failed', err)
-  }
-  res.status(HTTP_OK).json({ message: 'Cron job executed successfully' })
-})
+      const currentDate = new Date().toISOString().split('T')[0]
 
-module.exports = router
+      const plansExpiringToday = await UserPlan.findAll({
+        where: {
+          validity_to: {
+            [Op.gte]: `${currentDate} 00:00:00`,
+            [Op.lte]: `${currentDate} 23:59:59`,
+          },
+          expiration_reminder_sent: false,
+        },
+        include: [
+          {
+            model: User,
+            required: true,
+            attributes: ['name', 'email'],
+          },
+        ],
+      })
+
+      if (plansExpiringToday.length === 0) return
+
+      console.log(
+        `[SendPlanExpiryReminders] rocessing ${plansExpiringToday.length} expiration reminders...`
+      )
+
+      const emailPromises = plansExpiringToday.map(async (plan) => {
+        const { user } = plan
+
+        if (!user || !user.email) return null
+
+        try {
+          await mailTransporter.sendMail({
+            from: 'dev.6amyoga@gmail.com',
+            to: user.email,
+            cc: '992351@gmail.com',
+            subject: '6AM Yoga | Plan Expired!',
+            html: `
+            <p>Dear ${user.name},</p>
+
+            <p>This is a gentle reminder that your subscription plan with 6AM Yoga has <strong>expired</strong> as of <strong>${currentDate}</strong>.</p>
+
+            <p>To continue enjoying uninterrupted access to personalized yoga sessions, we invite you to renew your plan today.</p>
+
+            <p><strong>Renew your plan now and stay on the path to wellness:</strong></p>
+            <p><a href="https://ai.6amyoga.com/" style="background-color: #007BFF; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Renew Now</a></p>
+
+            <p>Feel free to contact us if you have any questions or need assistance with the renewal process.</p>
+
+            <p>We look forward to continuing this journey of health and mindfulness with you.</p>
+
+            <p>Warm regards,</p>
+            <p><strong>The 6AM Yoga Team</strong></p>
+            <p>Email: dev.6amyoga@gmail.com</p>
+            <p>Website: <a href="https://ai.6amyoga.com" target="_blank">ai.6amyoga.com</a></p>
+            `,
+          })
+          return plan.user_plan_id // Return ID on success
+        } catch (err) {
+          console.error(
+            `[SendPlanExpiryReminders] Failed to email user ${user.email}:`,
+            err
+          )
+          return null
+        }
+      })
+
+      const results = await Promise.all(emailPromises)
+
+      const successfulPlanIds = results.filter((id) => id !== null)
+
+      if (successfulPlanIds.length > 0) {
+        await UserPlan.update(
+          { expiration_reminder_sent: true },
+          {
+            where: {
+              user_plan_id: successfulPlanIds,
+            },
+          }
+        )
+        console.log(
+          `[SendPlanExpiryReminders] Successfully marked ${successfulPlanIds.length} plans as notified.`
+        )
+      }
+    } catch (error) {
+      console.error(
+        '[SendPlanExpiryReminders] Error while sending reminders:',
+        error
+      )
+    }
+  },
+}

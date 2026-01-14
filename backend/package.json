@@ -51,12 +51,14 @@
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",
+    "jest": "^30.2.0",
     "prettier": "^3.3.3",
     "sequelize-cli": "^6.6.2",
     "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4",
     "webpack-node-externals": "^3.0.0",
-    "wrangler": "^3.69.1"
+    "wrangler": "^3.69.1",
+    "@types/bun": "latest"
   },
   "engines": {
     "node": "20.x"
@@ -74,5 +76,8 @@
       "no-underscore-dangle": "warn",
       "no-case-declarations": "warn"
     }
+  },
+  "peerDependencies": {
+    "typescript": "^5"
   }
 }
