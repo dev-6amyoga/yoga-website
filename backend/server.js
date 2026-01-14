@@ -12,18 +12,19 @@ const path = require('path')
 const compression = require('compression')
 const helmet = require('helmet')
 const glob = require('glob')
-const { bulkCreateSampleData } = require('./sample_data')
+const morgan = require('morgan')
+
+const RateLimit = require('express-rate-limit')
+
+// const { bulkCreateSampleData } = require('./sample_data')
 const getFrontendDomain = require('./utils/getFrontendDomain')
-const getBackendDomain = require('./utils/getBackendDomain')
+
 // LOGGING
 // const logger = require('pino-http')
-const morgan = require('morgan')
 
 // JOB SCHEUDLER
 // const Bree = require('bree')
 // const Graceful = require('@ladjs/graceful')
-
-// const RateLimit = require('express-rate-limit')
 
 // init the config from .env file
 dotenv.config()
@@ -43,11 +44,10 @@ glob.sync('./models/mongo/*.js').forEach((file) => {
 // routers
 const asanaRouter = require('./routes/Asana')
 const classAttendanceRouter = require('./routes/Attendance')
-const reminderRouter = require('./routes/ReminderScript')
+// const reminderRouter = require('./routes/Reminder')
 const videoRecordingRouter = require('./routes/VideoRecordings')
 const videoPackagingRouter = require('./routes/VideoPackaging')
 const authRouter = require('./routes/Auth')
-const cronRouter = require('./routes/CronJobs')
 const instituteRouter = require('./routes/Institute')
 const userRouter = require('./routes/User')
 const playlistRouter = require('./routes/Playlist')
@@ -84,6 +84,13 @@ const zoomIntegrationRouter = require('./routes/ZoomIntegration')
 // ws routers
 
 const classWsRouter = require('./websocket-routes/Class')
+const {
+  UpdatePlanStatuses,
+  SendPlanExpiryReminders,
+} = require('./services/CronJobs')
+
+// initialize databases
+const mongoURI = process.env.MONGO_SRV_URL
 
 // JOB SCHEDULER
 // const bree = new Bree({
@@ -98,31 +105,27 @@ const classWsRouter = require('./websocket-routes/Class')
 // })
 // const graceful = new Graceful({ brees: [bree] })
 
-cron.schedule(
-  '0 0 * * *',
-  async () => {
-    console.log(
-      'Running a task every day at midnight: ',
-      new Date().toLocaleTimeString()
-    )
-    try {
-      console.log('Running cron job: Update plan statuses')
-      const response = await fetch(
-        `${getBackendDomain()}/cron/update-plan-statuses`,
-        {
-          method: 'POST',
-        }
-      )
-      const data = await response.json()
-      console.log('Cron job completed:', data)
-    } catch (err) {
-      console.error('Cron job failed:', err)
+if (process.env.UPDATE_PLAN_STATUSES_CRON) {
+  console.log(
+    '[cron] setting up cron to update plan statuses :',
+    process.env.UPDATE_PLAN_STATUSES_CRON
+  )
+  cron.schedule('0 0 * * *', UpdatePlanStatuses, { timezone: 'Asia/Kolkata' })
+}
+
+if (process.env.PLAN_EXPIRY_REMINDER_CRON) {
+  console.log(
+    '[cron] setting up cron to send plan reminder emails :',
+    process.env.PLAN_EXPIRY_REMINDER_CRON
+  )
+  cron.schedule(
+    process.env.PLAN_EXPIRY_REMINDER_CRON,
+    SendPlanExpiryReminders,
+    {
+      timezone: 'Asia/Kolkata',
     }
-  },
-  {
-    timezone: 'Asia/Kolkata',
-  }
-)
+  )
+}
 
 const corsOptions = {
   origin: [
@@ -158,13 +161,10 @@ expressWs(app)
 // logger
 // app.use(logger())
 
-// CORS
 app.use(cors(corsOptions))
 app.use('/payment/webhook/razorpay', express.raw({ type: 'application/json' }))
-// parse json body
 app.use(express.json())
 
-// logging
 app.use(
   morgan((tokens, req, res) =>
     [
@@ -198,29 +198,21 @@ app.use(
   })
 )
 
-/*
-// Apply rate limiter to all requests
 const limiter = RateLimit({
-  windowMs: 30 * 1000, // 30s
+  windowMs: 60 * 1000, // 30s
   max: process.env.NODE_ENV === 'production' ? 100 : 1000,
 })
-
-app.use(limiter);
-*/
 
 // static files
 app.use('/static', express.static(path.join(__dirname, 'public')))
 
-// initialize databases
-const mongoURI = process.env.MONGO_SRV_URL
-
-app.get('/info', async (req, res) =>
+app.get('/info', limiter, async (req, res) =>
   res.status(200).json({
     message: 'Running.',
   })
 )
 
-app.get('/error', async (req, res) =>
+app.get('/error', limiter, async (req, res) =>
   res.status(500).json({
     message: 'Error.',
   })
@@ -232,7 +224,6 @@ app.use('/video-packaging', videoPackagingRouter)
 app.use('/content', playlistRouter)
 app.use('/schedule', scheduleRouter)
 app.use('/user', userRouter)
-app.use('/cron', cronRouter)
 app.use('/auth', authRouter)
 app.use('/plan', planRouter)
 app.use('/user-plan', userPlanRouter)
@@ -274,7 +265,7 @@ const port = parseInt(process.env.PORT, 10)
 let start = performance.now()
 initializeSequelize()
   .then(() => {
-    //console.log('Sequelize initialized, took', performance.now() - start, 'ms')
+    console.log('Sequelize initialized, took', performance.now() - start, 'ms')
 
     start = performance.now()
 
@@ -286,6 +277,7 @@ initializeSequelize()
           performance.now() - start,
           'ms'
         )
+
         start = performance.now()
         // bulkCreateSampleData()
         //   .then(() => {

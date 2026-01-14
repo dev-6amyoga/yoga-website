@@ -1,0 +1,38 @@
+# Dependencies (Force fresh install inside Docker)
+**/node_modules
+**/npm-debug.log
+**/yarn-error.log
+**/bun-debug*
+
+# Environment Variables (Protect secrets)
+.env
+.env.production
+.env.development
+.env.local
+
+# Version Control
+.git
+.gitignore
+.github
+
+# IDE & OS Files
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# Build Artifacts & Coverage
+dist/
+build/
+coverage/
+
+# Python Cache (Since you have .py files)
+**/__pycache__
+**/*.pyc
+**/venv
+**/.venv
+
+# Docker metadata
+Dockerfile
+docker-compose.yml
+.dockerignore
