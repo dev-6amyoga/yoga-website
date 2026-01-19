@@ -241,18 +241,28 @@ router.get('/gst-summary', async (req, res) => {
     if (from) where.push(`payment_date >= :from`)
     if (to) where.push(`payment_date <= :to`)
     const query = `
-      SELECT
-        TO_CHAR(payment_date, 'YYYY-MM') AS month,
-        SUM(amount)/100 AS gross_revenue,
-        ROUND(SUM(amount) / 105, 2) AS taxable_value,
-        ROUND((SUM(amount) / 105) * 0.025, 2) AS cgst_2_5,
-        ROUND((SUM(amount) / 105) * 0.025, 2) AS sgst_2_5,
-        ROUND((SUM(amount) / 105) * 0.05, 2) AS total_gst,
-        ROUND(SUM(amount) / 105, 2) AS net_revenue
-      FROM public."transaction"
-      WHERE ${where.join(' AND ')}
-      GROUP BY TO_CHAR(payment_date, 'YYYY-MM')
-      ORDER BY month DESC;
+WITH adjusted AS (
+  SELECT
+    payment_date,
+    CASE
+      WHEN payment_date < DATE '2026-01-01' THEN amount / 100
+      ELSE amount
+    END AS adj_amount
+  FROM public."transaction"
+  WHERE ${where.join(' AND ')}
+)
+SELECT
+  TO_CHAR(payment_date, 'YYYY-MM') AS month,
+  SUM(adj_amount) AS gross_revenue,
+  ROUND(SUM(adj_amount) / 1.05, 2) AS taxable_value,
+  ROUND((SUM(adj_amount) / 1.05) * 0.025, 2) AS cgst_2_5,
+  ROUND((SUM(adj_amount) / 1.05) * 0.025, 2) AS sgst_2_5,
+  ROUND((SUM(adj_amount) / 1.05) * 0.05, 2) AS total_gst,
+  ROUND(SUM(adj_amount) / 1.05, 2) AS net_revenue
+FROM adjusted
+GROUP BY TO_CHAR(payment_date, 'YYYY-MM')
+ORDER BY month DESC;
+
     `
     const data = await sequelize.query(query, {
       replacements: { from, to },
