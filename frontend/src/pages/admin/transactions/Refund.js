@@ -123,10 +123,18 @@ function RefundManagement() {
           <SortableColumn column={column}>Amount</SortableColumn>
         ),
         cell: ({ row }) => {
+          const paymentDate = new Date(row?.original?.payment_date);
+          const cutoff = new Date("2026-01-01");
+
+          const rawAmount = row?.original?.amount;
+
+          const finalAmount =
+            paymentDate < cutoff ? rawAmount / 100 : rawAmount;
+
           const formatted = new Intl.NumberFormat("en-IN", {
             currency: row?.original?.currency?.short_tag || "INR",
             style: "currency",
-          }).format(row?.original?.amount / 100);
+          }).format(finalAmount);
 
           return formatted;
         },
