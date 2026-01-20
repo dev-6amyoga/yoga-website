@@ -284,39 +284,43 @@ router.get('/gst-transactions', async (req, res) => {
     if (to) where.push(`t.payment_date <= :to`)
 
     const query = `
-      SELECT
-        u.name,
-        u.email,
-        u.phone,
-        t.payment_date,
-        CASE
-          WHEN t.payment_date < DATE '2026-01-01' THEN t.amount / 100
-          ELSE t.amount
-        END AS adj_amount,
-        ROUND(
-          (CASE
-            WHEN t.payment_date < DATE '2026-01-01' THEN t.amount / 100
-            ELSE t.amount
-          END) / 1.05 * 0.025, 2
-        ) AS cgst_2_5,
-        ROUND(
-          (CASE
-            WHEN t.payment_date < DATE '2026-01-01' THEN t.amount / 100
-            ELSE t.amount
-          END) / 1.05 * 0.025, 2
-        ) AS sgst_2_5,
-        t.payment_method,
-        t.transaction_order_id,
-        t.transaction_payment_id,
-        t.transaction_signature,
-        t.discount_coupon_id,
-        t.referral_code_id,
-        t.currency_id
-      FROM public."transaction" t
-      JOIN public."user" u ON u.user_id = t.user_id
-      WHERE ${where.join(' AND ')}
-      ORDER BY t.payment_date DESC
-    `
+  SELECT
+    u.name,
+    u.email,
+    u.phone,
+    CASE
+      WHEN t.payment_date < DATE '2026-01-01' THEN t.amount / 100
+      ELSE t.amount
+    END AS amount_with_gst,
+    ROUND(
+      (CASE
+        WHEN t.payment_date < DATE '2026-01-01' THEN t.amount / 100
+        ELSE t.amount
+      END) / 1.05, 2
+    ) AS amount_without_gst,
+    ROUND(
+      ((CASE
+        WHEN t.payment_date < DATE '2026-01-01' THEN t.amount / 100
+        ELSE t.amount
+      END) / 1.05) * 0.025, 2
+    ) AS cgst_2_5,
+    ROUND(
+      ((CASE
+        WHEN t.payment_date < DATE '2026-01-01' THEN t.amount / 100
+        ELSE t.amount
+      END) / 1.05) * 0.025, 2
+    ) AS sgst_2_5,
+    TO_CHAR(t.payment_date, 'YYYY-MM-DD') AS payment_date,
+TO_CHAR(t.payment_date, 'FMMonth') AS month,
+    TO_CHAR(t.payment_date, 'YYYY') AS year,
+    t.payment_method,
+    t.transaction_order_id,
+    t.transaction_payment_id
+  FROM public."transaction" t
+  JOIN public."user" u ON u.user_id = t.user_id
+  WHERE ${where.join(' AND ')}
+  ORDER BY t.payment_date DESC
+`
 
     const data = await sequelize.query(query, {
       replacements: { from, to },

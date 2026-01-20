@@ -45,7 +45,20 @@ export default function MyIncome() {
 
       const rows = res.data.data || [];
 
-      const csv = Papa.unparse(rows);
+      const formatted = rows.map((r) => ({
+        Name: r.name,
+        Email: r.email,
+        Phone: r.phone,
+        "Amount (Without GST)": r.amount_without_gst,
+        "CGST (2.5%)": r.cgst_2_5,
+        "SGST (2.5%)": r.sgst_2_5,
+        "Amount (With GST)": r.amount_with_gst,
+        "Payment Date": r.payment_date,
+        Month: r.month,
+        Year: r.year,
+      }));
+
+      const csv = Papa.unparse(formatted);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
 
