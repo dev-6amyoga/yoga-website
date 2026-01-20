@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { Fetch } from "../../../utils/Fetch";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
+import Papa from "papaparse";
 
 const formatCurrency = (val) =>
   new Intl.NumberFormat("en-IN", {
@@ -33,6 +34,32 @@ export default function MyIncome() {
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+
+  const downloadCSV = async () => {
+    try {
+      const res = await Fetch({
+        url: "/transaction/gst-transactions",
+        method: "GET",
+        params: { from, to },
+      });
+
+      const rows = res.data.data || [];
+
+      const csv = Papa.unparse(rows);
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "gst-transactions.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to download CSV");
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -97,6 +124,9 @@ export default function MyIncome() {
             <Typography variant="h6" sx={{ mb: 2 }}>
               Monthly GST Breakdown
             </Typography>
+            <Button variant="outlined" onClick={downloadCSV}>
+              Download Detailed CSV
+            </Button>
 
             {loading ? (
               <Box sx={{ textAlign: "center", py: 4 }}>
