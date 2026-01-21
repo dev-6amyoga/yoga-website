@@ -106,6 +106,7 @@ router.post('/webhook/razorpay', async (req, res) => {
     }
 
     const event = JSON.parse(req.body.toString())
+    console.log('Razorpay obtained event: ', event)
     const payment = event?.payload?.payment?.entity
 
     if (!payment) {
@@ -113,7 +114,9 @@ router.post('/webhook/razorpay', async (req, res) => {
     }
 
     const status =
-      payment.status === 'captured' ? TRANSACTION_SUCCESS : TRANSACTION_FAILED
+      payment.status === 'captured' || payment.status === 'authorized'
+        ? TRANSACTION_SUCCESS
+        : TRANSACTION_FAILED
 
     const notes = payment.notes || {}
 

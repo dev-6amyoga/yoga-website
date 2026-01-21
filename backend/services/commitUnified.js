@@ -65,8 +65,15 @@ async function commitUnified(payload) {
 
     createdTxn = txnCreated
 
-    if (!txnCreated) {
-      console.log('ℹ️ Duplicate transaction commit ignored:', order_id)
+    if (
+      !txnCreated &&
+      status === TRANSACTION_SUCCESS &&
+      txn.payment_status !== TRANSACTION_SUCCESS
+    ) {
+      await txn.update(
+        { payment_status: TRANSACTION_SUCCESS },
+        { transaction: t }
+      )
     }
 
     if (status !== TRANSACTION_SUCCESS) {
