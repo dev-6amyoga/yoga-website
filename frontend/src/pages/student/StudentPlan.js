@@ -102,6 +102,10 @@ function StudentPlan() {
     setHasRecentInstituteSubscription(hasRecentInstitute);
   }, [myPlans]);
 
+  useEffect(() => {
+    checkRecentInstituteSubscription();
+  }, []);
+
   const handleDiscountCouponFormSubmit = async (e) => {
     e.preventDefault();
     const formData = getFormData(e);
@@ -123,7 +127,7 @@ function StudentPlan() {
         url: "/plan/get-all-student-plans",
       });
       const filteredPlans = response.data?.plans?.filter(
-        (plan) => plan.plan_user_type === "STUDENT"
+        (plan) => plan.plan_user_type === "STUDENT",
       );
       setAllPlans(filteredPlans);
     } catch (error) {
@@ -135,13 +139,13 @@ function StudentPlan() {
       });
       console.log("Fetched institute plans:", response.data?.plans);
       let filteredPlans = response.data?.plans?.filter(
-        (plan) => plan.plan_user_type === "INSTITUTE"
+        (plan) => plan.plan_user_type === "INSTITUTE",
       );
 
       // Filter out 30-day plans if user doesn't have any plan within last 6 months
       if (!hasRecentInstituteSubscription) {
         filteredPlans = filteredPlans.filter(
-          (plan) => plan.plan_validity_days !== 30
+          (plan) => plan.plan_validity_days !== 30,
         );
       }
 
@@ -169,11 +173,11 @@ function StudentPlan() {
       setValidityFromDate(data.newPlanPrediction.start_date);
       if (!data?.userPlan?.length) return;
       data.userPlan.sort(
-        (a, b) => new Date(a.validity_to) - new Date(b.validity_to)
+        (a, b) => new Date(a.validity_to) - new Date(b.validity_to),
       );
       setMyPlans(data.userPlan);
       const activePlan = data.userPlan.find(
-        (plan) => plan.current_status === "ACTIVE"
+        (plan) => plan.current_status === "ACTIVE",
       );
       console.log("ACTIVE : ", activePlan);
       if (activePlan) setPlanId(activePlan.plan_id);
@@ -192,7 +196,7 @@ function StudentPlan() {
   const onSelectPlan = (plan) => {
     setSelectedPlan(plan);
     const pricing = plan.pricing.find(
-      (p) => p.currency.short_tag === selectedCurrency
+      (p) => p.currency.short_tag === selectedCurrency,
     );
     setPrice(pricing?.denomination || 0);
   };
@@ -334,7 +338,7 @@ function StudentPlan() {
     setDiscountCouponApplied(false);
     setDiscountCoupon(null);
     const pricing = data.pricing.find(
-      (p) => p.currency.short_tag === selectedCurrency
+      (p) => p.currency.short_tag === selectedCurrency,
     );
     setPrice(pricing.denomination);
   };
@@ -641,7 +645,7 @@ function StudentPlan() {
                     <strong>
                       {calculateEndDate(cardData?.plan_validity_days)
                         ? calculateEndDate(
-                            cardData?.plan_validity_days
+                            cardData?.plan_validity_days,
                           ).toLocaleDateString()
                         : "--"}
                     </strong>
