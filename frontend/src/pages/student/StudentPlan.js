@@ -87,24 +87,19 @@ function StudentPlan() {
 
     // Check if user had ANY plan within the last 6 months
     const hasRecentInstitute = myPlans.some((plan) => {
-      const planDate = new Date(plan.validity_from);
-      const isRecent = planDate >= sixMonthsAgo;
+      const from = new Date(plan.validity_from);
+      const to = plan.validity_to ? new Date(plan.validity_to) : null;
 
-      console.log(`Plan: ${plan.plan?.name}`, {
-        planDate: planDate.toDateString(),
-        isRecent,
-      });
-
-      return isRecent;
+      // If plan ended after 6 months ago OR is still active
+      return (to && to >= sixMonthsAgo) || from >= sixMonthsAgo;
     });
-
     console.log("Has recent subscription:", hasRecentInstitute);
     setHasRecentInstituteSubscription(hasRecentInstitute);
   }, [myPlans]);
 
   useEffect(() => {
     checkRecentInstituteSubscription();
-  }, []);
+  }, [myPlans]);
 
   const handleDiscountCouponFormSubmit = async (e) => {
     e.preventDefault();
@@ -170,8 +165,6 @@ function StudentPlan() {
       });
       const data = response.data;
       console.log(data);
-      setValidityFromDate(data.newPlanPrediction.start_date);
-      if (!data?.userPlan?.length) return;
       data.userPlan.sort(
         (a, b) => new Date(a.validity_to) - new Date(b.validity_to),
       );
