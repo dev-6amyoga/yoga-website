@@ -161,6 +161,7 @@ router.post('/student/plan', async (req, res) => {
   const pricing = await PlanPricing.findOne({
     where: { plan_id: userPlan.plan_id, currency_id: 1 },
   })
+
   if (!pricing) {
     return res
       .status(HTTP_BAD_REQUEST)
@@ -174,6 +175,7 @@ router.post('/student/plan', async (req, res) => {
     plan: plan.toJSON(),
     plan_pricing: pricing.toJSON(),
   }
+
   const content = await renderer.renderAsync('/student/plan-purchase', details)
 
   return res.status(200).header('Content-Type', 'application/pdf').send(content)
@@ -406,7 +408,7 @@ router.post('/student/notify-admin', async (req, res) => {
                 <p>Plan Validity Period : ${details.plan.planValidity} days</p>
                 <p>Watch Hours : ${details.plan.watchHours} hours</p>
 
-                <p>Amount Paid : Rs. ${details.transaction.amount / 100}</p>
+                <p>Amount Paid : Rs. ${details.transaction.amount}</p>
                 <br/>
                 <br/>
 
@@ -492,7 +494,7 @@ router.post('/student/notify-admin', async (req, res) => {
                   details.plan.watch_time_limit / 3600
                 } hours</p>
 
-                <p>Amount Paid : Rs. ${details.transaction.amount / 100}</p>
+                <p>Amount Paid : Rs. ${details.transaction.amount}</p>
                 <br/>
                 <br/>
 
