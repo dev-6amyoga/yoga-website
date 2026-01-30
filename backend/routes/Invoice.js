@@ -161,6 +161,7 @@ router.post('/student/plan', async (req, res) => {
   const pricing = await PlanPricing.findOne({
     where: { plan_id: userPlan.plan_id, currency_id: 1 },
   })
+
   if (!pricing) {
     return res
       .status(HTTP_BAD_REQUEST)
@@ -174,6 +175,7 @@ router.post('/student/plan', async (req, res) => {
     plan: plan.toJSON(),
     plan_pricing: pricing.toJSON(),
   }
+
   const content = await renderer.renderAsync('/student/plan-purchase', details)
 
   return res.status(200).header('Content-Type', 'application/pdf').send(content)
@@ -326,7 +328,6 @@ router.post('/student/mail-invoice', async (req, res) => {
       )
     })
     .catch((err) => {
-      //console.log(err);
       return res.status(500).send()
     })
   return res.status(200).send(content)
