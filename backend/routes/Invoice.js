@@ -332,15 +332,21 @@ router.post('/student/mail-invoice', async (req, res) => {
     console.log('✅ HTML rendered. Length:', content.length)
 
     console.log('📄 Generating PDF...')
+    const options = {
+      format: 'A4',
+      printBackground: true,
+      preferCSSPageSize: true,
+      puppeteerArgs: {
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+        ],
+      },
+    }
 
-    const buffer = await HTMLToPDF.generatePdf(
-      { content },
-      {
-        format: 'A4',
-        printBackground: true,
-        preferCSSPageSize: true,
-      }
-    )
+    const buffer = await HTMLToPDF.generatePdf({ content }, options)
 
     console.log('✅ PDF generated. Size:', buffer?.length)
 
@@ -446,11 +452,9 @@ router.post('/student/notify-admin', async (req, res) => {
                 <p>Plan End Date : ${details.user_plan.validity_to}</p>
                 <p>Plan Validity Period : ${details.plan.planValidity} days</p>
                 <p>Watch Hours : ${details.plan.watchHours} hours</p>
-
                 <p>Amount Paid : Rs. ${details.transaction.amount}</p>
                 <br/>
                 <br/>
-
                 <p>Regards, </p>
                 <p>My Yoga Teacher, 6AM Yoga </p>
               `,
