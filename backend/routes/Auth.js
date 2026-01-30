@@ -677,7 +677,7 @@ router.post('/register', async (req, res) => {
     const user_institute_plan_role = await UserInstitutePlanRole.create(
       {
         user_id: newUser.user_id,
-        institute_id: institute_details ? institute_details.id : null,
+        institute_id: 3,
         role_id: role.role_id,
         user_plan_id: null,
       },
@@ -856,7 +856,7 @@ router.post('/register-google', async (req, res) => {
     const user_institute_plan_role = await UserInstitutePlanRole.create(
       {
         user_id: newUser.user_id,
-        institute_id: null,
+        institute_id: 3,
         role_id: role_name === 'STUDENT' ? 5 : 2,
         plan_id: null,
       },
