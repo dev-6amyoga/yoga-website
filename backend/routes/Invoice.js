@@ -161,7 +161,6 @@ router.post('/student/plan', async (req, res) => {
   const pricing = await PlanPricing.findOne({
     where: { plan_id: userPlan.plan_id, currency_id: 1 },
   })
-
   if (!pricing) {
     return res
       .status(HTTP_BAD_REQUEST)
@@ -175,7 +174,6 @@ router.post('/student/plan', async (req, res) => {
     plan: plan.toJSON(),
     plan_pricing: pricing.toJSON(),
   }
-
   const content = await renderer.renderAsync('/student/plan-purchase', details)
 
   return res.status(200).header('Content-Type', 'application/pdf').send(content)
@@ -292,48 +290,45 @@ router.post('/student/mail-invoice', async (req, res) => {
 
   const content = await renderer.renderAsync('/student/plan-purchase', details)
 
-  /*
-	HTMLToPDF.generatePdf(
-		{ content: content },
-		{ format: "A4", printBackground: true, preferCSSPageSize: true }
-	)
-		.then((buffer) => {
-			// change email
-			mailTransporter.sendMail(
-				{
-					from: "dev.6amyoga@gmail.com",
-					to: user.email,
-					subject: "6AM Yoga | Invoice for your recent payment",
-					text: "Welcome to 6AM Yoga! Please find attached, the invoice for your recent transaction!",
-					attachments: [
-						{
-							filename: "invoice.pdf",
-							content: Buffer.from(buffer, "base64"),
-							encoding: "base64",
-						},
-					],
-				},
-				async (err, info) => {
-					if (err) {
-						await t.rollback();
-						console.error(err);
-						res.status(HTTP_INTERNAL_SERVER_ERROR).json({
-							message: "Internal server error; try again",
-						});
-					} else {
-						res.status(HTTP_OK).json({
-							message: "Email sent",
-						});
-					}
-				}
-			);
-		})
-		.catch((err) => {
-			//console.log(err);
-			return res.status(500).send();
-		});
-	*/
-
+  HTMLToPDF.generatePdf(
+    { content: content },
+    { format: 'A4', printBackground: true, preferCSSPageSize: true }
+  )
+    .then((buffer) => {
+      // change email
+      mailTransporter.sendMail(
+        {
+          from: 'dev.6amyoga@gmail.com',
+          to: user.email,
+          subject: '6AM Yoga | Invoice for your recent payment',
+          text: 'Welcome to 6AM Yoga! Please find attached, the invoice for your recent transaction!',
+          attachments: [
+            {
+              filename: 'invoice.pdf',
+              content: Buffer.from(buffer, 'base64'),
+              encoding: 'base64',
+            },
+          ],
+        },
+        async (err, info) => {
+          if (err) {
+            await t.rollback()
+            console.error(err)
+            res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+              message: 'Internal server error; try again',
+            })
+          } else {
+            res.status(HTTP_OK).json({
+              message: 'Email sent',
+            })
+          }
+        }
+      )
+    })
+    .catch((err) => {
+      //console.log(err);
+      return res.status(500).send()
+    })
   return res.status(200).send(content)
 })
 
