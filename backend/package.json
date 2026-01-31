@@ -5,6 +5,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.621.0",
     "@mediapipe/tasks-vision": "^0.10.14",
+    "@sparticuz/chromium": "^143.0.4",
     "@xmldom/xmldom": "^0.8.10",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
@@ -36,6 +37,7 @@
     "pdfkit": "^0.14.0",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
+    "puppeteer-core": "^24.36.1",
     "querystring-es3": "^0.2.1",
     "razorpay": "^2.9.2",
     "request-ip": "^3.3.0",
@@ -48,6 +50,7 @@
     "prod": "nodemon ./dist/final.js"
   },
   "devDependencies": {
+    "@types/bun": "latest",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",
@@ -57,8 +60,7 @@
     "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4",
     "webpack-node-externals": "^3.0.0",
-    "wrangler": "^3.69.1",
-    "@types/bun": "latest"
+    "wrangler": "^3.69.1"
   },
   "engines": {
     "node": "20.x"
