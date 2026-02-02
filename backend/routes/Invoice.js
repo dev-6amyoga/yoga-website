@@ -180,25 +180,44 @@ router.post('/student/mail-invoice', async (req, res) => {
 
     console.log('📄 Generating PDF...')
 
-    const pdfBuffer = await generatePDF(html)
+    // const pdfBuffer = await generatePDF(html)
 
-    console.log('✅ PDF size:', pdfBuffer.length)
+    // console.log('✅ PDF size:', pdfBuffer.length)
 
     /* ---------- Mail ---------- */
 
     console.log('📧 Sending mail...')
 
+    const emailHtml = `
+  <h2>🧾 6AM Yoga - Invoice</h2>
+
+  <p><strong>Name:</strong> ${details.user.name}</p>
+  <p><strong>Email:</strong> ${details.user.email}</p>
+
+  <hr />
+
+  <h3>📦 Plan Details</h3>
+  <p><strong>Plan:</strong> ${details.plan.plan_name || details.plan.name}</p>
+  <p><strong>Type:</strong> ${details.plan.plan_type || 'NORMAL'}</p>
+
+  <hr />
+
+  <h3>💳 Payment Details</h3>
+  <p><strong>Order ID:</strong> ${details.transaction.transaction_order_id}</p>
+  <p><strong>Amount:</strong> ₹${details.plan_pricing.denomination}</p>
+  <p><strong>Status:</strong> ${details.transaction.status}</p>
+  <p><strong>Date:</strong> ${new Date(details.transaction.createdAt).toLocaleString()}</p>
+
+  <hr />
+
+  <p>Thank you for choosing 6AM Yoga 🙏</p>
+`
+
     await mailTransporter.sendMail({
       from: '6AM Yoga <dev.6amyoga@gmail.com>',
       to: user.email,
       subject: '6AM Yoga | Invoice',
-      text: 'Please find your invoice attached.',
-      attachments: [
-        {
-          filename: `invoice-${transaction_order_id}.pdf`,
-          content: pdfBuffer,
-        },
-      ],
+      html: emailHtml, // 👈 Send HTML instead of PDF
     })
 
     console.log('✅ Mail sent')
