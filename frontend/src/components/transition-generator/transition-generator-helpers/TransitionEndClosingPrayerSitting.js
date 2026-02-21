@@ -19,19 +19,19 @@ export const TransitionEndClosingPrayerSitting = async (
   start_video,
   end_video,
   drm_status,
-  transitions
+  transitions,
 ) => {
   const filteredTransitions_all = transitions.filter(
     (transition) =>
       transition.drm_transition === drm_status &&
-      transition.teacher_mode === end_video.teacher_mode
+      transition.teacher_mode === end_video.teacher_mode,
   );
 
   const handleTransition = (transitions) => {
     return transitions
       .map((transition) => {
         const filtered = filteredTransitions_all.filter(
-          (transitions) => transitions.transition_video_name === transition
+          (transitions) => transitions.transition_video_name === transition,
         );
         return getUniqueTransition(filtered);
       })
@@ -139,14 +139,23 @@ export const TransitionEndClosingPrayerSitting = async (
       return res;
     }
     if (break_status_start === "No Break") {
-      let res = handleTransition([
-        "Feet Apart Hands Back Sitting Transition",
-        "Pranayama Start Sitting",
-      ]);
-      res = res.map((transition) => transition.transition_id);
-      res = res.filter((element) => element !== undefined);
-      return res;
+      if (end_video.namaskara_start === false) {
+        transitions.push(
+          "Feet Apart Hands Back Sitting Transition",
+          "Pranayama Legs Lock",
+        );
+      } else {
+        transitions.push(
+          "Feet Apart Hands Back Sitting Transition",
+          "Pranayama Start Sitting",
+        );
+      }
     }
+    let res = handleTransition(transitions);
+    res = res
+      .map((transition) => transition.transition_id)
+      .filter((id) => id !== undefined);
+    return res;
   }
 
   if (start_category === "Supine") {
@@ -243,7 +252,7 @@ export const TransitionEndClosingPrayerSitting = async (
           }
         }
         res = res.filter((transition) =>
-          transition.transition_video_name.toLowerCase().includes("unlock")
+          transition.transition_video_name.toLowerCase().includes("unlock"),
         );
         let new_res = [...res, ...pending_2, res1];
         new_res = new_res.filter((element) => element !== undefined);
@@ -263,7 +272,7 @@ export const TransitionEndClosingPrayerSitting = async (
           }
         }
         res = res.filter((transition) =>
-          transition.transition_video_name.toLowerCase().includes("unlock")
+          transition.transition_video_name.toLowerCase().includes("unlock"),
         );
         let new_res = [...res, ...pending_2, res1];
         new_res = new_res.filter((element) => element !== undefined);
@@ -283,7 +292,7 @@ export const TransitionEndClosingPrayerSitting = async (
           }
         }
         res = res.filter((transition) =>
-          transition.transition_video_name.toLowerCase().includes("unlock")
+          transition.transition_video_name.toLowerCase().includes("unlock"),
         );
         let new_res = [...res, ...pending_2, res1];
         new_res = new_res.filter((element) => element !== undefined);
@@ -303,7 +312,7 @@ export const TransitionEndClosingPrayerSitting = async (
           }
         }
         res = res.filter((transition) =>
-          transition.transition_video_name.toLowerCase().includes("unlock")
+          transition.transition_video_name.toLowerCase().includes("unlock"),
         );
         let new_res = [...res, ...pending_2, res1];
         new_res = new_res.filter((element) => element !== undefined);
@@ -329,7 +338,7 @@ export const TransitionEndClosingPrayerSitting = async (
           }
         }
         res = res.filter((transition) =>
-          transition.transition_video_name.toLowerCase().includes("unlock")
+          transition.transition_video_name.toLowerCase().includes("unlock"),
         );
         let new_res = [...res, ...pending_2, res1];
         new_res = new_res.filter((element) => element !== undefined);
@@ -337,6 +346,27 @@ export const TransitionEndClosingPrayerSitting = async (
         console.log(new_res);
         return new_res;
       } else {
+        if (start_video.nose_lock_start && start_video.chin_lock_end) {
+          //console.log("pratiloma last cycle");
+          let res = [];
+          for (var i = 0; i !== filteredTransitions_all.length; i++) {
+            let transition_ind = filteredTransitions_all[i];
+            if (
+              transition_ind.transition_video_name
+                .toLowerCase()
+                .indexOf("jalandhara") !== -1
+            ) {
+              res.push(transition_ind);
+            }
+          }
+          res = res.filter((transition) =>
+            transition.transition_video_name.toLowerCase().includes("unlock"),
+          );
+          let new_res = [...res, ...pending_2, res1];
+          new_res = new_res.filter((element) => element !== undefined);
+          new_res = new_res.map((transition) => transition.transition_id);
+          return new_res;
+        }
         if (start_video.nose_lock_start && start_video.nose_lock_end) {
           let res = [];
           for (var i = 0; i !== filteredTransitions_all.length; i++) {
@@ -350,7 +380,7 @@ export const TransitionEndClosingPrayerSitting = async (
             }
           }
           res = res.filter((transition) =>
-            transition.transition_video_name.toLowerCase().includes("unlock")
+            transition.transition_video_name.toLowerCase().includes("unlock"),
           );
           let new_res = [...res, ...pending_2, res1];
           new_res = new_res.filter((element) => element !== undefined);
@@ -371,7 +401,7 @@ export const TransitionEndClosingPrayerSitting = async (
               }
             }
             res = res.filter((transition) =>
-              transition.transition_video_name.toLowerCase().includes("unlock")
+              transition.transition_video_name.toLowerCase().includes("unlock"),
             );
             let new_res = [...res, ...pending_2, res1];
             new_res = new_res.filter((element) => element !== undefined);
@@ -394,7 +424,7 @@ export const TransitionEndClosingPrayerSitting = async (
               res = res.filter((transition) =>
                 transition.transition_video_name
                   .toLowerCase()
-                  .includes("unlock")
+                  .includes("unlock"),
               );
               let new_res = [...res, ...pending_2, res1];
               new_res = new_res.filter((element) => element !== undefined);

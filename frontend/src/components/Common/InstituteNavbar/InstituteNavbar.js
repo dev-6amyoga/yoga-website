@@ -1,5 +1,18 @@
-import { Button, Divider, Drawer, Select, Spacer } from "@geist-ui/core";
-import { Menu, Plus } from "@geist-ui/icons";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Drawer,
+  Button,
+  Divider,
+  Box,
+  Select,
+  MenuItem,
+  Stack,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import AddIcon from "@mui/icons-material/Add";
 import { memo, useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
@@ -37,9 +50,8 @@ function InstituteNavbar() {
     state.userPlan,
   ]);
 
-  const handleInstituteSelection = (value) => {
-    console.log("Selected Institute:", value);
-    setCurrentInstituteId(parseInt(value));
+  const handleInstituteSelection = (event) => {
+    setCurrentInstituteId(parseInt(event.target.value));
   };
 
   const [cookies, setCookie, removeCookie] = useCookies([
@@ -55,14 +67,13 @@ function InstituteNavbar() {
       method: "POST",
       token: true,
     })
-      .then((res) => {
+      .then(() => {
         removeCookie(SIXAMYOGA_ACCESS_TOKEN);
         removeCookie(SIXAMYOGA_REFRESH_TOKEN);
         resetUserState();
         navigate("/auth");
       })
-      .catch((err) => {
-        console.log("Logout Error:", err);
+      .catch(() => {
         removeCookie(SIXAMYOGA_ACCESS_TOKEN);
         removeCookie(SIXAMYOGA_REFRESH_TOKEN);
         resetUserState();
@@ -73,198 +84,169 @@ function InstituteNavbar() {
   useEffect(() => {
     if (userPlan) {
       setActivePlanID(userPlan?.plan_id);
-      if (userPlan?.has_basic_playlist) {
-        setBasicPlaylist(true);
-      } else {
-        setBasicPlaylist(false);
-      }
-      if (userPlan?.has_playlist_creation) {
-        setPlaylistCreation(true);
-      } else {
-        setPlaylistCreation(false);
-      }
-      if (userPlan?.has_self_audio_upload) {
-        setSelfAudio(true);
-      } else {
-        setSelfAudio(false);
-      }
-      if (userPlan?.number_of_teachers > 0) {
-        setMoreTeachers(true);
-      } else {
-        setMoreTeachers(false);
-      }
+      setBasicPlaylist(userPlan?.has_basic_playlist);
+      setPlaylistCreation(userPlan?.has_playlist_creation);
+      setSelfAudio(userPlan?.has_self_audio_upload);
+      setMoreTeachers(userPlan?.number_of_teachers > 0);
     } else {
       toast(
-        "You dont have an active plan! Please head to the Purchase A Plan page"
+        "You dont have an active plan! Please head to the Purchase A Plan page",
       );
     }
   }, [userPlan]);
 
   return (
-    <div>
-      <div className="flex w-full items-center gap-4 bg-zinc-800 px-4 py-1 text-white">
-        <Button
-          width={"100%"}
-          auto
-          ghost
-          onClick={() => setOpen(true)}
-          icon={<Menu />}
-        />
-        <p className="text-xl font-bold">6AM Yoga</p>
-      </div>
-      <Drawer visible={open} onClose={() => setOpen(false)} placement="left">
-        <Drawer.Title>6AM Yoga</Drawer.Title>
-        <Drawer.Subtitle>Institute Dashboard</Drawer.Subtitle>
-        <Drawer.Content>
-          <div className="py-4">
-            <RoleShifter />
-            <Spacer h={1} />
-            {userPlan ? (
-              <h5 className="rounded-lg bg-zinc-800 p-2 text-white">
-                Plan : {userPlan?.name}
-              </h5>
-            ) : (
-              <h5 className="rounded-lg bg-zinc-800 p-2 text-white">
-                No active plan
-              </h5>
-            )}
-            <Divider />
-            <Spacer h={1} />
-            <Button
-              iconRight={<Plus />}
-              onClick={() => navigate("/institute/create")}
-              width="100%"
-            >
-              Create Institute
-            </Button>
-            <Spacer h={1 / 2} />
-            <Select
-              width="100%"
-              value={String(currentInstituteId)}
-              placeholder="Select An Institute"
-              onChange={handleInstituteSelection}
-              className="my-2"
-            >
-              {institutes?.map((institute) => {
-                return (
-                  <Select.Option
-                    key={institute.institute_id}
-                    value={String(institute.institute_id)}
-                  >
-                    {institute.name}
-                  </Select.Option>
-                );
-              })}
-            </Select>
-          </div>
-          <Divider />
-          <div className="flex w-full flex-col gap-4">
-            <Button className="w-full">
-              <Link to={"/institute"} className="w-full text-zinc-800">
-                Dashboard
-              </Link>
-            </Button>
-            <Button className="w-full">
-              <Link
-                to={"/institute/purchase-a-plan"}
-                className="w-full text-zinc-800"
+    <>
+      {/* TOP BAR */}
+      <AppBar position="static" sx={{ bgcolor: "#27272a" }}>
+        <Toolbar sx={{ display: "flex", gap: 2 }}>
+          <IconButton color="inherit" onClick={() => setOpen(true)}>
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" fontWeight="bold">
+            6AM Yoga
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      {/* DRAWER */}
+      <Drawer anchor="left" open={open} onClose={() => setOpen(false)}>
+        <Box width={280} p={2}>
+          <Typography variant="h6" fontWeight="bold">
+            6AM Yoga
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Institute Dashboard
+          </Typography>
+
+          <Divider sx={{ my: 2 }} />
+
+          <RoleShifter />
+
+          <Box
+            sx={{
+              bgcolor: "#27272a",
+              color: "white",
+              p: 1,
+              borderRadius: 1,
+              mt: 2,
+              textAlign: "center",
+            }}
+          >
+            {userPlan ? `Plan : ${userPlan?.name}` : "No active plan"}
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Button
+            fullWidth
+            startIcon={<AddIcon />}
+            onClick={() => navigate("/institute/create")}
+          >
+            Create Institute
+          </Button>
+
+          <Select
+            fullWidth
+            value={String(currentInstituteId)}
+            onChange={handleInstituteSelection}
+            displayEmpty
+            sx={{ mt: 2 }}
+          >
+            <MenuItem disabled value="">
+              Select An Institute
+            </MenuItem>
+            {institutes?.map((institute) => (
+              <MenuItem
+                key={institute.institute_id}
+                value={String(institute.institute_id)}
               >
-                Purchase A Plan
-              </Link>
+                {institute.name}
+              </MenuItem>
+            ))}
+          </Select>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Stack spacing={1}>
+            <Button component={Link} to="/institute">
+              Dashboard
             </Button>
-            <Button className="w-full">
-              <Link
-                to={"/institute/member-management"}
-                className="w-full text-zinc-800"
-              >
-                Member Management
-              </Link>
+
+            <Button component={Link} to="/institute/purchase-a-plan">
+              Purchase A Plan
             </Button>
+
+            <Button component={Link} to="/institute/member-management">
+              Member Management
+            </Button>
+
             <Button
-              onClick={() => {
-                navigate("/institute/add-new-teacher");
-              }}
+              onClick={() => navigate("/institute/add-new-teacher")}
               disabled={!moreTeachers}
             >
               Add New Teacher
             </Button>
+
             <Button
-              onClick={() => {
-                navigate("/institute/playlist-page");
-              }}
+              onClick={() => navigate("/institute/playlist-page")}
               disabled={!basicPlaylist}
             >
               Playlist Page
             </Button>
+
             <Button
-              onClick={() => {
-                navigate("/institute/make-playlist");
-              }}
+              onClick={() => navigate("/institute/make-playlist")}
               disabled={!playlistCreation}
             >
               Make New Playlist
             </Button>
 
             <Button
-              onClick={() => {
-                navigate("/institute/make-playlist");
-              }}
+              onClick={() => navigate("/institute/make-playlist")}
               disabled={!selfAudio}
             >
               Upload your own audio!
             </Button>
-            <Button className="w-full">
-              <Link
-                to={"/institute/add-new-teacher"}
-                className="w-full text-zinc-800"
-              >
-                Reports
-              </Link>
-            </Button>
-            <hr />
-            <Button className="w-full">
-              <Link to={"/institute/settings"} className="w-full text-zinc-800">
-                Institute Settings
-              </Link>
-            </Button>
-            <Button className="w-full">
-              <Link
-                to={"/institute/user/settings"}
-                className="w-full text-zinc-800"
-              >
-                User Settings
-              </Link>
-            </Button>
-            <Button className="w-full">
-              <Link
-                to={"/institute/view-transactions"}
-                className="w-full text-zinc-800"
-              >
-                View Transactions
-              </Link>
+
+            <Divider />
+
+            <Button component={Link} to="/institute/settings">
+              Institute Settings
             </Button>
 
-            <hr />
+            <Button component={Link} to="/institute/user/settings">
+              User Settings
+            </Button>
+
+            <Button component={Link} to="/institute/view-transactions">
+              View Transactions
+            </Button>
+
+            <Divider />
+
             {user ? (
               <>
-                <h2 className="text-center text-sm">
+                <Typography textAlign="center" variant="body2">
                   Logged in as {user?.name}
-                </h2>
-                <Button type="error" onClick={handleLogout}>
+                </Typography>
+                <Button
+                  color="error"
+                  variant="contained"
+                  onClick={handleLogout}
+                >
                   Logout
                 </Button>
               </>
             ) : (
-              <Link to={"/auth"} className="w-full">
-                <Button type="primary" width="100%">
-                  Login
-                </Button>
-              </Link>
+              <Button variant="contained" component={Link} to="/auth" fullWidth>
+                Login
+              </Button>
             )}
-          </div>
-        </Drawer.Content>
+          </Stack>
+        </Box>
       </Drawer>
-    </div>
+    </>
   );
 }
 

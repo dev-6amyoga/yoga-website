@@ -243,7 +243,7 @@ app.use('/video-rec', videoRecordingRouter)
 // ws routers
 app.ws('/ws/class/teacher', classWsRouter.handleTeacherConnection)
 app.ws('/ws/class/student', classWsRouter.handleStudentConnection)
-
+const { startZoomCron } = require('./cron/zoomRotation.cron')
 const port = parseInt(process.env.PORT, 10)
 
 let start = performance.now()
@@ -261,6 +261,7 @@ initializeSequelize()
           performance.now() - start,
           'ms'
         )
+        startZoomCron()
         start = performance.now()
         // bulkCreateSampleData()
         //   .then(() => {
