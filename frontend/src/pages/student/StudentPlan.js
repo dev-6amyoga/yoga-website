@@ -85,7 +85,6 @@ function StudentPlan() {
     console.log("Six months ago:", sixMonthsAgo);
     console.log("My plans:", myPlans);
 
-    // Check if user had ANY plan within the last 6 months
     const hasRecentInstitute = myPlans.some((plan) => {
       const from = new Date(plan.validity_from);
       const to = plan.validity_to ? new Date(plan.validity_to) : null;
