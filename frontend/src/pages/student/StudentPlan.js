@@ -136,10 +136,11 @@ function StudentPlan() {
         (plan) => plan.plan_user_type === "INSTITUTE",
       );
 
-      // Filter out 30-day plans if user doesn't have any plan within last 6 months
+      // Filter out 30-day and [1/WK] plans if user doesn't have any plan within last 6 months
       if (!hasRecentInstituteSubscription) {
         filteredPlans = filteredPlans.filter(
-          (plan) => plan.plan_validity_days !== 30,
+          (plan) =>
+            !plan.name.includes("1 month") && !plan.name.includes("[1/WK]"),
         );
       }
 

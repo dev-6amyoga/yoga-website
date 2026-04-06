@@ -19,19 +19,19 @@ export const TransitionEndVajrasana = async (
   start_video,
   end_video,
   drm_status,
-  transitions
+  transitions,
 ) => {
   const filteredTransitions_all = transitions.filter(
     (transition) =>
       transition.drm_transition === drm_status &&
-      transition.teacher_mode === end_video.teacher_mode
+      transition.teacher_mode === end_video.teacher_mode,
   );
 
   const handleTransition = (transitions) => {
     return transitions
       .map((transition) => {
         const filtered = filteredTransitions_all.filter(
-          (transitions) => transitions.transition_video_name === transition
+          (transitions) => transitions.transition_video_name === transition,
         );
         return getUniqueTransition(filtered);
       })
@@ -540,7 +540,7 @@ export const TransitionEndVajrasana = async (
           }
         }
         res = res.filter((transition) =>
-          transition.transition_video_name.toLowerCase().includes("unlock")
+          transition.transition_video_name.toLowerCase().includes("unlock"),
         );
         let new_res = [...res, ...pending_2];
         new_res = new_res.filter((element) => element !== undefined);
@@ -560,7 +560,7 @@ export const TransitionEndVajrasana = async (
           }
         }
         res = res.filter((transition) =>
-          transition.transition_video_name.toLowerCase().includes("unlock")
+          transition.transition_video_name.toLowerCase().includes("unlock"),
         );
         let new_res = [...res, ...pending_2];
         new_res = new_res.filter((element) => element !== undefined);
@@ -580,7 +580,7 @@ export const TransitionEndVajrasana = async (
           }
         }
         res = res.filter((transition) =>
-          transition.transition_video_name.toLowerCase().includes("unlock")
+          transition.transition_video_name.toLowerCase().includes("unlock"),
         );
         let new_res = [...res, ...pending_2];
         new_res = new_res.filter((element) => element !== undefined);
@@ -600,7 +600,7 @@ export const TransitionEndVajrasana = async (
           }
         }
         res = res.filter((transition) =>
-          transition.transition_video_name.toLowerCase().includes("unlock")
+          transition.transition_video_name.toLowerCase().includes("unlock"),
         );
         let new_res = [...res, ...pending_2];
         new_res = new_res.filter((element) => element !== undefined);
@@ -643,7 +643,7 @@ export const TransitionEndVajrasana = async (
             }
           }
           res = res.filter((transition) =>
-            transition.transition_video_name.toLowerCase().includes("unlock")
+            transition.transition_video_name.toLowerCase().includes("unlock"),
           );
           let new_res = [...res, ...pending_2, res1];
           new_res = new_res.filter((element) => element !== undefined);
@@ -663,7 +663,7 @@ export const TransitionEndVajrasana = async (
             }
           }
           res = res.filter((transition) =>
-            transition.transition_video_name.toLowerCase().includes("unlock")
+            transition.transition_video_name.toLowerCase().includes("unlock"),
           );
           let new_res = [...res, ...pending_2];
           new_res = new_res.filter((element) => element !== undefined);
@@ -682,7 +682,7 @@ export const TransitionEndVajrasana = async (
               }
             }
             res = res.filter((transition) =>
-              transition.transition_video_name.toLowerCase().includes("unlock")
+              transition.transition_video_name.toLowerCase().includes("unlock"),
             );
             let new_res = [...res, ...pending_2];
             new_res = new_res.filter((element) => element !== undefined);
@@ -704,7 +704,7 @@ export const TransitionEndVajrasana = async (
               res = res.filter((transition) =>
                 transition.transition_video_name
                   .toLowerCase()
-                  .includes("unlock")
+                  .includes("unlock"),
               );
               let new_res = [...res, ...pending_2];
               new_res = new_res.filter((element) => element !== undefined);
