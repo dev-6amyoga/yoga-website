@@ -292,7 +292,6 @@ module.exports = {
   UpdatePlanStatuses: async function UpdatePlanStatuses() {
     console.log('[UpdatePlanStatuses] Received request to update plan statuses')
     console.log('[UpdatePlanStatuses] User plan cron started')
-
     const tx = await sequelize.transaction()
 
     try {

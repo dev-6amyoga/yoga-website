@@ -18,6 +18,15 @@ const ClassAttendance = sequelize.define(
       type: DataTypes.BIGINT,
       allowNull: false,
     },
+    unpaid_email_sent: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+    },
+    adjusted_to_plan_id: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+    },
     user_plan_id: {
       type: DataTypes.BIGINT,
       allowNull: false,

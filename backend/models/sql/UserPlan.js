@@ -25,6 +25,11 @@ const UserPlan = sequelize.define(
       allowNull: true,
       defaultValue: false,
     },
+    expiration_reminder_sent: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+    },
     purchase_date: {
       type: DataTypes.DATE,
       allowNull: false,
