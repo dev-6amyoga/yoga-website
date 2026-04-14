@@ -81,6 +81,7 @@ const otpRouter = require('./routes/OTP')
 const r2Router = require('./routes/UploadToR2')
 const teacherPlanRouter = require('./routes/TeacherPlan')
 const zoomIntegrationRouter = require('./routes/ZoomIntegration')
+const cronJobsRouter = require('./routes/CronJobs')
 // ws routers
 
 const classWsRouter = require('./websocket-routes/Class')
@@ -89,21 +90,7 @@ const {
   SendPlanExpiryReminders,
 } = require('./services/CronJobs')
 
-// initialize databases
 const mongoURI = process.env.MONGO_SRV_URL
-
-// JOB SCHEDULER
-// const bree = new Bree({
-//   jobs: [
-//     // {
-//     //   name: 'schedule-classes',
-//     //   interval: '1m',
-//     //   timeout: '30s',
-//     //   retries: 2,
-//     // },
-//   ],
-// })
-// const graceful = new Graceful({ brees: [bree] })
 
 if (process.env.UPDATE_PLAN_STATUSES_CRON) {
   console.log(
@@ -149,17 +136,6 @@ const corsOptions = {
 const app = express()
 
 expressWs(app)
-
-// allow everything
-// const corsOptions = {
-//   origin: "*",
-//   optionSuccessStatus: 200,
-// };
-
-// middleware
-
-// logger
-// app.use(logger())
 
 app.use(cors(corsOptions))
 app.use('/payment/webhook/razorpay', express.raw({ type: 'application/json' }))
@@ -256,6 +232,7 @@ app.use('/r2', r2Router)
 app.use('/video-rec', videoRecordingRouter)
 app.use('/teacher-plan', teacherPlanRouter)
 app.use('/zoom', zoomIntegrationRouter)
+app.use('/cron', cronJobsRouter)
 // ws routers
 app.ws('/ws/class/teacher', classWsRouter.handleTeacherConnection)
 app.ws('/ws/class/student', classWsRouter.handleStudentConnection)
@@ -293,11 +270,6 @@ initializeSequelize()
             performance.now() - start,
             'ms'
           )
-
-          // graceful.listen()
-          // ;(async () => {
-          //   await bree.start()
-          // })()
         })
       })
       .catch((err) => {

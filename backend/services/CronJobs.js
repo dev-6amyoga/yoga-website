@@ -8,32 +8,62 @@ const { UserPlan } = require('../models/sql/UserPlan')
 
 const sendUnpaidClassEmail = async (
   user,
-  classDate,
+  unpaidClasses,
   frontendDomain,
   lastPlanId = null
 ) => {
   try {
-    if (!user || !user.email) return false
+    if (!user || !user.email || !unpaidClasses || unpaidClasses.length === 0) {
+      return false
+    }
 
     const purchaseLink = lastPlanId
       ? `${frontendDomain}/student/purchase-a-plan/${lastPlanId}`
       : `${frontendDomain}/student/purchase-a-plan`
 
+    const classCount = unpaidClasses.length
+    const classesHTML = unpaidClasses
+      .map(
+        (cls) => `
+          <tr style="border-bottom: 1px solid #ddd;">
+            <td style="padding: 12px; text-align: left;">${cls.date || 'N/A'}</td>
+            <td style="padding: 12px; text-align: left;">${cls.class_name || 'Yoga Class'}</td>
+            <td style="padding: 12px; text-align: left;">${cls.start_time || 'N/A'}</td>
+          </tr>
+        `
+      )
+      .join('')
+
     await mailTransporter.sendMail({
       from: 'dev.6amyoga@gmail.com',
       to: user.email,
-      subject: '6AM Yoga | Unpaid Class Attendance',
+      subject: `6AM Yoga | ${classCount} Unpaid Class${classCount > 1 ? 'es' : ''} Attendance`,
       html: `
         <p>Hello <strong>${user.name}</strong>,</p>
-        <p>You attended a class on <strong>${classDate}</strong> without an active plan.</p>
-        <p>Please purchase a plan to continue attending classes.</p>
+        <p>Our records show that you attended <strong>${classCount}</strong> class${classCount > 1 ? 'es' : ''} without an active plan:</p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+          <thead>
+            <tr style="background-color: #f8f9fa;">
+              <th style="padding: 12px; text-align: left; font-weight: bold;">Date</th>
+              <th style="padding: 12px; text-align: left; font-weight: bold;">Class</th>
+              <th style="padding: 12px; text-align: left; font-weight: bold;">Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${classesHTML}
+          </tbody>
+        </table>
+        
+        <p>To continue accessing our classes in the future, please purchase a plan today.</p>
         <p>
           <a href="${purchaseLink}"
-            style="background:#4CAF50;color:#fff;padding:10px 16px;
-                    border-radius:4px;text-decoration:none;">
-            Purchase Plan
+            style="background:#4CAF50;color:#fff;padding:12px 24px;
+                    border-radius:4px;text-decoration:none;display:inline-block;">
+            Purchase Plan Now
           </a>
         </p>
+        <p>If you have any questions, feel free to reach out to us.</p>
         <p>– 6AM Yoga Team</p>
       `,
     })
@@ -180,8 +210,15 @@ WITH last_expired_plan AS (
     AND deleted_at IS NULL
   GROUP BY user_id
 )
-SELECT ca.id, ca.user_id, ca.date
+SELECT 
+  ca.id, 
+  ca.user_id, 
+  ca.date,
+  COALESCE(c.class_name, 'Yoga Class') as class_name,
+  COALESCE(TO_CHAR(c.start_time, 'HH24:MI'), 'N/A') as start_time,
+  COALESCE(TO_CHAR(c.end_time, 'HH24:MI'), 'N/A') as end_time
 FROM class_attendance ca
+LEFT JOIN class c ON c.class_id = ca.class_id
 LEFT JOIN last_expired_plan lep ON lep.user_id = ca.user_id
 WHERE ca.attendance_status = 'ATTENDED'
   AND ca.deleted_at IS NULL
@@ -197,7 +234,8 @@ WHERE ca.attendance_status = 'ATTENDED'
   AND (
     lep.last_expired_date IS NULL
     OR CAST(ca.date AS DATE) >= lep.last_expired_date
-  );
+  )
+ORDER BY ca.user_id, ca.date DESC;
 `
 
 const SQL_RESET_ATTENDANCE = `
@@ -260,7 +298,7 @@ module.exports = {
     try {
       await sequelize.query(SQL_EXPIRE_BY_DATE, { transaction: tx })
       await sequelize.query(SQL_ACTIVATE_STAGED, { transaction: tx })
-      await sequelize.query(CLASS_ATTENDANCE_INIT, { transaction: tx })
+      // await sequelize.query(CLASS_ATTENDANCE_INIT, { transaction: tx })
       await sequelize.query(SQL_SYNC_ATTENDANCE_STATUS, { transaction: tx })
 
       await sequelize.query(SQL_ADJUST_UNPAID_CLASSES, { transaction: tx })
@@ -270,26 +308,62 @@ module.exports = {
         transaction: tx,
       })
 
+      // Group unpaid classes by user
+      const unpaidByUser = {}
+      unpaid.forEach((row) => {
+        if (!unpaidByUser[row.user_id]) {
+          unpaidByUser[row.user_id] = []
+        }
+        unpaidByUser[row.user_id].push({
+          id: row.id,
+          date: row.date
+            ? new Date(row.date).toLocaleDateString('en-IN')
+            : 'N/A',
+          class_name: row.class_name,
+          start_time: row.start_time,
+          end_time: row.end_time,
+        })
+      })
+
       const unsuccessful = []
+      const successfullySentIds = []
 
+      // Fetch user details and send emails grouped by user
       const emailResults = await Promise.all(
-        unpaid.map(async (row) => {
-          const sent = await sendUnpaidClassEmail(
-            row,
-            row.date.toISOString().split('T')[0],
-            process.env.FRONTEND_DOMAIN,
-            null
-          )
+        Object.entries(unpaidByUser).map(async ([userId, classes]) => {
+          try {
+            const user = await User.findByPk(userId)
+            if (!user) return null
 
-          if (!sent) {
-            unsuccessful.push(row.id)
+            const sent = await sendUnpaidClassEmail(
+              { name: user.name, email: user.email },
+              classes,
+              process.env.FRONTEND_DOMAIN,
+              null
+            )
+
+            if (sent) {
+              // Collect all IDs from this user's unpaid classes
+              classes.forEach((cls) => {
+                successfullySentIds.push(cls.id)
+              })
+              return userId
+            } else {
+              classes.forEach((cls) => {
+                unsuccessful.push(cls.id)
+              })
+              return null
+            }
+          } catch (err) {
+            console.error(
+              '[UpdatePlanStatuses] Error processing user',
+              userId,
+              err
+            )
+            return null
           }
-
-          return sent ? row.id : null
         })
       )
-
-      const successfullySentIds = emailResults.filter((id) => id !== null)
 
       if (successfullySentIds.length > 0) {
         await sequelize.query(
@@ -304,6 +378,11 @@ module.exports = {
       await sequelize.query(SQL_RECOUNT_ATTENDANCE, { transaction: tx })
       await sequelize.query(SQL_PRACTICE_NOW_ATTENDANCE, { transaction: tx })
       await sequelize.query(SQL_EXPIRE_BY_USAGE, { transaction: tx })
+
+      const sentCount = successfullySentIds.length
+      console.log(
+        `[UpdatePlanStatuses] Successfully sent unpaid class emails for ${sentCount} class${sentCount > 1 ? 'es' : ''}`
+      )
 
       await tx.commit()
       console.log('[UpdatePlanStatuses] User plan cron completed')
@@ -341,7 +420,7 @@ module.exports = {
       if (plansExpiringToday.length === 0) return
 
       console.log(
-        `[SendPlanExpiryReminders] rocessing ${plansExpiringToday.length} expiration reminders...`
+        `[SendPlanExpiryReminders] Processing ${plansExpiringToday.length} expiration reminders...`
       )
 
       const emailPromises = plansExpiringToday.map(async (plan) => {
