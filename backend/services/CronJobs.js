@@ -214,11 +214,11 @@ SELECT
   ca.id, 
   ca.user_id, 
   ca.date,
-  COALESCE(c.class_name, 'Yoga Class') as class_name,
-  COALESCE(TO_CHAR(c.start_time, 'HH24:MI'), 'N/A') as start_time,
-  COALESCE(TO_CHAR(c.end_time, 'HH24:MI'), 'N/A') as end_time
+  COALESCE(c.zoom_class_name, 'Yoga Class') as class_name,
+  COALESCE(c.recurring_start_time) as start_time,
+  COALESCE(c.recurring_end_time) as end_time
 FROM class_attendance ca
-LEFT JOIN class c ON c.class_id = ca.class_id
+LEFT JOIN zoom_class c ON c.zoom_class_id = ca.class_id
 LEFT JOIN last_expired_plan lep ON lep.user_id = ca.user_id
 WHERE ca.attendance_status = 'ATTENDED'
   AND ca.deleted_at IS NULL
