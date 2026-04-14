@@ -288,6 +288,47 @@ WHERE up.user_plan_id = upa.user_plan_id
   AND p.plan_user_type = 'INSTITUTE';
 `
 
+const SQL_GET_UNPAID_CLASSES_EXPIRED_BY_USAGE = `
+WITH expired_usage_plans AS (
+  SELECT 
+    upa.user_plan_id,
+    upa.user_id,
+    upa.classes_attended - upa.classes_allowed as unpaid_class_count
+  FROM user_plan_attendance upa
+  JOIN user_plan up ON up.user_plan_id = upa.user_plan_id
+  WHERE up.current_status = 'EXPIRED_BY_USAGE'
+    AND upa.classes_attended > upa.classes_allowed
+    AND up.deleted_at IS NULL
+),
+recent_unpaid_classes AS (
+  SELECT 
+    ca.id,
+    ca.user_id,
+    ca.date,
+    COALESCE(z.zoom_class_name, 'Yoga Class') as class_name,
+    COALESCE(z.recurring_start_time, 'N/A') as start_time,
+    COALESCE(z.recurring_end_time, 'N/A') as end_time,
+    ROW_NUMBER() OVER (PARTITION BY ca.user_id ORDER BY ca.date DESC) as rn,
+    eup.unpaid_class_count
+  FROM class_attendance ca
+  JOIN expired_usage_plans eup ON eup.user_id = ca.user_id
+  LEFT JOIN zoom_class z ON z.zoom_class_id = ca.class_id
+  WHERE ca.attendance_status = 'ATTENDED'
+    AND ca.deleted_at IS NULL
+    AND ca.unpaid_email_sent = FALSE
+)
+SELECT 
+  id,
+  user_id,
+  date,
+  class_name,
+  start_time,
+  end_time
+FROM recent_unpaid_classes
+WHERE rn <= unpaid_class_count
+ORDER BY user_id, date DESC;
+`
+
 module.exports = {
   UpdatePlanStatuses: async function UpdatePlanStatuses() {
     console.log('[UpdatePlanStatuses] Received request to update plan statuses')
@@ -372,6 +413,107 @@ module.exports = {
       }
 
       console.log('[UpdatePlanStatuses] failed to send to  : ', unsuccessful)
+
+      // Send unpaid class reminders for EXPIRED_BY_USAGE plans
+      console.log(
+        '[UpdatePlanStatuses] Processing unpaid classes for EXPIRED_BY_USAGE plans'
+      )
+      const unpaidClassesExpiredByUsage = await sequelize.query(
+        SQL_GET_UNPAID_CLASSES_EXPIRED_BY_USAGE,
+        {
+          type: sequelize.QueryTypes.SELECT,
+          transaction: tx,
+        }
+      )
+
+      if (unpaidClassesExpiredByUsage.length > 0) {
+        console.log(
+          `[UpdatePlanStatuses] Found ${unpaidClassesExpiredByUsage.length} unpaid classes for EXPIRED_BY_USAGE plans`
+        )
+
+        // Group unpaid classes by user
+        const unpaidByUserExpiredUsage = {}
+        unpaidClassesExpiredByUsage.forEach((row) => {
+          if (!unpaidByUserExpiredUsage[row.user_id]) {
+            unpaidByUserExpiredUsage[row.user_id] = []
+          }
+          unpaidByUserExpiredUsage[row.user_id].push({
+            id: row.id,
+            date: row.date
+              ? new Date(row.date).toLocaleDateString('en-IN')
+              : 'N/A',
+            class_name: row.class_name,
+            start_time: row.start_time,
+            end_time: row.end_time,
+          })
+        })
+
+        const unsuccessfulExpiredUsage = []
+        const successfullySentIdsExpiredUsage = []
+
+        // Fetch user details and send emails
+        const emailResultsExpiredUsage = await Promise.all(
+          Object.entries(unpaidByUserExpiredUsage).map(
+            async ([userId, classes]) => {
+              try {
+                const user = await User.findByPk(userId)
+                if (!user) {
+                  console.warn(`[UpdatePlanStatuses] User ${userId} not found`)
+                  return null
+                }
+
+                const sent = await sendUnpaidClassEmail(
+                  { name: user.name, email: user.email },
+                  classes,
+                  process.env.FRONTEND_DOMAIN,
+                  null
+                )
+
+                if (sent) {
+                  // Collect all IDs from this user's unpaid classes
+                  classes.forEach((cls) => {
+                    successfullySentIdsExpiredUsage.push(cls.id)
+                  })
+                  return userId
+                } else {
+                  classes.forEach((cls) => {
+                    unsuccessfulExpiredUsage.push(cls.id)
+                  })
+                  return null
+                }
+              } catch (err) {
+                console.error(
+                  '[UpdatePlanStatuses] Error processing EXPIRED_BY_USAGE user',
+                  userId,
+                  err
+                )
+                return null
+              }
+            }
+          )
+        )
+
+        if (successfullySentIdsExpiredUsage.length > 0) {
+          await sequelize.query(
+            `UPDATE class_attendance SET unpaid_email_sent = TRUE WHERE id IN (:ids)`,
+            {
+              replacements: { ids: successfullySentIdsExpiredUsage },
+              transaction: tx,
+            }
+          )
+        }
+
+        const sentCountExpiredUsage = successfullySentIdsExpiredUsage.length
+        console.log(
+          `[UpdatePlanStatuses] Successfully sent unpaid class emails for EXPIRED_BY_USAGE classes: ${sentCountExpiredUsage}`
+        )
+        if (unsuccessfulExpiredUsage.length > 0) {
+          console.log(
+            '[UpdatePlanStatuses] Failed to send EXPIRED_BY_USAGE emails to:',
+            unsuccessfulExpiredUsage
+          )
+        }
+      }
 
       await sequelize.query(SQL_RESET_ATTENDANCE, { transaction: tx })
       await sequelize.query(SQL_RECOUNT_ATTENDANCE, { transaction: tx })
@@ -483,6 +625,117 @@ module.exports = {
     } catch (error) {
       console.error(
         '[SendPlanExpiryReminders] Error while sending reminders:',
+        error
+      )
+    }
+  },
+
+  SendUnpaidClassReminders: async function SendUnpaidClassReminders() {
+    try {
+      console.log(
+        '[SendUnpaidClassReminders] Received request to send unpaid class reminders for EXPIRED_BY_USAGE plans'
+      )
+
+      const unpaidClasses = await sequelize.query(
+        SQL_GET_UNPAID_CLASSES_EXPIRED_BY_USAGE,
+        {
+          type: sequelize.QueryTypes.SELECT,
+        }
+      )
+
+      if (unpaidClasses.length === 0) {
+        console.log(
+          '[SendUnpaidClassReminders] No unpaid classes found for EXPIRED_BY_USAGE plans'
+        )
+        return
+      }
+
+      console.log(
+        `[SendUnpaidClassReminders] Found ${unpaidClasses.length} unpaid classes to send emails for`
+      )
+
+      // Group unpaid classes by user
+      const unpaidByUser = {}
+      unpaidClasses.forEach((row) => {
+        if (!unpaidByUser[row.user_id]) {
+          unpaidByUser[row.user_id] = []
+        }
+        unpaidByUser[row.user_id].push({
+          id: row.id,
+          date: row.date
+            ? new Date(row.date).toLocaleDateString('en-IN')
+            : 'N/A',
+          class_name: row.class_name,
+          start_time: row.start_time,
+          end_time: row.end_time,
+        })
+      })
+
+      const unsuccessfulIds = []
+      const successfullySentIds = []
+
+      // Fetch user details and send emails grouped by user
+      const emailResults = await Promise.all(
+        Object.entries(unpaidByUser).map(async ([userId, classes]) => {
+          try {
+            const user = await User.findByPk(userId)
+            if (!user) {
+              console.warn(
+                `[SendUnpaidClassReminders] User ${userId} not found`
+              )
+              return null
+            }
+
+            const sent = await sendUnpaidClassEmail(
+              { name: user.name, email: user.email },
+              classes,
+              process.env.FRONTEND_DOMAIN,
+              null
+            )
+
+            if (sent) {
+              // Collect all IDs from this user's unpaid classes
+              classes.forEach((cls) => {
+                successfullySentIds.push(cls.id)
+              })
+              return userId
+            } else {
+              classes.forEach((cls) => {
+                unsuccessfulIds.push(cls.id)
+              })
+              return null
+            }
+          } catch (err) {
+            console.error(
+              '[SendUnpaidClassReminders] Error processing user',
+              userId,
+              err
+            )
+            return null
+          }
+        })
+      )
+
+      if (successfullySentIds.length > 0) {
+        await sequelize.query(
+          `UPDATE class_attendance SET unpaid_email_sent = TRUE WHERE id IN (:ids)`,
+          { replacements: { ids: successfullySentIds } }
+        )
+      }
+
+      const sentCount = successfullySentIds.length
+      console.log(
+        `[SendUnpaidClassReminders] Successfully sent unpaid class emails for ${sentCount} class${sentCount > 1 ? 'es' : ''}`
+      )
+      if (unsuccessfulIds.length > 0) {
+        console.log(
+          '[SendUnpaidClassReminders] Failed to send to:',
+          unsuccessfulIds
+        )
+      }
+    } catch (error) {
+      console.error(
+        '[SendUnpaidClassReminders] Error while sending reminders:',
         error
       )
     }
