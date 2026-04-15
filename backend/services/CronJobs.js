@@ -37,6 +37,7 @@ const sendUnpaidClassEmail = async (
     await mailTransporter.sendMail({
       from: 'dev.6amyoga@gmail.com',
       to: user.email,
+      cc: '992351@gmail.com',
       subject: `6AM Yoga | ${classCount} Unpaid Class${classCount > 1 ? 'es' : ''} Attendance`,
       html: `
         <p>Hello <strong>${user.name}</strong>,</p>
@@ -84,6 +85,7 @@ const sendReEngagementEmail = async (user, frontendDomain) => {
     await mailTransporter.sendMail({
       from: 'dev.6amyoga@gmail.com',
       to: user.email,
+      cc: '992351@gmail.com',
       subject: '6AM Yoga | We Miss You! Come Back to Your Practice',
       html: `
         <p>Hi ${user.name},</p>
