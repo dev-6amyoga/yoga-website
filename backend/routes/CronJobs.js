@@ -9,6 +9,7 @@ const {
   HTTP_INTERNAL_SERVER_ERROR,
   HTTP_UNAUTHORIZED,
 } = require('../utils/http_status_codes')
+const { mailTransporter } = require('../init.nodemailer')
 
 const verifyCronSecret = (req, res, next) => {
   const cronSecret = req.headers['x-cron-secret'] || req.query.secret
