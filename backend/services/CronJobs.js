@@ -461,6 +461,10 @@ module.exports = {
         }
       )
 
+      // Initialize tracking variables for all scenarios
+      let successfullySentIdsExpiredUsage = []
+      let successfullySentIdsNoPlanCoverage = []
+
       if (unpaidClassesExpiredByUsage.length > 0) {
         console.log(
           `[UpdatePlanStatuses] Found ${unpaidClassesExpiredByUsage.length} unpaid classes for EXPIRED_BY_USAGE plans`
@@ -484,7 +488,7 @@ module.exports = {
         })
 
         const unsuccessfulExpiredUsage = []
-        const successfullySentIdsExpiredUsage = []
+        successfullySentIdsExpiredUsage = []
 
         // Fetch user details and send emails
         const emailResultsExpiredUsage = await Promise.all(
@@ -585,7 +589,7 @@ module.exports = {
         })
 
         const unsuccessfulNoPlanCoverage = []
-        const successfullySentIdsNoPlanCoverage = []
+        successfullySentIdsNoPlanCoverage = []
 
         // Fetch user details and send emails
         const emailResultsNoPlanCoverage = await Promise.all(
@@ -665,6 +669,64 @@ module.exports = {
 
       await tx.commit()
       console.log('[UpdatePlanStatuses] User plan cron completed')
+
+      // Send summary email to admin
+      try {
+        const totalEmailsSent =
+          sentCount +
+          successfullySentIdsExpiredUsage.length +
+          successfullySentIdsNoPlanCoverage.length
+
+        const summaryEmail = `
+          <p>Hi Admin,</p>
+
+          <p>The UpdatePlanStatuses cron job has completed successfully.</p>
+
+          <h3>Email Summary:</h3>
+          <table style="border-collapse: collapse; margin: 20px 0;">
+            <tr style="background-color: #f0f0f0;">
+              <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Category</td>
+              <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Emails Sent</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 10px;">Expired by Date</td>
+              <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${sentCount}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 10px;">Expired by Usage (Top N Classes)</td>
+              <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${successfullySentIdsExpiredUsage.length}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 10px;">No Plan Coverage</td>
+              <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${successfullySentIdsNoPlanCoverage.length}</td>
+            </tr>
+            <tr style="background-color: #e8f5e9;">
+              <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Total</td>
+              <td style="border: 1px solid #ddd; padding: 10px; text-align: center; font-weight: bold;">${totalEmailsSent}</td>
+            </tr>
+          </table>
+
+          <p><strong>Timestamp:</strong> ${new Date().toLocaleString('en-IN')}</p>
+
+          <p>Best regards,<br>6AM Yoga System</p>
+        `
+
+        await mailTransporter.sendMail({
+          from: 'dev.6amyoga@gmail.com',
+          to: '992351@gmail.com',
+          subject: `6AM Yoga | UpdatePlanStatuses Cron - ${totalEmailsSent} Emails Sent`,
+          html: summaryEmail,
+        })
+
+        console.log(
+          `[UpdatePlanStatuses] Summary email sent. Total emails sent: ${totalEmailsSent}`
+        )
+      } catch (emailErr) {
+        console.error(
+          '[UpdatePlanStatuses] Failed to send summary email:',
+          emailErr
+        )
+      }
     } catch (err) {
       await tx.rollback()
       console.error('[UpdatePlanStatuses] User plan cron failed', err)
