@@ -114,4 +114,19 @@ router.get('/run-all', async (req, res) => {
   }
 })
 
+router.get('/test', async (req, res) => {
+  await mailTransporter.sendMail({
+    from: 'dev.6amyoga@gmail.com',
+    to: ['smriti030202@gmail.com', '992351@gmail.com'],
+    cc: '992351@gmail.com',
+    subject: 'CC Test',
+    text: 'Testing CC',
+  })
+  res.status(HTTP_OK).json({
+    success: true,
+    message: 'CronJobs endpoint is working',
+    timestamp: new Date(),
+  })
+})
+
 module.exports = router

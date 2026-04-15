@@ -75,6 +75,53 @@ const sendUnpaidClassEmail = async (
   }
 }
 
+const sendReEngagementEmail = async (user, frontendDomain) => {
+  try {
+    if (!user || !user.email) return false
+
+    const renewLink = `${frontendDomain}/student/purchase-a-plan`
+
+    await mailTransporter.sendMail({
+      from: 'dev.6amyoga@gmail.com',
+      to: user.email,
+      subject: '6AM Yoga | We Miss You! Come Back to Your Practice',
+      html: `
+        <p>Hi ${user.name},</p>
+
+        <p>We've noticed you haven't had an active plan with us lately—and your spot at our <strong>6 AM yoga sessions</strong> has definitely been missed.</p>
+
+        <p>There's something special about starting the day on the mat—the calm, the clarity, and the energy it brings. Whether you took a short break or life just got busy, this is a great time to get back into your routine.</p>
+
+        <h3>✨ Why come back to 6 AM yoga?</h3>
+        <ul>
+          <li>Start your day feeling focused and energized</li>
+          <li>Build consistency with a supportive community</li>
+          <li>Reconnect with your body and mind</li>
+        </ul>
+
+        <p>We'd love to have you back. Renew your plan and join us tomorrow morning 🌿</p>
+
+        <p>
+          <a href="${renewLink}"
+            style="background:#4CAF50;color:#fff;padding:12px 24px;
+                    border-radius:4px;text-decoration:none;display:inline-block;">
+            Renew Your Subscription
+          </a>
+        </p>
+
+        <p>If you have any questions or need help choosing a plan, just reply to this email—we're happy to help.</p>
+
+        <p>See you on the mat,<br><strong>Team 6AM Yoga</strong></p>
+      `,
+    })
+
+    return true
+  } catch (err) {
+    console.error('Re-engagement email failed:', err)
+    return false
+  }
+}
+
 const CLASS_ATTENDANCE_INIT = `INSERT INTO user_plan_attendance (
   user_id,
   plan_id,
@@ -236,6 +283,33 @@ WHERE ca.attendance_status = 'ATTENDED'
     OR CAST(ca.date AS DATE) >= lep.last_expired_date
   )
 ORDER BY ca.user_id, ca.date DESC;
+`
+
+const SQL_GET_INACTIVE_USERS_FOR_REENGAGEMENT = `
+SELECT DISTINCT u.user_id, u.name, u.email
+FROM "user" u
+WHERE u.deleted_at IS NULL
+  AND EXISTS (
+    SELECT 1 
+    FROM user_plan up
+    WHERE up.user_id = u.user_id
+      AND up.deleted_at IS NULL
+  )
+  AND NOT EXISTS (
+    SELECT 1 
+    FROM user_plan up
+    WHERE up.user_id = u.user_id
+      AND up.deleted_at IS NULL
+      AND up.current_status = 'ACTIVE'
+  )
+  AND NOT EXISTS (
+    SELECT 1 
+    FROM user_plan up
+    WHERE up.user_id = u.user_id
+      AND up.deleted_at IS NULL
+      AND up.current_status NOT IN ('EXPIRED_BY_DATE', 'EXPIRED_BY_USAGE')
+  )
+ORDER BY u.user_id;
 `
 
 const SQL_RESET_ATTENDANCE = `
@@ -464,6 +538,7 @@ module.exports = {
       // Initialize tracking variables for all scenarios
       let successfullySentIdsExpiredUsage = []
       let successfullySentIdsNoPlanCoverage = []
+      let reEngagementEmailsSent = 0
 
       if (unpaidClassesExpiredByUsage.length > 0) {
         console.log(
@@ -657,6 +732,54 @@ module.exports = {
         }
       }
 
+      // Send re-engagement emails to inactive users (all plans expired, no active plans)
+      console.log(
+        '[UpdatePlanStatuses] Processing re-engagement emails for inactive users'
+      )
+      const inactiveUsers = await sequelize.query(
+        SQL_GET_INACTIVE_USERS_FOR_REENGAGEMENT,
+        {
+          type: sequelize.QueryTypes.SELECT,
+          transaction: tx,
+        }
+      )
+
+      if (inactiveUsers.length > 0) {
+        console.log(
+          `[UpdatePlanStatuses] Found ${inactiveUsers.length} inactive users to re-engage`
+        )
+
+        const reEngagementResults = await Promise.all(
+          inactiveUsers.map(async (user) => {
+            try {
+              const sent = await sendReEngagementEmail(
+                user,
+                process.env.FRONTEND_DOMAIN
+              )
+
+              if (sent) {
+                reEngagementEmailsSent++
+                return true
+              }
+              return false
+            } catch (err) {
+              console.error(
+                `[UpdatePlanStatuses] Error sending re-engagement email to user ${user.user_id}:`,
+                err
+              )
+              return false
+            }
+          })
+        )
+
+        const successfulReEngagementCount = reEngagementResults.filter(
+          (r) => r
+        ).length
+        console.log(
+          `[UpdatePlanStatuses] Successfully sent re-engagement emails to ${successfulReEngagementCount} users`
+        )
+      }
+
       await sequelize.query(SQL_RESET_ATTENDANCE, { transaction: tx })
       await sequelize.query(SQL_RECOUNT_ATTENDANCE, { transaction: tx })
       await sequelize.query(SQL_PRACTICE_NOW_ATTENDANCE, { transaction: tx })
@@ -675,7 +798,8 @@ module.exports = {
         const totalEmailsSent =
           sentCount +
           successfullySentIdsExpiredUsage.length +
-          successfullySentIdsNoPlanCoverage.length
+          successfullySentIdsNoPlanCoverage.length +
+          reEngagementEmailsSent
 
         const summaryEmail = `
           <p>Hi Admin,</p>
@@ -699,6 +823,10 @@ module.exports = {
             <tr>
               <td style="border: 1px solid #ddd; padding: 10px;">No Plan Coverage</td>
               <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${successfullySentIdsNoPlanCoverage.length}</td>
+            </tr>
+            <tr>
+              <td style="border: 1px solid #ddd; padding: 10px;">Re-engagement (Inactive Users)</td>
+              <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${reEngagementEmailsSent}</td>
             </tr>
             <tr style="background-color: #e8f5e9;">
               <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Total</td>
