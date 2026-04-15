@@ -329,6 +329,41 @@ WHERE rn <= unpaid_class_count
 ORDER BY user_id, date DESC;
 `
 
+const SQL_GET_UNPAID_CLASSES_NO_PLAN_COVERAGE = `
+SELECT 
+  ca.id,
+  ca.user_id,
+  ca.date,
+  COALESCE(z.zoom_class_name, 'Yoga Class') as class_name,
+  COALESCE(z.recurring_start_time, 'N/A') as start_time,
+  COALESCE(z.recurring_end_time, 'N/A') as end_time,
+  up.validity_from,
+  up.validity_to,
+  up.current_status
+
+FROM class_attendance ca
+LEFT JOIN zoom_class z 
+  ON z.zoom_class_id = ca.class_id
+
+LEFT JOIN user_plan up
+  ON up.user_id = ca.user_id
+ AND up.deleted_at IS NULL
+WHERE ca.attendance_status = 'ATTENDED'
+  AND ca.deleted_at IS NULL
+  AND ca.unpaid_email_sent = FALSE
+
+  AND NOT EXISTS (
+    SELECT 1
+    FROM user_plan up2
+    WHERE up2.user_id = ca.user_id
+      AND up2.deleted_at IS NULL
+      AND up2.current_status IN ('ACTIVE', 'EXPIRED_BY_DATE', 'EXPIRED_BY_USAGE')
+      AND ca.date::date BETWEEN up2.validity_from::date AND up2.validity_to::date
+  )
+
+ORDER BY ca.user_id, ca.date DESC, up.validity_from;
+`
+
 module.exports = {
   UpdatePlanStatuses: async function UpdatePlanStatuses() {
     console.log('[UpdatePlanStatuses] Received request to update plan statuses')
@@ -511,6 +546,109 @@ module.exports = {
           console.log(
             '[UpdatePlanStatuses] Failed to send EXPIRED_BY_USAGE emails to:',
             unsuccessfulExpiredUsage
+          )
+        }
+      }
+
+      // Send unpaid class reminders for classes with no plan coverage
+      console.log(
+        '[UpdatePlanStatuses] Processing unpaid classes with no plan coverage'
+      )
+      const unpaidClassesNoPlanCoverage = await sequelize.query(
+        SQL_GET_UNPAID_CLASSES_NO_PLAN_COVERAGE,
+        {
+          type: sequelize.QueryTypes.SELECT,
+          transaction: tx,
+        }
+      )
+
+      if (unpaidClassesNoPlanCoverage.length > 0) {
+        console.log(
+          `[UpdatePlanStatuses] Found ${unpaidClassesNoPlanCoverage.length} unpaid classes with no plan coverage`
+        )
+
+        // Group unpaid classes by user
+        const unpaidByUserNoPlanCoverage = {}
+        unpaidClassesNoPlanCoverage.forEach((row) => {
+          if (!unpaidByUserNoPlanCoverage[row.user_id]) {
+            unpaidByUserNoPlanCoverage[row.user_id] = []
+          }
+          unpaidByUserNoPlanCoverage[row.user_id].push({
+            id: row.id,
+            date: row.date
+              ? new Date(row.date).toLocaleDateString('en-IN')
+              : 'N/A',
+            class_name: row.class_name,
+            start_time: row.start_time,
+            end_time: row.end_time,
+          })
+        })
+
+        const unsuccessfulNoPlanCoverage = []
+        const successfullySentIdsNoPlanCoverage = []
+
+        // Fetch user details and send emails
+        const emailResultsNoPlanCoverage = await Promise.all(
+          Object.entries(unpaidByUserNoPlanCoverage).map(
+            async ([userId, classes]) => {
+              try {
+                const user = await User.findByPk(userId)
+                if (!user) {
+                  console.warn(
+                    `[UpdatePlanStatuses] User ${userId} not found for no plan coverage`
+                  )
+                  return null
+                }
+
+                const sent = await sendUnpaidClassEmail(
+                  { name: user.name, email: user.email },
+                  classes,
+                  process.env.FRONTEND_DOMAIN,
+                  null
+                )
+
+                if (sent) {
+                  // Collect all IDs from this user's unpaid classes
+                  classes.forEach((cls) => {
+                    successfullySentIdsNoPlanCoverage.push(cls.id)
+                  })
+                  return userId
+                } else {
+                  classes.forEach((cls) => {
+                    unsuccessfulNoPlanCoverage.push(cls.id)
+                  })
+                  return null
+                }
+              } catch (err) {
+                console.error(
+                  '[UpdatePlanStatuses] Error processing no plan coverage user',
+                  userId,
+                  err
+                )
+                return null
+              }
+            }
+          )
+        )
+
+        if (successfullySentIdsNoPlanCoverage.length > 0) {
+          await sequelize.query(
+            `UPDATE class_attendance SET unpaid_email_sent = TRUE WHERE id IN (:ids)`,
+            {
+              replacements: { ids: successfullySentIdsNoPlanCoverage },
+              transaction: tx,
+            }
+          )
+        }
+
+        const sentCountNoPlanCoverage = successfullySentIdsNoPlanCoverage.length
+        console.log(
+          `[UpdatePlanStatuses] Successfully sent unpaid class emails for no plan coverage classes: ${sentCountNoPlanCoverage}`
+        )
+        if (unsuccessfulNoPlanCoverage.length > 0) {
+          console.log(
+            '[UpdatePlanStatuses] Failed to send no plan coverage emails to:',
+            unsuccessfulNoPlanCoverage
           )
         }
       }
