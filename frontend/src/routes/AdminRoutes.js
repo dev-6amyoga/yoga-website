@@ -33,6 +33,7 @@ import EditPlaylist from "../components/content-management/EditPlaylist";
 import PackagingVideos from "../pages/admin/packing-videos/PackagingVideos";
 import LoginHistory from "../pages/admin/member-management/LoginHistory";
 import UserPlanPage from "../pages/admin/member-management/UserPlanPage";
+import EditUserDetails from "../pages/admin/member-management/EditUserDetails";
 import CreateNewClass from "../pages/admin/classes/CreateNewClass";
 import ViewAllClasses from "../pages/admin/classes/ViewAllClasses";
 import JoinClass from "../pages/admin/classes/JoinClass";
@@ -176,6 +177,10 @@ export const AdminRoutes = [
   {
     path: "/admin/members/students",
     element: <Students />,
+  },
+  {
+    path: "/admin/members/edit-user-details",
+    element: <EditUserDetails />,
   },
   {
     path: "/admin/members/login-history",

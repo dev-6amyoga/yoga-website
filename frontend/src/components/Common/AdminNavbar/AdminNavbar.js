@@ -68,6 +68,8 @@ const paths = [
 
       { path: "/admin/members/students", title: "Students" },
 
+      { path: "/admin/members/edit-user-details", title: "Edit User Details" },
+
       { path: "/admin/members/teachers", title: "Teachers" },
 
       { path: "/admin/members/login-history", title: "Login History" },
@@ -179,7 +181,7 @@ function AdminNavbar() {
       state.currentRole,
       state.userPlan,
       state.resetUserState,
-    ])
+    ]),
   );
 
   const [cookies, setCookie, removeCookie] = useCookies([
