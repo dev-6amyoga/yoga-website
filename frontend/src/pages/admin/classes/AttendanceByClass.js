@@ -32,16 +32,19 @@ export default function AttendanceByClass() {
   const isMobile = useMediaQuery("(max-width:600px)");
 
   const [classes, setClasses] = useState([]);
+  const [rawClasses, setRawClasses] = useState([]);
   const [loadingClasses, setLoadingClasses] = useState(false);
 
   const [selectedClassIndex, setSelectedClassIndex] = useState("");
   const [selectedClassName, setSelectedClassName] = useState("");
   const [selectedStartTime, setSelectedStartTime] = useState("");
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
   const [endTime, setEndTime] = useState("");
-  const [duration, setDuration] = useState("");
+  const [duration, setDuration] = useState(60);
+
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [availableClassesForDate, setAvailableClassesForDate] = useState([]);
 
   const [classUsers, setClassUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -65,13 +68,23 @@ export default function AttendanceByClass() {
     return () => clearTimeout(t);
   }, [search]);
 
+  useEffect(() => {
+    // Filter classes based on selected date
+    if (selectedDate && rawClasses.length > 0) {
+      console.log("Filtering classes for date:", selectedDate);
+      filterClassesByDate(selectedDate);
+    }
+  }, [selectedDate, rawClasses]);
+
   /* -------------------- API -------------------- */
 
   const loadClasses = async () => {
     setLoadingClasses(true);
     try {
       const res = await Fetch({ url: "/zoom/api/classes", method: "GET" });
-      setClasses(groupClasses(res.data || []));
+      const rawData = res.data || [];
+      setRawClasses(rawData);
+      setClasses(groupClasses(rawData));
     } catch (e) {
       console.error(e);
     }
@@ -114,8 +127,34 @@ export default function AttendanceByClass() {
     return Object.values(map);
   };
 
+  const filterClassesByDate = (dateString) => {
+    // Get day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    const date = new Date(dateString);
+    const dayOfWeek = date.getDay();
+    // Filter classes that occur on this day
+    const classesOnDay = rawClasses.filter((c) => {
+      if (!c.recurring_days) return false;
+      // recurring_days is an array like [1,3,5] for Mon, Wed, Fri
+      return c.recurring_days.includes(dayOfWeek);
+    });
+    console.log("Classes on selected day:", classesOnDay);
+
+    // Group filtered classes
+    const grouped = groupClasses(classesOnDay);
+    setAvailableClassesForDate(grouped);
+
+    // Reset class selection and users
+    setSelectedClassIndex("");
+    setSelectedClassName("");
+    setSelectedStartTime("");
+    setEndTime("");
+    setDuration("");
+    setSelectedUserIds(new Set());
+    setClassUsers([]);
+  };
+
   const handleClassChange = (index) => {
-    const group = classes[index];
+    const group = availableClassesForDate[index];
     setSelectedClassIndex(index);
     setSelectedClassName(group.class_name);
     setSelectedStartTime(group.start_time);
@@ -130,8 +169,8 @@ export default function AttendanceByClass() {
     const end = h * 60 + m + 60;
     setEndTime(
       `${String(Math.floor(end / 60)).padStart(2, "0")}:${String(
-        end % 60
-      ).padStart(2, "0")}`
+        end % 60,
+      ).padStart(2, "0")}`,
     );
     setDuration(60);
   };
@@ -204,35 +243,12 @@ export default function AttendanceByClass() {
       <CardContent>
         <Typography variant="h6">Enter Attendance by Class</Typography>
 
-        {/* CLASS SELECT */}
+        {/* DATE SELECT */}
         <Grid container spacing={2} mt={1}>
-          <Grid item xs={12} sm={3}>
-            <FormControl fullWidth>
-              <InputLabel>Class</InputLabel>
-              <Select
-                value={selectedClassIndex}
-                label="Class"
-                onChange={(e) => handleClassChange(e.target.value)}
-              >
-                {loadingClasses ? (
-                  <MenuItem>
-                    <CircularProgress size={20} />
-                  </MenuItem>
-                ) : (
-                  classes.map((c, i) => (
-                    <MenuItem key={i} value={i}>
-                      {c.label}
-                    </MenuItem>
-                  ))
-                )}
-              </Select>
-            </FormControl>
-          </Grid>
-
           <Grid item xs={12} sm={3}>
             <TextField
               fullWidth
-              label="Date"
+              label="Select Date"
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
@@ -240,6 +256,35 @@ export default function AttendanceByClass() {
             />
           </Grid>
         </Grid>
+
+        {/* CLASS SELECT - Shows only after date is selected */}
+        {selectedDate && availableClassesForDate.length > 0 && (
+          <Grid container spacing={2} mt={1}>
+            <Grid item xs={12} sm={3}>
+              <FormControl fullWidth>
+                <InputLabel>Class</InputLabel>
+                <Select
+                  value={selectedClassIndex}
+                  label="Class"
+                  onChange={(e) => handleClassChange(e.target.value)}
+                >
+                  {availableClassesForDate.map((c, i) => (
+                    <MenuItem key={i} value={i}>
+                      {c.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        )}
+
+        {/* NO CLASSES MESSAGE */}
+        {selectedDate && availableClassesForDate.length === 0 && (
+          <Alert severity="info" sx={{ mt: 2 }}>
+            No classes scheduled for the selected date.
+          </Alert>
+        )}
 
         {/* USERS */}
         {selectedClassIndex !== "" && (
@@ -318,7 +363,7 @@ export default function AttendanceByClass() {
                               u.validity_to &&
                               u.validity_to !== "No active plan"
                                 ? new Date(u.validity_to).toLocaleDateString(
-                                    "en-GB"
+                                    "en-GB",
                                   )
                                 : "No active plan"
                             }`}
