@@ -128,22 +128,16 @@ export default function AttendanceByClass() {
   };
 
   const filterClassesByDate = (dateString) => {
-    // Get day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
     const date = new Date(dateString);
     const dayOfWeek = date.getDay();
-    // Filter classes that occur on this day
     const classesOnDay = rawClasses.filter((c) => {
       if (!c.recurring_days) return false;
-      // recurring_days is an array like [1,3,5] for Mon, Wed, Fri
       return c.recurring_days.includes(dayOfWeek);
     });
     console.log("Classes on selected day:", classesOnDay);
 
-    // Group filtered classes
     const grouped = groupClasses(classesOnDay);
     setAvailableClassesForDate(grouped);
-
-    // Reset class selection and users
     setSelectedClassIndex("");
     setSelectedClassName("");
     setSelectedStartTime("");

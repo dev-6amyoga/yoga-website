@@ -300,12 +300,7 @@ router.get('/api/attendance/:userId', async (req, res) => {
 router.post('/admin/log-attendance-by-class', async (req, res) => {
   const t = await sequelize.transaction()
   try {
-    console.log('=== /admin/log-attendance-by-class START ===')
     const { entries } = req.body
-
-    console.log('Request body:', JSON.stringify(req.body, null, 2))
-    console.log('Entries:', entries)
-
     if (
       !entries ||
       !entries.class_name ||
@@ -320,7 +315,6 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
       console.log('  join_time:', entries?.join_time)
       console.log('  users:', entries?.users)
       console.log('  users is array:', Array.isArray(entries?.users))
-
       await t.rollback()
       return res.status(400).json({
         error:
@@ -423,6 +417,17 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
         transaction: t,
       })
 
+      // Skip if attendance already recorded for this user/class/date
+      if (existing) {
+        created.push({
+          user_id,
+          class_id,
+          action: 'skipped',
+          reason: 'Attendance already recorded for this class and date',
+        })
+        continue
+      }
+
       // ===== 3️⃣ If plan exists — ensure + update UPA =====
       let upa = null
 
@@ -469,47 +474,26 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
         }
       }
 
-      // ===== 4️⃣ Insert / Update Attendance =====
-      if (existing) {
-        await existing.update(
-          {
-            attendance_status: hasPlan ? 'ATTENDED' : 'UNPAID',
-            join_time: parsedJoinTime,
-            leave_time: parsedLeaveTime,
-            duration_minutes: duration_minutes || null,
-            marked_by: 'INSTRUCTOR',
-            device_id: 'ADMIN_MANUAL',
-          },
-          { transaction: t }
-        )
-
-        created.push({
-          attendanceId: existing.id,
-          action: 'updated',
+      // ===== 4️⃣ Insert Attendance =====
+      const newAttendance = await ClassAttendance.create(
+        {
           user_id,
+          plan_id: hasPlan ? plan_id : 999,
+          user_plan_id: hasPlan ? user_plan_id : 999,
           class_id,
-        })
-      } else {
-        const newAttendance = await ClassAttendance.create(
-          {
-            user_id,
-            plan_id: hasPlan ? plan_id : 999,
-            user_plan_id: hasPlan ? user_plan_id : 999,
-            class_id,
-            device_id: 'ADMIN_MANUAL',
-            date: when,
-            attendance_status: 'ATTENDED',
-            join_time: parsedJoinTime,
-            leave_time: parsedLeaveTime,
-            duration_minutes: duration_minutes || null,
-            marked_by: 'INSTRUCTOR',
-            instructor_id: null,
-          },
-          { transaction: t }
-        )
+          device_id: 'ADMIN_MANUAL',
+          date: when,
+          attendance_status: 'ATTENDED',
+          join_time: parsedJoinTime,
+          leave_time: parsedLeaveTime,
+          duration_minutes: duration_minutes || null,
+          marked_by: 'INSTRUCTOR',
+          instructor_id: null,
+        },
+        { transaction: t }
+      )
 
-        created.push(newAttendance)
-      }
+      created.push(newAttendance)
 
       // ===== 5️⃣ Increment class count ONLY if paid =====
       if (hasPlan && upa) {
