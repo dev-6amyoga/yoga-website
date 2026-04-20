@@ -50,7 +50,7 @@ const exportToCSV = (rows) => {
         r.classes_attended ?? "",
         r.classes_remaining ?? "",
         r.has_active_plan ? "YES" : "NO",
-      ].join(",")
+      ].join(","),
     ),
   ].join("\n");
 
@@ -104,7 +104,7 @@ export default function StudentsPlanTable() {
       (r) =>
         r.name?.toLowerCase().includes(s) ||
         r.email?.toLowerCase().includes(s) ||
-        r.phone?.includes(s)
+        r.phone?.includes(s),
     );
   }, [rows, debouncedSearch]);
 
@@ -114,11 +114,11 @@ export default function StudentsPlanTable() {
   const rowVirtualizer = useVirtualizer({
     count: filteredRows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => (isMobile ? 190 : 56),
+    estimateSize: () => (isMobile ? 190 : 65),
     overscan: 8,
   });
 
-  const desktopGrid = "60px 160px 220px 120px 160px 120px 120px 90px 110px";
+  const desktopGrid = "70px 150px 240px 130px 180px 130px 130px 100px 110px";
 
   /* ---------------- UI ---------------- */
 
@@ -165,9 +165,10 @@ export default function StudentsPlanTable() {
                   display: "grid",
                   gridTemplateColumns: desktopGrid,
                   fontWeight: 600,
-                  borderBottom: "1px solid #ddd",
-                  pb: 1,
+                  borderBottom: "2px solid #ddd",
+                  pb: 1.5,
                   mb: 1,
+                  px: 0.5,
                 }}
               >
                 <Box>ID</Box>
@@ -288,31 +289,103 @@ export default function StudentsPlanTable() {
                           display: "grid",
                           gridTemplateColumns: desktopGrid,
                           alignItems: "center",
-                          py: 1,
+                          py: 1.5,
                           px: 0.5,
-                          borderBottom: "1px solid #f0f0f0",
+                          borderBottom: "1px solid #e8e8e8",
                           backgroundColor: r.has_active_plan
                             ? "rgba(0,200,83,0.05)"
                             : "transparent",
+                          "&:hover": {
+                            backgroundColor: r.has_active_plan
+                              ? "rgba(0,200,83,0.1)"
+                              : "rgba(0,0,0,0.02)",
+                          },
                         }}
                       >
-                        <Box>{r.user_id}</Box>
-                        <Box fontWeight={500}>{r.name}</Box>
-                        <Box sx={{ fontSize: 13 }}>{r.email}</Box>
-                        <Box>{r.phone || "—"}</Box>
-                        <Box>{r.plan_name || "—"}</Box>
-                        <Box>
+                        <Box
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {r.user_id}
+                        </Box>
+                        <Box
+                          sx={{
+                            fontWeight: 500,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {r.name}
+                        </Box>
+                        <Box
+                          sx={{
+                            fontSize: 13,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            title: r.email,
+                          }}
+                        >
+                          {r.email}
+                        </Box>
+                        <Box
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {r.phone || "—"}
+                        </Box>
+                        <Box
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            title: r.plan_name,
+                          }}
+                        >
+                          {r.plan_name || "—"}
+                        </Box>
+                        <Box
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
                           {r.validity_from
                             ? new Date(r.validity_from).toLocaleDateString()
                             : "—"}
                         </Box>
-                        <Box>
+                        <Box
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
                           {r.validity_to
                             ? new Date(r.validity_to).toLocaleDateString()
                             : "—"}
                         </Box>
-                        <Box textAlign="center">{r.classes_remaining ?? 0}</Box>
-                        <Box>
+                        <Box
+                          sx={{
+                            textAlign: "center",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {r.classes_remaining ?? 0}
+                        </Box>
+                        <Box
+                          sx={{ display: "flex", justifyContent: "flex-start" }}
+                        >
                           {r.has_active_plan ? (
                             <Chip label="ACTIVE" size="small" color="success" />
                           ) : (

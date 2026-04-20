@@ -828,4 +828,181 @@ router.get('/same-class/:classId', async (req, res) => {
   }
 })
 
+router.post('/get-by-class-date', async (req, res) => {
+  try {
+    console.log(req.body)
+    const { class_ids, date } = req.body
+
+    if (!class_ids || !Array.isArray(class_ids) || class_ids.length === 0) {
+      return res.status(400).json({
+        error: 'class_ids array is required and must not be empty',
+      })
+    }
+
+    if (!date) {
+      return res.status(400).json({
+        error: 'date is required (format: YYYY-MM-DD)',
+      })
+    }
+
+    // Parse date and create start/end of day boundaries
+    const dateObj = new Date(date)
+    const startOfDay = new Date(
+      dateObj.getFullYear(),
+      dateObj.getMonth(),
+      dateObj.getDate(),
+      0,
+      0,
+      0,
+      0
+    )
+    const endOfDay = new Date(
+      dateObj.getFullYear(),
+      dateObj.getMonth(),
+      dateObj.getDate(),
+      23,
+      59,
+      59,
+      999
+    )
+
+    // Get attendance for all provided class_ids on the specific date
+    const attendance = await ClassAttendance.findAll({
+      where: {
+        class_id: {
+          [Op.in]: class_ids,
+        },
+        date: {
+          [Op.between]: [startOfDay, endOfDay],
+        },
+      },
+      order: [['date', 'DESC']],
+    })
+
+    // Collect user IDs and fetch user data
+    const userIds = [...new Set(attendance.map((a) => a.user_id))]
+    const users = await User.findAll({
+      where: { user_id: userIds },
+      attributes: ['user_id', 'name', 'phone'],
+    })
+
+    // Create user lookup map
+    const userMap = {}
+    users.forEach((u) => {
+      userMap[u.user_id] = {
+        name: u.name || 'N/A',
+        phone: u.phone || 'N/A',
+      }
+    })
+
+    // Format response with user details
+    const formattedAttendance = attendance.map((att) => ({
+      id: att.id,
+      user_id: att.user_id,
+      user_name: userMap[att.user_id]?.name || 'N/A',
+      user_phone: userMap[att.user_id]?.phone || 'N/A',
+      class_id: att.class_id,
+      join_time: att.join_time,
+      leave_time: att.leave_time,
+      duration_minutes: att.duration_minutes,
+      attendance_status: att.attendance_status,
+      date: att.date,
+      plan_id: att.plan_id,
+      user_plan_id: att.user_plan_id,
+      device_id: att.device_id,
+    }))
+
+    return res.status(200).json({
+      attendance: formattedAttendance,
+    })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({
+      error: 'Failed to fetch attendance records',
+    })
+  }
+})
+
+// Delete attendance record
+router.post('/delete', async (req, res) => {
+  const t = await sequelize.transaction()
+  try {
+    const { user_id, class_ids, date } = req.body
+
+    if (
+      !user_id ||
+      !class_ids ||
+      !Array.isArray(class_ids) ||
+      class_ids.length === 0
+    ) {
+      await t.rollback()
+      return res.status(400).json({
+        error: 'user_id and class_ids array are required',
+      })
+    }
+
+    if (!date) {
+      await t.rollback()
+      return res.status(400).json({
+        error: 'date is required',
+      })
+    }
+
+    const startOfDay = new Date(date)
+    startOfDay.setHours(0, 0, 0, 0)
+
+    const nextDay = new Date(startOfDay)
+    nextDay.setDate(nextDay.getDate() + 1)
+
+    // Find the attendance record
+    const attendance = await ClassAttendance.findOne({
+      where: {
+        user_id,
+        class_id: {
+          [Op.in]: class_ids,
+        },
+        date: {
+          [Op.gte]: startOfDay,
+          [Op.lt]: nextDay,
+        },
+      },
+      transaction: t,
+      lock: t.LOCK.UPDATE,
+    })
+
+    if (!attendance) {
+      await t.rollback()
+      return res.status(404).json({
+        error: 'Attendance record not found',
+      })
+    }
+
+    // If this attendance has a user_plan_id, decrement the classes_attended
+    if (attendance.user_plan_id && attendance.user_plan_id !== 999) {
+      await UserPlanAttendance.decrement(
+        { classes_attended: 1 },
+        {
+          where: { user_plan_id: attendance.user_plan_id },
+          transaction: t,
+        }
+      )
+    }
+
+    // Delete the attendance record
+    await attendance.destroy({ transaction: t })
+
+    await t.commit()
+
+    return res.status(200).json({
+      message: 'Attendance record deleted successfully',
+    })
+  } catch (err) {
+    console.error(err)
+    await t.rollback()
+    return res.status(500).json({
+      error: 'Failed to delete attendance record',
+    })
+  }
+})
+
 module.exports = router

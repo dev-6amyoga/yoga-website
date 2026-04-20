@@ -39,6 +39,7 @@ import ViewAllClasses from "../pages/admin/classes/ViewAllClasses";
 import JoinClass from "../pages/admin/classes/JoinClass";
 import AdminLogAttendance from "../pages/admin/classes/AdminLogAttendance";
 import ViewClassAttendees from "../pages/admin/classes/ViewClassAttendees";
+import ViewAttendanceLogs from "../pages/admin/classes/ViewAttendanceLogs";
 import MyIncome from "../pages/admin/transactions/MyIncome";
 import StudentsPlanTable from "../pages/admin/member-management/StudentsPlanTable";
 export const AdminRoutes = [
@@ -116,6 +117,10 @@ export const AdminRoutes = [
   {
     path: "/admin/view-class-attendees",
     element: <ViewClassAttendees />,
+  },
+  {
+    path: "/admin/view-attendance-logs",
+    element: <ViewAttendanceLogs />,
   },
   // schedule
   {
