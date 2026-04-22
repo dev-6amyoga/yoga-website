@@ -381,11 +381,17 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
         parsedLeaveTime.setHours(h, m, 0, 0)
       }
 
+      // Get day of week from the provided date (0=Sunday, 1=Monday, ..., 6=Saturday)
+      const dayOfWeek = when.getDay()
+
       // ===== 1️⃣ Resolve Zoom Class =====
       const classWhere = {
         zoom_class_name: class_name,
         class_type,
         recurring_start_time: join_time,
+        recurring_days: {
+          [Op.contains]: [dayOfWeek],
+        },
       }
 
       if (hasPlan) classWhere.plan_id = plan_id
@@ -399,8 +405,8 @@ router.post('/admin/log-attendance-by-class', async (req, res) => {
         await t.rollback()
         return res.status(400).json({
           error: hasPlan
-            ? `Class ${class_name} not applicable for user_plan_id ${user_plan_id}`
-            : `Class ${class_name} not found`,
+            ? `Class ${class_name} not scheduled for ${when.toDateString()} (user_plan_id ${user_plan_id})`
+            : `Class ${class_name} not scheduled for ${when.toDateString()}`,
         })
       }
 
