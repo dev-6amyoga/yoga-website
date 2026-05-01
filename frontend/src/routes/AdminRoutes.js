@@ -203,7 +203,7 @@ export const AdminRoutes = [
   },
   {
     path: "/admin/transactions/refund",
-    element: <RefundManagement />,
+    element: <RefundManagement adminRole={true} />,
   },
   {
     path: "/admin/transactions/my-income",

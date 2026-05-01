@@ -96,6 +96,13 @@ function TeacherNavbar({ mode, toggleColorMode }) {
   const paths = useMemo(() => {
     return [
       {
+        title: "Dashboard",
+        path: "/teacher/dashboard",
+        props: {
+          disabled: false,
+        },
+      },
+      {
         title: "Class Management",
         props: {
           disabled: false,

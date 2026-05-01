@@ -7,7 +7,7 @@ import Papa from "papaparse";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { parseISO } from "date-fns";
-
+import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
 import { DataTable } from "../../../components/Common/DataTable/DataTable";
 import SortableColumn from "../../../components/Common/DataTable/SortableColumn";
@@ -50,7 +50,7 @@ function Accordion({ title, children }) {
   );
 }
 
-function RefundManagement() {
+function RefundManagement({ adminRole = false }) {
   const {
     isLoading,
     data: transactions,
@@ -202,7 +202,7 @@ function RefundManagement() {
                 <DropdownMenuItem
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      row?.original.transaction_payment_id
+                      row?.original.transaction_payment_id,
                     );
                     toast("Copied to clipboard!");
                   }}
@@ -237,7 +237,7 @@ function RefundManagement() {
         },
       },
     ],
-    []
+    [],
   );
 
   useEffect(() => {
@@ -288,8 +288,9 @@ function RefundManagement() {
     }
   };
 
+  const Wrapper = adminRole ? AdminPageWrapper : TeacherPageWrapper;
   return (
-    <AdminPageWrapper heading="All Transactions">
+    <Wrapper heading="All Transactions">
       {/* Search and Date Range Filters */}
       <div
         style={{
@@ -383,8 +384,9 @@ function RefundManagement() {
           ></DataTable>
         </div>
       </div>
-    </AdminPageWrapper>
+    </Wrapper>
   );
 }
+export default RefundManagement;
 
-export default withAuth(RefundManagement, ROLE_ROOT);
+// export default withAuth(RefundManagement, ROLE_ROOT);

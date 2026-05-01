@@ -15,7 +15,7 @@ import TeacherPlaylistCreation from "../pages/teacher/TeacherPlaylistCreation";
 import TeacherTransactions from "../pages/teacher/TeacherTransactions";
 import TeacherManageClasses from "../pages/teacher/class/Manage";
 import InvitePage from "../pages/teacher/invite/Index";
-
+import Refund from "../pages/admin/transactions/Refund";
 // Admin Components for Teacher Routes
 import ViewAllClasses from "../pages/admin/classes/ViewAllClasses";
 import JoinClass from "../pages/admin/classes/JoinClass";
@@ -144,6 +144,6 @@ export const TeacherRoutes = [
   // Transaction Management (Admin Components)
   {
     path: "/teacher/transactions/all",
-    element: <MyIncome adminRole={false} />,
+    element: <Refund adminRole={false} />,
   },
 ];
