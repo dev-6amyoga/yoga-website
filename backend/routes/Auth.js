@@ -451,30 +451,67 @@ router.post('/login-google', async (req, res) => {
   }
 })
 
-router.post('/logout', authenticateToken, async (req, res) => {
+const optionalAuthenticateToken = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization
+    const token =
+      authHeader && authHeader.startsWith('Bearer ')
+        ? authHeader.slice(7)
+        : null
+
+    if (!token) {
+      req.user = null
+      return next()
+    }
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+      if (err) {
+        req.user = null
+        return next()
+      }
+
+      req.user = user
+      req.token = token
+      return next()
+    })
+  } catch (error) {
+    req.user = null
+    return next()
+  }
+}
+
+router.post('/logout', optionalAuthenticateToken, async (req, res) => {
   const clientIp = req.clientIp
 
-  if (!req.user) {
-    return res.status(HTTP_BAD_REQUEST).json({ error: 'No user logged in' })
-  }
-
-  const { user_id } = req.user
+  const authHeader = req.headers.authorization
+  const token =
+    authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
 
   const t = await sequelize.transaction()
 
   try {
-    const filter = {
-      user_id,
-    }
+    if (token) {
+      await LoginToken.destroy({
+        where: {
+          token,
+        },
+        transaction: t,
+        force: true,
+      })
+    } else if (req.user?.user_id) {
+      const filter = {
+        user_id: req.user.user_id,
+      }
 
-    if (clientIp) {
-      filter['ip'] = clientIp
+      if (clientIp) {
+        filter.ip = clientIp
+      }
+
+      await LoginToken.destroy({
+        where: filter,
+        transaction: t,
+        force: true,
+      })
     }
-    await LoginToken.destroy({
-      where: filter,
-      transaction: t,
-      force: true,
-    })
 
     await t.commit()
 
