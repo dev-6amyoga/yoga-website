@@ -13,6 +13,7 @@ COPY ./backend/*.yaml ./backend/
 
 COPY ./backend/enums/ ./backend/enums/
 COPY ./backend/invoice-templates/ ./backend/invoice-templates/
+COPY ./backend/middleware/ ./backend/middleware/
 COPY ./backend/models/ ./backend/models/
 COPY ./backend/routes/ ./backend/routes/
 COPY ./backend/services/ ./backend/services/

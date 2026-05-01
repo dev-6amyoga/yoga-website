@@ -244,7 +244,11 @@ app.listen(port, '0.0.0.0', () => {
   let start = performance.now()
   initializeSequelize()
     .then(() => {
-      console.log('Sequelize initialized, took', performance.now() - start, 'ms')
+      console.log(
+        'Sequelize initialized, took',
+        performance.now() - start,
+        'ms'
+      )
 
       start = performance.now()
       return mongoose.connect(mongoURI, {
@@ -263,3 +267,4 @@ app.listen(port, '0.0.0.0', () => {
       console.error('Startup dependency initialization failed:', err)
     })
 })
+ī
