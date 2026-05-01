@@ -29,6 +29,8 @@ steps:
         "gcr.io/am-yoga-website/github.com/dev-6amyoga/yoga-website:$COMMIT_SHA",
         "--region",
         "asia-southeast1",
+        "--port",
+        "4000",
       ]
 images:
   - gcr.io/am-yoga-website/github.com/dev-6amyoga/yoga-website:$COMMIT_SHA

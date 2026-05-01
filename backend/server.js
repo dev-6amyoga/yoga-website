@@ -236,43 +236,30 @@ app.use('/api/teacher', teacherDashboardRouter)
 app.ws('/ws/class/teacher', classWsRouter.handleTeacherConnection)
 app.ws('/ws/class/student', classWsRouter.handleStudentConnection)
 
-const port = parseInt(process.env.PORT, 10)
+const port = parseInt(process.env.PORT, 10) || 4000
 
-let start = performance.now()
-initializeSequelize()
-  .then(() => {
-    console.log('Sequelize initialized, took', performance.now() - start, 'ms')
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server is running on port ${port}`)
 
-    start = performance.now()
+  let start = performance.now()
+  initializeSequelize()
+    .then(() => {
+      console.log('Sequelize initialized, took', performance.now() - start, 'ms')
 
-    mongoose
-      .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-      .then(() => {
-        console.log(
-          'Connected to MongoDB Atlas, took',
-          performance.now() - start,
-          'ms'
-        )
-
-        start = performance.now()
-        // bulkCreateSampleData()
-        //   .then(() => {
-        //     //console.log('Sample data created!')
-        //   })
-        //   .catch((err) => {
-        //     //console.log(err)
-        //   })
-
-        app.listen(port || 4000, () => {
-          console.log(
-            `Server is running on port ${port}, took`,
-            performance.now() - start,
-            'ms'
-          )
-        })
+      start = performance.now()
+      return mongoose.connect(mongoURI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
       })
-      .catch((err) => {
-        console.error(err)
-      })
-  })
-  .catch((err) => console.log(err))
+    })
+    .then(() => {
+      console.log(
+        'Connected to MongoDB Atlas, took',
+        performance.now() - start,
+        'ms'
+      )
+    })
+    .catch((err) => {
+      console.error('Startup dependency initialization failed:', err)
+    })
+})

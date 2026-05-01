@@ -46,9 +46,10 @@
     "sqlite3": "^5.1.6"
   },
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
     "build": "webpack",
-    "prod": "nodemon ./dist/final.js"
+    "prod": "node ./dist/final.js"
   },
   "devDependencies": {
     "@types/bun": "latest",
