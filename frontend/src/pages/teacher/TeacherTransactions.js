@@ -12,7 +12,7 @@ import useUserStore from "../../store/UserStore";
 
 import Hero from "../student/components/Hero";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
-import { Fetch } from "../../utils/Fetch";
+import { getTransactions, exportTransactions } from "../../api/teacherApi";
 import { withAuth } from "../../utils/withAuth";
 import TeacherNavbar from "../../components/Common/TeacherNavbar/TeacherNavbar";
 
@@ -24,18 +24,10 @@ function TeacherTransactions() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await Fetch({
-          url: "/transaction/get-transaction-by-user-id",
-          method: "POST",
-          data: { user_id: user?.user_id },
-        });
-        const data = response.data;
-        data.all_transaction_for_user.sort(
-          (a, b) => new Date(b.payment_date) - new Date(a.payment_date)
-        );
-        setTransactions(data.all_transaction_for_user);
+        const response = await getTransactions(1, 50, "all", "all", "");
+        setTransactions(response?.transactions || []);
       } catch (error) {
-        //console.log(error);
+        console.error(error);
       }
     };
     if (user) {
@@ -43,15 +35,21 @@ function TeacherTransactions() {
     }
   }, [user]);
 
-  const handleDownload = (data1) => {
-    const csv = Papa.unparse(data1);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
+  const handleDownload = async () => {
+    try {
+      const blob = await exportTransactions("all");
+      const url = window.URL.createObjectURL(
+        new Blob([blob], { type: "text/csv" }),
+      );
       downloadATag.current.setAttribute("href", url);
-      downloadATag.current.setAttribute("download", "data.csv");
+      downloadATag.current.setAttribute(
+        "download",
+        `teacher-transactions-${new Date().toISOString().slice(0, 10)}.csv`,
+      );
       downloadATag.current.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error exporting teacher transactions:", error);
     }
   };
 
@@ -160,7 +158,7 @@ function TeacherTransactions() {
         },
       },
     ],
-    []
+    [],
   );
 
   const [mode, setMode] = useState("light");

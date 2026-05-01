@@ -13,6 +13,7 @@ import {
 } from "../../enums/cookies";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
+import { getHighestPriorityRole } from "../../utils/roleUtils";
 
 export default function LoginGoogle() {
   const [loginStatus, setLoginStatus] = useState(null);
@@ -43,7 +44,7 @@ export default function LoginGoogle() {
       state.currentRole,
       state.setCurrentRole,
       state.setRoles,
-    ])
+    ]),
   );
   const [clientID, setClientID] = useState("");
 
@@ -68,7 +69,7 @@ export default function LoginGoogle() {
       //console.log("here!");
       navigate("/admin");
     } else if (loginStatus === "Login successful" && type === "teacher") {
-      navigate("/teacher/free-videos");
+      navigate("/teacher/dashboard");
     } else if (
       loginStatus === "Login successful" &&
       type === "institute_admin"
@@ -102,7 +103,7 @@ export default function LoginGoogle() {
                 const googleEmail = response.data?.user.email;
                 // navigate("/auth?register=true");
                 navigate(
-                  `/auth?register=true&googleName=${encodeURIComponent(googleName)}&googleEmail=${encodeURIComponent(googleEmail)}`
+                  `/auth?register=true&googleName=${encodeURIComponent(googleName)}&googleEmail=${encodeURIComponent(googleEmail)}`,
                 );
               } else {
                 const userData = response.data;
@@ -110,13 +111,12 @@ export default function LoginGoogle() {
                 setAccessToken(userData?.accessToken);
                 setRefreshToken(userData?.refreshToken);
                 setRoles(userData?.user?.roles);
-                const currRole = Object.keys(userData?.user?.roles)[0];
-                const currPlan = userData?.user?.roles[currRole][0]?.plan;
+                const currRole = getHighestPriorityRole(userData?.user?.roles);
+                const currPlan = userData?.user?.roles[currRole]?.[0]?.plan;
                 setUserPlan(currPlan);
-                //console.log(userData?.user?.roles[currRole]);
-                const ins = userData?.user?.roles[currRole].map(
-                  (r) => r?.institute
-                );
+                const ins =
+                  userData?.user?.roles[currRole]?.map((r) => r?.institute) ??
+                  [];
                 setInstitutes(ins);
                 setCurrentInstituteId(ins[0]?.institute_id);
 

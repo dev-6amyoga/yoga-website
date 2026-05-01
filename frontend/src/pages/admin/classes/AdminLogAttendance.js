@@ -2,12 +2,15 @@ import { Tabs, Tab, Box } from "@mui/material";
 import AttendanceByClass from "./AttendanceByClass";
 import AttendanceByUser from "./AttendanceByUser";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
+import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
 import { useState } from "react";
-export default function AdminLogAttendance() {
+export default function AdminLogAttendance({ adminRole = false }) {
   const [tab, setTab] = useState(0);
 
+  const Wrapper = adminRole ? AdminPageWrapper : TeacherPageWrapper;
+
   return (
-    <AdminPageWrapper heading={"Log Attendance"}>
+    <Wrapper heading={"Log Attendance"}>
       <Tabs value={tab} onChange={(e, v) => setTab(v)}>
         <Tab label="Enter Attendance by Class" />
         <Tab label="Enter Attendance by User" />
@@ -17,6 +20,6 @@ export default function AdminLogAttendance() {
         {tab === 0 && <AttendanceByClass />}
         {tab === 1 && <AttendanceByUser />} {/* your existing entire screen */}
       </Box>
-    </AdminPageWrapper>
+    </Wrapper>
   );
 }

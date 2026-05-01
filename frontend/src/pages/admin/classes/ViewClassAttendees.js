@@ -16,12 +16,13 @@ import {
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
+import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
 import AttendanceByClass from "./AttendanceByClass";
 import AttendanceTable from "./AttendanceTable";
 import { Fetch } from "../../../utils/Fetch";
 import dayjs from "dayjs";
 
-export default function ViewClassAttendees() {
+export default function ViewClassAttendees({ adminRole = false }) {
   const [classesList, setClassesList] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedDate, setSelectedDate] = useState(dayjs());
@@ -117,7 +118,7 @@ export default function ViewClassAttendees() {
       const values = headers.map((h) =>
         row[h] !== null && row[h] !== undefined
           ? `"${String(row[h]).replace(/"/g, '""')}"`
-          : ""
+          : "",
       );
       csvRows.push(values.join(","));
     }
@@ -138,8 +139,9 @@ export default function ViewClassAttendees() {
     link.click();
   };
 
+  const Wrapper = adminRole ? AdminPageWrapper : TeacherPageWrapper;
   return (
-    <AdminPageWrapper heading="View Class Attendees">
+    <Wrapper heading="View Class Attendees">
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Card className="mb-6">
           <CardContent>
@@ -196,6 +198,6 @@ export default function ViewClassAttendees() {
           </Box>
         )}
       </LocalizationProvider>
-    </AdminPageWrapper>
+    </Wrapper>
   );
 }

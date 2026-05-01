@@ -11,11 +11,12 @@ import { withAuth } from "../../../utils/withAuth";
 import { ROLE_ROOT } from "../../../enums/roles";
 import { DataTable } from "../../../components/Common/DataTable/DataTable";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
+import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
 import SortableColumn from "../../../components/Common/DataTable/SortableColumn";
 import { Fetch } from "../../../utils/Fetch";
 import Papa from "papaparse";
 
-function UserPlanPage() {
+function UserPlanPage({ adminRole }) {
   const [userPlans, setUserPlans] = useState([]);
   const [userDetails, setUserDetails] = useState([]);
   const [userIdNameMap, setUserIdNameMap] = useState({});
@@ -37,7 +38,7 @@ function UserPlanPage() {
             url: "/user/get-by-id",
             method: "POST",
             data: { user_id: userPlan.user_id },
-          }).then((response) => response.data)
+          }).then((response) => response.data),
         );
         const userDetailsArray = await Promise.all(userDetailsPromises);
         setUserDetails(userDetailsArray);
@@ -50,7 +51,7 @@ function UserPlanPage() {
 
         // Sort plans by most recent (validity_from)
         const sortedPlans = data.userplans.sort(
-          (a, b) => new Date(b.validity_from) - new Date(a.validity_from)
+          (a, b) => new Date(b.validity_from) - new Date(a.validity_from),
         );
         setFilteredPlans(sortedPlans);
         setLoading(false);
@@ -65,7 +66,7 @@ function UserPlanPage() {
   const formatDate = (dateString) => {
     const options = { day: "2-digit", month: "2-digit", year: "numeric" };
     return new Intl.DateTimeFormat("en-GB", options).format(
-      new Date(dateString)
+      new Date(dateString),
     );
   };
 
@@ -73,7 +74,7 @@ function UserPlanPage() {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
     const filtered = userPlans.filter((plan) =>
-      (userIdNameMap[plan.user_id] || "").toLowerCase().includes(query)
+      (userIdNameMap[plan.user_id] || "").toLowerCase().includes(query),
     );
     setFilteredPlans(filtered);
   };
@@ -123,11 +124,13 @@ function UserPlanPage() {
         cell: ({ row }) => formatDate(row.original.validity_to),
       },
     ],
-    [userIdNameMap]
+    [userIdNameMap],
   );
 
+  const Wrapper = adminRole ? AdminPageWrapper : TeacherPageWrapper;
+
   return (
-    <AdminPageWrapper heading="Member Management - User Plans">
+    <Wrapper heading="Member Management - User Plans">
       <Box sx={{ padding: 4 }}>
         <Box
           display="flex"
@@ -170,8 +173,9 @@ function UserPlanPage() {
           </Box>
         )}
       </Box>
-    </AdminPageWrapper>
+    </Wrapper>
   );
 }
+export default UserPlanPage;
 
-export default withAuth(UserPlanPage, ROLE_ROOT);
+// export default withAuth(UserPlanPage, ROLE_ROOT);

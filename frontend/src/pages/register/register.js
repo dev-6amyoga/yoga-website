@@ -29,6 +29,7 @@ import {
 } from "../../enums/cookies";
 import useUserStore from "../../store/UserStore";
 import { Fetch, FetchRetry } from "../../utils/Fetch";
+import { getHighestPriorityRole } from "../../utils/roleUtils";
 import "./register.css";
 
 export default function Register({ switchForm }) {
@@ -50,7 +51,7 @@ export default function Register({ switchForm }) {
       state.setRefreshToken,
       state.setCurrentRole,
       state.setRoles,
-    ])
+    ]),
   );
 
   const [step, setStep] = useState(1);
@@ -226,8 +227,8 @@ export default function Register({ switchForm }) {
         setAccessToken(userData.accessToken);
         setRefreshToken(userData.refreshToken);
         setRoles(userData.user.roles);
-        const currRole = Object.keys(userData.user.roles)[0];
-        const currPlan = userData.user.roles[currRole][0]?.plan;
+        const currRole = getHighestPriorityRole(userData.user.roles);
+        const currPlan = userData.user.roles[currRole]?.[0]?.plan;
         setUserPlan(currPlan);
 
         setCookie(SIXAMYOGA_ACCESS_TOKEN, userData.accessToken, {

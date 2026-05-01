@@ -4,7 +4,6 @@ const requestIp = require('request-ip')
 
 const mongoose = require('mongoose')
 const cron = require('node-cron')
-
 const cors = require('cors')
 const dotenv = require('dotenv')
 const useragent = require('express-useragent')
@@ -13,9 +12,7 @@ const compression = require('compression')
 const helmet = require('helmet')
 const glob = require('glob')
 const morgan = require('morgan')
-
 const RateLimit = require('express-rate-limit')
-
 // const { bulkCreateSampleData } = require('./sample_data')
 const getFrontendDomain = require('./utils/getFrontendDomain')
 
@@ -82,6 +79,7 @@ const r2Router = require('./routes/UploadToR2')
 const teacherPlanRouter = require('./routes/TeacherPlan')
 const zoomIntegrationRouter = require('./routes/ZoomIntegration')
 const cronJobsRouter = require('./routes/CronJobs')
+const teacherDashboardRouter = require('./routes/TeacherDashboard')
 // ws routers
 
 const classWsRouter = require('./websocket-routes/Class')
@@ -233,6 +231,7 @@ app.use('/video-rec', videoRecordingRouter)
 app.use('/teacher-plan', teacherPlanRouter)
 app.use('/zoom', zoomIntegrationRouter)
 app.use('/cron', cronJobsRouter)
+app.use('/api/teacher', teacherDashboardRouter)
 // ws routers
 app.ws('/ws/class/teacher', classWsRouter.handleTeacherConnection)
 app.ws('/ws/class/student', classWsRouter.handleStudentConnection)

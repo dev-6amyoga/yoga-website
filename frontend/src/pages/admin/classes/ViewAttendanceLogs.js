@@ -29,8 +29,8 @@ import {
 import { Fetch } from "../../../utils/Fetch";
 import { toast } from "react-toastify";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
-
-export default function ViewAttendanceLogs() {
+import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
+export default function ViewAttendanceLogs({ adminRole = false }) {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0],
   );
@@ -516,9 +516,10 @@ export default function ViewAttendanceLogs() {
     }
     setSelectedStudents(newSelected);
   };
+  const Wrapper = adminRole ? AdminPageWrapper : TeacherPageWrapper;
 
   return (
-    <AdminPageWrapper heading="Class Management - View Attendance Logs">
+    <Wrapper heading="Class Management - View Attendance Logs">
       <Card sx={{ padding: 3, mb: 3 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
           Select Date and Class
@@ -1221,6 +1222,6 @@ export default function ViewAttendanceLogs() {
           </Button>
         </DialogActions>
       </Dialog>
-    </AdminPageWrapper>
+    </Wrapper>
   );
 }

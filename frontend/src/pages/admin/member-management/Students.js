@@ -9,19 +9,20 @@ import {
   TableHead,
   TableRow,
   Paper,
+  TablePagination,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import { Fetch } from "../../../utils/Fetch";
-import { withAuth } from "../../../utils/withAuth";
-import { ROLE_ROOT } from "../../../enums/roles";
+import { useEffect, useMemo, useState } from "react";
 import Papa from "papaparse";
+import { Fetch } from "../../../utils/Fetch";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
+import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
 
-function Students() {
-  const [students, setStudents] = useState([]);
+function Students({ adminRole = false }) {
   const [studentData, setStudentData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,43 +31,47 @@ function Students() {
           url: "/user/get-all-students",
           method: "GET",
         });
-        const data = response.data;
-        const sortedUsers = data.users.sort((a, b) => {
-          return new Date(b.created) - new Date(a.created);
-        });
-        setStudents(sortedUsers);
+
+        const sortedUsers = response.data.users.sort(
+          (a, b) => new Date(b.created) - new Date(a.created),
+        );
+
         setStudentData(sortedUsers);
-        setFilteredData(sortedUsers);
       } catch (err) {
         console.error(err);
       }
     };
+
     fetchData();
   }, []);
 
-  const handleSearch = (e) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-    const filtered = studentData.filter((student) =>
-      student.name.toLowerCase().includes(term)
+  const filteredData = useMemo(() => {
+    return studentData.filter((student) =>
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
-    setFilteredData(filtered);
-  };
+  }, [studentData, searchTerm]);
+
+  const paginatedData = useMemo(() => {
+    const start = page * rowsPerPage;
+    return filteredData.slice(start, start + rowsPerPage);
+  }, [filteredData, page, rowsPerPage]);
 
   const handleDownload = () => {
-    const csv = Papa.unparse(studentData);
+    const csv = Papa.unparse(filteredData);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", "students.csv");
-    document.body.appendChild(link);
+
+    link.href = url;
+    link.download = "students.csv";
     link.click();
-    document.body.removeChild(link);
   };
 
+  const Wrapper = adminRole ? AdminPageWrapper : TeacherPageWrapper;
+
   return (
-    <AdminPageWrapper heading="Member Management - Students">
+    <Wrapper heading="Member Management - Students">
       <div
         style={{
           display: "flex",
@@ -78,10 +83,14 @@ function Students() {
           label="Search by student name"
           variant="outlined"
           value={searchTerm}
-          onChange={handleSearch}
-          style={{ width: "300px" }}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setPage(0);
+          }}
+          style={{ width: 300 }}
         />
-        <Button variant="contained" color="primary" onClick={handleDownload}>
+
+        <Button variant="contained" onClick={handleDownload}>
           Download CSV
         </Button>
       </div>
@@ -91,7 +100,6 @@ function Students() {
           <Table>
             <TableHead>
               <TableRow>
-                {/* <TableCell>ID</TableCell> */}
                 <TableCell>Username</TableCell>
                 <TableCell>Student Name</TableCell>
                 <TableCell>Email ID</TableCell>
@@ -99,27 +107,42 @@ function Students() {
                 <TableCell>ACTIONS</TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
-              {filteredData.map((student) => (
+              {paginatedData.map((student) => (
                 <TableRow key={student.user_id}>
-                  {/* <TableCell>{student.user_id}</TableCell> */}
                   <TableCell>{student.username}</TableCell>
                   <TableCell>{student.name}</TableCell>
                   <TableCell>{student.email}</TableCell>
                   <TableCell>{student.phone}</TableCell>
                   <TableCell>
-                    <Button variant="contained" color="error" size="small">
-                      Delete
-                    </Button>
+                    {adminRole && (
+                      <Button variant="contained" color="error" size="small">
+                        Delete
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+
+          <TablePagination
+            component="div"
+            count={filteredData.length}
+            page={page}
+            onPageChange={(e, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(e) => {
+              setRowsPerPage(parseInt(e.target.value, 10));
+              setPage(0);
+            }}
+            rowsPerPageOptions={[10, 25, 50, 100]}
+          />
         </TableContainer>
       </Card>
-    </AdminPageWrapper>
+    </Wrapper>
   );
 }
 
-export default withAuth(Students, ROLE_ROOT);
+export default Students;

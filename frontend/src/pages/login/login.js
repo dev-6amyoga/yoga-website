@@ -6,6 +6,7 @@ import { useShallow } from "zustand/react/shallow";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
 import { navigateToDashboard } from "../../utils/navigateToDashboard";
+import { getHighestPriorityRole } from "../../utils/roleUtils";
 import "./login.css";
 
 import { LockOutlined, Visibility, VisibilityOff } from "@mui/icons-material";
@@ -68,7 +69,7 @@ export default function Login({ switchForm }) {
       state.currentRole,
       state.setCurrentRole,
       state.setRoles,
-    ])
+    ]),
   );
 
   const updateNewPassword = async (e) => {
@@ -122,15 +123,15 @@ export default function Login({ switchForm }) {
         const userData = response.data;
         console.log("userData:", userData);
         setUser(userData.user);
-        //console.log(user);
         setAccessToken(userData?.accessToken);
         setRefreshToken(userData?.refreshToken);
         setRoles(userData?.user?.roles);
-        const currRole = Object.keys(userData?.user?.roles)[0];
+        const currRole = getHighestPriorityRole(userData?.user?.roles);
         const currPlan = userData?.userPlan;
         console.log("userPlan:", currPlan);
         setUserPlan(currPlan);
-        const ins = userData?.user?.roles[currRole].map((r) => r?.institute);
+        const ins =
+          userData?.user?.roles[currRole]?.map((r) => r?.institute) ?? [];
         setInstitutes(ins);
         setCurrentInstituteId(ins[0]?.institute_id);
 
@@ -163,7 +164,7 @@ export default function Login({ switchForm }) {
         error?.response?.data?.error
           ? `${error?.response?.data?.error}`
           : "Error!",
-        { type: "error" }
+        { type: "error" },
       );
     }
   };

@@ -1,6 +1,17 @@
-import { Logout, PersonOutline } from "@mui/icons-material";
+import {
+  Logout,
+  PersonOutline,
+  ExpandMore,
+  ExpandLess,
+} from "@mui/icons-material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Avatar, ListItemIcon, Menu, Typography } from "@mui/material";
+import {
+  Avatar,
+  ListItemIcon,
+  Menu,
+  Typography,
+  Collapse,
+} from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -31,6 +42,7 @@ function TeacherNavbar({ mode, toggleColorMode }) {
   const [disabled, setDisabled] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [openProfileMenu, setOpenProfileMenu] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,66 +96,88 @@ function TeacherNavbar({ mode, toggleColorMode }) {
   const paths = useMemo(() => {
     return [
       {
-        path: "/teacher/purchase-a-plan",
-        title: "Purchase a plan",
+        title: "Class Management",
+        props: {
+          disabled: false,
+        },
+        children: [
+          {
+            path: "/teacher/class/view-all",
+            title: "View All Classes",
+            props: { disabled: false },
+          },
+          {
+            path: "/teacher/class/join",
+            title: "Join Class",
+            props: { disabled: false },
+          },
+          {
+            path: "/teacher/class/log-attendance",
+            title: "Log Attendance",
+            props: { disabled: false },
+          },
+          {
+            path: "/teacher/class/attendance-logs",
+            title: "View Attendance Logs",
+            props: { disabled: false },
+          },
+          // {
+          //   path: "/teacher/class/member-details",
+          //   title: "Member Details",
+          //   props: { disabled: false },
+          // },
+        ],
+      },
+      {
+        path: "/teacher/video-player",
+        title: "Video Player",
         props: {
           disabled: false,
         },
       },
       {
-        path: "/teacher/free-videos",
-        title: "Free Videos",
+        title: "Member Management",
         props: {
           disabled: false,
         },
+        children: [
+          {
+            path: "/teacher/members/students",
+            title: "Students",
+            props: { disabled: false },
+          },
+          {
+            path: "/teacher/members/user-plan-mappings",
+            title: "User Plan Mappings",
+            props: { disabled: false },
+          },
+        ],
       },
       {
-        path: "/teacher/playlist",
-        title: "6AM Yoga Playlists",
-        props: {
-          disabled: disabled,
-        },
-      },
-      {
-        path: "/teacher/register-new-playlist",
-        title: "Create Playlist",
-        props: {
-          disabled: disabled,
-        },
-      },
-      {
-        path: "/teacher/class/manage",
-        title: "Class Mode",
-        props: {
-          disabled: disabled,
-        },
-      },
-      {
-        path: "/teacher/contact-us",
-        title: "Contact Us",
+        title: "Transaction Management",
         props: {
           disabled: false,
         },
-      },
-      {
-        path: "/teacher/transactions",
-        title: "Transaction History",
-        props: {
-          disabled: false,
-        },
-      },
-      {
-        path: "/teacher/watch-history",
-        title: "Watch History",
-        props: {
-          disabled: false,
-        },
+        children: [
+          {
+            path: "/teacher/transactions/all",
+            title: "All Transactions",
+            props: { disabled: false },
+          },
+        ],
       },
     ];
   }, [disabled]);
 
   const handleNavigate = (path) => {
     navigate(path);
+  };
+
+  const toggleMenu = (menuTitle) => {
+    setExpandedMenus((prev) => ({
+      ...prev,
+      [menuTitle]: !prev[menuTitle],
+    }));
   };
 
   return (
@@ -196,10 +230,92 @@ function TeacherNavbar({ mode, toggleColorMode }) {
                 alt="logo of 6AM Yoga"
               />
               <div className="flex flex-row gap-4 justify-between w-full">
-                <div className="flex">
+                <div className="flex flex-wrap items-center gap-1">
                   {paths.map((path, index) => {
+                    const isActive =
+                      path.path && location.pathname === path.path;
+                    const hasChildren =
+                      path.children && path.children.length > 0;
+
+                    if (hasChildren) {
+                      return (
+                        <div key={index} style={{ position: "relative" }}>
+                          <MenuItem
+                            onClick={() => toggleMenu(path.title)}
+                            sx={{
+                              py: "6px",
+                              px: "12px",
+                              backgroundColor: expandedMenus[path.title]
+                                ? "rgba(153, 189, 247, 0.3)"
+                                : "",
+                              borderRadius: "1rem",
+                              display: "flex",
+                              gap: "4px",
+                            }}
+                            disabled={path.props.disabled}
+                          >
+                            <Typography variant="body2" color="text.primary">
+                              {path.title}
+                            </Typography>
+                            {expandedMenus[path.title] ? (
+                              <ExpandLess fontSize="small" />
+                            ) : (
+                              <ExpandMore fontSize="small" />
+                            )}
+                          </MenuItem>
+                          {expandedMenus[path.title] && (
+                            <Box
+                              sx={{
+                                position: "absolute",
+                                top: "100%",
+                                left: 0,
+                                backgroundColor: "background.paper",
+                                border: "1px solid",
+                                borderColor: "divider",
+                                borderRadius: "0.5rem",
+                                zIndex: 1300,
+                                minWidth: "200px",
+                                boxShadow: 3,
+                              }}
+                            >
+                              {path.children.map((child, childIndex) => (
+                                <MenuItem
+                                  key={childIndex}
+                                  onClick={() => {
+                                    handleNavigate(child.path);
+                                    toggleMenu(path.title);
+                                  }}
+                                  sx={{
+                                    py: "8px",
+                                    px: "16px",
+                                    backgroundColor:
+                                      location.pathname === child.path
+                                        ? "rgba(153, 189, 247, 0.3)"
+                                        : "",
+                                    "&:hover": {
+                                      backgroundColor:
+                                        "rgba(153, 189, 247, 0.2)",
+                                    },
+                                  }}
+                                  disabled={child.props.disabled}
+                                >
+                                  <Typography
+                                    variant="body2"
+                                    color="text.primary"
+                                  >
+                                    {child.title}
+                                  </Typography>
+                                </MenuItem>
+                              ))}
+                            </Box>
+                          )}
+                        </div>
+                      );
+                    }
+
                     return (
                       <Tooltip
+                        key={index}
                         title={
                           path.props.disabled
                             ? "Purchase a plan to access this feature"
@@ -208,17 +324,15 @@ function TeacherNavbar({ mode, toggleColorMode }) {
                       >
                         <span>
                           <MenuItem
-                            key={index}
                             onClick={() => {
                               return handleNavigate(path.path);
                             }}
                             sx={{
                               py: "6px",
                               px: "12px",
-                              backgroundColor:
-                                location.pathname === path.path
-                                  ? "rgba(153, 189, 247, 0.3)"
-                                  : "",
+                              backgroundColor: isActive
+                                ? "rgba(153, 189, 247, 0.3)"
+                                : "",
                               borderRadius: "1rem",
                             }}
                             disabled={path.props.disabled}
@@ -330,6 +444,67 @@ function TeacherNavbar({ mode, toggleColorMode }) {
                     }}
                   >
                     {paths.map((path, index) => {
+                      const hasChildren =
+                        path.children && path.children.length > 0;
+                      const isExpanded = expandedMenus[path.title];
+
+                      if (hasChildren) {
+                        return (
+                          <div key={index} style={{ width: "100%" }}>
+                            <MenuItem
+                              onClick={() => toggleMenu(path.title)}
+                              sx={{
+                                backgroundColor: isExpanded
+                                  ? "rgba(153, 189, 247, 0.3)"
+                                  : "",
+                                borderRadius: "1rem",
+                                transition: `background-color 0.3s ease-in-out`,
+                                display: "flex",
+                                justifyContent: "space-between",
+                                width: "100%",
+                              }}
+                              disabled={path.props.disabled}
+                            >
+                              <Typography>{path.title}</Typography>
+                              {isExpanded ? <ExpandLess /> : <ExpandMore />}
+                            </MenuItem>
+                            <Collapse in={isExpanded} timeout="auto">
+                              <Box
+                                sx={{
+                                  pl: 4,
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: "0.5rem",
+                                }}
+                              >
+                                {path.children.map((child, childIndex) => (
+                                  <MenuItem
+                                    key={childIndex}
+                                    onClick={() => {
+                                      handleNavigate(child.path);
+                                      setOpen(false);
+                                    }}
+                                    sx={{
+                                      backgroundColor:
+                                        location.pathname === child.path
+                                          ? "rgba(153, 189, 247, 0.3)"
+                                          : "",
+                                      borderRadius: "0.5rem",
+                                      transition: `background-color 0.3s ease-in-out`,
+                                    }}
+                                    disabled={child.props.disabled}
+                                  >
+                                    <Typography variant="body2">
+                                      {child.title}
+                                    </Typography>
+                                  </MenuItem>
+                                ))}
+                              </Box>
+                            </Collapse>
+                          </div>
+                        );
+                      }
+
                       return (
                         <MenuItem
                           key={index}

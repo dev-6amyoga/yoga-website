@@ -104,23 +104,23 @@ export const AdminRoutes = [
   },
   {
     path: "/admin/view-classes",
-    element: <ViewAllClasses />,
+    element: <ViewAllClasses adminRole={true} />,
   },
   {
     path: "/admin/join-class",
-    element: <JoinClass />,
+    element: <JoinClass adminRole={true} />,
   },
   {
     path: "/admin/log-attendance",
-    element: <AdminLogAttendance />,
+    element: <AdminLogAttendance adminRole={true} />,
   },
   {
     path: "/admin/view-class-attendees",
-    element: <ViewClassAttendees />,
+    element: <ViewClassAttendees adminRole={true} />,
   },
   {
     path: "/admin/view-attendance-logs",
-    element: <ViewAttendanceLogs />,
+    element: <ViewAttendanceLogs adminRole={true} />,
   },
   // schedule
   {
@@ -181,7 +181,7 @@ export const AdminRoutes = [
   },
   {
     path: "/admin/members/students",
-    element: <Students />,
+    element: <Students adminRole={true} />,
   },
   {
     path: "/admin/members/edit-user-details",
@@ -193,7 +193,7 @@ export const AdminRoutes = [
   },
   {
     path: "/admin/members/all-user-plans",
-    element: <UserPlanPage />,
+    element: <UserPlanPage adminRole={true} />,
   },
 
   // transactions
@@ -207,7 +207,7 @@ export const AdminRoutes = [
   },
   {
     path: "/admin/transactions/my-income",
-    element: <MyIncome />,
+    element: <MyIncome adminRole={true} />,
   },
   // plans
   {

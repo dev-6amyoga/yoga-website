@@ -12,7 +12,7 @@ export const navigateToDashboard = async (currentRole, userPlan, navigate) => {
       navigate("/admin");
       break;
     case "TEACHER":
-      navigate("/teacher/free-videos");
+      navigate("/teacher/dashboard");
       break;
     case "INSTITUTE_OWNER":
       navigate("/institute");
@@ -38,7 +38,7 @@ export const navigateToDashboard = async (currentRole, userPlan, navigate) => {
           });
           const classes = response.data || [];
           const hasMasterClass = classes.some(
-            (classObj) => classObj.zoom_class_name === "Master Class"
+            (classObj) => classObj.zoom_class_name === "Master Class",
           );
 
           if (hasMasterClass) {

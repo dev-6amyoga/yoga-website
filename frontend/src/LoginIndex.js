@@ -16,6 +16,7 @@ import {
   accessTimeExpiry,
 } from "./enums/cookies";
 import { ROLE_TEACHER } from "./enums/roles";
+import { getHighestPriorityRole } from "./utils/roleUtils";
 import "./index.css";
 import useUserStore from "./store/UserStore";
 
@@ -51,7 +52,7 @@ export default function LoginIndex() {
       state.setCurrentRole,
       state.setRoles,
       state.resetUserState,
-    ])
+    ]),
   );
 
   const init = useCallback(async () => {
@@ -73,7 +74,7 @@ export default function LoginIndex() {
 
         const [verifyData, verifyErr] = await AuthAPI.postVerifyTokens(
           access_token,
-          refresh_token
+          refresh_token,
         );
 
         // //console.log("[INIT] Verify Tokens", verifyData, verifyErr);
@@ -102,7 +103,7 @@ export default function LoginIndex() {
               userData?.roles === undefined ||
               !userData?.roles[currRole]
             ) {
-              currRole = Object.keys(userData?.roles)[0];
+              currRole = getHighestPriorityRole(userData?.roles);
               setCurrentRole(currRole);
             }
 
@@ -151,7 +152,7 @@ export default function LoginIndex() {
                 if (currInsId) {
                   const [teacherInstitutePlanData, teacherInstitutePlanErr] =
                     await UserPlanAPI.postUserPlanTeacherInstitutePlan(
-                      currInsId
+                      currInsId,
                     );
 
                   if (teacherInstitutePlanData) {

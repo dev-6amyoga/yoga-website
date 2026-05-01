@@ -124,7 +124,8 @@ const sendReEngagementEmail = async (user, frontendDomain) => {
   }
 }
 
-const CLASS_ATTENDANCE_INIT = `INSERT INTO user_plan_attendance (
+const CLASS_ATTENDANCE_INIT = `
+INSERT INTO user_plan_attendance (
   user_id,
   plan_id,
   user_plan_id,
@@ -333,7 +334,8 @@ FROM (
 WHERE upa.user_plan_id = sub.user_plan_id;
 `
 
-const SQL_PRACTICE_NOW_ATTENDANCE = `UPDATE user_plan_attendance upa
+const SQL_PRACTICE_NOW_ATTENDANCE = `
+UPDATE user_plan_attendance upa
 SET classes_attended = classes_attended + pn.total_attended
 FROM (
   SELECT

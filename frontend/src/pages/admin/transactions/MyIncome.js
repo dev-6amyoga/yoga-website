@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { Fetch } from "../../../utils/Fetch";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
+import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
 import Papa from "papaparse";
 
 const formatCurrency = (val) =>
@@ -27,7 +28,7 @@ const formatCurrency = (val) =>
     maximumFractionDigits: 2,
   }).format(val || 0);
 
-export default function MyIncome() {
+export default function MyIncome({ adminRole = false }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -96,8 +97,10 @@ export default function MyIncome() {
     fetchData();
   }, []);
 
+  const Wrapper = adminRole ? AdminPageWrapper : TeacherPageWrapper;
+
   return (
-    <AdminPageWrapper heading="GST Revenue Summary">
+    <Wrapper heading="GST Revenue Summary">
       <Box sx={{ p: 3 }}>
         <Card sx={{ mb: 3 }}>
           <CardContent>
@@ -190,6 +193,6 @@ export default function MyIncome() {
           </CardContent>
         </Card>
       </Box>
-    </AdminPageWrapper>
+    </Wrapper>
   );
 }

@@ -1,12 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
+import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
 import YogaClassCard from "./YogaClassCard";
 import { Fetch } from "../../../utils/Fetch";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import useUserStore from "../../../store/UserStore";
 
-export default function JoinClass() {
+export default function JoinClass({ adminRole = false }) {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(false);
   const user = useUserStore((state) => state.user);
@@ -25,9 +26,10 @@ export default function JoinClass() {
       })
       .finally(() => setLoading(false));
   }, []);
+  const Wrapper = adminRole ? AdminPageWrapper : TeacherPageWrapper;
 
   return (
-    <AdminPageWrapper heading={"Join Class"}>
+    <Wrapper heading={"Join Class"}>
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
           <CircularProgress />
@@ -57,6 +59,6 @@ export default function JoinClass() {
           ))}
         </Box>
       )}
-    </AdminPageWrapper>
+    </Wrapper>
   );
 }

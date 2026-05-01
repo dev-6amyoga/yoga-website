@@ -25,10 +25,10 @@ import { Edit, Delete, ExpandMore, ExpandLess } from "@mui/icons-material";
 import { Fetch } from "../../../utils/Fetch";
 import { toast } from "react-toastify";
 import AdminPageWrapper from "../../../components/Common/AdminPageWrapper";
-
+import TeacherPageWrapper from "../../../components/Common/TeacherPageWrapper";
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export default function ViewAllClasses() {
+export default function ViewAllClasses({ adminRole = false }) {
   const [classes, setClasses] = useState([]);
   const [groupedClasses, setGroupedClasses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -164,6 +164,7 @@ export default function ViewAllClasses() {
       setDeletingClassId(null);
     }
   };
+  const Wrapper = adminRole ? AdminPageWrapper : TeacherPageWrapper;
 
   const handleFormChange = (field, value) => {
     setFormData((prev) => ({
@@ -198,16 +199,16 @@ export default function ViewAllClasses() {
 
   if (loading) {
     return (
-      <AdminPageWrapper heading="View All Classes">
+      <Wrapper heading="View All Classes">
         <Box sx={{ p: 4, textAlign: "center" }}>
           <CircularProgress />
         </Box>
-      </AdminPageWrapper>
+      </Wrapper>
     );
   }
 
   return (
-    <AdminPageWrapper heading="View All Classes">
+    <Wrapper heading="View All Classes">
       <Box sx={{ p: 3 }}>
         <TableContainer component={Paper}>
           <Table>
@@ -230,7 +231,7 @@ export default function ViewAllClasses() {
                     cls.zoom_class_name === groupItem.zoom_class_name &&
                     cls.institute_id === groupItem.institute_id &&
                     cls.teacher_id === groupItem.teacher_id &&
-                    cls.recurring_start_time === groupItem.recurring_start_time
+                    cls.recurring_start_time === groupItem.recurring_start_time,
                 );
 
                 return (
@@ -498,6 +499,6 @@ export default function ViewAllClasses() {
           </Button>
         </DialogActions>
       </Dialog>
-    </AdminPageWrapper>
+    </Wrapper>
   );
 }
