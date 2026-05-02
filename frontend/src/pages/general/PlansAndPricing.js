@@ -71,7 +71,7 @@ function PlansAndPricing() {
             <CardActions>
               <Typography variant="body2" color="text.secondary">
                 For any queries contact us at +91990802351 or write us at
-                992351@gmail.com
+                dev.6amyoga@gmail.com
               </Typography>
             </CardActions>
           </Card>

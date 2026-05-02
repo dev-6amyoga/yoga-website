@@ -66,7 +66,7 @@ function TermsAndConditions() {
           <Text>
             Contact Information : For any questions or concerns regarding these
             Terms and Conditions, please contact your Teacher or email us at
-            992351@gmail.com.
+            dev.6amyoga@gmail.com.
           </Text>
           <Card.Footer>
             <Text>For any queries contact us at +91990802351.</Text>

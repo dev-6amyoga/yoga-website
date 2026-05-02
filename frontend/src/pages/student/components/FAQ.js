@@ -61,8 +61,8 @@ export default function FAQ() {
               sx={{ maxWidth: { sm: "100%", md: "70%" } }}
             >
               You can reach our customer support team by emailing
-              <Link> 992351@gmail.com </Link>
-              or calling us at +91-9980802351. We&apos;re here to assist you
+              <Link> dev.6amyoga@gmail.com </Link>
+              or calling us at +91-9844854007. We&apos;re here to assist you
               promptly.
             </Typography>
           </AccordionDetails>

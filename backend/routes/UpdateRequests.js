@@ -154,7 +154,7 @@ router.post('/approve', async (req, res) => {
     } to : ${updateRequest.new_email}.</p>
     <p>To verify the authenticity of this request and update your Email ID, kindly click on the following link:</p>
     <p><a href=\`${getFrontendDomain()}/auth/update-email?token=${token}\`>Verify Email</a></p>
-    <p>If this was not you, kindly ignore the mail and contact 6AM Yoga at +91-9980802351</p>
+    <p>If this was not you, kindly ignore the mail and contact 6AM Yoga at +91-9844854007</p>
   `,
       },
       async (err, info) => {
@@ -232,7 +232,7 @@ router.post('/reject', async (req, res) => {
       <p>We received a request from you to update you Email ID. The details are as follows</p>
       <p>Old Email ID : ${ur.old_email}</p>
       <p>New Email ID : ${ur.new_email}.</p>
-      <p>This request has been rejected by the admin. For any clarifications, please mail us back, or reach out to us at +919980802351</p>
+      <p>This request has been rejected by the admin. For any clarifications, please mail us back, or reach out to us at +91-9844854007</p>
       <p>Regards, </p>
       <p>My Yoga Teacher, 6AM Yoga </p>
     `,

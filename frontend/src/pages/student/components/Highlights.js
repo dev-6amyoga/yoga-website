@@ -24,12 +24,12 @@ const items = [
   {
     icon: <EmailIcon />,
     title: "Get in Touch",
-    description: "992351@gmail.com",
+    description: "dev.6amyoga@gmail.com",
   },
   {
     icon: <PhoneIcon />,
     title: "Talk to Us",
-    description: "+91-9980802351",
+    description: "+91-9844854007",
   },
   {
     icon: <ThumbUpAltRoundedIcon />,
@@ -184,7 +184,7 @@ export default function Highlights() {
         });
       } else {
         toast(
-          "Could not submit query. An error occured! Kindly contact us directly."
+          "Could not submit query. An error occured! Kindly contact us directly.",
         );
       }
     } catch (err) {

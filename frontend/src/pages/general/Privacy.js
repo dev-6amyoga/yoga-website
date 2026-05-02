@@ -46,7 +46,7 @@ function Privacy() {
           <Text>
             Contact Information For any inquiries or concerns related to this
             Privacy Policy, please contact the Teacher through the contact
-            details provided. (992351@gmail.com)
+            details provided. (dev.6amyoga@gmail.com)
           </Text>
           <Card.Footer>
             <Text>For any queries contact us at +91990802351.</Text>
