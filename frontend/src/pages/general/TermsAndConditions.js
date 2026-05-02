@@ -1,79 +1,96 @@
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Stack,
+  Typography,
+} from "@mui/material";
 import PageWrapper from "../../components/Common/PageWrapper";
-import { Card, Divider, Text } from "@geist-ui/core";
+
+const sections = [
+  {
+    title: "Acceptance of Terms",
+    text: "By accessing this website, you agree to these Terms and Conditions and to comply with applicable laws and regulations.",
+  },
+  {
+    title: "Use of the Platform",
+    text: "The platform enables access to online content and classes facilitated by 6AM Yoga, teachers, or institutions. Users must follow the rules and guidelines set by their teacher and the platform.",
+  },
+  {
+    title: "Student Responsibilities",
+    text: "Students are responsible for maintaining the required equipment, internet connection, and appropriate practice environment for accessing classes and videos.",
+  },
+  {
+    title: "Payments",
+    text: "Payments for services must be made through the platform or as directed by the teacher. All payments are subject to plan and service terms.",
+  },
+  {
+    title: "Intellectual Property",
+    text: "Class materials, videos, and related content remain the intellectual property of their rightful owners and may not be distributed or reproduced without permission.",
+  },
+  {
+    title: "Disclaimers and Liability",
+    text: "6AM Yoga and the Teacher disclaim warranties to the extent permitted by law and are not liable for damages arising from platform use.",
+  },
+];
 
 function TermsAndConditions() {
   return (
-    <PageWrapper heading={"Terms and Conditions"}>
-      <div className="flex flex-col items-center">
-        <Divider />{" "}
-        <Card width="50%" type="secondary" hoverable>
-          <Text h4 my={0}>
-            Terms and Conditions
-          </Text>
-          <Text>
-            Acceptance of Terms : By accessing the website, you agree to be
-            bound by these Terms and Conditions, all applicable laws and
-            regulations, and agree that you are responsible for compliance with
-            any applicable local laws.
-          </Text>
-          <Text>
-            Use of the Platform : The platform enables you to engage in online
-            content by 6AM Yoga facilitated by your chosen teacher or
-            institution ("Teacher"). You must comply with all rules and
-            guidelines set by the Teacher and our website.
-          </Text>
-          <Text>
-            Student Responsibilities : You are responsible for ensuring that you
-            have the necessary equipment and internet connection to access the
-            videos. You must adhere to all guidelines and codes of conduct set
-            by your Teacher.
-          </Text>
-          <Text>
-            Payments : If applicable, payments for the services must be made
-            through the platform or as directed by your Teacher. All payments
-            are subject to the terms and conditions set by the Teacher and the
-            platform.
-          </Text>
-          <Text>
-            Privacy : Your privacy is important to us. Please review our Privacy
-            Policy for information on how your personal information is
-            collected, used, and shared.
-          </Text>
-          <Text>
-            Intellectual Property : All content, including but not limited to
-            class materials, videos, and documents provided by the Teacher, is
-            the intellectual property of the Teacher or other rightful owners.
-            You may not distribute, reproduce, or use this content in any way
-            without express permission.
-          </Text>
-          <Text>
-            Disclaimers and Limitations of Liability : 6AM Yoga and the Teacher
-            make no warranties, expressed or implied, and hereby disclaim and
-            negate all other warranties. Neither 6AM Yoga nor the Teacher shall
-            be liable for any damages arising from your use of the platform.
-          </Text>
-          <Text>
-            Modifications to Terms : 6AM Yoga or the Teacher may revise these
-            Terms and Conditions at any time without notice. By using this
-            website, you agree to be bound by the then-current version of these
-            Terms and Conditions.
-          </Text>
-          <Text>
-            Governing Law : These terms and conditions are governed by the laws
-            of the jurisdiction in which your Teacher operates, and any disputes
-            will be resolved in accordance with those laws.
-          </Text>
-          <Text>
-            Contact Information : For any questions or concerns regarding these
-            Terms and Conditions, please contact your Teacher or email us at
-            dev.6amyoga@gmail.com.
-          </Text>
-          <Card.Footer>
-            <Text>For any queries contact us at +91990802351.</Text>
-          </Card.Footer>
-        </Card>
-      </div>
+    <PageWrapper>
+      <Box sx={{ py: { xs: 5, md: 8 }, bgcolor: "#f7f8fb" }}>
+        <Container maxWidth="md">
+          <Stack spacing={3}>
+            <Box>
+              <Chip label="Legal" sx={{ mb: 2, fontWeight: 800 }} />
+              <Typography
+                component="h1"
+                sx={{
+                  color: "#101828",
+                  fontSize: { xs: 34, md: 48 },
+                  fontWeight: 900,
+                  mb: 1.5,
+                }}
+              >
+                Terms and Conditions
+              </Typography>
+              <Typography sx={{ color: "#667085", fontSize: 18, lineHeight: 1.7 }}>
+                Please read these terms before using the 6AM Yoga platform or
+                participating in teacher-led classes.
+              </Typography>
+            </Box>
+
+            <Card elevation={0} sx={{ border: "1px solid #dfe5ec", borderRadius: 2 }}>
+              <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+                <Stack spacing={3}>
+                  {sections.map((section) => (
+                    <Box key={section.title}>
+                      <Typography sx={{ color: "#101828", fontWeight: 800, mb: 1 }}>
+                        {section.title}
+                      </Typography>
+                      <Typography sx={{ color: "#5f6b7a", lineHeight: 1.8 }}>
+                        {section.text}
+                      </Typography>
+                    </Box>
+                  ))}
+                  <Box sx={{ bgcolor: "#f2f6f5", borderRadius: 2, p: 2.5 }}>
+                    <Typography sx={{ color: "#101828", fontWeight: 800 }}>
+                      Questions
+                    </Typography>
+                    <Typography sx={{ color: "#5f6b7a", mt: 0.75 }}>
+                      For questions about these terms, email
+                      dev.6amyoga@gmail.com or call +91 98448 54007.
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Stack>
+        </Container>
+      </Box>
     </PageWrapper>
   );
 }
+
 export default TermsAndConditions;

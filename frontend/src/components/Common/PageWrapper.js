@@ -7,10 +7,20 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useNavigate } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import HomeIcon from "@mui/icons-material/Home";
+import ContactSupportOutlinedIcon from "@mui/icons-material/ContactSupportOutlined";
+import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
 
 export default function PageWrapper({ heading, children }) {
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:600px)");
+  const navItems = [
+    { label: "Pricing", path: "/pricing", icon: <PaymentsOutlinedIcon /> },
+    {
+      label: "Contact",
+      path: "/contact-us",
+      icon: <ContactSupportOutlinedIcon />,
+    },
+  ];
 
   return (
     <>
@@ -20,8 +30,9 @@ export default function PageWrapper({ heading, children }) {
           boxShadow: 0,
           bgcolor: "transparent",
           backgroundImage: "none",
-          px: 1,
-          width: "100vw",
+          px: { xs: 1, md: 3 },
+          py: 1.25,
+          width: "100%",
           left: 0,
         }}
       >
@@ -34,45 +45,69 @@ export default function PageWrapper({ heading, children }) {
             justifyContent: "space-between",
             overflow: "hidden",
             borderRadius: "999px",
-            px: 1,
-            py: 0.5,
-            minHeight: 44,
+            px: { xs: 1.25, md: 2 },
+            py: 0.75,
+            minHeight: { xs: 48, md: 56 },
             bgcolor:
               theme.palette.mode === "light"
-                ? "rgba(255, 255, 255, 0.9)"
+                ? "rgba(255, 255, 255, 0.86)"
                 : "rgba(2, 31, 59, 0.7)",
             backdropFilter: "blur(24px)",
             border: "1px solid",
             borderColor: "divider",
+            boxShadow: "0 16px 40px rgba(15, 23, 42, 0.08)",
           })}
         >
-          {/* Logo */}
-          <Box sx={{ display: "flex", alignItems: "center", maxWidth: "60%" }}>
+          <Box
+            onClick={() => navigate("/")}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              maxWidth: "60%",
+              cursor: "pointer",
+            }}
+          >
             <img
-              src="logo_6am.png"
-              alt="logo"
+              src="/logo_6am.png"
+              alt="6AM Yoga"
               style={{
-                height: isMobile ? 22 : 28,
+                height: isMobile ? 24 : 32,
                 maxWidth: "100%",
                 objectFit: "contain",
               }}
             />
           </Box>
 
-          {/* Icons */}
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 0.5,
+              gap: { xs: 0.25, md: 0.75 },
               flexShrink: 0,
             }}
           >
+            {!isMobile &&
+              navItems.map((item) => (
+                <Button
+                  key={item.path}
+                  size="small"
+                  onClick={() => navigate(item.path)}
+                  sx={{
+                    color: "#182230",
+                    fontWeight: 700,
+                    textTransform: "none",
+                    px: 1.5,
+                  }}
+                >
+                  {item.label}
+                </Button>
+              ))}
+
             <Tooltip title="Home">
               <Button
                 size="small"
                 onClick={() => navigate("/")}
-                sx={{ minWidth: 36 }}
+                sx={{ color: "#182230", minWidth: 36 }}
               >
                 <HomeIcon fontSize="small" />
               </Button>
@@ -87,21 +122,32 @@ export default function PageWrapper({ heading, children }) {
                     window.location.reload();
                   }, 100);
                 }}
-                sx={{ minWidth: 36 }}
+                sx={{
+                  bgcolor: "#1f6f5b",
+                  color: "#fff",
+                  minWidth: 36,
+                  px: { xs: 1, md: 1.75 },
+                  textTransform: "none",
+                  fontWeight: 800,
+                  "&:hover": { bgcolor: "#185846" },
+                }}
               >
-                <PersonIcon fontSize="small" />
+                {isMobile ? <PersonIcon fontSize="small" /> : "Login"}
               </Button>
             </Tooltip>
           </Box>
         </Toolbar>
       </AppBar>
 
-      {/* Content spacing */}
-      <Box sx={{ pt: 8 }}>
-        <div className="min-h-screen">
-          {heading && <h1 className="pt-4 font-bold text-center">{heading}</h1>}
-          <div>{children}</div>
-        </div>
+      <Box sx={{ pt: { xs: 8, md: 9 }, bgcolor: "#f7f8fb" }}>
+        <Box sx={{ minHeight: "100vh" }}>
+          {heading && (
+            <Box sx={{ textAlign: "center", px: 2, pt: 5 }}>
+              <h1 className="font-bold">{heading}</h1>
+            </Box>
+          )}
+          {children}
+        </Box>
       </Box>
     </>
   );
