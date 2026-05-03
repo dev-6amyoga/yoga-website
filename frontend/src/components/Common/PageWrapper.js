@@ -140,7 +140,7 @@ export default function PageWrapper({ heading, children }) {
       </AppBar>
 
       <Box sx={{ pt: { xs: 8, md: 9 }, bgcolor: "#f7f8fb" }}>
-        <Box sx={{ minHeight: "100vh" }}>
+        <Box sx={{ minHeight: "100vh", overflow: "visible" }}>
           {heading && (
             <Box sx={{ textAlign: "center", px: 2, pt: 5 }}>
               <h1 className="font-bold">{heading}</h1>

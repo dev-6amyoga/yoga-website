@@ -78,7 +78,7 @@ function FreeVideos() {
     <ThemeProvider theme={defaultTheme}>
       <CssBaseline />
       <TeacherNavbar />
-      <div className="flex flex-col items-center h-96">
+      <div className="flex min-h-screen flex-col items-center pb-10">
         <Hero heading="Free Videos" />
 
         <Box
@@ -86,7 +86,8 @@ function FreeVideos() {
           sx={(theme) => ({
             mt: { xs: 0, sm: 0 },
             alignSelf: "center",
-            height: { xs: 200, sm: 900 },
+            minHeight: { xs: 0, sm: 900 },
+            height: "auto",
             width: "80%",
             backgroundSize: "cover",
             borderRadius: "10px",

@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { CookiesProvider } from "react-cookie";
+import { useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import "react-phone-number-input/style.css";
 import {
@@ -38,6 +39,14 @@ const Root = () => {
 
   //   </motion.div>
   // </AnimatePresence>
+  useEffect(() => {
+    document.documentElement.style.overflowY = "auto";
+    document.body.style.overflowY = "auto";
+    document.body.style.overflowX = "hidden";
+    document.body.style.position = "";
+    document.body.style.width = "";
+  }, [location.pathname]);
+
   return <Outlet />;
 };
 

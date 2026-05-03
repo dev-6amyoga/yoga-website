@@ -166,6 +166,17 @@ body {
 	-moz-osx-font-smoothing: grayscale;
 }
 
+html,
+body,
+#root {
+	min-height: 100%;
+	overflow-y: auto;
+}
+
+body {
+	overflow-x: hidden;
+}
+
 code {
 	font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
 		monospace;
