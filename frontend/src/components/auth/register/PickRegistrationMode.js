@@ -1,5 +1,6 @@
-// import { useEffect, useState } from "react";
-import { Button } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import GoogleIcon from "@mui/icons-material/Google";
 import { GoogleLogin } from "@react-oauth/google";
 import { toast } from "react-toastify";
 import { Fetch } from "../../../utils/Fetch";
@@ -13,115 +14,115 @@ export default function PickRegistationMode({
   clientID,
   handleNextStep,
 }) {
+  const verifyGoogleToken = async (credentialResponse) => {
+    setLoading(true);
+    const jwt_token = credentialResponse.credential || null;
+
+    try {
+      const payload = await Fetch({
+        url: `/auth/verify-google`,
+        method: "POST",
+        data: {
+          client_id: clientID,
+          jwtToken: jwt_token,
+        },
+      });
+
+      const email_verified = payload.data.email_verified;
+      if (payload?.data?.message && payload.data.message !== "Token verified") {
+        toast(payload.data.message, { type: "warning" });
+        return;
+      }
+
+      if (email_verified) {
+        const email = payload.data.email;
+        const name = payload.data.name;
+        setGoogleInfo({
+          jwt_token,
+          verified: true,
+          email_id: email,
+          name,
+        });
+        setGeneralInfo({
+          email_id: email,
+          name,
+        });
+        handleNextStep();
+      } else {
+        setGoogleInfo({ verified: false });
+        toast("Google email is not verified", { type: "warning" });
+      }
+    } catch (error) {
+      toast("Google login failed. Try again", { type: "warning" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <form className="flex flex-col gap-4 w-full" onSubmit={() => {}}>
-      <h6 className="text-center">Select Mode Of Registration</h6>
+    <Stack spacing={2.5}>
+      <Box sx={{ textAlign: "center" }}>
+        <Typography sx={{ color: "#101828", fontWeight: 900, fontSize: 20 }}>
+          Choose how to sign up
+        </Typography>
+        <Typography sx={{ color: "#667085", mt: 0.5 }}>
+          Google is fastest, or use your email to create a password.
+        </Typography>
+      </Box>
 
-      <div className="flex gap-4 items-center justify-center sm:flex flex-col w-min mx-auto">
-        <div
-          className={`flex-1 flex items-center justify-center ${
-            regMode === "GOOGLE" ? "border-blue-500" : ""
-          }`}
-          onClick={() => {
-            setRegMode("GOOGLE");
+      <Stack spacing={1.5}>
+        <Box
+          sx={{
+            p: 2,
+            border: "1px solid #dfe5ec",
+            borderRadius: 2,
+            display: "grid",
+            placeItems: "center",
+            bgcolor: regMode === "GOOGLE" ? "#f0f8f5" : "#fff",
           }}
+          onClick={() => setRegMode("GOOGLE")}
         >
-          <GoogleLogin
-            size="large"
-            containerProps={{}}
-            onSuccess={async (credentialResponse) => {
-              setLoading(true);
-              // //console.log(credentialResponse);
-              const jwt_token = credentialResponse.credential
-                ? credentialResponse.credential
-                : null;
-
-              const payload = await Fetch({
-                url: `/auth/verify-google`,
-                method: "POST",
-                data: {
-                  client_id: clientID,
-                  jwtToken: jwt_token,
-                },
-              });
-
-              if (payload?.data?.message) {
-                // toast(payload.data.message, {
-                //   type: "warning",
-                // });
-                if (payload?.data?.message === "Token verified") {
-                  const email_verified = payload.data.email_verified;
-                  if (email_verified) {
-                    const email = payload.data.email;
-                    const name = payload.data.name;
-                    setGoogleInfo({
-                      jwt_token,
-                      verified: true,
-                      email_id: email,
-                      name,
-                    });
-                    setGeneralInfo({
-                      email_id: email,
-                      name: name,
-                    });
-                    setLoading(false);
-                    handleNextStep();
-                  }
-                }
-                setLoading(false);
-                return;
-              }
-
-              const email_verified = payload.data.email_verified;
-
-              if (email_verified) {
-                const email = payload.data.email;
-                const name = payload.data.name;
-                // //console.log(email, name);
-                setGoogleInfo({
-                  jwt_token,
-                  verified: true,
-                  email_id: email,
-                  name,
+          <Stack spacing={1} alignItems="center">
+            <GoogleIcon sx={{ color: "#1f6f5b" }} />
+            <GoogleLogin
+              size="large"
+              onSuccess={verifyGoogleToken}
+              onError={() => {
+                toast("Google login failed", { type: "warning" });
+              }}
+              onNonOAuthError={() => {
+                toast("Google login failed. Try again", {
+                  type: "warning",
                 });
-                setGeneralInfo({
-                  email_id: email,
-                  name: name,
-                });
-                setLoading(false);
-                handleNextStep();
-              } else {
-                setGoogleInfo({
-                  verified: false,
-                });
-                setLoading(false);
-              }
-              setLoading(false);
-            }}
-            onError={() => {
-              toast("Login Failed", { type: "warning" });
-            }}
-            onNonOAuthError={(err) => {
-              toast("Google login failed! Try again", {
-                type: "warning",
-              });
-            }}
-          ></GoogleLogin>
-        </div>
+              }}
+            />
+          </Stack>
+        </Box>
+
         <Button
-          className={`flex-1 w-full flex items-center gap-2 flex-col px-4 py-2 border rounded-lg 
-              ${regMode === "NORMAL" ? "border-2 border-blue-500" : ""}
-              `}
           onClick={() => {
             setGoogleInfo({});
             setRegMode("NORMAL");
             handleNextStep();
           }}
           variant="outlined"
+          startIcon={<MailOutlineIcon />}
+          size="large"
+          sx={{
+            borderColor: "#1f6f5b",
+            color: "#1f6f5b",
+            py: 1.2,
+            fontWeight: 900,
+            textTransform: "none",
+            "&:hover": {
+              borderColor: "#185846",
+              bgcolor: "rgba(31, 111, 91, 0.08)",
+            },
+          }}
         >
-          Use Email
+          Continue with email
         </Button>
-      </div>
-    </form>
+      </Stack>
+    </Stack>
   );
 }

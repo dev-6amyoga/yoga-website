@@ -1,12 +1,19 @@
-import { Modal } from "@geist-ui/core";
 import { Assignment, East, West } from "@mui/icons-material";
 import {
+  Box,
   Button,
-  FormControl,
-  InputLabel,
+  Card,
+  CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   LinearProgress,
-  MenuItem,
-  Select,
+  Stack,
+  Step,
+  StepLabel,
+  Stepper,
+  Typography,
 } from "@mui/material";
 
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -20,7 +27,6 @@ import { useShallow } from "zustand/react/shallow";
 import GeneralInformationForm from "../../components/auth/register/GeneralInformationForm";
 import PickRegistationMode from "../../components/auth/register/PickRegistrationMode";
 import RoleSelectorForm from "../../components/auth/register/RoleSelectorForm";
-import { Card } from "../../components/ui/card";
 import {
   SIXAMYOGA_ACCESS_TOKEN,
   SIXAMYOGA_REFRESH_TOKEN,
@@ -32,7 +38,7 @@ import { Fetch, FetchRetry } from "../../utils/Fetch";
 import { getHighestPriorityRole } from "../../utils/roleUtils";
 import "./register.css";
 
-export default function Register({ switchForm }) {
+export default function Register() {
   const location = useLocation();
   const [
     user,
@@ -66,11 +72,11 @@ export default function Register({ switchForm }) {
   const [googleInfo, setGoogleInfo] = useState({});
   const [generalInfo, setGeneralInfo] = useState({});
   const [clientID, setClientID] = useState("");
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [checkEmailVerification, setCheckEmailVerification] = useState(false);
 
-  const { isError, isLoading } = useQuery({
+  useQuery({
     queryKey: ["get-email-verification-by-token"],
     queryFn: async () => {
       try {
@@ -207,7 +213,7 @@ export default function Register({ switchForm }) {
     }
   }, [user, role]);
 
-  const [cookies, setCookie, removeCookie] = useCookies([
+  const [, setCookie, removeCookie] = useCookies([
     SIXAMYOGA_ACCESS_TOKEN,
     SIXAMYOGA_REFRESH_TOKEN,
   ]);
@@ -318,23 +324,50 @@ export default function Register({ switchForm }) {
         );
       case 4:
         return (
-          <div className="border text-center rounded-lg p-4">
-            <p>
-              We will send an email to <b>{generalInfo?.email_id}</b>
-            </p>
-            <p>
-              <Button onClick={sendEmail} disabled={regVerifyDisabled}>
-                Click Here
-              </Button>
-              to send the email.
-            </p>
+          <Stack
+            spacing={2}
+            sx={{
+              border: "1px solid #dfe5ec",
+              borderRadius: 2,
+              p: 2.5,
+              textAlign: "center",
+            }}
+          >
+            <Typography sx={{ color: "#101828", fontWeight: 900, fontSize: 20 }}>
+              Verify your email
+            </Typography>
+            <Typography sx={{ color: "#667085" }}>
+              We will send a verification email to{" "}
+              <b>{generalInfo?.email_id}</b>.
+            </Typography>
+            <Button
+              onClick={sendEmail}
+              disabled={regVerifyDisabled}
+              variant="contained"
+              sx={{
+                bgcolor: "#1f6f5b",
+                fontWeight: 900,
+                textTransform: "none",
+                "&:hover": { bgcolor: "#185846" },
+              }}
+            >
+              Send verification email
+            </Button>
             {checkInbox && (
-              <p className="text-sm border p-2 rounded-lg text-zinc-500 border-red-500">
+              <Typography
+                sx={{
+                  color: "#667085",
+                  border: "1px solid #f2b8b5",
+                  borderRadius: 1,
+                  p: 1.25,
+                  fontSize: 14,
+                }}
+              >
                 Please check your inbox and spam folders for an email from
-                dev.6amyoga@gmail.com!
-              </p>
+                dev.6amyoga@gmail.com.
+              </Typography>
             )}
-          </div>
+          </Stack>
         );
       default:
         return null;
@@ -356,38 +389,79 @@ export default function Register({ switchForm }) {
     setDisclaimerAcceptedVar(true);
   };
 
-  return (
-    <div className="scale-70">
-      <GoogleOAuthProvider clientId={clientID}>
-        <div className="w-80 sm:w-96 lg:w-[440px]">
-          <div className="mb-4 flex flex-col items-center gap-2">
-            <img
-              src="/logo_6am.png"
-              alt="6AM Yoga"
-              className="mx-auto max-h-24 my-4"
-            />
-            <div className="p-2 bg-blue-500 rounded-full text-white">
-              <Assignment />
-            </div>
-            <h2 className="text-center">Sign Up</h2>
-          </div>
+  const stepLabels = ["Method", "Details", "Role", "Verify"];
 
-          <LinearProgress
-            className="accent-blue-500 my-6"
-            variant="determinate"
-            value={(step / maxSteps) * 100}
-          />
+  return (
+    <Box sx={{ width: "100%" }}>
+      <GoogleOAuthProvider clientId={clientID}>
+        <Stack spacing={3}>
+          <Stack spacing={2} alignItems="center">
+            <img src="/logo_6am.png" alt="6AM Yoga" style={{ maxHeight: 76 }} />
+            <Box
+              sx={{
+                display: "grid",
+                placeItems: "center",
+                width: 44,
+                height: 44,
+                borderRadius: "50%",
+                bgcolor: "#e8f5e9",
+                color: "#1f6f5b",
+              }}
+            >
+              <Assignment />
+            </Box>
+            <Box sx={{ textAlign: "center" }}>
+              <Typography
+                component="h2"
+                sx={{ color: "#101828", fontSize: 28, fontWeight: 900 }}
+              >
+                Create account
+              </Typography>
+              <Typography sx={{ color: "#667085", mt: 0.5 }}>
+                Complete a few quick steps to get started.
+              </Typography>
+            </Box>
+          </Stack>
+
+          <Box>
+            <Stepper activeStep={step - 1} alternativeLabel sx={{ mb: 2 }}>
+              {stepLabels.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+            <LinearProgress
+              variant="determinate"
+              value={(step / maxSteps) * 100}
+              sx={{
+                height: 8,
+                borderRadius: 999,
+                bgcolor: "#eef2f6",
+                "& .MuiLinearProgress-bar": {
+                  bgcolor: "#1f6f5b",
+                  borderRadius: 999,
+                },
+              }}
+            />
+          </Box>
 
           {RenderStep}
 
-          <div className="flex justify-between my-10 sm:flex flex-col py-2 gap-y-2">
+          <Stack spacing={1}>
             {role === "STUDENT" && step < maxSteps && step === 1 && (
               <Button
                 onClick={handleNextStep}
-                loading={loading}
                 disabled={loading || blockStep}
                 variant="contained"
                 endIcon={<East />}
+                size="large"
+                sx={{
+                  bgcolor: "#1f6f5b",
+                  fontWeight: 900,
+                  textTransform: "none",
+                  "&:hover": { bgcolor: "#185846" },
+                }}
               >
                 Next
               </Button>
@@ -396,64 +470,86 @@ export default function Register({ switchForm }) {
             {step > minSteps && step !== maxSteps && (
               <Button
                 onClick={handlePrevStep}
-                loading={loading}
                 startIcon={<West />}
                 disabled={loading}
                 variant="outlined"
+                sx={{
+                  borderColor: "#1f6f5b",
+                  color: "#1f6f5b",
+                  fontWeight: 800,
+                  textTransform: "none",
+                }}
               >
                 Back
               </Button>
             )}
-          </div>
+          </Stack>
 
-          <div className="flex flex-col gap-1 items-center w-full mt-4">
+          <Box sx={{ display: "grid", placeItems: "center" }}>
             <Button
               onClick={() => setSearchParams({ login: true })}
               size="small"
-              variant="outlined"
+              variant="text"
+              sx={{ color: "#1f6f5b", fontWeight: 800, textTransform: "none" }}
             >
-              Have an account already? Sign in.
+              Already have an account? Sign in
             </Button>
-          </div>
-        </div>
+          </Box>
+        </Stack>
       </GoogleOAuthProvider>
 
-      <Modal visible={disclaimerModal} disableBackdropClick>
-        <Modal.Title>Disclaimer</Modal.Title>
-        <Modal.Content>
-          <Card shadow>
-            <div className="flex flex-col gap-3">
-              <p>
+      <Dialog open={disclaimerModal} disableEscapeKeyDown maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 900 }}>Disclaimer</DialogTitle>
+        <DialogContent>
+          <Card elevation={0} sx={{ border: "1px solid #dfe5ec" }}>
+            <CardContent>
+              <Stack spacing={1.5} sx={{ color: "#344054" }}>
+              <Typography>
                 I would like to subscribe to the yoga videos offered by 6AM
                 Yoga. I understand yoga includes physical activity that may
                 cause physical injury.
-              </p>
-              <p>
+              </Typography>
+              <Typography>
                 I declare that a physician's approval has been taken for
                 pre-existing health conditions if any.
-              </p>
-              <p>
+              </Typography>
+              <Typography>
                 I recognize my physical limitations and can take rest if needed.
-              </p>
-              <p>
+              </Typography>
+              <Typography>
                 I accept full responsibility for any injuries and release 6AM
                 Yoga from liabilities.
-              </p>
-            </div>
+              </Typography>
+              </Stack>
+            </CardContent>
           </Card>
-        </Modal.Content>
-        <Modal.Action onClick={disclaimerAccepted}>Accept</Modal.Action>
-        <Modal.Action
-          onClick={() => {
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => {
             setDisclaimerModal(false);
             setSearchParams({
               login: true,
             });
           }}
-        >
-          Cancel
-        </Modal.Action>
-      </Modal>
-    </div>
+            sx={{ color: "#667085", textTransform: "none" }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={disclaimerAccepted}
+            variant="contained"
+            sx={{
+              bgcolor: "#1f6f5b",
+              textTransform: "none",
+              fontWeight: 900,
+              "&:hover": { bgcolor: "#185846" },
+            }}
+          >
+            Accept
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }

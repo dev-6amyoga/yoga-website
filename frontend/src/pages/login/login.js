@@ -11,8 +11,11 @@ import "./login.css";
 
 import { LockOutlined, Visibility, VisibilityOff } from "@mui/icons-material";
 import {
+  Alert,
+  Box,
   IconButton,
   InputAdornment,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
@@ -28,18 +31,15 @@ import {
 } from "../../enums/cookies";
 import getFormData from "../../utils/getFormData";
 
-export default function Login({ switchForm }) {
+export default function Login() {
   const navigate = useNavigate();
-  const [type, SetType] = useState("");
-  const [number, setNumber] = useState("");
   const [userNow, setUserNow] = useState(null);
-  const [phoneSignIn, setPhoneSignIn] = useState(false);
   const [mainVisible, setMainVisible] = useState(true);
   const [emailVerify, setEmailVerify] = useState(false);
   const [forgotPasswordVisible, setForgotPasswordVisible] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
 
-  const [cookies, setCookie, removeCookie] = useCookies([
+  const [, setCookie, removeCookie] = useCookies([
     SIXAMYOGA_ACCESS_TOKEN,
     SIXAMYOGA_REFRESH_TOKEN,
   ]);
@@ -98,7 +98,6 @@ export default function Login({ switchForm }) {
       if (response && response?.status === 200) {
         toast.success("Password updated successfully");
         setForgotPasswordVisible(false);
-        setForgotPassword(false);
         setMainVisible(true);
       } else {
         const errorData = response.data;
@@ -229,29 +228,54 @@ export default function Login({ switchForm }) {
   };
 
   return (
-    <main id="login-page" className="h-90 w-80 sm:w-96 lg:w-[440px]">
-      <div className="mb-4 flex flex-col items-center gap-2">
-        <img
-          src="/logo_6am.png"
-          alt="6AM Yoga"
-          className="mx-auto max-h-24 my-4"
-        />
-        <div className="p-2 bg-blue-500 rounded-full text-white">
+    <Box id="login-page" sx={{ width: "100%" }}>
+      <Stack spacing={3} alignItems="center" sx={{ mb: 3 }}>
+        <img src="/logo_6am.png" alt="6AM Yoga" style={{ maxHeight: 76 }} />
+        <Box
+          sx={{
+            display: "grid",
+            placeItems: "center",
+            width: 44,
+            height: 44,
+            borderRadius: "50%",
+            bgcolor: "#e8f5e9",
+            color: "#1f6f5b",
+          }}
+        >
           <LockOutlined />
-        </div>
-        <h2 className="text-center">Sign In</h2>
-      </div>
-      {/* <hr /> */}
+        </Box>
+        <Box sx={{ textAlign: "center" }}>
+          <Typography
+            component="h2"
+            sx={{ color: "#101828", fontSize: 28, fontWeight: 900 }}
+          >
+            Sign in
+          </Typography>
+          <Typography sx={{ color: "#667085", mt: 0.5 }}>
+            Use your username and password to continue.
+          </Typography>
+        </Box>
+      </Stack>
+
       {mainVisible && (
-        <div className="mt-4 flex w-full flex-col items-center gap-1">
-          <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
-            <TextField name="username" label="Username" />
-            {/* <TextField type="password" name="password" label="Password" /> */}
+        <Stack spacing={2.25}>
+          <form onSubmit={handleSubmit}>
+            <Stack spacing={2}>
+              <TextField
+                name="username"
+                label="Username"
+                autoComplete="username"
+                fullWidth
+                required
+              />
             <TextField
               label="Password"
               variant="outlined"
               name="password"
               type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              fullWidth
+              required
               onCut={handleDisable}
               onCopy={handleDisable}
               onPaste={handleDisable}
@@ -268,23 +292,40 @@ export default function Login({ switchForm }) {
                 ),
               }}
             />
-            <Button variant="contained" type="submit" size="medium">
-              Login
-            </Button>
+              <Button
+                variant="contained"
+                type="submit"
+                size="large"
+                fullWidth
+                sx={{
+                  bgcolor: "#1f6f5b",
+                  py: 1.2,
+                  fontWeight: 900,
+                  textTransform: "none",
+                  "&:hover": { bgcolor: "#185846" },
+                }}
+              >
+                Sign in
+              </Button>
+            </Stack>
           </form>
-          <div className="my-6">
-            <LoginGoogle />
-          </div>
 
-          {/* <hr /> */}
-          <div className="flex justify-between w-full">
+          <Box sx={{ display: "grid", placeItems: "center" }}>
+            <LoginGoogle />
+          </Box>
+
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1}
+            justifyContent="space-between"
+          >
             <Button
               size="small"
-              //   variant="text"
-              variant="outlined"
+              variant="text"
               onClick={handleForgotPassword}
+              sx={{ color: "#1f6f5b", textTransform: "none", fontWeight: 800 }}
             >
-              <span className="normal-case">Forgot Password</span>
+              Forgot password?
             </Button>
             <Button
               size="small"
@@ -292,52 +333,99 @@ export default function Login({ switchForm }) {
               onClick={() => {
                 setSearchParams({ register: true });
               }}
+              sx={{
+                borderColor: "#1f6f5b",
+                color: "#1f6f5b",
+                textTransform: "none",
+                fontWeight: 800,
+              }}
             >
-              <span className="normal-case">
-                Don't have an account? Sign up
-              </span>
+              Create an account
             </Button>
-          </div>
-        </div>
+          </Stack>
+        </Stack>
       )}
 
       {emailVerify && (
-        <form onSubmit={emailVerifyFunc} className="flex flex-col gap-4">
-          {" "}
-          <Typography>Forgot Password</Typography>
-          <TextField name="email_verify" label="Enter your Email ID" required />
-          <Button type="submit" variant="contained">
-            Send Email
-          </Button>
+        <form onSubmit={emailVerifyFunc}>
+          <Stack spacing={2}>
+            <Typography
+              component="h3"
+              sx={{ color: "#101828", fontSize: 22, fontWeight: 900 }}
+            >
+              Reset password
+            </Typography>
+            <Typography sx={{ color: "#667085" }}>
+              Enter your email and we will send a verification link.
+            </Typography>
+            <TextField
+              name="email_verify"
+              label="Email ID"
+              type="email"
+              required
+              fullWidth
+            />
+            {verifyShow && (
+              <Alert severity="success">
+                Verification email sent. Please check your inbox and spam
+                folder.
+              </Alert>
+            )}
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{
+                bgcolor: "#1f6f5b",
+                textTransform: "none",
+                fontWeight: 900,
+                "&:hover": { bgcolor: "#185846" },
+              }}
+            >
+              Send email
+            </Button>
+            <Button
+              onClick={() => {
+                setEmailVerify(false);
+                setMainVisible(true);
+              }}
+              sx={{ color: "#1f6f5b", textTransform: "none" }}
+            >
+              Back to sign in
+            </Button>
+          </Stack>
         </form>
       )}
 
       {forgotPasswordVisible && userNow && (
-        <form onSubmit={updateNewPassword} className="flex flex-col gap-4">
-          <p>
-            Setting password for user : <strong>{userNow?.username}</strong>
-          </p>
-          <p className={`text-sm border p-2 rounded-lg text-zinc-500`}>
-            Password must be minimum 8 letters and contain atleast 1 number, 1
-            alphabet, 1 special character [!@#$%^&*,?]
-          </p>
+        <form onSubmit={updateNewPassword}>
+          <Stack spacing={2}>
+          <Typography>
+            Setting password for <strong>{userNow?.username}</strong>
+          </Typography>
+          <Alert severity="info">
+            Password must be minimum 8 letters and contain at least 1 number, 1
+            alphabet, and 1 special character.
+          </Alert>
           <TextField
             name="new_password"
             label="New Password"
             type="password"
             required
+            fullWidth
           />
           <TextField
             name="new_confirm_password"
             label="Confirm New Password"
             type="password"
             required
+            fullWidth
           />
           <Button type="submit" variant="contained">
-            Reset Password
+            Reset password
           </Button>
+          </Stack>
         </form>
       )}
-    </main>
+    </Box>
   );
 }

@@ -1,11 +1,17 @@
 import {
+  Alert,
   Button,
   FormControl,
   InputLabel,
+  IconButton,
+  InputAdornment,
   MenuItem,
   Select,
+  Stack,
   TextField,
+  Typography,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { UserAPI } from "../../../api/user.api";
@@ -41,6 +47,7 @@ export default function GeneralInformationForm({
   const [phoneError, setPhoneError] = useState(null);
 
   const [infoSaved, setInfoSaved] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleGeneralInfoChange = useCallback(
     async (e) => {
@@ -185,8 +192,13 @@ export default function GeneralInformationForm({
     if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
 
     inputErrorDebounce.current = setTimeout(() => {
-      if (password && confirmPassword && password !== confirmPassword) {
+      if (!password && !confirmPassword) {
         setPasswordError(null);
+        return;
+      }
+
+      if (password && confirmPassword && password !== confirmPassword) {
+        setPasswordError(new Error("Passwords do not match"));
         return;
       } else {
         const [is_password_valid, pass_error] = validatePassword(password);
@@ -286,29 +298,11 @@ export default function GeneralInformationForm({
   }, []);
 
   const handleCountryChange = (event) => {
-    const selectedCountry = event.target.value;
-    setCountry(selectedCountry);
-    const countryCode = countryCodes[selectedCountry];
-    if (countryCode) {
-      setPhone(countryCode);
-    }
+    setCountry(event.target.value);
   };
 
   const handlePhoneChange = (event) => {
-    const newPhone = event.target.value;
-    const countryCode = countryCodes[country] || "";
-    if (
-      newPhone === countryCode &&
-      event.nativeEvent.inputType === "deleteContentBackward"
-    ) {
-      setPhone(countryCode);
-      return;
-    }
-    if (newPhone.length < countryCode.length) {
-      setPhone(countryCode);
-    } else {
-      setPhone(newPhone);
-    }
+    setPhone(event.target.value);
   };
 
   const handleDisable = (e) => {
@@ -317,20 +311,27 @@ export default function GeneralInformationForm({
 
   return (
     <form
-      className="flex flex-col gap-4 w-full"
+      style={{ width: "100%" }}
       onSubmit={handleGeneralInfoChange}
     >
-      <h6 className="text-center">General Information</h6>
+      <Stack spacing={2}>
+      <div style={{ textAlign: "center" }}>
+        <Typography sx={{ color: "#101828", fontWeight: 900, fontSize: 20 }}>
+          Your details
+        </Typography>
+        <Typography sx={{ color: "#667085", mt: 0.5 }}>
+          These details help us create and secure your account.
+        </Typography>
+      </div>
       <TextField
-        width="100%"
         name="name"
         placeholder="John Doe"
         defaultValue={generalInfo?.name}
         required
         label="Name"
+        fullWidth
       />
       <TextField
-        width="100%"
         name="email_id"
         placeholder="abc@email.com"
         defaultValue={generalInfo?.email_id}
@@ -339,6 +340,8 @@ export default function GeneralInformationForm({
         }}
         required
         label="Email ID"
+        type="email"
+        fullWidth
         error={emailError ? true : false}
         helperText={emailError ? emailError : " "}
       />
@@ -350,6 +353,7 @@ export default function GeneralInformationForm({
           value={country}
           onChange={handleCountryChange}
           required
+          label="Country"
         >
           {countryCodes.map((countryName) => (
             <MenuItem key={countryName} value={countryName}>
@@ -360,19 +364,18 @@ export default function GeneralInformationForm({
       </FormControl>
 
       <TextField
-        width="100%"
         name="phone_no"
         placeholder="XXXXXXXXXX"
         value={phone}
         onChange={handlePhoneChange}
         required
         label="Phone No"
+        fullWidth
         error={phoneError ? true : false}
         helperText={phoneError ? phoneError : " "}
       />
 
       <TextField
-        width="100%"
         name="username"
         placeholder="johnDoe123"
         defaultValue={generalInfo?.username}
@@ -381,18 +384,16 @@ export default function GeneralInformationForm({
         }}
         required
         label="Username"
+        fullWidth
         error={usernameError ? true : false}
         helperText={usernameError ? usernameError : " "}
       />
-      <p
-        className={`text-sm border p-2 rounded-lg text-zinc-500 ${passwordError ? "border-red-500" : ""}`}
-      >
+      <Alert severity={passwordError ? "warning" : "info"}>
         Password must be minimum 8 letters and contain at least 1 number, 1
-        alphabet, 1 special character [!@#$%^&*,?]
-      </p>
+        alphabet, and 1 special character.
+      </Alert>
       <TextField
-        type="password"
-        width="100%"
+        type={showPassword ? "text" : "password"}
         name="password"
         defaultValue={generalInfo?.password}
         onChange={(e) => {
@@ -404,10 +405,23 @@ export default function GeneralInformationForm({
         title="Password must be minimum 8 letters and contain at least 1 number, 1 alphabet, 1 special character."
         required
         label="Password"
+        fullWidth
+        error={passwordError ? true : false}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label="toggle password visibility"
+                onClick={() => setShowPassword((visible) => !visible)}
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
       <TextField
-        type="password"
-        width="100%"
+        type={showPassword ? "text" : "password"}
         name="confirm_password"
         defaultValue={generalInfo?.confirm_password}
         onChange={(e) => {
@@ -416,6 +430,7 @@ export default function GeneralInformationForm({
         title="Password must be minimum 8 letters and contain at least 1 number, 1 alphabet, 1 special character."
         required
         label="Confirm Password"
+        fullWidth
         onCut={handleDisable}
         onCopy={handleDisable}
         onPaste={handleDisable}
@@ -426,9 +441,20 @@ export default function GeneralInformationForm({
             : " "
         }
       />
-      <Button variant="contained" type="submit">
-        Save Changes
+      <Button
+        variant="contained"
+        type="submit"
+        size="large"
+        sx={{
+          bgcolor: "#1f6f5b",
+          fontWeight: 900,
+          textTransform: "none",
+          "&:hover": { bgcolor: "#185846" },
+        }}
+      >
+        Save and continue
       </Button>
+      </Stack>
     </form>
   );
 }
