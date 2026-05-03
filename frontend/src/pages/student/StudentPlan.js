@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
 import calculateTotalPrice from "../../utils/calculateTotalPrice";
+import getFormData from "../../utils/getFormData";
 import RazorpayCheckout from "./RenderRazorpay";
 import Pricing from "./components/Pricing";
 import StudentNavMUI from "../../components/Common/StudentNavbar/StudentNavMUI";
@@ -14,29 +15,65 @@ import {
   Alert,
   Box,
   Button,
+  Card,
+  CardContent,
+  Chip,
   Divider,
-  Input,
   Modal,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
+  Typography,
 } from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import InstitutePlansAccordion from "../../components/student/InstitutePlansAccordion";
 
-function DiscountCouponForm({ handleDiscountCouponFormSubmit }) {
+const INR = "INR";
+
+const formatInr = (amount = 0) =>
+  `₹ ${Number(amount || 0).toLocaleString("en-IN")}`;
+
+function DiscountCouponForm({
+  handleDiscountCouponFormSubmit,
+  disabled = false,
+}) {
   return (
     <form
-      className="flex items-end gap-1"
+      style={{ display: "flex", gap: 8, alignItems: "flex-start" }}
       onSubmit={handleDiscountCouponFormSubmit}
     >
-      <Input width="100%" name="discount_coupon">
-        <strong>Discount Coupon</strong>
-      </Input>
-      <Button type="submit" scale={0.8} width="35%">
+      <TextField
+        fullWidth
+        size="small"
+        name="discount_coupon"
+        label="Discount coupon"
+        placeholder="Enter coupon code"
+        disabled={disabled}
+      />
+      <Button
+        type="submit"
+        variant="outlined"
+        disabled={disabled}
+        sx={{
+          borderColor: "#1f6f5b",
+          color: "#1f6f5b",
+          minWidth: 92,
+          fontWeight: 800,
+          textTransform: "none",
+          "&:hover": {
+            borderColor: "#185846",
+            bgcolor: "rgba(31, 111, 91, 0.08)",
+          },
+        }}
+      >
         Apply
       </Button>
     </form>
@@ -68,8 +105,7 @@ function StudentPlan() {
   const [myPlans, setMyPlans] = useState([]);
   const [validityFromDate, setValidityFromDate] = useState("");
   const [currencies, setAllCurrencies] = useState([]);
-  const [selectedCurrency, setSelectedCurrency] = useState("INR");
-  const [selectedCurrencyId, setSelectedCurrencyId] = useState(1);
+  const [selectedCurrency] = useState(INR);
   const [planId, setPlanId] = useState(-1);
   const [toBeRegistered, setToBeRegistered] = useState({});
   const [invalidCountry, setInvalidCountry] = useState(false);
@@ -96,6 +132,20 @@ function StudentPlan() {
     setHasRecentInstituteSubscription(hasRecentInstitute);
   }, [myPlans]);
 
+  const getInrPricing = (plan) =>
+    plan?.pricing?.find(
+      (p) => (p.currency?.short_tag || "").toUpperCase() === INR,
+    ) ||
+    plan?.pricing?.[0] ||
+    null;
+
+  const getDiscountAmount = () =>
+    discountCouponApplied && discountCoupon
+      ? (price * Number(discountCoupon.discount_percentage || 0)) / 100
+      : 0;
+
+  const getPayablePrice = () => Math.max(price - getDiscountAmount(), 0);
+
   useEffect(() => {
     checkRecentInstituteSubscription();
   }, [myPlans]);
@@ -113,6 +163,8 @@ function StudentPlan() {
       });
       return;
     }
+
+    toast("Coupon applied", { type: "success" });
   };
 
   const fetchPlans = useCallback(async () => {
@@ -188,9 +240,7 @@ function StudentPlan() {
 
   const onSelectPlan = (plan) => {
     setSelectedPlan(plan);
-    const pricing = plan.pricing.find(
-      (p) => p.currency.short_tag === selectedCurrency,
-    );
+    const pricing = getInrPricing(plan);
     setPrice(pricing?.denomination || 0);
   };
 
@@ -209,6 +259,9 @@ function StudentPlan() {
     if (!discount_coupon) {
       return new Error("Invalid discount coupon");
     }
+    if (!cardData?.plan_id) {
+      return new Error("Please select a plan before applying a coupon");
+    }
     try {
       let isCustom = false;
       const res = await Fetch({
@@ -216,9 +269,9 @@ function StudentPlan() {
         method: "POST",
         token: true,
         data: {
-          coupon_name: discount_coupon,
+          coupon_name: discount_coupon.trim(),
           is_custom_plan: isCustom,
-          plan_id: cardData.plan_id,
+          plan_id: Number(cardData.plan_id),
         },
       });
       if (res.status === 200) {
@@ -247,7 +300,15 @@ function StudentPlan() {
       return;
     }
 
-    const amount = calculateTotalPrice(price, selectedCurrency, true, 5);
+    const appliedCoupon =
+      discountCouponApplied && discountCoupon ? discountCoupon : null;
+    const amount = calculateTotalPrice(
+      price,
+      INR,
+      true,
+      5,
+      appliedCoupon,
+    );
 
     const userPlanPayload = {
       purchase_date: new Date().toISOString(),
@@ -260,13 +321,15 @@ function StudentPlan() {
       is_trial: false,
       user_type: "STUDENT",
       institute_id: selectedPlan?.institute_id || null,
+      discount_coupon_id: appliedCoupon?.discount_coupon_id || null,
     };
 
     const payload = {
       user_id: user.user_id,
       plan_id: selectedPlan.plan_id,
       amount,
-      currency: selectedCurrency,
+      currency: INR,
+      discount_coupon_id: appliedCoupon?.discount_coupon_id || null,
       user_plan_payload: userPlanPayload,
     };
 
@@ -330,10 +393,8 @@ function StudentPlan() {
     setSelectedPlan(data);
     setDiscountCouponApplied(false);
     setDiscountCoupon(null);
-    const pricing = data.pricing.find(
-      (p) => p.currency.short_tag === selectedCurrency,
-    );
-    setPrice(pricing.denomination);
+    const pricing = getInrPricing(data);
+    setPrice(pricing?.denomination || 0);
   };
 
   const pollForActivation = async () => {
@@ -415,29 +476,50 @@ function StudentPlan() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <Box sx={{ bgcolor: "#f7f8fb", minHeight: "100vh" }}>
       <StudentNavMUI />
       <Hero heading="Plans" />
 
-      <div className="mx-auto max-w-7xl">
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: 1180,
+          mx: "auto",
+          px: { xs: 2, md: 3 },
+          py: { xs: 2.5, md: 4 },
+        }}
+      >
         {planId === -1 ? (
-          <Alert variant="outlined" severity="info">
-            Please purchase a subscription to unlock all features!
+          <Alert variant="outlined" severity="info" sx={{ bgcolor: "#fff" }}>
+            Please purchase a subscription to unlock all features.
           </Alert>
         ) : (
-          <Alert variant="outlined" severity="info">
+          <Alert variant="outlined" severity="success" sx={{ bgcolor: "#fff" }}>
             Plan is currently active.
           </Alert>
         )}
-      </div>
+      </Box>
       {myPlans && myPlans.length > 0 && (
-        <div className="mx-auto max-w-7xl">
-          <h4>Plan History</h4>
-          <TableContainer component={Paper} sx={{ margin: "2rem 0" }}>
+        <Box sx={{ maxWidth: 1180, mx: "auto", px: { xs: 2, md: 3 } }}>
+          <Typography
+            component="h2"
+            sx={{ color: "#101828", fontSize: 22, fontWeight: 900, mb: 2 }}
+          >
+            Plan History
+          </Typography>
+          <TableContainer
+            component={Paper}
+            elevation={0}
+            sx={{
+              mb: 3,
+              border: "1px solid #dfe5ec",
+              borderRadius: 2,
+            }}
+          >
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead
                 sx={{
-                  bgcolor: "linear-gradient(#033363, #021F3B)",
+                  bgcolor: "#f2f4f7",
                 }}
               >
                 <TableRow>
@@ -469,13 +551,23 @@ function StudentPlan() {
                         ? new Date(row?.validity_to).toDateString()
                         : ""}
                     </TableCell>
-                    <TableCell>{row?.current_status}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={row?.current_status}
+                        size="small"
+                        color={
+                          row?.current_status === "ACTIVE"
+                            ? "success"
+                            : "default"
+                        }
+                      />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
-        </div>
+        </Box>
       )}
       {activating && (
         <Alert severity="info" sx={{ mt: 2 }}>

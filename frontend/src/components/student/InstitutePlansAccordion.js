@@ -1,4 +1,3 @@
-// ...existing code...
 import React, { useMemo } from "react";
 import {
   Box,
@@ -13,15 +12,21 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import CurrencyRupeeOutlinedIcon from "@mui/icons-material/CurrencyRupeeOutlined";
+import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import useUserStore from "../../store/UserStore";
+
+const INR = "INR";
 
 function InstitutePlansAccordion({
   allInstitutePlans,
   subscribePlan,
-  selectedCurrency,
+  selectedCurrency = INR,
 }) {
   const [expandedPlanId, setExpandedPlanId] = React.useState(null);
   const theme = useTheme();
@@ -32,13 +37,11 @@ function InstitutePlansAccordion({
   const user = useUserStore((state) => state.user);
 
   useEffect(() => {
-    // Check URL planId first
     if (urlPlanId) {
       setExpandedPlanId(parseInt(urlPlanId));
       return;
     }
 
-    // Check sessionStorage for selected plan (after login redirect)
     const selectedPlanId = sessionStorage.getItem("selectedPlanId");
     if (selectedPlanId) {
       setExpandedPlanId(parseInt(selectedPlanId));
@@ -48,65 +51,41 @@ function InstitutePlansAccordion({
   const handleChange = (planId) => (_, expanded) => {
     setExpandedPlanId(expanded ? planId : null);
   };
-  const CURRENCY_SYMBOLS = {
-    INR: "₹",
-    USD: "$",
-    EUR: "€",
-    GBP: "£",
-  };
 
   const handleSubscribePlan = (plan) => {
     if (!user) {
-      // Store the current plan and redirect to login
       sessionStorage.setItem("redirectAfterLogin", location.pathname);
       sessionStorage.setItem("selectedPlanId", plan.plan_id);
       navigate("/auth?login=true");
       return;
     }
-    // User is logged in, proceed with subscription
+
     subscribePlan(plan);
   };
 
   const preferredCurrencyTag = useMemo(() => {
+    if (typeof selectedCurrency === "string") return selectedCurrency;
     if (selectedCurrency?.short_tag) return selectedCurrency.short_tag;
-    // prefer India if user's timezone or locale suggests India
-    try {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-      if (
-        tz.toLowerCase().includes("kolkata") ||
-        tz.toLowerCase().includes("india")
-      )
-        return "INR";
-      const lang = (navigator.language || "").toLowerCase();
-      if (lang.includes("en-in") || lang.includes("hi-in")) return "INR";
-    } catch (e) {
-      /* ignore */
-    }
-    return null;
+    return INR;
   }, [selectedCurrency]);
 
   const getPricingForPlan = (plan) => {
     const pricingArray = plan.pricing || [];
-    // try preferred currency first
-    if (preferredCurrencyTag) {
-      const found = pricingArray.find(
-        (p) =>
-          (p.currency?.short_tag || "").toUpperCase() ===
-          preferredCurrencyTag.toUpperCase()
-      );
-      if (found) return found;
-    }
-    // fallback to currency from selectedCurrency prop if symbol & short_tag provided
-    if (selectedCurrency?.short_tag) {
-      const fromSelected = pricingArray.find(
-        (p) =>
-          (p.currency?.short_tag || "").toUpperCase() ===
-          selectedCurrency.short_tag.toUpperCase()
-      );
-      if (fromSelected) return fromSelected;
-    }
-    // final fallback to first available price
-    return pricingArray[0] || null;
+    const preferred = pricingArray.find(
+      (p) =>
+        (p.currency?.short_tag || "").toUpperCase() ===
+        preferredCurrencyTag.toUpperCase(),
+    );
+
+    if (preferred) return preferred;
+
+    return (
+      pricingArray.find(
+        (p) => (p.currency?.short_tag || "").toUpperCase() === INR,
+      ) ||
+      pricingArray[0] ||
+      null
+    );
   };
 
   const sortedPlans = useMemo(() => {
@@ -115,6 +94,7 @@ function InstitutePlansAccordion({
       const n = Number(v);
       return Number.isFinite(n) ? n : 0;
     };
+
     return [...allInstitutePlans].sort((a, b) => {
       const aIsUrlPlan = urlPlanId && a.plan_id === parseInt(urlPlanId);
       const bIsUrlPlan = urlPlanId && b.plan_id === parseInt(urlPlanId);
@@ -133,25 +113,19 @@ function InstitutePlansAccordion({
   }, [allInstitutePlans, urlPlanId]);
 
   return (
-    <Box
-      sx={{ width: "100%", px: { xs: 1, sm: 2 }, maxWidth: 1100, mx: "auto" }}
-    >
+    <Box sx={{ width: "100%", maxWidth: 1120, mx: "auto" }}>
       {Array.isArray(allInstitutePlans) && allInstitutePlans.length === 0 && (
-        <Typography sx={{ py: 3 }} align="center" color="textSecondary">
+        <Typography sx={{ py: 3 }} align="center" color="text.secondary">
           No plans available
         </Typography>
       )}
 
-      {sortedPlans?.map((plan, index) => {
+      {sortedPlans?.map((plan) => {
         const pricingItem = getPricingForPlan(plan);
-        const currencyTag =
-          pricingItem?.currency?.short_tag ||
-          selectedCurrency?.short_tag ||
-          "INR";
-        const symbol = CURRENCY_SYMBOLS[currencyTag] || currencyTag;
         const priceAmount =
           pricingItem?.denomination ?? pricingItem?.price ?? 0;
         const isTopPlan = urlPlanId && plan.plan_id === parseInt(urlPlanId);
+        const classesCount = plan.number_of_zoom_classes ?? "Unlimited";
 
         return (
           <Accordion
@@ -159,30 +133,40 @@ function InstitutePlansAccordion({
             expanded={expandedPlanId === plan.plan_id}
             onChange={handleChange(plan.plan_id)}
             sx={{
-              mb: 1,
-              border: isTopPlan ? "2px solid #4caf50" : "1px solid #e0e0e0",
-              backgroundColor: isTopPlan ? "#f1f8f4" : "transparent",
+              mb: 1.5,
+              border: isTopPlan ? "1px solid #1f6f5b" : "1px solid #dfe5ec",
+              borderRadius: "8px !important",
+              backgroundColor: "#fff",
               boxShadow: isTopPlan
-                ? "0 4px 12px rgba(76, 175, 80, 0.15)"
-                : "none",
-              transition: "all 0.3s ease",
+                ? "0 10px 28px rgba(31, 111, 91, 0.14)"
+                : "0 6px 18px rgba(16, 24, 40, 0.05)",
+              overflow: "hidden",
+              "&:before": { display: "none" },
             }}
           >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              sx={{
+                px: { xs: 2, sm: 2.5 },
+                py: 1,
+                "& .MuiAccordionSummary-content": { my: 1.2 },
+              }}
+            >
               <Grid container alignItems="center" spacing={1}>
                 {isTopPlan && (
                   <Grid item xs={12}>
                     <Chip
                       label="Selected Plan"
                       sx={{
-                        backgroundColor: "#4caf50",
+                        backgroundColor: "#1f6f5b",
                         color: "white",
-                        fontWeight: 600,
+                        fontWeight: 700,
                         mb: 1,
                       }}
                     />
                   </Grid>
                 )}
+
                 <Grid item xs={8} sm={6}>
                   <Typography
                     variant={isMobile ? "subtitle2" : "h6"}
@@ -190,15 +174,15 @@ function InstitutePlansAccordion({
                     sx={{
                       textOverflow: "ellipsis",
                       maxWidth: "100%",
-                      color: isTopPlan ? "#2e7d32" : "inherit",
-                      fontWeight: isTopPlan ? 700 : 500,
+                      color: "#101828",
+                      fontWeight: 800,
                     }}
                   >
                     {plan.name}
                   </Typography>
                   {!isMobile && (
                     <Typography variant="caption" color="text.secondary" noWrap>
-                      {plan.description || ""}
+                      {plan.description || "Structured yoga subscription"}
                     </Typography>
                   )}
                 </Grid>
@@ -211,12 +195,9 @@ function InstitutePlansAccordion({
                 >
                   <Typography
                     variant={isMobile ? "subtitle1" : "h5"}
-                    sx={{
-                      fontWeight: 700,
-                      color: isTopPlan ? "#4caf50" : "inherit",
-                    }}
+                    sx={{ fontWeight: 900, color: "#1f6f5b" }}
                   >
-                    {symbol + " " + priceAmount}
+                    ₹ {Number(priceAmount).toLocaleString("en-IN")}
                   </Typography>
                   <Typography
                     variant="caption"
@@ -235,7 +216,6 @@ function InstitutePlansAccordion({
                 >
                   <Button
                     variant={isTopPlan ? "contained" : "outlined"}
-                    color={isTopPlan ? "success" : "primary"}
                     size={isMobile ? "small" : "medium"}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -243,7 +223,17 @@ function InstitutePlansAccordion({
                     }}
                     fullWidth={isMobile}
                     sx={{
-                      fontWeight: isTopPlan ? 700 : 500,
+                      borderColor: "#1f6f5b",
+                      color: isTopPlan ? "#fff" : "#1f6f5b",
+                      bgcolor: isTopPlan ? "#1f6f5b" : "transparent",
+                      fontWeight: 800,
+                      textTransform: "none",
+                      "&:hover": {
+                        borderColor: "#185846",
+                        bgcolor: isTopPlan
+                          ? "#185846"
+                          : "rgba(31, 111, 91, 0.08)",
+                      },
                     }}
                   >
                     {isMobile ? "Buy" : "Buy / Subscribe"}
@@ -252,7 +242,7 @@ function InstitutePlansAccordion({
               </Grid>
             </AccordionSummary>
 
-            {/* <AccordionDetails>
+            <AccordionDetails sx={{ px: { xs: 2, sm: 2.5 }, pt: 0, pb: 2.5 }}>
               <Stack direction="column" spacing={2}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={8}>
@@ -263,11 +253,23 @@ function InstitutePlansAccordion({
                     <Stack
                       direction="row"
                       spacing={1}
-                      sx={{ mt: 2, flexWrap: "wrap" }}
+                      sx={{ mt: 2, flexWrap: "wrap", rowGap: 1 }}
                     >
-                      {(plan.tags || []).slice(0, 8).map((t) => (
-                        <Chip key={t} label={t} size="small" sx={{ mb: 1 }} />
-                      ))}
+                      <Chip
+                        icon={<CalendarMonthOutlinedIcon />}
+                        label={`${plan.plan_validity_days ?? 30} days`}
+                        size="small"
+                      />
+                      <Chip
+                        icon={<VideocamOutlinedIcon />}
+                        label={`${classesCount} live classes`}
+                        size="small"
+                      />
+                      <Chip
+                        icon={<CurrencyRupeeOutlinedIcon />}
+                        label="INR billing"
+                        size="small"
+                      />
                     </Stack>
                   </Grid>
 
@@ -278,50 +280,56 @@ function InstitutePlansAccordion({
                         pl: { sm: 2 },
                       }}
                     >
-                      <Typography variant="subtitle2">Plan details</Typography>
-                      <Typography variant="body2">
-                        Classes: {plan.number_of_zoom_classes ?? "Unlimited"}
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                        Plan details
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Validity: {plan.plan_validity_days} days
-                      </Typography>
+                      {[
+                        `Classes: ${classesCount}`,
+                        `Validity: ${plan.plan_validity_days ?? 30} days`,
+                        plan.watch_time_limit
+                          ? `Watch time: ${
+                              plan.watch_time_limit < 3600
+                                ? `${plan.watch_time_limit / 60} minutes`
+                                : `${plan.watch_time_limit / 3600} hours`
+                            }`
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .map((item) => (
+                          <Stack
+                            key={item}
+                            direction="row"
+                            spacing={1}
+                            alignItems="center"
+                            sx={{ mt: 1 }}
+                          >
+                            <CheckCircleRoundedIcon
+                              sx={{ color: "#1f6f5b", fontSize: 18 }}
+                            />
+                            <Typography variant="body2">{item}</Typography>
+                          </Stack>
+                        ))}
 
                       <Box sx={{ mt: 2 }}>
                         <Button
                           variant="contained"
-                          color="primary"
                           fullWidth
                           onClick={() => handleSubscribePlan(plan)}
+                          sx={{
+                            bgcolor: "#1f6f5b",
+                            textTransform: "none",
+                            fontWeight: 800,
+                            "&:hover": { bgcolor: "#185846" },
+                          }}
                         >
                           Purchase
-                        </Button>
-                        <Button
-                          variant="text"
-                          sx={{ mt: 1 }}
-                          fullWidth
-                          onClick={() => window.open("/terms", "_blank")}
-                        >
-                          Terms
                         </Button>
                       </Box>
                     </Box>
                   </Grid>
                 </Grid>
-
-                {isMobile && (
-                  <Box sx={{ display: "flex", gap: 1 }}>
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      fullWidth
-                      onClick={() => handleSubscribePlan(plan)}
-                    >
-                      Quick purchase
-                    </Button>
-                  </Box>
-                )}
               </Stack>
-            </AccordionDetails> */}
+            </AccordionDetails>
           </Accordion>
         );
       })}
@@ -330,4 +338,3 @@ function InstitutePlansAccordion({
 }
 
 export default InstitutePlansAccordion;
-// ...existing code...
