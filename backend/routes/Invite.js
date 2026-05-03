@@ -631,14 +631,13 @@ router.post('/create-email-verification', async (req, res) => {
   }
   const t = await sequelize.transaction()
   try {
-    const token = tokenUtils.enc_token(name, email)
-    //console.log("TOKEN : ", token);
+    const token = Math.floor(100000 + Math.random() * 900000).toString()
     mailTransporter.sendMail(
       {
         from: 'dev.6amyoga@gmail.com',
         to: email,
         subject: '6AM Yoga | User Verify',
-        text: `Welcome to 6AM Yoga! Please click on the link to verify your email: ${getFrontendDomain()}/auth/verify-email?token=${token}`,
+        text: `Welcome to 6AM Yoga! Your email verification code is ${token}. This code expires in 30 minutes.`,
       },
       async (err, info) => {
         if (err) {
@@ -661,7 +660,6 @@ router.post('/create-email-verification', async (req, res) => {
           await t.commit()
           res.status(HTTP_OK).json({
             message: 'Email sent',
-            token: token,
           })
         }
       }
@@ -669,6 +667,63 @@ router.post('/create-email-verification', async (req, res) => {
     return res
   } catch (err) {
     //console.log(err);
+    return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
+      message: 'Internal server error',
+    })
+  }
+})
+
+router.post('/verify-email-code', async (req, res) => {
+  const { email, code } = req.body
+  if (!email || !code) {
+    return res.status(HTTP_BAD_REQUEST).json({
+      message: 'Missing required fields',
+    })
+  }
+
+  const t = await sequelize.transaction()
+  try {
+    const invite = await EmailVerification.findOne({
+      where: { email, token: code.toString().trim() },
+      order: [['created', 'DESC']],
+      transaction: t,
+    })
+
+    if (!invite) {
+      await t.rollback()
+      return res.status(HTTP_BAD_REQUEST).json({
+        message: 'Invalid verification code',
+      })
+    }
+
+    if (invite.expiry_date < new Date()) {
+      await t.rollback()
+      return res.status(HTTP_BAD_REQUEST).json({
+        message: 'Verification code expired',
+      })
+    }
+
+    if (invite.is_verified === true) {
+      await t.rollback()
+      return res.status(HTTP_BAD_REQUEST).json({
+        message: 'Email already verified',
+      })
+    }
+
+    await EmailVerification.update(
+      { is_verified: true },
+      {
+        where: { email, token: code.toString().trim() },
+        transaction: t,
+      }
+    )
+
+    await t.commit()
+    return res.status(HTTP_OK).json({
+      message: 'Successfully verified',
+    })
+  } catch (err) {
+    await t.rollback()
     return res.status(HTTP_INTERNAL_SERVER_ERROR).json({
       message: 'Internal server error',
     })

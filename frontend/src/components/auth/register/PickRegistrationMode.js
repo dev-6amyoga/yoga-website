@@ -13,6 +13,7 @@ export default function PickRegistationMode({
   setLoading,
   clientID,
   handleNextStep,
+  handleExistingGoogleLogin,
 }) {
   const verifyGoogleToken = async (credentialResponse) => {
     setLoading(true);
@@ -29,6 +30,11 @@ export default function PickRegistationMode({
       });
 
       const email_verified = payload.data.email_verified;
+      if (payload?.data?.message === "User already exists; Please sign in") {
+        await handleExistingGoogleLogin(jwt_token);
+        return;
+      }
+
       if (payload?.data?.message && payload.data.message !== "Token verified") {
         toast(payload.data.message, { type: "warning" });
         return;

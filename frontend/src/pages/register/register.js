@@ -13,11 +13,11 @@ import {
   Step,
   StepLabel,
   Stepper,
+  TextField,
   Typography,
 } from "@mui/material";
 
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { useQuery } from "@tanstack/react-query";
 import { add } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCookies } from "react-cookie";
@@ -35,6 +35,7 @@ import {
 } from "../../enums/cookies";
 import useUserStore from "../../store/UserStore";
 import { Fetch, FetchRetry } from "../../utils/Fetch";
+import { navigateToDashboard } from "../../utils/navigateToDashboard";
 import { getHighestPriorityRole } from "../../utils/roleUtils";
 import "./register.css";
 
@@ -46,6 +47,8 @@ export default function Register() {
     setUserPlan,
     setAccessToken,
     setRefreshToken,
+    setCurrentInstituteId,
+    setInstitutes,
     setCurrentRole,
     setRoles,
   ] = useUserStore(
@@ -55,6 +58,8 @@ export default function Register() {
       state.setUserPlan,
       state.setAccessToken,
       state.setRefreshToken,
+      state.setCurrentInstituteId,
+      state.setInstitutes,
       state.setCurrentRole,
       state.setRoles,
     ]),
@@ -64,7 +69,6 @@ export default function Register() {
   const [blockStep, setBlockStep] = useState(false);
   const [disclaimerModal, setDisclaimerModal] = useState(false);
   const [disclaimerAcceptedVar, setDisclaimerAcceptedVar] = useState(false);
-  const [token, setToken] = useState("");
   const [regVerifyDisabled, setRegVerifyDisabled] = useState(false);
   const [role, setRole] = useState("STUDENT");
   const [regMode, setRegMode] = useState("NORMAL");
@@ -74,40 +78,7 @@ export default function Register() {
   const [clientID, setClientID] = useState("");
   const [, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [checkEmailVerification, setCheckEmailVerification] = useState(false);
-
-  useQuery({
-    queryKey: ["get-email-verification-by-token"],
-    queryFn: async () => {
-      try {
-        const res = await Fetch({
-          url: "/invite/get-email-verification-by-token",
-          method: "POST",
-          data: { token },
-        });
-
-        if (res.status === 200) {
-          const invite = res.data.invite;
-          if (invite?.is_verified) {
-            setDisclaimerModal(true);
-            toast.success("Email verified successfully!");
-            setCheckEmailVerification(false);
-          } else {
-            //console.log("Error verifying email; Retrying...");
-          }
-        } else {
-          //console.log("Error verifying email; Retrying...");
-        }
-        return null;
-      } catch (err) {
-        //console.log("Error verifying email; Retrying...");
-        return null;
-      }
-    },
-    refetchInterval: 2000,
-    retry: 10,
-    enabled: checkEmailVerification,
-  });
+  const [verificationCode, setVerificationCode] = useState("");
 
   useEffect(() => {
     setClientID(import.meta.env.VITE_GOOGLE_CLIENT_ID);
@@ -195,7 +166,87 @@ export default function Register() {
     }
   }, [disclaimerAcceptedVar, generalInfo, role, googleInfo, clientID]);
 
+  const [, setCookie, removeCookie] = useCookies([
+    SIXAMYOGA_ACCESS_TOKEN,
+    SIXAMYOGA_REFRESH_TOKEN,
+  ]);
+
   const redirectAfterLogin = sessionStorage.getItem("redirectAfterLogin");
+
+  const handleExistingGoogleLogin = useCallback(
+    async (jwtToken) => {
+      try {
+        const response = await Fetch({
+          url: "/auth/login-google",
+          method: "POST",
+          data: {
+            client_id: clientID,
+            jwtToken,
+          },
+        });
+
+        if (response?.status === 200) {
+          if (response.data?.message === "User does not exist") {
+            toast.error("No account found for this Google email.");
+            return;
+          }
+
+          const userData = response.data;
+          setUser(userData.user);
+          setAccessToken(userData?.accessToken);
+          setRefreshToken(userData?.refreshToken);
+          setRoles(userData?.user?.roles);
+
+          const currRole = getHighestPriorityRole(userData?.user?.roles);
+          const currPlan = userData?.user?.roles[currRole]?.[0]?.plan;
+          const institutes =
+            userData?.user?.roles[currRole]?.map((r) => r?.institute) ?? [];
+
+          setUserPlan(currPlan);
+          setInstitutes(institutes);
+          setCurrentInstituteId(institutes[0]?.institute_id);
+
+          setCookie(SIXAMYOGA_ACCESS_TOKEN, userData?.accessToken, {
+            expires: add(new Date(), accessTimeExpiry),
+          });
+
+          setCookie(SIXAMYOGA_REFRESH_TOKEN, userData?.refreshToken, {
+            expires: add(new Date(), refreshTimeExpiry),
+          });
+
+          setCurrentRole(currRole);
+          toast.success("Account already exists. Signing you in.");
+
+          if (redirectAfterLogin) {
+            navigate(redirectAfterLogin);
+          } else {
+            navigateToDashboard(currRole, currPlan, navigate);
+          }
+        }
+      } catch (error) {
+        removeCookie(SIXAMYOGA_ACCESS_TOKEN);
+        removeCookie(SIXAMYOGA_REFRESH_TOKEN);
+        toast.error(
+          error?.response?.data?.error || "Google sign in failed. Try again.",
+        );
+      }
+    },
+    [
+      clientID,
+      navigate,
+      redirectAfterLogin,
+      removeCookie,
+      setAccessToken,
+      setCookie,
+      setCurrentInstituteId,
+      setCurrentRole,
+      setInstitutes,
+      setRefreshToken,
+      setRoles,
+      setUser,
+      setUserPlan,
+    ],
+  );
 
   useEffect(() => {
     if (user?.user_id && role === "STUDENT") {
@@ -212,11 +263,6 @@ export default function Register() {
       }
     }
   }, [user, role]);
-
-  const [, setCookie, removeCookie] = useCookies([
-    SIXAMYOGA_ACCESS_TOKEN,
-    SIXAMYOGA_REFRESH_TOKEN,
-  ]);
 
   const handleLogin = async (username, password) => {
     const loginData = { username, password };
@@ -275,19 +321,43 @@ export default function Register() {
   const sendEmail = useCallback(async () => {
     setCheckInbox(true);
     try {
-      const res = await Fetch({
+      await Fetch({
         url: "/invite/create-email-verification",
         method: "POST",
         data: { email: generalInfo.email_id, name: generalInfo.name },
       });
-      toast.success("Email sent successfully");
-      setToken(res.data.token);
+      toast.success("Verification code sent");
       setRegVerifyDisabled(true);
-      setCheckEmailVerification(true);
+      setVerificationCode("");
     } catch (err) {
       toast.error(`Error: ${err?.response?.data?.message}`);
     }
   }, [generalInfo]);
+
+  const verifyEmailCode = useCallback(async () => {
+    if (!verificationCode.trim()) {
+      toast.error("Please enter the verification code");
+      return;
+    }
+
+    try {
+      await Fetch({
+        url: "/invite/verify-email-code",
+        method: "POST",
+        data: {
+          email: generalInfo.email_id,
+          code: verificationCode.trim(),
+        },
+      });
+      toast.success("Email verified successfully!");
+      setDisclaimerModal(true);
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message ||
+          "Invalid verification code. Please try again.",
+      );
+    }
+  }, [generalInfo.email_id, verificationCode]);
 
   const RenderStep = useMemo(() => {
     switch (step) {
@@ -301,6 +371,7 @@ export default function Register() {
             setLoading={setLoading}
             clientID={clientID}
             handleNextStep={handleNextStep}
+            handleExistingGoogleLogin={handleExistingGoogleLogin}
           />
         );
       case 2:
@@ -337,7 +408,7 @@ export default function Register() {
               Verify your email
             </Typography>
             <Typography sx={{ color: "#667085" }}>
-              We will send a verification email to{" "}
+              We will send a 6-digit verification code to{" "}
               <b>{generalInfo?.email_id}</b>.
             </Typography>
             <Button
@@ -351,21 +422,62 @@ export default function Register() {
                 "&:hover": { bgcolor: "#185846" },
               }}
             >
-              Send verification email
+              Send verification code
             </Button>
             {checkInbox && (
-              <Typography
-                sx={{
-                  color: "#667085",
-                  border: "1px solid #f2b8b5",
-                  borderRadius: 1,
-                  p: 1.25,
-                  fontSize: 14,
-                }}
-              >
-                Please check your inbox and spam folders for an email from
-                dev.6amyoga@gmail.com.
-              </Typography>
+              <Stack spacing={1.5}>
+                <Typography
+                  sx={{
+                    color: "#667085",
+                    border: "1px solid #dfe5ec",
+                    borderRadius: 1,
+                    p: 1.25,
+                    fontSize: 14,
+                  }}
+                >
+                  Please check your inbox and spam folders for a code from
+                  dev.6amyoga@gmail.com.
+                </Typography>
+                <TextField
+                  label="Verification code"
+                  value={verificationCode}
+                  onChange={(event) =>
+                    setVerificationCode(
+                      event.target.value.replace(/\D/g, "").slice(0, 6),
+                    )
+                  }
+                  inputProps={{
+                    inputMode: "numeric",
+                    maxLength: 6,
+                    style: {
+                      textAlign: "center",
+                      letterSpacing: 6,
+                      fontWeight: 800,
+                    },
+                  }}
+                  fullWidth
+                />
+                <Button
+                  onClick={verifyEmailCode}
+                  variant="outlined"
+                  disabled={verificationCode.length !== 6}
+                  sx={{
+                    borderColor: "#1f6f5b",
+                    color: "#1f6f5b",
+                    fontWeight: 900,
+                    textTransform: "none",
+                  }}
+                >
+                  Verify code
+                </Button>
+                <Button
+                  onClick={sendEmail}
+                  variant="text"
+                  sx={{ color: "#667085", textTransform: "none" }}
+                >
+                  Resend code
+                </Button>
+              </Stack>
             )}
           </Stack>
         );
@@ -382,6 +494,8 @@ export default function Register() {
     handleNextStep,
     regVerifyDisabled,
     sendEmail,
+    verificationCode,
+    verifyEmailCode,
   ]);
 
   const disclaimerAccepted = () => {
