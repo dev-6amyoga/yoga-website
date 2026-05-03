@@ -304,13 +304,7 @@ function StudentPlan() {
 
     const appliedCoupon =
       discountCouponApplied && discountCoupon ? discountCoupon : null;
-    const amount = calculateTotalPrice(
-      price,
-      INR,
-      true,
-      5,
-      appliedCoupon,
-    );
+    const amount = calculateTotalPrice(price, INR, true, 5, appliedCoupon);
 
     const userPlanPayload = {
       purchase_date: new Date().toISOString(),
@@ -753,14 +747,14 @@ function StudentPlan() {
                   </Box>
                 </Box>
 
-                <Box sx={{ ...infoCardStyle, mt: 1.5 }}>
+                {/* <Box sx={{ ...infoCardStyle, mt: 1.5 }}>
                   <span>Watch Limit</span>
                   <strong>
                     {cardData?.watch_time_limit < 3600
                       ? `${cardData?.watch_time_limit / 60} Minutes`
                       : `${cardData?.watch_time_limit / 3600} Hours`}
                   </strong>
-                </Box>
+                </Box> */}
               </Box>
             </Box>
 
