@@ -38,17 +38,17 @@ const getPlanFeatures = (plan) =>
     plan.has_zoom_classes
       ? `${plan.number_of_zoom_classes || 0} live Zoom classes`
       : null,
-    plan.watch_time_limit
-      ? `${plan.watch_time_limit} hours watch time`
-      : null,
+    // plan.watch_time_limit
+    //   ? `${plan.watch_time_limit} hours watch time`
+    //   : null,
     plan.has_basic_playlist ? "Basic playlist access included" : null,
     plan.has_playlist_creation
       ? `${plan.playlist_creation_limit || 0} playlist creations`
       : null,
     plan.has_self_audio_upload ? "Self audio upload included" : null,
-    plan.number_of_teachers
-      ? `Supports up to ${plan.number_of_teachers} teachers`
-      : null,
+    // plan.number_of_teachers
+    //   ? `Supports up to ${plan.number_of_teachers} teachers`
+    //   : null,
   ].filter(Boolean);
 
 function PlansAndPricing() {
