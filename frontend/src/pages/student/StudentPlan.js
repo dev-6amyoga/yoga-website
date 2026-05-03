@@ -552,25 +552,6 @@ function StudentPlan() {
                   )}
                 </Box>
 
-                {/* GST hint */}
-                <Box sx={{ mt: 0.5, fontSize: 13, color: "#555" }}>
-                  {selectedCurrency === "INR" && "Excludes 5% GST"}
-                </Box>
-
-                {/* After GST amount */}
-                {selectedCurrency === "INR" && (
-                  <Box sx={{ mt: 0.5, fontSize: 13, color: "#888" }}>
-                    After GST: ₹
-                    {(
-                      (price -
-                        (discountCouponApplied
-                          ? (price * discountCoupon.discount_percentage) / 100
-                          : 0)) *
-                      1.05
-                    ).toFixed(2)}
-                  </Box>
-                )}
-
                 {discountCouponApplied && (
                   <Box
                     sx={{
