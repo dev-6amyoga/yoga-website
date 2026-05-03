@@ -103,7 +103,9 @@ function StudentPlan() {
 
   const [loading, setLoading] = useState(false);
   const [myPlans, setMyPlans] = useState([]);
-  const [validityFromDate, setValidityFromDate] = useState("");
+  const [validityFromDate, setValidityFromDate] = useState(
+    new Date().toISOString(),
+  );
   const [currencies, setAllCurrencies] = useState([]);
   const [selectedCurrency] = useState(INR);
   const [planId, setPlanId] = useState(-1);
@@ -581,7 +583,14 @@ function StudentPlan() {
         </Alert>
       )}
 
-      <div className="flex flex-col items-center justify-center pt-4">
+      <Box
+        sx={{
+          maxWidth: 1180,
+          mx: "auto",
+          px: { xs: 2, md: 3 },
+          pb: { xs: 4, md: 6 },
+        }}
+      >
         {invalidCountry ? (
           <Alert variant="outlined" severity="warning">
             6AM Yoga is unavailable in your country right now! We are working on
@@ -589,7 +598,20 @@ function StudentPlan() {
           </Alert>
         ) : (
           <>
-            <Divider />
+            <Typography
+              component="h2"
+              sx={{
+                color: "#101828",
+                fontSize: { xs: 22, md: 28 },
+                fontWeight: 900,
+                mb: 0.5,
+              }}
+            >
+              Yoga Class Subscriptions
+            </Typography>
+            <Typography sx={{ color: "#667085", mb: 2 }}>
+              All prices are shown and charged in INR.
+            </Typography>
 
             <InstitutePlansAccordion
               allInstitutePlans={allInstitutePlans}
@@ -615,33 +637,47 @@ function StudentPlan() {
               left: "50%",
               transform: "translate(-50%, -50%)",
               bgcolor: "background.paper",
-              borderRadius: 3,
-              width: { xs: "90%", sm: 420 },
-              maxHeight: "85vh",
+              borderRadius: 2,
+              width: { xs: "92%", sm: 460 },
+              maxHeight: "88vh",
               display: "flex",
               flexDirection: "column",
               boxShadow: 24,
               overflow: "hidden",
             }}
           >
-            {/* Header */}
             <Box sx={{ px: 3, py: 2, borderBottom: "1px solid #eee" }}>
-              <h3 style={{ margin: 0 }}>{cardData?.name}</h3>
+              <Typography sx={{ fontSize: 20, fontWeight: 900 }}>
+                {cardData?.name}
+              </Typography>
+              <Typography variant="body2" sx={{ color: "#667085" }}>
+                Checkout in INR
+              </Typography>
             </Box>
 
-            {/* Scrollable Content */}
             <Box sx={{ px: 3, py: 2, overflowY: "auto", flex: 1 }}>
-              {/* Price */}
               <Box sx={{ mb: 2 }}>
-                <strong>Price</strong>
-                <Box sx={{ mt: 1 }}>
-                  <span>{selectedCurrency}</span>{" "}
-                  <span style={{ fontWeight: 600 }}>{price}</span>{" "}
+                <Typography sx={{ fontWeight: 800, mb: 1 }}>Price</Typography>
+                <Box sx={{ ...infoCardStyle, gap: 1 }}>
+                  <Stack direction="row" justifyContent="space-between">
+                    <span>Plan price</span>
+                    <strong>{formatInr(price)}</strong>
+                  </Stack>
                   {discountCouponApplied && (
-                    <span style={{ color: "green", marginLeft: 6 }}>
-                      - {(price * discountCoupon.discount_percentage) / 100}
-                    </span>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      sx={{ color: "#1f6f5b" }}
+                    >
+                      <span>Coupon discount</span>
+                      <strong>- {formatInr(getDiscountAmount())}</strong>
+                    </Stack>
                   )}
+                  <Divider />
+                  <Stack direction="row" justifyContent="space-between">
+                    <strong>Total payable</strong>
+                    <strong>{formatInr(getPayablePrice())}</strong>
+                  </Stack>
                 </Box>
 
                 {discountCouponApplied && (
@@ -658,8 +694,8 @@ function StudentPlan() {
                     }}
                   >
                     <span>
-                      Coupon: {discountCoupon.coupon_name} (
-                      {discountCoupon.discount_percentage}% OFF)
+                      {discountCoupon.coupon_name} applied (
+                      {discountCoupon.discount_percentage}% off)
                     </span>
                     <Button
                       size="small"
@@ -677,16 +713,15 @@ function StudentPlan() {
 
               <Divider sx={{ my: 2 }} />
 
-              {/* Coupon */}
               <DiscountCouponForm
                 handleDiscountCouponFormSubmit={handleDiscountCouponFormSubmit}
+                disabled={loading}
               />
 
               <Divider sx={{ my: 2 }} />
 
-              {/* Validity */}
               <Box>
-                <strong>Validity</strong>
+                <Typography sx={{ fontWeight: 800 }}>Validity</Typography>
 
                 <Box
                   sx={{
@@ -702,7 +737,7 @@ function StudentPlan() {
                       {validityFromDate &&
                       !isNaN(new Date(validityFromDate).getTime())
                         ? new Date(validityFromDate).toLocaleDateString()
-                        : "--"}
+                        : "Today"}
                     </strong>
                   </Box>
 
@@ -744,8 +779,17 @@ function StudentPlan() {
                 fullWidth
                 variant="contained"
                 disabled={loading}
+                sx={{
+                  bgcolor: "#1f6f5b",
+                  py: 1.2,
+                  fontWeight: 900,
+                  textTransform: "none",
+                  "&:hover": { bgcolor: "#185846" },
+                }}
               >
-                {loading ? "Processing..." : "Purchase"}
+                {loading
+                  ? "Processing..."
+                  : `Purchase for ${formatInr(getPayablePrice())}`}
               </Button>
 
               <Button
@@ -756,6 +800,7 @@ function StudentPlan() {
                   setCardData(null);
                   setDisplayRazorpay(false);
                 }}
+                sx={{ textTransform: "none" }}
               >
                 Cancel
               </Button>
@@ -773,8 +818,8 @@ function StudentPlan() {
           onSuccess={onPaymentSuccess}
           onFailure={() => toast("Payment cancelled")}
         />
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 

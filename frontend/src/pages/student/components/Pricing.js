@@ -26,7 +26,7 @@ export default function Pricing({
   heading,
   allPlans,
   subscribePlan,
-  selectedCurrency,
+  selectedCurrency = "INR",
   trialPlanAvailed,
 }) {
   const [allCurrencies, setAllCurrencies] = useState([]);
@@ -116,9 +116,16 @@ export default function Pricing({
           let selectedPricing;
           //console.log("plan is:", plan);
           if (plan.pricing) {
-            selectedPricing = plan.pricing.find(
-              (x) => x.currency.short_tag === selectedCurrency
-            );
+            selectedPricing =
+              plan.pricing.find(
+                (x) =>
+                  (x.currency?.short_tag || "").toUpperCase() ===
+                  selectedCurrency.toUpperCase()
+              ) ||
+              plan.pricing.find(
+                (x) => (x.currency?.short_tag || "").toUpperCase() === "INR"
+              ) ||
+              plan.pricing[0];
           } else {
             selectedPricing = Number(plan.prices[0][currentCurrencyId]);
           }
@@ -177,7 +184,10 @@ export default function Pricing({
                       {plan.description !==
                         "Tailor made playlists as per your requirement" && (
                         <Typography component="h3" variant="h3">
-                          {selectedCurrency} {selectedPricing.denomination}
+                          ₹{" "}
+                          {Number(
+                            selectedPricing?.denomination || 0
+                          ).toLocaleString("en-IN")}
                         </Typography>
                       )}
                     </Box>
