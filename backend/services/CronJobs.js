@@ -37,7 +37,7 @@ const sendUnpaidClassEmail = async (
     await mailTransporter.sendMail({
       from: 'dev.6amyoga@gmail.com',
       to: user.email,
-      cc: '992351@gmail.com',
+      cc: 'kjrosa1982@gmail.com',
       subject: `6AM Yoga | ${classCount} Unpaid Class${classCount > 1 ? 'es' : ''} Attendance`,
       html: `
         <p>Hello <strong>${user.name}</strong>,</p>
@@ -85,7 +85,7 @@ const sendReEngagementEmail = async (user, frontendDomain) => {
     await mailTransporter.sendMail({
       from: 'dev.6amyoga@gmail.com',
       to: user.email,
-      cc: '992351@gmail.com',
+      cc: 'kjrosa1982@gmail.com',
       subject: '6AM Yoga | We Miss You! Come Back to Your Practice',
       html: `
         <p>Hi ${user.name},</p>
@@ -542,7 +542,6 @@ module.exports = {
       // Initialize tracking variables for all scenarios
       let successfullySentIdsExpiredUsage = []
       let successfullySentIdsNoPlanCoverage = []
-      let reEngagementEmailsSent = 0
 
       if (unpaidClassesExpiredByUsage.length > 0) {
         console.log(
@@ -736,54 +735,6 @@ module.exports = {
         }
       }
 
-      // Send re-engagement emails to inactive users (all plans expired, no active plans)
-      console.log(
-        '[UpdatePlanStatuses] Processing re-engagement emails for inactive users'
-      )
-      const inactiveUsers = await sequelize.query(
-        SQL_GET_INACTIVE_USERS_FOR_REENGAGEMENT,
-        {
-          type: sequelize.QueryTypes.SELECT,
-          transaction: tx,
-        }
-      )
-
-      if (inactiveUsers.length > 0) {
-        console.log(
-          `[UpdatePlanStatuses] Found ${inactiveUsers.length} inactive users to re-engage`
-        )
-
-        const reEngagementResults = await Promise.all(
-          inactiveUsers.map(async (user) => {
-            try {
-              const sent = await sendReEngagementEmail(
-                user,
-                process.env.FRONTEND_DOMAIN
-              )
-
-              if (sent) {
-                reEngagementEmailsSent++
-                return true
-              }
-              return false
-            } catch (err) {
-              console.error(
-                `[UpdatePlanStatuses] Error sending re-engagement email to user ${user.user_id}:`,
-                err
-              )
-              return false
-            }
-          })
-        )
-
-        const successfulReEngagementCount = reEngagementResults.filter(
-          (r) => r
-        ).length
-        console.log(
-          `[UpdatePlanStatuses] Successfully sent re-engagement emails to ${successfulReEngagementCount} users`
-        )
-      }
-
       await sequelize.query(SQL_RESET_ATTENDANCE, { transaction: tx })
       await sequelize.query(SQL_RECOUNT_ATTENDANCE, { transaction: tx })
       await sequelize.query(SQL_PRACTICE_NOW_ATTENDANCE, { transaction: tx })
@@ -802,8 +753,7 @@ module.exports = {
         const totalEmailsSent =
           sentCount +
           successfullySentIdsExpiredUsage.length +
-          successfullySentIdsNoPlanCoverage.length +
-          reEngagementEmailsSent
+          successfullySentIdsNoPlanCoverage.length
 
         const summaryEmail = `
           <p>Hi Admin,</p>
@@ -828,10 +778,6 @@ module.exports = {
               <td style="border: 1px solid #ddd; padding: 10px;">No Plan Coverage</td>
               <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${successfullySentIdsNoPlanCoverage.length}</td>
             </tr>
-            <tr>
-              <td style="border: 1px solid #ddd; padding: 10px;">Re-engagement (Inactive Users)</td>
-              <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${reEngagementEmailsSent}</td>
-            </tr>
             <tr style="background-color: #e8f5e9;">
               <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Total</td>
               <td style="border: 1px solid #ddd; padding: 10px; text-align: center; font-weight: bold;">${totalEmailsSent}</td>
@@ -845,7 +791,7 @@ module.exports = {
 
         await mailTransporter.sendMail({
           from: 'dev.6amyoga@gmail.com',
-          to: '992351@gmail.com',
+          to: 'kjrosa1982@gmail.com',
           subject: `6AM Yoga | UpdatePlanStatuses Cron - ${totalEmailsSent} Emails Sent`,
           html: summaryEmail,
         })
@@ -862,6 +808,56 @@ module.exports = {
     } catch (err) {
       await tx.rollback()
       console.error('[UpdatePlanStatuses] User plan cron failed', err)
+    }
+  },
+
+  SendReEngagementEmails: async function SendReEngagementEmails() {
+    try {
+      console.log(
+        '[SendReEngagementEmails] Processing re-engagement emails for inactive users'
+      )
+
+      const inactiveUsers = await sequelize.query(
+        SQL_GET_INACTIVE_USERS_FOR_REENGAGEMENT,
+        {
+          type: sequelize.QueryTypes.SELECT,
+        }
+      )
+
+      if (inactiveUsers.length === 0) {
+        console.log('[SendReEngagementEmails] No inactive users found')
+        return
+      }
+
+      console.log(
+        `[SendReEngagementEmails] Found ${inactiveUsers.length} inactive users to re-engage`
+      )
+
+      const reEngagementResults = await Promise.all(
+        inactiveUsers.map(async (user) => {
+          try {
+            return sendReEngagementEmail(user, process.env.FRONTEND_DOMAIN)
+          } catch (err) {
+            console.error(
+              `[SendReEngagementEmails] Error sending re-engagement email to user ${user.user_id}:`,
+              err
+            )
+            return false
+          }
+        })
+      )
+
+      const successfulReEngagementCount = reEngagementResults.filter(
+        (sent) => sent
+      ).length
+      console.log(
+        `[SendReEngagementEmails] Successfully sent re-engagement emails to ${successfulReEngagementCount} users`
+      )
+    } catch (error) {
+      console.error(
+        '[SendReEngagementEmails] Error while sending re-engagement emails:',
+        error
+      )
     }
   },
 
@@ -905,7 +901,7 @@ module.exports = {
           await mailTransporter.sendMail({
             from: 'dev.6amyoga@gmail.com',
             to: user.email,
-            cc: '992351@gmail.com',
+            cc: 'kjrosa1982@gmail.com',
             subject: '6AM Yoga | Plan Expired!',
             html: `
             <p>Dear ${user.name},</p>

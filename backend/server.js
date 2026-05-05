@@ -85,6 +85,7 @@ const teacherDashboardRouter = require('./routes/TeacherDashboard')
 const classWsRouter = require('./websocket-routes/Class')
 const {
   UpdatePlanStatuses,
+  SendReEngagementEmails,
   SendPlanExpiryReminders,
 } = require('./services/CronJobs')
 
@@ -97,6 +98,10 @@ if (process.env.UPDATE_PLAN_STATUSES_CRON) {
   )
   cron.schedule('0 0 * * *', UpdatePlanStatuses, { timezone: 'Asia/Kolkata' })
 }
+
+cron.schedule('0 7 * * 0', SendReEngagementEmails, {
+  timezone: 'Asia/Kolkata',
+})
 
 if (process.env.PLAN_EXPIRY_REMINDER_CRON) {
   console.log(

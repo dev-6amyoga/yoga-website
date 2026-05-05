@@ -50,7 +50,7 @@ router.post('/register', async (req, res) => {
     mailTransporter.sendMail(
       {
         from: 'dev.6amyoga@gmail.com',
-        to: '992351@gmail.com',
+        to: 'kjrosa1982@gmail.com',
         subject: '6AM Yoga | You have a query!',
         text: emailText,
       },

@@ -287,7 +287,7 @@ router.post('/student/notify-admin', async (req, res) => {
     mailTransporter.sendMail(
       {
         from: 'dev.6amyoga@gmail.com',
-        to: '992351@gmail.com',
+        to: 'kjrosa1982@gmail.com',
         subject: '6AM Yoga | New User Subscription Purchased.',
         html: `
                 <p>Greetings,</p>
@@ -367,7 +367,7 @@ router.post('/student/notify-admin', async (req, res) => {
     mailTransporter.sendMail(
       {
         from: 'dev.6amyoga@gmail.com',
-        to: '992351@gmail.com',
+        to: 'kjrosa1982@gmail.com',
         subject: '6AM Yoga | New User Subscription Purchased.',
         html: `
                 <p>Greetings,</p>
