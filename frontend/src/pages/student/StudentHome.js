@@ -19,9 +19,16 @@ import {
   CssBaseline,
   ThemeProvider,
   createTheme,
-  IconButton,
 } from "@mui/material";
-import { Brightness4, Brightness7 } from "@mui/icons-material";
+
+const getInitialStudentColorMode = () => {
+  const savedMode = window.localStorage.getItem("studentColorMode");
+  if (savedMode === "dark" || savedMode === "light") return savedMode;
+
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+};
 
 function StudentHome() {
   let [watchHistoryExhausted] = useWatchHistoryStore((state) => [
@@ -29,13 +36,7 @@ function StudentHome() {
   ]);
   const navigate = useNavigate();
 
-  // Dark Mode State
-  const [mode, setMode] = useState("light");
-
-  // Toggle between Dark and Light mode
-  const toggleMode = () => {
-    setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
-  };
+  const [mode, setMode] = useState(getInitialStudentColorMode);
 
   // MUI Theme Configuration
   const theme = createTheme({
@@ -100,6 +101,17 @@ function StudentHome() {
         window.location.href = "https://www.google.com/chrome/";
       }
     });
+  }, []);
+
+  useEffect(() => {
+    const handleModeChange = (event) => {
+      setMode(event.detail);
+    };
+
+    window.addEventListener("student-color-mode-change", handleModeChange);
+    return () => {
+      window.removeEventListener("student-color-mode-change", handleModeChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -175,13 +187,6 @@ function StudentHome() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-
-      {/* Dark Mode Toggle Button */}
-      <div className="flex justify-end p-4">
-        <IconButton onClick={toggleMode} color="inherit">
-          {mode === "light" ? <Brightness4 /> : <Brightness7 />}
-        </IconButton>
-      </div>
 
       <StudentNavMUI />
       <Hero heading="6AM Yoga Player" />
