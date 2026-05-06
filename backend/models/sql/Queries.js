@@ -23,6 +23,32 @@ const Queries = sequelize.define(
       allowNull: false,
     },
     query_text: { type: DataTypes.STRING, allowNull: false },
+    query_source: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: "website",
+    },
+    entered_by_user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    entered_by_name: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    follow_up_status: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    follow_up_notes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    followed_up_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   { ...options }
 );

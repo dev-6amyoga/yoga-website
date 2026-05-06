@@ -5,6 +5,7 @@ import FreeVideos from "../pages/teacher/FreeVideos";
 import SelfAudioUpload from "../pages/teacher/SelfAudioUpload";
 import TeacherHome from "../pages/teacher/TeacherHome";
 import TeacherDashboard from "../pages/teacher/TeacherDashboard";
+import TeacherEnquiries from "../pages/teacher/TeacherEnquiries";
 import ClassManagement from "../pages/teacher/ClassManagement";
 import MemberManagement from "../pages/teacher/MemberManagement";
 import VideoPlayer from "../pages/teacher/VideoPlayer";
@@ -73,6 +74,10 @@ export const TeacherRoutes = [
   {
     path: "/teacher/contact-us",
     element: <ContactUs />,
+  },
+  {
+    path: "/teacher/enquiries",
+    element: <TeacherEnquiries />,
   },
   {
     path: "/teacher/transactions",

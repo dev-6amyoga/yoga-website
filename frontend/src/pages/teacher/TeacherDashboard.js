@@ -5,6 +5,7 @@ import {
   FiVideo,
   FiCreditCard,
   FiBook,
+  FiMessageSquare,
   FiChevronRight,
 } from "react-icons/fi";
 import useUserStore from "../../store/UserStore";
@@ -106,6 +107,17 @@ export default function TeacherDashboard() {
       features: ["Students list", "View plans", "Manage mappings"],
       stats: stats.studentsCount,
       onClick: () => navigate("/teacher/members/students"),
+    },
+    {
+      id: "enquiries",
+      title: "Enquiries",
+      description: "Record people interested in yoga classes",
+      icon: FiMessageSquare,
+      color: "bg-cyan-50",
+      borderColor: "border-cyan-200",
+      textColor: "text-cyan-600",
+      features: ["Add enquiries", "Capture contact details", "Share with admin"],
+      onClick: () => navigate("/teacher/enquiries"),
     },
     {
       id: "transaction-management",

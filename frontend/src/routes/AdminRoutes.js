@@ -16,6 +16,7 @@ import RegisterCustomizedPlan from "../pages/admin/Plans/RegisterCustomizedPlan"
 import ViewAllCustomPlans from "../pages/admin/Plans/ViewAllCustomPlans";
 import ViewAllPlans from "../pages/admin/Plans/ViewAllPlans";
 import PlayerPage from "../pages/admin/PlayerPage";
+import QueriesDashboard from "../pages/admin/QueriesDashboard";
 import AdminManageClasses from "../pages/admin/classes/AdminLogAttendance";
 import RegisterPlaylist from "../pages/admin/content-management/playlist/RegisterPlaylist";
 import EditAsana from "../pages/admin/content-management/video/EditAsana";
@@ -84,6 +85,10 @@ export const AdminRoutes = [
   {
     path: "/admin/watch-analysis",
     element: <WatchAnalysis />,
+  },
+  {
+    path: "/admin/queries",
+    element: <QueriesDashboard />,
   },
   // video transition
   {

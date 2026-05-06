@@ -48,6 +48,10 @@ const paths = [
     path: "/admin/watch-analysis",
     title: "Watch Analysis",
   },
+  {
+    path: "/admin/queries",
+    title: "Enquiries",
+  },
 
   // {
   // 	title: "Class Mode",

@@ -143,6 +143,13 @@ function TeacherNavbar({ mode, toggleColorMode }) {
         },
       },
       {
+        path: "/teacher/enquiries",
+        title: "Enquiries",
+        props: {
+          disabled: false,
+        },
+      },
+      {
         title: "Member Management",
         props: {
           disabled: false,
