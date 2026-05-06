@@ -3,7 +3,9 @@ import {
   Avatar,
   Box,
   Card,
+  CardContent,
   Container,
+  Stack,
   Tab,
   Tabs,
   Typography,
@@ -11,7 +13,6 @@ import {
 import { useEffect, useState } from "react";
 import StudentPageWrapper from "../../components/Common/StudentPageWrapper";
 import ChangePassword from "../../components/student/UserSettings/ChangePassword";
-import UpdateContactDetails from "../../components/student/UserSettings/UpdateContactDetails";
 import UpdateProfile from "../../components/student/UserSettings/UpdateProfile";
 import { ROLE_STUDENT } from "../../enums/roles";
 import useUserStore from "../../store/UserStore";
@@ -32,46 +33,76 @@ function StudentProfile() {
 
   return (
     <StudentPageWrapper>
-      <Container maxWidth="md" sx={{ mt: 8, mb: 4 }}>
-        <Card sx={{ p: 4 }}>
+      <Container maxWidth="lg" sx={{ mb: 5 }}>
+        <Card
+          sx={{
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+            boxShadow: "0 12px 30px rgba(15, 23, 42, 0.08)",
+            overflow: "hidden",
+          }}
+        >
           <Box
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 2,
+              px: { xs: 3, md: 5 },
+              py: { xs: 4, md: 5 },
+              bgcolor: "grey.50",
+              borderBottom: "1px solid",
+              borderColor: "divider",
             }}
           >
-            <Avatar sx={{ bgcolor: "primary.main" }}>
-              <PersonIcon />
-            </Avatar>
-            <Typography variant="h4">Hello {user?.name}</Typography>
-            <Typography variant="body1">
-              Welcome to your profile page!
-            </Typography>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2.5}
+              alignItems={{ xs: "flex-start", sm: "center" }}
+            >
+              <Avatar
+                sx={{
+                  width: 72,
+                  height: 72,
+                  bgcolor: "primary.main",
+                  fontSize: 28,
+                  fontWeight: 700,
+                }}
+              >
+                {user?.name ? user.name[0].toUpperCase() : <PersonIcon />}
+              </Avatar>
+              <Box>
+                <Typography variant="h4" fontWeight={700}>
+                  {user?.name || "Your Profile"}
+                </Typography>
+                <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+                  Manage your account details and security settings.
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  {user?.email}
+                </Typography>
+              </Box>
+            </Stack>
           </Box>
 
-          <Tabs value={tabIndex} onChange={handleTabChange} centered>
-            <Tab label="Profile" />
-            <Tab label="Change Email" />
-            <Tab label="Change Phone" />
-            <Tab label="Change Password" />
-          </Tabs>
+          <Box sx={{ px: { xs: 2, md: 4 }, borderBottom: 1, borderColor: "divider" }}>
+            <Tabs
+              value={tabIndex}
+              onChange={handleTabChange}
+              variant="scrollable"
+              scrollButtons="auto"
+              allowScrollButtonsMobile
+            >
+              <Tab label="Profile" />
+              <Tab label="Email" />
+              <Tab label="Phone" />
+              <Tab label="Password" />
+            </Tabs>
+          </Box>
 
-          <Box
-            sx={{
-              mt: 4,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
+          <CardContent sx={{ p: { xs: 3, md: 5 } }}>
             {tabIndex === 0 && <UpdateProfile />}
             {tabIndex === 1 && <UpdateEmailForm />}
             {tabIndex === 2 && <UpdatePhoneForm />}
             {tabIndex === 3 && <ChangePassword />}
-          </Box>
+          </CardContent>
         </Card>
       </Container>
     </StudentPageWrapper>

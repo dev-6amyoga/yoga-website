@@ -1,20 +1,88 @@
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { Button, IconButton, InputAdornment, TextField } from "@mui/material";
+import LockResetIcon from "@mui/icons-material/LockReset";
+import {
+  Alert,
+  Box,
+  Button,
+  IconButton,
+  InputAdornment,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import { validatePassword } from "../../../utils/formValidation";
-import getFormData from "../../../utils/getFormData";
+
+const initialForm = {
+  old_password: "",
+  new_password: "",
+  confirm_new_password: "",
+};
 
 export default function ChangePassword() {
-  let user = useUserStore((state) => state.user);
+  const user = useUserStore((state) => state.user);
+  const [formData, setFormData] = useState(initialForm);
+  const [isSaving, setIsSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState({
+    old_password: false,
+    new_password: false,
+    confirm_new_password: false,
+  });
+  const debounceRef = useRef(null);
 
-  useEffect(() => {}, [user]);
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const nextErrors = {};
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const formData = getFormData(e);
+      if (formData.new_password) {
+        const [isPasswordValid, passwordError] = validatePassword(
+          formData.new_password,
+        );
+        if (!isPasswordValid || passwordError) {
+          nextErrors.new_password = passwordError.message;
+        }
+      }
+
+      if (
+        formData.confirm_new_password &&
+        formData.new_password !== formData.confirm_new_password
+      ) {
+        nextErrors.confirm_new_password = "Passwords do not match";
+      }
+
+      setErrors(nextErrors);
+    }, 300);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [formData.new_password, formData.confirm_new_password]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDisable = (event) => {
+    event.preventDefault();
+  };
+
+  const toggleShowPassword = (field) => {
+    setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
+
+  const resetForm = () => {
+    setFormData(initialForm);
+    setErrors({});
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
     if (
       !formData.old_password ||
@@ -25,233 +93,107 @@ export default function ChangePassword() {
       return;
     }
 
-    const new_password = formData.new_password;
-    const conf_new_password = formData.confirm_new_password;
-
-    if (new_password !== conf_new_password) {
-      toast("The new passwords do not match!");
+    if (formData.new_password !== formData.confirm_new_password) {
+      setErrors((prev) => ({
+        ...prev,
+        confirm_new_password: "Passwords do not match",
+      }));
       return;
     }
 
-    const [is_password_valid, pass_error] = validatePassword(new_password);
-    if (is_password_valid) {
-      Fetch({
+    const [isPasswordValid, passwordError] = validatePassword(
+      formData.new_password,
+    );
+    if (!isPasswordValid || passwordError) {
+      setErrors((prev) => ({
+        ...prev,
+        new_password: passwordError.message,
+      }));
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await Fetch({
         url: "/user/update-password",
         method: "POST",
         data: { ...formData, user_id: user?.user_id },
-      })
-        .then((res) => {
-          if (res && res.status === 200) {
-            toast("Password updated successfully", {
-              type: "success",
-            });
-          } else {
-            toast("Error updating password; retry", {
-              type: "error",
-            });
-          }
-        })
-        .catch((err) => {
-          toast("Error updating password: " + err?.response?.data?.error, {
-            type: "error",
-          });
-        });
-    } else {
-      toast("Password is invalid");
-      return;
+      });
+
+      toast.success("Password updated successfully");
+      resetForm();
+    } catch (error) {
+      toast.error(error?.response?.data?.error || "Could not update password");
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const [password, setPassword] = useState(null);
-  const [confirmPassword, setConfirmPassword] = useState(null);
-  const [passwordError, setPasswordError] = useState(null);
-  const [confirmPasswordError, setConfirmPasswordError] = useState(null);
-
-  const inputErrorDebounce = useRef(null);
-
-  useEffect(() => {
-    //console.log(passwordError);
-  }, [passwordError]);
-  // Check password
-
-  // Check password
-  useEffect(() => {
-    if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
-
-    inputErrorDebounce.current = setTimeout(() => {
-      if (password && confirmPassword && password !== confirmPassword) {
-        setPasswordError(null);
-        setConfirmPasswordError("Passwords do not match");
-        return;
-      } else {
-        const [is_password_valid, pass_error] = validatePassword(password);
-        if (!is_password_valid || pass_error) {
-          setPasswordError(pass_error.message);
-          return;
-        }
-
-        const [is_confirm_password_valid, confirm_pass_error] =
-          validatePassword(confirmPassword);
-        if (!is_confirm_password_valid || confirm_pass_error) {
-          setConfirmPasswordError(confirm_pass_error.message);
-          return;
-        }
-      }
-
-      setPasswordError(null);
-      setConfirmPasswordError(null);
-    }, 500);
-
-    return () => {
-      if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
-    };
-  }, [password, confirmPassword]);
-
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
-
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleClickShowNewPassword = () => setShowNewPassword(!showNewPassword);
-
-  const [showNewPassword, setShowNewPassword] = useState(false);
-
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const handleClickShowConfirmPassword = () =>
-    setShowConfirmPassword(!showConfirmPassword);
-
-  const handleDisable = (e) => {
-    e.preventDefault();
-  };
+  const renderPasswordField = (name, label) => (
+    <TextField
+      label={label}
+      name={name}
+      type={showPassword[name] ? "text" : "password"}
+      value={formData[name]}
+      onChange={handleChange}
+      onCut={handleDisable}
+      onCopy={handleDisable}
+      onPaste={handleDisable}
+      required
+      fullWidth
+      error={Boolean(errors[name])}
+      helperText={errors[name] || " "}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <IconButton
+              aria-label={`toggle ${label.toLowerCase()} visibility`}
+              onClick={() => toggleShowPassword(name)}
+              edge="end"
+            >
+              {showPassword[name] ? <Visibility /> : <VisibilityOff />}
+            </IconButton>
+          </InputAdornment>
+        ),
+      }}
+    />
+  );
 
   return (
-    <form
-      className="flex flex-col gap-2"
-      onSubmit={handleSubmit}
-      style={{ width: "100%" }}
-    >
-      {/* <TextField
-        fullWidth
-        required
-        name="old_password"
-        label="Old Password"
-        type="password"
-        variant="outlined"
-      /> */}
+    <Box component="form" onSubmit={handleSubmit} onReset={resetForm}>
+      <Stack spacing={3}>
+        <Box>
+          <Typography variant="h6" fontWeight={700}>
+            Change password
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Use a strong password that is unique to your 6AM Yoga account.
+          </Typography>
+        </Box>
 
-      <TextField
-        label="Old Password"
-        variant="outlined"
-        name="old_password"
-        type={showPassword ? "text" : "password"}
-        onCut={handleDisable}
-        onCopy={handleDisable}
-        onPaste={handleDisable}
-        required
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="toggle password visibility"
-                onClick={handleClickShowPassword}
-              >
-                {showPassword ? <Visibility /> : <VisibilityOff />}
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-      />
-      <br />
-      <p
-        className={`text-sm border p-2 rounded-lg text-zinc-500 ${passwordError || confirmPasswordError ? "border-red-500" : ""}`}
-      >
-        Password must be minimum 8 letters and contain at least 1 number, 1
-        alphabet, 1 special character [!@#$%^&*,?]
-      </p>
-      {/* <TextField
-        fullWidth
-        required
-        name="new_password"
-        label="New Password"
-        type="password"
-        variant="outlined"
-      /> */}
-      <TextField
-        label="New Password"
-        variant="outlined"
-        name="new_password"
-        type={showNewPassword ? "text" : "password"}
-        onCut={handleDisable}
-        onCopy={handleDisable}
-        onPaste={handleDisable}
-        required
-        onChange={(e) => {
-          setPassword(e.target.value);
-        }}
-        error={passwordError ? true : false}
-        helperText={passwordError ? passwordError : " "}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="toggle password visibility"
-                onClick={handleClickShowNewPassword}
-              >
-                {showNewPassword ? <Visibility /> : <VisibilityOff />}
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-        // error={passwordError ? true : false}
-        // helperText={passwordError ? passwordError : " "}
-      />
-      <TextField
-        label="Confirm New Password"
-        variant="outlined"
-        name="confirm_new_password"
-        type={showConfirmPassword ? "text" : "password"}
-        onCut={handleDisable}
-        onCopy={handleDisable}
-        onPaste={handleDisable}
-        required
-        error={confirmPasswordError ? true : false}
-        helperText={confirmPasswordError ? confirmPasswordError : " "}
-        onChange={(e) => {
-          setConfirmPassword(e.target.value);
-        }}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="toggle password visibility"
-                onClick={handleClickShowConfirmPassword}
-              >
-                {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-        // error={passwordError ? true : false}
-        // helperText={passwordError ? passwordError : " "}
-      />
-      <div className="flex flex-row gap-2 w-full">
-        <Button
-          className="flex-1"
-          variant="contained"
-          color="primary"
-          type="submit"
-        >
-          Update
-        </Button>
-        <Button
-          className="flex-1"
-          variant="outlined"
-          color="secondary"
-          type="reset"
-        >
-          Reset
-        </Button>
-      </div>
-    </form>
+        <Alert severity={Object.keys(errors).length ? "error" : "info"}>
+          Password must be at least 8 characters and include a lowercase letter,
+          a number, and one special character from !@#$%^&*,?
+        </Alert>
+
+        {renderPasswordField("old_password", "Current password")}
+        {renderPasswordField("new_password", "New password")}
+        {renderPasswordField("confirm_new_password", "Confirm new password")}
+
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+          <Button
+            type="submit"
+            variant="contained"
+            startIcon={<LockResetIcon />}
+            disabled={isSaving || Boolean(Object.keys(errors).length)}
+          >
+            {isSaving ? "Updating..." : "Update Password"}
+          </Button>
+          <Button type="reset" variant="outlined" disabled={isSaving}>
+            Reset
+          </Button>
+        </Stack>
+      </Stack>
+    </Box>
   );
 }

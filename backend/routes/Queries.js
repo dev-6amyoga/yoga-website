@@ -43,7 +43,6 @@ router.post('/register', async (req, res) => {
     query_name,
     query_email,
     query_phone,
-    query_text,
     query_source = 'website',
     entered_by_user_id = null,
     entered_by_name = null,
@@ -54,9 +53,8 @@ router.post('/register', async (req, res) => {
       .status(HTTP_BAD_REQUEST)
       .json({ error: 'Missing required fields' })
   }
-  if (!query_text) {
-    query_text = 'No query text provided'
-  }
+  const query_text = req.body.query_text || 'No query text provided'
+
   const t = await sequelize.transaction()
 
   try {

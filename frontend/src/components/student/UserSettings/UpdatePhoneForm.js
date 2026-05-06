@@ -1,20 +1,12 @@
 import CancelIcon from "@mui/icons-material/Cancel";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
-import {
-  Badge,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  Typography,
-} from "@mui/material";
+import VerifiedIcon from "@mui/icons-material/Verified";
+import { Alert, Box, Button, Chip, Skeleton, Stack, TextField, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import PhoneInputWithCountrySelect from "react-phone-number-input";
-// import {} from "react-phone-number-input/input";
+import "react-phone-number-input/style.css";
 import { toast } from "react-toastify";
 import OTPAPI from "../../../api/otp.api";
 import { UserAPI } from "../../../api/user.api";
@@ -22,52 +14,23 @@ import useUserStore from "../../../store/UserStore";
 import { Fetch } from "../../../utils/Fetch";
 import { validatePhone } from "../../../utils/formValidation";
 
-const CustomTextField = forwardRef((props, ref) => {
-  return <TextField inputRef={ref} {...props} />;
-});
+const CustomTextField = forwardRef((props, ref) => (
+  <TextField inputRef={ref} fullWidth {...props} />
+));
 
 export default function UpdatePhoneForm() {
   const user = useUserStore((state) => state.user);
-  const [update, setUpdate] = useState(false);
+  const setUser = useUserStore((state) => state.setUser);
   const [isEditing, setIsEditing] = useState(false);
-
+  const [isSaving, setIsSaving] = useState(false);
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState(null);
-
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState(null);
-
   const [verified, setVerified] = useState(false);
-
-  // resend related
-  const [startResendTimer, setStartResendTimer] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
   const [timer, setTimer] = useState(0);
-  const [resendCounter, setResendCounter] = useState(0);
-
-  // setting up resend timer
-  useEffect(() => {
-    let t;
-    if (startResendTimer) {
-      setTimer(0);
-      // update timer every second
-      t = setInterval(() => {
-        setTimer((prev) => prev + 1);
-      }, 1000);
-    }
-
-    return () => {
-      clearInterval(t);
-    };
-  }, [startResendTimer]);
-
-  useEffect(() => {
-    // reset timer
-    if (timer === resendCounter * 30) {
-      setStartResendTimer(false);
-    }
-  }, [timer, resendCounter]);
-
-  const inputErrorDebounce = useRef(null);
+  const debounceRef = useRef(null);
 
   const {
     data: userData,
@@ -75,134 +38,112 @@ export default function UpdatePhoneForm() {
     refetch: refetchUser,
   } = useQuery({
     queryKey: ["user", user?.user_id],
+    enabled: Boolean(user?.user_id),
     queryFn: async () => {
       const [res, error] = await UserAPI.postGetUserByID(user?.user_id);
-
-      //console.log(res.user);
-
       if (error) {
-        toast(error.message, { type: "error" });
+        toast(error.message || "Could not load phone", { type: "error" });
         return {};
       }
-
       return res?.user;
     },
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setPhone(() => value);
-  };
-
-  const closeUpdateHandler = (event) => {
-    setUpdate(false);
-  };
-
-  const handleReset = () => {
-    setPhone("");
-    setIsEditing(false);
-    setPhoneError(null);
-    setOtpError(null);
-    setVerified(false);
-    setResendCounter(0);
-    setStartResendTimer(false);
-  };
-
-  const handleUpdatePhone = async (e) => {
-    e.preventDefault();
-
-    //console.log("Update phone called");
-
-    if (phone === "" || phone === undefined) {
-      toast("Phone is required", { type: "error" });
-      return;
-    }
-
-    if (!userData?.email) {
-      toast("Email is required", { type: "error" });
-      return;
-    }
-
-    if (!verified) {
-      toast("Please verify phone number", { type: "error" });
-      return;
-    }
-
-    Fetch({
-      url: "/user/update-profile",
-      method: "POST",
-      data: {
-        user_id: userData.user_id,
-        phone: phone,
-      },
-    })
-      .then((res) => {
-        //console.log(res);
-        toast("Updated!", { type: "success" });
-        handleReset();
-        refetchUser();
-      })
-      .catch((err) => {
-        toast(`Error : ${err.response.data.error}`, {
-          type: "error",
-        });
-      });
-  };
-
-  // check phone number
   useEffect(() => {
-    if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
+    if (userData?.phone) {
+      setPhone(userData.phone);
+    }
+  }, [userData]);
 
-    inputErrorDebounce.current = setTimeout(async () => {
-      //console.log("Checking phone number");
+  useEffect(() => {
+    if (!timer) return undefined;
 
-      if (phone) {
-        const [is_phone_valid, phone_error] = await validatePhone(phone);
+    const interval = setInterval(() => {
+      setTimer((prev) => Math.max(prev - 1, 0));
+    }, 1000);
 
-        if (!is_phone_valid || phone_error) {
-          setPhoneError(phone_error.message);
+    return () => clearInterval(interval);
+  }, [timer]);
 
-          return;
-        }
+  useEffect(() => {
+    if (!isEditing) return undefined;
 
-        const [check_phone, error] = await UserAPI.postCheckPhoneNumber(phone);
-
-        if (error) {
-          toast(error.message, { type: "warning" });
-          return;
-        }
-
-        if (check_phone?.exists) {
-          setPhoneError("Phone number exists");
-
-          return;
-        }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      if (!phone || phone === userData?.phone) {
+        setPhoneError(null);
+        return;
       }
-      setPhoneError(null);
-    }, 500);
+
+      const [isPhoneValid, validationError] = await validatePhone(phone);
+      if (!isPhoneValid || validationError) {
+        setPhoneError(validationError.message);
+        return;
+      }
+
+      const [checkPhone, error] = await UserAPI.postCheckPhoneNumber(phone);
+      if (error) {
+        toast(error.message || "Could not validate phone", { type: "warning" });
+        return;
+      }
+
+      setPhoneError(checkPhone?.exists ? "Phone number is already registered" : null);
+    }, 400);
 
     return () => {
-      if (inputErrorDebounce.current) clearTimeout(inputErrorDebounce.current);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [phone]);
+  }, [phone, isEditing, userData?.phone]);
 
-  const handleOTPVerify = async () => {
-    // verify otp
-    if (phone === "" || phone === undefined) {
-      toast("Phone is required", { type: "error" });
-      setVerified(false);
+  const resetVerification = () => {
+    setOtp("");
+    setOtpError(null);
+    setVerified(false);
+    setOtpSent(false);
+    setTimer(0);
+  };
+
+  const handleCancel = () => {
+    setPhone(userData?.phone || "");
+    setPhoneError(null);
+    resetVerification();
+    setIsEditing(false);
+  };
+
+  const handleOTPSend = async () => {
+    if (!phone || phoneError) return;
+
+    if (phone === userData?.phone) {
+      toast.info("Enter a new phone number first");
       return;
     }
 
     if (!userData?.email) {
-      toast("Email is required", { type: "error" });
-      setVerified(false);
+      toast.error("Email is required to receive OTP");
       return;
     }
 
+    const [res, error] = await OTPAPI.postCreateOTP(
+      "OTP_FOR_PHONE",
+      phone,
+      "OTP_TARGET_EMAIL",
+      userData.email,
+    );
+
+    if (error) {
+      toast.error(error.message || "Could not send OTP");
+      return;
+    }
+
+    setOtpSent(true);
+    setVerified(false);
+    setTimer(30);
+    toast.success("OTP sent to your email");
+  };
+
+  const handleOTPVerify = async () => {
     if (!otp) {
       setOtpError("OTP is required");
-      setVerified(false);
       return;
     }
 
@@ -211,210 +152,190 @@ export default function UpdatePhoneForm() {
       phone,
       "OTP_TARGET_EMAIL",
       userData.email,
-      otp
+      otp,
     );
 
     if (error) {
-      // toast(error.message, { type: "error" });
       setVerified(false);
       setOtpError("Incorrect OTP");
       return;
     }
 
     if (res?.message === "OTP verified successfully") {
-      toast("OTP sent successfully", { type: "success" });
       setVerified(true);
+      setOtpError(null);
+      toast.success("Phone verified");
     }
   };
 
-  const handleOTPSend = async () => {
-    setVerified(false);
-    setOtpError(null);
+  const handleUpdatePhone = async (event) => {
+    event.preventDefault();
 
-    if (phone === "" || phone === undefined) {
-      toast("Phone is required", { type: "error" });
+    if (!isEditing) {
+      setIsEditing(true);
+      setPhone(userData?.phone || "");
       return;
     }
 
-    if (!userData?.email) {
-      toast("Email is required", { type: "error" });
-
+    if (phone === userData?.phone) {
+      toast.info("No changes to save");
+      setIsEditing(false);
       return;
     }
 
-    const [res, error] = await OTPAPI.postCreateOTP(
-      "OTP_FOR_PHONE",
-      phone,
-      "OTP_TARGET_EMAIL",
-      userData.email
+    if (!verified) {
+      toast.error("Please verify the new phone number");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const response = await Fetch({
+        url: "/user/update-profile",
+        method: "POST",
+        data: {
+          user_id: userData.user_id,
+          phone,
+        },
+      });
+
+      const updatedUser = response.data?.user;
+      if (updatedUser) {
+        setUser({
+          ...user,
+          user_id: updatedUser.user_id,
+          name: updatedUser.name,
+          username: updatedUser.username,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+        });
+      }
+      await refetchUser();
+      resetVerification();
+      setIsEditing(false);
+      toast.success("Phone updated");
+    } catch (error) {
+      toast.error(error?.response?.data?.error || "Could not update phone");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Stack spacing={2}>
+        <Skeleton height={54} />
+        <Skeleton height={40} width={180} />
+      </Stack>
     );
-
-    if (error) {
-      toast(error.message, { type: "error" });
-      return;
-    }
-
-    setResendCounter((prev) => prev + 1);
-    setStartResendTimer(true);
-
-    toast("OTP sent to email", { type: "success" });
-  };
+  }
 
   return (
-    <div className="w-full">
-      <form
-        className="flex flex-col items-center w-full gap-4"
-        onSubmit={handleUpdatePhone}
-        onReset={handleReset}
-      >
+    <Box component="form" onSubmit={handleUpdatePhone}>
+      <Stack spacing={3}>
+        <Box>
+          <Typography variant="h6" fontWeight={700}>
+            Phone number
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Verify your new phone number with an OTP sent to your email.
+          </Typography>
+        </Box>
+
         <PhoneInputWithCountrySelect
           value={phone}
-          onChange={(val) => {
-            //console.log(val);
-            setPhone(val);
+          onChange={(value) => {
+            setPhone(value || "");
+            resetVerification();
           }}
-          disabled={!isEditing || verified || resendCounter > 0}
-          limitMaxLength={true}
+          disabled={!isEditing || isSaving || verified}
+          defaultCountry="IN"
+          limitMaxLength
           numberInputProps={{
-            fullWidth: true,
             name: "phone",
-            label: isEditing ? "Phone" : "",
-            placeholder: userData?.phone,
-            sx: { mb: 2 },
-            helperText: phoneError ? phoneError : " ",
-            error: phoneError ? true : false,
+            label: "Phone number",
+            helperText: phoneError || " ",
+            error: Boolean(phoneError),
           }}
           inputComponent={CustomTextField}
         />
-        {/* <TextField
-					fullWidth
-					name="phone"
-					label={isEditing ? "Phone" : ""}
-					placeholder={userData?.phone}
-					onChange={handleChange}
-					disabled={!isEditing || verified || resendCounter > 0}
-					sx={{ mb: 2 }}
-					helperText={phoneError ? phoneError : " "}
-					error={phoneError ? true : false}
-				/> */}
 
-        {/* otp form */}
-        {phone && isEditing && !phoneError && !verified ? (
-          <div className="flex flex-col gap-4">
-            <TextField
-              fullWidth
-              label="OTP"
-              placeholder={"XXXXXX"}
-              onChange={(e) => {
-                setOtp(e.target.value);
-              }}
-              size="small"
-              disabled={resendCounter === 0 || verified}
-              error={otpError ? true : false}
-              helperText={otpError ? "Incorrect OTP" : ""}
-            />
-            <div className="flex flex-row gap-2">
+        {isEditing && phone && phone !== userData?.phone && !phoneError && (
+          <Stack spacing={2}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
               <Button
+                type="button"
+                variant="contained"
                 onClick={handleOTPSend}
-                disabled={startResendTimer}
-                className="w-full sm:w-auto"
-                variant="contained"
-                sx={{ height: "fit-content" }}
+                disabled={timer > 0 || verified}
               >
-                {resendCounter === 0
-                  ? "Send OTP"
-                  : timer === 30
-                    ? "Resend OTP"
-                    : `Resend in ${resendCounter * 30 - timer} seconds`}
+                {otpSent ? (timer ? `Resend in ${timer}s` : "Resend OTP") : "Send OTP"}
               </Button>
+              {verified && (
+                <Chip
+                  color="success"
+                  icon={<VerifiedIcon />}
+                  label="Verified"
+                  sx={{ width: "fit-content" }}
+                />
+              )}
+            </Stack>
 
-              <Button
-                variant="contained"
-                onClick={handleOTPVerify}
-                className="w-full sm:w-auto"
-                sx={{ height: "fit-content" }}
-                disable={resendCounter === 0}
-              >
-                Verify
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <>
-            {isEditing && !phoneError && verified ? (
-              <>
-                <Badge color="success">Verified!</Badge>
-              </>
-            ) : (
-              <></>
+            {otpSent && !verified && (
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+                <TextField
+                  label="OTP"
+                  value={otp}
+                  onChange={(event) => setOtp(event.target.value)}
+                  error={Boolean(otpError)}
+                  helperText={otpError || " "}
+                  fullWidth
+                />
+                <Button
+                  type="button"
+                  variant="outlined"
+                  onClick={handleOTPVerify}
+                  sx={{ minWidth: 120, height: 56 }}
+                >
+                  Verify
+                </Button>
+              </Stack>
             )}
-          </>
+          </Stack>
         )}
 
-        <div className="flex gap-2">
-          {!isEditing ? (
-            <Button
-              startIcon={<EditIcon />}
-              onClick={() => {
-                setPhone(null);
-                setIsEditing(true);
-              }}
-              type="button"
-              variant="outlined"
-              sx={{ height: "fit-content" }}
-            >
-              Edit
-            </Button>
-          ) : (
-            <></>
-          )}
+        {isEditing && phone === userData?.phone && (
+          <Alert severity="info">Enter a new phone number to verify and save.</Alert>
+        )}
 
-          {isEditing && verified ? (
-            <>
-              <Button
-                startIcon={<SaveIcon />}
-                type="submit"
-                sx={{ height: "fit-content" }}
-              >
-                Save
-              </Button>
-            </>
-          ) : (
-            <></>
-          )}
-
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
           {isEditing ? (
             <>
               <Button
-                startIcon={<CancelIcon />}
-                type="reset"
+                type="submit"
+                variant="contained"
+                startIcon={<SaveIcon />}
+                disabled={isSaving || !verified}
+              >
+                {isSaving ? "Saving..." : "Save Phone"}
+              </Button>
+              <Button
+                type="button"
                 variant="outlined"
-                sx={{ height: "fit-content" }}
+                startIcon={<CancelIcon />}
+                onClick={handleCancel}
+                disabled={isSaving}
               >
                 Cancel
               </Button>
             </>
           ) : (
-            <> </>
+            <Button type="submit" variant="outlined" startIcon={<EditIcon />}>
+              Change Phone
+            </Button>
           )}
-        </div>
-      </form>
-
-      {/* Update Confirmation Dialog */}
-      <Dialog open={update} onClose={closeUpdateHandler}>
-        <DialogTitle>Update Profile</DialogTitle>
-        <DialogContent>
-          <Typography variant="body1">
-            Do you really wish to update your profile?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setUpdate(false)}>No</Button>
-          <Button onClick={() => {}} autoFocus>
-            Yes
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
+        </Stack>
+      </Stack>
+    </Box>
   );
 }
