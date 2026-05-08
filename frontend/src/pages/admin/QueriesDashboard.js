@@ -1,7 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import AdminPageWrapper from "../../components/Common/AdminPageWrapper";
+import useUserStore from "../../store/UserStore";
 import { Fetch } from "../../utils/Fetch";
+
+const initialForm = {
+  query_name: "",
+  query_email: "",
+  query_phone: "",
+  query_text: "",
+};
 
 const formatDate = (value) => {
   if (!value) return "Not recorded";
@@ -12,9 +20,12 @@ const formatDate = (value) => {
 };
 
 export default function QueriesDashboard() {
+  const user = useUserStore((state) => state.user);
   const [queries, setQueries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState(null);
+  const [formData, setFormData] = useState(initialForm);
+  const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -63,7 +74,9 @@ export default function QueriesDashboard() {
     });
   }, [queries, search, statusFilter]);
 
-  const pendingCount = queries.filter((query) => !query.follow_up_status).length;
+  const pendingCount = queries.filter(
+    (query) => !query.follow_up_status,
+  ).length;
   const followedCount = queries.length - pendingCount;
 
   const updateFollowUp = async (query, followUpStatus) => {
@@ -93,6 +106,38 @@ export default function QueriesDashboard() {
     }
   };
 
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSubmitting(true);
+
+    try {
+      await Fetch({
+        url: "/query/register",
+        method: "POST",
+        data: {
+          ...formData,
+          query_source: "admin",
+          entered_by_user_id: user?.user_id || null,
+          entered_by_name: user?.name || null,
+        },
+      });
+
+      toast.success("Enquiry saved successfully");
+      setFormData(initialForm);
+      await fetchQueries();
+    } catch (error) {
+      console.error("Error saving enquiry:", error);
+      toast.error("Could not save enquiry");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const updateLocalNotes = (queryId, value) => {
     setQueries((prev) =>
       prev.map((query) =>
@@ -106,6 +151,69 @@ export default function QueriesDashboard() {
   return (
     <AdminPageWrapper heading="Enquiries">
       <div className="grid gap-5">
+        <div className="rounded-md border border-slate-200 bg-white p-4">
+          <h2 className="mb-4 text-lg font-semibold text-slate-900">
+            Log enquiry
+          </h2>
+          <form className="grid gap-4" onSubmit={handleSubmit}>
+            <div className="grid gap-4 md:grid-cols-3">
+              <label className="grid gap-2 text-sm font-medium text-slate-700">
+                Name
+                <input
+                  className="rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                  name="query_name"
+                  value={formData.query_name}
+                  onChange={handleChange}
+                  required
+                />
+              </label>
+
+              <label className="grid gap-2 text-sm font-medium text-slate-700">
+                Phone
+                <input
+                  className="rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                  name="query_phone"
+                  value={formData.query_phone}
+                  onChange={handleChange}
+                  required
+                />
+              </label>
+
+              <label className="grid gap-2 text-sm font-medium text-slate-700">
+                Email
+                <input
+                  className="rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                  name="query_email"
+                  type="email"
+                  value={formData.query_email}
+                  onChange={handleChange}
+                  required
+                />
+              </label>
+            </div>
+
+            <label className="grid gap-2 text-sm font-medium text-slate-700">
+              Enquiry details
+              <textarea
+                className="min-h-[100px] rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-blue-500"
+                name="query_text"
+                value={formData.query_text}
+                onChange={handleChange}
+              />
+            </label>
+
+            <div className="flex justify-end">
+              <button
+                className="rounded-md bg-blue-600 px-5 py-2 font-medium text-white disabled:cursor-not-allowed disabled:bg-slate-400"
+                type="submit"
+                disabled={submitting}
+              >
+                {submitting ? "Saving..." : "Save Enquiry"}
+              </button>
+            </div>
+          </form>
+        </div>
+
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-md border border-slate-200 bg-white p-4">
             <p className="text-sm text-slate-500">Total enquiries</p>
@@ -115,9 +223,7 @@ export default function QueriesDashboard() {
           </div>
           <div className="rounded-md border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm text-amber-700">Pending follow-up</p>
-            <p className="text-3xl font-bold text-amber-900">
-              {pendingCount}
-            </p>
+            <p className="text-3xl font-bold text-amber-900">{pendingCount}</p>
           </div>
           <div className="rounded-md border border-emerald-200 bg-emerald-50 p-4">
             <p className="text-sm text-emerald-700">Followed up</p>
