@@ -754,7 +754,7 @@ router.post('/register', async (req, res) => {
           mailTransporter.sendMail(
             {
               from: 'dev.6amyoga@gmail.com',
-              to: 'kjrosa1982@gmail.com',
+              to: ['kjrosa1982@gmail.com', 'sivakumarp2910@gmail.com'],
               subject: '6AM Yoga | New User Registration',
               html: `
                 <p>Greetings,</p>
@@ -933,7 +933,7 @@ router.post('/register-google', async (req, res) => {
           mailTransporter.sendMail(
             {
               from: 'dev.6amyoga@gmail.com',
-              to: 'kjrosa1982@gmail.com',
+              to: ['kjrosa1982@gmail.com', 'sivakumarp2910@gmail.com'],
               subject: '6AM Yoga | New User Registration',
               html: `
                 <p>Greetings,</p>

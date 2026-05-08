@@ -118,8 +118,8 @@ router.get('/run-all', async (req, res) => {
 router.get('/test', async (req, res) => {
   await mailTransporter.sendMail({
     from: 'dev.6amyoga@gmail.com',
-    to: ['smriti030202@gmail.com', '992351@gmail.com'],
-    cc: '992351@gmail.com',
+    to: ['smriti030202@gmail.com', 'sivakumarp2910@gmail.com'],
+    cc: 'sivakumarp2910@gmail.com',
     subject: 'CC Test',
     text: 'Testing CC',
   })

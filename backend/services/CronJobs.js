@@ -37,7 +37,7 @@ const sendUnpaidClassEmail = async (
     await mailTransporter.sendMail({
       from: 'dev.6amyoga@gmail.com',
       to: user.email,
-      cc: 'kjrosa1982@gmail.com',
+      cc: ['kjrosa1982@gmail.com', 'sivakumarp2910@gmail.com'],
       subject: `6AM Yoga | ${classCount} Unpaid Class${classCount > 1 ? 'es' : ''} Attendance`,
       html: `
         <p>Hello <strong>${user.name}</strong>,</p>
@@ -85,7 +85,7 @@ const sendReEngagementEmail = async (user, frontendDomain) => {
     await mailTransporter.sendMail({
       from: 'dev.6amyoga@gmail.com',
       to: user.email,
-      cc: 'kjrosa1982@gmail.com',
+      cc: ['kjrosa1982@gmail.com', 'sivakumarp2910@gmail.com'],
       subject: '6AM Yoga | We Miss You! Come Back to Your Practice',
       html: `
         <p>Hi ${user.name},</p>
@@ -791,7 +791,7 @@ module.exports = {
 
         await mailTransporter.sendMail({
           from: 'dev.6amyoga@gmail.com',
-          to: 'kjrosa1982@gmail.com',
+          to: ['kjrosa1982@gmail.com', 'sivakumarp2910@gmail.com'],
           subject: `6AM Yoga | UpdatePlanStatuses Cron - ${totalEmailsSent} Emails Sent`,
           html: summaryEmail,
         })
@@ -901,7 +901,7 @@ module.exports = {
           await mailTransporter.sendMail({
             from: 'dev.6amyoga@gmail.com',
             to: user.email,
-            cc: 'kjrosa1982@gmail.com',
+            cc: ['kjrosa1982@gmail.com', 'sivakumarp2910@gmail.com'],
             subject: '6AM Yoga | Plan Expired!',
             html: `
             <p>Dear ${user.name},</p>
