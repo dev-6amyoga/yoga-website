@@ -114,6 +114,7 @@ function StudentPlan() {
   const [formattedDate, setFormattedDate] = useState(new Date().toISOString());
   const [hasRecentInstituteSubscription, setHasRecentInstituteSubscription] =
     useState(false);
+  const [hasTrialAvailed, setHasTrialAvailed] = useState(false);
 
   const checkRecentInstituteSubscription = useCallback(() => {
     const sixMonthsAgo = new Date();
@@ -190,6 +191,13 @@ function StudentPlan() {
         (plan) => plan.plan_user_type === "INSTITUTE",
       );
 
+      // Filter out trial plans if already availed
+      if (hasTrialAvailed) {
+        filteredPlans = filteredPlans.filter(
+          (plan) => !plan.name.toLowerCase().includes("trial"),
+        );
+      }
+
       // Filter out 30-day and [1/WK] plans if user doesn't have any plan within last 6 months
       if (!hasRecentInstituteSubscription) {
         filteredPlans = filteredPlans.filter(
@@ -203,7 +211,7 @@ function StudentPlan() {
     } catch (error) {
       toast("Error fetching plans", { type: "error" });
     }
-  }, [hasRecentInstituteSubscription]);
+  }, [hasRecentInstituteSubscription, hasTrialAvailed]);
 
   useEffect(() => {
     fetchPlans();
@@ -223,6 +231,7 @@ function StudentPlan() {
         (a, b) => new Date(a.validity_to) - new Date(b.validity_to),
       );
       setMyPlans(data.userPlan);
+      setHasTrialAvailed(data.userPlan.some((plan) => plan.is_trial));
       const activePlan = data.userPlan.find(
         (plan) => plan.current_status === "ACTIVE",
       );
@@ -314,7 +323,7 @@ function StudentPlan() {
       auto_renewal_enabled: false,
       referral_code_id: null,
       current_status: "ACTIVE",
-      is_trial: false,
+      is_trial: selectedPlan.name.toLowerCase().includes("trial"),
       user_type: "STUDENT",
       institute_id: selectedPlan?.institute_id || null,
       discount_coupon_id: appliedCoupon?.discount_coupon_id || null,
