@@ -352,6 +352,8 @@ function StudentPlan() {
             status: "SUCCESS",
             payment_method: "FREE",
             order_id: `free_${Date.now()}`,
+            payment_for: "USER_PLAN",
+            currency_id: 1,
           },
         });
 

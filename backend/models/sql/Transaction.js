@@ -16,6 +16,10 @@ const Transaction = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     payment_for: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -47,6 +51,10 @@ const Transaction = sequelize.define(
     },
     transaction_signature: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    currency_id: {
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
   },
