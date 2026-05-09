@@ -137,14 +137,23 @@ function StudentNavMUI() {
           return;
         }
 
+        const isTrialPlan =
+          activePlan.is_trial ||
+          activePlan.plan?.name?.toLowerCase().includes("trial");
+        const canJoinZoomClasses =
+          isTrialPlan ||
+          activePlan.plan?.has_zoom_classes ||
+          Number(activePlan.plan?.number_of_zoom_classes || 0) > 0 ||
+          hasMasterClass;
+
         setUserPlan(activePlan);
-        setDisabled(!activePlan.plan.has_basic_playlist);
+        setDisabled(!activePlan.plan?.has_basic_playlist);
         setDisabledTailorMade(
-          activePlan.plan.name === "Solo Plan 1 Month"
+          activePlan.plan?.name === "Solo Plan 1 Month"
             ? true
-            : !activePlan.plan.has_playlist_creation,
+            : !activePlan.plan?.has_playlist_creation,
         );
-        setHasZoomClasses(!activePlan.plan.has_zoom_classes && !hasMasterClass);
+        setHasZoomClasses(!canJoinZoomClasses);
       } catch (error) {
         setDisabled(true);
         setDisabledTailorMade(true);

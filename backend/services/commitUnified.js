@@ -14,6 +14,21 @@ const { TRANSACTION_SUCCESS } = require('../enums/transaction_status')
 
 const BACKEND_BASE = process.env.BACKEND_DOMAIN || 'http://localhost:4000'
 
+const normalizeTransactionStatus = (status) => {
+  const normalized = String(status || '').toLowerCase()
+
+  if (
+    normalized === TRANSACTION_SUCCESS ||
+    normalized === 'success' ||
+    normalized === 'captured' ||
+    normalized === 'authorized'
+  ) {
+    return TRANSACTION_SUCCESS
+  }
+
+  return status
+}
+
 async function commitUnified(payload) {
   const t = await sequelize.transaction()
 
@@ -24,7 +39,7 @@ async function commitUnified(payload) {
     const {
       user_id,
       plan_id,
-      status,
+      status: rawStatus,
       payment_for,
       payment_method,
       amount,
@@ -35,6 +50,7 @@ async function commitUnified(payload) {
       discount_coupon_id,
       user_plan_payload,
     } = payload
+    const status = normalizeTransactionStatus(rawStatus)
 
     if (!user_id || !order_id || !status) {
       throw new Error('Missing required commit fields')

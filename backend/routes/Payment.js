@@ -166,63 +166,63 @@ const triggerInvoiceAndAdmin = async (user_id, order_id, transaction) => {
   }
 }
 
-router.post('/commit', async (req, res) => {
-  try {
-    const {
-      user_id,
-      plan_id,
-      status,
-      payment_for,
-      payment_method,
-      amount,
-      signature,
-      order_id,
-      payment_id,
-      currency_id,
-      discount_coupon_id,
-    } = req.body
+// router.post('/commit', async (req, res) => {
+//   try {
+//     const {
+//       user_id,
+//       plan_id,
+//       status,
+//       payment_for,
+//       payment_method,
+//       amount,
+//       signature,
+//       order_id,
+//       payment_id,
+//       currency_id,
+//       discount_coupon_id,
+//     } = req.body
 
-    if (!user_id || !status || !order_id) {
-      return res
-        .status(HTTP_BAD_REQUEST)
-        .json({ message: 'Missing required fields' })
-    }
+//     if (!user_id || !status || !order_id) {
+//       return res
+//         .status(HTTP_BAD_REQUEST)
+//         .json({ message: 'Missing required fields' })
+//     }
 
-    if (status === TRANSACTION_SUCCESS && payment_method === 'razorpay') {
-      const digest = crypto
-        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-        .update(`${order_id}|${payment_id}`)
-        .digest('hex')
+//     if (status === TRANSACTION_SUCCESS && payment_method === 'razorpay') {
+//       const digest = crypto
+//         .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+//         .update(`${order_id}|${payment_id}`)
+//         .digest('hex')
 
-      if (digest !== signature) {
-        return res
-          .status(HTTP_BAD_REQUEST)
-          .json({ message: 'Invalid signature' })
-      }
-    }
+//       if (digest !== signature) {
+//         return res
+//           .status(HTTP_BAD_REQUEST)
+//           .json({ message: 'Invalid signature' })
+//       }
+//     }
 
-    await commitUnified({
-      user_id,
-      plan_id,
-      status,
-      payment_for,
-      payment_method,
-      amount,
-      order_id,
-      payment_id,
-      signature,
-      currency_id,
-      discount_coupon_id,
-    })
+//     await commitUnified({
+//       user_id,
+//       plan_id,
+//       status,
+//       payment_for,
+//       payment_method,
+//       amount,
+//       order_id,
+//       payment_id,
+//       signature,
+//       currency_id,
+//       discount_coupon_id,
+//     })
 
-    return res.status(HTTP_OK).json({ ok: true })
-  } catch (err) {
-    console.error('Commit error', err)
-    return res
-      .status(HTTP_INTERNAL_SERVER_ERROR)
-      .json({ message: 'Server error' })
-  }
-})
+//     return res.status(HTTP_OK).json({ ok: true })
+//   } catch (err) {
+//     console.error('Commit error', err)
+//     return res
+//       .status(HTTP_INTERNAL_SERVER_ERROR)
+//       .json({ message: 'Server error' })
+//   }
+// })
 
 router.post('/refund/history', async (req, res) => {
   const { transaction_id } = req.body

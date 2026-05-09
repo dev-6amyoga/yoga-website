@@ -349,7 +349,7 @@ function StudentPlan() {
           token: true,
           data: {
             ...payload,
-            status: "SUCCESS",
+            status: "successful",
             payment_method: "FREE",
             order_id: `free_${Date.now()}`,
             payment_for: "USER_PLAN",
