@@ -46,15 +46,16 @@ function TeacherNavbar({ mode, toggleColorMode }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await Fetch({
-        url: `/teacher-plan/plans/${user.user_id}`,
-        method: "GET",
-      });
-      if (response.data.planId === -1) {
-        setDisabled(true);
-      } else {
-        setDisabled(false);
-      }
+      // const response = await Fetch({
+      //   url: `/teacher-plan/plans/${user.user_id}`,
+      //   method: "GET",
+      // });
+      // if (response.data.planId === -1) {
+      //   setDisabled(true);
+      // } else {
+      //   setDisabled(false);
+      // }
+      setDisabled(false);
     };
     if (user) {
       fetchData();

@@ -145,7 +145,7 @@ function TeacherPlan() {
         url: "/plan/get-all-teacher-plans",
       });
       const filteredPlans = response.data?.plans?.filter(
-        (plan) => plan.plan_user_type === "TEACHER"
+        (plan) => plan.plan_user_type === "TEACHER",
       );
       //console.log("filtered plans : ", filteredPlans);
       setAllPlans(filteredPlans);
@@ -233,7 +233,7 @@ function TeacherPlan() {
         .catch((err) => {
           toast(
             "Something went wrong, try again. Any money debited will be refunded in 5-7 business days.",
-            { type: "error" }
+            { type: "error" },
           );
         });
     };
@@ -281,7 +281,7 @@ function TeacherPlan() {
           selectedCurrency,
           true,
           5,
-          discountCoupon
+          discountCoupon,
         ),
         currency: selectedCurrency,
         user_type: "STUDENT",
@@ -289,7 +289,7 @@ function TeacherPlan() {
       if (planId !== -1) {
         if (currentStatus !== USER_PLAN_ACTIVE) {
           toast(
-            "You have an active plan! If you purchase a new plan, it will be staged."
+            "You have an active plan! If you purchase a new plan, it will be staged.",
           );
         }
         const validityToDate = calculateEndDate(cardData.plan_validity_days);
@@ -303,7 +303,7 @@ function TeacherPlan() {
         userPlanData.purchase_date = formattedDate;
         userPlanData.validity_from = formattedDate;
         userPlanData.validity_to = calculateEndDate(
-          cardData.plan_validity_days
+          cardData.plan_validity_days,
         );
         userPlanData.current_status = USER_PLAN_ACTIVE;
         setToBeRegistered(userPlanData);
@@ -430,7 +430,7 @@ function TeacherPlan() {
               setCardData(null);
               toast(
                 "Error mailing invoice; Download invoice in Transaction History",
-                { type: "error" }
+                { type: "error" },
               );
               setLoading(false);
             });
@@ -442,7 +442,7 @@ function TeacherPlan() {
       .catch((error) => {
         toast(
           "Error subscribing plan; Incase money has been debited from your account, it will be refunded within 4 to 5 business days! Please try again!",
-          { type: "error" }
+          { type: "error" },
         );
       });
   };
@@ -479,7 +479,7 @@ function TeacherPlan() {
   const handleCurrencyChange = (val) => {
     setSelectedCurrency(val);
     setSelectedCurrencyId(
-      currencies.find((x) => x.short_tag === val)?.currency_id || null
+      currencies.find((x) => x.short_tag === val)?.currency_id || null,
     );
   };
 
@@ -535,7 +535,7 @@ function TeacherPlan() {
             }
           } else {
             setSelectedCurrency(
-              continentCurrencyMap[continentNames[data.continent_code]]
+              continentCurrencyMap[continentNames[data.continent_code]],
             );
           }
         }
@@ -555,7 +555,7 @@ function TeacherPlan() {
           (plan) =>
             plan.custom_plan_id === finalCustomCardData?._id &&
             (plan.current_status === USER_PLAN_ACTIVE ||
-              plan.current_status === USER_PLAN_STAGED)
+              plan.current_status === USER_PLAN_STAGED),
         );
         if (relevantPlans.length > 0) {
           const existingPlan = relevantPlans.reduce(
@@ -565,14 +565,14 @@ function TeacherPlan() {
               return currentValidityTo > latestValidityTo
                 ? currentPlan
                 : latestPlan;
-            }
+            },
           );
           const existingValidityFrom = new Date(existingPlan.validity_to);
           finalCustomCardData.validity_from =
             existingValidityFrom.toISOString();
           const newValidityTo = new Date(existingValidityFrom);
           newValidityTo.setDate(
-            newValidityTo.getDate() + (data.planValidity || 0)
+            newValidityTo.getDate() + (data.planValidity || 0),
           );
           finalCustomCardData.validity_to = newValidityTo.toISOString();
           finalCustomCardData.current_status = USER_PLAN_STAGED;
@@ -580,7 +580,7 @@ function TeacherPlan() {
           finalCustomCardData.validity_from = new Date().toISOString();
           const validityToDate = new Date(finalCustomCardData.validity_from);
           validityToDate.setDate(
-            validityToDate.getDate() + (data.planValidity || 0)
+            validityToDate.getDate() + (data.planValidity || 0),
           );
           finalCustomCardData.validity_to = validityToDate.toISOString();
           finalCustomCardData.current_status = USER_PLAN_ACTIVE;
@@ -600,7 +600,7 @@ function TeacherPlan() {
       setDiscountCouponApplied(false);
       setDiscountCoupon(null);
       const pricing = data.pricing.find(
-        (p) => p.currency.short_tag === selectedCurrency
+        (p) => p.currency.short_tag === selectedCurrency,
       );
       setPrice(pricing.denomination);
     }
@@ -721,7 +721,7 @@ function TeacherPlan() {
                               true,
                               5,
                               discountCoupon,
-                              1
+                              1,
                             )}
                           </span>
                         </>
@@ -777,7 +777,7 @@ function TeacherPlan() {
                       <span className="font-medium">Plan End Date</span>
                       <span className="text-center">
                         {new Date(
-                          calculateEndDate(cardData.plan_validity_days)
+                          calculateEndDate(cardData.plan_validity_days),
                         ).toLocaleString()}
                       </span>
                     </p>
