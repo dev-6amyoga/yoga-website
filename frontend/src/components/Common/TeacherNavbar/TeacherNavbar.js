@@ -179,6 +179,11 @@ function TeacherNavbar({ mode, toggleColorMode }) {
             title: "All Transactions",
             props: { disabled: false },
           },
+          {
+            path: "/teacher/statements",
+            title: "Income Statements",
+            props: { disabled: false },
+          },
         ],
       },
     ];

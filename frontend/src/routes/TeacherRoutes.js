@@ -151,4 +151,8 @@ export const TeacherRoutes = [
     path: "/teacher/transactions/all",
     element: <Refund adminRole={false} />,
   },
+  {
+    path: "/teacher/statements",
+    element: <MyIncome adminRole={false} />,
+  },
 ];

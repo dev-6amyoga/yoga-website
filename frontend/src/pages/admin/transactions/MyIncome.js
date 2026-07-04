@@ -100,7 +100,7 @@ export default function MyIncome({ adminRole = false }) {
   const Wrapper = adminRole ? AdminPageWrapper : TeacherPageWrapper;
 
   return (
-    <Wrapper heading="GST Revenue Summary">
+    <Wrapper heading="Revenue Summary">
       <Box sx={{ p: 3 }}>
         <Card sx={{ mb: 3 }}>
           <CardContent>
@@ -138,7 +138,7 @@ export default function MyIncome({ adminRole = false }) {
         <Card>
           <CardContent>
             <Typography variant="h6" sx={{ mb: 2 }}>
-              Monthly GST Breakdown
+              Monthly Income
             </Typography>
             <Button variant="outlined" onClick={downloadCSV}>
               Download Detailed CSV
@@ -159,9 +159,6 @@ export default function MyIncome({ adminRole = false }) {
                     <TableRow>
                       <TableCell>Month</TableCell>
                       <TableCell align="right">Gross Revenue</TableCell>
-                      <TableCell align="right">CGST (2.5%)</TableCell>
-                      <TableCell align="right">SGST (2.5%)</TableCell>
-                      <TableCell align="right">Total GST</TableCell>
                       <TableCell align="right">Net Revenue</TableCell>
                     </TableRow>
                   </TableHead>
@@ -173,16 +170,7 @@ export default function MyIncome({ adminRole = false }) {
                           {formatCurrency(row.gross_revenue)}
                         </TableCell>
                         <TableCell align="right">
-                          {formatCurrency(row.cgst_2_5)}
-                        </TableCell>
-                        <TableCell align="right">
-                          {formatCurrency(row.sgst_2_5)}
-                        </TableCell>
-                        <TableCell align="right">
-                          {formatCurrency(row.total_gst)}
-                        </TableCell>
-                        <TableCell align="right">
-                          {formatCurrency(row.net_revenue)}
+                          {formatCurrency(row.gross_revenue)}
                         </TableCell>
                       </TableRow>
                     ))}
