@@ -35,10 +35,10 @@ const paths = [
       { path: "/admin/members/students-plans", title: "Member Details" },
     ],
   },
-  {
-    title: "Package Videos",
-    path: "/admin/package-videos",
-  },
+  // {
+  //   title: "Package Videos",
+  //   path: "/admin/package-videos",
+  // },
   {
     path: "/admin/player-page",
     title: "Video Player",
